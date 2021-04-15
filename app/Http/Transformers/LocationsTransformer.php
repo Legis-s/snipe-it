@@ -125,7 +125,7 @@ class LocationsTransformer
             if ($location->assets_count > 0 && $count==0){
                 $res = "FF0000";
             }
-            if ($location->assets_count == $count){
+            if ($count != 0 && $location->assets_count == $count){
                 $res = "00FF00";
             }
             $array = [
