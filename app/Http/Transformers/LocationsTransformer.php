@@ -120,8 +120,11 @@ class LocationsTransformer
             }
             $res = "808080";
             if ($count > 0 && $location->assets_count > 0) {
-//                $count =  $location->assets_count -1;
                 $res = self::redYellowGreen(0, $location->assets_count,$count);
+            }else if ($location->assets_count > 0 && $count==0){
+                $res = "FF0000";
+            }else if($location->assets_count == $count){
+                $res = "00FF00";
             }
             $array = [
                 "id" => (int)$location->id,
