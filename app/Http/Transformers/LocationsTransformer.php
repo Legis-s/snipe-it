@@ -126,7 +126,7 @@ class LocationsTransformer
             if ($max > 0 && $count==0){
                 $res = "FF0000";
             }
-            if ($count != 0 && $max == $count){
+            if ($max != 0 && $max == $count){
                 $res = "00FF00";
             }
             $array = [
