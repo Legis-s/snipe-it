@@ -11,8 +11,8 @@ class LocationsTransformer
 {
     public function redYellowGreen($min, $max, $value)
     {
-        $green_max = 255;
-        $red_max = 255;
+        $green_max = 220;
+        $red_max = 220;
         $red = 0;
         $green = 0;
         $blue = 0;
