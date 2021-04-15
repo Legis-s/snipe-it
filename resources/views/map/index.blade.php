@@ -50,8 +50,10 @@
                 gridSize: 32,
                 clusterDisableClickZoom: true
             });
-
-            objectManager.objects.options.set('preset', 'islands#greenDotIcon');
+            objectManager.objects.options.set({
+                preset: 'islands#circleDotIcon',
+            });
+            // objectManager.objects.options.set('preset', 'islands#greenDotIcon');
             myMap.geoObjects.add(objectManager);
 
             $.ajax({
