@@ -126,7 +126,7 @@ class LocationsTransformer
                 $res = "FF0000";
             }
             if ($location->assets_count == $count){
-                $res = "FF0000";
+                $res = "00FF00";
             }
             $array = [
                 "id" => (int)$location->id,
