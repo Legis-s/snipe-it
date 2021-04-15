@@ -30,6 +30,7 @@ class MapController extends Controller
             'locations.name',
             'locations.address',
             'locations.coordinates',
+            'locations.active',
         ])->withCount('assignedAssets as assigned_assets_count')
             ->withCount('assets as assets_count');
 

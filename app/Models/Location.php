@@ -64,7 +64,8 @@ class Location extends SnipeModel
         'image',
         'bitrix_id',
         'notes',
-        'coordinates'
+        'coordinates',
+        'active'
     ];
     protected $hidden = ['user_id'];
 

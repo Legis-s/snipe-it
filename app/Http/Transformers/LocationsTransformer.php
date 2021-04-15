@@ -92,7 +92,11 @@ class LocationsTransformer
     {
         $array = array();
         foreach ($locations as $location) {
-            $array[] = self::transformForMap($location);
+            if (!$location->active &&$location->assets_count == 0 ){
+
+            }else{
+                $array[] = self::transformForMap($location);
+            }
         }
         $objects_array['type'] = "FeatureCollection";
         $objects_array['features'] = $array;
@@ -129,12 +133,23 @@ class LocationsTransformer
             if ($max != 0 && $max == $count){
                 $res = "00FF00";
             }
+            if ($location->active){
+                $options = [
+                    "iconColor" => '#'.$res,
+                ];
+            }else{
+                $options = [
+                    "iconColor" => '#'.$res,
+                    "preset"=> 'islands#circleIcon',
+                ];
+            }
             $array = [
                 "id" => (int)$location->id,
                 "type" => "Feature",
                 "geometry" => [
                     "type" => "Point",
                     "coordinates" => $cords,
+                    "active"=> e($location->active)
                 ],
                 "properties" => [
                     "balloonContentHeader" => e($location->name),
@@ -142,9 +157,7 @@ class LocationsTransformer
                     "balloonContentFooter" => "",
                     "hintContent" => e($location->name)
                 ],
-                "options" => [
-                    "iconColor" => '#'.$res,
-                ]
+                "options" => $options
             ];
             return $array;
         } else {

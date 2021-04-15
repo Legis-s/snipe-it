@@ -103,7 +103,8 @@ class SyncBitrix extends Command
                         'city' => $value["ADDRESS_CITY"],
                         'address' => $value["ADDRESS"],
                         'address2' => $value["ADDRESS_2"],
-                        'coordinates' => $value["UF_MAP"]
+                        'coordinates' => $value["UF_MAP"],
+                        'active' => false
                     ]);
                     $location->save();
                 }
@@ -122,7 +123,8 @@ class SyncBitrix extends Command
                         'city' => $value["ADDRESS_CITY"],
                         'address' => $value["ADDRESS"],
                         'address2' => $value["ADDRESS_2"],
-                        'coordinates' => $value["UF_MAP"]
+                        'coordinates' => $value["UF_MAP"],
+                        'active' => true
                     ]
                 );
                 if (!$sklad_user) {
