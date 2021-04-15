@@ -121,10 +121,12 @@ class LocationsTransformer
             $res = "808080";
             if ($count > 0 && $location->assets_count > 0) {
                 $res = self::redYellowGreen(0, $location->assets_count,$count);
-            }else if ($location->assets_count > 0 && $count==0){
+            }
+            if ($location->assets_count > 0 && $count==0){
                 $res = "FF0000";
-            }else if($location->assets_count == $count){
-                $res = "00FF00";
+            }
+            if ($location->assets_count == $count){
+                $res = "FF0000";
             }
             $array = [
                 "id" => (int)$location->id,
@@ -132,9 +134,6 @@ class LocationsTransformer
                 "geometry" => [
                     "type" => "Point",
                     "coordinates" => $cords,
-                    "count" => $count,
-                    "location->assets_count" => $location->assets_count,
-                    "tt" => $res
                 ],
                 "properties" => [
                     "balloonContentHeader" => e($location->name),
