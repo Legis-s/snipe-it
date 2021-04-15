@@ -117,7 +117,7 @@ class LocationsTransformer
                 foreach ($assets as $asset) {
                     $asset_tag = $asset->asset_tag;
                     $first_s = substr($asset_tag, 0, 1);
-                    if ($first_s == "I" || $first_s == "X" || strlen($asset_tag) > 7) {
+                    if ($first_s == "I" || $first_s == "X" || strlen($asset_tag) > 8) {
                         $count++;
                     }
                 }
