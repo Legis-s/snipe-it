@@ -112,9 +112,11 @@ class LocationsTransformer
                 $cords = explode(",", $location->coordinates);
             }
             $count = 0;
+            $all_price= 0;
             if ($location->assets) {
                 $assets = $location->assets;
                 foreach ($assets as $asset) {
+                    $all_price+= $asset->purchase_cost;
                     $asset_tag = $asset->asset_tag;
                     $first_s = substr($asset_tag, 0, 1);
                     if ($first_s == "I" || $first_s == "X" || strlen($asset_tag) > 8) {
@@ -153,7 +155,7 @@ class LocationsTransformer
                 ],
                 "properties" => [
                     "balloonContentHeader" => e($location->name),
-                    "balloonContentBody" => "Адрес: " . e($location->address) . "<br>" . "Активов: " . e($location->assets_count) . "<br>" . "Инвентаризированно: " . $count,
+                    "balloonContentBody" => "<a target='_blank'  href='/locations/".$location->id."'>Открыть список</a><br>Адрес: " . e($location->address) ."<br>Общяя стоимость: ".$all_price." руб. <br>Активов: " . e($location->assets_count) . "<br>" . "Инвентаризированно: " . $count. "<br>",
                     "balloonContentFooter" => "",
                     "hintContent" => e($location->name)
                 ],
