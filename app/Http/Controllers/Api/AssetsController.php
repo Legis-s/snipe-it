@@ -128,6 +128,13 @@ class AssetsController extends Controller
             $assets->where('assets.location_id', '=', $request->input('location_id'));
         }
 
+        if ($request->filled('bitrix_object_id')) {
+            $bitrix_object_id = $request->input('bitrix_object_id');
+            $location = Location::where('bitrix_id',  $bitrix_object_id)->firstOrFail();
+            $assets->where('assets.location_id', '=',$location->id);
+        }
+
+
         if ($request->filled('purchase_id')) {
             $assets->where('assets.purchase_id', '=', $request->input('purchase_id'));
         }
