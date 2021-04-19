@@ -391,6 +391,8 @@ class AssetsController extends Controller
             $this->authorize('review', Asset::class);
             $status = Statuslabel::where('name', 'Доступные')->first();
             $asset->status_id = $status->id;
+            $user = Auth::user();
+            $asset->user_verified_id = $user->id;
             $asset ->save();
             return (new AssetsTransformer)->transformAsset($asset);
         }

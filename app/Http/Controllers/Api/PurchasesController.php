@@ -55,6 +55,7 @@ class PurchasesController extends Controller
                 'purchases.comment',
                 'purchases.currency',
                 'purchases.user_id',
+                'purchases.user_verified_id',
                 'purchases.created_at',
                 'purchases.deleted_at',
             ])->withCount([

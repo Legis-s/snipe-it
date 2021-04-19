@@ -62,6 +62,32 @@ class AssetObserver
             if($all_ok1){
                 $purchase->status="finished";
                 $purchase->save();
+                /** @var \GuzzleHttp\Client $client */
+                $client = new \GuzzleHttp\Client();
+                $user = $asset->user_verified;
+                $purchase->user_verified_id = $user->id;
+                $purchase->save();
+                if ($user && $user->bitrix_token && $user->bitrix_id && $purchase->bitrix_task_id){
+                    $params1 = [
+                        'query' => [
+                            'taskId' => $purchase->bitrix_task_id
+                        ]
+                    ];
+                    $raw_bitrix_token  = Crypt::decryptString($user->bitrix_token);
+
+                    $response1 = $client->request('POST', 'https://bitrix.legis-s.ru/rest/'.$user->bitrix_id.'/'.$raw_bitrix_token.'/tasks.task.complete/',$params1);
+                    $params2 = [
+                        'query' => [
+                            'TASKID' => $purchase->bitrix_task_id,
+                            'FIELDS' => [
+                                'POST_MESSAGE'=>'Закртыта автоматически.'
+                            ]
+                        ]
+                    ];
+                    $response2 = $client->request('POST', 'https://bitrix.legis-s.ru/rest/'.$user->bitrix_id.'/'.$raw_bitrix_token.'/task.commentitem.add/',$params2);
+
+
+                }
             }
         }
         // если все активы из закупки инвентаризированиа  то закупка уходит на прверку

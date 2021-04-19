@@ -63,7 +63,8 @@ class Purchase extends SnipeModel
         "user_id",
         "bitrix_result_at",
         "verified_at",
-        "bitrix_task_id"
+        "bitrix_task_id",
+        "user_verified_id"
     ];
 
     use Searchable;
@@ -131,5 +132,9 @@ class Purchase extends SnipeModel
         return $this->belongsTo('\App\Models\User', 'user_id');
     }
 
+    public function user_verified()
+    {
+        return $this->belongsTo('\App\Models\User', 'user_verified_id');
+    }
 
 }

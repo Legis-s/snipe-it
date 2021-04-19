@@ -119,7 +119,8 @@ class Asset extends Depreciable
         'warranty_months',
         'requestable',
         'purchase_id',
-        'nds'
+        'nds',
+        'user_verified_id'
     ];
 
     use Searchable;
@@ -1450,5 +1451,8 @@ class Asset extends Depreciable
         return $this->belongsTo('\App\Models\Purchase');
     }
 
-
+    public function user_verified()
+    {
+        return $this->belongsTo('\App\Models\User', 'user_verified_id');
+    }
 }

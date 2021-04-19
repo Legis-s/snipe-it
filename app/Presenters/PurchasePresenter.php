@@ -103,6 +103,14 @@ class PurchasePresenter extends Presenter
                 "visible" => true,
                 "formatter" => 'usersLinkObjFormatter',
             ],[
+                "field" => "user_verified",
+                "searchable" => true,
+                "sortable" => true,
+                "switchable" => true,
+                "title" => "Проверил",
+                "visible" => true,
+                "formatter" => 'usersLinkObjFormatter',
+            ],[
                 "field" => "status",
                 "searchable" => true,
                 "sortable" => true,
