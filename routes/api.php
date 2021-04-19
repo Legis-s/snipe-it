@@ -892,6 +892,13 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
             ]
         );
 
+        Route::post('{purchase}/in_payment',
+            [
+                'as' => 'api.purchases.in_payment',
+                'uses' => 'PurchasesController@in_payment'
+            ]
+        );
+
         Route::post('{purchase}/reject',
             [
                 'as' => 'api.purchases.reject',

@@ -145,6 +145,30 @@ class PurchasesController extends Controller
      * Display a listing of the resource.
      * @return \Illuminate\Http\Response
      */
+    public function in_payment(Request $request, $purchaseId = null)
+    {
+        $this->authorize('view', Location::class);
+        $purchase = Purchase::findOrFail($purchaseId);
+        $purchase->status = "in_payment";
+        if ($purchase->save()) {
+
+            return response()->json(
+                Helper::formatStandardApiResponse(
+                    'success',
+                    (new PurchasesTransformer)->transformPurchase($purchase),
+                    trans('admin/locations/message.update.success')
+                )
+            );
+        }
+
+        return response()->json(Helper::formatStandardApiResponse('error', null, $purchase->getErrors()));
+    }
+
+
+    /**
+     * Display a listing of the resource.
+     * @return \Illuminate\Http\Response
+     */
     public function bitrix_task(Request $request, $purchaseId = null,$bitrix_task= null)
     {
         $this->authorize('view', Location::class);

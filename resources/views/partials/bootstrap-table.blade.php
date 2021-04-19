@@ -525,6 +525,9 @@
                 case "inventory":
                     return '<span class="label label-warning">В процессе инвентаризации</span>';
                     break;
+                case "in_payment":
+                    return '<span class="label label-primary">В оплате</span>';
+                    break;
                 case "review":
                     return '<span class="label label-warning">В процессе проверки</span>';
                     break;
