@@ -583,6 +583,14 @@
                         </a>
                     </li>
                 @endcan
+                    @can('view', \App\Models\Component::class)
+                        <li{!! (Request::is('sales*') ? ' class="active"' : '') !!}>
+                            <a href="{{ route('sales.index') }}">
+                                <i class="fa fa-shopping-basket"></i>
+                                <span>На продажу</span>
+                            </a>
+                        </li>
+                    @endcan
                 @can('view', \App\Models\User::class)
                     <li{!! (Request::is('users*') ? ' class="active"' : '') !!}>
                         <a href="{{ route('users.index') }}">

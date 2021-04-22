@@ -523,6 +523,11 @@ Route::group([ 'middleware' => 'web'], function () {
     );
 });
 
+Route::resource('sales', 'SalesController', [
+    'middleware' => ['auth'],
+    'parameters' => ['consumable' => 'consumable_id']
+]);
+
 
 
 Auth::routes();
