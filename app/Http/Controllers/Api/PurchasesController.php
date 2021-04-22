@@ -76,6 +76,10 @@ class PurchasesController extends Controller
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
         $sort = in_array($request->input('sort'), $allowed_columns) ? $request->input('sort') : 'created_at';
 
+        if ($request->input('status')){
+            $purchases->where('status', $request->input('status'));
+        }
+
         $purchases->orderBy($sort, $order);
         // Set the offset to the API call's offset, unless the offset is higher than the actual count of items in which
         // case we override with the actual count, so we should return 0 items.
