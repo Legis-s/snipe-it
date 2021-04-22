@@ -76,8 +76,8 @@ class PurchasesController extends Controller
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
         $sort = in_array($request->input('sort'), $allowed_columns) ? $request->input('sort') : 'created_at';
 
-        if ($request->input('status')){
-            $purchases->where('status', $request->input('status'));
+        if ($request->input('not_finished_status')){
+            $purchases->where('status', '<>', "finished");
         }
 
         $purchases->orderBy($sort, $order);

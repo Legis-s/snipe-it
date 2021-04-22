@@ -770,7 +770,7 @@
 
     function priceFormatter(value, row) {
         if (row.currency && row.final_price) {
-            return "<span style='font-size: 120%; font-weight: bold;' class='text-primary'>"+row.final_price+" "+row.currency+"</span>";
+            return "<span style='font-size: 120%; font-weight: bold;' class='text-primary'>"+row.final_price+"<br>"+row.currency+"</span>";
         } else {
         }
     }
