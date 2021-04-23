@@ -231,7 +231,7 @@ class PurchasesController extends Controller
     {
         $this->authorize('view', Location::class);
         $purchase = Purchase::findOrFail($purchaseId);
-        
+
 
         $file_data = file_get_contents(public_path().'/uploads/purchases/'.$purchase->bitrix_send_json);
 
