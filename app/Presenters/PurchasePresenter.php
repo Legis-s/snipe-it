@@ -77,6 +77,14 @@ class PurchasePresenter extends Presenter
                 "formatter" => 'bitrixIdFormatter',
                 "events"=> "operateEvents"
             ],[
+                "field" => "bitrix_task_id",
+                "searchable" => false,
+                "sortable" => true,
+                "title" => "ID задачи Bitrix",
+                "visible" => true,
+                "formatter" => 'bitrixTaskIdFormatter',
+                "events"=> "operateEvents"
+            ],[
                 "field" => "final_price",
                 "searchable" => true,
                 "sortable" => true,
