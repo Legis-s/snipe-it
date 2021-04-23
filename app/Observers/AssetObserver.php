@@ -8,6 +8,7 @@ use App\Models\Actionlog;
 use App\Models\Statuslabel;
 use Auth;
 use Log;
+use Crypt;
 class AssetObserver
 {
     /**
