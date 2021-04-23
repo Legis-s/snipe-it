@@ -231,9 +231,11 @@ class PurchasesController extends Controller
     {
         $this->authorize('view', Location::class);
         $purchase = Purchase::findOrFail($purchaseId);
+        
 
-        $params_json = $purchase->bitrix_send_json;
-        $params = json_decode($params_json, true);
+        $file_data = file_get_contents(public_path().'/uploads/purchases/'.$purchase->bitrix_send_json);
+
+        $params = json_decode($file_data, true);
         /** @var \GuzzleHttp\Client $client */
         $client = new \GuzzleHttp\Client();
 //        $response = $client->request('POST', 'https://bitrixdev.legis-s.ru/rest/1/lp06vc4xgkxjbo3t/lists.element.add.json/',$params);
