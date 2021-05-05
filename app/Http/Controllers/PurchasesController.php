@@ -210,9 +210,12 @@ class PurchasesController extends Controller
                 ]
             ];
             $params_json = json_encode($params);
+            file_put_contents(public_path().'/uploads/purchases/'.$purchase->id.'.json', $params_json);
+
 //            \Log::debug($params_json);
-            $purchase->bitrix_send_json= $params_json;
+            $purchase->bitrix_send_json = $purchase->id.'.json';
             $purchase->save();
+
 //            $response = $client->request('POST', 'https://bitrixdev.legis-s.ru/rest/1/lp06vc4xgkxjbo3t/lists.element.add.json/',$params);
 
             if ($user->bitrix_token && $user->bitrix_id){
@@ -224,8 +227,8 @@ class PurchasesController extends Controller
 
             }
             $response = $response->getBody()->getContents();
+
             $purchase->bitrix_result = $response;
-            $purchase->save();
             $bitrix_result = json_decode($response, true);
             $bitrix_id = $bitrix_result["result"];
             $purchase->bitrix_id = $bitrix_id;

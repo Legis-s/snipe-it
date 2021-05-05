@@ -58,6 +58,7 @@ class PurchasesController extends Controller
                 'purchases.user_verified_id',
                 'purchases.created_at',
                 'purchases.deleted_at',
+                'purchases.bitrix_task_id',
             ])->withCount([
                 'assets as assets_count',
             ]);
@@ -75,6 +76,10 @@ class PurchasesController extends Controller
 
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
         $sort = in_array($request->input('sort'), $allowed_columns) ? $request->input('sort') : 'created_at';
+
+        if ($request->input('not_finished_status')){
+            $purchases->where('status', '<>', "finished");
+        }
 
         $purchases->orderBy($sort, $order);
         // Set the offset to the API call's offset, unless the offset is higher than the actual count of items in which
@@ -228,8 +233,10 @@ class PurchasesController extends Controller
         $this->authorize('view', Location::class);
         $purchase = Purchase::findOrFail($purchaseId);
 
-        $params_json = $purchase->bitrix_send_json;
-        $params = json_decode($params_json, true);
+
+        $file_data = file_get_contents(public_path().'/uploads/purchases/'.$purchase->bitrix_send_json);
+
+        $params = json_decode($file_data, true);
         /** @var \GuzzleHttp\Client $client */
         $client = new \GuzzleHttp\Client();
 //        $response = $client->request('POST', 'https://bitrixdev.legis-s.ru/rest/1/lp06vc4xgkxjbo3t/lists.element.add.json/',$params);

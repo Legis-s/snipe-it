@@ -8,6 +8,7 @@ use App\Models\Actionlog;
 use App\Models\Statuslabel;
 use Auth;
 use Log;
+use Crypt;
 class AssetObserver
 {
     /**
@@ -80,7 +81,7 @@ class AssetObserver
                         'query' => [
                             'TASKID' => $purchase->bitrix_task_id,
                             'FIELDS' => [
-                                'POST_MESSAGE'=>'Закртыта автоматически.'
+                                'POST_MESSAGE'=>'Закрыта автоматически.'
                             ]
                         ]
                     ];
