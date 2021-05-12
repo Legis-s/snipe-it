@@ -108,10 +108,13 @@ class PurchasesController extends Controller
             $assets = Asset::where('purchase_id', $purchase->id)->get();
             if (count($assets) > 0) {
 //                $status = Statuslabel::where('name', 'Доступные')->first();
-                $status = Statuslabel::where('name', 'Ожидает инвентаризации')->first();
+                $status_review_wait = Statuslabel::where('name', 'Ожидает проверки')->first();
+                $status_inventory_wait = Statuslabel::where('name', 'Ожидает инвентаризации')->first();
                 foreach ($assets as &$value) {
-                    $value->status_id = $status->id;
-                    $value->save();
+                    if ($value->status_id != $status_review_wait) {
+                        $value->status_id = $status_inventory_wait->id;
+                        $value->save();
+                    }
                 }
             }
             $consumables_server = Consumable::where('purchase_id', $purchase->id)->get();
