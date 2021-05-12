@@ -112,7 +112,7 @@ class PurchasesController extends Controller
                 $status_review_wait = Statuslabel::where('name', 'Ожидает проверки')->first();
                 $status_inventory_wait = Statuslabel::where('name', 'Ожидает инвентаризации')->first();
                 foreach ($assets as &$value) {
-                    if ($value->status_id != $status_review_wait) {
+                    if ($value->status_id != $status_review_wait->id) {
                         $value->status_id = $status_inventory_wait->id;
                         $value->save();
                     }
