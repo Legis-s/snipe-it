@@ -58,6 +58,7 @@ class PurchasesController extends Controller
                 'purchases.user_verified_id',
                 'purchases.created_at',
                 'purchases.deleted_at',
+                'purchases.bitrix_task_id',
             ])->withCount([
                 'assets as assets_count',
             ]);
@@ -234,7 +235,7 @@ class PurchasesController extends Controller
     {
         $this->authorize('view', Location::class);
         $purchase = Purchase::findOrFail($purchaseId);
-        
+
 
         $file_data = file_get_contents(public_path().'/uploads/purchases/'.$purchase->bitrix_send_json);
 

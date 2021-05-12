@@ -51,6 +51,7 @@ class PurchasesTransformer
             'user' => ($purchase->user) ? (new UsersTransformer)->transformUser($purchase->user) : null,
             'created_at' => Helper::getFormattedDateObject($purchase->created_at, 'datetime'),
             'updated_at' => Helper::getFormattedDateObject($purchase->updated_at, 'datetime'),
+            'bitrix_task_id' => (int) $purchase->bitrix_task_id,
         ];
 
         return $array;

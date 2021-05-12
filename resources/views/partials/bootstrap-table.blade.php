@@ -767,6 +767,13 @@
             }
         }
     }
+    function bitrixTaskIdFormatter(value, row) {
+        if (value) {
+            return "<a href='https://bitrix.legis-s.ru/company/personal/user/"+row.user.bitrix_id+"/tasks/task/view/"+value+"/' target='_blank'>"+value+"</a>";
+        } else {
+            return ' ';
+        }
+    }
 
     function priceFormatter(value, row) {
         if (row.currency && row.final_price) {
