@@ -103,7 +103,7 @@ class PurchasesController extends Controller
     {
         $this->authorize('view', Location::class);
         $purchase = Purchase::findOrFail($purchaseId);
-        // меняем статус на Ожидает инвентаризации, только если еще её не было у закупки
+        // меняем статус на "В процессе инвентаризации", только если еще её не было у закупки
         if ($purchase->status != "review") {
             $purchase->status = "inventory";
         }
