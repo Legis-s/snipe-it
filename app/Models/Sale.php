@@ -46,7 +46,7 @@ class Sale extends Depreciable
      *
      * @var string
      */
-    protected $table = 'assets';
+    protected $table = 'sales';
 
     /**
      * Whether the model should inject it's identifier to the unique

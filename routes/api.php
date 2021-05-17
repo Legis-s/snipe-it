@@ -422,6 +422,21 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
     ); // Hardware resource
 
 
+    Route::resource('sale', 'SalesController',
+        [
+            'names' =>
+                [
+                    'index' => 'api.sales.index',
+                    'show' => 'api.sales.show',
+                    'store' => 'api.sales.store',
+                    'update' => 'api.sales.update',
+                    'destroy' => 'api.sales.destroy',
+                ],
+            'except' => ['create', 'edit'],
+            'parameters' => ['asset' => 'sale_id']
+        ]
+    ); // Sales resource
+
     /*--- Imports API ---*/
 
     Route::resource('imports', 'ImportController',
@@ -527,6 +542,22 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
         ]
     ); // Locations resource
 
+
+
+    Route::resource('contracts', 'ContractsController',
+        [
+            'names' =>
+                [
+                    'index' => 'api.contracts.index',
+                    'show' => 'api.contracts.show',
+                    'store' => 'api.contracts.store',
+                    'update' => 'api.contracts.update',
+                    'destroy' => 'api.contracts.destroy'
+                ],
+            'except' => ['create', 'edit'],
+            'parameters' => ['contract' => 'contract_id']
+        ]
+    ); // Contracts resource
 
 
 

@@ -77,7 +77,7 @@ class SalesController extends Controller
         } else {
             $company = null;
         }
-        return view('hardware/index')->with('company', $company);
+        return view('sale/index')->with('company', $company);
     }
 
     /**
