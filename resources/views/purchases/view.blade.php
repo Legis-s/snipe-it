@@ -191,6 +191,16 @@
                             </div>
                         </div>
                     @endif
+
+                    @can('review', \App\Models\Asset::class)
+                        @if ($purchase->consumables_json &&  count($purchase->consumables)==0)
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <button type="button" class="btn btn-primary" id="check_consumables">Принять расходники</button>
+                                </div>
+                            </div>
+                        @endif
+                    @endcan
             </div><!-- /.box-body -->
         </div> <!--/.box-->
     </div>
@@ -209,10 +219,26 @@
     <script nonce="{{ csrf_token() }}">
 
         var table_consumables = $('#table_consumables');
+        var check_consumables = $('#check_consumables');
         var data = '{!! $purchase->consumables_json !!}';
         data = JSON.parse(data);
         $(function() {
             console.log(data);
+
+            check_consumables.click(function() {
+                $.ajax({
+                    type: 'POST',
+                    url: "{{ route('api.purchases.consumables_check', $purchase->id) }}",
+                    headers: {
+                        "X-Requested-With": 'XMLHttpRequest',
+                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        check_consumables.hide();
+                    },
+                });
+            });
             table_consumables.bootstrapTable('destroy').bootstrapTable({
                 data: data,
                 search:true,
@@ -257,34 +283,42 @@
                     name: 'Количество',
                     align: 'center',
                     valign: 'middle'
-                },{
-                    align: 'center',
-                    valign: 'middle',
-                    events: {
-                        'click .remove': function (e, value, row, index) {
-                            table_consumables.bootstrapTable('remove', {
-                                field: 'id',
-                                values: [row.id]
-                            });
-                            var data = table_consumables.bootstrapTable('getData');
-                            var newData = [];
-                            var count = 0 ;
-                            data.forEach(function callback(currentValue, index, array) {
-                                count++;
-                                currentValue.id = count;
-                                newData.push(currentValue);
-                            });
-                            table_consumables.bootstrapTable('load',newData);
-                        }
-                    },
-                    formatter: function (value, row, index) {
-                        return [
-                            '<a class="remove text-danger"  href="javascript:void(0)" title="Убрать">',
-                            '<i class="remove fa fa-times fa-lg"></i>',
-                            '</a>'
-                        ].join('')
-                    }
-                }]
+                }
+                // , {
+                //     field: 'status',
+                //     name: 'Статус',
+                //     align: 'center',
+                //     valign: 'middle'
+                // }
+                // ,{
+                //     align: 'center',
+                //     valign: 'middle',
+                //     events: {
+                //         'click .remove': function (e, value, row, index) {
+                //             table_consumables.bootstrapTable('remove', {
+                //                 field: 'id',
+                //                 values: [row.id]
+                //             });
+                //             var data = table_consumables.bootstrapTable('getData');
+                //             var newData = [];
+                //             var count = 0 ;
+                //             data.forEach(function callback(currentValue, index, array) {
+                //                 count++;
+                //                 currentValue.id = count;
+                //                 newData.push(currentValue);
+                //             });
+                //             table_consumables.bootstrapTable('load',newData);
+                //         }
+                //     },
+                //     formatter: function (value, row, index) {
+                //         return [
+                //             '<a class="remove text-danger"  href="javascript:void(0)" title="Убрать">',
+                //             '<i class="remove fa fa-times fa-lg"></i>',
+                //             '</a>'
+                //         ].join('')
+                //     }
+                // }
+                ]
             });
         })
     </script>

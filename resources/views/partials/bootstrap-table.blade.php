@@ -704,6 +704,23 @@
     }
 
 
+    function assetsCountFormatter(value,row) {
+        if (row.assets_count_ok>0){
+            return row.assets_count_ok + "/"+value;
+        }else{
+            return value;
+        }
+    }
+
+
+    function consumablesCountFormatter(value,row) {
+        if (row.consumables_count_real>0){
+            return row.consumables_count_real + "/"+value;
+        }else{
+            return value;
+        }
+    }
+
     function fileUploadNameFormatter(value) {
         console.dir(value);
         if ((value) && (value.filename) && (value.url)) {
