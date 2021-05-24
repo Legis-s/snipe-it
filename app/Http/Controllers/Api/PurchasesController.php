@@ -40,7 +40,7 @@ class PurchasesController extends Controller
     public function index(Request $request)
     {
         $this->authorize('view', Location::class);
-
+        $status = Statuslabel::where('name', 'Доступные')->first();
         $purchases = Purchase::with('supplier', 'assets', 'invoice_type', 'legal_person','user','consumables')
             ->select([
                 'purchases.id',
@@ -63,8 +63,8 @@ class PurchasesController extends Controller
             ])->withCount([
                 'consumables as consumables_count',
                 'assets as assets_count',
-                'assets as assets_count_ok' => function (Builder $query) {
-                    $query->where('status_id', 5);
+                'assets as assets_count_ok' => function (Builder $query) use ($status) {
+                    $query->where('status_id', $status->id);
                 }
             ]);
 
