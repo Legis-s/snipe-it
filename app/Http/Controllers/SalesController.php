@@ -95,7 +95,7 @@ class SalesController extends Controller
         $asset = new Asset;
         $asset->nds = 20;
         $asset->quality = 5;
-        $view = View::make('hardware/edit')
+        $view = View::make('sale/edit')
             ->with('statuslabel_list', Helper::statusLabelList())
             ->with('item', $asset)
             ->with('statuslabel_types', Helper::statusTypeList());

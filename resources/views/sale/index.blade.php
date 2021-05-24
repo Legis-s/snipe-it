@@ -42,9 +42,9 @@
 @stop
 
 @section('header_right')
-  <a href="{{ route('reports/custom') }}" style="margin-right: 5px;" class="btn btn-default">
-    Custom Export</a>
-  <a href="{{ route('hardware.create') }}" class="btn btn-primary pull-right"></i> {{ trans('general.create') }}</a>
+{{--  <a href="{{ route('reports/custom') }}" style="margin-right: 5px;" class="btn btn-default">--}}
+{{--    Custom Export</a>--}}
+  <a href="{{ route('sales.create') }}" class="btn btn-primary pull-right"></i> {{ trans('general.create') }}</a>
 @stop
 
 {{-- Page content --}}
@@ -76,7 +76,7 @@
               <table
                 data-advanced-search="true"
                 data-click-to-select="true"
-                data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayout() }}"
+                data-columns="{{ \App\Presenters\SalesPresenter::dataTableLayout() }}"
                 data-cookie-id-table="assetsListingTable"
                 data-pagination="true"
                 data-id-table="assetsListingTable"

@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AssetRequest;
 use App\Http\Requests\AssetCheckoutRequest;
 use App\Http\Transformers\AssetsTransformer;
+use App\Http\Transformers\SalesTransformer;
 use App\Models\Sale;
 use App\Models\AssetModel;
 use App\Models\Company;
@@ -95,13 +96,9 @@ class SalesController extends Controller
             $filter = json_decode($request->input('filter'), true);
         }
 
-        $all_custom_fields = CustomField::all(); //used as a 'cache' of custom fields throughout this page load
-        foreach ($all_custom_fields as $field) {
-            $allowed_columns[] = $field->db_column_name();
-        }
 
         $assets = Company::scopeCompanyables(Sale::select('sales.*'), "company_id", "assets")
-            ->with('location', 'assetstatus', 'assetlog', 'company', 'defaultLoc', 'assignedTo',
+            ->with('location', 'assetstatus', 'assetlog', 'company', 'assignedTo',
                 'model.category', 'model.manufacturer', 'model.fieldset', 'supplier');
 
 
@@ -109,11 +106,7 @@ class SalesController extends Controller
         // They are also used by the individual searches on detail pages like
         // locations, etc.
         if ($request->filled('status_id')) {
-            $assets->where('assets.status_id', '=', $request->input('status_id'));
-        }
-
-        if ($request->input('requestable') == 'true') {
-            $assets->where('assets.requestable', '=', '1');
+            $assets->where('sales.status_id', '=', $request->input('status_id'));
         }
 
         if ($request->filled('model_id')) {
@@ -125,45 +118,36 @@ class SalesController extends Controller
         }
 
         if ($request->filled('location_id')) {
-            $assets->where('assets.location_id', '=', $request->input('location_id'));
+            $assets->where('sales.location_id', '=', $request->input('location_id'));
         }
 
         if ($request->filled('bitrix_object_id')) {
             $bitrix_object_id = $request->input('bitrix_object_id');
-            $location = Location::where('bitrix_id',  $bitrix_object_id)->firstOrFail();
-            $assets->where('assets.location_id', '=',$location->id);
+            $location = Location::where('bitrix_id', $bitrix_object_id)->firstOrFail();
+            $assets->where('sales.location_id', '=', $location->id);
         }
-
 
         if ($request->filled('purchase_id')) {
-            $assets->where('assets.purchase_id', '=', $request->input('purchase_id'));
-        }
-
-        if ($request->filled('rtd_location_id')) {
-            $assets->where('assets.rtd_location_id', '=', $request->input('rtd_location_id'));
+            $assets->where('sales.purchase_id', '=', $request->input('purchase_id'));
         }
 
         if ($request->filled('supplier_id')) {
-            $assets->where('assets.supplier_id', '=', $request->input('supplier_id'));
+            $assets->where('sales.supplier_id', '=', $request->input('supplier_id'));
         }
 
         if (($request->filled('assigned_to')) && ($request->filled('assigned_type'))) {
-            $assets->where('assets.assigned_to', '=', $request->input('assigned_to'))
-                ->where('assets.assigned_type', '=', $request->input('assigned_type'));
+            $assets->where('sales.assigned_to', '=', $request->input('assigned_to'))
+                ->where('sales.assigned_type', '=', $request->input('assigned_type'));
         }
         if ($request->filled('company_id')) {
-            $assets->where('assets.company_id', '=', $request->input('company_id'));
+            $assets->where('sales.company_id', '=', $request->input('company_id'));
         }
 
         if ($request->filled('manufacturer_id')) {
             $assets->ByManufacturer($request->input('manufacturer_id'));
         }
 
-        if ($request->filled('depreciation_id')) {
-            $assets->ByDepreciationId($request->input('depreciation_id'));
-        }
-
-        $request->filled('order_number') ? $assets = $assets->where('assets.order_number', '=', e($request->get('order_number'))) : '';
+        $request->filled('order_number') ? $assets = $assets->where('sales.order_number', '=', e($request->get('order_number'))) : '';
 
 
         // Set the offset to the API call's offset, unless the offset is higher than the actual count of items in which
@@ -176,20 +160,6 @@ class SalesController extends Controller
 
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
 
-        // This is used by the audit reporting routes
-        if (Gate::allows('audit', Asset::class)) {
-
-            switch ($audit) {
-                case 'due':
-                    $assets->DueOrOverdueForAudit($settings);
-                    break;
-                case 'overdue':
-                    $assets->overdueForAudit($settings);
-                    break;
-            }
-        }
-
-
         // This is used by the sidenav, mostly
 
         // We switched from using query scopes here because of a Laravel bug
@@ -201,16 +171,16 @@ class SalesController extends Controller
                 break;
             case 'Pending':
                 $assets->join('status_labels AS status_alias', function ($join) {
-                    $join->on('status_alias.id', "=", "assets.status_id")
+                    $join->on('status_alias.id', "=", "sales.status_id")
                         ->where('status_alias.deployable', '=', 0)
                         ->where('status_alias.pending', '=', 1)
                         ->where('status_alias.archived', '=', 0);
                 });
                 break;
             case 'RTD':
-                $assets->whereNull('assets.assigned_to')
+                $assets->whereNull('sales.assigned_to')
                     ->join('status_labels AS status_alias', function ($join) {
-                        $join->on('status_alias.id', "=", "assets.status_id")
+                        $join->on('status_alias.id', "=", "sales.status_id")
                             ->where('status_alias.deployable', '=', 1)
                             ->where('status_alias.pending', '=', 0)
                             ->where('status_alias.archived', '=', 0);
@@ -221,7 +191,7 @@ class SalesController extends Controller
                 break;
             case 'Archived':
                 $assets->join('status_labels AS status_alias', function ($join) {
-                    $join->on('status_alias.id', "=", "assets.status_id")
+                    $join->on('status_alias.id', "=", "sales.status_id")
                         ->where('status_alias.deployable', '=', 0)
                         ->where('status_alias.pending', '=', 0)
                         ->where('status_alias.archived', '=', 1);
@@ -230,7 +200,7 @@ class SalesController extends Controller
             case 'Requestable':
                 $assets->where('assets.requestable', '=', 1)
                     ->join('status_labels AS status_alias', function ($join) {
-                        $join->on('status_alias.id', "=", "assets.status_id")
+                        $join->on('status_alias.id', "=", "sales.status_id")
                             ->where('status_alias.deployable', '=', 1)
                             ->where('status_alias.pending', '=', 0)
                             ->where('status_alias.archived', '=', 0);
@@ -239,21 +209,21 @@ class SalesController extends Controller
                 break;
             case 'Deployed':
                 // more sad, horrible workarounds for laravel bugs when doing full text searches
-                $assets->where('assets.assigned_to', '>', '0');
+                $assets->where('sales.assigned_to', '>', '0');
                 break;
             default:
 
                 if ((!$request->filled('status_id')) && ($settings->show_archived_in_list != '1')) {
                     // terrible workaround for complex-query Laravel bug in fulltext
                     $assets->join('status_labels AS status_alias', function ($join) {
-                        $join->on('status_alias.id', "=", "assets.status_id")
+                        $join->on('status_alias.id', "=", "sales.status_id")
                             ->where('status_alias.archived', '=', 0);
                     });
 
                     // If there is a status ID, don't take show_archived_in_list into consideration
                 } else {
                     $assets->join('status_labels AS status_alias', function ($join) {
-                        $join->on('status_alias.id', "=", "assets.status_id");
+                        $join->on('status_alias.id', "=", "sales.status_id");
                     });
                 }
 
@@ -274,7 +244,7 @@ class SalesController extends Controller
 
         // This handles all of the pivot sorting (versus the assets.* fields
         // in the allowed_columns array)
-        $column_sort = in_array($sort_override, $allowed_columns) ? $sort_override : 'assets.created_at';
+        $column_sort = in_array($sort_override, $allowed_columns) ? $sort_override : 'sales.created_at';
 
 
         switch ($sort_override) {
@@ -316,7 +286,7 @@ class SalesController extends Controller
 
         $total = $assets->count();
         $assets = $assets->skip($offset)->take($limit)->get();
-        return (new AssetsTransformer)->transformAssets($assets, $total);
+        return (new SalesTransformer)->transformSales($assets, $total);
     }
 
 
@@ -330,11 +300,11 @@ class SalesController extends Controller
      */
     public function showByTag($tag)
     {
-        if ($asset = Asset::with('assetstatus')->with('assignedTo')->withTrashed()->where('asset_tag', $tag)->first()) {
+        if ($asset = Sale::with('assetstatus')->with('assignedTo')->withTrashed()->where('asset_tag', $tag)->first()) {
             $this->authorize('view', $asset);
-            return (new AssetsTransformer)->transformAsset($asset);
+            return (new SalesTransformer)->transformSale($asset);
         }
-        return response()->json(Helper::formatStandardApiResponse('error', null, 'Asset not found'), 200);
+        return response()->json(Helper::formatStandardApiResponse('error', null, 'Sale not found'), 200);
 
     }
 
@@ -349,12 +319,12 @@ class SalesController extends Controller
     public function showBySerial($serial)
     {
         $this->authorize('index', Asset::class);
-        if ($assets = Asset::with('assetstatus')->with('assignedTo')
+        if ($assets = Sale::with('assetstatus')->with('assignedTo')
             ->withTrashed()->where('serial', $serial)->get()) {
 
-            return (new AssetsTransformer)->transformAssets($assets, $assets->count());
+            return (new SalesTransformer)->transformSale($assets, $assets->count());
         }
-        return response()->json(Helper::formatStandardApiResponse('error', null, 'Asset not found'), 200);
+        return response()->json(Helper::formatStandardApiResponse('error', null, 'Sale not found'), 200);
 
     }
 
@@ -369,9 +339,9 @@ class SalesController extends Controller
      */
     public function show($id)
     {
-        if ($asset = Asset::with('assetstatus')->with('assignedTo')->withTrashed()->withCount('checkins as checkins_count', 'checkouts as checkouts_count', 'userRequests as userRequests_count')->findOrFail($id)) {
+        if ($asset = Sale::with('assetstatus')->with('assignedTo')->withTrashed()->withCount('checkins as checkins_count', 'checkouts as checkouts_count', 'userRequests as userRequests_count')->findOrFail($id)) {
             $this->authorize('view', $asset);
-            return (new AssetsTransformer)->transformAsset($asset);
+            return (new SalesTransformer)->transformSale($asset);
         }
 
 
@@ -387,17 +357,16 @@ class SalesController extends Controller
      */
     public function review($id)
     {
-        if ($asset = Asset::with('assetstatus')->with('assignedTo')->withTrashed()->withCount('checkins as checkins_count', 'checkouts as checkouts_count', 'userRequests as userRequests_count')->findOrFail($id)) {
+        if ($asset = Sale::with('assetstatus')->with('assignedTo')->withTrashed()->withCount('checkins as checkins_count', 'checkouts as checkouts_count', 'userRequests as userRequests_count')->findOrFail($id)) {
             $this->authorize('review', Asset::class);
             $status = Statuslabel::where('name', 'Доступные')->first();
             $asset->status_id = $status->id;
             $user = Auth::user();
             $asset->user_verified_id = $user->id;
-            $asset ->save();
-            return (new AssetsTransformer)->transformAsset($asset);
+            $asset->save();
+            return (new SalesTransformer)->transformSale($asset);
         }
     }
-
 
 
     /**
@@ -411,15 +380,15 @@ class SalesController extends Controller
     public function selectlist(Request $request)
     {
 
-        $assets = Company::scopeCompanyables(Asset::select([
-            'assets.id',
-            'assets.name',
-            'assets.asset_tag',
-            'assets.model_id',
-            'assets.assigned_to',
-            'assets.assigned_type',
-            'assets.status_id'
-        ])->with('model', 'assetstatus', 'assignedTo')->NotArchived(), 'company_id', 'assets');
+        $assets = Company::scopeCompanyables(Sale::select([
+            'sales.id',
+            'sales.name',
+            'sales.asset_tag',
+            'sales.model_id',
+            'sales.assigned_to',
+            'sales.assigned_type',
+            'sales.status_id'
+        ])->with('model', 'assetstatus', 'assignedTo')->NotArchived(), 'company_id', 'sales');
 
         if ($request->filled('assetStatusType') && $request->input('assetStatusType') === 'RTD') {
             $assets = $assets->RTD();
@@ -470,7 +439,7 @@ class SalesController extends Controller
 
         $this->authorize('create', Asset::class);
 
-        $asset = new Asset();
+        $asset = new Sale();
         $asset->model()->associate(AssetModel::find((int)$request->get('model_id')));
 
         $asset->name = $request->get('name');
@@ -567,9 +536,9 @@ class SalesController extends Controller
 
 
             $status_inv = Statuslabel::where('name', 'Ожидает инвентаризации')->first();
-            $status_review= Statuslabel::where('name', 'Ожидает проверки')->first();
-            if ($asset->status_id == $status_inv->id && $request->filled('asset_tag')){
-                $asset->status_id=$status_review->id;
+            $status_review = Statuslabel::where('name', 'Ожидает проверки')->first();
+            if ($asset->status_id == $status_inv->id && $request->filled('asset_tag')) {
+                $asset->status_id = $status_review->id;
             }
 
             if ($asset->save()) {
@@ -690,11 +659,11 @@ class SalesController extends Controller
         $asset_name = request('name', null);
         $photos = request('photos', null);
         $photos_json = [];
-        if($photos !=null && count($photos)>0){
+        if ($photos != null && count($photos) > 0) {
             foreach ($photos as &$photo) {
-                $imgBase64 = substr($photo['base64'], strpos($photo['base64'], ",")+1);
+                $imgBase64 = substr($photo['base64'], strpos($photo['base64'], ",") + 1);
                 $image = base64_decode($imgBase64);
-                $jpg_url = "/uploads/log_img/log_img-".time()."-".uniqid().".jpeg";
+                $jpg_url = "/uploads/log_img/log_img-" . time() . "-" . uniqid() . ".jpeg";
                 $path = public_path() . $jpg_url;
                 file_put_contents($path, $image);
                 array_push($photos_json, [
@@ -713,7 +682,7 @@ class SalesController extends Controller
 //        }
 
 
-        if ($asset->checkOut($target, Auth::user(), $checkout_at, $expected_checkin, $note, $asset_name, $asset->location_id,$quality,$depreciable_cost,$photos_json)) {
+        if ($asset->checkOut($target, Auth::user(), $checkout_at, $expected_checkin, $note, $asset_name, $asset->location_id, $quality, $depreciable_cost, $photos_json)) {
             return response()->json(Helper::formatStandardApiResponse('success', ['asset' => e($asset->asset_tag)], trans('admin/hardware/message.checkout.success')));
         }
 
@@ -755,11 +724,11 @@ class SalesController extends Controller
             $asset->depreciable_cost = $request->get('depreciable_cost');
         }
         if ($request->filled('quality')) {
-            $asset->quality =intval( $request->get('quality'));
+            $asset->quality = intval($request->get('quality'));
         }
 
         if ($request->filled('quality')) {
-            $asset->quality =intval( $request->get('quality'));
+            $asset->quality = intval($request->get('quality'));
         }
 
         $asset->location_id = $asset->rtd_location_id;
@@ -780,11 +749,11 @@ class SalesController extends Controller
         }
         $photos = request('photos', null);
         $photos_json = [];
-        if($photos !=null && count($photos)>0){
+        if ($photos != null && count($photos) > 0) {
             foreach ($photos as &$photo) {
-                $imgBase64 = substr($photo['base64'], strpos($photo['base64'], ",")+1);
+                $imgBase64 = substr($photo['base64'], strpos($photo['base64'], ",") + 1);
                 $image = base64_decode($imgBase64);
-                $jpg_url = "/uploads/log_img/log_img-".time()."-".uniqid().".jpeg";
+                $jpg_url = "/uploads/log_img/log_img-" . time() . "-" . uniqid() . ".jpeg";
                 $path = public_path() . $jpg_url;
                 file_put_contents($path, $image);
                 array_push($photos_json, [
@@ -795,7 +764,7 @@ class SalesController extends Controller
         }
 
         if ($asset->save()) {
-            $asset->logCheckin($target, e(request('note')),$changed,$photos_json);
+            $asset->logCheckin($target, e(request('note')), $changed, $photos_json);
             return response()->json(Helper::formatStandardApiResponse('success', ['asset' => e($asset->asset_tag)], trans('admin/hardware/message.checkin.success')));
         }
 
