@@ -103,16 +103,25 @@ class PurchasesController extends Controller
     {
         $this->authorize('view', Location::class);
         $purchase = Purchase::findOrFail($purchaseId);
-        $purchase->status = "inventory";
+        // меняем статус на "В процессе инвентаризации", только если еще её не было у закупки
+        if ($purchase->status != "review" && $purchase->status != "finished") {
+            $purchase->status = "inventory";
+        }
+
         $purchase->bitrix_result_at = new DateTime();
         if ($purchase->save()) {
             $assets = Asset::where('purchase_id', $purchase->id)->get();
+            // меняем статус у активов только если закупка еще не обработана
             if (count($assets) > 0) {
-//                $status = Statuslabel::where('name', 'Доступные')->first();
-                $status = Statuslabel::where('name', 'Ожидает инвентаризации')->first();
+                $status_in_purchase = Statuslabel::where('name', 'В закупке')->first();
+                $status_inventory_wait = Statuslabel::where('name', 'Ожидает инвентаризации')->first();
                 foreach ($assets as &$value) {
-                    $value->status_id = $status->id;
-                    $value->save();
+
+                    // меняем статус на Ожидает инвентаризации, только если актив в статусе "В закупке"
+                    if ($value->status_id == $status_in_purchase->id) {
+                        $value->status_id = $status_inventory_wait->id;
+                        $value->save();
+                    }
                 }
             }
             $consumables_server = Consumable::where('purchase_id', $purchase->id)->get();
