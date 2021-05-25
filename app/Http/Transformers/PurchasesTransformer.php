@@ -26,6 +26,7 @@ class PurchasesTransformer
     {
 
         $consumables_count = null ;
+        $check_count = 0 ;
         if($purchase->consumables_json){
             $consumables = json_decode($purchase->consumables_json, true);
             $consumables_count = count($consumables);
@@ -46,7 +47,10 @@ class PurchasesTransformer
             'invoice_type' => ($purchase->invoice_type) ? e($purchase->invoice_type->name) : null,
 
             'assets_count' => (int) $purchase->assets_count,
+            'consumables_count_real' => (int) $purchase->consumables_count,
+            'assets_count_ok' => (int) $purchase->assets_count_ok,
             'consumables_count' => (int) $consumables_count,
+            'consumables_check_count' => (int) $check_count,
             'comment' =>  ($purchase->comment) ? e($purchase->comment) : null,
             'user' => ($purchase->user) ? (new UsersTransformer)->transformUser($purchase->user) : null,
             'created_at' => Helper::getFormattedDateObject($purchase->created_at, 'datetime'),

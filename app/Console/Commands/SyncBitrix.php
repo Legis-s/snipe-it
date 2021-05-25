@@ -111,7 +111,7 @@ class SyncBitrix extends Command
                 }
                 continue;
             }
-            if($value["TABEL_ID"] && $value["UF_TYPE"] == 455 || $value["UF_TYPE"] == 739){
+            if($value["TABEL_ID"] && $value["UF_TYPE"] == 455 || $value["UF_TYPE"] == 739 || $value["ID"] == 2956){
                 $count++;
 
                 $bitrix_user =  $value["ASSIGNED_BY_ID"];

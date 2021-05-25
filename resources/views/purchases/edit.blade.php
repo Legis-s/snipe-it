@@ -254,7 +254,8 @@
                     name: 'Количество',
                     align: 'center',
                     valign: 'middle'
-                }, {
+                }
+                , {
                     align: 'center',
                     valign: 'middle',
                     events: {
@@ -281,7 +282,8 @@
                             '</a>'
                         ].join('')
                     }
-                }]
+                }
+                ]
             });
 
             $('#modal_asset').on("show.bs.modal", function (event) {
@@ -504,6 +506,8 @@
                         purchase_cost: purchase_cost,
                         nds: nds,
                         quantity: quantity,
+                        check: false,
+                        status: "На согласовании",
                     };
                     table_consumables.bootstrapTable('append', data);
                     $('#modal_consumables').modal('hide');

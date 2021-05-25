@@ -43,6 +43,71 @@
                 zoom: 11,
                 controls: ['zoomControl']
             });
+
+            CustomControlClass = function (options) {
+                CustomControlClass.superclass.constructor.call(this, options);
+                this._$content = null;
+                this._geocoderDeferred = null;
+            };
+            // И наследуем его от collection.Item.
+            ymaps.util.augment(CustomControlClass, ymaps.collection.Item, {
+                onAddToMap: function (map) {
+                    CustomControlClass.superclass.onAddToMap.call(this, map);
+                    this._lastCenter = null;
+                    this.getParent().getChildElement(this).then(this._onGetChildElement, this);
+                },
+
+                onRemoveFromMap: function (oldMap) {
+                    this._lastCenter = null;
+                    if (this._$content) {
+                        this._$content.remove();
+                        this._mapEventGroup.removeAll();
+                    }
+                    CustomControlClass.superclass.onRemoveFromMap.call(this, oldMap);
+                },
+
+                _onGetChildElement: function (parentDomContainer) {
+                    // Создаем HTML-элемент с текстом.
+                    this._$content = $('<div class="customControl">' +
+                        '<div class="form-check">' +
+                        '<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">' +
+                        '<label class="form-check-label" for="flexCheckDefault">' +
+                        ' Показать без имущества' +
+                        '</label>' +
+                        '</div>'+
+                        '</div>').appendTo(parentDomContainer);
+                    this._mapEventGroup = this.getMap().events.group();
+                    // Запрашиваем данные после изменения положения карты.
+                    this._mapEventGroup.add('boundschange', this._createRequest, this);
+                    // Сразу же запрашиваем название места.
+                    this._createRequest();
+                },
+
+                _createRequest: function () {
+
+
+
+                },
+
+                _onServerResponse: function (result) {
+                    // Данные от сервера были получены и теперь их необходимо отобразить.
+                    // Описание ответа в формате JSON.
+                    var members = result.GeoObjectCollection.featureMember,
+                        geoObjectData = (members && members.length) ? members[0].GeoObject : null;
+                    if (geoObjectData) {
+                        this._$content.text(geoObjectData.metaDataProperty.GeocoderMetaData.text);
+                    }
+                }
+            });
+
+            var customControl = new CustomControlClass();
+            myMap.controls.add(customControl, {
+                float: 'none',
+                position: {
+                    top: 20,
+                    left: 20
+                }
+            });
             var objectManager = new ymaps.ObjectManager({
                 // Чтобы метки начали кластеризоваться, выставляем опцию.
                 clusterize: false,
