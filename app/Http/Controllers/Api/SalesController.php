@@ -98,7 +98,8 @@ class SalesController extends Controller
 
 
         $assets = Company::scopeCompanyables(Sale::select('sales.*'), "company_id", "assets")
-            ->with('location', 'assetstatus', 'assetlog', 'company', 'assignedTo',
+//            ->with('location', 'assetstatus', 'assetlog', 'company', 'assignedTo',
+            ->with('location', 'assetstatus', 'company', 'assignedTo',
                 'model.category', 'model.manufacturer', 'model.fieldset', 'supplier');
 
 
@@ -409,10 +410,10 @@ class SalesController extends Controller
 
             $asset->use_text = $asset->present()->fullName;
 
-            if (($asset->checkedOutToUser()) && ($asset->assigned)) {
-                $asset->use_text .= ' → ' . $asset->assigned->getFullNameAttribute();
-            }
-
+//            if (($asset->checkedOutToUser()) && ($asset->assigned)) {
+//                $asset->use_text .= ' → ' . $asset->assigned->getFullNameAttribute();
+//            }
+//
 
             if ($asset->assetstatus->getStatuslabelType() == 'pending') {
                 $asset->use_text .= '(' . $asset->assetstatus->getStatuslabelType() . ')';

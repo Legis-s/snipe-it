@@ -14,6 +14,7 @@ use App\Models\Company;
 use App\Models\CustomField;
 use App\Models\Import;
 use App\Models\Location;
+use App\Models\Sale;
 use App\Models\Setting;
 use App\Models\Statuslabel;
 use App\Models\User;
@@ -119,36 +120,28 @@ class SalesController extends Controller
         $this->authorize(Asset::class);
 
 
-        $asset = new Asset();
-        $asset->model()->associate(AssetModel::find($request->input('model_id')));
+        $sale = new Sale();
+        $sale->model()->associate(AssetModel::find($request->input('model_id')));
 
-        $asset->name                    = $request->input('name');
-        $asset->serial                  = $request->input('serial');
-        $asset->company_id              = Company::getIdForCurrentUser($request->input('company_id'));
-        $asset->model_id                = $request->input('model_id');
-        $asset->order_number            = $request->input('order_number');
-        $asset->notes                   = $request->input('notes');
-        $asset->asset_tag               = $request->input('asset_tag');
-        $asset->quality                 = $request->input('quality');
-        $asset->nds                     = intval(request('nds', 0));
-        $asset->user_id                 = Auth::id();
-        $asset->archived                = '0';
-        $asset->physical                = '1';
-        $asset->depreciate              = '0';
-        $asset->status_id               = request('status_id', 0);
-        $asset->warranty_months         = request('warranty_months', null);
-        $asset->purchase_cost           = Helper::ParseFloat($request->get('purchase_cost'));
-        $asset->depreciable_cost        = Helper::ParseFloat($request->get('depreciable_cost'));
-        $asset->purchase_date           = request('purchase_date', null);
-        $asset->assigned_to             = request('assigned_to', null);
-        $asset->supplier_id             = request('supplier_id', 0);
-        $asset->requestable             = request('requestable', 0);
-        $asset->rtd_location_id         = request('rtd_location_id', null);
-        $asset->quality        = $request->input('quality');
-        $asset->depreciable_cost        = $request->input('depreciable_cost');
-
-        if ($asset->assigned_to=='') {
-            $asset->location_id = $request->input('rtd_location_id', null);
+        $sale->name                    = $request->input('name');
+        $sale->serial                  = $request->input('serial');
+        $sale->company_id              = Company::getIdForCurrentUser($request->input('company_id'));
+        $sale->model_id                = $request->input('model_id');
+        $sale->order_number            = $request->input('order_number');
+        $sale->notes                   = $request->input('notes');
+        $sale->asset_tag               = $request->input('asset_tag');
+        $sale->nds                     = intval(request('nds', 0));
+        $sale->user_id                 = Auth::id();
+//        $sale->archived                = '0';
+//        $sale->physical                = '1';
+//        $sale->depreciate              = '0';
+        $sale->status_id               = request('status_id', 0);
+        $sale->purchase_cost           = Helper::ParseFloat($request->get('purchase_cost'));
+        $sale->purchase_date           = request('purchase_date', null);
+        $sale->assigned_to             = request('assigned_to', null);
+        $sale->supplier_id             = request('supplier_id', 0);
+        if ($sale->assigned_to=='') {
+            $sale->location_id = $request->input('rtd_location_id', null);
         }
 
         // Create the image (if one was chosen.)
@@ -165,18 +158,18 @@ class SalesController extends Controller
 
             $file_name = str_random(25).".".$extension;
 
-            $directory= public_path('uploads/assets/');
+            $directory= public_path('uploads/sales/');
             // Check if the uploads directory exists.  If not, try to create it.
             if (!file_exists($directory)) {
                 mkdir($directory, 0755, true);
             }
-            $path = public_path('uploads/assets/'.$file_name);
+            $path = public_path('uploads/sales/'.$file_name);
             try {
                 Image::make($image)->resize(800, 800, function ($constraint) {
                     $constraint->aspectRatio();
                     $constraint->upsize();
                 })->save($path);
-                $asset->image = $file_name;
+                $sale->image = $file_name;
             } catch (\Exception $e) {
                 \Input::flash();
                 $messageBag = new \Illuminate\Support\MessageBag();
@@ -196,16 +189,16 @@ class SalesController extends Controller
             foreach ($model->fieldset->fields as $field) {
                 if ($field->field_encrypted=='1') {
                     if (Gate::allows('admin')) {
-                        $asset->{$field->convertUnicodeDbSlug()} = \Crypt::encrypt($request->input($field->convertUnicodeDbSlug()));
+                        $sale->{$field->convertUnicodeDbSlug()} = \Crypt::encrypt($request->input($field->convertUnicodeDbSlug()));
                     }
                 } else {
-                    $asset->{$field->convertUnicodeDbSlug()} = $request->input($field->convertUnicodeDbSlug());
+                    $sale->{$field->convertUnicodeDbSlug()} = $request->input($field->convertUnicodeDbSlug());
                 }
             }
         }
 
         // Was the asset created?
-        if ($asset->save()) {
+        if ($sale->save()) {
 
 
             if (request('assigned_user')) {
@@ -220,15 +213,15 @@ class SalesController extends Controller
             }
 
             if (isset($target)) {
-                $asset->checkOut($target, Auth::user(), date('Y-m-d H:i:s'), '', 'Checked out on asset creation', e($request->get('name')), $location);
+                $sale->checkOut($target, Auth::user(), date('Y-m-d H:i:s'), '', 'Checked out on asset creation', e($request->get('name')), $location);
             }
             // Redirect to the asset listing page
             \Session::flash('success', trans('admin/hardware/message.create.success'));
-            return response()->json(['redirect_url' => route('hardware.index')]);
+            return response()->json(['redirect_url' => route('sales.index')]);
         }
         \Input::flash();
-        \Session::flash('errors', $asset->getErrors());
-        return response()->json(['errors' => $asset->getErrors()], 500);
+        \Session::flash('errors', $sale->getErrors());
+        return response()->json(['errors' => $sale->getErrors()], 500);
     }
 
     /**
@@ -243,12 +236,12 @@ class SalesController extends Controller
     {
         if (!$item = Asset::find($assetId)) {
             // Redirect to the asset management page with error
-            return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));
+            return redirect()->route('sales.index')->with('error', trans('admin/hardware/message.does_not_exist'));
         }
         //Handles company checks and permissions.
         $this->authorize($item);
 
-        return view('hardware/edit', compact('item'))
+        return view('sales/edit', compact('item'))
             ->with('statuslabel_list', Helper::statusLabelList())
             ->with('statuslabel_types', Helper::statusTypeList());
     }

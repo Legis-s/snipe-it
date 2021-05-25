@@ -36,21 +36,6 @@
     @include ('partials.forms.edit.model-select', ['translated_name' => trans('admin/hardware/form.model'), 'fieldname' => 'model_id', 'required' => 'true'])
 
 
-    <div id='custom_fields_content'>
-        <!-- Custom Fields -->
-        @if ($item->model && $item->model->fieldset)
-            <?php $model = $item->model; ?>
-        @endif
-        @if (Input::old('model_id'))
-            <?php $model = \App\Models\AssetModel::find(Input::old('model_id')); ?>
-        @elseif (isset($selected_model))
-            <?php $model = $selected_model; ?>
-        @endif
-        @if (isset($model) && $model)
-            @include("models/custom_fields_form",["model" => $model])
-        @endif
-    </div>
-
     @include ('partials.forms.edit.status')
 
     @if (!$item->id)
@@ -75,16 +60,10 @@
     }
     ?>
     @include ('partials.forms.edit.purchase_cost', ['currency_type' => $currency_type])
-    @include ('partials.forms.edit.depreciable_cost', ['currency_type' => $currency_type])
-    @include ('partials.forms.edit.quality')
     @include ('partials.forms.edit.nds')
-    @include ('partials.forms.edit.warranty')
     @include ('partials.forms.edit.notes')
 
     @include ('partials.forms.edit.location-select', ['translated_name' => trans('admin/hardware/form.default_location'), 'fieldname' => 'rtd_location_id'])
-
-
-    @include ('partials.forms.edit.requestable', ['requestable_text' => trans('admin/hardware/general.requestable')])
 
     <!-- Image -->
     @if ($item->image)
