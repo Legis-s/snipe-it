@@ -193,7 +193,7 @@
                     @endif
 
                     @can('review', \App\Models\Asset::class)
-                        @if ($purchase->consumables_json &&  count($purchase->consumables)==0)
+                        @if ($purchase->consumables_json != "[]" &&  count($purchase->consumables)==0)
                             <div class="row">
                                 <div class="col-md-12">
                                     <button type="button" class="btn btn-primary" id="check_consumables">Принять расходники</button>
