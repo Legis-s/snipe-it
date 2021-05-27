@@ -14,6 +14,7 @@ use App\Models\Department;
 use App\Models\License;
 use App\Models\Location;
 use App\Models\Depreciation;
+use App\Models\Purchase;
 use App\Models\Statuslabel;
 use App\Models\Supplier;
 use App\Models\Manufacturer;
@@ -31,6 +32,7 @@ use App\Policies\DepartmentPolicy;
 use App\Policies\DepreciationPolicy;
 use App\Policies\LicensePolicy;
 use App\Policies\LocationPolicy;
+use App\Policies\PurchasePolicy;
 use App\Policies\StatuslabelPolicy;
 use App\Policies\SupplierPolicy;
 use App\Policies\UserPolicy;
@@ -63,6 +65,7 @@ class AuthServiceProvider extends ServiceProvider
         Depreciation::class => DepreciationPolicy::class,
         License::class => LicensePolicy::class,
         Location::class => LocationPolicy::class,
+        Purchase::class => PurchasePolicy::class,
         Statuslabel::class => StatuslabelPolicy::class,
         Supplier::class => SupplierPolicy::class,
         User::class => UserPolicy::class,
@@ -155,6 +158,7 @@ class AuthServiceProvider extends ServiceProvider
                 || $user->can('view', Supplier::class)
                 || $user->can('view', Department::class)
                 || $user->can('view', Location::class)
+                || $user->can('view', Purchase::class)
                 || $user->can('view', Company::class)
                 || $user->can('view', Manufacturer::class)
                 || $user->can('view', CustomField::class)

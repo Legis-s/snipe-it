@@ -3,8 +3,7 @@
 {{-- Page title --}}
 @section('title')
 
- Закупка -
- {{ $purchase->invoice_number }}
+ Закупка - {{ $purchase->invoice_number }}
  
 @parent
 @stop
