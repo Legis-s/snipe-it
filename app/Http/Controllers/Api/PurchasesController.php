@@ -39,7 +39,7 @@ class PurchasesController extends Controller
      */
     public function index(Request $request)
     {
-        $this->authorize('view', Location::class);
+        $this->authorize('view', Purchase::class);
         $status = Statuslabel::where('name', 'Доступные')->first();
         $purchases = Purchase::with('supplier', 'assets', 'invoice_type', 'legal_person','user','consumables')
             ->select([
@@ -106,7 +106,7 @@ class PurchasesController extends Controller
      */
     public function paid(Request $request, $purchaseId = null)
     {
-        $this->authorize('view', Location::class);
+        $this->authorize('view', Purchase::class);
         $purchase = Purchase::findOrFail($purchaseId);
         // меняем статус на "В процессе инвентаризации", только если еще её не было у закупки
         if ($purchase->status != "review" && $purchase->status != "finished") {
@@ -171,7 +171,7 @@ class PurchasesController extends Controller
      */
     public function consumables_check(Request $request, $purchaseId = null)
     {
-        $this->authorize('view', Location::class);
+        $this->authorize('view', Purchase::class);
         $purchase = Purchase::findOrFail($purchaseId);
 
         $assets = Asset::where('purchase_id', $purchase->id)->get();
@@ -232,7 +232,7 @@ class PurchasesController extends Controller
      */
     public function in_payment(Request $request, $purchaseId = null)
     {
-        $this->authorize('view', Location::class);
+        $this->authorize('view', Purchase::class);
         $purchase = Purchase::findOrFail($purchaseId);
         $purchase->status = "in_payment";
         if ($purchase->save()) {
@@ -256,7 +256,7 @@ class PurchasesController extends Controller
      */
     public function bitrix_task(Request $request, $purchaseId = null,$bitrix_task= null)
     {
-        $this->authorize('view', Location::class);
+        $this->authorize('view', Purchase::class);
         $purchase = Purchase::findOrFail($purchaseId);
         $purchase->bitrix_task_id = $bitrix_task;
         if ($purchase->save()) {
@@ -279,7 +279,7 @@ class PurchasesController extends Controller
      */
     public function reject(Request $request, $purchaseId = null)
     {
-        $this->authorize('view', Location::class);
+        $this->authorize('view', Purchase::class);
         $purchase = Purchase::findOrFail($purchaseId);
         $purchase->status = "rejected";
         $purchase->bitrix_result_at =new DateTime();
@@ -309,7 +309,7 @@ class PurchasesController extends Controller
      */
     public function resend(Request $request, $purchaseId = null)
     {
-        $this->authorize('view', Location::class);
+        $this->authorize('view', Purchase::class);
         $purchase = Purchase::findOrFail($purchaseId);
 
 

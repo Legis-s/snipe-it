@@ -13,6 +13,7 @@ use App\Models\Location;
 use App\Models\Statuslabel;
 use App\Models\User;
 use DateTime;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Crypt;
 
@@ -58,7 +59,7 @@ class PurchasesController extends Controller
      */
     public function create()
     {
-        $this->authorize('view', Location::class);
+        $this->authorize('create', Purchase::class);
         return view('purchases/edit')
             ->with('item', new Purchase);
     }
@@ -74,7 +75,7 @@ class PurchasesController extends Controller
      */
     public function store(FileUploadRequest $request)
     {
-        $this->authorize('view', Location::class);
+        $this->authorize('create', Purchase::class);
         $purchase = new Purchase();
         $purchase->invoice_number      = $request->input('invoice_number');
         $purchase->final_price         = $request->input('final_price');
@@ -250,7 +251,7 @@ class PurchasesController extends Controller
      */
     public function edit($purchaseId = null)
     {
-        $this->authorize('view', Location::class);
+        $this->authorize('update', Purchase::class);
         // Check if the location exists
         if (is_null($item = Purchase::find($purchaseId))) {
             return redirect()->route('purchases.index')->with('error', trans('admin/locations/message.does_not_exist'));

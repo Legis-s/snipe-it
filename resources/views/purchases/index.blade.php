@@ -7,7 +7,7 @@
 @stop
 
 @section('header_right')
-    @can('create', \App\Models\Location::class)
+    @can('create', \App\Models\Purchase::class)
         <a href="{{ route('purchases.create') }}" class="btn btn-primary pull-right">
             {{ trans('general.create') }}</a>
     @endcan

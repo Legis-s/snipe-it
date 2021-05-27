@@ -115,6 +115,22 @@ return array(
 
     ),
 
+
+    'Purchases' => array(
+        array(
+            'permission' => 'purchases.view',
+            'label'      => 'View ',
+            'note'       => '',
+            'display'    => true,
+        ),
+        array(
+            'permission' => 'purchases.create',
+            'label'      => 'Create ',
+            'note'       => '',
+            'display'    => true,
+        ),
+    ),
+
     'Accessories' => array(
         array(
             'permission' => 'accessories.view',
