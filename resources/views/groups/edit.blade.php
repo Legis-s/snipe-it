@@ -2,9 +2,11 @@
     'createText' => trans('admin/groups/titles.create') ,
     'updateText' => trans('admin/groups/titles.update'),
     'item' => $group,
-    'formAction' => ($group !== null && $group->id !== null) ? route('groups.index', ['group' => $group->id]) : route('groups.store'),
-
+    'formAction' => ($group) ? route('groups.update', ['group' => $group->id]) : route('groups.store'),
 ])
+{{--'formAction' => ($item) ? route('locations.update', ['location' => $item->id]) : route('locations.store'),--}}
+
+{{--'formAction' => ($group !== null && $group->id !== null) ? route('groups.index', ['group' => $group->id]) : route('groups.store'),--}}
 @section('content')
 
     <style>
