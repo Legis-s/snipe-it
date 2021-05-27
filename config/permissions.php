@@ -129,18 +129,6 @@ return array(
             'note'       => '',
             'display'    => true,
         ),
-        array(
-            'permission' => 'purchases.edit',
-            'label'      => 'Edit  ',
-            'note'       => '',
-            'display'    => true,
-        ),
-        array(
-            'permission' => 'purchases.delete',
-            'label'      => 'Delete ',
-            'note'       => '',
-            'display'    => true,
-        )
     ),
 
     'Accessories' => array(
