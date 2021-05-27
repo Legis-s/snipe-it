@@ -42,7 +42,7 @@ class SalesPresenter extends Presenter
                 "sortable" => true,
                 "title" => trans('admin/hardware/form.name'),
                 "visible" => true,
-                "formatter" => "hardwareLinkFormatter"
+                "formatter" => "salesLinkFormatter"
             ], [
                 "field" => "image",
                 "searchable" => false,
@@ -57,14 +57,14 @@ class SalesPresenter extends Presenter
                 "sortable" => true,
                 "title" => trans('admin/hardware/table.asset_tag'),
                 "visible" => true,
-                "formatter" => "hardwareLinkFormatter"
+                "formatter" => "salesLinkFormatter"
             ], [
                 "field" => "serial",
                 "searchable" => true,
                 "sortable" => true,
                 "title" => trans('admin/hardware/form.serial'),
                 "visible" => true,
-                "formatter" => "hardwareLinkFormatter"
+                "formatter" => "salesLinkFormatter"
             ],  [
                 "field" => "model",
                 "searchable" => true,
@@ -93,34 +93,6 @@ class SalesPresenter extends Presenter
                 "visible" => true,
                 "formatter" => "statuslabelsLinkObjFormatter"
             ], [
-                "field" => "assigned_to",
-                "searchable" => true,
-                "sortable" => true,
-                "title" => trans('admin/hardware/form.checkedout_to'),
-                "visible" => true,
-                "formatter" => "polymorphicItemFormatter"
-            ], [
-                "field" => "employee_number",
-                "searchable" => false,
-                "sortable" => false,
-                "title" => trans('admin/users/table.employee_num'),
-                "visible" => false,
-                "formatter" => "employeeNumFormatter"
-            ],[
-                "field" => "location",
-                "searchable" => true,
-                "sortable" => true,
-                "title" => trans('admin/hardware/table.location'),
-                "visible" => true,
-                "formatter" => "deployedLocationFormatter"
-            ], [
-                "field" => "rtd_location",
-                "searchable" => true,
-                "sortable" => true,
-                "title" => trans('admin/hardware/form.default_location'),
-                "visible" => false,
-                "formatter" => "deployedLocationFormatter"
-            ], [
                 "field" => "manufacturer",
                 "searchable" => true,
                 "sortable" => true,
@@ -148,84 +120,18 @@ class SalesPresenter extends Presenter
                 "title" => trans('general.purchase_cost'),
                 "footerFormatter" => 'sumFormatter',
             ], [
-                "field" => "depreciable_cost",
-                "searchable" => true,
-                "sortable" => true,
-                "title" => "Остаточная стоимость",
-                "footerFormatter" => 'sumFormatter',
-            ], [
-//                "field" => "depreciable_cost",
-//                "searchable" => true,
-                "sortable" => true,
-                "title" => "Срок эксплуатации",
-                "formatter" => 'lifetimeFormatter',
-            ], [
-                "field" => "quality",
-                "searchable" => true,
-                "sortable" => true,
-                "title" => "Состояние",
-                "formatter" => 'qualityFormatter',
-            ], [
-                "field" => "order_number",
-                "searchable" => true,
-                "sortable" => true,
-                "visible" => false,
-                "title" => trans('general.order_number'),
-                'formatter' => "orderNumberObjFilterFormatter"
-            ], [
                 "field" => "purchase_id",
                 "searchable" => false,
                 "sortable" => true,
                 "switchable" => true,
                 "title" => "ID закупки",
                 "visible" => false
-            ], [
-                "field" => "eol",
-                "searchable" => false,
-                "sortable" => false,
-                "visible" => false,
-                "title" => trans('general.eol'),
-                "formatter" => "dateDisplayFormatter"
-            ], [
-                "field" => "warranty_months",
-                "searchable" => true,
-                "sortable" => true,
-                "visible" => false,
-                "title" => trans('admin/hardware/form.warranty')
-            ],[
-                "field" => "warranty_expires",
-                "searchable" => false,
-                "sortable" => false,
-                "visible" => false,
-                "title" => trans('admin/hardware/form.warranty_expires'),
-                "formatter" => "dateDisplayFormatter"
             ],[
                 "field" => "notes",
                 "searchable" => true,
                 "sortable" => true,
                 "visible" => false,
                 "title" => trans('general.notes'),
-
-            ], [
-                "field" => "checkout_counter",
-                "searchable" => false,
-                "sortable" => true,
-                "visible" => false,
-                "title" => trans('general.checkouts_count')
-
-            ],[
-                "field" => "checkin_counter",
-                "searchable" => false,
-                "sortable" => true,
-                "visible" => false,
-                "title" => trans('general.checkins_count')
-
-            ], [
-                "field" => "requests_counter",
-                "searchable" => false,
-                "sortable" => true,
-                "visible" => false,
-                "title" => trans('general.user_requests_count')
 
             ], [
                 "field" => "created_at",
@@ -242,32 +148,11 @@ class SalesPresenter extends Presenter
                 "title" => trans('general.updated_at'),
                 "formatter" => "dateDisplayFormatter"
             ], [
-                "field" => "last_checkout",
-                "searchable" => false,
-                "sortable" => true,
-                "visible" => false,
-                "title" => trans('admin/hardware/table.checkout_date'),
-                "formatter" => "dateDisplayFormatter"
-            ], [
-                "field" => "expected_checkin",
-                "searchable" => false,
-                "sortable" => true,
-                "visible" => false,
-                "title" => trans('admin/hardware/form.expected_checkin'),
-                "formatter" => "dateDisplayFormatter"
-            ], [
                 "field" => "last_audit_date",
                 "searchable" => false,
                 "sortable" => true,
                 "visible" => false,
                 "title" => trans('general.last_audit'),
-                "formatter" => "dateDisplayFormatter"
-            ], [
-                "field" => "next_audit_date",
-                "searchable" => false,
-                "sortable" => true,
-                "visible" => false,
-                "title" => trans('general.next_audit_date'),
                 "formatter" => "dateDisplayFormatter"
             ], [
                 "field" => "nds",
@@ -279,42 +164,17 @@ class SalesPresenter extends Presenter
             ],
         ];
 
-        // This looks complicated, but we have to confirm that the custom fields exist in custom fieldsets
-        // *and* those fieldsets are associated with models, otherwise we'll trigger
-        // javascript errors on the bootstrap tables side of things, since we're asking for properties
-        // on fields that will never be passed through the REST API since they're not associated with
-        // models. We only pass the fieldsets that pertain to each asset (via their model) so that we
-        // don't junk up the REST API with tons of custom fields that don't apply
-
-        $fields =  CustomField::whereHas('fieldset', function ($query) {
-            $query->whereHas('models');
-        })->get();
-
-
-        // Note: We do not need to e() escape the field names here, as they are already escaped when
-        // they are presented in the blade view. If we escape them here, custom fields with quotes in their
-        // name can break the listings page. - snipe
-        foreach ($fields as $field) {
-            $layout[] = [
-                "field" => 'custom_fields.'.$field->convertUnicodeDbSlug(),
-                "searchable" => true,
-                "sortable" => true,
-                "switchable" => true,
-                "title" => ($field->field_encrypted=='1') ?'<i class="fa fa-lock"></i> '.$field->name : $field->name,
-                "formatter" => "customFieldsFormatter"
-            ];
-
-        }
 
         $layout[] = [
-            "field" => "checkincheckout",
+            "field" => "selfield",
             "searchable" => false,
             "sortable" => false,
             "switchable" => true,
-            "title" => trans('general.checkin').'/'.trans('general.checkout'),
+            "title" => "Продажа",
             "visible" => true,
-            "formatter" => "hardwareInOutFormatter",
+            "formatter" => "selFormatter",
         ];
+
 
         $layout[] = [
             "field" => "review",

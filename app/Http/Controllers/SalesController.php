@@ -93,12 +93,11 @@ class SalesController extends Controller
     public function create(Request $request)
     {
         $this->authorize('create', Asset::class);
-        $asset = new Asset;
-        $asset->nds = 20;
-        $asset->quality = 5;
+        $sale = new Sale();
+        $sale->nds = 20;
         $view = View::make('sale/edit')
             ->with('statuslabel_list', Helper::statusLabelList())
-            ->with('item', $asset)
+            ->with('item', $sale)
             ->with('statuslabel_types', Helper::statusTypeList());
 
         if ($request->filled('model_id')) {
@@ -180,23 +179,6 @@ class SalesController extends Controller
             }
         }
 
-
-        // Update custom fields in the database.
-        // Validation for these fields is handled through the AssetRequest form request
-        $model = AssetModel::find($request->get('model_id'));
-
-        if (($model) && ($model->fieldset)) {
-            foreach ($model->fieldset->fields as $field) {
-                if ($field->field_encrypted=='1') {
-                    if (Gate::allows('admin')) {
-                        $sale->{$field->convertUnicodeDbSlug()} = \Crypt::encrypt($request->input($field->convertUnicodeDbSlug()));
-                    }
-                } else {
-                    $sale->{$field->convertUnicodeDbSlug()} = $request->input($field->convertUnicodeDbSlug());
-                }
-            }
-        }
-
         // Was the asset created?
         if ($sale->save()) {
 
@@ -228,13 +210,13 @@ class SalesController extends Controller
      * Returns a view that presents a form to edit an existing asset.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @param int $assetId
+     * @param int $saleId
      * @since [v1.0]
      * @return View
      */
-    public function edit($assetId = null)
+    public function edit($saleId = null)
     {
-        if (!$item = Asset::find($assetId)) {
+        if (!$item = Sale::find($saleId)) {
             // Redirect to the asset management page with error
             return redirect()->route('sales.index')->with('error', trans('admin/hardware/message.does_not_exist'));
         }
@@ -251,24 +233,24 @@ class SalesController extends Controller
      * Returns a view that presents information about an asset for detail view.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @param int $assetId
+     * @param int $saleId
      * @since [v1.0]
      * @return View
      */
-    public function show($assetId = null)
+    public function show($saleId = null)
     {
-        $asset = Asset::withTrashed()->find($assetId);
-        $this->authorize('view', $asset);
+        $sale = Sale::withTrashed()->find($saleId);
+        $this->authorize('view', $sale);
         $settings = Setting::getSettings();
 
-        if (isset($asset)) {
+        if (isset($sale)) {
             $audit_log = Actionlog::where('action_type', '=', 'audit')
-                ->where('item_id', '=', $assetId)
+                ->where('item_id', '=', $sale)
                 ->where('item_type', '=', Asset::class)
                 ->orderBy('created_at', 'DESC')->first();
 
-            if ($asset->location) {
-                $use_currency = $asset->location->currency;
+            if ($sale->location) {
+                $use_currency = $sale->location->currency;
             } else {
                 if ($settings->default_currency!='') {
                     $use_currency = $settings->default_currency;
@@ -279,14 +261,14 @@ class SalesController extends Controller
 
             $qr_code = (object) array(
                 'display' => $settings->qr_code == '1',
-                'url' => route('qr_code/hardware', $asset->id)
+                'url' => route('qr_code/hardware', $sale->id)
             );
 
-            return view('hardware/view', compact('asset', 'qr_code', 'settings'))
+            return view('sale/view', compact('sale', 'qr_code', 'settings'))
                 ->with('use_currency', $use_currency)->with('audit_log', $audit_log);
         }
 
-        return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));
+        return redirect()->route('sales.index')->with('error', trans('admin/hardware/message.does_not_exist'));
     }
 
 

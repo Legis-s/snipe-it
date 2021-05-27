@@ -283,6 +283,15 @@
         }
     }
 
+    function selFormatter(value, row) {
+        if ((row.available_actions.sell == true) && (row.user_can_sell== true)) {
+            return '<button type="button" class="btn btn-primary btn-sm review">Продать</button>';
+        }else{
+            return "";
+        }
+    }
+
+
     // We need a special formatter for license seats, since they don't work exactly the same
     // Checkouts need the license ID, checkins need the specific seat ID
 
@@ -355,6 +364,7 @@
         'groups',
         'inventories',
         'purchases',
+        'sales',
         "inventorystatuslabels"
     ];
 
