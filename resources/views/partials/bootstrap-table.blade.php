@@ -283,12 +283,15 @@
         }
     }
 
-    function selFormatter(value, row) {
-        if ((row.available_actions.sell == true) && (row.user_can_sell== true)) {
-            return '<button type="button" class="btn btn-primary btn-sm review">Продать</button>';
-        }else{
-            return "";
-        }
+    function sellFormatter(value, row) {
+        {{--if ((row.available_actions.sell == true) && (row.user_can_sell== true)) {--}}
+        {{--    // return '<button type="button" class="btn btn-primary btn-sm review">Продать</button>';--}}
+        {{--    return '<a href="{{ url('/') }}/sales/' + row.id + '/sell/" class="btn btn-sm bg-maroon" data-tooltip="true" title="Check this item out">Продать</a>';--}}
+        {{--}else{--}}
+        {{--    return "";--}}
+        {{--}--}}
+        return '<a href="{{ url('/') }}/sales/' + row.id + '/sell/" class="btn btn-sm bg-maroon" data-tooltip="true" title="Check this item out">Продать</a>';
+
     }
 
 

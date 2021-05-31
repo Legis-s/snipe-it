@@ -166,13 +166,13 @@ class SalesPresenter extends Presenter
 
 
         $layout[] = [
-            "field" => "selfield",
+            "field" => "sellfield",
             "searchable" => false,
             "sortable" => false,
             "switchable" => true,
             "title" => "Продажа",
             "visible" => true,
-            "formatter" => "selFormatter",
+            "formatter" => "sellFormatter",
         ];
 
 
@@ -195,7 +195,7 @@ class SalesPresenter extends Presenter
             "sortable" => false,
             "switchable" => false,
             "title" => trans('table.actions'),
-            "formatter" => "hardwareActionsFormatter",
+            "formatter" => "salesActionsFormatter",
 //            "events"=> "operateEvents"
         ];
 

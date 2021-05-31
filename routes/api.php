@@ -543,6 +543,16 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
     ); // Locations resource
 
 
+    Route::group(['prefix' => 'contracts'], function () {
+
+        Route::get('selectlist',
+            [
+                'as' => 'api.contracts.selectlist',
+                'uses'=> 'ContractsController@selectlist'
+            ]
+        );
+    }); // Contracts group
+
 
     Route::resource('contracts', 'ContractsController',
         [
@@ -558,7 +568,6 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
             'parameters' => ['contract' => 'contract_id']
         ]
     ); // Contracts resource
-
 
 
     /*--- Manufacturers API ---*/

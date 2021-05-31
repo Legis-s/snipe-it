@@ -76,4 +76,92 @@ class ContractsController extends Controller
     }
 
 
+    /**
+     * Display the specified resource.
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v4.0]
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        $this->authorize('view', Contract::class);
+        $contract = Contract::with('')
+            ->select([
+                'contracts.id',
+                'contracts.name',
+                'contracts.number',
+                'contracts.status',
+                'contracts.date_start',
+                'contracts.date_end',
+                'contracts.bitrix_id',
+                'contracts.created_at',
+                'contracts.updated_at',
+            ])
+        ->findOrFail($id);
+        return (new ContractsTransformer)->transformContracts($contract);
+    }
+
+
+
+    /**
+     * Gets a paginated collection for the select2 menus
+     *
+     * This is handled slightly differently as of ~4.7.8-pre, as
+     * we have to do some recursive magic to get the hierarchy to display
+     * properly when looking at the parent/child relationship in the
+     * rich menus.
+     *
+     * This means we can't use the normal pagination that we use elsewhere
+     * in our selectlists, since we have to get the full set before we can
+     * determine which location is parent/child/grandchild, etc.
+     *
+     * This also means that hierarchy display gets a little funky when people
+     * use the Select2 search functionality, but there's not much we can do about
+     * that right now.
+     *
+     * As a result, instead of paginating as part of the query, we have to grab
+     * the entire data set, and then invoke a paginator manually and pass that
+     * through to the SelectListTransformer.
+     *
+     * Many thanks to @uberbrady for the help getting this working better.
+     * Recursion still sucks, but I guess he doesn't have to get in the
+     * sea... this time.
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v4.0.16]
+     * @see \App\Http\Transformers\SelectlistTransformer
+     *
+     */
+    public function selectlist(Request $request)
+    {
+
+        $contracts = Contract::select([
+            'contracts.id',
+            'contracts.name',
+        ]);
+
+        $page = 1;
+        if ($request->filled('page')) {
+            $page = $request->input('page');
+        }
+
+        if ($request->filled('search')) {
+            $contracts = $contracts->where('contracts.name', 'LIKE', '%'.$request->input('search').'%');
+        }
+
+        $contracts = $contracts->orderBy('name', 'ASC')->get();
+
+
+        $paginated_results =  new LengthAwarePaginator($contracts->forPage($page, 500), $contracts->count(), 500, $page, []);
+
+//        return [];
+        return (new SelectlistTransformer)->transformSelectlist($paginated_results);
+
+    }
+
+
+
+
 }

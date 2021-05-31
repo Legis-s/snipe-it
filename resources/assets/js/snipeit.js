@@ -284,6 +284,7 @@ $(document).ready(function () {
                 $('#assigned_asset').show();
                 $('#assigned_user').hide();
                 $('#assigned_location').hide();
+                $('#assigned_contract').hide();
                 $('.notification-callout').fadeOut();
 
             } else if (assignto_type == 'location') {
@@ -291,12 +292,21 @@ $(document).ready(function () {
                 $('#assigned_asset').hide();
                 $('#assigned_user').hide();
                 $('#assigned_location').show();
+                $('#assigned_contract').hide();
+                $('.notification-callout').fadeOut();
+            } else if (assignto_type == 'contract') {
+                $('#current_assets_box').fadeOut();
+                $('#assigned_asset').hide();
+                $('#assigned_user').hide();
+                $('#assigned_location').hide();
+                $('#assigned_contract').show();
                 $('.notification-callout').fadeOut();
             } else  {
 
                 $('#assigned_asset').hide();
                 $('#assigned_user').show();
                 $('#assigned_location').hide();
+                $('#assigned_contract').hide();
                 if (userid) {
                     $('#current_assets_box').fadeIn();
                 }

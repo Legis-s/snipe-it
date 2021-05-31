@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Exceptions\CheckoutNotAllowed;
 use App\Helpers\Helper;
 use App\Http\Requests\AssetCheckinRequest;
 use App\Http\Requests\AssetCheckoutRequest;
@@ -11,6 +12,7 @@ use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\Company;
+use App\Models\Contract;
 use App\Models\CustomField;
 use App\Models\Import;
 use App\Models\Location;
@@ -24,6 +26,7 @@ use Carbon\Carbon;
 use Config;
 use DB;
 use Gate;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Image;
 use Input;
@@ -72,7 +75,7 @@ class SalesController extends Controller
      */
     public function index(Request $request)
     {
-        $this->authorize('index', Asset::class);
+        $this->authorize('index', Sale::class);
         if ($request->filled('company_id')) {
             $company = Company::find($request->input('company_id'));
         } else {
@@ -92,7 +95,7 @@ class SalesController extends Controller
      */
     public function create(Request $request)
     {
-        $this->authorize('create', Asset::class);
+        $this->authorize('create', Sale::class);
         $sale = new Sale();
         $sale->nds = 20;
         $view = View::make('sale/edit')
@@ -116,7 +119,7 @@ class SalesController extends Controller
      */
     public function store(AssetRequest $request)
     {
-        $this->authorize(Asset::class);
+        $this->authorize(Sale::class);
 
 
         $sale = new Sale();
@@ -223,7 +226,7 @@ class SalesController extends Controller
         //Handles company checks and permissions.
         $this->authorize($item);
 
-        return view('sales/edit', compact('item'))
+        return view('sale/edit', compact('item'))
             ->with('statuslabel_list', Helper::statusLabelList())
             ->with('statuslabel_types', Helper::statusTypeList());
     }
@@ -284,40 +287,33 @@ class SalesController extends Controller
     public function update(AssetRequest $request, $assetId = null)
     {
         // Check if the asset exists
-        if (!$asset = Asset::find($assetId)) {
+        if (!$sale = Sale::find($assetId)) {
             // Redirect to the asset management page with error
-            return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));
+            return redirect()->route('sales.index')->with('error', trans('admin/hardware/message.does_not_exist'));
         }
-        $this->authorize($asset);
+        $this->authorize($sale);
 
-        $asset->status_id = $request->input('status_id', null);
-        $asset->warranty_months = $request->input('warranty_months', null);
-        $asset->purchase_cost = Helper::ParseFloat($request->input('purchase_cost', null));
-        $asset->purchase_date = $request->input('purchase_date', null);
-        $asset->supplier_id = $request->input('supplier_id', null);
-        $asset->nds                     = intval(request('nds', 0));
-
-        // If the box isn't checked, it's not in the request at all.
-        $asset->requestable = $request->filled('requestable');
-        $asset->rtd_location_id = $request->input('rtd_location_id', null);
-
-
+        $sale->status_id = $request->input('status_id', null);
+        $sale->purchase_cost = Helper::ParseFloat($request->input('purchase_cost', null));
+        $sale->purchase_date = $request->input('purchase_date', null);
+        $sale->supplier_id = $request->input('supplier_id', null);
+        $sale->nds                     = intval(request('nds', 0));
 
         $status_inv = Statuslabel::where('name', 'Ожидает инвентаризации')->first();
         $status_review = Statuslabel::where('name', 'Ожидает проверки')->first();
-        if ($asset->status_id == $status_inv->id && $request->filled('asset_tag')){
-            $asset->status_id=$status_review->id;
+        if ($sale->status_id == $status_inv->id && $request->filled('asset_tag')){
+            $sale->status_id=$status_review->id;
         }
 
-        if ($asset->assigned_to=='') {
-            $asset->location_id = $request->input('rtd_location_id', null);
+        if ($sale->assigned_to=='') {
+            $sale->location_id = $request->input('rtd_location_id', null);
         }
 
 
         if ($request->filled('image_delete')) {
             try {
-                unlink(public_path().'/uploads/assets/'.$asset->image);
-                $asset->image = '';
+                unlink(public_path().'/uploads/sales/'.$sale->image);
+                $sale->image = '';
             } catch (\Exception $e) {
                 \Log::debug($e);
             }
@@ -326,16 +322,13 @@ class SalesController extends Controller
 
 
         // Update the asset data
-        $asset->name         = $request->input('name');
-        $asset->serial       = $request->input('serial');
-        $asset->company_id   = Company::getIdForCurrentUser($request->input('company_id'));
-        $asset->model_id     = $request->input('model_id');
-        $asset->order_number = $request->input('order_number');
-        $asset->asset_tag    = $request->input('asset_tag');
-        $asset->notes        = $request->input('notes');
-        $asset->quality        = $request->input('quality');
-        $asset->depreciable_cost        = $request->input('depreciable_cost');
-        $asset->physical     = '1';
+        $sale->name         = $request->input('name');
+        $sale->serial       = $request->input('serial');
+        $sale->company_id   = Company::getIdForCurrentUser($request->input('company_id'));
+        $sale->model_id     = $request->input('model_id');
+        $sale->order_number = $request->input('order_number');
+        $sale->asset_tag    = $request->input('asset_tag');
+        $sale->notes        = $request->input('notes');
 
         // Update the image
         if ($request->filled('image')) {
@@ -345,20 +338,20 @@ class SalesController extends Controller
             $extension = substr($header, strpos($header, '/')+1);
             $image = substr($image, strpos($image, ',')+1);
 
-            $directory= public_path('uploads/assets/');
+            $directory= public_path('uploads/sales/');
             // Check if the uploads directory exists.  If not, try to create it.
             if (!file_exists($directory)) {
                 mkdir($directory, 0755, true);
             }
 
             $file_name = str_random(25).".".$extension;
-            $path = public_path('uploads/assets/'.$file_name);
+            $path = public_path('uploads/sales/'.$file_name);
             try {
                 Image::make($image)->resize(800, 800, function ($constraint) {
                     $constraint->aspectRatio();
                     $constraint->upsize();
                 })->save($path);
-                $asset->image = $file_name;
+                $sale->image = $file_name;
             } catch (\Exception $e) {
                 \Input::flash();
                 $messageBag = new \Illuminate\Support\MessageBag();
@@ -367,7 +360,7 @@ class SalesController extends Controller
                     ->put('default', $messageBag));
                 return response()->json(['image' => $e->getMessage()], 422);
             }
-            $asset->image = $file_name;
+            $sale->image = $file_name;
         }
 
         // Update custom fields in the database.
@@ -379,29 +372,29 @@ class SalesController extends Controller
             foreach ($model->fieldset->fields as $field) {
                 if ($field->field_encrypted=='1') {
                     if (Gate::allows('admin')) {
-                        $asset->{$field->convertUnicodeDbSlug()} = \Crypt::encrypt(e($request->input($field->convertUnicodeDbSlug())));
+                        $sale->{$field->convertUnicodeDbSlug()} = \Crypt::encrypt(e($request->input($field->convertUnicodeDbSlug())));
                     }
                 } else {
-                    $asset->{$field->convertUnicodeDbSlug()} = $request->input($field->convertUnicodeDbSlug());
+                    $sale->{$field->convertUnicodeDbSlug()} = $request->input($field->convertUnicodeDbSlug());
                 }
             }
         }
 
 
-        if ($asset->save()) {
+        if ($sale->save()) {
 
              // Update any assigned assets with the new location_id from the parent asset
 
-            Asset::where('assigned_type', '\\App\\Models\\Asset')->where('assigned_to', $asset->id)
-                ->update(['location_id' => $asset->location_id]);
+            Asset::where('assigned_type', '\\App\\Models\\Asset')->where('assigned_to', $sale->id)
+                ->update(['location_id' => $sale->location_id]);
 
             // Redirect to the new asset page
             \Session::flash('success', trans('admin/hardware/message.update.success'));
-            return response()->json(['redirect_url' => route("hardware.show", $assetId)]);
+            return response()->json(['redirect_url' => route("sales.show", $assetId)]);
         }
         \Input::flash();
-        \Session::flash('errors', $asset->getErrors());
-        return response()->json(['errors' => $asset->getErrors()], 500);
+        \Session::flash('errors', $sale->getErrors());
+        return response()->json(['errors' => $sale->getErrors()], 500);
     }
 
     /**
@@ -415,20 +408,20 @@ class SalesController extends Controller
     public function destroy($assetId)
     {
         // Check if the asset exists
-        if (is_null($asset = Asset::find($assetId))) {
+        if (is_null($sale = Sale::find($assetId))) {
             // Redirect to the asset management page with error
-            return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));
+            return redirect()->route('sales.index')->with('error', trans('admin/hardware/message.does_not_exist'));
         }
 
-        $this->authorize('delete', $asset);
+        $this->authorize('delete', $sale);
 
-        DB::table('assets')
-            ->where('id', $asset->id)
+        DB::table('sales')
+            ->where('id', $sale->id)
             ->update(array('assigned_to' => null));
 
-        $asset->delete();
+        $sale->delete();
 
-        return redirect()->route('hardware.index')->with('success', trans('admin/hardware/message.delete.success'));
+        return redirect()->route('sales.index')->with('success', trans('admin/hardware/message.delete.success'));
     }
 
 
@@ -581,23 +574,23 @@ class SalesController extends Controller
     public function getClone($assetId = null)
     {
         // Check if the asset exists
-        if (is_null($asset_to_clone = Asset::find($assetId))) {
+        if (is_null($sale_to_clone = Sale::find($assetId))) {
             // Redirect to the asset management page
-            return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));
+            return redirect()->route('sales.index')->with('error', trans('admin/hardware/message.does_not_exist'));
         }
 
-        $this->authorize('create', $asset_to_clone);
+        $this->authorize('create', $sale_to_clone);
 
-        $asset = clone $asset_to_clone;
-        $asset->id = null;
-        $asset->asset_tag = '';
-        $asset->serial = '';
-        $asset->assigned_to = '';
+        $sale = clone $sale_to_clone;
+        $sale->id = null;
+        $sale->asset_tag = '';
+        $sale->serial = '';
+        $sale->assigned_to = '';
 
-        return view('hardware/edit')
+        return view('sale/edit')
             ->with('statuslabel_list', Helper::statusLabelList())
             ->with('statuslabel_types', Helper::statusTypeList())
-            ->with('item', $asset);
+            ->with('item', $sale);
     }
 
     /**
@@ -875,5 +868,92 @@ class SalesController extends Controller
 
         return view('hardware/requested', compact('requestedItems'));
     }
+
+
+
+    /**
+     * Returns a view that presents a form to check an asset out to a
+     * user.
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @param int $assetId
+     * @since [v1.0]
+     * @return View
+     */
+    public function sellGet($assetId)
+    {
+        // Check if the asset exists
+        if (is_null($sale = Sale::find(e($assetId)))) {
+            return redirect()->route('sales.index')->with('error', trans('admin/hardware/message.does_not_exist'));
+        }
+
+        $this->authorize('checkout', $sale);
+
+        if ($sale->availableForSale()) {
+            return view('sale/sell', compact('sale'));
+        }
+        return redirect()->route('sale.index')->with('error', trans('admin/hardware/message.checkout.not_available'));
+
+
+    }
+
+
+    /**
+     * Validate and process the form data to check out an asset to a user.
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @param AssetCheckoutRequest $request
+     * @param int $assetId
+     * @return Redirect
+     * @since [v1.0]
+     */
+    public function storePost(Request $request, $assetId)
+    {
+        try {
+            // Check if the asset exists
+            if (!$sale = Sale::find($assetId)) {
+                return redirect()->route('sale.index')->with('error', trans('admin/hardware/message.does_not_exist'));
+            } elseif (!$sale->availableForSale()) {
+                return redirect()->route('sale.index')->with('error', trans('admin/hardware/message.checkout.not_available'));
+            }
+            $this->authorize('view', $sale);
+            $admin = \Illuminate\Support\Facades\Auth::user();
+
+            // This item is checked out to a location
+            switch(request('checkout_to_type_s'))
+            {
+                case 'location':
+                    $target =  Location::findOrFail(request('assigned_location'));
+//                    $sale->location_id = $target->id;
+                    break;
+                case 'user':
+                    $target = User::findOrFail(request('assigned_user'));
+                    break;
+                case 'contract':
+                    $target = Contract::findOrFail(request('assigned_contract'));
+//                    $sale->location_id = $target->location_id;
+                    break;
+            }
+
+
+            $checkout_at = date("Y-m-d H:i:s");
+            if (($request->filled('checkout_at')) && ($request->get('checkout_at')!= date("Y-m-d"))) {
+                $checkout_at = $request->get('checkout_at');
+            }
+
+            if ($sale->checkOut($target, $admin, $checkout_at, $expected_checkin, e($request->get('note')), $request->get('name'),$location = null)) {
+                return redirect()->route("hardware.index")->with('success', trans('admin/hardware/message.checkout.success'));
+            }
+
+            // Redirect to the asset management page with error
+            return redirect()->to("sale/$assetId/sell")->with('error', trans('admin/hardware/message.checkout.error'))->withErrors($sale->getErrors());
+        } catch (ModelNotFoundException $e) {
+            return redirect()->back()->with('error', trans('admin/hardware/message.checkout.error'))->withErrors($sale->getErrors());
+        } catch (CheckoutNotAllowed $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+
 
 }

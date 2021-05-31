@@ -27,8 +27,13 @@ use App\Notifications\CheckoutAssetNotification;
 class Sale extends Depreciable
 {
     protected $presenter = 'App\Presenters\SalesPresenter';
-    use Loggable, Requestable, Presentable, SoftDeletes, ValidatingTrait, UniqueUndeletedTrait, UniqueSerialTrait;
+    use Loggable, Presentable, SoftDeletes, ValidatingTrait, UniqueUndeletedTrait, UniqueSerialTrait;
 
+    const LOCATION = 'location';
+    const CONTRACT = 'contract';
+    const USER = 'user';
+
+    const ACCEPTANCE_PENDING = 'pending';
 
     /**
      * The database table used by the model.
@@ -48,6 +53,7 @@ class Sale extends Depreciable
 
     // We set these as protected dates so that they will be easily accessible via Carbon
     protected $dates = [
+        'sold_at',
         'created_at',
         'updated_at',
         'deleted_at',
@@ -315,5 +321,18 @@ class Sale extends Depreciable
     {
         return $this->belongsTo('\App\Models\User', 'user_verified_id');
     }
+
+
+    public function availableForSale()
+    {
+//        if (
+//            (empty($this->assigned_to)) &&
+//            (empty($this->deleted_at)) &&
+//            (($this->assetstatus) && ($this->assetstatus->deployable == 1))) {
+//            return true;
+//        }
+        return true;
+    }
+
 
 }

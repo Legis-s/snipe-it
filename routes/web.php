@@ -530,6 +530,28 @@ Route::resource('sales', 'SalesController', [
 ]);
 
 
+Route::group(
+    ['prefix' => 'sales',
+        'middleware' => ['auth']],
+    function () {
+
+        Route::get('{assetId}/sell', [
+            'as' => 'sell',
+            'uses' => 'SalesController@sellGet'
+        ]);
+        Route::post('{assetId}/sell', [
+            'as' => 'sell',
+            'uses' => 'SalesController@storePost'
+        ]);
+
+        Route::get('{assetId}/clone', [
+            'as' => 'clone/sales',
+            'uses' => 'SalesController@getClone'
+        ]);
+        Route::post('{assetId}/clone', 'SalesController@postCreate');
+    });
+
+
 Auth::routes();
 
 

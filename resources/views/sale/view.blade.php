@@ -2,14 +2,14 @@
 
 {{-- Page title --}}
 @section('title')
-{{ trans('admin/hardware/general.view') }} {{ $sale->asset_tag }}
+{{ trans('admin/hardware/general.view') }} на продажу  {{ $sale->asset_tag }}
 @parent
 @stop
 
 {{-- Right header --}}
 @section('header_right')
 
-@can('manage', \App\Models\Asset::class)
+@can('manage', \App\Models\Sale::class)
 <div class="dropdown pull-right">
   <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">{{ trans('button.actions') }}
     <span class="caret"></span>
