@@ -883,14 +883,14 @@ class SalesController extends Controller
     public function sellGet($assetId)
     {
         // Check if the asset exists
-        if (is_null($sale = Sale::find(e($assetId)))) {
+        if (is_null($item = Sale::find(e($assetId)))) {
             return redirect()->route('sales.index')->with('error', trans('admin/hardware/message.does_not_exist'));
         }
 
-        $this->authorize('checkout', $sale);
+        $this->authorize('checkout', $item);
 
-        if ($sale->availableForSale()) {
-            return view('sale/sell', compact('sale'));
+        if ($item->availableForSale()) {
+            return view('sale/sell', compact('item'));
         }
         return redirect()->route('sale.index')->with('error', trans('admin/hardware/message.checkout.not_available'));
 
@@ -907,7 +907,7 @@ class SalesController extends Controller
      * @return Redirect
      * @since [v1.0]
      */
-    public function storePost(Request $request, $assetId)
+    public function sellPost(Request $request, $assetId)
     {
         try {
             // Check if the asset exists
@@ -919,34 +919,44 @@ class SalesController extends Controller
             $this->authorize('view', $sale);
             $admin = \Illuminate\Support\Facades\Auth::user();
 
-            // This item is checked out to a location
-            switch(request('checkout_to_type_s'))
-            {
-                case 'location':
-                    $target =  Location::findOrFail(request('assigned_location'));
-//                    $sale->location_id = $target->id;
-                    break;
-                case 'user':
-                    $target = User::findOrFail(request('assigned_user'));
-                    break;
-                case 'contract':
-                    $target = Contract::findOrFail(request('assigned_contract'));
-//                    $sale->location_id = $target->location_id;
-                    break;
-            }
+
 
 
             $checkout_at = date("Y-m-d H:i:s");
-            if (($request->filled('checkout_at')) && ($request->get('checkout_at')!= date("Y-m-d"))) {
-                $checkout_at = $request->get('checkout_at');
+
+            if (($request->filled('contract_id')) && $request->get('contract_id')) {
+                $sale->contract_id = request('contract_id');
             }
 
-            if ($sale->checkOut($target, $admin, $checkout_at, $expected_checkin, e($request->get('note')), $request->get('name'),$location = null)) {
-                return redirect()->route("hardware.index")->with('success', trans('admin/hardware/message.checkout.success'));
+            if (($request->filled('user_responsible_id')) && $request->get('user_responsible_id')) {
+                $sale->user_responsible_id =  request('user_responsible_id');
             }
+
+            if (($request->filled('name')) && $request->get('name')) {
+                $sale->name =  $request->get('name');
+            }
+            if (($request->filled('note')) && $request->get('note')) {
+                $sale->note =  $request->get('note');
+            }
+
+            if (($request->filled('closing_documents')) && $request->get('closing_documents')) {
+                $sale->closing_documents =  $request->get('closing_documents');
+            }
+
+            if ($sale->save()) {
+                return redirect()->route("sales.index")->with('success', trans('admin/hardware/message.checkout.success'));
+            }
+
+            if (($request->filled('sold_at')) && ($request->get('sold_at')!= date("Y-m-d"))) {
+                $sale->sold_at = $request->get('sold_at');
+            }
+//
+//            if ($sale->checkOut($target, $admin, $checkout_at, $expected_checkin, e($request->get('note')), $request->get('name'),$location = null)) {
+//                return redirect()->route("hardware.index")->with('success', trans('admin/hardware/message.checkout.success'));
+//            }
 
             // Redirect to the asset management page with error
-            return redirect()->to("sale/$assetId/sell")->with('error', trans('admin/hardware/message.checkout.error'))->withErrors($sale->getErrors());
+            return redirect()->to("sales/$assetId/sell")->with('error', trans('admin/hardware/message.checkout.error'))->withErrors($sale->getErrors());
         } catch (ModelNotFoundException $e) {
             return redirect()->back()->with('error', trans('admin/hardware/message.checkout.error'))->withErrors($sale->getErrors());
         } catch (CheckoutNotAllowed $e) {

@@ -102,7 +102,10 @@ class Sale extends Depreciable
         'requestable',
         'purchase_id',
         'nds',
-        'user_verified_id'
+        'user_verified_id',
+        'contract_id',
+        'user_responsible_id',
+        'closing_documents'
     ];
 
     use Searchable;
@@ -315,6 +318,16 @@ class Sale extends Depreciable
     public function purchase()
     {
         return $this->belongsTo('\App\Models\Purchase');
+    }
+
+    public function user_responsible()
+    {
+        return $this->belongsTo('\App\Models\User', 'user_responsible_id');
+    }
+
+    public function contract()
+    {
+        return $this->belongsTo('\App\Models\Contract', 'contract_id');
     }
 
     public function user_verified()

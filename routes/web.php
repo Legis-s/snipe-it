@@ -541,7 +541,7 @@ Route::group(
         ]);
         Route::post('{assetId}/sell', [
             'as' => 'sell',
-            'uses' => 'SalesController@storePost'
+            'uses' => 'SalesController@sellPost'
         ]);
 
         Route::get('{assetId}/clone', [
