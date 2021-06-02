@@ -155,7 +155,7 @@ class LocationsTransformer
                 ],
                 "properties" => [
                     "balloonContentHeader" => e($location->name),
-                    "balloonContentBody" => "<a target='_blank'  href='/locations/".$location->id."'>Открыть список</a><br>Адрес: " . e($location->address) ."<br>Общяя стоимость: ".$all_price." руб. <br>Активов: " . e($location->assets_count) . "<br>" . "Инвентаризированно: " . $count. "<br>",
+                    "balloonContentBody" => "<a target='_blank'  href='/locations/".$location->id."'>Открыть список</a><br><a target='_blank'  href='https://bitrix.legis-s.ru/crm/object/details/".$location->bitrix_id."/'>Открыть Bitrix [".$location->bitrix_id."]</a><br>Адрес: " . e($location->address) ."<br>Общяя стоимость: ".$all_price." руб. <br>Активов: " . e($location->assets_count) . "<br>" . "Инвентаризированно: " . $count. "<br>",
                     "balloonContentFooter" => "",
                     "hintContent" => e($location->name)
                 ],
