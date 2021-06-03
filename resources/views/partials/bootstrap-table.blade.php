@@ -689,6 +689,14 @@
         }
     }
 
+    function bitrixIdLocationFormatter(value, row) {
+
+//https://bitrix.legis-s.ru/crm/object/details/2952/
+        if (value) {
+            return '<a href="https://bitrix.legis-s.ru/crm/object/details/'+value+'/"   target="_blank" >'+value+'</a>';
+        }
+    }
+
     function fileUploadFormatter(value) {
         if ((value) && (value.url) && (value.inlineable)) {
             return '<a href="' + value.url + '" data-toggle="lightbox" data-type="image"><img src="' + value.url + '" style="max-height: {{ $snipeSettings->thumbnail_max_h }}px; width: auto;" class="img-responsive"></a>';
