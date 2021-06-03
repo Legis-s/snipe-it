@@ -950,6 +950,16 @@ class SalesController extends Controller
             if (($request->filled('sold_at')) && ($request->get('sold_at')!= date("Y-m-d"))) {
                 $sale->sold_at = $request->get('sold_at');
             }
+
+            if ($sale->user_responsible_id>0 ){
+                $status = Statuslabel::where('name', 'Выдано')->first();
+                $sale->status_id = $status->id;
+            }
+
+            if ($sale->closing_documents >0 && $sale->contract_id>0){
+                $status = Statuslabel::where('name', 'Продано')->first();
+                $sale->status_id = $status->id;
+            }
 //
 //            if ($sale->checkOut($target, $admin, $checkout_at, $expected_checkin, e($request->get('note')), $request->get('name'),$location = null)) {
 //                return redirect()->route("hardware.index")->with('success', trans('admin/hardware/message.checkout.success'));

@@ -687,6 +687,13 @@
         }
     }
 
+    function bitrixIdLocationFormatter(value, row) {
+
+//https://bitrix.legis-s.ru/crm/object/details/2952/
+        if (value) {
+            return '<a href="https://bitrix.legis-s.ru/crm/object/details/'+value+'/"   target="_blank" >'+value+'</a>';
+        }
+    }
 
     function imageFormatter(value, row) {
 
