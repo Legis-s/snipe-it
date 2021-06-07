@@ -10,6 +10,7 @@ use App\Http\Transformers\LocationsTransformer;
 use App\Models\Asset;
 use App\Models\Consumable;
 use App\Models\Location;
+use App\Models\Sale;
 use App\Models\Statuslabel;
 use DateTime;
 use Illuminate\Http\Request;
@@ -41,7 +42,7 @@ class PurchasesController extends Controller
     {
         $this->authorize('view', Purchase::class);
         $status = Statuslabel::where('name', 'Доступные')->first();
-        $purchases = Purchase::with('supplier', 'assets', 'invoice_type', 'legal_person','user','consumables')
+        $purchases = Purchase::with('supplier', 'assets', 'invoice_type', 'legal_person','user','consumables','sales')
             ->select([
                 'purchases.id',
                 'purchases.invoice_number',
@@ -63,9 +64,10 @@ class PurchasesController extends Controller
             ])->withCount([
                 'consumables as consumables_count',
                 'assets as assets_count',
+                'sales as sales_count',
                 'assets as assets_count_ok' => function (Builder $query) use ($status) {
                     $query->where('status_id', $status->id);
-                }
+                },
             ]);
 
         if ($request->filled('search')) {
@@ -121,6 +123,26 @@ class PurchasesController extends Controller
                 $status_in_purchase = Statuslabel::where('name', 'В закупке')->first();
                 $status_inventory_wait = Statuslabel::where('name', 'Ожидает инвентаризации')->first();
                 foreach ($assets as &$value) {
+
+                    // меняем статус на Ожидает инвентаризации, только если актив в статусе "В закупке"
+                    if ($value->status_id == $status_in_purchase->id) {
+                        $value->status_id = $status_inventory_wait->id;
+                        $value->save();
+                    }
+                }
+            }else{
+                if ($purchase->status != "finished") {
+                    $purchase->status = "review";
+                    $purchase->save();
+                }
+            }
+
+            $sales = Sale::where('purchase_id', $purchase->id)->get();
+            // меняем статус у активов только если закупка еще не обработана
+            if (count($sales) > 0) {
+                $status_in_purchase = Statuslabel::where('name', 'В закупке')->first();
+                $status_inventory_wait = Statuslabel::where('name', 'Ожидает инвентаризации')->first();
+                foreach ($sales as &$value) {
 
                     // меняем статус на Ожидает инвентаризации, только если актив в статусе "В закупке"
                     if ($value->status_id == $status_in_purchase->id) {
@@ -290,6 +312,12 @@ class PurchasesController extends Controller
                 $value->status_id = $status->id;
                 $value->save();
             }
+            $sales = Sale::where('purchase_id', $purchase->id)->get();
+            foreach ($sales as &$value) {
+                $value->status_id = $status->id;
+                $value->save();
+            }
+
             return response()->json(
                 Helper::formatStandardApiResponse(
                     'success',

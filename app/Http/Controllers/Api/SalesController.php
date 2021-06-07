@@ -8,6 +8,7 @@ use App\Http\Requests\AssetRequest;
 use App\Http\Requests\AssetCheckoutRequest;
 use App\Http\Transformers\AssetsTransformer;
 use App\Http\Transformers\SalesTransformer;
+use App\Models\Asset;
 use App\Models\Sale;
 use App\Models\AssetModel;
 use App\Models\Company;
@@ -358,8 +359,8 @@ class SalesController extends Controller
      */
     public function review($id)
     {
-        if ($asset = Sale::with('assetstatus')->with('assignedTo')->withTrashed()->withCount('checkins as checkins_count', 'checkouts as checkouts_count', 'userRequests as userRequests_count')->findOrFail($id)) {
-            $this->authorize('review', Asset::class);
+        if ($asset = Sale::with('assetstatus')->with('assignedTo')->withTrashed()->findOrFail($id)) {
+            $this->authorize('review', Sale::class);
             $status = Statuslabel::where('name', 'Доступные')->first();
             $asset->status_id = $status->id;
             $user = Auth::user();
@@ -477,6 +478,13 @@ class SalesController extends Controller
                 }
             }
         }
+
+        $status_inv = Statuslabel::where('name', 'Ожидает инвентаризации')->first();
+        $status_review= Statuslabel::where('name', 'Ожидает проверки')->first();
+        if ($asset->status_id == $status_inv->id && $request->filled('asset_tag')){
+            $asset->status_id=$status_review->id;
+        }
+
 
         if ($asset->save()) {
 
@@ -865,4 +873,9 @@ class SalesController extends Controller
         $assets = $assets->skip($offset)->take($limit)->get();
         return (new AssetsTransformer)->transformRequestedAssets($assets, $total);
     }
+
+
+
+
+
 }

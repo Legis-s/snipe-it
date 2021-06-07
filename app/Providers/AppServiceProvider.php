@@ -2,6 +2,8 @@
 namespace App\Providers;
 
 
+use App\Models\Sale;
+use App\Observers\SaleObserver;
 use Illuminate\Support\ServiceProvider;
 use Log;
 use Illuminate\Support\Facades\Schema;
@@ -41,6 +43,7 @@ class AppServiceProvider extends ServiceProvider
         Component::observe(ComponentObserver::class);
         Consumable::observe(ConsumableObserver::class);
         License::observe(LicenseObserver::class);
+        Sale::observe(SaleObserver::class);
 
 
     }

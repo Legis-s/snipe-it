@@ -381,6 +381,13 @@ class SalesController extends Controller
         }
 
 
+        $status_inv = Statuslabel::where('name', 'Ожидает инвентаризации')->first();
+        $status_review = Statuslabel::where('name', 'Ожидает проверки')->first();
+        if ($sale->status_id == $status_inv->id && $request->filled('asset_tag')){
+            $sale->status_id=$status_review->id;
+        }
+
+
         if ($sale->save()) {
 
              // Update any assigned assets with the new location_id from the parent asset
@@ -889,7 +896,7 @@ class SalesController extends Controller
 
         $this->authorize('checkout', $item);
 
-        if ($item->availableForSale()) {
+        if ($item->availableForSell()) {
             return view('sale/sell', compact('item'));
         }
         return redirect()->route('sale.index')->with('error', trans('admin/hardware/message.checkout.not_available'));
@@ -913,7 +920,7 @@ class SalesController extends Controller
             // Check if the asset exists
             if (!$sale = Sale::find($assetId)) {
                 return redirect()->route('sale.index')->with('error', trans('admin/hardware/message.does_not_exist'));
-            } elseif (!$sale->availableForSale()) {
+            } elseif (!$sale->availableForSell()) {
                 return redirect()->route('sale.index')->with('error', trans('admin/hardware/message.checkout.not_available'));
             }
             $this->authorize('view', $sale);
@@ -943,9 +950,6 @@ class SalesController extends Controller
                 $sale->closing_documents =  $request->get('closing_documents');
             }
 
-            if ($sale->save()) {
-                return redirect()->route("sales.index")->with('success', trans('admin/hardware/message.checkout.success'));
-            }
 
             if (($request->filled('sold_at')) && ($request->get('sold_at')!= date("Y-m-d"))) {
                 $sale->sold_at = $request->get('sold_at');
@@ -956,11 +960,15 @@ class SalesController extends Controller
                 $sale->status_id = $status->id;
             }
 
-            if ($sale->closing_documents >0 && $sale->contract_id>0){
+            if ($sale->closing_documents > 0 && $sale->contract_id > 0){
                 $status = Statuslabel::where('name', 'Продано')->first();
                 $sale->status_id = $status->id;
             }
-//
+
+            if ($sale->save()) {
+                return redirect()->route("sales.index")->with('success', trans('admin/hardware/message.checkout.success'));
+            }
+
 //            if ($sale->checkOut($target, $admin, $checkout_at, $expected_checkin, e($request->get('note')), $request->get('name'),$location = null)) {
 //                return redirect()->route("hardware.index")->with('success', trans('admin/hardware/message.checkout.success'));
 //            }

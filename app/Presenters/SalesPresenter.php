@@ -183,7 +183,7 @@ class SalesPresenter extends Presenter
             "switchable" => true,
             "title" => "Проверка",
             "visible" => true,
-            "formatter" => "reviewFormatter",
+            "formatter" => "review_asset_for_saleFormatter",
             "events"=> "operateEvents"
         ];
 

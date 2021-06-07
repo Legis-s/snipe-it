@@ -24,8 +24,8 @@
     @include ('partials.forms.edit.invoice_file')
 
     <input type="hidden" id="assets" name="assets" value="">
-
     <input type="hidden" id="consumables" name="consumables" value="">
+    <input type="hidden" id="sales" name="sales" value="">
 
     <div class="row">
         <div class="col-md-12">
@@ -50,6 +50,20 @@
                 </div>
                 <p class="activ text-center text-bold text-danger hidden">Добавте хотя бы один расходник</p>
                 <table id="table_consumables" class="table table-striped snipe-table"></table>
+            </div><!-- /.table-responsive -->
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="table table-responsive">
+                <div id="toolbar_sales">
+                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#modal_sales">
+                        Добавить актив на продажу
+                    </button>
+                </div>
+                <p class="activ text-center text-bold text-danger hidden">Добавте хотя бы один актив на проджажу</p>
+                <table id="table_sales" class="table table-striped snipe-table"></table>
             </div><!-- /.table-responsive -->
         </div>
     </div>
@@ -120,6 +134,37 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Актив на продажу -->
+    <div class="modal fade" id="modal_sales" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Добавить</h4>
+                </div>
+                <div class="modal-body2">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <form class="form-horizontal">
+                                @include ('partials.forms.edit.model-select3', ['translated_name' => trans('admin/hardware/form.model'), 'fieldname' => 'model_id', 'required' => 'true'])
+                                <p class="duble text-center text-bold text-danger hidden">Такая модель уже есть</p>
+                                @include ('partials.forms.edit.purchase_cost')
+                                @include ('partials.forms.edit.nds')
+{{--                                @include ('partials.forms.edit.warranty')--}}
+                                @include ('partials.forms.edit.quantity')
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-primary" id="addSalesButton">Добавить</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <style>
         .modal-body2 {
             position: relative;
@@ -134,6 +179,7 @@
     <script nonce="{{ csrf_token() }}">
         var table_asset = $('#table_asset');
         var table_consumables = $('#table_consumables');
+        var table_sales = $('#table_sales');
 
         $(function () {
             //select2 for no ajax lists activate
@@ -285,7 +331,64 @@
                 }
                 ]
             });
-
+            table_sales.bootstrapTable('destroy').bootstrapTable({
+                data: [],
+                search: true,
+                toolbar: '#toolbar_sales',
+                columns: [{
+                    field: 'id',
+                    name: '#',
+                    align: 'left',
+                    valign: 'middle'
+                }, {
+                    field: 'model',
+                    name: 'Модель',
+                    align: 'left',
+                    valign: 'middle'
+                }, {
+                    field: 'purchase_cost',
+                    name: 'Закупочная цена',
+                    align: 'center',
+                    valign: 'middle'
+                }, {
+                    field: 'nds',
+                    name: 'НДС',
+                    align: 'center',
+                    valign: 'middle'
+                }, {
+                    field: 'quantity',
+                    name: 'Количество',
+                    align: 'center',
+                    valign: 'middle'
+                }, {
+                    align: 'center',
+                    valign: 'middle',
+                    events: {
+                        'click .remove': function (e, value, row, index) {
+                            table_sales.bootstrapTable('remove', {
+                                field: 'id',
+                                values: [row.id]
+                            });
+                            var data = table_sales.bootstrapTable('getData');
+                            var newData = [];
+                            var count = 0;
+                            data.forEach(function callback(currentValue, index, array) {
+                                count++;
+                                currentValue.id = count;
+                                newData.push(currentValue);
+                            });
+                            table_sales.bootstrapTable('load', newData);
+                        }
+                    },
+                    formatter: function (value, row, index) {
+                        return [
+                            '<a class="remove text-danger"  href="javascript:void(0)" title="Убрать">',
+                            '<i class="remove fa fa-times fa-lg"></i>',
+                            '</a>'
+                        ].join('')
+                    }
+                }]
+            });
             $('#modal_asset').on("show.bs.modal", function (event) {
                 var modal = $(this);
                 $("#model_id").removeClass("has-error");
@@ -417,7 +520,69 @@
                 });
 
             });
+            $('#modal_sales').on("show.bs.modal", function (event) {
+                var modal = $(this);
+                $("#model_id").removeClass("has-error");
+                $("#model_select_id").val('');
+                $('#model_select_id').trigger('change');
+                modal.find('#purchase_cost').val('');
+                modal.find('#nds').val(20);
+                modal.find('#warranty_months').val(12);
+                modal.find('#quantity').val(1);
+                $('.duble').addClass('hidden');
+                // modal.find('select.select2').select2({
+                //     dropdownParent: modal,
+                // });
 
+                $('.js-data-ajax3').each(function (i, item) {
+                    var link = $(item);
+                    var endpoint = link.data("endpoint");
+                    if (link.hasClass("select2-hidden-accessible")) {
+                        link.select2('destroy');
+                    }
+                    link.select2({
+                        dropdownParent: modal,
+                        ajax: {
+
+                            // the baseUrl includes a trailing slash
+                            url: baseUrl + 'api/v1/' + endpoint + '/selectlist',
+                            dataType: 'json',
+                            delay: 250,
+                            headers: {
+                                "X-Requested-With": 'XMLHttpRequest',
+                                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                            },
+                            data: function (params) {
+                                var data = {
+                                    search: params.term,
+                                    page: params.page || 1,
+                                    assetStatusType: link.data("asset-status-type"),
+                                };
+                                return data;
+                            },
+                            processResults: function (data, params) {
+                                console.log(data)
+                                params.page = params.page || 1;
+
+                                var answer = {
+                                    results: data.items,
+                                    pagination: {
+                                        more: "true" //(params.page  < data.page_count)
+                                    }
+                                };
+
+                                return answer;
+                            },
+                            cache: true
+                        },
+                        escapeMarkup: function (markup) {
+                            return markup;
+                        }, // let our custom formatter work
+                        templateResult: formatDatalist,
+                        templateSelection: formatDataSelection
+                    });
+                });
+            });
             function formatDatalist(datalist) {
                 var loading_markup = '<i class="fa fa-spinner fa-spin" aria-hidden="true"></i> Loading...';
                 if (datalist.loading) {
@@ -516,10 +681,47 @@
                     $("#name").addClass("has-error");
                 }
             });
+            $('#addSalesButton').click(function (e) {
+                e.preventDefault();
+                var model_id = $('#modal_sales').find('select[name=model_id] option').filter(':selected').val();
+                var model_name = $('#modal_sales').find('select[name=model_id] option').filter(':selected').text();
+                var purchase_cost = $('#modal_sales').find('#purchase_cost').val();
+                var nds = $('#modal_sales').find('#nds').val();
+                // var warranty = $('#modal_sales').find('#warranty_months').val();
+                var quantity = $('#modal_sales').find('#quantity').val();
+                var table_data = table_sales.bootstrapTable('getData');
+                if (model_id > 0) {
+                    var rez = true;
+                    table_data.forEach(function callback(currentValue, index, array) {
+                        if (currentValue.model_id == model_id) {
+                            rez = false;
+                        }
+                    });
+                    if (rez) {
+                        var data = {
+                            id: table_data.length + 1,
+                            model_id: model_id,
+                            model: model_name,
+                            purchase_cost: purchase_cost,
+                            nds: nds,
+                            // warranty: warranty,
+                            quantity: quantity,
+                        };
+                        table_sales.bootstrapTable('append', data);
+                        $('#modal_sales').modal('hide');
+                        $('.duble').addClass('hidden');
+                    } else {
+                        $('.duble').removeClass('hidden');
+                    }
+                } else {
+                    $("#model_id").addClass("has-error");
+                }
+            });
 
             $("#create-form").on("submit", function () {
                 var data_asset = table_asset.bootstrapTable('getData');
                 var data_consumables = table_consumables.bootstrapTable('getData');
+                var data_sales = table_sales.bootstrapTable('getData');
                 var check_name = false;
                 var check_final_price = false;
                 var check_comment = false;
@@ -578,9 +780,10 @@
                     $('#uploadFile').closest(".form-group").removeClass("has-error");
                 }
 
-                if ((data_asset.length > 0 || data_consumables.length > 0) && check_name && check_final_price && check_comment && check_supplier_id && check_invoice_type_id && check_ilegal_person_id && check_uploadFile) {
+                if ((data_asset.length > 0 || data_consumables.length > 0|| data_sales.length > 0) && check_name && check_final_price && check_comment && check_supplier_id && check_invoice_type_id && check_ilegal_person_id && check_uploadFile) {
                     $('#assets').val(JSON.stringify(data_asset));
                     $('#consumables').val(JSON.stringify(data_consumables));
+                    $('#sales').val(JSON.stringify(data_sales));
                     $('.activ').addClass("hidden");
                     return true;
                 } else {

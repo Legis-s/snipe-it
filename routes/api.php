@@ -437,6 +437,20 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
         ]
     ); // Sales resource
 
+
+
+    /*--- Hardware API ---*/
+
+    Route::group(['prefix' => 'sale'], function () {
+
+        Route::post('{asset_id}/review',
+            [
+                'as' => 'api.sales.review',
+                'uses' => 'SalesController@review'
+            ]
+        );
+
+    });
     /*--- Imports API ---*/
 
     Route::resource('imports', 'ImportController',

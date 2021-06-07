@@ -282,16 +282,22 @@
             return "";
         }
     }
+    function review_asset_for_saleFormatter(value, row) {
+        if ((row.available_actions.review == true) && (row.user_can_review == true)) {
+            return '<button type="button" class="btn btn-primary btn-sm review_asset_for_sale">Проверено</button>';
+        }else{
+            return "";
+        }
+    }
+
+
 
     function sellFormatter(value, row) {
-        {{--if ((row.available_actions.sell == true) && (row.user_can_sell== true)) {--}}
-        {{--    // return '<button type="button" class="btn btn-primary btn-sm review">Продать</button>';--}}
-        {{--    return '<a href="{{ url('/') }}/sales/' + row.id + '/sell/" class="btn btn-sm bg-maroon" data-tooltip="true" title="Check this item out">Продать</a>';--}}
-        {{--}else{--}}
-        {{--    return "";--}}
-        {{--}--}}
-        return '<a href="{{ url('/') }}/sales/' + row.id + '/sell/" class="btn btn-sm bg-maroon" data-tooltip="true" title="Check this item out">Продать</a>';
-
+        if (row.user_can_sell== true) {
+            return '<a href="{{ url('/') }}/sales/' + row.id + '/sell/" class="btn btn-sm bg-maroon" data-tooltip="true" title="Check this item out">Продать</a>';
+        }else{
+            return "";
+        }
     }
 
 
@@ -855,6 +861,20 @@
                 console.log(row);
                 $.ajax({
                     url: '/api/v1/hardware/' + row.id + '/review',
+                    method: "POST",
+                    headers: {
+                        "X-Requested-With": 'XMLHttpRequest',
+                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function () {
+                        $(".table").bootstrapTable('refresh');
+                    }
+                });
+            },
+            'click .review_asset_for_sale': function (e, value, row, index) {
+                console.log(row);
+                $.ajax({
+                    url: '/api/v1/sale/' + row.id + '/review',
                     method: "POST",
                     headers: {
                         "X-Requested-With": 'XMLHttpRequest',

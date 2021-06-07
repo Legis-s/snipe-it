@@ -336,16 +336,30 @@ class Sale extends Depreciable
     }
 
 
-    public function availableForSale()
+
+
+    public function availableForSell()
     {
-//        if (
-//            (empty($this->assigned_to)) &&
-//            (empty($this->deleted_at)) &&
-//            (($this->assetstatus) && ($this->assetstatus->deployable == 1))) {
-//            return true;
-//        }
-        return true;
+        $status = Statuslabel::where('name', 'Доступные')->first();
+        $status_1 = Statuslabel::where('name', 'Выдано')->first();
+        if ($this->status_id == $status->id || $this->status_id == $status_1->id){
+            return true;
+        }else{
+            return false;
+        }
     }
 
+
+
+    public function availableForReview()
+    {
+        $status = Statuslabel::where('name', 'Ожидает проверки')->first();
+        if ($this->status_id == $status->id){
+            return true;
+        }else{
+            return false;
+        }
+
+    }
 
 }
