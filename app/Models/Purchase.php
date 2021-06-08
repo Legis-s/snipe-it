@@ -59,6 +59,7 @@ class Purchase extends SnipeModel
         "currency",
         "status",
         "assets_json",
+        "sales_json",
         "bitrix_send_json",
         "user_id",
         "bitrix_result_at",
@@ -101,6 +102,11 @@ class Purchase extends SnipeModel
     public function consumables()
     {
         return $this->hasMany('\App\Models\Consumable', 'purchase_id');
+    }
+
+    public function sales()
+    {
+        return $this->hasMany('\App\Models\Sale', 'purchase_id');
     }
 
     public function supplier()

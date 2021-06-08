@@ -583,6 +583,14 @@
                         </a>
                     </li>
                 @endcan
+                @can('view', \App\Models\Component::class)
+                    <li{!! (Request::is('sales*') ? ' class="active"' : '') !!}>
+                        <a href="{{ route('sales.index') }}">
+                            <i class="fa fa-shopping-basket"></i>
+                            <span>На продажу</span>
+                        </a>
+                    </li>
+                @endcan
                 @can('view', \App\Models\User::class)
                     <li{!! (Request::is('users*') ? ' class="active"' : '') !!}>
                         <a href="{{ route('users.index') }}">
@@ -625,10 +633,21 @@
                                 </li>
                             @endcan
 
+
+
                             @can('view', \App\Models\Statuslabel::class)
                                 <li {!! (Request::is('inventorystatuslabels*') ? ' class="active"' : '') !!}>
                                     <a href="{{ route('inventorystatuslabels.index') }}">
-                                        Статусы инвенторизаций
+                                        Статусы инвентаризаций
+                                    </a>
+                                </li>
+                            @endcan
+
+
+                            @can('view', \App\Models\Contract::class)
+                                <li {!! (Request::is('contracts*') ? ' class="active"' : '') !!}>
+                                    <a href="{{ route('contracts.index') }}">
+                                        Договоры
                                     </a>
                                 </li>
                             @endcan
@@ -769,12 +788,12 @@
                     </a>
                 </li>
 
-                    <li{!! (Request::is('map/*') ? ' class="active"' : '') !!}>
-                        <a href="{{ route('map.index') }}">
-                            <i class="fa fa-map"></i>
-                            <span>Карта</span>
-                        </a>
-                    </li>
+                <li{!! (Request::is('map/*') ? ' class="active"' : '') !!}>
+                    <a href="{{ route('map.index') }}">
+                        <i class="fa fa-map"></i>
+                        <span>Карта</span>
+                    </a>
+                </li>
 
                 @can('viewRequestable', \App\Models\Asset::class)
                     <li{!! (Request::is('account/requestable-assets') ? ' class="active"' : '') !!}>

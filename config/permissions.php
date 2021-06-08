@@ -116,6 +116,43 @@ return array(
     ),
 
 
+
+    'Sales' => array(
+        array(
+            'permission' => 'sales.view',
+            'label'      => 'View ',
+            'note'       => '',
+            'display'    => true,
+        ),
+        array(
+            'permission' => 'sales.create',
+            'label'      => 'Create ',
+            'note'       => '',
+            'display'    => true,
+        ),
+        array(
+            'permission' => 'sales.edit',
+            'label'      => 'Edit  ',
+            'note'       => '',
+            'display'    => true,
+        ),
+        array(
+            'permission' => 'sales.delete',
+            'label'      => 'Delete ',
+            'note'       => '',
+            'display'    => true,
+        ),
+
+        array(
+            'permission' => 'assets.review',
+            'label'      => 'Review',
+            'note'       => '',
+            'display'    => true,
+        ),
+
+    ),
+
+
     'Purchases' => array(
         array(
             'permission' => 'purchases.view',

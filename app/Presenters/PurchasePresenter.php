@@ -64,6 +64,12 @@ class PurchasePresenter extends Presenter
                 "visible" => true,
                 "formatter" => "consumablesCountFormatter"
             ],[
+                "field" => "sales_count",
+                "searchable" => false,
+                "sortable" => true,
+                "title" => "Активов на продажу",
+                "visible" => true,
+            ],[
                 "field" => "invoice_file",
                 "searchable" => false,
                 "sortable" => true,

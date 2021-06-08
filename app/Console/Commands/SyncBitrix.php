@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Contract;
 use App\Models\CustomField;
 use App\Models\Supplier;
 use App\Models\LegalPerson;
@@ -193,6 +194,29 @@ class SyncBitrix extends Command
         print("Синхрониизтрованно ".$count." юр. лиц \n");
 
 
+        $response = $client->request('GET', 'https://bitrix.legis-s.ru/rest/1/rzrrat22t46msv7v/legis_crm.contracts.list?select[0]=UF_*&select[1]=*');
+        $response = $response->getBody()->getContents();
+        $bitrix_contracts = json_decode($response, true);
+        $bitrix_contracts = $bitrix_contracts["result"];
+        $count = 0 ;
+        foreach ($bitrix_contracts as &$value) {
+            $count++;
+            $contract = Contract::updateOrCreate(
+                ['bitrix_id' =>  $value["ID"]],
+                [
+                    'name' => $value["NAME"],
+                    'number' => $value["UF_NUMBER"],
+                    'status' => $value["STATUS_ID"],
+                    'date_start' => $value["DATE_START"],
+                    'date_end' => $value["DATE_END"],
+                ]
+            );
+//            print($contract);
+        }
+        print("Синхрониизтрованно ".$count." договоров \n");
+
+
+
         $response = $client->request('GET', 'https://bitrix.legis-s.ru/rest/1/rzrrat22t46msv7v/lists.element.get?IBLOCK_TYPE_ID=lists&IBLOCK_ID=166');
         $response = $response->getBody()->getContents();
         $bitrix_invoice_types = json_decode($response, true);
@@ -210,6 +234,7 @@ class SyncBitrix extends Command
 
         }
         print("Синхрониизтрованно ".$count." типов закупок \n");
+
 
         if (($this->option('output')=='all') || ($this->option('output')=='info')) {
             foreach ($output['info'] as $key => $output_text) {

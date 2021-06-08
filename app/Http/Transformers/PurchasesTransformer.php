@@ -50,6 +50,7 @@ class PurchasesTransformer
             'consumables_count_real' => (int) $purchase->consumables_count,
             'assets_count_ok' => (int) $purchase->assets_count_ok,
             'consumables_count' => (int) $consumables_count,
+            'sales_count' => (int) $purchase->sales_count,
             'consumables_check_count' => (int) $check_count,
             'comment' =>  ($purchase->comment) ? e($purchase->comment) : null,
             'user' => ($purchase->user) ? (new UsersTransformer)->transformUser($purchase->user) : null,

@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\CheckoutNotAllowed;
 use App\Models\Asset;
+use App\Models\Contract;
 use App\Models\Location;
 use App\Models\User;
 
@@ -23,6 +24,8 @@ trait CheckInOutRequest
                 return Asset::findOrFail(request('assigned_asset'));
             case 'user':
                 return User::findOrFail(request('assigned_user'));
+            case 'contract':
+                return Contract::findOrFail(request('assigned_contract'));
         }
         return null;
     }
@@ -48,8 +51,8 @@ trait CheckInOutRequest
                 }
                 break;
             case 'user':
-                    $asset->location_id = $target->location_id;
-                    break;
+                $asset->location_id = $target->location_id;
+                break;
         }
         return $asset;
     }

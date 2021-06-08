@@ -91,6 +91,37 @@
                 </div><!-- /.box-body -->
             </div> <!--/.box-->
         @endif
+
+        <div class="box box-default">
+            <div class="box-header with-border">
+                <div class="box-heading">
+                    <h2 class="box-title">Активы на продажу</h2>
+                </div>
+            </div>
+            <div class="box-body">
+                <div class="table table-responsive">
+                    <table
+                            data-columns="{{ \App\Presenters\SalesPresenter::dataTableLayout() }}"
+                            data-cookie-id-table="salesListingTable"
+                            data-pagination="true"
+                            data-id-table="salesListingTable"
+                            data-search="true"
+                            data-side-pagination="server"
+                            data-show-columns="true"
+                            data-show-export="true"
+                            data-show-refresh="true"
+                            data-sort-order="asc"
+                            id="salesListingTable"
+                            class="table table-striped snipe-table"
+                            data-url="{{route('api.sales.index', ['purchase_id' => $purchase->id]) }}"
+                            data-export-options='{
+                              "fileName": "export-locations-{{ str_slug($purchase->invoice_number) }}-assets-{{ date('Y-m-d') }}",
+                              "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
+                              }'>
+                    </table>
+                </div><!-- /.table-responsive -->
+            </div><!-- /.box-body -->
+        </div> <!--/.box-->
     </div><!--/.col-md-9-->
     <div class="col-md-4">
         <div class="box box-default">
