@@ -230,6 +230,9 @@
             @if (($location->parent))
               <li>{{ trans('admin/locations/table.parent') }}: {!! $location->parent->present()->nameUrl() !!}</li>
             @endif
+              @if (($location->bitrix_id))
+                  <li><a href="https://bitrix.legis-s.ru/crm/object/details/{{ $location->bitrix_id}}/"   target="_blank" >Открыть в Bitrix</a></li>
+              @endif
         </ul>
 
         @if (($location->state!='') && ($location->country!='') && (config('services.google.maps_api_key')))

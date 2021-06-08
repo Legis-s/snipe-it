@@ -398,9 +398,13 @@
                     $buydate = "{{$asset->purchase_date}}";
                     $buydate = new Date($buydate.substr(0, 10));
                     $usetime = monthDiff($buydate);
-                    $time_divider = ($lifetime - $usetime) / $lifetime;
-                    if ($time_divider < 0) {
+                    if ($usetime<=12){
                         $time_divider = 0;
+                    }else{
+                        $time_divider = ($lifetime - $usetime) / $lifetime;
+                        if ($time_divider < 0) {
+                            $time_divider = 0;
+                        }
                     }
                 @else
                     $time_divider = 1/3;
