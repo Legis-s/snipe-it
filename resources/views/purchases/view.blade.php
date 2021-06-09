@@ -250,8 +250,9 @@
 
         var table_consumables = $('#table_consumables');
         var check_consumables = $('#check_consumables');
-        var data = '{!! $purchase->consumables_json !!}';
-        data = JSON.parse(data);
+        var data = {!! $purchase->consumables_json !!};
+        // data = data.Replace(@"\", "");
+        // data = JSON.parse(data);
         $(function() {
             console.log(data);
 
