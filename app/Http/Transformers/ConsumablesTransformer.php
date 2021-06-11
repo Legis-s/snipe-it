@@ -39,6 +39,11 @@ class ConsumablesTransformer
             'qty'           => (int) $consumable->qty,
             'created_at' => Helper::getFormattedDateObject($consumable->created_at, 'datetime'),
             'updated_at' => Helper::getFormattedDateObject($consumable->updated_at, 'datetime'),
+            'model' => ($consumable->model) ? [
+                'id' => (int) $consumable->model->id,
+                'name'=> e($consumable->model->name),
+                'lifetime'=> e($consumable->model->lifetime)
+            ] : null,
         ];
 
         $permissions_array['user_can_checkout'] = false;

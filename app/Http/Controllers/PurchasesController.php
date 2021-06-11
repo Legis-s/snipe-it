@@ -168,6 +168,8 @@ class PurchasesController extends Controller
             if (count($consumables)>0) {
                 $data_list .= "Компоненты:"."\n";
                 foreach ($consumables as &$consumable) {
+                    $model= $consumable["model"];
+                    $model_id = $consumable["model_id"];
                     $name = $consumable["name"];
                     $category_name= $consumable["category_name"];
                     $purchase_cost = $consumable["purchase_cost"];

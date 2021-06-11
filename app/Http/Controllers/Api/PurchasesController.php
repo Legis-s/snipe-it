@@ -220,8 +220,9 @@ class PurchasesController extends Controller
                     $consumable_server = new Consumable();
                     $consumable_server->name = $consumable_new["name"];
                     $consumable_server->category_id = $consumable_new["category_id"];
-//                    $consumable_server->location_id = 1;
-//                    $consumable_server->company_id = $consumable_new["company_id"];
+                    if(!empty($consumable_new["model_id"])) {
+                        $consumable_server->model_id = $consumable_new["model_id"];
+                    }
                     $consumable_server->order_number = $purchase->id;
                     $consumable_server->manufacturer_id = $consumable_new["manufacturer_id"];
                     $consumable_server->model_number = $consumable_new["model_number"];

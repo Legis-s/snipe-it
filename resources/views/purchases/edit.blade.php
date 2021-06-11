@@ -116,6 +116,7 @@
                         <div class="col-md-12">
                             <form class="form-horizontal">
                                 @include ('partials.forms.edit.name', ['translated_name' => trans('admin/consumables/table.title')])
+                                @include ('partials.forms.edit.model-select4', ['translated_name' => trans('admin/hardware/form.model'), 'fieldname' => 'model_id', 'required' => 'true'])
                                 @include ('partials.forms.edit.category-select2', ['translated_name' => trans('general.category'), 'fieldname' => 'category_id', 'required' => 'true', 'category_type' => 'consumable'])
                                 <p class="duble text-center text-bold text-danger hidden">Такая категория уже есть</p>
                                 @include ('partials.forms.edit.manufacturer-select2', ['translated_name' => trans('general.manufacturer'), 'fieldname' => 'manufacturer_id', 'required' => 'true'])
@@ -263,6 +264,11 @@
                 columns: [{
                     field: 'id',
                     name: '#',
+                    align: 'left',
+                    valign: 'middle'
+                }, {
+                    field: 'model',
+                    name: 'Модель',
                     align: 'left',
                     valign: 'middle'
                 }, {
@@ -648,6 +654,8 @@
             $('#addСonsumablesButton').click(function (e) {
                 e.preventDefault();
                 var name = $('#modal_consumables').find('#name').val();
+                var model_id = $('#modal_consumables').find('select[name=model_id] option').filter(':selected').val();
+                var model_name = $('#modal_consumables').find('select[name=model_id] option').filter(':selected').text();
                 var category_id = $('select[name=category_id] option').filter(':selected').val();
                 var category_name = $('select[name=category_id] option').filter(':selected').text();
                 var manufacturer_id = $('select[name=manufacturer_id] option').filter(':selected').val();
@@ -664,6 +672,8 @@
                         id: tabele_data.length + 1,
                         name: name,
                         category_id: category_id,
+                        model_id: model_id,
+                        model: model_name,
                         category_name: category_name,
                         manufacturer_id: manufacturer_id,
                         manufacturer_name: manufacturer_name,

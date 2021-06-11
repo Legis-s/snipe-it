@@ -27,7 +27,7 @@ class ConsumablesController extends Controller
         $consumables = Company::scopeCompanyables(
             Consumable::select('consumables.*')
 //                ->with('company', 'location', 'category', 'users', 'manufacturer')
-                ->with('company', 'location', 'category', 'locations', 'manufacturer')
+                ->with('company', 'location', 'category', 'locations', 'manufacturer', 'model.category', 'model.manufacturer')
         );
 
         if ($request->filled('search')) {

@@ -80,6 +80,7 @@ class ConsumablesController extends Controller
         $consumable->order_number           = $request->input('order_number');
         $consumable->min_amt                = $request->input('min_amt');
         $consumable->manufacturer_id        = $request->input('manufacturer_id');
+        $consumable->model_id        = $request->input('model_id');
         $consumable->model_number           = $request->input('model_number');
         $consumable->item_no                = $request->input('item_no');
         $consumable->purchase_date          = $request->input('purchase_date');
@@ -150,6 +151,7 @@ class ConsumablesController extends Controller
         $consumable->purchase_date          = $request->input('purchase_date');
         $consumable->purchase_cost          = Helper::ParseFloat(Input::get('purchase_cost'));
         $consumable->qty                    = Helper::ParseFloat(Input::get('quantity'));
+        $consumable->model_id        = $request->input('model_id');
 
         if ($request->file('image')) {
             $image = $request->file('image');

@@ -67,7 +67,8 @@ class Consumable extends SnipeModel
         'purchase_date',
         'qty',
         'requestable',
-        'consumables_json'
+        'consumables_json',
+        'model_id',
     ];
 
     use Searchable;
@@ -89,7 +90,10 @@ class Consumable extends SnipeModel
         'company'      => ['name'],
         'location'     => ['name'],  
         'manufacturer' => ['name'],
-    ];     
+        'model' => ['name', 'model_number'],
+        'model.category' => ['name'],
+        'model.manufacturer' => ['name'],
+    ];
 
     public function setRequestableAttribute($value)
     {
@@ -263,5 +267,11 @@ class Consumable extends SnipeModel
     {
         return $this->belongsTo('\App\Models\Purchase');
     }
+
+    public function model()
+    {
+        return $this->belongsTo('\App\Models\AssetModel', 'model_id')->withTrashed();
+    }
+
 
 }
