@@ -15,49 +15,29 @@
     <span class="caret"></span>
   </button>
   <ul class="dropdown-menu pull-right" role="menu">
-    @if (($sale->assetstatus) && ($sale->assetstatus->deployable=='1'))
-      @if ($sale->assigned_to != '')
-        @can('checkin', \App\Models\Asset::class)
+      @can('update', \App\Models\Sale::class)
         <li role="menuitem">
-          <a href="{{ route('checkin/hardware', $sale->id) }}">
-            {{ trans('admin/hardware/general.checkin') }}
-          </a>
-        </li>
-        @endcan
-      @else
-       @can('checkout', \App\Models\Asset::class)
-          <li role="menuitem">
-            <a href="{{ route('checkout/hardware', $sale->id)  }}">
-              {{ trans('admin/hardware/general.checkout') }}
-            </a>
-          </li>
-       @endcan
-      @endif
-    @endif
-
-      @can('update', \App\Models\Asset::class)
-        <li role="menuitem">
-          <a href="{{ route('hardware.edit', $sale->id) }}">
+          <a href="{{ route('sales.edit', $sale->id) }}">
             {{ trans('admin/hardware/general.edit') }}
           </a>
         </li>
       @endcan
 
-      @can('create', \App\Models\Asset::class)
-          <li role="menuitem">
-            <a href="{{ route('clone/hardware', $sale->id) }}">
-              {{ trans('admin/hardware/general.clone') }}
-            </a>
-          </li>
-      @endcan
+{{--      @can('create', \App\Models\Sale::class)--}}
+{{--          <li role="menuitem">--}}
+{{--            <a href="{{ route('clone/hardware', $sale->id) }}">--}}
+{{--              {{ trans('admin/hardware/general.clone') }}--}}
+{{--            </a>--}}
+{{--          </li>--}}
+{{--      @endcan--}}
 
-      @can('audit', \App\Models\Asset::class)
-          <li role="menuitem">
-            <a href="{{ route('asset.audit.create', $sale->id)  }}">
-              {{ trans('general.audit') }}
-            </a>
-          </li>
-     @endcan
+{{--      @can('audit', \App\Models\Asset::class)--}}
+{{--          <li role="menuitem">--}}
+{{--            <a href="{{ route('asset.audit.create', $sale->id)  }}">--}}
+{{--              {{ trans('general.audit') }}--}}
+{{--            </a>--}}
+{{--          </li>--}}
+{{--     @endcan--}}
   </ul>
 </div>
 @endcan
