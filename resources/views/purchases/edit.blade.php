@@ -120,7 +120,7 @@
                                 @include ('partials.forms.edit.category-select2', ['translated_name' => trans('general.category'), 'fieldname' => 'category_id', 'required' => 'true', 'category_type' => 'consumable'])
                                 <p class="duble text-center text-bold text-danger hidden">Такая категория уже есть</p>
                                 @include ('partials.forms.edit.manufacturer-select2', ['translated_name' => trans('general.manufacturer'), 'fieldname' => 'manufacturer_id', 'required' => 'true'])
-                                @include ('partials.forms.edit.model_number')
+{{--                                @include ('partials.forms.edit.model_number')--}}
                                 @include ('partials.forms.edit.purchase_cost')
                                 @include ('partials.forms.edit.nds')
                                 @include ('partials.forms.edit.quantity')
@@ -477,7 +477,7 @@
                 //     dropdownParent: modal,
                 // });
 
-                $('.js-data-ajax2').each(function (i, item) {
+                $('.js-data-ajax4').each(function (i, item) {
                     var link = $(item);
                     var endpoint = link.data("endpoint");
                     if (link.hasClass("select2-hidden-accessible")) {
