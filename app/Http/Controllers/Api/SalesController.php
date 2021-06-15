@@ -59,7 +59,7 @@ class SalesController extends Controller
     public function index(Request $request, $audit = null)
     {
 
-        $this->authorize('index', Asset::class);
+        $this->authorize('view', Sale::class);
         $settings = Setting::getSettings();
 
         $allowed_columns = [
