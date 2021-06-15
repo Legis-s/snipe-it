@@ -476,7 +476,53 @@
                 // modal.find('select.select2').select2({
                 //     dropdownParent: modal,
                 // });
+                $('.js-data-ajax2').each(function (i, item) {
+                    var link = $(item);
+                    var endpoint = link.data("endpoint");
+                    if (link.hasClass("select2-hidden-accessible")) {
+                        link.select2('destroy');
+                    }
+                    link.select2({
+                        dropdownParent: modal,
+                        ajax: {
+                            // the baseUrl includes a trailing slash
+                            url: baseUrl + 'api/v1/' + endpoint + '/selectlist',
+                            dataType: 'json',
+                            delay: 250,
+                            headers: {
+                                "X-Requested-With": 'XMLHttpRequest',
+                                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                            },
+                            data: function (params) {
+                                var data = {
+                                    search: params.term,
+                                    page: params.page || 1,
+                                    assetStatusType: link.data("asset-status-type"),
+                                };
+                                return data;
+                            },
+                            processResults: function (data, params) {
+                                console.log(data)
+                                params.page = params.page || 1;
 
+                                var answer = {
+                                    results: data.items,
+                                    pagination: {
+                                        more: "true" //(params.page  < data.page_count)
+                                    }
+                                };
+
+                                return answer;
+                            },
+                            cache: true
+                        },
+                        escapeMarkup: function (markup) {
+                            return markup;
+                        }, // let our custom formatter work
+                        templateResult: formatDatalist,
+                        templateSelection: formatDataSelection
+                    });
+                });
                 $('.js-data-ajax4').each(function (i, item) {
                     var link = $(item);
                     var endpoint = link.data("endpoint");
