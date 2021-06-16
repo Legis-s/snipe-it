@@ -391,12 +391,22 @@
                                     </li>
                                 @endcan
                                 <li class="divider"></li>
+                                @impersonating($guard = null)
+                                <li>
+                                    <a href="{{ route('impersonate.leave') }}">
+                                        <i class="fa fa-user-times fa-fw" aria-hidden="true"></i>
+                                        Leave impersonation
+                                    </a>
+                                </li>
+                                <li class="divider"></li>
+                                @endImpersonating
                                 <li>
                                     <a href="{{ url('/logout') }}">
                                         <i class="fa fa-sign-out fa-fw" aria-hidden="true"></i>
                                         {{ trans('general.logout') }}
                                     </a>
                                 </li>
+
                             </ul>
                         </li>
                     @endif

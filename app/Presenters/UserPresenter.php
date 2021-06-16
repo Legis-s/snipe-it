@@ -212,16 +212,14 @@ class UserPresenter extends Presenter
                 "title" => ' <span class="hidden-md hidden-lg">Accessories</span>'
                     .'<span class="hidden-xs"><i class="fa fa-keyboard-o fa-lg"></i></span>',
                 "visible" => true,
-            ],
-            [
+            ], [
                 "field" => "notes",
                 "searchable" => true,
                 "sortable" => true,
                 "switchable" => true,
                 "title" => trans('general.notes'),
                 "visible" => true,
-            ],
-            [
+            ], [
                 "field" => "groups",
                 "searchable" => false,
                 "sortable" => false,
@@ -229,8 +227,7 @@ class UserPresenter extends Presenter
                 "title" => trans('general.groups'),
                 "visible" => true,
                 'formatter' => 'groupsFormatter'
-            ],
-            [
+            ], [
                 "field" => "two_factor_enrolled",
                 "searchable" => false,
                 "sortable" => true,
@@ -285,6 +282,7 @@ class UserPresenter extends Presenter
                 "formatter" => "usersActionsFormatter",
             ]
         ];
+
 
         return json_encode($layout);
     }

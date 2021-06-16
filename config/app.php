@@ -328,6 +328,8 @@ return [
         App\Providers\MacroServiceProvider::class,
 
 
+        Lab404\Impersonate\ImpersonateServiceProvider::class,
+
     ],
 
     /*

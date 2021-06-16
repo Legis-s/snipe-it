@@ -1,5 +1,6 @@
 <?php
 
+Route::impersonate();
 
 Route::group(['middleware' => 'auth'], function () {
     /*
