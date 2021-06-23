@@ -144,7 +144,7 @@ return array(
         ),
 
         array(
-            'permission' => 'assets.review',
+            'permission' => 'sales.review',
             'label'      => 'Review',
             'note'       => '',
             'display'    => true,

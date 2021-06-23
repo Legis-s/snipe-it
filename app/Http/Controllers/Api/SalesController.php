@@ -359,8 +359,10 @@ class SalesController extends Controller
      */
     public function review($id)
     {
+
+        $this->authorize('review', Sale::class);
+
         if ($asset = Sale::with('assetstatus')->with('assignedTo')->withTrashed()->findOrFail($id)) {
-            $this->authorize('review', Sale::class);
             $status = Statuslabel::where('name', 'Доступные')->first();
             $asset->status_id = $status->id;
             $user = Auth::user();
