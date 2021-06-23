@@ -225,7 +225,7 @@ class PurchasesController extends Controller
                     }
                     $consumable_server->order_number = $purchase->id;
                     $consumable_server->manufacturer_id = $consumable_new["manufacturer_id"];
-                    $consumable_server->model_number = $consumable_new["model_number"];
+//                    $consumable_server->model_number = $consumable_new["model_number"];
                     $consumable_server->purchase_date = $purchase->created_at;
                     $consumable_server->purchase_cost = Helper::ParseFloat($consumable_new["purchase_cost"]);
                     $consumable_server->qty = Helper::ParseFloat($consumable_new["quantity"]);
