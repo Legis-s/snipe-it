@@ -38,11 +38,7 @@
                         data-sort-order="asc"
                         id="assetsListingTable"
                         class="table table-striped snipe-table"
-                        data-url="{{route('api.assets.index', ['purchase_id' => $purchase->id]) }}"
-                        data-export-options='{
-                              "fileName": "export-locations-{{ str_slug($purchase->invoice_number) }}-assets-{{ date('Y-m-d') }}",
-                              "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                              }'>
+                        data-url="{{route('api.assets.index', ['purchase_id' => $purchase->id]) }}">
                 </table>
             </div><!-- /.table-responsive -->
           </div><!-- /.box-body -->
