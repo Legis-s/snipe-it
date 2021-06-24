@@ -35,7 +35,7 @@
                         data-show-columns="true"
                         data-show-export="true"
                         data-show-refresh="true"
-                        data-sort-order="asc"
+{{--                        data-sort-order="asc"--}}
                         id="assetsListingTable"
                         class="table table-striped snipe-table"
                         data-url="{{route('api.assets.index', ['purchase_id' => $purchase->id]) }}">
@@ -74,12 +74,12 @@
                                 data-side-pagination="server"
                                 data-show-columns="true"
                                 data-show-export="true"
-                                data-show-footer="true"
+                                data-shconsumablesTableow-footer="true"
                                 data-show-refresh="true"
-                                data-sort-order="asc"
-                                data-sort-name="name"
+{{--                                data-sort-order="asc"--}}
+{{--                                data-sort-name="name"--}}
                                 data-toolbar="#toolbar"
-                                id="consumablesTable"
+                                id=""
                                 class="table table-striped snipe-table"
                                 data-url="{{ route('api.consumables.index', ['purchase_id' => $purchase->id]) }}">
                         </table>
@@ -106,14 +106,10 @@
                             data-show-columns="true"
                             data-show-export="true"
                             data-show-refresh="true"
-                            data-sort-order="asc"
+{{--                            data-sort-order="asc"--}}
                             id="salesListingTable"
                             class="table table-striped snipe-table"
-                            data-url="{{route('api.sales.index', ['purchase_id' => $purchase->id]) }}"
-                            data-export-options='{
-                              "fileName": "export-locations-{{ str_slug($purchase->invoice_number) }}-assets-{{ date('Y-m-d') }}",
-                              "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                              }'>
+                            data-url="{{route('api.sales.index', ['purchase_id' => $purchase->id]) }}">
                     </table>
                 </div><!-- /.table-responsive -->
             </div><!-- /.box-body -->
