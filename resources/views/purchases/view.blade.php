@@ -27,7 +27,7 @@
             <div class="table table-responsive">
                 <table
                         data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayout() }}"
-                        data-cookie-id-table="assetsListingTable"
+{{--                        data-cookie-id-table="assetsListingTable"--}}
                         data-pagination="true"
                         data-id-table="assetsListingTable"
                         data-search="true"
@@ -71,7 +71,7 @@
                     <div class="table table-responsive">
                         <table
                                 data-columns="{{ \App\Presenters\ConsumablePresenter::dataTableLayout() }}"
-                                data-cookie-id-table="consumablesTable"
+{{--                                data-cookie-id-table="consumablesTable"--}}
                                 data-pagination="true"
                                 data-id-table="consumablesTable"
                                 data-search="true"
@@ -102,7 +102,7 @@
                 <div class="table table-responsive">
                     <table
                             data-columns="{{ \App\Presenters\SalesPresenter::dataTableLayout() }}"
-                            data-cookie-id-table="salesListingTable"
+{{--                            data-cookie-id-table="salesListingTable"--}}
                             data-pagination="true"
                             data-id-table="salesListingTable"
                             data-search="true"
