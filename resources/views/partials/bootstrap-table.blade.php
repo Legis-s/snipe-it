@@ -45,7 +45,7 @@
             stickyHeaderOffsetY: stickyHeaderOffsetY + 'px',
             undefinedText: '',
             iconsPrefix: 'fa',
-            cookie: true,
+            cookie: false,
             cookieExpire: '2y',
             cookieIdTable: '{{ Route::currentRouteName() }}',
             mobileResponsive: true,
