@@ -118,7 +118,8 @@ class PurchasePresenter extends Presenter
                 "title" => "Добавил",
                 "visible" => true,
                 "formatter" => 'usersLinkObjFormatter',
-            ],[
+            ],
+            [
                 "field" => "user_verified",
                 "searchable" => true,
                 "sortable" => true,
@@ -126,7 +127,8 @@ class PurchasePresenter extends Presenter
                 "title" => "Проверил",
                 "visible" => true,
                 "formatter" => 'usersLinkObjFormatter',
-            ],[
+            ],
+            [
                 "field" => "status",
                 "searchable" => true,
                 "sortable" => true,
@@ -155,6 +157,14 @@ class PurchasePresenter extends Presenter
                 "visible" => false,
                 "title" => trans('general.created_at'),
                 "formatter" => "dateDisplayFormatter"
+            ], [
+                "field" => "actions",
+                "searchable" => false,
+                "sortable" => false,
+                "switchable" => false,
+                "title" => "Действия",
+                "visible" => true,
+                "formatter" => "purchasesActionsFormatter",
             ]
         ];
 

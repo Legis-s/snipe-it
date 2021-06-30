@@ -309,5 +309,29 @@ class PurchasesController extends Controller
     }
 
 
+    /**
+     * Returns a view that presents a form to clone an asset.
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @param int $purchaseId
+     * @since [v1.0]
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function getClone($purchaseId = null)
+    {
+        // Check if the asset exists
+        if (is_null($purchase_to_clone = Purchase::find($purchaseId))) {
+            // Redirect to the asset management page
+            return redirect()->route('purchases.index')->with('error', trans('admin/hardware/message.does_not_exist'));
+        }
+
+        $this->authorize('create', $purchase_to_clone);
+
+        $purchase = clone $purchase_to_clone;
+        $purchase->id = null;
+
+        return view('purchases/edit')
+            ->with('item', $purchase);
+    }
 
 }

@@ -23,9 +23,9 @@
 
     @include ('partials.forms.edit.invoice_file')
 
-    <input type="hidden" id="assets" name="assets" value="">
-    <input type="hidden" id="consumables" name="consumables" value="">
-    <input type="hidden" id="sales" name="sales" value="">
+    <input type="hidden" id="assets" name="assets" value="{{ Input::old('assets_json', $item->assets_json) }}">
+    <input type="hidden" id="consumables" name="consumables" value="{{ Input::old('consumables_json', $item->consumables_json) }}">
+    <input type="hidden" id="sales" name="sales"value="{{ Input::old('sales_json', $item->sales_json) }}">
 
     <div class="row">
         <div class="col-md-12">
@@ -183,6 +183,7 @@
         var table_sales = $('#table_sales');
 
         $(function () {
+
             //select2 for no ajax lists activate
             $('.js-data-no-ajax').each(function (i, item) {
                 var link = $(item);
@@ -194,6 +195,9 @@
                 // $(this).val() // get the current value of the input field.
             });
             //generate tables vith raw data
+            console.log($('#assets').val())
+            console.log($('#consumables').val())
+            console.log($('#sales').val())
             table_asset.bootstrapTable('destroy').bootstrapTable({
                 data: [],
                 search: true,
@@ -257,6 +261,9 @@
                     }
                 }]
             });
+            if($('#assets').val()){
+                table_asset.bootstrapTable('load', JSON.parse($('#assets').val()));
+            }
             table_consumables.bootstrapTable('destroy').bootstrapTable({
                 data: [],
                 search: true,
@@ -337,6 +344,9 @@
                 }
                 ]
             });
+            if($('#consumables').val()){
+                table_consumables.bootstrapTable('load', JSON.parse($('#consumables').val()));
+            }
             table_sales.bootstrapTable('destroy').bootstrapTable({
                 data: [],
                 search: true,
@@ -395,6 +405,9 @@
                     }
                 }]
             });
+            if($('#sales').val()){
+                table_sales.bootstrapTable('load', JSON.parse($('#sales').val()));
+            }
             $('#modal_asset').on("show.bs.modal", function (event) {
                 var modal = $(this);
                 $("#model_id").removeClass("has-error");
@@ -836,7 +849,7 @@
                     $('#uploadFile').closest(".form-group").removeClass("has-error");
                 }
 
-                if ((data_asset.length > 0 || data_consumables.length > 0|| data_sales.length > 0) && check_name && check_final_price && check_comment && check_supplier_id && check_invoice_type_id && check_ilegal_person_id && check_uploadFile) {
+                if ((data_asset.length > 0 || data_consumables.length > 0 || data_sales.length > 0) && check_name && check_final_price && check_comment && check_supplier_id && check_invoice_type_id && check_ilegal_person_id && check_uploadFile) {
                     $('#assets').val(JSON.stringify(data_asset));
                     $('#consumables').val(JSON.stringify(data_consumables));
                     $('#sales').val(JSON.stringify(data_sales));

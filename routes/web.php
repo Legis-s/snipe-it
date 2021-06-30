@@ -263,18 +263,28 @@ Route::resource('purchases', 'PurchasesController', [
 ]);
 
 
+Route::group(
+    ['prefix' => 'purchases',
+        'middleware' => ['auth']],
+    function () {
+
+        Route::get('{assetId}/clone', [
+            'as' => 'clone/purchases',
+            'uses' => 'PurchasesController@getClone'
+        ]);
+    });
+
+
 /*
 |--------------------------------------------------------------------------
-| Purchases Routes
+| Map Routes
 |--------------------------------------------------------------------------
 |
 |
 |
 */
 
-Route::resource('map', 'MapController', [
-//    'parameters' => ['purchase' => 'purchase_id']
-]);
+Route::resource('map', 'MapController', []);
 
 
 /*

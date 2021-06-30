@@ -5,6 +5,7 @@ use App\Http\Transformers\InventoryItemTransformer;
 use App\Http\Transformers\LocationsTransformer;
 use App\Http\Transformers\SuppliersTransformer;
 use App\Models\Purchase;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use phpDocumentor\Reflection\Types\Integer;
 use Gate;
@@ -58,6 +59,12 @@ class PurchasesTransformer
             'updated_at' => Helper::getFormattedDateObject($purchase->updated_at, 'datetime'),
             'bitrix_task_id' => (int) $purchase->bitrix_task_id,
         ];
+
+        $permissions_array['available_actions'] = [
+            'clone' => (Gate::allows('create', Purchase::class) && ($purchase->deleted_at=='')) ,
+        ];
+
+        $array += $permissions_array;
 
         return $array;
     }
