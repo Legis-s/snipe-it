@@ -161,7 +161,7 @@ class PurchasePresenter extends Presenter
                 "field" => "actions",
                 "searchable" => false,
                 "sortable" => false,
-                "switchable" => false,
+                "switchable" => true,
                 "title" => "Действия",
                 "visible" => true,
                 "formatter" => "purchasesActionsFormatter",
