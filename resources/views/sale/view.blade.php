@@ -22,6 +22,11 @@
           </a>
         </li>
       @endcan
+        <li role="menuitem">
+          <a href="#" id="print_tag">
+            Напечатать этикетку
+          </a>
+        </li>
 
 {{--      @can('create', \App\Models\Sale::class)--}}
 {{--          <li role="menuitem">--}}
@@ -856,8 +861,63 @@
 
 @section('moar_scripts')
   @include ('partials.bootstrap-table')
+  <script src="{{ url(asset('js/bootstrap-notify/bootstrap-notify.js')) }}" nonce="{{ csrf_token() }}"></script>
   <script>
     $(function() {
+
+      $('#print_tag').click(function() {
+        console.log("test");
+        $.ajax({
+          type: "GET",
+          url: "http://127.0.0.1:8001/termal_print",
+          data: JSON.stringify({ "text": "{{ $sale->asset_tag }}" }),
+          dataType: "json",
+          success: function(data, textStatus, xhr){
+            if (xhr.status == 200){
+              $.notify({
+                // options
+                title: "Успешно",
+                // message: 'Ошибка'
+              },{
+                // settings
+                type: 'info',
+                placement: {
+                  from: "bottom",
+                  align: "right"
+                },
+              });
+            }else{
+              $.notify({
+                // options
+                title: "Ошибка",
+                // message: 'Ошибка'
+              },{
+                // settings
+                type: 'danger',
+                placement: {
+                  from: "bottom",
+                  align: "right"
+                },
+              });
+            }
+          },
+          error: function(xhr, textStatus){
+            $.notify({
+              // options
+              title: "Ошибка",
+              message: textStatus
+            },{
+              // settings
+              type: 'danger',
+              placement: {
+                from: "bottom",
+                align: "right"
+              },
+            });
+          }
+        });
+
+      });
       $('#assetHistory').on('post-body.bs.table', function (e, data) {
         // console.log("assetHistory");
         // $('.aniimated-thumbnials').lightGallery({
