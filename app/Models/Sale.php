@@ -118,18 +118,11 @@ class Sale extends Depreciable
     protected $searchableAttributes = [
         'name',
         'asset_tag',
-        'serial',
-        'order_number',
         'purchase_cost',
-        'depreciable_cost',
         'notes',
         'created_at',
         'updated_at',
         'purchase_date',
-        'quality',
-        'expected_checkin',
-        'next_audit_date',
-        'last_audit_date'
     ];
 
     /**
@@ -141,7 +134,6 @@ class Sale extends Depreciable
         'assetstatus' => ['name'],
         'supplier' => ['name'],
         'company' => ['name'],
-        'defaultLoc' => ['name'],
         'model' => ['name', 'model_number'],
         'model.category' => ['name'],
         'model.manufacturer' => ['name'],
