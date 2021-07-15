@@ -51,6 +51,7 @@ class PurchasesTransformer
             'consumables_count_real' => (int) $purchase->consumables_count,
             'assets_count_ok' => (int) $purchase->assets_count_ok,
             'consumables_count' => (int) $consumables_count,
+            'consumables_json' => ($purchase->consumables_json) ? e($purchase->consumables_json) : null,
             'sales_count' => (int) $purchase->sales_count,
             'consumables_check_count' => (int) $check_count,
             'comment' =>  ($purchase->comment) ? e($purchase->comment) : null,
