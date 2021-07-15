@@ -873,12 +873,12 @@
         $.ajax({
           type: "POST",
           url: "http://127.0.0.1:8001/termal_print",
-          dataType: 'jsonp',
+          dataType: 'json',
           contentType: 'application/json',
           data: JSON.stringify(dataToSend),
           crossDomain: true,
           headers: {
-            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Origin': 'http://127.0.0.1:8001/',
           },
           success: function(data, textStatus, xhr){
             if (xhr.status == 200){
