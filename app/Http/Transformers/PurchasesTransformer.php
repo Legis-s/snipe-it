@@ -26,45 +26,46 @@ class PurchasesTransformer
     public function transformPurchase (Purchase $purchase, $full = false)
     {
 
-        $consumables_count = null ;
-        $check_count = 0 ;
-        if($purchase->consumables_json){
+        $consumables_count = null;
+        $check_count = 0;
+        if ($purchase->consumables_json) {
             $consumables = json_decode($purchase->consumables_json, true);
             $consumables_count = count($consumables);
         }
         $array = [
-            'id' => (int) $purchase->id,
-            'invoice_number' =>  ($purchase->invoice_number) ? e($purchase->invoice_number) : null,
+            'id' => (int)$purchase->id,
+            'invoice_number' => ($purchase->invoice_number) ? e($purchase->invoice_number) : null,
             'invoice_file' => ($purchase->getInvoiceFile()) ? $purchase->getInvoiceFile() : null,
-            'bitrix_id' =>  ($purchase->bitrix_id) ? e($purchase->bitrix_id) : null,
-            'final_price' =>  ($purchase->final_price) ? e($purchase->final_price) : null,
-            'status' =>  ($purchase->status) ? e($purchase->status) : null,
-            'currency' =>  ($purchase->currency) ? e($purchase->currency) : null,
+            'bitrix_id' => ($purchase->bitrix_id) ? e($purchase->bitrix_id) : null,
+            'final_price' => ($purchase->final_price) ? e($purchase->final_price) : null,
+            'status' => ($purchase->status) ? e($purchase->status) : null,
+            'currency' => ($purchase->currency) ? e($purchase->currency) : null,
             'supplier' => ($purchase->supplier) ? [
-                'id' => (int) $purchase->supplier->id,
-                'name'=> e($purchase->supplier->name)
-            ]  : null,
+                'id' => (int)$purchase->supplier->id,
+                'name' => e($purchase->supplier->name)
+            ] : null,
             'legal_person' => ($purchase->legal_person) ? e($purchase->legal_person->name) : null,
             'invoice_type' => ($purchase->invoice_type) ? e($purchase->invoice_type->name) : null,
 
-            'assets_count' => (int) $purchase->assets_count,
-            'consumables_count_real' => (int) $purchase->consumables_count,
-            'assets_count_ok' => (int) $purchase->assets_count_ok,
-            'consumables_count' => (int) $consumables_count,
-            'consumables_json' => ($purchase->consumables_json) ? e($purchase->consumables_json) : null,
-            'sales_count' => (int) $purchase->sales_count,
-            'consumables_check_count' => (int) $check_count,
-            'comment' =>  ($purchase->comment) ? e($purchase->comment) : null,
+            'assets_count' => (int)$purchase->assets_count,
+            'consumables_count_real' => (int)$purchase->consumables_count,
+            'assets_count_ok' => (int)$purchase->assets_count_ok,
+            'consumables_count' => (int)$consumables_count,
+            'sales_count' => (int)$purchase->sales_count,
+            'consumables_check_count' => (int)$check_count,
+            'comment' => ($purchase->comment) ? e($purchase->comment) : null,
             'user' => ($purchase->user) ? (new UsersTransformer)->transformUser($purchase->user) : null,
             'created_at' => Helper::getFormattedDateObject($purchase->created_at, 'datetime'),
             'updated_at' => Helper::getFormattedDateObject($purchase->updated_at, 'datetime'),
-            'bitrix_task_id' => (int) $purchase->bitrix_task_id,
+            'bitrix_task_id' => (int)$purchase->bitrix_task_id,
         ];
 
         $permissions_array['available_actions'] = [
-            'clone' => (Gate::allows('create', Purchase::class) && ($purchase->deleted_at=='')) ,
+            'clone' => (Gate::allows('create', Purchase::class) && ($purchase->deleted_at == '')),
         ];
-
+        if ($full) {
+            $array += ['consumables_json' => ($purchase->consumables_json) ? e($purchase->consumables_json) : null];
+        }
         $array += $permissions_array;
 
         return $array;

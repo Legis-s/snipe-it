@@ -143,7 +143,7 @@ class PurchasesController extends Controller
                 },
             ])
             ->findOrFail($id);
-        return (new PurchasesTransformer)->transformPurchase($purchise);
+        return (new PurchasesTransformer)->transformPurchase($purchise,true);
     }
 
     /**
