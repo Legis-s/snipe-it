@@ -878,7 +878,7 @@
           data: JSON.stringify(dataToSend),
           crossDomain: true,
           headers: {
-            'Access-Control-Allow-Origin': 'http://127.0.0.1:8001/',
+            'Access-Control-Allow-Origin': '*',
           },
           success: function(data, textStatus, xhr){
             if (xhr.status == 200){
