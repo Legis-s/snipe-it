@@ -102,6 +102,50 @@ class PurchasesController extends Controller
         return (new PurchasesTransformer)->transformPurchases($purchases, $total);
     }
 
+
+    /**
+     * Display the specified resource.
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v4.0]
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        $this->authorize('view', Purchase::class);
+        $status = Statuslabel::where('name', 'Доступные')->first();
+        $purchise = Purchase::with('supplier', 'assets', 'invoice_type', 'legal_person','user','consumables','sales')
+            ->select([
+                'purchases.id',
+                'purchases.invoice_number',
+                'purchases.invoice_file',
+                'purchases.bitrix_id',
+                'purchases.final_price',
+                'purchases.status',
+                'purchases.supplier_id',
+                'purchases.legal_person_id',
+                'purchases.invoice_type_id',
+                'purchases.comment',
+                'purchases.currency',
+                'purchases.user_id',
+                'purchases.user_verified_id',
+                'purchases.created_at',
+                'purchases.deleted_at',
+                'purchases.bitrix_task_id',
+                'purchases.consumables_json',
+            ])->withCount([
+                'consumables as consumables_count',
+                'assets as assets_count',
+                'sales as sales_count',
+                'assets as assets_count_ok' => function (Builder $query) use ($status) {
+                    $query->where('status_id', $status->id);
+                },
+            ])
+            ->findOrFail($id);
+        return (new PurchasesTransformer)->transformPurchase($purchise);
+    }
+
     /**
      * Display a listing of the resource.
      * @return \Illuminate\Http\Response
