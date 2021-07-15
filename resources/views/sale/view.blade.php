@@ -867,12 +867,16 @@
 
       $('#print_tag').click(function() {
         console.log("test");
+        var dataToSend = {
+          text: "{{ $sale->asset_tag }}"
+        };
         $.ajax({
           type: "POST",
           url: "http://127.0.0.1:8001/termal_print",
-          data: { "text": "{{ $sale->asset_tag }}" },
-          dataType: "json",
-          contentType: "application/json; charset=utf-8",
+          dataType: 'json',
+          contentType: 'application/json',
+          data: JSON.stringify(dataToSend),
+          crossDomain: true,
           headers: {
             'Access-Control-Allow-Origin': '*',
           },
