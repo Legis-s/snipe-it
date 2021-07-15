@@ -872,7 +872,7 @@
         };
         $.ajax({
           type: "POST",
-          url: "http://127.0.0.1:8001/termal_print",
+          url: "http://lvh.me:8001/termal_printer",
           // dataType: 'json',
           // contentType: 'application/json',
           data: JSON.stringify(dataToSend),
