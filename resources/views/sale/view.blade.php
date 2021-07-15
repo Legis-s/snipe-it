@@ -868,10 +868,14 @@
       $('#print_tag').click(function() {
         console.log("test");
         $.ajax({
-          type: "GET",
           url: "http://127.0.0.1:8001/termal_print",
           data: JSON.stringify({ "text": "{{ $sale->asset_tag }}" }),
+          type: "POST",
           dataType: "json",
+          contentType: "application/json; charset=utf-8",
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+          },
           success: function(data, textStatus, xhr){
             if (xhr.status == 200){
               $.notify({
