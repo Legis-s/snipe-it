@@ -868,9 +868,9 @@
       $('#print_tag').click(function() {
         console.log("test");
         $.ajax({
-          url: "http://127.0.0.1:8001/termal_print",
-          data: JSON.stringify({ "text": "{{ $sale->asset_tag }}" }),
           type: "POST",
+          url: "http://127.0.0.1:8001/termal_print",
+          data: { "text": "{{ $sale->asset_tag }}" },
           dataType: "json",
           contentType: "application/json; charset=utf-8",
           headers: {
