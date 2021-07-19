@@ -207,11 +207,11 @@ class SyncBitrix extends Command
                     'name' => $value["NAME"],
                     'number' => $value["UF_NUMBER"],
                     'status' => $value["STATUS_ID"],
+                    'type' => $value["TYPE_ID"],
                     'date_start' => $value["DATE_START"],
                     'date_end' => $value["DATE_END"],
                 ]
             );
-//            print($contract);
         }
         print("Синхрониизтрованно ".$count." договоров \n");
 

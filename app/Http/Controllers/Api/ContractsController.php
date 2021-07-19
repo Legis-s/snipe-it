@@ -35,6 +35,7 @@ class ContractsController extends Controller
             'contracts.name',
             'contracts.number',
             'contracts.status',
+            'contracts.type',
             'contracts.date_start',
             'contracts.date_end',
             'contracts.bitrix_id',

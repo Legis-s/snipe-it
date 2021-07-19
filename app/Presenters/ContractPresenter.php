@@ -40,7 +40,7 @@ class ContractPresenter extends Presenter
                 "field" => "name",
                 "searchable" => true,
                 "sortable" => true,
-                "title" => trans('admin/locations/table.name'),
+                "title" => "Название",
                 "visible" => true,
 //                "formatter" => "locationsLinkFormatter"
             ], [
@@ -48,6 +48,20 @@ class ContractPresenter extends Presenter
                 "searchable" => true,
                 "sortable" => true,
                 "title" => "Номер",
+                "visible" => true,
+//                "formatter" => "locationsLinkFormatter"
+            ], [
+                "field" => "type",
+                "searchable" => true,
+                "sortable" => true,
+                "title" => "Тип",
+                "visible" => true,
+//                "formatter" => "locationsLinkFormatter"
+            ], [
+                "field" => "status",
+                "searchable" => true,
+                "sortable" => true,
+                "title" => "Статус",
                 "visible" => true,
 //                "formatter" => "locationsLinkFormatter"
             ],
