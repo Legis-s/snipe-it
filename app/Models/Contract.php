@@ -104,7 +104,7 @@ class Contract  extends SnipeModel
                 return "Пожарная сигнализация ТО";
                 break;
             default:
-                return "Не заполнено";
+                return "";
         }
     }
     public function getStatusText()
@@ -136,7 +136,7 @@ class Contract  extends SnipeModel
                 return "Завершен";
                 break;
             default:
-                return "Не заполнено";
+                return "";
         }
     }
 
