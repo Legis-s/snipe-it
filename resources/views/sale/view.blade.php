@@ -884,7 +884,7 @@
         //   }
         // });
         $.ajax({
-          type: "POST",
+          type: "GET",
           url: "http://localhost:8001/termal_print",
           // dataType: 'json',
           // contentType: 'application/json',
