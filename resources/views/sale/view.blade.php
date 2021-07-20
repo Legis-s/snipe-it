@@ -870,73 +870,73 @@
         var dataToSend = {
           text: "{{ $sale->asset_tag }}"
         };
-        $.ajax('http://localhost:8001/termal_print', {
-          success: function (data, textStatus, xhr) {
-            console.log(xhr.status);
-            if (xhr.status === 200) {
-              console.log(data);
-            } else {
-              console.log(data);
-            }
-          },
-          error: function () {
-            console.log("error");
-          }
-        });
-        // $.ajax({
-        //   type: "POST",
-        //   url: "http://127.0.0.1:8001/termal_print",
-        //   // dataType: 'json',
-        //   // contentType: 'application/json',
-        //   data: JSON.stringify(dataToSend),
-        //   // crossDomain: true,
-        //   headers: {
-        //     'Access-Control-Allow-Origin': '*',
-        //   },
-        //   success: function(data, textStatus, xhr){
-        //     if (xhr.status == 200){
-        //       $.notify({
-        //         // options
-        //         title: "Успешно",
-        //         // message: 'Ошибка'
-        //       },{
-        //         // settings
-        //         type: 'info',
-        //         placement: {
-        //           from: "bottom",
-        //           align: "right"
-        //         },
-        //       });
-        //     }else{
-        //       $.notify({
-        //         // options
-        //         title: "Ошибка",
-        //         // message: 'Ошибка'
-        //       },{
-        //         // settings
-        //         type: 'danger',
-        //         placement: {
-        //           from: "bottom",
-        //           align: "right"
-        //         },
-        //       });
+        // $.ajax('http://localhost:8001/termal_print', {
+        //   success: function (data, textStatus, xhr) {
+        //     console.log(xhr.status);
+        //     if (xhr.status === 200) {
+        //       console.log(data);
+        //     } else {
+        //       console.log(data);
         //     }
         //   },
-        //   error: function(xhr, textStatus){
-        //     $.notify({
-        //       // options
-        //       title: "Ошибка",
-        //       message: textStatus
-        //     },{
-        //       // settings
-        //       type: 'danger',
-        //       placement: {
-        //         from: "bottom",
-        //         align: "right"
-        //       },
-        //     });
+        //   error: function () {
+        //     console.log("error");
         //   }
         // });
+        $.ajax({
+          type: "POST",
+          url: "http://localhost:8001/termal_print",
+          // dataType: 'json',
+          // contentType: 'application/json',
+          data: JSON.stringify(dataToSend),
+          // crossDomain: true,
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+          },
+          success: function(data, textStatus, xhr){
+            if (xhr.status == 200){
+              $.notify({
+                // options
+                title: "Успешно",
+                // message: 'Ошибка'
+              },{
+                // settings
+                type: 'info',
+                placement: {
+                  from: "bottom",
+                  align: "right"
+                },
+              });
+            }else{
+              $.notify({
+                // options
+                title: "Ошибка",
+                // message: 'Ошибка'
+              },{
+                // settings
+                type: 'danger',
+                placement: {
+                  from: "bottom",
+                  align: "right"
+                },
+              });
+            }
+          },
+          error: function(xhr, textStatus){
+            $.notify({
+              // options
+              title: "Ошибка",
+              message: textStatus
+            },{
+              // settings
+              type: 'danger',
+              placement: {
+                from: "bottom",
+                align: "right"
+              },
+            });
+          }
+        });
 
       });
       $('#assetHistory').on('post-body.bs.table', function (e, data) {
