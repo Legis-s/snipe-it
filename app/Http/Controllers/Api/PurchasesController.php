@@ -72,6 +72,16 @@ class PurchasesController extends Controller
 
         if ($request->filled('search')) {
             $purchases = $purchases->TextSearch($request->input('search'));
+
+        }
+        if ($request->filled('user_id')) {
+            $purchases->where('user_id', '=', $request->input('user_id'));
+        }
+        if ($request->filled('status')) {
+            $purchases->where('status', '=', $request->input('status'));
+        }
+        if ($request->filled('supplier')) {
+            $purchases->where('supplier_id', '=', $request->input('supplier'));
         }
 
         $allowed_columns =

@@ -12,19 +12,40 @@ use App\Models\Purchase;
 use App\Models\Location;
 use App\Models\Sale;
 use App\Models\Statuslabel;
+use App\Models\Supplier;
 use App\Models\User;
 use DateTime;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Crypt;
+use Illuminate\Support\Facades\DB;
 
 class PurchasesController extends Controller
 {
     public function index()
     {
-        // Grab all the locations
+        $purchases_d = DB::table('purchases')
+            ->select('user_id')
+            ->distinct()
+            ->get();
+        $ids = [];
+        foreach ($purchases_d as &$value) {
+            array_push($ids, $value->user_id);
+        }
+
+        $purchases_s = DB::table('purchases')
+            ->select('supplier_id')
+            ->distinct()
+            ->get();
+        $ids_s = [];
+        foreach ($purchases_s as &$value) {
+            array_push($ids_s, $value->supplier_id);
+        }
+
+        $users = User::find($ids);
+        $suppliers = Supplier::find($ids_s);
         $this->authorize('view', Location::class);
-       return view('purchases/index');
+       return view('purchases/index', compact('users','suppliers'));
     }
 
     /**
