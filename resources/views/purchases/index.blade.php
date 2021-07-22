@@ -77,6 +77,8 @@
     @include ('partials.bootstrap-table')
     <script>
         $(document).ready(function () {
+            var query_holder = {};
+
             $('.js-select-user').select2({
                 placeholder: 'Выберите пользователя',
                 allowClear: true,

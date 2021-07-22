@@ -870,7 +870,7 @@
         {{--var dataToSend = {--}}
         {{--  text: "{{ $sale->asset_tag }}"--}}
         {{--};--}}
-        $.ajax('http://localhost: 8001/termal_print?text={{ $sale->asset_tag }}', {
+        $.ajax('http://localhost:8001/termal_print?text={{ $sale->asset_tag }}', {
           success: function (data, textStatus, xhr) {
             console.log(xhr.status);
             if (xhr.status === 200) {
