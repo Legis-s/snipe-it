@@ -152,7 +152,11 @@ class InventoriesController extends Controller
     public function store(Request $request)
     {
         $data = $request->all();
-        $location = Location::where('bitrix_id',$data["bitrix_id"] )->firstOrFail();
+        if ($data["bitrix_id"]){
+            $location = Location::where('bitrix_id',$data["bitrix_id"] )->firstOrFail();
+        }elseif ($data["location_id"]){
+            $location = Location::where('id',$data["location_id"] )->firstOrFail();
+        }
 
         $assets = Company::scopeCompanyables(Asset::select('assets.*'),"company_id","assets")
             ->with('location', 'assetstatus', 'assetlog', 'company', 'defaultLoc','assignedTo',
