@@ -346,7 +346,8 @@ class Sale extends Depreciable
     public function availableForReview()
     {
         $status = Statuslabel::where('name', 'Ожидает проверки')->first();
-        if ($this->status_id == $status->id){
+        $status_i = Statuslabel::where('name', 'Ожидает инвентаризации')->first();
+        if ($this->status_id == $status->id || $this->status_id == $status_i->id){
             return true;
         }else{
             return false;
