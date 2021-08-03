@@ -374,6 +374,28 @@ class SalesController extends Controller
 
 
     /**
+     * Returns JSON with information about an asset for detail view.
+     *
+     * @param int $assetId
+     * @return JsonResponse
+     * @since [v4.0]
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     */
+    public function inventory($id)
+    {
+
+        $this->authorize('view', Sale::class);
+
+        if ($asset = Sale::with('assetstatus')->with('assignedTo')->withTrashed()->findOrFail($id)) {
+            $status = Statuslabel::where('name', 'Ожидает проверки')->first();
+            $asset->status_id = $status->id;
+            $asset->save();
+            return (new SalesTransformer)->transformSale($asset);
+        }
+    }
+
+
+    /**
      * Gets a paginated collection for the select2 menus
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]

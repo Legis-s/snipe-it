@@ -875,6 +875,21 @@
             console.log(xhr.status);
             if (xhr.status === 200) {
               console.log(data);
+              $.ajax({
+                method: "POST",
+                url: "{{ route('api.sales.inventory', $sale->id ) }}",
+                headers: {
+                  "X-Requested-With": 'XMLHttpRequest',
+                  "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(data) {
+                  //console.log('ajax fired');
+                  // do some stuff here
+
+
+                }
+              });
+
             } else {
               console.log(data);
             }
@@ -883,67 +898,9 @@
             console.log("error");
           }
         });
-        // $.ajax({
-        //   type: "GET",
-        //   url: "http://localhost:8001/termal_print",
-        //   // dataType: 'json',
-        //   // contentType: 'application/json',
-        //   data: JSON.stringify(dataToSend),
-        //   // crossDomain: true,
-        //   headers: {
-        //     'Access-Control-Allow-Origin': '*',
-        //   },
-        //   success: function(data, textStatus, xhr){
-        //     if (xhr.status == 200){
-        //       $.notify({
-        //         // options
-        //         title: "Успешно",
-        //         // message: 'Ошибка'
-        //       },{
-        //         // settings
-        //         type: 'info',
-        //         placement: {
-        //           from: "bottom",
-        //           align: "right"
-        //         },
-        //       });
-        //     }else{
-        //       $.notify({
-        //         // options
-        //         title: "Ошибка",
-        //         // message: 'Ошибка'
-        //       },{
-        //         // settings
-        //         type: 'danger',
-        //         placement: {
-        //           from: "bottom",
-        //           align: "right"
-        //         },
-        //       });
-        //     }
-        //   },
-        //   error: function(xhr, textStatus){
-        //     $.notify({
-        //       // options
-        //       title: "Ошибка",
-        //       message: textStatus
-        //     },{
-        //       // settings
-        //       type: 'danger',
-        //       placement: {
-        //         from: "bottom",
-        //         align: "right"
-        //       },
-        //     });
-        //   }
-        // });
 
       });
       $('#assetHistory').on('post-body.bs.table', function (e, data) {
-        // console.log("assetHistory");
-        // $('.aniimated-thumbnials').lightGallery({
-        //   // thumbnail:true,
-        // });
         lightbox.option({
           'resizeDuration': 200,
           'wrapAround': true

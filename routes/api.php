@@ -450,6 +450,13 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
             ]
         );
 
+        Route::post('{asset_id}/inventory',
+            [
+                'as' => 'api.sales.inventory',
+                'uses' => 'SalesController@inventory'
+            ]
+        );
+
     });
     /*--- Imports API ---*/
 
