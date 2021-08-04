@@ -205,6 +205,14 @@ class User extends SnipeModel implements AuthenticatableContract, CanResetPasswo
     }
 
     /**
+     * Get licenses assigned to this user
+     */
+    public function sales()
+    {
+        return $this->hasMany('\App\Models\Sale', 'user_responsible_id')->withTrashed();
+    }
+
+    /**
      * Get assets assigned to this user
      */
     public function assetmaintenances()
@@ -227,6 +235,7 @@ class User extends SnipeModel implements AuthenticatableContract, CanResetPasswo
 //    {
 //        return $this->belongsToMany('\App\Models\Consumable', 'consumables_users', 'assigned_to', 'consumable_id')->withPivot('id')->withTrashed();
 //    }
+
 
 
 

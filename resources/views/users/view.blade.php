@@ -49,6 +49,14 @@
           </a>
         </li>
 
+        <li>
+          <a href="#sales" data-toggle="tab">
+            <span class="hidden-lg hidden-md">
+            <i class="fa fa-shopping-basket"></i>
+            </span> <span class="hidden-xs hidden-sm">Активы на продажу</span>
+          </a>
+        </li>
+
 {{--        <li>--}}
 {{--          <a href="#consumables" data-toggle="tab">--}}
 {{--            <span class="hidden-lg hidden-md">--}}
@@ -439,6 +447,39 @@
           </div>
         </div><!-- /accessories-tab -->
 
+        <div class="tab-pane" id="sales">
+          <!-- checked out assets table -->
+          <div class="table-responsive">
+            <table class="display table table-striped">
+              <thead>
+              <tr>
+                <th class="col-md-3">{{ trans('admin/hardware/table.asset_model') }}</th>
+                <th class="col-md-2">{{ trans('admin/hardware/table.asset_tag') }}</th>
+                <th class="col-md-2">{{ trans('general.name') }}</th>
+              </tr>
+              </thead>
+              <tbody>
+              @if ($user->sales)
+                @foreach ($user->sales as $asset)
+                  <tr>
+                    <td>
+                      @if (($asset->model) && ($asset->physical=='1'))
+                        <a href="{{ route('models.show', $asset->model->id) }}">{{ $asset->model->name }}</a>
+                      @endif
+                    </td>
+                    <td>
+                      @can('view', $asset)
+                        <a href="{{ route('sales.show', $asset->id) }}">{{ $asset->asset_tag }}</a>
+                      @endcan
+                    </td>
+                    <td>{!! $asset->present()->nameUrl() !!}</td>
+                  </tr>
+                @endforeach
+              @endif
+              </tbody>
+            </table>
+          </div>
+        </div><!-- /asset -->
 {{--        <div class="tab-pane" id="consumables">--}}
 {{--          <div class="table-responsive">--}}
 {{--            <table class="display table table-striped">--}}
