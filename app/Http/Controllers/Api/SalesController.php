@@ -129,6 +129,12 @@ class SalesController extends Controller
             $assets->where('sales.location_id', '=', $location->id);
         }
 
+
+        if ($request->filled('contract_id')) {
+            $assets->where('sales.contract_id', '=', $request->input('contract_id'));
+            $settings->show_archived_in_list =true;
+        }
+
         if ($request->filled('purchase_id')) {
             $assets->where('sales.purchase_id', '=', $request->input('purchase_id'));
         }

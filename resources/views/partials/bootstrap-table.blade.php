@@ -380,7 +380,8 @@
         'inventories',
         'purchases',
         'sales',
-        "inventorystatuslabels"
+        "inventorystatuslabels",
+        "contracts"
     ];
 
     for (var i in formatters) {
