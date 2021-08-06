@@ -23,6 +23,7 @@ class ConsumableAssignment extends Model
     const LOCATION = 'location';
     const ASSET = 'asset';
     const USER = 'user';
+    const CONTRACT = 'contract';
 
     const PURCHASE = 'purchase';
     const ISSUED = 'issued';

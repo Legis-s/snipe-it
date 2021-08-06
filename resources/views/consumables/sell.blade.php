@@ -35,20 +35,38 @@
                                     <p class="form-control-static">{{ $consumable->name }}</p>
                                 </div>
                             </div>
-                        @endif
+                    @endif
 
-                        {{--                        @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'assigned_to', 'style' => '', 'required'=>'true'])--}}
-                        {{--          <!-- User -->--}}
-                        {{--            @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.select_user'), 'fieldname' => 'assigned_to', 'required'=> 'true'])--}}
+{{--                    @include ('partials.forms.checkout-selector', ['user_select' => 'true','contract_select'=> 'true'])--}}
+                    @include ('partials.forms.sell-selector', ['user_select' => 'true','contract_select'=> 'true'])
 
+                    @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.user'), 'fieldname' => 'assigned_user','required'=>'true'])
+                    @include ('partials.forms.edit.contract-select', ['translated_name' => "Договор", 'fieldname' => 'assigned_contract', 'style' => 'display:none;','required'=>'true'])
 
-                        @include ('partials.forms.checkout-selector', ['user_select' => 'true','asset_select' => 'true', 'location_select' => 'true'])
+                    <!-- Purchase Cost -->
+                        <div class="form-group {{ $errors->has('purchase_cost') ? ' has-error' : '' }}">
+                            <label for="purchase_cost" class="col-md-3 control-label">Закупочная стоимость</label>
+                            <div class="col-md-9">
+                                <div class="input-group col-md-4" style="padding-left: 0px;">
+                                    <input class="form-control float" type="text"
+                                           name="purchase_cost" aria-label="Purchase_cost"
+                                           id="purchase_cost"
+                                           disabled
+                                           value="{{ Input::old('purchase_cost', \App\Helpers\Helper::formatCurrencyOutput($consumable->purchase_cost)) }}"/>
+                                    <span class="input-group-addon">
+                @if (isset($currency_type))
+                                            {{ $currency_type }}
+                                        @else
+                                            {{ $snipeSettings->default_currency }}
+                                        @endif
+            </span>
+                                </div>
 
-                        @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'assigned_location', 'required'=>'true'])
-
-                        @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.user'), 'fieldname' => 'assigned_user', 'style' => 'display:none;','required'=>'true'])
-
-                        @include ('partials.forms.edit.asset-select', ['translated_name' => trans('general.asset'), 'fieldname' => 'assigned_asset', 'unselect' => 'true', 'style' => 'display:none;', 'required'=>'true'])
+                                <div class="col-md-9" style="padding-left: 0px;">
+                                    {!! $errors->first('depreciable_cost', '<span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                </div>
+                            </div>
+                        </div>
 
                         @include ('partials.forms.edit.quantity_max')
 
@@ -101,4 +119,90 @@
 
         </div>
     </div>
+@stop
+
+@section('moar_scripts')
+    <script nonce="{{ csrf_token() }}">
+        $(function () {
+            // $('input[name=checkout_to_type]').off('change').on("change", function () {
+            //     var assignto_type = $('input[name=checkout_to_type]:checked').val();
+            //     var userid = $('#assigned_user option:selected').val();
+            //
+            //     if (assignto_type == 'asset') {
+            //         $('#current_assets_box').fadeOut();
+            //         $('#assigned_asset').show();
+            //         $('#assigned_user').hide();
+            //         $('#assigned_location').hide();
+            //         $('#assigned_contract').hide();
+            //         $('.notification-callout').fadeOut();
+            //
+            //     } else if (assignto_type == 'location') {
+            //         $('#current_assets_box').fadeOut();
+            //         $('#assigned_asset').hide();
+            //         $('#assigned_user').hide();
+            //         $('#assigned_location').show();
+            //         $('#assigned_contract').hide();
+            //         $('.notification-callout').fadeOut();
+            //     } else if (assignto_type == 'contract') {
+            //         $('#current_assets_box').fadeOut();
+            //         $('#assigned_asset').hide();
+            //         $('#assigned_user').hide();
+            //         $('#assigned_location').hide();
+            //         $('#assigned_contract').show();
+            //         $('.notification-callout').fadeOut();
+            //     } else {
+            //         $('#assigned_asset').hide();
+            //         $('#assigned_user').show();
+            //         $('#assigned_location').hide();
+            //         $('#assigned_contract').hide();
+            //         if (userid) {
+            //             $('#current_assets_box').fadeIn();
+            //         }
+            //         $('.notification-callout').fadeIn();
+            //
+            //     }
+            // });
+
+
+            $('input[name=checkout_to_type_s]').on("change",function () {
+                var assignto_type = $('input[name=checkout_to_type_s]:checked').val();
+                var userid = $('#assigned_user option:selected').val();
+
+                if (assignto_type == 'asset') {
+                    $('#current_assets_box').fadeOut();
+                    $('#assigned_asset').show();
+                    $('#assigned_user').hide();
+                    $('#assigned_location').hide();
+                    $('#assigned_contract').hide();
+                    $('.notification-callout').fadeOut();
+
+                } else if (assignto_type == 'location') {
+                    $('#current_assets_box').fadeOut();
+                    $('#assigned_asset').hide();
+                    $('#assigned_user').hide();
+                    $('#assigned_location').show();
+                    $('#assigned_contract').hide();
+                    $('.notification-callout').fadeOut();
+                } else if (assignto_type == 'contract') {
+                    $('#current_assets_box').fadeOut();
+                    $('#assigned_asset').hide();
+                    $('#assigned_user').hide();
+                    $('#assigned_location').hide();
+                    $('#assigned_contract').show();
+                    $('.notification-callout').fadeOut();
+                } else  {
+
+                    $('#assigned_asset').hide();
+                    $('#assigned_user').show();
+                    $('#assigned_location').hide();
+                    $('#assigned_contract').hide();
+                    if (userid) {
+                        $('#current_assets_box').fadeIn();
+                    }
+                    $('.notification-callout').fadeIn();
+
+                }
+            });
+        });
+    </script>
 @stop

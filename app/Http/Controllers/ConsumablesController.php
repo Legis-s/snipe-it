@@ -378,7 +378,7 @@ class ConsumablesController extends Controller
 
         $assigned_to =  null;
         // This item is checked out to a location
-        switch(request('checkout_to_type'))
+        switch(request('checkout_to_type_s'))
         {
             case 'location':
                 $assigned_to= Location::findOrFail(request('assigned_location'));
@@ -392,6 +392,10 @@ class ConsumablesController extends Controller
                 $assigned_to=  User::findOrFail(request('assigned_user'));
                 $assigned_type = "App\Models\User";
                 break;
+            case 'contract':
+                $assigned_to=  Contract::findOrFail(request('assigned_contract'));
+                $assigned_type = "App\Models\Contract";
+                break;
         }
         $consumable->locations()->attach($consumable->id, [
             'consumable_id' => $consumable->id,
@@ -399,7 +403,7 @@ class ConsumablesController extends Controller
             'quantity' => $quantity,
             'comment' => $comment,
             'cost' => $consumable->purchase_cost,
-            'type'=> ConsumableAssignment::ISSUED,
+            'type'=> ConsumableAssignment::SOLD,
             'assigned_to' => $assigned_to->id,
             'assigned_type' => $assigned_type,
         ]);

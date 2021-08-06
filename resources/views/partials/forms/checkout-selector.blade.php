@@ -9,8 +9,17 @@
             @endif
 
             @if ((isset($user_select)) && ($user_select!='false'))
-            <label class="btn btn-default ">
-                <input name="checkout_to_type" value="user" aria-label="checkout_to_type" type="radio"><i class="fa fa-user" aria-hidden="true"></i> {{ trans('general.user') }}
+            <label class="btn btn-default
+ @if ((isset($location_select)) && ($location_select!='false'))
+            @else
+ active"
+            @endif     >
+                <input name="checkout_to_type" value="user" aria-label="checkout_to_type" type="radio"
+                @if ((isset($location_select)) && ($location_select!='false'))
+                        @else
+                class="active" checked="checked"
+                        @endif
+                ><i class="fa fa-user" aria-hidden="true"></i> {{ trans('general.user') }}
             </label>
             @endif
             @if ((isset($asset_select)) && ($asset_select!='false'))
@@ -18,6 +27,12 @@
                 <input name="checkout_to_type" value="asset" aria-label="checkout_to_type" type="radio"><i class="fa fa-barcode" aria-hidden="true"></i> {{ trans('general.asset') }}
             </label>
             @endif
+
+                @if ((isset($contract_select)) && ($contract_select!='false'))
+                    <label class="btn btn-default">
+                        <input name="checkout_to_type" value="contract" aria-label="checkout_to_type" type="radio"><i class="fa fa-file" aria-hidden="true"></i> Договор
+                    </label>
+                @endif
 
             {!! $errors->first('checkout_to_type', '<span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span>') !!}
         </div>

@@ -263,7 +263,11 @@
             } else if (value.type == 'purchase') {
                 item_destination = 'purchases'
                 item_icon = 'fa-usd';
+            }else if (value.type == 'contract') {
+                item_destination = 'contracts'
+                item_icon = 'fa-file';
             }
+
 
             return '<nobr><a href="{{ url('/') }}/' + item_destination + '/' + value.id + '" data-tooltip="true" title="' + value.type + '"><i class="fa ' + item_icon + ' text-{{ $snipeSettings->skin!='' ? $snipeSettings->skin : 'blue' }} "></i> ' + value.name + '</a></nobr>';
 
@@ -300,7 +304,6 @@
     function notesFormatter(value) {
         if (value) {
             return value.replace(/(?:\r\n|\r|\n)/g, '<br />');
-            ;
         }
     }
 

@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Transformers\SelectlistTransformer;
+use App\Models\Asset;
 use App\Models\Component;
 use App\Models\ConsumableAssignment;
+use App\Models\Contract;
 use App\Models\Location;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -12,6 +15,7 @@ use App\Models\Company;
 use App\Models\Consumable;
 use App\Http\Transformers\ConsumablesTransformer;
 use App\Helpers\Helper;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 
 class ConsumablesController extends Controller
@@ -273,4 +277,41 @@ class ConsumablesController extends Controller
 //        $data = array('total' => $locationCount, 'rows' => $rows);
 //        return $data;
 //    }
+
+
+
+
+    /**
+     * Gets a paginated collection for the select2 menus
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v4.0.16]
+     * @see \App\Http\Transformers\SelectlistTransformer
+     *
+     */
+    public function selectlist(Request $request)
+    {
+
+        $consumables = Consumable::select([
+            'consumables.id',
+            'consumables.name',
+        ]);
+
+        $page = 1;
+        if ($request->filled('page')) {
+            $page = $request->input('page');
+        }
+
+        if ($request->filled('search')) {
+            $consumables = $consumables->where('consumables.name', 'LIKE', '%'.$request->input('search').'%');
+        }
+
+        $consumables = $consumables->orderBy('name', 'ASC')->get();
+
+
+        $paginated_results =  new LengthAwarePaginator($consumables->forPage($page, 500), $consumables->count(), 500, $page, []);
+
+        return (new SelectlistTransformer)->transformSelectlist($paginated_results);
+
+    }
 }

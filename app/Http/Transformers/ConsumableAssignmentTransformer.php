@@ -101,6 +101,9 @@ class ConsumableAssignmentTransformer
                     case ConsumableAssignment::LOCATION:
                         $str=" на объект";
                         break;
+                    case ConsumableAssignment::CONTRACT:
+                        $str=" по договору";
+                        break;
                 }
                 return "Продано ".$str;
             case ConsumableAssignment::CONVERTED:
