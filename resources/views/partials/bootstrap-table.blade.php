@@ -222,6 +222,15 @@
     }
 
 
+    // This just prints out the item type in the activity report
+    function itemTypeFormatter(value, row) {
+
+        if ((row) && (row.item) && (row.item.type)) {
+            return row.item.type;
+        }
+    }
+
+
     // This handles the icons and display of polymorphic entries
     function polymorphicItemFormatter(value) {
 
@@ -251,6 +260,9 @@
             } else if (value.type == 'location') {
                 item_destination = 'locations'
                 item_icon = 'fa-map-marker';
+            } else if (value.type == 'purchase') {
+                item_destination = 'purchases'
+                item_icon = 'fa-usd';
             }
 
             return '<nobr><a href="{{ url('/') }}/' + item_destination + '/' + value.id + '" data-tooltip="true" title="' + value.type + '"><i class="fa ' + item_icon + ' text-{{ $snipeSettings->skin!='' ? $snipeSettings->skin : 'blue' }} "></i> ' + value.name + '</a></nobr>';
@@ -263,10 +275,23 @@
     }
 
     // This just prints out the item type in the activity report
-    function itemTypeFormatter(value, row) {
-
-        if ((row) && (row.item) && (row.item.type)) {
-            return row.item.type;
+    function quantityItemFormatter(value, row) {
+        console.log(row);
+        if ((row) && (row.type)) {
+            switch (row.type){
+                case "purchase":
+                    return "<span class='text-success'  style='font-size: 130%; font-weight: bold'> +"+value+"</span>";
+                case "issued":
+                    return "<span class='text-danger' style='font-size: 130%; font-weight: bold'> -"+value+"</span>";
+                case "converted":
+                    return "<span class='text-success' style='font-size: 130%; font-weight: bold'> +"+value+"</span>";
+                case "sold":
+                    return "<span class='text-danger' style='font-size: 130%; font-weight: bold'> -"+value+"</span>";
+                case "manually":
+                    return "<span class='text-success' style='font-size: 130%; font-weight: bold'> +"+value+"</span>";
+                case "collected":
+                    return "<span class='text-success' style='font-size: 130%; font-weight: bold'> +"+value+"</span>";
+            }
         }
     }
 
@@ -296,7 +321,13 @@
         }
     }
 
-
+    function consumablesSellFormatter(value, row) {
+        if (row.user_can_sell== true) {
+            return '<a href="{{ url('/') }}/consumables/' + row.id + '/sell/" class="btn btn-sm bg-maroon" data-tooltip="true" title="Sell this item out">Продать</a>';
+        }else{
+            return '<a href="{{ url('/') }}/consumables/' + row.id + '/sell/" class="btn btn-sm bg-maroon" data-tooltip="true" title="Sell this item out" disabled>Продать</a>';
+        }
+    }
 
     function sellFormatter(value, row) {
         if (row.user_can_sell== true) {

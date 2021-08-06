@@ -3,14 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Helper;
+use App\Models\Asset;
 use App\Models\Company;
 use App\Models\Consumable;
+use App\Models\ConsumableAssignment;
+use App\Models\Contract;
 use App\Models\Location;
 use App\Models\Setting;
 use App\Models\User;
 use Auth;
 use Config;
 use DB;
+use Illuminate\Database\Eloquent\Model;
 use Input;
 use Lang;
 use Redirect;
@@ -80,7 +84,7 @@ class ConsumablesController extends Controller
         $consumable->order_number           = $request->input('order_number');
         $consumable->min_amt                = $request->input('min_amt');
         $consumable->manufacturer_id        = $request->input('manufacturer_id');
-        $consumable->model_id        = $request->input('model_id');
+//        $consumable->model_id        = $request->input('model_id');
         $consumable->model_number           = $request->input('model_number');
         $consumable->item_no                = $request->input('item_no');
         $consumable->purchase_date          = $request->input('purchase_date');
@@ -93,6 +97,13 @@ class ConsumablesController extends Controller
 
 
         if ($consumable->save()) {
+            $consumableAssignment = new ConsumableAssignment;
+            $consumableAssignment->type = ConsumableAssignment::MANUALLY;
+            $consumableAssignment->quantity = $consumable->qty;
+            $consumableAssignment->cost = $consumable->purchase_cost;
+            $consumableAssignment->user_id =Auth::id();
+            $consumableAssignment->consumable_id = $consumable->id;
+            $consumableAssignment->save();
             return redirect()->route('consumables.index')->with('success', trans('admin/consumables/message.create.success'));
         }
 
@@ -246,45 +257,169 @@ class ConsumablesController extends Controller
         $this->authorize('checkout', $consumable);
 
         $admin_user = Auth::user();
-        $assigned_to = e(Input::get('assigned_to'));
         $quantity = e(Input::get('quantity'));
+        $comment = e(Input::get('comment'));
 
 //        // Check if the user exists
 //        if (is_null($user = User::find($assigned_to))) {
 //            // Redirect to the consumable management page with error
 //            return redirect()->route('checkout/consumable', $consumable)->with('error', trans('admin/consumables/message.checkout.user_does_not_exist'));
 //        }
-
-        // Check if the location exists
-        if (is_null($location = Location::find($assigned_to))) {
-            // Redirect to the consumable management page with error
-            return redirect()->route('checkout/consumable', $consumable)->with('error', "Местоположение не найдено");
-        }
+//
+//        // Check if the location exists
+//        if (is_null($location = Location::find($assigned_to))) {
+//            // Redirect to the consumable management page with error
+//            return redirect()->route('checkout/consumable', $consumable)->with('error', "Местоположение не найдено");
+//        }
 
         // Update the consumable data
-        $consumable->assigned_to = e(Input::get('assigned_to'));
+//        $consumable->assigned_to = e(Input::get('assigned_to'));
 
+        $assigned_to =  null;
+        // This item is checked out to a location
+        switch(request('checkout_to_type'))
+        {
+            case 'location':
+                $assigned_to= Location::findOrFail(request('assigned_location'));
+                $assigned_type = "App\Models\Location";
+                break;
+            case 'asset':
+                $assigned_to =  Asset::findOrFail(request('assigned_asset'));
+                $assigned_type = "App\Models\Asset";
+                break;
+            case 'user':
+                $assigned_to=  User::findOrFail(request('assigned_user'));
+                $assigned_type = "App\Models\User";
+                break;
+        }
         $consumable->locations()->attach($consumable->id, [
             'consumable_id' => $consumable->id,
             'user_id' => $admin_user->id,
             'quantity' => $quantity,
-            'assigned_to' => e(Input::get('assigned_to'))
+            'comment' => $comment,
+            'cost' => $consumable->purchase_cost,
+            'type'=> ConsumableAssignment::ISSUED,
+            'assigned_to' => $assigned_to->id,
+            'assigned_type' => $assigned_type,
         ]);
 
-        $logaction = $consumable->logCheckout(e(Input::get('note')), $location);
-
-        $data['log_id'] = $logaction->id;
-        $data['eula'] = $consumable->getEula();
-//        $data['first_name'] = $user->first_name;
-        $data['item_name'] = $consumable->name;
-        $data['checkout_date'] = $logaction->created_at;
-        $data['note'] = $logaction->note;
-        $data['require_acceptance'] = $consumable->requireAcceptance();
-
+//        $logaction = $consumable->logCheckout(e(Input::get('note')), $assigned_to);
+//
+//        $data['log_id'] = $logaction->id;
+//        $data['eula'] = $consumable->getEula();
+////        $data['first_name'] = $user->first_name;
+//        $data['item_name'] = $consumable->name;
+//        $data['checkout_date'] = $logaction->created_at;
+//        $data['note'] = $logaction->note;
+//        $data['require_acceptance'] = $consumable->requireAcceptance();
+//
 
       // Redirect to the new consumable page
         return redirect()->route('consumables.index')->with('success', trans('admin/consumables/message.checkout.success'));
 
     }
+
+
+
+    /**
+     * Return a view to checkout a consumable to a user.
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @see ConsumablesController::postCheckout() method that stores the data.
+     * @since [v1.0]
+     * @param int $consumableId
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function getSell($consumableId)
+    {
+        if (is_null($consumable = Consumable::find($consumableId))) {
+            return redirect()->route('consumables.index')->with('error', trans('admin/consumables/message.does_not_exist'));
+        }
+        $this->authorize('checkout', $consumable);
+        return view('consumables/sell', compact('consumable'));
+    }
+
+
+    /**
+     * Saves the checkout information
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @see ConsumablesController::getCheckout() method that returns the form.
+     * @since [v1.0]
+     * @param int $consumableId
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postSell($consumableId)
+    {
+        if (is_null($consumable = Consumable::find($consumableId))) {
+            return redirect()->route('consumables.index')->with('error', trans('admin/consumables/message.not_found'));
+        }
+
+        $this->authorize('checkout', $consumable);
+
+        $admin_user = Auth::user();
+        $quantity = e(Input::get('quantity'));
+        $comment = e(Input::get('comment'));
+
+//        // Check if the user exists
+//        if (is_null($user = User::find($assigned_to))) {
+//            // Redirect to the consumable management page with error
+//            return redirect()->route('checkout/consumable', $consumable)->with('error', trans('admin/consumables/message.checkout.user_does_not_exist'));
+//        }
+//
+//        // Check if the location exists
+//        if (is_null($location = Location::find($assigned_to))) {
+//            // Redirect to the consumable management page with error
+//            return redirect()->route('checkout/consumable', $consumable)->with('error', "Местоположение не найдено");
+//        }
+
+        // Update the consumable data
+//        $consumable->assigned_to = e(Input::get('assigned_to'));
+
+        $assigned_to =  null;
+        // This item is checked out to a location
+        switch(request('checkout_to_type'))
+        {
+            case 'location':
+                $assigned_to= Location::findOrFail(request('assigned_location'));
+                $assigned_type = "App\Models\Location";
+                break;
+            case 'asset':
+                $assigned_to =  Asset::findOrFail(request('assigned_asset'));
+                $assigned_type = "App\Models\Asset";
+                break;
+            case 'user':
+                $assigned_to=  User::findOrFail(request('assigned_user'));
+                $assigned_type = "App\Models\User";
+                break;
+        }
+        $consumable->locations()->attach($consumable->id, [
+            'consumable_id' => $consumable->id,
+            'user_id' => $admin_user->id,
+            'quantity' => $quantity,
+            'comment' => $comment,
+            'cost' => $consumable->purchase_cost,
+            'type'=> ConsumableAssignment::ISSUED,
+            'assigned_to' => $assigned_to->id,
+            'assigned_type' => $assigned_type,
+        ]);
+
+//        $logaction = $consumable->logCheckout(e(Input::get('note')), $assigned_to);
+//
+//        $data['log_id'] = $logaction->id;
+//        $data['eula'] = $consumable->getEula();
+////        $data['first_name'] = $user->first_name;
+//        $data['item_name'] = $consumable->name;
+//        $data['checkout_date'] = $logaction->created_at;
+//        $data['note'] = $logaction->note;
+//        $data['require_acceptance'] = $consumable->requireAcceptance();
+//
+
+        // Redirect to the new consumable page
+        return redirect()->route('consumables.index')->with('success', trans('admin/consumables/message.checkout.success'));
+
+    }
+
+
 
 }

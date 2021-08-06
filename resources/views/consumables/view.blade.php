@@ -2,8 +2,7 @@
 
 {{-- Page title --}}
 @section('title')
- {{ $consumable->name }}
- {{ trans('general.consumable') }}
+ Расходник:   {{ $consumable->name }}
 @parent
 @stop
 
@@ -19,24 +18,17 @@
 <div class="row">
   <div class="col-md-9">
     <div class="box box-default">
-      @if ($consumable->id)
-      <div class="box-header with-border">
-        <div class="box-heading">
-          <h2 class="box-title"> {{ $consumable->name }}</h2>
-        </div>
-      </div><!-- /.box-header -->
-      @endif
-
       <div class="box-body">
         <div class="row">
           <div class="col-md-12">
             <div class="table table-responsive">
-
               <table
+                      data-columns="{{ \App\Presenters\ConsumableAssignmentPresenter::dataTableLayout() }}"
                       data-cookie-id-table="consumablesCheckedoutTable"
+                      data-toolbar="#toolbar"
                       data-pagination="true"
                       data-id-table="consumablesCheckedoutTable"
-                      data-search="false"
+                      data-search="true"
                       data-side-pagination="server"
                       data-show-columns="true"
                       data-show-export="true"
@@ -46,19 +38,7 @@
                       data-sort-name="name"
                       id="consumablesCheckedoutTable"
                       class="table table-striped snipe-table"
-                      data-url="{{route('api.consumables.showLocations', $consumable->id)}}"
-                      data-export-options='{
-                "fileName": "export-consumables-{{ str_slug($consumable->name) }}-checkedout-{{ date('Y-m-d') }}",
-                "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                }'>
-                <thead>
-                  <tr>
-                    <th data-searchable="false" data-sortable="false" data-field="name">Выдано на объект</th>
-                      <th data-searchable="false" data-sortable="false" data-field="quantity">Количество</th>
-                    <th data-searchable="false" data-sortable="false" data-field="created_at" data-formatter="dateDisplayFormatter">{{ trans('general.date') }}</th>
-                    <th data-searchable="false" data-sortable="false" data-field="admin">Выдал</th>
-                  </tr>
-                </thead>
+                      data-url="{{route('api.consumableassignments.index',['consumable_id' => $consumable->id])}}">
               </table>
             </div>
           </div> <!-- /.col-md-12-->

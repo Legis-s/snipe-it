@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\Component;
 use App\Models\ConsumableAssignment;
 use App\Models\Location;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\Consumable;
 use App\Http\Transformers\ConsumablesTransformer;
 use App\Helpers\Helper;
+use Illuminate\Support\Facades\Auth;
 
 class ConsumablesController extends Controller
 {
@@ -103,8 +106,15 @@ class ConsumablesController extends Controller
         $this->authorize('create', Consumable::class);
         $consumable = new Consumable;
         $consumable->fill($request->all());
-
         if ($consumable->save()) {
+            $consumableAssignment = new ConsumableAssignment;
+            $consumableAssignment->type = ConsumableAssignment::MANUALLY;
+            $consumableAssignment->quantity = $consumable->qty;
+            $consumableAssignment->cost = $consumable->purchase_cost;
+            $consumableAssignment->user_id = Auth::id();
+            $consumableAssignment->consumable_id = $consumable->id;
+            $consumableAssignment->save();
+
             return response()->json(Helper::formatStandardApiResponse('success', $consumable, trans('admin/consumables/message.create.success')));
         }
         return response()->json(Helper::formatStandardApiResponse('error', null, $consumable->getErrors()));
@@ -164,98 +174,103 @@ class ConsumablesController extends Controller
         return response()->json(Helper::formatStandardApiResponse('success', null,  trans('admin/consumables/message.delete.success')));
     }
 
-        /**
-    * Returns a JSON response containing details on the users associated with this consumable.
-    *
-    * @author [A. Gianotto] [<snipe@snipe.net>]
-    * @see ConsumablesController::getView() method that returns the form.
-    * @since [v1.0]
-    * @param int $consumableId
-    * @return array
-     */
-    public function getDataView($consumableId)
-    {
-        $consumable = Consumable::with(array('consumableAssignments'=>
-        function ($query) {
-            $query->orderBy($query->getModel()->getTable().'.created_at', 'DESC');
-        },
-        'consumableAssignments.admin'=> function ($query) {
-        },
-        'consumableAssignments.location'=> function ($query) {
-        },
-        ))->find($consumableId);
-
-        if (!Company::isCurrentUserHasAccess($consumable)) {
-            return ['total' => 0, 'rows' => []];
-        }
-        $this->authorize('view', Consumable::class);
-        $rows = array();
-
+//        /**
+//    * Returns a JSON response containing details on the users associated with this consumable.
+//    *
+//    * @author [A. Gianotto] [<snipe@snipe.net>]
+//    * @see ConsumablesController::getView() method that returns the form.
+//    * @since [v1.0]
+//    * @param int $consumableId
+//    * @return array
+//     */
+//    public function getDataView($consumableId)
+//    {
+//        $consumable = Consumable::with(array('consumableAssignments'=>
+//        function ($query) {
+//            $query->orderBy($query->getModel()->getTable().'.created_at', 'DESC');
+//        },
+//        'consumableAssignments.admin'=> function ($query) {
+//        },
+//        'consumableAssignments.location'=> function ($query) {
+//        },
+//        ))->find($consumableId);
+//
+//        if (!Company::isCurrentUserHasAccess($consumable)) {
+//            return ['total' => 0, 'rows' => []];
+//        }
+//        $this->authorize('view', Consumable::class);
+//        $rows = array();
+//
+////        foreach ($consumable->consumableAssignments as $consumable_assignment) {
+////            $rows[] = [
+////                'name' => ($consumable_assignment->user) ? $consumable_assignment->user->present()->nameUrl() : 'Deleted User',
+////                'created_at' => Helper::getFormattedDateObject($consumable_assignment->created_at, 'datetime'),
+////                'admin' => ($consumable_assignment->admin) ? $consumable_assignment->admin->present()->nameUrl() : '',
+////            ];
+////        }
+//
 //        foreach ($consumable->consumableAssignments as $consumable_assignment) {
 //            $rows[] = [
-//                'name' => ($consumable_assignment->user) ? $consumable_assignment->user->present()->nameUrl() : 'Deleted User',
+//                'name' => ($consumable_assignment->location) ? $consumable_assignment->location->present()->nameUrl() : 'Deleted Location',
 //                'created_at' => Helper::getFormattedDateObject($consumable_assignment->created_at, 'datetime'),
+//                'quantity' =>($consumable_assignment->quantity) ? $consumable_assignment->quantity: '',
 //                'admin' => ($consumable_assignment->admin) ? $consumable_assignment->admin->present()->nameUrl() : '',
 //            ];
 //        }
-
-        foreach ($consumable->consumableAssignments as $consumable_assignment) {
-            $rows[] = [
-                'name' => ($consumable_assignment->location) ? $consumable_assignment->location->present()->nameUrl() : 'Deleted Location',
-                'created_at' => Helper::getFormattedDateObject($consumable_assignment->created_at, 'datetime'),
-                'quantity' =>($consumable_assignment->quantity) ? $consumable_assignment->quantity: '',
-                'admin' => ($consumable_assignment->admin) ? $consumable_assignment->admin->present()->nameUrl() : '',
-            ];
-        }
-
-        $consumableCount = $consumable->locations->count();
-        $data = array('total' => $consumableCount, 'rows' => $rows);
-        return $data;
-    }
-
-    /**
-     * Returns a JSON response containing details on the users associated with this consumable.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @see ConsumablesController::getDataViewLocation() method that returns the form.
-     * @since [v1.0]
-     * @param int $locationId
-     * @return array
-     */
-    public function getDataViewLocation($locationId)
-    {
-
-//        $location = Location::findOrFail($locationId);
-        $consumableAssignments = ConsumableAssignment::where('assigned_to', $locationId)->get();
-//        $location = Location::with(array('consumables'=>
-//            function ($query) {
-//                $query->orderBy($query->getModel()->getTable().'.created_at', 'DESC');
-//            },
-//            'consumables.admin'=> function ($query) {
-//            },
-//            'consumables.location'=> function ($query) {
-//            },
-////            'consumables.consumable'=> function ($query) {
+//
+//        $consumableCount = $consumable->locations->count();
+//        $data = array('total' => $consumableCount, 'rows' => $rows);
+//        return $data;
+//    }
+//
+//    /**
+//     * Returns a JSON response containing details on the users associated with this consumable.
+//     *
+//     * @author [A. Gianotto] [<snipe@snipe.net>]
+//     * @see ConsumablesController::getDataViewLocation() method that returns the form.
+//     * @since [v1.0]
+//     * @param int $locationId
+//     * @return array
+//     */
+//    public function getDataViewLocation($locationId)
+//    {
+//
+//
+//
+////        $location = Location::findOrFail($locationId);
+//        $consumableAssignments = ConsumableAssignment::where('assigned_to', $locationId)->get();
+//
+//        $components = ConsumableAssignment::scopeCompanyables(Component::select('components.*')
+//            ->with('company', 'location', 'category'));
+////        $location = Location::with(array('consumables'=>
+////            function ($query) {
+////                $query->orderBy($query->getModel()->getTable().'.created_at', 'DESC');
 ////            },
-//        ))->find($locationId);
-
-        $this->authorize('view', Consumable::class);
-        $rows = array();
-
-
-        foreach ($consumableAssignments as $consumable_assignment) {
-            $rows[] = [
-//                'name' => ($consumable_assignment->location) ? $consumable_assignment->location->present()->nameUrl() : 'Deleted Location',
-                'name' => ($consumable_assignment->consumable) ? $consumable_assignment->consumable->present()->nameUrl() : 'Deleted Location',
-                'created_at' => Helper::getFormattedDateObject($consumable_assignment->created_at, 'datetime'),
-                'quantity' =>($consumable_assignment->quantity) ? $consumable_assignment->quantity: '',
-                'admin' => ($consumable_assignment->admin) ? $consumable_assignment->admin->present()->nameUrl() : '',
-            ];
-        }
-
-//        $locationCount = $location->consumables->count();
-        $locationCount = $consumableAssignments->count();
-        $data = array('total' => $locationCount, 'rows' => $rows);
-        return $data;
-    }
+////            'consumables.admin'=> function ($query) {
+////            },
+////            'consumables.location'=> function ($query) {
+////            },
+//////            'consumables.consumable'=> function ($query) {
+//////            },
+////        ))->find($locationId);
+//
+//        $this->authorize('view', Consumable::class);
+//        $rows = array();
+//
+//
+//        foreach ($consumableAssignments as $consumable_assignment) {
+//            $rows[] = [
+////                'name' => ($consumable_assignment->location) ? $consumable_assignment->location->present()->nameUrl() : 'Deleted Location',
+//                'name' => ($consumable_assignment->consumable) ? $consumable_assignment->consumable->present()->nameUrl() : 'Deleted Location',
+//                'created_at' => Helper::getFormattedDateObject($consumable_assignment->created_at, 'datetime'),
+//                'quantity' =>($consumable_assignment->quantity) ? $consumable_assignment->quantity: '',
+//                'admin' => ($consumable_assignment->admin) ? $consumable_assignment->admin->present()->nameUrl() : '',
+//            ];
+//        }
+//
+////        $locationCount = $location->consumables->count();
+//        $locationCount = $consumableAssignments->count();
+//        $data = array('total' => $locationCount, 'rows' => $rows);
+//        return $data;
+//    }
 }

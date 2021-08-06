@@ -204,6 +204,7 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
             'parameters' => ['consumable' => 'consumable_id']
         ]
     ); // Consumables resource
+
 //    Route::get('consumables/view/{id}/users',
 //        [
 //            'as' => 'api.consumables.showUsers',
@@ -218,12 +219,27 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
         ]
     );
 
-    Route::get('consumables/view/{id}/location',
+//    Route::get('consumables/view/{id}/location',
+//        [
+//            'as' => 'api.consumables.showLocation',
+//            'uses' => 'ConsumablesController@getDataViewLocation'
+//        ]
+//    );
+
+    /*--- ConsumableAssignment API ---*/
+
+
+    Route::resource('consumableassignments', 'ConsumableAssignmentController',
         [
-            'as' => 'api.consumables.showLocation',
-            'uses' => 'ConsumablesController@getDataViewLocation'
+            'names' =>
+                [
+                    'index' => 'api.consumableassignments.index',
+                ],
+            'except' => ['create', 'edit'],
+            'parameters' => ['consumable' => 'consumable_id']
         ]
-    );
+    ); // Consumables resource
+
 
     /*--- Depreciations API ---*/
 

@@ -2,7 +2,7 @@
 
 {{-- Page title --}}
 @section('title')
-    {{ trans('admin/consumables/general.checkout') }}
+    Продать расходники
     @parent
 @stop
 

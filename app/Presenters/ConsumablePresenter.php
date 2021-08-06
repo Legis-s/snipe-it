@@ -136,8 +136,15 @@ class ConsumablePresenter extends Presenter
                 "searchable" => false,
                 "sortable" => false,
                 "visible" => true,
-                "title" => trans('general.change'),
+                "title" =>"Выдать",
                 "formatter" => "consumablesInOutFormatter",
+            ],[
+                "field" => "sell",
+                "searchable" => false,
+                "sortable" => false,
+                "visible" => true,
+                "title" => "Продать",
+                "formatter" => "consumablesSellFormatter",
             ], [
                 "field" => "actions",
                 "searchable" => false,
