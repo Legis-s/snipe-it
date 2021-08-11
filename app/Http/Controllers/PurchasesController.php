@@ -15,6 +15,7 @@ use App\Models\Statuslabel;
 use App\Models\Supplier;
 use App\Models\User;
 use DateTime;
+use Facebook\WebDriver\AbstractWebDriverCheckboxOrRadio;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Crypt;
@@ -62,9 +63,14 @@ class PurchasesController extends Controller
         $this->authorize('view', Location::class);
 
         $purchase = Purchase::find($purchaseId);
-
+        $old = false;
         if (isset($purchase->id)) {
-            return view('purchases/view', compact('purchase'));
+            $consumables_json = $purchase->consumables_json;
+            $consumables = json_decode($consumables_json, true);
+            if (count($consumables)>0 && isset($consumables[0]["category_id"])){
+                $old = true;
+            }
+            return view('purchases/view', compact('purchase',"old"));
         }
 
         return redirect()->route('purchases.index')->with('error', trans('admin/locations/message.does_not_exist'));
@@ -189,13 +195,11 @@ class PurchasesController extends Controller
             if (count($consumables)>0) {
                 $data_list .= "Компоненты:"."\n";
                 foreach ($consumables as &$consumable) {
-                    $model= $consumable["model"];
-                    $model_id = $consumable["model_id"];
-                    $name = $consumable["name"];
-                    $category_name= $consumable["category_name"];
+                    $consumable_name= $consumable["consumable"];
+                    $consumable_id = $consumable["consumable_id"];
                     $purchase_cost = $consumable["purchase_cost"];
                     $quantity = $consumable["quantity"];
-                    $data_list .= "[".$consumable["id"]."] ".$category_name." - ".$name." - Количество: ".$quantity." Цена: ".$purchase_cost."\n";
+                    $data_list .= "[".$consumable["id"]."] ".$consumable_name." - Количество: ".$quantity." Цена: ".$purchase_cost."\n";
                 }
             }
             if (count($sales)>0) {

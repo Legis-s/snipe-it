@@ -43,7 +43,6 @@
                     <th>Модель</th>
                     <th>Закупочная цена</th>
                     <th>НДС</th>
-                    <th>Гарантия</th>
                     <th>Количество</th>
                     <th>Удалить</th>
                     </thead>
@@ -61,12 +60,14 @@
                 </div>
                 <p class="activ text-center text-bold text-danger hidden">Добавте хотя бы один расходник</p>
                 <table id="table_consumables" class="table table-striped snipe-table">
+                    <thead>
                     <th>#</th>
-                    <th>Наименование</th>
+                    <th>Модель</th>
                     <th>Закупочная цена</th>
                     <th>НДС</th>
                     <th>Количество</th>
                     <th>Удалить</th>
+                    </thead>
                 </table>
             </div><!-- /.table-responsive -->
         </div>
@@ -142,11 +143,11 @@
                     <div class="row">
                         <div class="col-md-12">
                             <form class="form-horizontal">
-{{--                                @include ('partials.forms.edit.name', ['translated_name' => trans('admin/consumables/table.title')])--}}
+                                {{--                                @include ('partials.forms.edit.name', ['translated_name' => trans('admin/consumables/table.title')])--}}
                                 @include ('partials.forms.edit.consumables-select', ['translated_name' => 'Название', 'fieldname' => 'consumable_id', 'required' => 'true'])
-{{--                                @include ('partials.forms.edit.category-select2', ['translated_name' => trans('general.category'), 'fieldname' => 'category_id', 'required' => 'true', 'category_type' => 'consumable'])--}}
-{{--                                <p class="duble text-center text-bold text-danger hidden">Такая категория уже есть</p>--}}
-{{--                                @include ('partials.forms.edit.manufacturer-select2', ['translated_name' => trans('general.manufacturer'), 'fieldname' => 'manufacturer_id', 'required' => 'true'])--}}
+                                {{--                                @include ('partials.forms.edit.category-select2', ['translated_name' => trans('general.category'), 'fieldname' => 'category_id', 'required' => 'true', 'category_type' => 'consumable'])--}}
+                                {{--                                <p class="duble text-center text-bold text-danger hidden">Такая категория уже есть</p>--}}
+                                {{--                                @include ('partials.forms.edit.manufacturer-select2', ['translated_name' => trans('general.manufacturer'), 'fieldname' => 'manufacturer_id', 'required' => 'true'])--}}
                                 {{--                                @include ('partials.forms.edit.model_number')--}}
                                 <p class="duble text-center text-bold text-danger hidden">Такая модель уже есть</p>
                                 @include ('partials.forms.edit.purchase_cost')
@@ -226,10 +227,10 @@
             console.log($('#assets').val())
             console.log($('#consumables').val())
             console.log($('#sales').val())
-            var stickyHeaderOffsetY = 0;
+
             table_asset.bootstrapTable('destroy').bootstrapTable({
                 locale: 'ru',
-                data: $('#assets').val(),
+                data: [],
                 search: true,
                 toolbar: '#toolbar_asset',
                 columns: [{
@@ -252,11 +253,6 @@
                     name: 'НДС',
                     align: 'center',
                     valign: 'middle'
-                }, {
-                    field: 'warranty',
-                    name: 'Гарантия',
-                    align: 'center',
-                    valign: 'middle',
                 }, {
                     field: 'quantity',
                     name: 'Количество',
@@ -295,6 +291,7 @@
                 table_asset.bootstrapTable('load', JSON.parse($('#assets').val()));
             }
             table_consumables.bootstrapTable('destroy').bootstrapTable({
+                locale: 'ru',
                 data: [],
                 search: true,
                 toolbar: '#toolbar_consumables',
@@ -304,27 +301,7 @@
                     align: 'left',
                     valign: 'middle'
                 }, {
-                    field: 'model',
-                    name: 'Модель',
-                    align: 'left',
-                    valign: 'middle'
-                }, {
-                    field: 'name',
-                    name: 'Назвние',
-                    align: 'left',
-                    valign: 'middle'
-                }, {
-                    field: 'manufacturer_name',
-                    name: 'Производитель',
-                    align: 'left',
-                    valign: 'middle'
-                }, {
-                    field: 'category_name',
-                    name: 'Категория',
-                    align: 'left',
-                    valign: 'middle'
-                }, {
-                    field: 'model_number',
+                    field: 'consumable',
                     name: 'Модель',
                     align: 'left',
                     valign: 'middle'
@@ -743,31 +720,19 @@
             });
             $('#addСonsumablesButton').click(function (e) {
                 e.preventDefault();
-                var name = $('#modal_consumables').find('#name').val();
-                var model_id = $('#modal_consumables').find('select[name=model_id] option').filter(':selected').val();
-                var model_name = $('#modal_consumables').find('select[name=model_id] option').filter(':selected').text();
-                var category_id = $('select[name=category_id] option').filter(':selected').val();
-                var category_name = $('select[name=category_id] option').filter(':selected').text();
-                var manufacturer_id = $('select[name=manufacturer_id] option').filter(':selected').val();
-                var manufacturer_name = $('select[name=manufacturer_id] option').filter(':selected').text();
-                var model_number = $('#modal_consumables').find('#model_number').val();
+
+                var consumable_id = $('#modal_consumables').find('select[name=consumable_id] option').filter(':selected').val();
+                var consumable_name = $('#modal_consumables').find('select[name=consumable_id] option').filter(':selected').text();
                 var purchase_cost = $('#modal_consumables').find('#purchase_cost').val();
                 var nds = $('#modal_consumables').find('#nds').val();
                 var quantity = $('#modal_consumables').find('#quantity').val();
 
                 var tabele_data = table_consumables.bootstrapTable('getData');
-
-                if (category_id > 0 && name.length > 0) {
+                if (consumable_id > 0) {
                     var data = {
                         id: tabele_data.length + 1,
-                        name: name,
-                        category_id: category_id,
-                        model_id: model_id,
-                        model: model_name,
-                        category_name: category_name,
-                        manufacturer_id: manufacturer_id,
-                        manufacturer_name: manufacturer_name,
-                        model_number: model_number,
+                        consumable_id: consumable_id,
+                        consumable: consumable_name,
                         purchase_cost: purchase_cost,
                         nds: nds,
                         quantity: quantity,

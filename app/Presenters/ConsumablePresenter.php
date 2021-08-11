@@ -18,6 +18,10 @@ class ConsumablePresenter extends Presenter
     {
         $layout = [
             [
+                "field" => "checkbox",
+                "checkbox" => true,
+            ],
+            [
                 "field" => "id",
                 "searchable" => false,
                 "sortable" => true,
@@ -41,13 +45,6 @@ class ConsumablePresenter extends Presenter
                 "title" => trans('general.name'),
                 "visible" => true,
                 "formatter" => 'consumablesLinkFormatter',
-            ],  [
-                "field" => "model",
-                "searchable" => true,
-                "sortable" => true,
-                "title" => trans('admin/hardware/form.model'),
-                "visible" => true,
-                "formatter" => "modelsLinkObjFormatter"
             ],
             [
                 "field" => "image",

@@ -59,6 +59,7 @@ class Purchase extends SnipeModel
         "currency",
         "status",
         "assets_json",
+        "consumables_json",
         "sales_json",
         "bitrix_send_json",
         "user_id",

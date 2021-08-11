@@ -19,11 +19,6 @@
             '{consumableID}/sell',
             [ 'as' => 'checkout/consumable', 'uses' => 'ConsumablesController@postSell' ]
         );
-
-        Route::get( 'selectlist',  [
-            'as' => 'consumables.selectlist',
-            'uses' => 'ConsumablesController@selectlist'
-        ]);
     });
 
     Route::resource('consumables', 'ConsumablesController', [

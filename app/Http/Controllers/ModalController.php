@@ -32,6 +32,10 @@ class ModalController extends Controller
         return view('modals.category');
     }
 
+    function consumable() {
+        return view('modals.consumable');
+    }
+
     function manufacturer() {
         return view('modals.manufacturer');
     }
