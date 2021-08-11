@@ -36,6 +36,7 @@ class ConsumableAssignmentTransformer
                 'comment' => ($consumableAssignment->comment) ? e($consumableAssignment->comment) : null,
                 'created_at' => Helper::getFormattedDateObject($consumableAssignment->created_at, 'datetime'),
                 'updated_at' => Helper::getFormattedDateObject($consumableAssignment->updated_at, 'datetime'),
+                'can_return' => (bool) $consumableAssignment->availableForReturn(),
             ];
 
 

@@ -4,6 +4,7 @@
 namespace App\Http\Controllers\Api;
 
 
+use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Transformers\ComponentsTransformer;
 use App\Http\Transformers\ConsumableAssignmentTransformer;
@@ -13,7 +14,9 @@ use App\Models\Component;
 use App\Models\Consumable;
 use App\Models\ConsumableAssignment;
 use App\Models\Location;
+use App\Models\Purchase;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ConsumableAssignmentController extends Controller
 {
@@ -73,4 +76,30 @@ class ConsumableAssignmentController extends Controller
     }
 
 
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param int $id
+     * @return \Illuminate\Http\Response
+     * @since [v4.0]
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     */
+    public function return(Request $request, $id)
+    {
+        $this->authorize('view', Consumable::class);
+        $consumableAssignment = ConsumableAssignment::findOrFail($id);
+        if ($request->filled('quantity')) {
+            $consumableAssignment->quantity = $consumableAssignment->quantity - $request->filled('quantity');
+            $user = Auth::user();
+            $user_name = "(".$user->id.") ".$user->last_name." ".$user->first_name;
+            $consumableAssignment->comment = $consumableAssignment->comment." Возвращено: ".$request->filled('quantity').", ".date("Y-m-d H:i:s").", ".$user_name;
+            if ($consumableAssignment->save()) {
+                return response()->json(Helper::formatStandardApiResponse('success', $consumableAssignment, trans('admin/consumables/message.update.success')));
+            }
+        } else {
+            return response()->json(Helper::formatStandardApiResponse('error', null, $consumableAssignment->getErrors()));
+        }
+        return response()->json(Helper::formatStandardApiResponse('error', null, $consumableAssignment->getErrors()));
+    }
 }

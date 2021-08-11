@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Transformers\SelectlistTransformer;
+use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\Component;
 use App\Models\ConsumableAssignment;
@@ -319,7 +320,7 @@ class ConsumablesController extends Controller
 
             $consumables = Consumable::findMany($id_array);
             ConsumableAssignment::whereIn('consumable_id', $id_array)->update(['consumable_id' => $main_consumable->id]);
-
+            Actionlog::where("item_type","App\Models\Consumable")->whereNotIn("action_type",["create","delete","update"])->whereIn('item_id', $id_array)->update(['item_id' => $main_consumable->id]);
             $all_amount = 0;
             foreach ($consumables as &$consumable_delete) {
                 $all_amount+=$consumable_delete->qty;

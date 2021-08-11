@@ -81,7 +81,15 @@ class ConsumableAssignmentPresenter extends Presenter
                 "visible" => false,
                 "title" => trans('general.updated_at'),
                 "formatter" => "dateDisplayFormatter"
-            ],
+            ],[
+                "field" => "return",
+                "searchable" => false,
+                "sortable" => false,
+                "visible" => true,
+                "title" => "Вернуть",
+                "events"=>"operateEvents",
+                "formatter" => "consumablesReturnFormatter",
+            ]
         ];
 
 

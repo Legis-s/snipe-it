@@ -102,4 +102,12 @@ class ConsumableAssignment extends Model
     {
         return $this->belongsTo('\App\Models\Purchase', 'purchase_id');
     }
+    public function availableForReturn()
+    {
+        if ($this->type==$this::SOLD || $this->type==$this::ISSUED){
+            return true;
+        }
+        return false;
+    }
+
 }

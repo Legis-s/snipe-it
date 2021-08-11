@@ -238,7 +238,16 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api', 'middleware' => 'api'], fu
 
 
     /*--- ConsumableAssignment API ---*/
+    Route::group(['prefix' => 'consumableassignments'], function () {
 
+        Route::post('{id}/return',
+            [
+                'as' => 'api.consumableassignments.return',
+                'uses' => 'ConsumableAssignmentController@return'
+            ]
+        );
+
+    }); // ConsumableAssignment group
 
     Route::resource('consumableassignments', 'ConsumableAssignmentController',
         [

@@ -331,6 +331,13 @@
             return '<a href="{{ url('/') }}/consumables/' + row.id + '/sell/" class="btn btn-sm bg-maroon" data-tooltip="true" title="Sell this item out" disabled>Продать</a>';
         }
     }
+    function consumablesReturnFormatter(value, row) {
+        if (row.can_return == true) {
+            return '<button class="btn btn-sm bg-maroon return" data-tooltip="true" title="Вернуть">Вернуть</button>';
+        }else{
+            return '';
+        }
+    }
 
     function sellFormatter(value, row) {
         if (row.user_can_sell== true) {

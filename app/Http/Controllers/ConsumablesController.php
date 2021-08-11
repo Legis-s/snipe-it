@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Helper;
+use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\Company;
+use App\Models\Component;
 use App\Models\Consumable;
 use App\Models\ConsumableAssignment;
 use App\Models\Contract;
@@ -15,6 +17,7 @@ use Auth;
 use Config;
 use DB;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Input;
 use Lang;
 use Redirect;
@@ -34,12 +37,12 @@ use App\Http\Requests\ImageUploadRequest;
 class ConsumablesController extends Controller
 {
     /**
-    * Return a view to display component information.
-    *
-    * @author [A. Gianotto] [<snipe@snipe.net>]
-    * @see ConsumablesController::getDatatable() method that generates the JSON response
-    * @since [v1.0]
-    * @return \Illuminate\Contracts\View\View
+     * Return a view to display component information.
+     *
+     * @return \Illuminate\Contracts\View\View
+     * @see ConsumablesController::getDatatable() method that generates the JSON response
+     * @since [v1.0]
+     * @author [A. Gianotto] [<snipe@snipe.net>]
      */
     public function index()
     {
@@ -49,12 +52,12 @@ class ConsumablesController extends Controller
 
 
     /**
-    * Return a view to display the form view to create a new consumable
-    *
-    * @author [A. Gianotto] [<snipe@snipe.net>]
-    * @see ConsumablesController::postCreate() method that stores the form data
-    * @since [v1.0]
-    * @return \Illuminate\Contracts\View\View
+     * Return a view to display the form view to create a new consumable
+     *
+     * @return \Illuminate\Contracts\View\View
+     * @see ConsumablesController::postCreate() method that stores the form data
+     * @since [v1.0]
+     * @author [A. Gianotto] [<snipe@snipe.net>]
      */
     public function create()
     {
@@ -66,34 +69,34 @@ class ConsumablesController extends Controller
 
 
     /**
-    * Validate and store new consumable data.
-    *
-    * @author [A. Gianotto] [<snipe@snipe.net>]
-    * @see ConsumablesController::getCreate() method that returns the form view
-    * @since [v1.0]
-    * @return \Illuminate\Http\RedirectResponse
+     * Validate and store new consumable data.
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     * @see ConsumablesController::getCreate() method that returns the form view
+     * @since [v1.0]
+     * @author [A. Gianotto] [<snipe@snipe.net>]
      */
     public function store(ImageUploadRequest $request)
     {
         $this->authorize('create', Consumable::class);
         $consumable = new Consumable();
-        $consumable->name                   = $request->input('name');
-        $consumable->category_id            = $request->input('category_id');
-        $consumable->location_id            = $request->input('location_id');
-        $consumable->company_id             = Company::getIdForCurrentUser($request->input('company_id'));
-        $consumable->order_number           = $request->input('order_number');
-        $consumable->min_amt                = $request->input('min_amt');
-        $consumable->manufacturer_id        = $request->input('manufacturer_id');
+        $consumable->name = $request->input('name');
+        $consumable->category_id = $request->input('category_id');
+        $consumable->location_id = $request->input('location_id');
+        $consumable->company_id = Company::getIdForCurrentUser($request->input('company_id'));
+        $consumable->order_number = $request->input('order_number');
+        $consumable->min_amt = $request->input('min_amt');
+        $consumable->manufacturer_id = $request->input('manufacturer_id');
 //        $consumable->model_id        = $request->input('model_id');
-        $consumable->model_number           = $request->input('model_number');
-        $consumable->item_no                = $request->input('item_no');
-        $consumable->purchase_date          = $request->input('purchase_date');
-        $consumable->purchase_cost          = Helper::ParseFloat($request->input('purchase_cost'));
-        $consumable->qty                    = $request->input('quantity');
-        $consumable->user_id                = Auth::id();
+        $consumable->model_number = $request->input('model_number');
+        $consumable->item_no = $request->input('item_no');
+        $consumable->purchase_date = $request->input('purchase_date');
+        $consumable->purchase_cost = Helper::ParseFloat($request->input('purchase_cost'));
+        $consumable->qty = $request->input('quantity');
+        $consumable->user_id = Auth::id();
 
 
-        $consumable = $request->handleImages($consumable,600, public_path().'/uploads/components');
+        $consumable = $request->handleImages($consumable, 600, public_path() . '/uploads/components');
 
 
         if ($consumable->save()) {
@@ -101,7 +104,7 @@ class ConsumablesController extends Controller
             $consumableAssignment->type = ConsumableAssignment::MANUALLY;
             $consumableAssignment->quantity = $consumable->qty;
             $consumableAssignment->cost = $consumable->purchase_cost;
-            $consumableAssignment->user_id =Auth::id();
+            $consumableAssignment->user_id = Auth::id();
             $consumableAssignment->consumable_id = $consumable->id;
             $consumableAssignment->save();
             return redirect()->route('consumables.index')->with('success', trans('admin/consumables/message.create.success'));
@@ -112,13 +115,13 @@ class ConsumablesController extends Controller
     }
 
     /**
-    * Returns a form view to edit a consumable.
-    *
-    * @author [A. Gianotto] [<snipe@snipe.net>]
-    * @param  int $consumableId
-    * @see ConsumablesController::postEdit() method that stores the form data.
-    * @since [v1.0]
-    * @return \Illuminate\Contracts\View\View
+     * Returns a form view to edit a consumable.
+     *
+     * @param int $consumableId
+     * @return \Illuminate\Contracts\View\View
+     * @see ConsumablesController::postEdit() method that stores the form data.
+     * @since [v1.0]
+     * @author [A. Gianotto] [<snipe@snipe.net>]
      */
     public function edit($consumableId = null)
     {
@@ -134,15 +137,15 @@ class ConsumablesController extends Controller
 
 
     /**
-    * Returns a form view to edit a consumable.
-    *
-    * @author [A. Gianotto] [<snipe@snipe.net>]
-    * @param  int $consumableId
-    * @see ConsumablesController::getEdit() method that stores the form data.
-    * @since [v1.0]
-    * @return \Illuminate\Http\RedirectResponse
+     * Returns a form view to edit a consumable.
+     *
+     * @param int $consumableId
+     * @return \Illuminate\Http\RedirectResponse
+     * @see ConsumablesController::getEdit() method that stores the form data.
+     * @since [v1.0]
+     * @author [A. Gianotto] [<snipe@snipe.net>]
      */
-    public function update(ImageUploadRequest $request,  $consumableId = null)
+    public function update(ImageUploadRequest $request, $consumableId = null)
     {
         if (is_null($consumable = Consumable::find($consumableId))) {
             return redirect()->route('consumables.index')->with('error', trans('admin/consumables/message.does_not_exist'));
@@ -150,30 +153,30 @@ class ConsumablesController extends Controller
 
         $this->authorize($consumable);
 
-        $consumable->name                   = $request->input('name');
-        $consumable->category_id            = $request->input('category_id');
-        $consumable->location_id            = $request->input('location_id');
-        $consumable->company_id             = Company::getIdForCurrentUser($request->input('company_id'));
-        $consumable->order_number           = $request->input('order_number');
-        $consumable->min_amt                = $request->input('min_amt');
-        $consumable->manufacturer_id        = $request->input('manufacturer_id');
-        $consumable->model_number           = $request->input('model_number');
-        $consumable->item_no                = $request->input('item_no');
-        $consumable->purchase_date          = $request->input('purchase_date');
-        $consumable->purchase_cost          = Helper::ParseFloat(Input::get('purchase_cost'));
-        $consumable->qty                    = Helper::ParseFloat(Input::get('quantity'));
-        $consumable->model_id        = $request->input('model_id');
+        $consumable->name = $request->input('name');
+        $consumable->category_id = $request->input('category_id');
+        $consumable->location_id = $request->input('location_id');
+        $consumable->company_id = Company::getIdForCurrentUser($request->input('company_id'));
+        $consumable->order_number = $request->input('order_number');
+        $consumable->min_amt = $request->input('min_amt');
+        $consumable->manufacturer_id = $request->input('manufacturer_id');
+        $consumable->model_number = $request->input('model_number');
+        $consumable->item_no = $request->input('item_no');
+        $consumable->purchase_date = $request->input('purchase_date');
+        $consumable->purchase_cost = Helper::ParseFloat(Input::get('purchase_cost'));
+        $consumable->qty = Helper::ParseFloat(Input::get('quantity'));
+        $consumable->model_id = $request->input('model_id');
 
         if ($request->file('image')) {
             $image = $request->file('image');
-            $file_name = str_random(25).".".$image->getClientOriginalExtension();
-            $path = public_path('uploads/consumables/'.$file_name);
+            $file_name = str_random(25) . "." . $image->getClientOriginalExtension();
+            $path = public_path('uploads/consumables/' . $file_name);
             Image::make($image->getRealPath())->resize(800, null, function ($constraint) {
                 $constraint->aspectRatio();
                 $constraint->upsize();
             })->save($path);
             $consumable->image = $file_name;
-        } elseif ($request->input('image_delete')=='1') {
+        } elseif ($request->input('image_delete') == '1') {
             $consumable->image = null;
         }
 
@@ -184,12 +187,12 @@ class ConsumablesController extends Controller
     }
 
     /**
-    * Delete a consumable.
-    *
-    * @author [A. Gianotto] [<snipe@snipe.net>]
-    * @param  int $consumableId
-    * @since [v1.0]
-    * @return \Illuminate\Http\RedirectResponse
+     * Delete a consumable.
+     *
+     * @param int $consumableId
+     * @return \Illuminate\Http\RedirectResponse
+     * @since [v1.0]
+     * @author [A. Gianotto] [<snipe@snipe.net>]
      */
     public function destroy($consumableId)
     {
@@ -203,13 +206,13 @@ class ConsumablesController extends Controller
     }
 
     /**
-    * Return a view to display component information.
-    *
-    * @author [A. Gianotto] [<snipe@snipe.net>]
-    * @see ConsumablesController::getDataView() method that generates the JSON response
-    * @since [v1.0]
-    * @param int $consumableId
-    * @return \Illuminate\Contracts\View\View
+     * Return a view to display component information.
+     *
+     * @param int $consumableId
+     * @return \Illuminate\Contracts\View\View
+     * @since [v1.0]
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @see ConsumablesController::getDataView() method that generates the JSON response
      */
     public function show($consumableId = null)
     {
@@ -222,13 +225,13 @@ class ConsumablesController extends Controller
     }
 
     /**
-    * Return a view to checkout a consumable to a user.
-    *
-    * @author [A. Gianotto] [<snipe@snipe.net>]
-    * @see ConsumablesController::postCheckout() method that stores the data.
-    * @since [v1.0]
-    * @param int $consumableId
-    * @return \Illuminate\Contracts\View\View
+     * Return a view to checkout a consumable to a user.
+     *
+     * @param int $consumableId
+     * @return \Illuminate\Contracts\View\View
+     * @since [v1.0]
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @see ConsumablesController::postCheckout() method that stores the data.
      */
     public function getCheckout($consumableId)
     {
@@ -240,15 +243,15 @@ class ConsumablesController extends Controller
     }
 
     /**
-    * Saves the checkout information
-    *
-    * @author [A. Gianotto] [<snipe@snipe.net>]
-    * @see ConsumablesController::getCheckout() method that returns the form.
-    * @since [v1.0]
-    * @param int $consumableId
-    * @return \Illuminate\Http\RedirectResponse
+     * Saves the checkout information
+     *
+     * @param int $consumableId
+     * @return \Illuminate\Http\RedirectResponse
+     * @since [v1.0]
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @see ConsumablesController::getCheckout() method that returns the form.
      */
-    public function postCheckout($consumableId)
+    public function postCheckout(Request $request, $consumableId)
     {
         if (is_null($consumable = Consumable::find($consumableId))) {
             return redirect()->route('consumables.index')->with('error', trans('admin/consumables/message.not_found'));
@@ -260,35 +263,19 @@ class ConsumablesController extends Controller
         $quantity = e(Input::get('quantity'));
         $comment = e(Input::get('comment'));
 
-//        // Check if the user exists
-//        if (is_null($user = User::find($assigned_to))) {
-//            // Redirect to the consumable management page with error
-//            return redirect()->route('checkout/consumable', $consumable)->with('error', trans('admin/consumables/message.checkout.user_does_not_exist'));
-//        }
-//
-//        // Check if the location exists
-//        if (is_null($location = Location::find($assigned_to))) {
-//            // Redirect to the consumable management page with error
-//            return redirect()->route('checkout/consumable', $consumable)->with('error', "Местоположение не найдено");
-//        }
-
-        // Update the consumable data
-//        $consumable->assigned_to = e(Input::get('assigned_to'));
-
-        $assigned_to =  null;
+        $assigned_to = null;
         // This item is checked out to a location
-        switch(request('checkout_to_type'))
-        {
+        switch (request('checkout_to_type')) {
             case 'location':
-                $assigned_to= Location::findOrFail(request('assigned_location'));
+                $assigned_to = Location::findOrFail(request('assigned_location'));
                 $assigned_type = "App\Models\Location";
                 break;
             case 'asset':
-                $assigned_to =  Asset::findOrFail(request('assigned_asset'));
+                $assigned_to = Asset::findOrFail(request('assigned_asset'));
                 $assigned_type = "App\Models\Asset";
                 break;
             case 'user':
-                $assigned_to=  User::findOrFail(request('assigned_user'));
+                $assigned_to = User::findOrFail(request('assigned_user'));
                 $assigned_type = "App\Models\User";
                 break;
         }
@@ -298,37 +285,35 @@ class ConsumablesController extends Controller
             'quantity' => $quantity,
             'comment' => $comment,
             'cost' => $consumable->purchase_cost,
-            'type'=> ConsumableAssignment::ISSUED,
+            'type' => ConsumableAssignment::ISSUED,
             'assigned_to' => $assigned_to->id,
             'assigned_type' => $assigned_type,
         ]);
 
-//        $logaction = $consumable->logCheckout(e(Input::get('note')), $assigned_to);
-//
-//        $data['log_id'] = $logaction->id;
-//        $data['eula'] = $consumable->getEula();
-////        $data['first_name'] = $user->first_name;
-//        $data['item_name'] = $consumable->name;
-//        $data['checkout_date'] = $logaction->created_at;
-//        $data['note'] = $logaction->note;
-//        $data['require_acceptance'] = $consumable->requireAcceptance();
-//
+        $log = new Actionlog();
+        $log->user_id = Auth::id();
+        $log->action_type = 'checkout';
+        $log->target_type = $assigned_type;
+        $log->target_id = $assigned_to->id;
+        $log->item_id = $consumable->id;
+        $log->item_type = Consumable::class;
+        $log->note = json_encode($request->all());
+        $log->save();
 
-      // Redirect to the new consumable page
+        // Redirect to the new consumable page
         return redirect()->route('consumables.index')->with('success', trans('admin/consumables/message.checkout.success'));
 
     }
 
 
-
     /**
      * Return a view to checkout a consumable to a user.
      *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @see ConsumablesController::postCheckout() method that stores the data.
-     * @since [v1.0]
      * @param int $consumableId
      * @return \Illuminate\Contracts\View\View
+     * @since [v1.0]
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @see ConsumablesController::postCheckout() method that stores the data.
      */
     public function getSell($consumableId)
     {
@@ -343,13 +328,13 @@ class ConsumablesController extends Controller
     /**
      * Saves the checkout information
      *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @see ConsumablesController::getCheckout() method that returns the form.
-     * @since [v1.0]
      * @param int $consumableId
      * @return \Illuminate\Http\RedirectResponse
+     * @since [v1.0]
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @see ConsumablesController::getCheckout() method that returns the form.
      */
-    public function postSell($consumableId)
+    public function postSell(Request $request, $consumableId)
     {
         if (is_null($consumable = Consumable::find($consumableId))) {
             return redirect()->route('consumables.index')->with('error', trans('admin/consumables/message.not_found'));
@@ -361,39 +346,23 @@ class ConsumablesController extends Controller
         $quantity = e(Input::get('quantity'));
         $comment = e(Input::get('comment'));
 
-//        // Check if the user exists
-//        if (is_null($user = User::find($assigned_to))) {
-//            // Redirect to the consumable management page with error
-//            return redirect()->route('checkout/consumable', $consumable)->with('error', trans('admin/consumables/message.checkout.user_does_not_exist'));
-//        }
-//
-//        // Check if the location exists
-//        if (is_null($location = Location::find($assigned_to))) {
-//            // Redirect to the consumable management page with error
-//            return redirect()->route('checkout/consumable', $consumable)->with('error', "Местоположение не найдено");
-//        }
-
-        // Update the consumable data
-//        $consumable->assigned_to = e(Input::get('assigned_to'));
-
-        $assigned_to =  null;
+        $assigned_to = null;
         // This item is checked out to a location
-        switch(request('checkout_to_type_s'))
-        {
+        switch (request('checkout_to_type_s')) {
             case 'location':
-                $assigned_to= Location::findOrFail(request('assigned_location'));
+                $assigned_to = Location::findOrFail(request('assigned_location'));
                 $assigned_type = "App\Models\Location";
                 break;
             case 'asset':
-                $assigned_to =  Asset::findOrFail(request('assigned_asset'));
+                $assigned_to = Asset::findOrFail(request('assigned_asset'));
                 $assigned_type = "App\Models\Asset";
                 break;
             case 'user':
-                $assigned_to=  User::findOrFail(request('assigned_user'));
+                $assigned_to = User::findOrFail(request('assigned_user'));
                 $assigned_type = "App\Models\User";
                 break;
             case 'contract':
-                $assigned_to=  Contract::findOrFail(request('assigned_contract'));
+                $assigned_to = Contract::findOrFail(request('assigned_contract'));
                 $assigned_type = "App\Models\Contract";
                 break;
         }
@@ -403,27 +372,25 @@ class ConsumablesController extends Controller
             'quantity' => $quantity,
             'comment' => $comment,
             'cost' => $consumable->purchase_cost,
-            'type'=> ConsumableAssignment::SOLD,
+            'type' => ConsumableAssignment::SOLD,
             'assigned_to' => $assigned_to->id,
             'assigned_type' => $assigned_type,
         ]);
 
-//        $logaction = $consumable->logCheckout(e(Input::get('note')), $assigned_to);
-//
-//        $data['log_id'] = $logaction->id;
-//        $data['eula'] = $consumable->getEula();
-////        $data['first_name'] = $user->first_name;
-//        $data['item_name'] = $consumable->name;
-//        $data['checkout_date'] = $logaction->created_at;
-//        $data['note'] = $logaction->note;
-//        $data['require_acceptance'] = $consumable->requireAcceptance();
-//
+        $log = new Actionlog();
+        $log->user_id = Auth::id();
+        $log->action_type = 'sell';
+        $log->target_type = $assigned_type;
+        $log->target_id = $assigned_to->id;
+        $log->item_id = $consumable->id;
+        $log->item_type = Consumable::class;
+        $log->note = json_encode($request->all());
+        $log->save();
 
         // Redirect to the new consumable page
         return redirect()->route('consumables.index')->with('success', trans('admin/consumables/message.checkout.success'));
 
     }
-
 
 
 }

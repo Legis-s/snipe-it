@@ -14,7 +14,7 @@
 
 {{-- Page content --}}
 @section('content')
-
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/sweetalert2.min.css') }}">
 <div class="row">
   <div class="col-md-9">
     <div class="box box-default">
@@ -98,7 +98,7 @@
       </div>
     @endif
       <div class="col-md-12" style="padding-bottom: 5px;">
-        <h2>{{ trans('admin/consumables/general.about_consumables_title') }}</h4>
+        <h2>{{ trans('admin/consumables/general.about_consumables_title') }}</h2>
         <p>{{ trans('admin/consumables/general.about_consumables_text') }} </p>
       </div>
   </div> <!-- /.col-md-3-->
@@ -108,4 +108,54 @@
 
 @section('moar_scripts')
 @include ('partials.bootstrap-table', ['exportFile' => 'consumable' . $consumable->name . '-export', 'search' => false])
+<script src="{{ asset('js/sweetalert2.min.js') }}"></script>
+<script nonce="{{ csrf_token() }}">
+    $(function () {
+        var table = $('#consumablesCheckedoutTable');
+        window.operateEvents = {
+            'click .return': function (e, value, row, index) {
+                console.log(row);
+                Swal.fire({
+                    title: "Вернуть - "+row.name+" "+row.assigned_to.name,
+                    // text: 'Do you want to continue',
+                    icon: 'question',
+                    input:"range",
+                    inputLabel: 'Количество',
+                    inputAttributes: {
+                        min: 1,
+                        max: row.quantity,
+                        step: 1
+                    },
+                    inputValue: 1,
+                    reverseButtons:true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Подтвердить',
+                    cancelButtonText: 'Отменить',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+
+                        var sendData = {
+                            quantity:result.value,
+                            nds:row.nds,
+                            purchase_cost:row.purchase_cost,
+                        };
+                        $.ajax({
+                            type: 'POST',
+                            url:"/api/v1/consumableassignments/"+row.id+"/return",
+                            headers: {
+                                "X-Requested-With": 'XMLHttpRequest',
+                                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                            },
+                            data: sendData,
+                            dataType: 'json',
+                            success: function (data) {
+                                table.bootstrapTable('refresh');
+                            },
+                        });
+                    }
+                });
+            }
+        }
+    });
+</script>
 @stop
