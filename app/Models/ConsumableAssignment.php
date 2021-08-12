@@ -84,7 +84,7 @@ class ConsumableAssignment extends Model
 
     public function consumable()
     {
-        return $this->belongsTo('\App\Models\Consumable');
+        return $this->belongsTo('\App\Models\Consumable')->withTrashed();
     }
 
 
@@ -95,12 +95,12 @@ class ConsumableAssignment extends Model
 
     public function user()
     {
-        return $this->belongsTo('\App\Models\User', 'user_id');
+        return $this->belongsTo('\App\Models\User', 'user_id')->withTrashed();
     }
 
     public function purchase()
     {
-        return $this->belongsTo('\App\Models\Purchase', 'purchase_id');
+        return $this->belongsTo('\App\Models\Purchase', 'purchase_id')->withTrashed();
     }
     public function availableForReturn()
     {

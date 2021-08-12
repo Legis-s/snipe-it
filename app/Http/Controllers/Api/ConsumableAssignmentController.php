@@ -61,8 +61,12 @@ class ConsumableAssignmentController extends Controller
             $consumableAssignments->where('consumable_id','=',$request->input('consumable_id'));
         }
         if ($request->filled('asset_id')) {
-            $consumableAssignments->where('assigned_type',"App\Models\Asset");
             $consumableAssignments->where('assigned_to', $request->input('asset_id'));
+            $consumableAssignments->where('assigned_type',"App\Models\Asset");
+        }
+        if ($request->filled('user_id')) {
+            $consumableAssignments->where('assigned_to', $request->input('user_id'));
+            $consumableAssignments->where('assigned_type',"App\Models\User");
         }
 
         if ($request->filled('location_id')) {
