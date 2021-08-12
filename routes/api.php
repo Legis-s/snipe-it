@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 */
 
 
-Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], function () {
+Route::group(['prefix' => 'v1', 'namespace' => 'Api', 'middleware' => 'api'], function () {
 
     Route::group(['prefix' => 'account'], function () {
         Route::get('requestable/hardware',
@@ -106,7 +106,7 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
 
     /*--- Companies API ---*/
 
-    Route::get( 'companies/selectlist',  [
+    Route::get('companies/selectlist', [
         'as' => 'companies.selectlist',
         'uses' => 'CompaniesController@selectlist'
     ]);
@@ -141,7 +141,6 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
             ]
         );
     }); // Departments group
-
 
 
     Route::resource('departments', 'DepartmentsController',
@@ -181,12 +180,49 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
 
         Route::get('{component}/assets',
             [
-                'as' =>'api.components.assets',
+                'as' => 'api.components.assets',
                 'uses' => 'ComponentsController@getAssets',
             ]
         );
     }); // Components group
 
+
+    /*--- Consumable API ---*/
+    Route::group(['prefix' => 'consumables'], function () {
+
+
+        Route::get('view/{id}/locations',
+            [
+                'as' => 'api.consumables.showLocations',
+                'uses' => 'ConsumablesController@getDataView'
+            ]
+        );
+        Route::post('{id}/review',
+            [
+                'as' => 'api.consumables.review',
+                'uses' => 'ConsumablesController@review'
+            ]
+        );
+        Route::post('{id}/compact',
+            [
+                'as' => 'api.consumables.compact',
+                'uses' => 'ConsumablesController@compact'
+            ]
+        );
+        Route::get('view/{id}/location',
+            [
+                'as' => 'api.consumables.showLocation',
+                'uses' => 'ConsumablesController@getDataViewLocation'
+            ]
+        );
+        Route::get('selectlist',
+            [
+                'as' => 'api.consumables.selectlist',
+                'uses' => 'ConsumablesController@selectlist'
+            ]
+        );
+
+    }); // Consumable group
 
     /*--- Consumables API ---*/
 
@@ -204,26 +240,38 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
             'parameters' => ['consumable' => 'consumable_id']
         ]
     ); // Consumables resource
-//    Route::get('consumables/view/{id}/users',
-//        [
-//            'as' => 'api.consumables.showUsers',
-//            'uses' => 'ConsumablesController@getDataView'
-//        ]
-//    );
 
-    Route::get('consumables/view/{id}/locations',
-        [
-            'as' => 'api.consumables.showLocations',
-            'uses' => 'ConsumablesController@getDataView'
-        ]
-    );
 
-    Route::get('consumables/view/{id}/location',
+    /*--- ConsumableAssignment API ---*/
+    Route::group(['prefix' => 'consumableassignments'], function () {
+
+        Route::post('{id}/return',
+            [
+                'as' => 'api.consumableassignments.return',
+                'uses' => 'ConsumableAssignmentController@return'
+            ]
+        );
+
+        Route::post('{id}/close_documents',
+            [
+                'as' => 'api.consumableassignments.return',
+                'uses' => 'ConsumableAssignmentController@close_documents'
+            ]
+        );
+
+    }); // ConsumableAssignment group
+
+    Route::resource('consumableassignments', 'ConsumableAssignmentController',
         [
-            'as' => 'api.consumables.showLocation',
-            'uses' => 'ConsumablesController@getDataViewLocation'
+            'names' =>
+                [
+                    'index' => 'api.consumableassignments.index',
+                ],
+            'except' => ['create', 'edit'],
+            'parameters' => ['consumable' => 'consumable_id']
         ]
-    );
+    ); // Consumables resource
+
 
     /*--- Depreciations API ---*/
 
@@ -253,8 +301,8 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
             'update' => 'api.customfields.update',
             'destroy' => 'api.customfields.destroy'
         ],
-        'except' => [ 'create', 'edit' ],
-        'parameters' => [ 'field' => 'field_id' ]
+        'except' => ['create', 'edit'],
+        'parameters' => ['field' => 'field_id']
     ]);
 
     Route::group(['prefix' => 'fields'], function () {
@@ -347,10 +395,10 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
                 'as' => 'api.assets.show.byserial',
                 'uses' => 'AssetsController@showBySerial'
             ]
-         )->where('any', '.*');
-        
+        )->where('any', '.*');
 
-        Route::get( 'selectlist',  [
+
+        Route::get('selectlist', [
             'as' => 'assets.selectlist',
             'uses' => 'AssetsController@selectlist'
         ]);
@@ -438,7 +486,6 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
     ); // Sales resource
 
 
-
     /*--- Hardware API ---*/
 
     Route::group(['prefix' => 'sale'], function () {
@@ -480,12 +527,10 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
         Route::post('process/{import}',
             [
                 'as' => 'api.imports.importFile',
-                'uses'=> 'ImportController@process'
+                'uses' => 'ImportController@process'
             ]
         );
     }); // Imports group
-
-
 
 
     /*--- Licenses API ---*/
@@ -513,22 +558,21 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
     ); // Licenses resource
 
 
-
     /*--- Locations API ---*/
 
     Route::group(['prefix' => 'locations'], function () {
 
         Route::get('{location}/users',
             [
-                'as'=>'api.locations.viewusers',
-                'uses'=>'LocationsController@getDataViewUsers'
+                'as' => 'api.locations.viewusers',
+                'uses' => 'LocationsController@getDataViewUsers'
             ]
         );
 
         Route::get('{location}/assets',
             [
-                'as'=>'api.locations.viewassets',
-                'uses'=>'LocationsController@getDataViewAssets'
+                'as' => 'api.locations.viewassets',
+                'uses' => 'LocationsController@getDataViewAssets'
             ]
         );
 
@@ -540,12 +584,11 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
             ]
         );
 
-        Route::get( 'selectlist',  [
+        Route::get('selectlist', [
             'as' => 'locations.selectlist',
             'uses' => 'LocationsController@selectlist'
         ]);
     }); // Locations group
-
 
 
     Route::resource('locations', 'LocationsController',
@@ -569,7 +612,7 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
         Route::get('selectlist',
             [
                 'as' => 'api.contracts.selectlist',
-                'uses'=> 'ContractsController@selectlist'
+                'uses' => 'ContractsController@selectlist'
             ]
         );
     }); // Contracts group
@@ -595,7 +638,7 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
 
     Route::group(['prefix' => 'manufacturers'], function () {
 
-        Route::get( 'selectlist',  [
+        Route::get('selectlist', [
             'as' => 'manufacturers.selectlist',
             'uses' => 'ManufacturersController@selectlist'
         ]);
@@ -625,13 +668,13 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
         Route::get('assets',
             [
                 'as' => 'api.models.assets',
-                'uses'=> 'AssetModelsController@assets'
+                'uses' => 'AssetModelsController@assets'
             ]
         );
         Route::get('selectlist',
             [
                 'as' => 'api.models.selectlist',
-                'uses'=> 'AssetModelsController@selectlist'
+                'uses' => 'AssetModelsController@selectlist'
             ]
         );
     }); // Models group
@@ -653,8 +696,6 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
     ); // Models resource
 
 
-
-
     /*--- Settings API ---*/
     Route::get('settings/ldaptest', [
         'as' => 'api.settings.ldaptest',
@@ -674,8 +715,8 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
     Route::post(
         'settings/mailtest',
         [
-            'as'  => 'api.settings.mailtest',
-            'uses' => 'SettingsController@ajaxTestEmail' ]
+            'as' => 'api.settings.mailtest',
+            'uses' => 'SettingsController@ajaxTestEmail']
     );
 
 
@@ -692,8 +733,6 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
             'parameters' => ['setting' => 'setting_id']
         ]
     ); // Settings resource
-
-
 
 
     /*--- Status Labels API ---*/
@@ -764,8 +803,8 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
 
         Route::get('list',
             [
-                'as'=>'api.suppliers.list',
-                'uses'=>'SuppliersController@getDatatable'
+                'as' => 'api.suppliers.list',
+                'uses' => 'SuppliersController@getDatatable'
             ]
         );
 
@@ -794,12 +833,10 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
     ); // Suppliers resource
 
 
-
-
     /*--- Users API ---*/
 
-    
-    Route::group([ 'prefix' => 'users' ], function () {
+
+    Route::group(['prefix' => 'users'], function () {
 
         Route::post('two_factor_reset',
             [
@@ -876,7 +913,7 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
 
     Route::get(
         'reports/activity',
-        [ 'as' => 'api.activity.index', 'uses' => 'ReportsController@index' ]
+        ['as' => 'api.activity.index', 'uses' => 'ReportsController@index']
     );
 
     /*--- Inventory API ---*/
@@ -913,8 +950,6 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
     ); // Inventory resource
 
 
-
-
     /*--- Map API ---*/
 
     Route::resource('map', 'MapController',
@@ -944,7 +979,7 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
         ]
     ); // Purchases resource
 
-    Route::group([ 'prefix' => 'purchases' ], function () {
+    Route::group(['prefix' => 'purchases'], function () {
 
         Route::post('{purchase}/paid',
             [
@@ -993,7 +1028,7 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
 
     Route::group(['prefix' => 'invoice_types'], function () {
 
-        Route::get( 'selectlist',  [
+        Route::get('selectlist', [
             'as' => 'invoice_types.selectlist',
             'uses' => 'InvoiceTypesController@selectlist'
         ]);
@@ -1003,7 +1038,7 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
 
     Route::group(['prefix' => 'legal_persons'], function () {
 
-        Route::get( 'selectlist',  [
+        Route::get('selectlist', [
             'as' => 'legal_persons.selectlist',
             'uses' => 'LegalPersonsController@selectlist'
         ]);
@@ -1013,27 +1048,27 @@ Route::group(['prefix' => 'v1','namespace' => 'Api', 'middleware' => 'api'], fun
 
     Route::group(['prefix' => 'bitrix_sync'], function () {
 
-        Route::post( 'users',  [
+        Route::post('users', [
             'as' => 'bitrix_sync.users',
             'uses' => 'BitrixSyncController@syncUsers'
         ]);
 
-        Route::post( 'locations',  [
+        Route::post('locations', [
             'as' => 'bitrix_sync.locations',
             'uses' => 'BitrixSyncController@syncLocations'
         ]);
 
-        Route::post( 'suppliers',  [
+        Route::post('suppliers', [
             'as' => 'bitrix_sync.suppliers',
             'uses' => 'BitrixSyncController@syncSuppliers'
         ]);
 
-        Route::post( 'legal_persons',  [
+        Route::post('legal_persons', [
             'as' => 'bitrix_sync.legal_persons',
             'uses' => 'BitrixSyncController@syncLegalPersons'
         ]);
 
-        Route::post( 'invoice_types',  [
+        Route::post('invoice_types', [
             'as' => 'bitrix_sync.invoice_types',
             'uses' => 'BitrixSyncController@syncInvoiceTypes'
         ]);

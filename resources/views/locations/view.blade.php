@@ -191,7 +191,7 @@
                                   data-url="{{route('api.consumables.showLocation', $location->id)}}">
                               <thead>
                               <tr>
-                                  <th data-searchable="false" data-sortable="false" data-field="name">Выдано на объект</th>
+                                  <th data-searchable="false" data-sortable="false" data-field="name">Наименование</th>
                                   <th data-searchable="false" data-sortable="false" data-field="quantity">Количество</th>
                                   <th data-searchable="false" data-sortable="false" data-field="created_at" data-formatter="dateDisplayFormatter">{{ trans('general.date') }}</th>
                                   <th data-searchable="false" data-sortable="false" data-field="admin">Выдал</th>

@@ -105,6 +105,7 @@ Route::group(['middleware' => 'auth'], function () {
 Route::group(['middleware' => 'auth', 'prefix' => 'modals'], function () {
     Route::get('location', ['as' => 'modal.location', 'uses' => 'ModalController@location']);
     Route::get('category', ['as' => 'modal.category', 'uses' => 'ModalController@category']);
+    Route::get('consumable', ['as' => 'modal.consumable', 'uses' => 'ModalController@consumable']);
     Route::get('manufacturer', ['as' => 'modal.manufacturer', 'uses' => 'ModalController@manufacturer']);
     Route::get('model', ['as' => 'modal.model', 'uses' => 'ModalController@model']);
     Route::get('statuslabel', ['as' => 'modal.statuslabel', 'uses' => 'ModalController@statuslabel']);

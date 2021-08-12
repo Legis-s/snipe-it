@@ -200,6 +200,7 @@ class Consumable extends SnipeModel
     public function numRemaining()
     {
         $consumable = ConsumableAssignment::where('consumable_id', $this->id)
+            ->whereIn("type",["sold", "issued"])
             ->get();
         $checkedout = 0 ;
         foreach ($consumable as &$consumabl) {

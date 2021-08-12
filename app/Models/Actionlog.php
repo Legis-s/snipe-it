@@ -100,6 +100,8 @@ class Actionlog extends SnipeModel
             $itemroute = 'licenses';
         } elseif ($this->itemType()=="component") {
             $itemroute = 'components';
+        } elseif ($this->itemType()=="sale") {
+            $itemroute = 'sales';
         } else {
             $itemroute = '';
         }

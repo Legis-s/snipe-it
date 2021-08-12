@@ -24,7 +24,7 @@ class UserPresenter extends Presenter
         $layout = [
             [
                 "field" => "checkbox",
-                "checkbox" => true
+                "checkbox" => true,
             ],[
                 "field" => "bitrix_id",
                 "searchable" => false,

@@ -47,9 +47,11 @@ class ConsumablesTransformer
         ];
 
         $permissions_array['user_can_checkout'] = false;
+        $permissions_array['user_can_sell'] = false;
 
         if ($consumable->numRemaining() > 0) {
             $permissions_array['user_can_checkout'] = true;
+            $permissions_array['user_can_sell'] = true;
         }
 
         $permissions_array['available_actions'] = [
