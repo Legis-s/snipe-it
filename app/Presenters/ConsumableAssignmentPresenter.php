@@ -112,6 +112,13 @@ class ConsumableAssignmentPresenter extends Presenter
                 "title" => trans('general.id'),
                 "visible" => false
             ], [
+                "field" => "name",
+                "searchable" => true,
+                "sortable" => true,
+                "switchable" => true,
+                "title" => "Запись",
+                "visible" => true,
+            ], [
                 "field" => "consumable",
                 "searchable" => true,
                 "sortable" => true,
