@@ -262,11 +262,15 @@
                 item_icon = 'fa-map-marker';
             } else if (value.type == 'purchase') {
                 item_destination = 'purchases'
-                item_icon = 'fa-usd';
+                item_icon = 'fa-shopping-basket';
             }else if (value.type == 'contract') {
                 item_destination = 'contracts'
                 item_icon = 'fa-file';
+            }else if (value.type == 'sale') {
+                item_destination = 'sales'
+                item_icon = 'fa-usd';
             }
+
 
 
             return '<nobr><a href="{{ url('/') }}/' + item_destination + '/' + value.id + '" data-tooltip="true" title="' + value.type + '"><i class="fa ' + item_icon + ' text-{{ $snipeSettings->skin!='' ? $snipeSettings->skin : 'blue' }} "></i> ' + value.name + '</a></nobr>';

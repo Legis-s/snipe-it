@@ -52,7 +52,7 @@
         <li>
           <a href="#sales" data-toggle="tab">
             <span class="hidden-lg hidden-md">
-            <i class="fa fa-shopping-basket"></i>
+            <i class="fa fa-usd"></i>
             </span> <span class="hidden-xs hidden-sm">Активы на продажу</span>
           </a>
         </li>
