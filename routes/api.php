@@ -209,7 +209,12 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api', 'middleware' => 'api'], fu
                 'uses' => 'ConsumablesController@compact'
             ]
         );
-
+        Route::get('view/{id}/location',
+            [
+                'as' => 'api.consumables.showLocation',
+                'uses' => 'ConsumablesController@getDataViewLocation'
+            ]
+        );
         Route::get('selectlist',
             [
                 'as' => 'api.consumables.selectlist',

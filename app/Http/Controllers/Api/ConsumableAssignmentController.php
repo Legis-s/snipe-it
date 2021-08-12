@@ -57,6 +57,9 @@ class ConsumableAssignmentController extends Controller
         if ($request->filled('consumable_id')) {
             $consumableAssignments->where('consumable_id','=',$request->input('consumable_id'));
         }
+        if ($request->filled('consumable_id')) {
+            $consumableAssignments->where('consumable_id','=',$request->input('consumable_id'));
+        }
 
 
         // Set the offset to the API call's offset, unless the offset is higher than the actual count of items in which
