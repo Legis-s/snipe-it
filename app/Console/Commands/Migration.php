@@ -41,7 +41,7 @@ class Migration extends Command
     public function handle()
     {
 
-        $purchases = Purchase::where('status', "finished")->whereRaw('LENGTH(consumables_json) > 3')->get();;
+        $purchases = Purchase::where('status', "paid")->whereRaw('LENGTH(consumables_json) > 3')->get();;
         $assigned_type = "App\Models\Purchase";
         foreach ($purchases as $purchase) {
 //            $this->info($purchase->consumables_json);

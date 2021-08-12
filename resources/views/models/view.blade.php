@@ -56,6 +56,7 @@
                           <option value="labels">Generate Labels</option>
                       </select>
                       <button class="btn btn-primary" id="bulkEdit" disabled>Go</button>
+                      <a href="#" class="btn btn-primary"  data-toggle="modal" data-target="#exampleModal">Конвертировать в расходник</a>
                   </div>
 
                   <table
@@ -195,10 +196,35 @@
           </div>
       </div>
   </div>
-  </div>
 </div>
+<div class="modal" id="exampleModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Конвертировать в расходник</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Modal body text goes here.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                <button type="button" class="btn btn-primary">Конвертировать</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @stop
 
 @section('moar_scripts')
 @include ('partials.bootstrap-table')
+<script nonce="{{ csrf_token() }}">
+    $(function () {
+        var table = $('#assetListingTable');
+        $('#convert');
+    });
+</script>
 @stop
