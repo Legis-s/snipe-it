@@ -5,6 +5,7 @@ namespace App\Http\Transformers;
 
 
 use App\Helpers\Helper;
+use App\Models\Consumable;
 use App\Models\ConsumableAssignment;
 use App\Models\Location;
 use Illuminate\Database\Eloquent\Collection;
@@ -28,6 +29,7 @@ class ConsumableAssignmentTransformer
             $array = [
                 'id' => (int)$consumableAssignment->id,
                 'name' => $this->transformName($consumableAssignment),
+                'consumable' => ($consumableAssignment->consumable) ? (new ConsumablesTransformer())->transformConsumable($consumableAssignment->consumable) : null,
                 'quantity' => e($consumableAssignment->quantity),
                 'type' => e($consumableAssignment->type),
                 'cost' => e($consumableAssignment->cost),
@@ -37,6 +39,7 @@ class ConsumableAssignmentTransformer
                 'created_at' => Helper::getFormattedDateObject($consumableAssignment->created_at, 'datetime'),
                 'updated_at' => Helper::getFormattedDateObject($consumableAssignment->updated_at, 'datetime'),
                 'can_return' => (bool) $consumableAssignment->availableForReturn(),
+                'can_close_documents' => (bool) $consumableAssignment->availableForCloseDocuments(),
             ];
 
 

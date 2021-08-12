@@ -109,5 +109,12 @@ class ConsumableAssignment extends Model
         }
         return false;
     }
+    public function availableForCloseDocuments()
+    {
+        if ($this->type==$this::SOLD && $this->assigned_type=='App\Models\User'){
+            return true;
+        }
+        return false;
+    }
 
 }

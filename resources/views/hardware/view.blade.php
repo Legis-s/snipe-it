@@ -71,7 +71,7 @@
   @if (!$asset->model)
     <div class="col-md-12">
       <div class="callout callout-danger">
-        <h2>NO MODEL ASSOCIATED</h4>
+        <h2>NO MODEL ASSOCIATED</h2>
         <p>This will break things in weird and horrible ways. Edit this asset now to assign it a model. </p>
       </div>
     </div>
@@ -133,6 +133,16 @@
             </span>
             <span class="hidden-xs hidden-sm">
               {{ trans('general.assets') }}
+            </span>
+          </a>
+        </li>
+        <li>
+          <a href="#consumables" data-toggle="tab">
+            <span class="hidden-lg hidden-md">
+              <i class="fa fa-barcode" aria-hidden="true"></i>
+            </span>
+            <span class="hidden-xs hidden-sm">
+              {{ trans('general.consumables') }}
             </span>
           </a>
         </li>
@@ -917,7 +927,6 @@
           </div>
         </div> <!-- /.tab-pane components -->
 
-
         <div class="tab-pane fade" id="assets">
           <div class="row">
             <div class="col-md-12">
@@ -981,6 +990,45 @@
           </div> <!-- row -->
         </div> <!-- /.tab-pane software -->
 
+        <div class="tab-pane fade" id="consumables">
+          <div class="row">
+            <div class="col-md-12">
+
+                <div id="toolbar">
+                </div>
+                <!-- checked out assets table -->
+                <div class="table-responsive">
+                  <table
+                          data-columns="{{ \App\Presenters\ConsumableAssignmentPresenter::dataTableLayoutIn() }}"
+                          data-cookie-id-table="consumablesCheckedoutTable"
+                          data-pagination="true"
+                          data-id-table="consumablesCheckedoutTable"
+                          data-search="false"
+                          data-side-pagination="server"
+                          data-show-columns="true"
+                          data-show-export="true"
+                          data-show-footer="true"
+                          data-show-refresh="true"
+                          data-sort-order="asc"
+                          data-sort-name="name"
+                          id="consumablesCheckedoutTable"
+                          class="table table-striped snipe-table"
+                          data-url="{{route('api.consumableassignments.index',['asset_id'=> $asset->id])}}">
+{{--                    <thead>--}}
+{{--                    <tr>--}}
+{{--                      <th data-searchable="false" data-sortable="false" data-field="name">Наименование</th>--}}
+{{--                      <th data-searchable="false" data-sortable="false" data-field="quantity">Количество</th>--}}
+{{--                      <th data-searchable="false" data-sortable="false" data-field="created_at" data-formatter="dateDisplayFormatter">{{ trans('general.date') }}</th>--}}
+{{--                      <th data-searchable="false" data-sortable="false" data-field="admin">Выдал</th>--}}
+{{--                    </tr>--}}
+{{--                    </thead>--}}
+                  </table>
+                </div>
+
+
+            </div><!-- /col -->
+          </div> <!-- row -->
+        </div> <!-- /.tab-pane software -->
 
         <div class="tab-pane fade" id="maintenances">
           <div class="row">

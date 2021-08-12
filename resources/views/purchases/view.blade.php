@@ -332,7 +332,7 @@
                         valign: 'middle'
                     },{
                         field: 'name',
-                        name:'Назвние',
+                        name:'Название',
                         align: 'left',
                         valign: 'middle'
                     },{
@@ -383,7 +383,10 @@
                         field: 'consumable',
                         name:'Назвние',
                         align: 'left',
-                        valign: 'middle'
+                        valign: 'middle',
+                        formatter:function (value,row) {
+                            return "<a href='/consumables/"+row.consumable_id+"'>"+value+"</a>";
+                        }
                     },{
                         field: 'purchase_cost',
                         name: 'Закупочная цена',

@@ -252,6 +252,13 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api', 'middleware' => 'api'], fu
             ]
         );
 
+        Route::post('{id}/close_documents',
+            [
+                'as' => 'api.consumableassignments.return',
+                'uses' => 'ConsumableAssignmentController@close_documents'
+            ]
+        );
+
     }); // ConsumableAssignment group
 
     Route::resource('consumableassignments', 'ConsumableAssignmentController',
