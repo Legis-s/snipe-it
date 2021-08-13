@@ -271,16 +271,27 @@ class ConsumablesController extends Controller
         $consumables = Consumable::select([
             'consumables.id',
             'consumables.name',
+            'consumables.model_number',
             'consumables.category_id',
             'consumables.manufacturer_id',
         ])->with('manufacturer','category');
 
+        $settings = \App\Models\Setting::getSettings();
 
         if ($request->filled('search')) {
-            $consumables = $consumables->where('consumables.name', 'LIKE', '%' . $request->get('search') . '%');
+            $consumables = $consumables->SearchByManufacturerOrCat($request->input('search'));
         }
 
-        $consumables = $consumables->orderBy('name', 'ASC')->paginate(50);
+//        if ($request->filled('search')) {
+//            $consumables = $consumables
+//                ->where('consumables.name', 'LIKE', '%' . $request->get('search') . '%')
+//                ->orWhere('consumables.model_number', 'LIKE', '%' . $request->get('search') . '%')
+//                ->orWhere('manufacturers.name', 'LIKE', '%' . $request->get('search') . '%')
+//                ->orWhere('categories.name', 'LIKE', '%' . $request->get('search') . '%')
+//                ->paginate(50);
+//        }
+
+        $consumables = $consumables->paginate(50);
         foreach ($consumables as $consumable) {
 
             $consumable->use_text = '';
@@ -289,7 +300,8 @@ class ConsumablesController extends Controller
 
             $consumable->use_text .= (($consumable->manufacturer) ? e($consumable->manufacturer->name).' - ' : '');
 
-            $consumable->use_text .=  e($consumable->name);
+            $consumable->use_text .=  e($consumable->name).' - ';
+            $consumable->use_text .=  e($consumable->model_number);
 
        }
 
