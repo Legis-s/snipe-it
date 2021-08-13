@@ -67,8 +67,6 @@ class Consumable extends SnipeModel
         'purchase_date',
         'qty',
         'requestable',
-        'consumables_json',
-        'model_id',
     ];
 
     use Searchable;

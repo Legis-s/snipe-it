@@ -5,6 +5,10 @@ use App\Models\AssetModel;
 use App\Models\Asset;
 use App\Http\Controllers\Controller;
 use App\Helpers\Helper;
+use App\Models\Category;
+use App\Models\Consumable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use App\Http\Transformers\AssetModelsTransformer;
 use App\Http\Transformers\AssetsTransformer;
@@ -244,6 +248,54 @@ class AssetModelsController extends Controller
         }
 
         return (new SelectlistTransformer)->transformSelectlist($assetmodels);
+    }
+
+
+    /**
+     * Display the specified resource.
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v4.0]
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function convert($id)
+    {
+        $this->authorize('view', AssetModel::class);
+//        $assetmodel = AssetModel::withCount('assets as assets_count')->findOrFail($id);
+
+        $assets = Asset::where("model_id",$id)->get();
+        $count =count($assets);
+        $asset = $assets[0];
+        $purchase_cost = null;
+        foreach ($assets as &$asset) {
+            if ($asset->purchase_cost > $purchase_cost){
+                $purchase_cost =$asset->purchase_cost;
+            }
+        }
+        $category_old = Category::findOrFail($asset->model->category_id);
+        $category_new = Category::where("name",$category_old->name)->where("category_type","consumable")->first();;
+        if (!$category_new) {
+            $category_new = $category_old->replicate();
+            $category_new->category_type = "consumable";
+            $category_new->save();
+        }
+        $consumable = new Consumable();
+        $consumable->name = $asset->model->name;
+        $consumable->qty =$count;
+        $consumable->category_id= $category_new->id;
+        $consumable->manufacturer_id= $asset->manufacturer_id;
+        $consumable->purchase_cost = $purchase_cost;
+
+        $consumable->save();
+        foreach ($assets as &$asset) {
+            if ((empty($asset->assigned_to)) && (empty($asset->deleted_at)) &&
+                (($asset->assetstatus) && ($asset->assetstatus->deployable == 1))) {
+
+            }
+        }
+//        \Debugbar::info($assets);
+        return "No credentals";
     }
 
 }

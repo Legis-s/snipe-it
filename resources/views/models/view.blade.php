@@ -28,7 +28,7 @@
 
 {{-- Page content --}}
 @section('content')
-
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/sweetalert2.min.css') }}">
 <div class="row">
   <div class="col-md-9">
     <div class="box box-default">
@@ -56,7 +56,7 @@
                           <option value="labels">Generate Labels</option>
                       </select>
                       <button class="btn btn-primary" id="bulkEdit" disabled>Go</button>
-                      <a href="#" class="btn btn-primary"  data-toggle="modal" data-target="#exampleModal">Конвертировать в расходник</a>
+                      <a href="#" class="btn btn-primary convert">Конвертировать в расходник</a>
                   </div>
 
                   <table
@@ -221,10 +221,34 @@
 
 @section('moar_scripts')
 @include ('partials.bootstrap-table')
+<script src="{{ asset('js/sweetalert2.min.js') }}"></script>
 <script nonce="{{ csrf_token() }}">
     $(function () {
         var table = $('#assetListingTable');
-        $('#convert');
-    });
+        $('.convert').click(function() {
+            Swal.fire({
+                title: "Конвертировать в расходник?",
+                // text: 'Do you want to continue',
+                icon: 'question',
+                reverseButtons: true,
+                showCancelButton: true,
+                confirmButtonText: 'Подтвердить',
+                cancelButtonText: 'Отменить',
+            }).then((result) => {
+                    $.ajax({
+                        type: 'POST',
+                        url: "/api/v1/models/{{$model->id}}/convert",
+                        headers: {
+                            "X-Requested-With": 'XMLHttpRequest',
+                            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                        },
+                        dataType: 'json',
+                        success: function (data) {
+                            table.bootstrapTable('refresh');
+                        },
+                    });
+                });
+            });
+        });
 </script>
 @stop
