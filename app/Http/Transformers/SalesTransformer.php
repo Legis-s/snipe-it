@@ -129,7 +129,7 @@ class SalesTransformer
             'restore' => false,
             'update' => (bool) Gate::allows('update', Asset::class),
             'delete' => (bool) Gate::allows('delete', Asset::class),
-            'review' => (bool) Gate::allows('review', Asset::class),
+            'review' => (bool) Gate::allows('review'),
         ];
 
         if ($asset->deleted_at!='') {
