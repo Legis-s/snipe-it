@@ -126,6 +126,15 @@ class AuthServiceProvider extends ServiceProvider
             }
         });
 
+        // Can the user import CSVs?
+        Gate::define('review', function ($user) {
+            if ($user->hasAccess('review') ) {
+                return true;
+            }
+        });
+
+
+
 
         # -----------------------------------------
         # Reports

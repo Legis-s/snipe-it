@@ -665,6 +665,13 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api', 'middleware' => 'api'], fu
 
     Route::group(['prefix' => 'models'], function () {
 
+        Route::post('{model}/convert',
+            [
+                'as' => 'api.models.convert',
+                'uses' => 'AssetModelsController@convert'
+            ]
+        );
+
         Route::get('assets',
             [
                 'as' => 'api.models.assets',
