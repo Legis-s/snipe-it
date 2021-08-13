@@ -1,18 +1,22 @@
 <?php
 namespace App\Http\Controllers\Api;
 
+use App\Models\Actionlog;
 use App\Models\AssetModel;
 use App\Models\Asset;
 use App\Http\Controllers\Controller;
 use App\Helpers\Helper;
 use App\Models\Category;
 use App\Models\Consumable;
+use App\Models\ConsumableAssignment;
+use App\Models\Statuslabel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use App\Http\Transformers\AssetModelsTransformer;
 use App\Http\Transformers\AssetsTransformer;
 use App\Http\Transformers\SelectlistTransformer;
+use Illuminate\Support\Facades\Auth;
 
 
 /**
@@ -268,11 +272,27 @@ class AssetModelsController extends Controller
         $count =count($assets);
         $asset = $assets[0];
         $purchase_cost = null;
+
+        $status_ok = Statuslabel::where('name', 'Доступные')->first();
+        $free_count = 0;
+        $busy_count = 0;
+        $free_id=[];
+        $busy_id=[];
         foreach ($assets as &$asset) {
-            if ($asset->purchase_cost > $purchase_cost){
-                $purchase_cost =$asset->purchase_cost;
+            if ((empty($asset->assigned_to)) && (empty($asset->deleted_at)) &&
+                (($asset->assetstatus) && ($asset->assetstatus->deployable == 1))) {
+                $free_count++;
+                array_push($free_id, $asset->id.",". $asset->asset_tag);
+            }
+
+            if (empty($asset->deleted_at) && isset($asset->assigned_to) && $asset->assetstatus->deployable == 1 ){
+                $busy_count++;
+                array_push($busy_id, $asset->id.",". $asset->asset_tag);
             }
         }
+
+        $all_count = $free_count+$busy_count;
+
         $category_old = Category::findOrFail($asset->model->category_id);
         $category_new = Category::where("name",$category_old->name)->where("category_type","consumable")->first();;
         if (!$category_new) {
@@ -282,19 +302,75 @@ class AssetModelsController extends Controller
         }
         $consumable = new Consumable();
         $consumable->name = $asset->model->name;
-        $consumable->qty =$count;
+        $consumable->qty =$all_count;
         $consumable->category_id= $category_new->id;
         $consumable->manufacturer_id= $asset->manufacturer_id;
         $consumable->purchase_cost = $purchase_cost;
 
         $consumable->save();
+        $comment = "Свободные  [".implode(";",$free_id)."] Выданные [".implode(";",$busy_id)."]";
+        $consumable->locations()->attach($consumable->id, [
+            'consumable_id' => $consumable->id,
+            'user_id' => Auth::id(),
+            'quantity' => $all_count,
+            'comment' => $comment,
+            'cost' => $consumable->purchase_cost,
+            'type' => ConsumableAssignment::CONVERTED,
+//            'assigned_to' => $assigned_to->id,
+//            'assigned_type' => $assigned_type,
+        ]);
+
         foreach ($assets as &$asset) {
+
             if ((empty($asset->assigned_to)) && (empty($asset->deleted_at)) &&
                 (($asset->assetstatus) && ($asset->assetstatus->deployable == 1))) {
+                $log = new Actionlog();
+                $log->user_id = Auth::id();
+                $log->action_type = 'converted';
+                $log->target_type = "App\Models\Consumable";
+                $log->target_id = $consumable->id;
+                $log->item_id = $asset->id;
+                $log->item_type = "App\Models\Asset";
+//                $log->note = json_encode($request->all());
+                $log->save();
+            }
 
+            if (empty($asset->deleted_at) && isset($asset->assigned_to) && $asset->assetstatus->deployable == 1 ){
+                $consumable->locations()->attach($consumable->id, [
+                    'consumable_id' => $consumable->id,
+                    'user_id' => Auth::id(),
+                    'quantity' => 1,
+//            'comment' => $comment,
+                    'cost' => $consumable->purchase_cost,
+                    'type' => ConsumableAssignment::ISSUED,
+                    'assigned_to' => $asset->assigned_to,
+                    'assigned_type' => $asset->assigned_type,
+                ]);
+                $log = new Actionlog();
+                $log->user_id = Auth::id();
+                $log->action_type = 'converted';
+                $log->target_type = "App\Models\Consumable";
+                $log->target_id = $consumable->id;
+                $log->item_id = $asset->id;
+                $log->item_type = "App\Models\Asset";
+//                $log->note = json_encode($request->all());
+                $log->save();
             }
         }
-//        \Debugbar::info($assets);
+
+        foreach ($assets as &$asset) {
+            \Debugbar::info($asset->assetstatus);
+            if ((empty($asset->assigned_to)) && (empty($asset->deleted_at)) &&
+                (($asset->assetstatus) && ($asset->assetstatus->deployable == 1))) {
+                $asset->delete();
+            }
+
+            if (empty($asset->deleted_at) && isset($asset->assigned_to) && $asset->assetstatus->deployable == 1 ){
+                $asset->delete();
+            }
+        }
+
+
         return "No credentals";
     }
 
