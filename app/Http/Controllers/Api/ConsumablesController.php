@@ -242,6 +242,7 @@ class ConsumablesController extends Controller
 
 
             if ($consumable->save()) {
+                $purchase->checkStatus();
                 $purchase->save();
                 return response()->json(Helper::formatStandardApiResponse('success', $consumable, trans('admin/consumables/message.update.success')));
             }

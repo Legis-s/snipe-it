@@ -164,71 +164,9 @@ class PurchasesController extends Controller
     {
         $this->authorize('view', Purchase::class);
         $purchase = Purchase::findOrFail($purchaseId);
-        // меняем статус на "В процессе инвентаризации", только если еще её не было у закупки
-        if ($purchase->status != "review" && $purchase->status != "finished") {
-            $purchase->status = "inventory";
-        }
+        $purchase->setStatusPaid();
 
-        $purchase->bitrix_result_at = new DateTime();
         if ($purchase->save()) {
-            $assets = Asset::where('purchase_id', $purchase->id)->get();
-            // меняем статус у активов только если закупка еще не обработана
-            if (count($assets) > 0) {
-                $status_in_purchase = Statuslabel::where('name', 'В закупке')->first();
-                $status_inventory_wait = Statuslabel::where('name', 'Ожидает инвентаризации')->first();
-                foreach ($assets as &$value) {
-
-                    // меняем статус на Ожидает инвентаризации, только если актив в статусе "В закупке"
-                    if ($value->status_id == $status_in_purchase->id) {
-                        $value->status_id = $status_inventory_wait->id;
-                        $value->save();
-                    }
-                }
-            }else{
-                if ($purchase->status != "finished") {
-                    $purchase->status = "review";
-                    $purchase->save();
-                }
-            }
-
-            $sales = Sale::where('purchase_id', $purchase->id)->get();
-            // меняем статус у активов только если закупка еще не обработана
-            if (count($sales) > 0) {
-                $status_in_purchase = Statuslabel::where('name', 'В закупке')->first();
-                $status_inventory_wait = Statuslabel::where('name', 'Ожидает инвентаризации')->first();
-                foreach ($sales as &$value) {
-
-                    // меняем статус на Ожидает инвентаризации, только если актив в статусе "В закупке"
-                    if ($value->status_id == $status_in_purchase->id) {
-                        $value->status_id = $status_inventory_wait->id;
-                        $value->save();
-                    }
-                }
-            }else{
-                if ($purchase->status != "finished") {
-                    $purchase->status = "review";
-                    $purchase->save();
-                }
-            }
-//            $consumables_server = Consumable::where('purchase_id', $purchase->id)->get();
-//            $consumables = json_decode($purchase->consumables_json, true);
-//            if ($purchase->consumables_json != null && count($consumables) > 0 && count($consumables_server) == 0) {
-//                foreach ($consumables as &$consumable_new) {
-//                    $consumable_server = new Consumable();
-//                    $consumable_server->name = $consumable_new["name"];
-//                    $consumable_server->category_id = $consumable_new["category_id"];
-////                    $consumable_server->location_id = 1;
-////                    $consumable_server->company_id = $consumable_new["company_id"];
-//                    $consumable_server->order_number = $purchase->id;
-//                    $consumable_server->manufacturer_id = $consumable_new["manufacturer_id"];
-//                    $consumable_server->model_number = $consumable_new["model_number"];
-//                    $consumable_server->purchase_date = $purchase->created_at;
-//                    $consumable_server->purchase_cost = Helper::ParseFloat($consumable_new["purchase_cost"]);
-//                    $consumable_server->qty = Helper::ParseFloat($consumable_new["quantity"]);
-//                    $consumable_server->purchase_id = $purchase->id;
-//                    $consumable_server->save();
-//                }
-//            }
             return response()->json(
                 Helper::formatStandardApiResponse(
                     'success',

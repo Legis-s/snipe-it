@@ -25,6 +25,7 @@
                 </div>
             </div>
             <div class="box-body">
+                {{$purchase->checkStatus()}}
             <div class="table table-responsive">
                 <table
                         data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayout() }}"

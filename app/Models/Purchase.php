@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Http\Traits\UniqueUndeletedTrait;
 use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
+use DateTime;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Watson\Validating\ValidatingTrait;
 
@@ -15,6 +16,12 @@ class Purchase extends SnipeModel
     protected $presenter = 'App\Presenters\PurchasePresenter';
     use Presentable;
     use SoftDeletes;
+
+    const INPROGRESS = 'inprogress';
+    const FINISHED = 'finished';
+    const REVIEW = 'review';
+    const INVENTORY = 'inventory';
+
     protected $dates = ['deleted_at'];
     protected $table = 'purchases';
     protected $rules = array(
@@ -144,4 +151,165 @@ class Purchase extends SnipeModel
         return $this->belongsTo('\App\Models\User', 'user_verified_id');
     }
 
+
+    public function setStatusInprogress()
+    {
+        $this->status = $this::INPROGRESS;
+    }
+
+    public function setStatusPaid()
+    {
+        $this->bitrix_result_at = new DateTime();
+
+        $assets = Asset::where('purchase_id', $this->id)->get();
+        $sales = Sale::where('purchase_id', $this->id)->get();
+        $need_to_inventrory = false;
+        if(count($assets)>0){
+            $need_to_inventrory = true;
+            foreach ($assets as &$asset) {
+                $asset->setStatusAfterPaid();
+                $asset->save();
+            }
+        }
+        if(count($sales)>0){
+            $need_to_inventrory= true;
+            foreach ($sales as &$sale) {
+                $sale->setStatusAfterPaid();
+                $sale->save();
+            }
+        }
+
+        // меняем статус на "В процессе инвентаризации", только если еще её не было у закупки
+        if ($this->status != $this::REVIEW  && $this->status != $this::FINISHED && $this->status != $this::INVENTORY ) {
+            if($need_to_inventrory){
+                $this->status = $this::INVENTORY;
+            }else{
+                $this->status = $this::REVIEW;
+            }
+        }
+
+    }
+    public function checkStatus(){
+        $status_review_wait = Statuslabel::where('name', 'Ожидает проверки')->first();
+        $status_review_wait_id = intval($status_review_wait->id);
+        $status_ok = Statuslabel::where('name', 'Доступные')->first();
+        $status_ok_id = intval($status_ok->id);
+
+        $assets = Asset::where('purchase_id', $this->id)->get();
+        $sales = Sale::where('purchase_id', $this->id)->get();
+        $consumables_json = $this->consumables_json;
+        $consumables = json_decode($consumables_json, true);
+        $consumables_count = count($consumables);
+
+        $all_status = "inventory";
+        $consumables_status = "review";
+
+        $asset_status = "inventory";
+        $assets_count = count($assets);
+        $assets_review_wait_count=0;
+        $assets_status_ok_count=0;
+        $sales_status = "inventory";
+        $sales_count = count($sales);
+        $sales_review_wait_count=0;
+        $sales_status_ok_count=0;
+
+        if($assets_count>0){
+            foreach ($assets as &$asset) {
+                if($asset->status_id==$status_review_wait_id) {
+                    $assets_review_wait_count++;
+                }
+                if($asset->status_id==$status_ok_id) {
+                    $assets_status_ok_count++;
+                }
+            }
+            if($assets_count==$assets_review_wait_count+$assets_status_ok_count){
+                $asset_status = "review";
+            }
+            if($assets_count==$assets_status_ok_count){
+                $asset_status = "finished";
+            }
+        }else{
+            $asset_status = "finished";
+        }
+
+        if($sales_count>0){
+            foreach ($sales as &$sale) {
+                if($sale->status_id==$status_review_wait_id) {
+                    $sales_review_wait_count++;
+                }
+                if($sale->status_id==$status_ok_id) {
+                    $sales_status_ok_count++;
+                }
+            }
+            if($sales_count==$sales_review_wait_count+$sales_status_ok_count){
+                $sales_status = "review";
+            }
+            if($sales_count==$sales_status_ok_count){
+                $sales_status = "finished";
+            }
+        }else{
+            $sales_status = "finished";
+        }
+        if($consumables_count>0){
+            $consumable_all_count=0;
+            $consumable_review_count=0;
+            foreach ($consumables as &$consumable) {
+                $consumable_all_count+=$consumable["quantity"];
+                if (isset($consumable["reviewed"])){
+                    $consumable_review_count+=$consumable["reviewed"];
+                }
+            }
+            if($consumable_all_count==$consumable_review_count){
+                $consumables_status = "finished";
+            }
+        }else{
+            $consumables_status = "finished";
+        }
+
+        if(($asset_status=="review")||( $consumables_status=="review" )||($sales_status=="review")){
+            $all_status ="review";
+        }
+        if(($asset_status=="inventory")||( $consumables_status=="inventory" )||($sales_status=="inventory")){
+            $all_status ="inventory";
+        }
+        if($asset_status==$sales_status &&$asset_status == $consumables_status && $asset_status=="finished"){
+            $all_status ="finished";
+        }
+        if ($all_status =="review"){
+            $this->status = $this::REVIEW;
+        }
+        if ($all_status =="finished"){
+            $this->status = $this::FINISHED;
+        }
+        return $all_status;
+
+    }
+
+    public function closeBitrixTask($asset){
+        /** @var \GuzzleHttp\Client $client */
+        $client = new \GuzzleHttp\Client();
+        $user = $asset->user_verified;
+        $this->user_verified_id = $user->id;
+        $this->save();
+        if ($user && $user->bitrix_token && $user->bitrix_id && $this->bitrix_task_id){
+            $params1 = [
+                'query' => [
+                    'taskId' => $this->bitrix_task_id
+                ]
+            ];
+            $raw_bitrix_token  = Crypt::decryptString($user->bitrix_token);
+
+            $client->request('POST', 'https://bitrix.legis-s.ru/rest/'.$user->bitrix_id.'/'.$raw_bitrix_token.'/tasks.task.complete/',$params1);
+            $params2 = [
+                'query' => [
+                    'TASKID' => $this->bitrix_task_id,
+                    'FIELDS' => [
+                        'POST_MESSAGE'=>'Закрыта автоматически.'
+                    ]
+                ]
+            ];
+            $client->request('POST', 'https://bitrix.legis-s.ru/rest/'.$user->bitrix_id.'/'.$raw_bitrix_token.'/task.commentitem.add/',$params2);
+        }
+
+    }
 }
