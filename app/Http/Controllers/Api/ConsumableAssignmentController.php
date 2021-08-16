@@ -90,7 +90,7 @@ class ConsumableAssignmentController extends Controller
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
         $sort = in_array($request->input('sort'), $allowed_columns) ? $request->input('sort') : 'created_at';
 
-        $consumableAssignments->orderBy('consumables_locations.created_at', 'desc');
+        $consumableAssignments->orderBy('consumables_locations.created_at', 'desc')->orderBy('consumables_locations.id', 'desc');
         $total = $consumableAssignments->count();
         $consumableAssignments = $consumableAssignments->skip($offset)->take($limit)->get();
         return (new ConsumableAssignmentTransformer)->transformConsumableAssignments($consumableAssignments, $total);

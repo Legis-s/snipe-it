@@ -296,9 +296,9 @@
         var table_consumables = $('#table_consumables');
         var check_consumables = $('#check_consumables');
         var data = {!! $purchase->consumables_json !!};
-
-        @can('review', \App\Models\Asset::class)
-                var can_reviewconsumable = true;
+        var can_reviewconsumable = false;
+        @can('review')
+                can_reviewconsumable = true;
         @endcan
         $(function() {
 
