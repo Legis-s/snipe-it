@@ -229,7 +229,7 @@ class ConsumablesController extends Controller
             if ($consumable->purchase_cost < $purchase_cost){
                 $consumable->purchase_cost = $purchase_cost;
             }
-            $consumable->qty =$consumable->qty+$quantity;
+            $consumable->qty = $consumable->qty+$quantity;
             $consumable->locations()->attach($consumable->id, [
                 'consumable_id' => $consumable->id,
                 'user_id' => Auth::id(),
@@ -242,6 +242,8 @@ class ConsumablesController extends Controller
 
 
             if ($consumable->save()) {
+                \Log::error("consumables review");
+                $purchase->checkStatus();
                 $purchase->save();
                 return response()->json(Helper::formatStandardApiResponse('success', $consumable, trans('admin/consumables/message.update.success')));
             }

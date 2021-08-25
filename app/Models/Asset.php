@@ -1455,4 +1455,16 @@ class Asset extends Depreciable
     {
         return $this->belongsTo('\App\Models\User', 'user_verified_id');
     }
+
+
+    public function setStatusAfterPaid()
+    {
+        $status_in_purchase = Statuslabel::where('name', 'В закупке')->first();
+        $status_inventory_wait = Statuslabel::where('name', 'Ожидает инвентаризации')->first();
+
+        // меняем статус на Ожидает инвентаризации, только если актив в статусе "В закупке"
+        if ($this->status_id == $status_in_purchase->id) {
+            $this->status_id = $status_inventory_wait->id;
+        }
+    }
 }

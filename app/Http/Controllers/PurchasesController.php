@@ -25,6 +25,7 @@ class PurchasesController extends Controller
 {
     public function index()
     {
+
         $purchases_d = DB::table('purchases')
             ->select('user_id')
             ->distinct()
@@ -114,9 +115,9 @@ class PurchasesController extends Controller
         $purchase->consumables_json    = $request->input('consumables');
         $purchase->assets_json         = $request->input('assets');
         $purchase->sales_json         = $request->input('sales');
-        $purchase->status             = "inprogress";
         $purchase->user_id             = Auth::id();
         $currency_id = $request->input('currency_id');
+        $purchase->setStatusInprogress();
 
         switch ($currency_id) {
             case 341:

@@ -79,7 +79,6 @@ class SalesController extends Controller
             'purchase_date',
             'purchase_cost',
             'depreciable_cost',
-            'quality',
             'last_audit_date',
             'next_audit_date',
             'warranty_months',
