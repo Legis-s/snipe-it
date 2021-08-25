@@ -304,9 +304,12 @@ class Purchase extends SnipeModel
     public function closeBitrixTask($asset){
         /** @var \GuzzleHttp\Client $client */
         $client = new \GuzzleHttp\Client();
-        $user = $asset->user_verified;
-        $this->user_verified_id = $user->id;
-        $this->save();
+        $user = null;
+        if ($asset){
+            $user = $asset->user_verified;
+            $this->user_verified_id = $user->id;
+            $this->save();
+        }
         if ($user && $user->bitrix_token && $user->bitrix_id && $this->bitrix_task_id){
             $params1 = [
                 'query' => [

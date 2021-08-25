@@ -172,6 +172,47 @@
                 </div>
             </div>
             <div class="box-body">
+                @if ($purchase->status)
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>
+                                Статаус
+                            </strong>
+                        </div>
+                        <div class="col-md-6 status_label">
+                            @switch($purchase->status)
+                                @case("inventory")
+                                <span class="label label-warning">В процессе инвентаризации</span>
+                                @break
+
+                                @case("in_payment")
+                                <span class="label label-primary">В оплате</span>
+                                @break
+
+                                @case("review")
+                                <span class="label label-warning">В процессе проверки</span>
+                                @break
+
+                                @case("finished")
+                                <span class="label label-success">Завершено</span>
+                                @break
+
+                                @case("rejected")
+                                <span class="label label-danger">Отклонено</span>
+                                @break
+
+                                @case("paid")
+                                <span class="label label-success">Оплачено</span>
+                                @break
+
+                                @case("inprogress")
+                                <span class="label label-primary">На согласовании</span>
+                                @break
+
+                            @endswitch
+                        </div>
+                    </div>
+                @endif
                 @if ($purchase->invoice_number)
                     <div class="row">
                         <div class="col-md-6">
@@ -483,6 +524,45 @@
                                                     row.reviewed= parseInt(result.value);
                                                 }
                                                 table_consumables.bootstrapTable('updateRow', {index: index, row: row});
+                                                $.ajax({
+                                                    type: 'GET',
+                                                    url:"/api/v1/purchases/{{ $purchase->id}}",
+                                                    headers: {
+                                                        "X-Requested-With": 'XMLHttpRequest',
+                                                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                                                    },
+                                                    dataType: 'json',
+                                                    success: function (data) {
+                                                        var status = data.status;
+                                                        var result = "";
+                                                        switch (status) {
+                                                            case "inventory":
+                                                                result=  '<span class="label label-warning">В процессе инвентаризации</span>';
+                                                                break;
+                                                            case "in_payment":
+                                                                result= '<span class="label label-primary">В оплате</span>';
+                                                                break;
+                                                            case "review":
+                                                                result= '<span class="label label-warning">В процессе проверки</span>';
+                                                                break;
+                                                            case "finished":
+                                                                result= '<span class="label label-success">Завершено</span>';
+                                                                break;
+                                                            case "rejected":
+                                                                result= '<span class="label label-danger">Отклонено</span>';
+                                                                break;
+                                                            case "paid":
+                                                                result= '<span class="label label-success">Оплачено</span>';
+                                                                break;
+                                                            case "inprogress":
+                                                                result= '<span class="label label-primary">На согласовании</span>';
+                                                                break;
+                                                        }
+                                                        $('.status_label').html(result);
+
+                                                    },
+                                                });
+
                                             },
                                         });
                                     }
