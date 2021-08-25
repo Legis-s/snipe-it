@@ -931,44 +931,44 @@
                     },
                     success: function () {
                         $(".table").bootstrapTable('refresh');
-                        $.ajax({
-                            type: 'GET',
-                            url:"/api/v1/purchases/{{ $purchase->id}}",
-                            headers: {
-                                "X-Requested-With": 'XMLHttpRequest',
-                                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                            },
-                            dataType: 'json',
-                            success: function (data) {
-                                var status = data.status;
-                                var result = "";
-                                switch (status) {
-                                    case "inventory":
-                                        result=  '<span class="label label-warning">В процессе инвентаризации</span>';
-                                        break;
-                                    case "in_payment":
-                                        result= '<span class="label label-primary">В оплате</span>';
-                                        break;
-                                    case "review":
-                                        result= '<span class="label label-warning">В процессе проверки</span>';
-                                        break;
-                                    case "finished":
-                                        result= '<span class="label label-success">Завершено</span>';
-                                        break;
-                                    case "rejected":
-                                        result= '<span class="label label-danger">Отклонено</span>';
-                                        break;
-                                    case "paid":
-                                        result= '<span class="label label-success">Оплачено</span>';
-                                        break;
-                                    case "inprogress":
-                                        result= '<span class="label label-primary">На согласовании</span>';
-                                        break;
-                                }
-                                $('.status_label').html(result);
+                        {{--$.ajax({--}}
+                        {{--    type: 'GET',--}}
+                        {{--    url:"/api/v1/purchases/{{ $purchase->id}}",--}}
+                        {{--    headers: {--}}
+                        {{--        "X-Requested-With": 'XMLHttpRequest',--}}
+                        {{--        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')--}}
+                        {{--    },--}}
+                        {{--    dataType: 'json',--}}
+                        {{--    success: function (data) {--}}
+                        {{--        var status = data.status;--}}
+                        {{--        var result = "";--}}
+                        {{--        switch (status) {--}}
+                        {{--            case "inventory":--}}
+                        {{--                result=  '<span class="label label-warning">В процессе инвентаризации</span>';--}}
+                        {{--                break;--}}
+                        {{--            case "in_payment":--}}
+                        {{--                result= '<span class="label label-primary">В оплате</span>';--}}
+                        {{--                break;--}}
+                        {{--            case "review":--}}
+                        {{--                result= '<span class="label label-warning">В процессе проверки</span>';--}}
+                        {{--                break;--}}
+                        {{--            case "finished":--}}
+                        {{--                result= '<span class="label label-success">Завершено</span>';--}}
+                        {{--                break;--}}
+                        {{--            case "rejected":--}}
+                        {{--                result= '<span class="label label-danger">Отклонено</span>';--}}
+                        {{--                break;--}}
+                        {{--            case "paid":--}}
+                        {{--                result= '<span class="label label-success">Оплачено</span>';--}}
+                        {{--                break;--}}
+                        {{--            case "inprogress":--}}
+                        {{--                result= '<span class="label label-primary">На согласовании</span>';--}}
+                        {{--                break;--}}
+                        {{--        }--}}
+                        {{--        $('.status_label').html(result);--}}
 
-                            },
-                        });
+                        {{--    },--}}
+                        {{--});--}}
                     }
                 });
             },
@@ -983,44 +983,44 @@
                     },
                     success: function () {
                         $(".table").bootstrapTable('refresh');
-                        $.ajax({
-                            type: 'GET',
-                            url:"/api/v1/purchases/{{ $purchase->id}}",
-                            headers: {
-                                "X-Requested-With": 'XMLHttpRequest',
-                                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                            },
-                            dataType: 'json',
-                            success: function (data) {
-                                var status = data.status;
-                                var result = "";
-                                switch (status) {
-                                    case "inventory":
-                                        result=  '<span class="label label-warning">В процессе инвентаризации</span>';
-                                        break;
-                                    case "in_payment":
-                                        result= '<span class="label label-primary">В оплате</span>';
-                                        break;
-                                    case "review":
-                                        result= '<span class="label label-warning">В процессе проверки</span>';
-                                        break;
-                                    case "finished":
-                                        result= '<span class="label label-success">Завершено</span>';
-                                        break;
-                                    case "rejected":
-                                        result= '<span class="label label-danger">Отклонено</span>';
-                                        break;
-                                    case "paid":
-                                        result= '<span class="label label-success">Оплачено</span>';
-                                        break;
-                                    case "inprogress":
-                                        result= '<span class="label label-primary">На согласовании</span>';
-                                        break;
-                                }
-                                $('.status_label').html(result);
+                        {{--$.ajax({--}}
+                        {{--    type: 'GET',--}}
+                        {{--    url:"/api/v1/purchases/{{ $purchase->id}}",--}}
+                        {{--    headers: {--}}
+                        {{--        "X-Requested-With": 'XMLHttpRequest',--}}
+                        {{--        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')--}}
+                        {{--    },--}}
+                        {{--    dataType: 'json',--}}
+                        {{--    success: function (data) {--}}
+                        {{--        var status = data.status;--}}
+                        {{--        var result = "";--}}
+                        {{--        switch (status) {--}}
+                        {{--            case "inventory":--}}
+                        {{--                result=  '<span class="label label-warning">В процессе инвентаризации</span>';--}}
+                        {{--                break;--}}
+                        {{--            case "in_payment":--}}
+                        {{--                result= '<span class="label label-primary">В оплате</span>';--}}
+                        {{--                break;--}}
+                        {{--            case "review":--}}
+                        {{--                result= '<span class="label label-warning">В процессе проверки</span>';--}}
+                        {{--                break;--}}
+                        {{--            case "finished":--}}
+                        {{--                result= '<span class="label label-success">Завершено</span>';--}}
+                        {{--                break;--}}
+                        {{--            case "rejected":--}}
+                        {{--                result= '<span class="label label-danger">Отклонено</span>';--}}
+                        {{--                break;--}}
+                        {{--            case "paid":--}}
+                        {{--                result= '<span class="label label-success">Оплачено</span>';--}}
+                        {{--                break;--}}
+                        {{--            case "inprogress":--}}
+                        {{--                result= '<span class="label label-primary">На согласовании</span>';--}}
+                        {{--                break;--}}
+                        {{--        }--}}
+                        {{--        $('.status_label').html(result);--}}
 
-                            },
-                        });
+                        {{--    },--}}
+                        {{--});--}}
                     }
                 });
             },
