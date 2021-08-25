@@ -253,42 +253,42 @@ class SalesController extends Controller
         // in the allowed_columns array)
         $column_sort = in_array($sort_override, $allowed_columns) ? $sort_override : 'sales.created_at';
 
-
-        switch ($sort_override) {
-            case 'model':
-                $assets->OrderModels($order);
-                break;
-            case 'model_number':
-                $assets->OrderModelNumber($order);
-                break;
-            case 'category':
-                $assets->OrderCategory($order);
-                break;
-            case 'manufacturer':
-                $assets->OrderManufacturer($order);
-                break;
-            case 'company':
-                $assets->OrderCompany($order);
-                break;
-            case 'location':
-                $assets->OrderLocation($order);
-                break;
-            case 'rtd_location':
-                $assets->OrderRtdLocation($order);
-                break;
-            case 'status_label':
-                $assets->OrderStatus($order);
-                break;
-            case 'supplier':
-                $assets->OrderSupplier($order);
-                break;
-            case 'assigned_to':
-                $assets->OrderAssigned($order);
-                break;
-            default:
-                $assets->orderBy($column_sort, $order);
-                break;
-        }
+//
+//        switch ($sort_override) {
+//            case 'model':
+//                $assets->OrderModels($order);
+//                break;
+//            case 'model_number':
+//                $assets->OrderModelNumber($order);
+//                break;
+//            case 'category':
+//                $assets->OrderCategory($order);
+//                break;
+//            case 'manufacturer':
+//                $assets->OrderManufacturer($order);
+//                break;
+//            case 'company':
+//                $assets->OrderCompany($order);
+//                break;
+//            case 'location':
+//                $assets->OrderLocation($order);
+//                break;
+//            case 'rtd_location':
+//                $assets->OrderRtdLocation($order);
+//                break;
+//            case 'status_label':
+//                $assets->OrderStatus($order);
+//                break;
+//            case 'supplier':
+//                $assets->OrderSupplier($order);
+//                break;
+//            case 'assigned_to':
+//                $assets->OrderAssigned($order);
+//                break;
+//            default:
+//                $assets->orderBy($column_sort, $order);
+//                break;
+//        }
 
 
         $total = $assets->count();
