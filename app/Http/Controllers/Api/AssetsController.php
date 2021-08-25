@@ -388,7 +388,7 @@ class AssetsController extends Controller
     public function review($id)
     {
         if ($asset = Asset::with('assetstatus')->with('assignedTo')->withTrashed()->withCount('checkins as checkins_count', 'checkouts as checkouts_count', 'userRequests as userRequests_count')->findOrFail($id)) {
-            $this->authorize('review', Asset::class);
+            $this->authorize('review');
             $status = Statuslabel::where('name', 'Доступные')->first();
             $asset->status_id = $status->id;
             $user = Auth::user();

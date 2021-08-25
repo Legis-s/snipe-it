@@ -193,7 +193,7 @@ class ConsumablesController extends Controller
      */
     public function review(Request $request, $id)
     {
-        $this->authorize('review', Consumable::class);
+        $this->authorize('review');
         $consumable = Consumable::findOrFail($id);
         if ($request->filled('purchase_id') && $request->filled('quantity')) {
 
