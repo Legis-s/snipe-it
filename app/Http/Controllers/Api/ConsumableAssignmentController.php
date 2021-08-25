@@ -116,6 +116,17 @@ class ConsumableAssignmentController extends Controller
             $user_name = "(".$user->id.") ".$user->last_name." ".$user->first_name;
             $consumableAssignment->comment = $consumableAssignment->comment." Возвращено: ".$request->input('quantity').", ".date("Y-m-d H:i:s").", ".$user_name;
             if ($consumableAssignment->save()) {
+
+                $log = new Actionlog();
+                $log->user_id = Auth::id();
+                $log->action_type = 'return';
+//                $log->target_type = "App\Models\Contract";
+//                $log->target_id = $contract_id;
+                $log->item_id = $consumableAssignment->consumable_id;
+                $log->item_type = Consumable::class;
+                $log->note = json_encode($request->all());
+                $log->save();
+
                 return response()->json(Helper::formatStandardApiResponse('success', $consumableAssignment, trans('admin/consumables/message.update.success')));
             }
         } else {
