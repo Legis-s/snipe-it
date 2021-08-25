@@ -337,7 +337,7 @@ class AssetPresenter extends Presenter
             "switchable" => false,
             "title" => trans('table.actions'),
             "formatter" => "hardwareActionsFormatter",
-//            "events"=> "operateEvents"
+            "events"=> "operateEvents"
         ];
 
         return json_encode($layout);

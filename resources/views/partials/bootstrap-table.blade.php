@@ -188,6 +188,11 @@
                 var dest = 'hardware/maintenances';
             }
 
+
+            if ((row.available_actions) && (row.available_actions.inventory === true)) {
+                actions += '<span class="btn btn-sm btn-warning inventory" data-tooltip="true" title="Inventory Item"><i class="fa fa-key" aria-hidden="true"></i><span class="sr-only">Inventory</span></span>&nbsp;';
+            }
+
             if ((row.available_actions) && (row.available_actions.impersonate === true)) {
                 actions += '<a href="{{ url('/') }}/impersonate/take/' + row.id + '/" class="btn btn-sm btn-danger" data-tooltip="true" title="Impersonate"><i class="fa fa-unlock" aria-hidden="true"></i><span class="sr-only">impersonate</span></a>&nbsp;';
             }
@@ -905,7 +910,46 @@
         });
     });
     $(function () {
+
         operateEvents = {
+            'click .inventory': function (e, value, row, index) {
+
+                Swal.fire({
+                    title: "Изменить тег актива <b>" + row.asset_tag + " </b>",
+                    // text: 'Do you want to continue',
+                    icon: 'question',
+                    input: "text",
+                    inputLabel: 'Новый тег',
+                    inputAttributes: {
+                        autocapitalize: 'on'
+                    },
+                    reverseButtons: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Подтвердить',
+                    cancelButtonText: 'Отменить',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+
+                        var sendData = {
+                            asset_tag: result.value,
+                        };
+                        console.log("asset_tag: "+result.value);
+                        $.ajax({
+                            type: 'PATCH',
+                            url: "/api/v1/hardware/" + row.id + "",
+                            headers: {
+                                "X-Requested-With": 'XMLHttpRequest',
+                                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                            },
+                            data: sendData,
+                            dataType: 'json',
+                            success: function (data) {
+                                $(".table").bootstrapTable('refresh');
+                            },
+                        });
+                    }
+                });
+            },
             'click .resend': function (e, value, row, index) {
                 $.ajax({
                     url: '/api/v1/purchases/' + row.id + '/resend',

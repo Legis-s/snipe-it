@@ -122,6 +122,7 @@ class AssetsTransformer
         }
 
         $permissions_array['available_actions'] = [
+            'inventory' => (bool) Gate::allows('update', Asset::class),
             'checkout' => (bool) Gate::allows('checkout', Asset::class),
             'checkin' => (bool) Gate::allows('checkin', Asset::class),
             'clone' => Gate::allows('create', Asset::class) ? true : false,
