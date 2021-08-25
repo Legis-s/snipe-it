@@ -15,6 +15,7 @@ class Contract  extends SnipeModel
     protected $presenter = 'App\Presenters\ContractPresenter';
     use Presentable;
 
+
     protected $dates = ['deleted_at'];
     protected $table = 'contracts';
     protected $rules = array(
@@ -58,7 +59,7 @@ class Contract  extends SnipeModel
      *
      * @var array
      */
-    protected $searchableAttributes = ['name', 'account_number', 'comments', 'bitrix_id'];
+    protected $searchableAttributes = ['name', 'number', 'type',];
 
 
     public function getTypeText()

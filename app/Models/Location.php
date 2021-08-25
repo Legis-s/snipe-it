@@ -18,6 +18,7 @@ class Location extends SnipeModel
     protected $presenter = 'App\Presenters\LocationPresenter';
     use Presentable;
     use SoftDeletes;
+    use Searchable;
 
     protected $dates = ['deleted_at'];
     protected $table = 'locations';
@@ -69,7 +70,6 @@ class Location extends SnipeModel
     ];
     protected $hidden = ['user_id'];
 
-    use Searchable;
 
     /**
      * The attributes that should be included when searching the model.
