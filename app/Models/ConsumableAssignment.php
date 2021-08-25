@@ -1,6 +1,7 @@
 <?php
 namespace App\Models;
 
+use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,6 +12,7 @@ class ConsumableAssignment extends Model
     protected $presenter = 'App\Presenters\ConsumableAssignmentPresenter';
 
     use  Presentable;
+    use Searchable;
     protected $dates = [
         'created_at',
         'updated_at',
@@ -47,6 +49,13 @@ class ConsumableAssignment extends Model
         'assigned_to',
         'cost',
     ];
+
+    /**
+     * The attributes that should be included when searching the model.
+     *
+     * @var array
+     */
+    protected $searchableAttributes = ['type', 'cost','quantity'];
 
 
     public function getDisplayNameAttribute()
@@ -116,5 +125,59 @@ class ConsumableAssignment extends Model
         }
         return false;
     }
+
+
+
+    /**
+     * Query builder scope to search on text for complex Bootstrap Tables API.
+     *
+     * @param \Illuminate\Database\Query\Builder $query Query builder instance
+     * @param text $search Search term
+     *
+     * @return \Illuminate\Database\Query\Builder          Modified query builder
+     */
+    public function scopeAssignedSearch($query, $search)
+    {
+
+        \Debugbar::info("test");
+        $search = explode(' OR ', $search);
+        \Debugbar::info($search);
+        return $query->leftJoin('users as cl_users', function ($leftJoin) {
+            $leftJoin->on("cl_users.id", "=", "consumables_locations.assigned_to")
+                ->where("consumables_locations.assigned_type", "=", User::class);
+        })->leftJoin('locations as cl_locations', function ($leftJoin) {
+            $leftJoin->on("cl_locations.id", "=", "consumables_locations.assigned_to")
+                ->where("consumables_locations.assigned_type", "=", Location::class);
+        })->leftJoin('contracts as cl_contracts', function ($leftJoin) {
+            $leftJoin->on('cl_contracts.id', '=', 'consumables_locations.assigned_to')
+                ->where('consumables_locations.assigned_type', '=', Contract::class);
+        })->leftJoin('purchases as cl_purchases', function ($leftJoin) {
+            $leftJoin->on('cl_purchases.id', '=', 'consumables_locations.assigned_to')
+                ->where('consumables_locations.assigned_type', '=', Purchase::class);
+        })->leftJoin('assets as cl_assets', function ($leftJoin) {
+            $leftJoin->on('cl_assets.id', '=', 'consumables_locations.assigned_to')
+                ->where('consumables_locations.assigned_type', '=', Asset::class);
+        })->where(function ($query) use ($search) {
+            foreach ($search as $search) {
+                $query->orWhere(function ($query) use ($search) {
+                    $query->where('cl_users.first_name', 'LIKE', '%' . $search . '%')
+                        ->orWhere('cl_users.last_name', 'LIKE', '%' . $search . '%')
+                        ->orWhere('cl_users.username', 'LIKE', '%' . $search . '%')
+                        ->orWhere('cl_purchases.invoice_number', 'LIKE', '%' . $search . '%')
+                        ->orWhere('cl_contracts.name', 'LIKE', '%' . $search . '%')
+                        ->orWhere('cl_assets.name', 'LIKE', '%' . $search . '%')
+                        ->orWhere('cl_locations.name', 'LIKE', '%' . $search . '%')
+                        ->orWhere('cl_contracts.name', 'LIKE', '%' . $search . '%');
+                });
+
+                $query->orWhere('consumables_locations.quantity', 'LIKE', '%' . $search . '%')
+                    ->orWhere('consumables_locations.comment', 'LIKE', '%' . $search . '%')
+                    ->orWhere('consumables_locations.cost', 'LIKE', '%' . $search . '%');
+            }
+
+        }); //workaround for laravel bug
+    }
+
+
 
 }

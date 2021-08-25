@@ -53,9 +53,14 @@ class ConsumableAssignmentController extends Controller
         ]);
 
 
+//        if ($request->filled('search')) {
+//            $consumableAssignments = $consumableAssignments->TextSearch($request->input('search'));
+//        }
+
         if ($request->filled('search')) {
-            $consumableAssignments = $consumableAssignments->TextSearch($request->input('search'));
+            $consumableAssignments = $consumableAssignments->AssignedSearch($request->input('search'));
         }
+
 
         if ($request->filled('consumable_id')) {
             $consumableAssignments->where('consumable_id','=',$request->input('consumable_id'));
