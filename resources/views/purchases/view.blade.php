@@ -81,6 +81,27 @@
                         </table>
                     </div><!-- /.table-responsive -->
                 </div><!-- /.box-body -->
+
+                <div class="box-body">
+                    <div class="table table-responsive">
+                        <table
+                                data-columns="{{ \App\Presenters\ConsumableAssignmentPresenter::dataTableLayoutIn() }}"
+                                data-cookie-id-table="сonsumableAssignmentTable"
+                                data-pagination="true"
+                                data-id-table="сonsumableAssignmentTable"
+                                data-search="true"
+                                data-side-pagination="server"
+                                data-show-columns="true"
+                                data-show-export="true"
+                                data-show-refresh="true"
+                                data-sort-order="asc"
+                                id="сonsumableAssignmentTable"
+                                class="table table-striped snipe-table"
+                                data-url="{{route('api.consumableassignments.index',['purchase_id'=> $purchase->id])}}">
+
+                        </table>
+                    </div><!-- /.table-responsive -->
+                </div><!-- /.box-body -->
             </div> <!--/.box-->
         @else
 {{--            <div class="box box-default">--}}
@@ -113,6 +134,8 @@
 {{--                </div><!-- /.box-body -->--}}
 {{--            </div> <!--/.box-->--}}
         @endif
+
+
 
         <div class="box box-default">
             <div class="box-header with-border">

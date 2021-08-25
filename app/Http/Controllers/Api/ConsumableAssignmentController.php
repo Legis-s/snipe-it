@@ -83,6 +83,10 @@ class ConsumableAssignmentController extends Controller
             $consumableAssignments->where('assigned_type',"App\Models\Contract");
         }
 
+        if ($request->filled('purchase_id')) {
+            $consumableAssignments->where('assigned_to', $request->input('purchase_id'));
+            $consumableAssignments->where('assigned_type',"App\Models\Purchase");
+        }
 
 
         // Set the offset to the API call's offset, unless the offset is higher than the actual count of items in which
