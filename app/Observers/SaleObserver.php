@@ -24,7 +24,10 @@ class SaleObserver
 
         $purchase =$asset->purchase;
         if ($purchase && $purchase->status != Purchase::FINISHED){
-            $purchase->checkStatus($asset,Sale::class);
+
+            \Log::error("sale observer");
+            $purchase->checkStatus($asset);
+//            $purchase->checkStatus();
             $purchase->save();
         }
     }

@@ -20,7 +20,6 @@ class AssetObserver
      */
     public function updating(Asset $asset)
     {
-
         // If the asset isn't being checked out or audited, log the update.
         // (Those other actions already create log entries.)
         if (($asset->getAttributes()['assigned_to'] == $asset->getOriginal()['assigned_to'])
@@ -45,9 +44,11 @@ class AssetObserver
             $logAction->logaction('update');
 
         }
-        $purchase =$asset->purchase;
+        $purchase = $asset->purchase;
         if ($purchase && $purchase->status != Purchase::FINISHED){
-            $purchase->checkStatus($asset,Asset::class);
+            \Log::error("asset observer");
+            $purchase->checkStatus($asset);
+//            $purchase->checkStatus();
             $purchase->save();
         }
 //

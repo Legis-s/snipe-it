@@ -189,7 +189,8 @@ class Purchase extends SnipeModel
         }
 
     }
-    public function checkStatus(){
+    public function checkStatus($asset_new = null){
+
         $status_review_wait = Statuslabel::where('name', 'Ожидает проверки')->first();
         $status_review_wait_id = intval($status_review_wait->id);
         $status_ok = Statuslabel::where('name', 'Доступные')->first();
@@ -215,6 +216,11 @@ class Purchase extends SnipeModel
 
         if($assets_count>0){
             foreach ($assets as &$asset) {
+                if ($asset_new != null && $asset_new instanceof Asset) {
+                    if ($asset_new->id == $asset->id){
+                        $asset->status_id = $asset_new->status_id;
+                    }
+                }
                 if($asset->status_id==$status_review_wait_id) {
                     $assets_review_wait_count++;
                 }
@@ -222,6 +228,7 @@ class Purchase extends SnipeModel
                     $assets_status_ok_count++;
                 }
             }
+
             if($assets_count==$assets_review_wait_count+$assets_status_ok_count){
                 $asset_status = "review";
             }
@@ -234,6 +241,13 @@ class Purchase extends SnipeModel
 
         if($sales_count>0){
             foreach ($sales as &$sale) {
+
+                if ($asset_new != null && $asset_new instanceof Sale) {
+                    if ($asset_new->id == $sale->id){
+                        $sale->status_id = $asset_new->status_id;
+                    }
+                }
+
                 if($sale->status_id==$status_review_wait_id) {
                     $sales_review_wait_count++;
                 }
@@ -280,7 +294,9 @@ class Purchase extends SnipeModel
         }
         if ($all_status =="finished"){
             $this->status = $this::FINISHED;
+            $this->closeBitrixTask($asset_new);
         }
+//        \Log::error("asset ".$asset_status);
         return $all_status;
 
     }

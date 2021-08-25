@@ -25,6 +25,7 @@ class PurchasesController extends Controller
 {
     public function index()
     {
+
         $purchases_d = DB::table('purchases')
             ->select('user_id')
             ->distinct()
