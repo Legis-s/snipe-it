@@ -336,7 +336,7 @@
         }
     }
     function consumablesReturnFormatter(value, row) {
-        if (row.can_return == true) {
+        if (row.can_return == true && row.quantity != 0) {
             if (row.can_close_documents == true) {
                 return '<button class="btn btn-sm bg-maroon return" data-tooltip="true" title="Вернуть">Вернуть</button><br><button class="btn btn-sm bg-maroon close_documents" data-tooltip="true" title="Вернуть">Получены закр. док.</button>';
             }
@@ -948,6 +948,147 @@
                     }
                 });
             },
+            'click .return': function (e, value, row, index) {
+                Swal.fire({
+                    title: "Вернуть - " + row.name + " " + row.assigned_to.name,
+                    // text: 'Do you want to continue',
+                    icon: 'question',
+                    input: "range",
+                    inputLabel: 'Количество',
+                    inputAttributes: {
+                        min: 1,
+                        max: row.quantity,
+                        step: 1
+                    },
+                    inputValue: 1,
+                    reverseButtons: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Подтвердить',
+                    cancelButtonText: 'Отменить',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+
+                        var sendData = {
+                            quantity: result.value,
+                            nds: row.nds,
+                            purchase_cost: row.purchase_cost,
+                        };
+                        $.ajax({
+                            type: 'POST',
+                            url: "/api/v1/consumableassignments/" + row.id + "/return",
+                            headers: {
+                                "X-Requested-With": 'XMLHttpRequest',
+                                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                            },
+                            data: sendData,
+                            dataType: 'json',
+                            success: function (data) {
+                                $(".table").bootstrapTable('refresh');
+                            },
+                        });
+                    }
+                });
+            },
+            'click .close_documents': function (e, value, row, index) {
+                Swal.fire({
+                    title: "Закрывающие документы - " + row.name + " " + row.assigned_to.name,
+                    // text: 'Do you want to continue',
+                    icon: 'question',
+                    html:
+                        '<select class="js-data-ajax" data-endpoint="contracts" data-placeholder="Выберите договор" name="assigned_contract" style="width: 100%" id="assigned_contract_contract_select" aria-label="assigned_contract">' +
+                        '<option value=""  role="option">Выберите договор</option>' +
+                        '</select>',
+                    reverseButtons: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Подтвердить',
+                    cancelButtonText: 'Отменить',
+                    preConfirm: () => {
+                        return [
+                            $('#assigned_contract_contract_select').val(),
+                        ]
+                    },
+                    didOpen: (toast) => {
+                        // Crazy select2 rich dropdowns with images!
+                        $('.js-data-ajax').each(function (i, item) {
+                            console.log("js-data-ajax")
+                            var link = $(item);
+                            var endpoint = link.data("endpoint");
+                            var select = link.data("select");
+                            link.select2({
+
+                                /**
+                                 * Adds an empty placeholder, allowing every select2 instance to be cleared.
+                                 * This placeholder can be overridden with the "data-placeholder" attribute.
+                                 */
+                                placeholder: '',
+                                allowClear: true,
+
+                                ajax: {
+
+                                    // the baseUrl includes a trailing slash
+                                    url: baseUrl + 'api/v1/' + endpoint + '/selectlist',
+                                    dataType: 'json',
+                                    delay: 250,
+                                    headers: {
+                                        "X-Requested-With": 'XMLHttpRequest',
+                                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                                    },
+                                    data: function (params) {
+                                        var data = {
+                                            search: params.term,
+                                            page: params.page || 1,
+                                            assetStatusType: link.data("asset-status-type"),
+                                        };
+                                        return data;
+                                    },
+                                    processResults: function (data, params) {
+
+                                        params.page = params.page || 1;
+
+                                        var answer = {
+                                            results: data.items,
+                                            pagination: {
+                                                more: "true" //(params.page  < data.page_count)
+                                            }
+                                        };
+
+                                        return answer;
+                                    },
+                                    cache: true
+                                },
+                                escapeMarkup: function (markup) {
+                                    return markup;
+                                }, // let our custom formatter work
+                                templateResult: formatDatalist,
+                                templateSelection: formatDataSelection
+                            });
+
+                        });
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        var contract_id = result.value[0];
+                        console.log(contract_id);
+                        var sendData = {
+                            contract_id: contract_id,
+                        };
+
+                        $.ajax({
+                            type: 'POST',
+                            url: "/api/v1/consumableassignments/" + row.id + "/close_documents",
+                            headers: {
+                                "X-Requested-With": 'XMLHttpRequest',
+                                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                            },
+                            data: sendData,
+                            dataType: 'json',
+                            success: function (data) {
+                                $(".table").bootstrapTable('refresh');
+                            },
+                        });
+                    }
+                });
+            }
         }
     });
 

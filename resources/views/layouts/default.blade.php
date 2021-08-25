@@ -20,7 +20,7 @@
     <!-- Select2 -->
     <link rel="stylesheet" href="{{ url(asset('js/plugins/select2/select2.min.css')) }}">
     <link rel="stylesheet" href="{{ url(asset('js/lightbox/css/lightbox.min.css')) }}">
-
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/sweetalert2.min.css') }}">
     <!-- iCheck for checkboxes and radio inputs -->
     <link rel="stylesheet" href="{{ url(asset('js/plugins/iCheck/all.css')) }}">
 
@@ -84,7 +84,6 @@
             {!! $snipeSettings->show_custom_css() !!}
         </style>
     @endif
-
     <script nonce="{{ csrf_token() }}">
         window.snipeit = {
             settings: {
@@ -944,7 +943,7 @@
 <script src="{{ url(asset('js/lightgallery/js/lightgallery.min.js')) }}"></script>
 <script src="{{ url(mix('js/dist/all.js')) }}" nonce="{{ csrf_token() }}"></script>
 <script src="{{ url(asset('js/lightbox/js/lightbox.min.js')) }}" nonce="{{ csrf_token() }}"></script>
-
+<script src="{{ asset('js/sweetalert2.min.js') }}"></script>
 @section('moar_scripts')
 @show
 
