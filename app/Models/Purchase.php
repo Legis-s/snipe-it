@@ -294,40 +294,42 @@ class Purchase extends SnipeModel
         }
         if ($all_status =="finished"){
             $this->status = $this::FINISHED;
-            $this->closeBitrixTask($asset_new);
+            if ($asset_new){
+                $this->closeBitrixTask($asset_new);
+            }
         }
 //        \Log::error("asset ".$asset_status);
         return $all_status;
 
     }
 
-    public function closeBitrixTask($asset){
+    public function closeBitrixTask($asset = null){
         /** @var \GuzzleHttp\Client $client */
         $client = new \GuzzleHttp\Client();
-        $user = null;
-        if ($asset){
+        if ($asset) {
+            $user = null;
             $user = $asset->user_verified;
             $this->user_verified_id = $user->id;
             $this->save();
-        }
-        if ($user && $user->bitrix_token && $user->bitrix_id && $this->bitrix_task_id){
-            $params1 = [
-                'query' => [
-                    'taskId' => $this->bitrix_task_id
-                ]
-            ];
-            $raw_bitrix_token  = Crypt::decryptString($user->bitrix_token);
-
-            $client->request('POST', 'https://bitrix.legis-s.ru/rest/'.$user->bitrix_id.'/'.$raw_bitrix_token.'/tasks.task.complete/',$params1);
-            $params2 = [
-                'query' => [
-                    'TASKID' => $this->bitrix_task_id,
-                    'FIELDS' => [
-                        'POST_MESSAGE'=>'Закрыта автоматически.'
+            if ($user && $user->bitrix_token && $user->bitrix_id && $this->bitrix_task_id) {
+                $params1 = [
+                    'query' => [
+                        'taskId' => $this->bitrix_task_id
                     ]
-                ]
-            ];
-            $client->request('POST', 'https://bitrix.legis-s.ru/rest/'.$user->bitrix_id.'/'.$raw_bitrix_token.'/task.commentitem.add/',$params2);
+                ];
+                $raw_bitrix_token = Crypt::decryptString($user->bitrix_token);
+
+                $client->request('POST', 'https://bitrix.legis-s.ru/rest/' . $user->bitrix_id . '/' . $raw_bitrix_token . '/tasks.task.complete/', $params1);
+                $params2 = [
+                    'query' => [
+                        'TASKID' => $this->bitrix_task_id,
+                        'FIELDS' => [
+                            'POST_MESSAGE' => 'Закрыта автоматически.'
+                        ]
+                    ]
+                ];
+                $client->request('POST', 'https://bitrix.legis-s.ru/rest/' . $user->bitrix_id . '/' . $raw_bitrix_token . '/task.commentitem.add/', $params2);
+            }
         }
 
     }
