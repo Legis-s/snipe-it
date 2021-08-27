@@ -47,6 +47,7 @@ class AssetObserver
         $purchase = $asset->purchase;
         if ($purchase != null && ($purchase->status != Purchase::FINISHED  || $purchase->status != "paid")){
             \Log::error("asset observer");
+            \Log::error($purchase);
             $purchase->checkStatus($asset);
 //            $purchase->checkStatus();
             $purchase->save();
