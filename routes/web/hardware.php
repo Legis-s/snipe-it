@@ -158,7 +158,14 @@ Route::group(
             'uses' => 'BulkAssetsController@storeCheckout'
         ]);
 
-
+        Route::get('{assetId}/sell', [
+            'as' => 'sell',
+            'uses' => 'AssetsController@sellGet'
+        ]);
+        Route::post('{assetId}/sell', [
+            'as' => 'sell',
+            'uses' => 'AssetsController@sellPost'
+        ]);
 
 
 });

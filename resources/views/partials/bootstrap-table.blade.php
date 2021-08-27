@@ -352,11 +352,19 @@
     }
 
     function sellFormatter(value, row) {
-        if (row.user_can_sell== true) {
-            return '<a href="{{ url('/') }}/sales/' + row.id + '/sell/" class="btn btn-sm bg-maroon" data-tooltip="true" title="Check this item out">Продать</a>';
-        }else{
-            return "";
-        }
+        {{--if (row.user_can_sell== true) {--}}
+        {{--    return '<a href="{{ url('/') }}/sales/' + row.id + '/sell/" class="btn btn-sm bg-maroon" data-tooltip="true" title="Check this item out">Продать</a>';--}}
+        {{--}else{--}}
+        {{--    return "";--}}
+        {{--}--}}
+
+            if ((row.available_actions.sell == true) && (row.user_can_sell == true) && ((!row.asset_id) && (!row.assigned_to))) {
+                return '<a href="{{ url('/') }}/hardware/' + row.id + '/sell/" class="btn btn-sm bg-maroon" data-tooltip="true" title="Check this item out">Продать</a>';
+            }
+            else {
+                return ""
+            }
+
     }
 
 
@@ -375,7 +383,6 @@
 
     function genericCheckinCheckoutFormatter(destination) {
         return function (value, row) {
-
             // The user is allowed to check items out, AND the item is deployable
             if ((row.available_actions.checkout == true) && (row.user_can_checkout == true) && ((!row.asset_id) && (!row.assigned_to))) {
                 return '<a href="{{ url('/') }}/' + destination + '/' + row.id + '/checkout" class="btn btn-sm bg-maroon" data-tooltip="true" title="Check this item out">{{ trans('general.checkout') }}</a>';
@@ -391,12 +398,8 @@
                 } else if (row.assigned_pivot_id) {
                     return '<a href="{{ url('/') }}/' + destination + '/' + row.assigned_pivot_id + '/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="Check this item in so it is available for re-imaging, re-issue, etc.">{{ trans('general.checkin') }}</a>';
                 }
-
             }
-
         }
-
-
     }
 
 

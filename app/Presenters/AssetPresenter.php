@@ -317,6 +317,18 @@ class AssetPresenter extends Presenter
         ];
 
         $layout[] = [
+            "field" => "sellfield",
+            "searchable" => false,
+            "sortable" => false,
+            "switchable" => true,
+            "title" => "Продажа",
+            "visible" => true,
+            "formatter" => "sellFormatter",
+        ];
+
+
+
+        $layout[] = [
             "field" => "review",
             "searchable" => false,
             "sortable" => false,

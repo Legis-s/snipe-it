@@ -116,6 +116,14 @@ return array(
             'display'    => true,
         ),
 
+        array(
+            'permission' => 'assets.sell',
+            'label'      => 'Sell ',
+            'note'       => 'Allows the user to sell',
+            'display'    => true,
+        ),
+
+
     ),
 
 
