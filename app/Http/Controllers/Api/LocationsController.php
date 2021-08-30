@@ -10,6 +10,7 @@ use App\Http\Transformers\LocationsTransformer;
 use App\Http\Transformers\SelectlistTransformer;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 
 class LocationsController extends Controller
 {
@@ -45,6 +46,7 @@ class LocationsController extends Controller
             'locations.image',
             'locations.currency',
             'locations.notes',
+            'locations.sklad',
         ])->withCount('assignedAssets as assigned_assets_count')
         ->withCount('assets as assets_count')
         ->withCount('users as users_count');
@@ -160,7 +162,6 @@ class LocationsController extends Controller
 
 
         $location->fill($request->all());
-
         if ($location->save()) {
             return response()->json(
                 Helper::formatStandardApiResponse(
@@ -223,11 +224,15 @@ class LocationsController extends Controller
     public function selectlist(Request $request)
     {
 
+        $user = Auth::user();
+        $favorite_location = $user->favoriteLocation;
+
         $locations = Location::select([
             'locations.id',
             'locations.name',
             'locations.parent_id',
             'locations.image',
+            'locations.sklad',
         ]);
 
         $page = 1;
@@ -239,7 +244,12 @@ class LocationsController extends Controller
             $locations = $locations->where('locations.name', 'LIKE', '%'.$request->input('search').'%');
         }
 
-        $locations = $locations->orderBy('name', 'ASC')->get();
+        $locations = $locations->orderBy('sklad', 'desc');
+        $locations = $locations->orderBy('name', 'ASC');
+//        if ($favorite_location) {
+//            $locations->orderByRaw('FIELD(id,'.$favorite_location.')');
+//        }
+        $locations = $locations->get();
 
         $locations_with_children = [];
 
@@ -248,7 +258,25 @@ class LocationsController extends Controller
                 $locations_with_children[$location->parent_id] = [];
             }
             $locations_with_children[$location->parent_id][] = $location;
+            if ($location->sklad){
+                $location->name =   "[Склад] ".$location->name;
+            }
         }
+        \Debugbar::info($locations);
+
+
+//        if ($favorite_location){
+//            \Debugbar::info($favorite_location);
+//            foreach ($locations as $location) {
+//                if ($location->id == $favorite_location->id){
+//                    \Debugbar::info($location);
+////                    \Debugbar::info($favorite_location);
+//                    $location_new = $location;
+////                    $locations->forget($location);
+////                    $locations->prepend($location);
+//                }
+//            }
+//        }
 
         if ($request->filled('search')) {
             $locations_formatted =  $locations;

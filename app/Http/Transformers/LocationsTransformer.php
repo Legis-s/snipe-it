@@ -73,6 +73,7 @@ class LocationsTransformer
                 'bitrix_id' => ($location->bitrix_id) ? (int)$location->bitrix_id : null,
                 'children' => $children_arr,
                 'notes' => ($location->notes) ? e($location->notes) : null,
+                'sklad' => ($location->sklad) ? e($location->sklad) : null,
             ];
 
             $permissions_array['available_actions'] = [

@@ -118,6 +118,7 @@ class UsersController extends Controller
         $user->jobtitle = $request->input('jobtitle');
         $user->phone = $request->input('phone');
         $user->location_id = $request->input('location_id', null);
+        $user->favorite_location_id = $request->input('favorite_location_id', null);
         $user->department_id = $request->input('department_id', null);
         $user->company_id = Company::getIdForUser($request->input('company_id', null));
         $user->manager_id = $request->input('manager_id', null);
@@ -285,6 +286,7 @@ class UsersController extends Controller
         $user->phone = $request->input('phone');
         $user->website = $request->input('website', null);
         $user->location_id = $request->input('location_id', null);
+        $user->favorite_location_id = $request->input('favorite_location_id', null);
         $user->company_id = Company::getIdForUser($request->input('company_id', null));
         $user->manager_id = $request->input('manager_id', null);
         $user->notes = $request->input('notes');

@@ -118,6 +118,7 @@
     // Use this when we're introspecting into a column object and need to link
     function genericColumnObjLinkFormatter(destination) {
         return function (value, row) {
+            console.log(row);
             if ((value) && (value.status_meta)) {
 
                 var text_color;
