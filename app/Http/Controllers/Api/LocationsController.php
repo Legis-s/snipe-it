@@ -246,12 +246,22 @@ class LocationsController extends Controller
 
         $locations = $locations->orderBy('sklad', 'desc');
         $locations = $locations->orderBy('name', 'ASC');
-//        if ($favorite_location) {
-//            $locations->orderByRaw('FIELD(id,'.$favorite_location.')');
-//        }
         $locations = $locations->get();
 
         $locations_with_children = [];
+
+        $locations_new = collect([]);
+        if ($favorite_location){
+
+            foreach ($locations as $location) {
+                if ($location->id == $favorite_location->id){
+                    $locations_new->prepend($location);
+                }else{
+                    $locations_new->push($location);
+                }
+            }
+            $locations = $locations_new;
+        }
 
         foreach ($locations as $location) {
             if (!array_key_exists($location->parent_id, $locations_with_children)) {
@@ -262,21 +272,8 @@ class LocationsController extends Controller
                 $location->name =   "[Склад] ".$location->name;
             }
         }
-        \Debugbar::info($locations);
 
 
-//        if ($favorite_location){
-//            \Debugbar::info($favorite_location);
-//            foreach ($locations as $location) {
-//                if ($location->id == $favorite_location->id){
-//                    \Debugbar::info($location);
-////                    \Debugbar::info($favorite_location);
-//                    $location_new = $location;
-////                    $locations->forget($location);
-////                    $locations->prepend($location);
-//                }
-//            }
-//        }
 
         if ($request->filled('search')) {
             $locations_formatted =  $locations;
