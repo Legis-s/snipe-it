@@ -44,6 +44,14 @@ class LocationPresenter extends Presenter
                 "formatter" => "locationsLinkFormatter"
             ],
             [
+                "field" => "sklad",
+                "searchable" => true,
+                "sortable" => true,
+                "title" => "Склад",
+                "visible" => true,
+                "formatter" => "checkFormatter"
+            ],
+            [
                 "field" => "image",
                 "searchable" => false,
                 "sortable" => true,

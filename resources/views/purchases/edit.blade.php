@@ -41,6 +41,7 @@
                     <thead>
                     <th>#</th>
                     <th>Модель</th>
+                    <th>Склад</th>
                     <th>Закупочная цена</th>
                     <th>НДС</th>
                     <th>Количество</th>
@@ -86,6 +87,7 @@
                     <thead>
                     <th>#</th>
                     <th>Модель</th>
+                    <th>Склад</th>
                     <th>Закупочная цена</th>
                     <th>НДС</th>
                     <th>Количество</th>
@@ -118,6 +120,11 @@
                                 @include ('partials.forms.edit.nds')
                                 @include ('partials.forms.edit.warranty')
                                 @include ('partials.forms.edit.quantity')
+                                @if(Auth::user()->favoriteLocation)
+                                    @include ('partials.forms.edit.location-select-checkin', ['translated_name' =>"Ожидаемый склад", 'fieldname' => 'location_id'])
+                                @else
+                                    @include ('partials.forms.edit.location-select', ['translated_name' =>"Ожидаемый склад", 'fieldname' => 'location_id' ])
+                                @endif
                             </form>
                         </div>
                     </div>
@@ -184,6 +191,11 @@
                                 @include ('partials.forms.edit.nds')
                                 {{--                                @include ('partials.forms.edit.warranty')--}}
                                 @include ('partials.forms.edit.quantity')
+                                @if(Auth::user()->favoriteLocation)
+                                    @include ('partials.forms.edit.location-select-checkin', ['translated_name' =>"Ожидаемый склад", 'fieldname' => 'location_id'])
+                                @else
+                                    @include ('partials.forms.edit.location-select', ['translated_name' =>"Ожидаемый склад", 'fieldname' => 'location_id' ])
+                                @endif
                             </form>
                         </div>
                     </div>
@@ -242,6 +254,11 @@
                     field: 'model',
                     name: 'Модель',
                     align: 'left',
+                    valign: 'middle'
+                }, {
+                    field: 'location',
+                    name: 'Склад',
+                    align: 'center',
                     valign: 'middle'
                 }, {
                     field: 'purchase_cost',
@@ -369,6 +386,11 @@
                     align: 'left',
                     valign: 'middle'
                 }, {
+                    field: 'location',
+                    name: 'Склад',
+                    align: 'center',
+                    valign: 'middle'
+                }, {
                     field: 'purchase_cost',
                     name: 'Закупочная цена',
                     align: 'center',
@@ -417,19 +439,16 @@
             }
             $('#modal_asset').on("show.bs.modal", function (event) {
                 var modal = $(this);
-                $("#model_id").removeClass("has-error");
-                $("#model_select_id").val('');
-                $('#model_select_id').trigger('change');
+                modal.find("#model_id").removeClass("has-error");
+                modal.find("#model_select_id").val('');
+                modal.find('#model_select_id').trigger('change');
                 modal.find('#purchase_cost').val('');
                 modal.find('#nds').val(20);
                 modal.find('#warranty_months').val(12);
                 modal.find('#quantity').val(1);
-                $('.duble').addClass('hidden');
-                // modal.find('select.select2').select2({
-                //     dropdownParent: modal,
-                // });
-
-                $('.js-data-ajax2').each(function (i, item) {
+                modal.find('.duble').addClass('hidden');
+                modal.find('select').each(function (i, item) {
+                    // $('.js-data-ajax2').each(function (i, item) {
                     var link = $(item);
                     var endpoint = link.data("endpoint");
                     if (link.hasClass("select2-hidden-accessible")) {
@@ -481,22 +500,16 @@
             $('#modal_consumables').on("show.bs.modal", function (event) {
                 var modal = $(this);
                 modal.find('#name').val("");
-
-                $("#model_id").removeClass("has-error");
-                $("#category_select_id").val('');
-                $('#category_select_id').trigger('change');
-                $("#manufacturer_select_id").val('');
-                $('#manufacturer_select_id').trigger('change');
+                modal.find("#model_id").removeClass("has-error");
+                modal.find("#model_select_id").val('');
+                modal.find('#model_select_id').trigger('change');
                 modal.find('#model_number').val('');
                 modal.find('#purchase_cost').val('');
                 modal.find('#nds').val(20);
                 modal.find('#quantity').val(1);
-                $('.duble').addClass('hidden');
-
-                // modal.find('select.select2').select2({
-                //     dropdownParent: modal,
-                // });
-                $('.js-data-ajax2').each(function (i, item) {
+                modal.find('.duble').addClass('hidden');
+                modal.find('select').each(function (i, item) {
+                    // $('.js-data-ajax2').each(function (i, item) {
                     var link = $(item);
                     var endpoint = link.data("endpoint");
                     if (link.hasClass("select2-hidden-accessible")) {
@@ -543,70 +556,19 @@
                         templateSelection: formatDataSelection
                     });
                 });
-                $('.js-data-ajax4').each(function (i, item) {
-                    var link = $(item);
-                    var endpoint = link.data("endpoint");
-                    if (link.hasClass("select2-hidden-accessible")) {
-                        link.select2('destroy');
-                    }
-                    link.select2({
-                        dropdownParent: modal,
-                        ajax: {
-                            // the baseUrl includes a trailing slash
-                            url: baseUrl + 'api/v1/' + endpoint + '/selectlist',
-                            dataType: 'json',
-                            delay: 250,
-                            headers: {
-                                "X-Requested-With": 'XMLHttpRequest',
-                                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                            },
-                            data: function (params) {
-                                var data = {
-                                    search: params.term,
-                                    page: params.page || 1,
-                                    assetStatusType: link.data("asset-status-type"),
-                                };
-                                return data;
-                            },
-                            processResults: function (data, params) {
-                                console.log(data)
-                                params.page = params.page || 1;
-
-                                var answer = {
-                                    results: data.items,
-                                    pagination: {
-                                        more: "true" //(params.page  < data.page_count)
-                                    }
-                                };
-
-                                return answer;
-                            },
-                            cache: true
-                        },
-                        escapeMarkup: function (markup) {
-                            return markup;
-                        }, // let our custom formatter work
-                        templateResult: formatDatalist,
-                        templateSelection: formatDataSelection
-                    });
-                });
-
             });
             $('#modal_sales').on("show.bs.modal", function (event) {
                 var modal = $(this);
-                $("#model_id").removeClass("has-error");
-                $("#model_select_id").val('');
-                $('#model_select_id').trigger('change');
+                modal.find("#model_id").removeClass("has-error");
+                modal.find("#model_select_id").val('');
+                modal.find('#model_select_id').trigger('change');
                 modal.find('#purchase_cost').val('');
                 modal.find('#nds').val(20);
                 modal.find('#warranty_months').val(12);
                 modal.find('#quantity').val(1);
-                $('.duble').addClass('hidden');
-                // modal.find('select.select2').select2({
-                //     dropdownParent: modal,
-                // });
-
-                $('.js-data-ajax3').each(function (i, item) {
+                modal.find('.duble').addClass('hidden');
+                modal.find('select').each(function (i, item) {
+                    // $('.js-data-ajax3').each(function (i, item) {
                     var link = $(item);
                     var endpoint = link.data("endpoint");
                     if (link.hasClass("select2-hidden-accessible")) {
@@ -684,12 +646,15 @@
 
             $('#addAssetButton').click(function (e) {
                 e.preventDefault();
-                var model_id = $('select[name=model_id] option').filter(':selected').val();
-                var model_name = $('select[name=model_id] option').filter(':selected').text();
-                var purchase_cost = $('#modal_asset').find('#purchase_cost').val();
-                var nds = $('#modal_asset').find('#nds').val();
-                var warranty = $('#modal_asset').find('#warranty_months').val();
-                var quantity = $('#modal_asset').find('#quantity').val();
+                var modal = $('#modal_asset');
+                var model_id = modal.find('select[name=model_id] option').filter(':selected').val();
+                var model_name = modal.find('select[name=model_id] option').filter(':selected').text();
+                var location_id = modal.find('select[name=location_id] option').filter(':selected').val();
+                var location_name = modal.find('select[name=location_id] option').filter(':selected').text();
+                var purchase_cost = modal.find('#purchase_cost').val();
+                var nds = modal.find('#nds').val();
+                var warranty = modal.find('#warranty_months').val();
+                var quantity = modal.find('#quantity').val();
                 var table_data = table_asset.bootstrapTable('getData');
                 if (model_id > 0) {
                     var rez = true;
@@ -703,6 +668,8 @@
                             id: table_data.length + 1,
                             model_id: model_id,
                             model: model_name,
+                            location_id: location_id,
+                            location: location_name,
                             purchase_cost: purchase_cost,
                             nds: nds,
                             warranty: warranty,
@@ -715,17 +682,17 @@
                         $('.duble').removeClass('hidden');
                     }
                 } else {
-                    $("#model_id").addClass("has-error");
+                    modal.find("#model_id").addClass("has-error");
                 }
             });
             $('#addСonsumablesButton').click(function (e) {
                 e.preventDefault();
-
-                var consumable_id = $('#modal_consumables').find('select[name=consumable_id] option').filter(':selected').val();
-                var consumable_name = $('#modal_consumables').find('select[name=consumable_id] option').filter(':selected').text();
-                var purchase_cost = $('#modal_consumables').find('#purchase_cost').val();
-                var nds = $('#modal_consumables').find('#nds').val();
-                var quantity = $('#modal_consumables').find('#quantity').val();
+                var modal = $('#modal_consumables');
+                var consumable_id = modal.find('select[name=consumable_id] option').filter(':selected').val();
+                var consumable_name = modal.find('select[name=consumable_id] option').filter(':selected').text();
+                var purchase_cost = modal.find('#purchase_cost').val();
+                var nds = modal.find('#nds').val();
+                var quantity = modal.find('#quantity').val();
 
                 var tabele_data = table_consumables.bootstrapTable('getData');
                 if (consumable_id > 0) {
@@ -742,18 +709,20 @@
                     table_consumables.bootstrapTable('append', data);
                     $('#modal_consumables').modal('hide');
                 } else {
-                    $("#category_id").addClass("has-error");
-                    $("#name").addClass("has-error");
+                    modal.find("#category_id").addClass("has-error");
+                    modal.find("#name").addClass("has-error");
                 }
             });
             $('#addSalesButton').click(function (e) {
                 e.preventDefault();
-                var model_id = $('#modal_sales').find('select[name=model_id] option').filter(':selected').val();
-                var model_name = $('#modal_sales').find('select[name=model_id] option').filter(':selected').text();
-                var purchase_cost = $('#modal_sales').find('#purchase_cost').val();
-                var nds = $('#modal_sales').find('#nds').val();
-                // var warranty = $('#modal_sales').find('#warranty_months').val();
-                var quantity = $('#modal_sales').find('#quantity').val();
+                var modal = $('#modal_sales');
+                var model_id = modal.find('select[name=model_id] option').filter(':selected').val();
+                var model_name = modal.find('select[name=model_id] option').filter(':selected').text();
+                var purchase_cost = modal.find('#purchase_cost').val();
+                var location_id = modal.find('select[name=location_id] option').filter(':selected').val();
+                var location_name = modal.find('select[name=location_id] option').filter(':selected').text();
+                var nds = modal.find('#nds').val();
+                var quantity = modal.find('#quantity').val();
                 var table_data = table_sales.bootstrapTable('getData');
                 if (model_id > 0) {
                     var rez = true;
@@ -767,19 +736,21 @@
                             id: table_data.length + 1,
                             model_id: model_id,
                             model: model_name,
+                            location_id: location_id,
+                            location: location_name,
                             purchase_cost: purchase_cost,
                             nds: nds,
                             // warranty: warranty,
                             quantity: quantity,
                         };
                         table_sales.bootstrapTable('append', data);
-                        $('#modal_sales').modal('hide');
+                        modal.modal('hide');
                         $('.duble').addClass('hidden');
                     } else {
                         $('.duble').removeClass('hidden');
                     }
                 } else {
-                    $("#model_id").addClass("has-error");
+                    modal.find("#model_id").addClass("has-error");
                 }
             });
 

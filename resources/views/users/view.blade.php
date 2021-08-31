@@ -236,6 +236,13 @@
 
                   </tr>
                   @endif
+                    @if ($user->favoriteLocation)
+                      <tr>
+                        <td class="text-nowrap">Основной склад</td>
+                        <td>{{ link_to_route('locations.show', $user->favoriteLocation->name, [$user->favoriteLocation->id]) }}</td>
+
+                      </tr>
+                    @endif
                     @if ($user->last_login)
                       <tr>
                         <td class="text-nowrap">{{ trans('general.last_login') }}</td>

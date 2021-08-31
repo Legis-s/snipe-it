@@ -265,7 +265,8 @@
 
                   <!-- Location -->
               @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'location_id'])
-
+              <!-- Location -->
+              @include ('partials.forms.edit.location-select', ['translated_name' => "Основной склад", 'fieldname' => 'favorite_location_id'])
                 <!-- Phone -->
                 <div class="form-group {{ $errors->has('phone') ? 'has-error' : '' }}">
                   <label class="col-md-3 control-label" for="phone">{{ trans('admin/users/table.phone') }}</label>

@@ -54,7 +54,8 @@ class User extends SnipeModel implements AuthenticatableContract, CanResetPasswo
         'username',
         'zip',
         'bitrix_id',
-        'bitrix_token'
+        'bitrix_token',
+        'favorite_location_id'
     ];
 
     protected $casts = [
@@ -265,6 +266,7 @@ class User extends SnipeModel implements AuthenticatableContract, CanResetPasswo
         return $this->belongsTo('\App\Models\Location', 'location_id')->withTrashed();
     }
 
+
     /**
      * Get the asset's location based on the assigned user
      **/
@@ -272,6 +274,16 @@ class User extends SnipeModel implements AuthenticatableContract, CanResetPasswo
     {
         return $this->belongsTo('\App\Models\Location', 'location_id')->withTrashed();
     }
+
+
+    /**
+     * Get the asset's location based on the assigned user
+     **/
+    public function favoriteLocation()
+    {
+        return $this->belongsTo('\App\Models\Location', 'favorite_location_id')->withTrashed();
+    }
+
 
     /**
      * Get the user's manager based on the assigned user

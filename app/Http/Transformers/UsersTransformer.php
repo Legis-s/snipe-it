@@ -50,6 +50,10 @@ class UsersTransformer
                     'id' => (int) $user->userloc->id,
                     'name'=> e($user->userloc->name)
                 ]  : null,
+                'favorite_location' => ($user->favoriteLocation) ? [
+                    'id' => (int) $user->favoriteLocation->id,
+                    'name'=> e($user->favoriteLocation->name)
+                ]  : null,
                 'notes'=> e($user->notes),
                 'permissions' => $user->decodePermissions(),
                 'activated' => ($user->activated =='1') ? true : false,
