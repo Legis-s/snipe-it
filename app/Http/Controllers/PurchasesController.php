@@ -176,6 +176,9 @@ class PurchasesController extends Controller
                         $asset->supplier_id             = $purchase->supplier_id;
                         $asset->purchase_id             = $purchase->id;
                         $asset->user_id                 = Auth::id();
+                        if (isset($value["location_id"])) {
+                            $asset->location_id = $value["location_id"];
+                        }
                         $settings = \App\Models\Setting::getSettings();
                         if($asset->save()){
                             if ($settings->zerofill_count > 0) {
@@ -230,6 +233,9 @@ class PurchasesController extends Controller
                         $sale->purchase_id             = $purchase->id;
                         $sale->user_id                 = Auth::id();
                         $settings = \App\Models\Setting::getSettings();
+                        if (isset($value["location_id"])) {
+                            $asset->location_id = $value["location_id"];
+                        }
                         if($sale->save()){
                             if ($settings->zerofill_count > 0) {
                                 $asset_tag_digits = preg_replace('/\D/', '', $asset_tag);
