@@ -155,6 +155,10 @@ class PurchasesController extends Controller
                     $nds = $value["nds"];
                     $warranty = $value["warranty"];
                     $quantity = $value["quantity"];
+                    $location_id = null;
+                    if (isset($value["location_id"]) && $value["location_id"]>0) {
+                        $location_id = $value["location_id"];
+                    }
                     $data_list .= "[".$value["id"]."] ".$model." - Количество: ".$quantity." Цена: ".$purchase_cost."\n";
 
                     $dt = new DateTime();
@@ -176,9 +180,8 @@ class PurchasesController extends Controller
                         $asset->supplier_id             = $purchase->supplier_id;
                         $asset->purchase_id             = $purchase->id;
                         $asset->user_id                 = Auth::id();
-                        if (isset($value["location_id"]) && $value["location_id"]>0) {
-                            $asset->location_id = $value["location_id"];
-                        }
+                        $asset->location_id            = $location_id;
+
                         $settings = \App\Models\Setting::getSettings();
                         if($asset->save()){
                             if ($settings->zerofill_count > 0) {
@@ -217,7 +220,10 @@ class PurchasesController extends Controller
 //                    $warranty = $value["warranty"];
                     $quantity = $value["quantity"];
                     $data_list .= "[".$value["id"]."] ".$model." - Количество: ".$quantity." Цена: ".$purchase_cost."\n";
-
+                    $location_id = null;
+                    if (isset($value["location_id"]) && $value["location_id"]>0) {
+                        $location_id = $value["location_id"];
+                    }
                     $dt = new DateTime();
                     for ($i = 1; $i <= $quantity; $i++) {
                         $sale = new Sale();
@@ -232,10 +238,8 @@ class PurchasesController extends Controller
                         $sale->supplier_id             = $purchase->supplier_id;
                         $sale->purchase_id             = $purchase->id;
                         $sale->user_id                 = Auth::id();
+                        $sale->location_id            = $location_id;
                         $settings = \App\Models\Setting::getSettings();
-                        if (isset($value["location_id"]) && $value["location_id"]>0) {
-                            $asset->location_id = $value["location_id"];
-                        }
                         if($sale->save()){
                             if ($settings->zerofill_count > 0) {
                                 $asset_tag_digits = preg_replace('/\D/', '', $asset_tag);
