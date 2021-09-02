@@ -490,6 +490,22 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api', 'middleware' => 'api'], fu
 
     Route::group(['prefix' => 'sale'], function () {
 
+        Route::get('bytag/{any}',
+            [
+                'as' => 'api.sales.show.bytag',
+                'uses' => 'SalesController@showByTag'
+            ]
+        )->where('any', '.*');
+
+
+        Route::get('byserial/{any}',
+            [
+                'as' => 'api.sales.show.byserial',
+                'uses' => 'SalesController@showBySerial'
+            ]
+        )->where('any', '.*');
+
+
         Route::post('{asset_id}/review',
             [
                 'as' => 'api.sales.review',

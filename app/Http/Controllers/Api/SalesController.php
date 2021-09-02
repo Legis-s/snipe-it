@@ -325,11 +325,11 @@ class SalesController extends Controller
      */
     public function showBySerial($serial)
     {
-        $this->authorize('index', Asset::class);
+        $this->authorize('index', Sale::class);
         if ($assets = Sale::with('assetstatus')->with('assignedTo')
             ->withTrashed()->where('serial', $serial)->get()) {
 
-            return (new SalesTransformer)->transformSale($assets, $assets->count());
+            return (new SalesTransformer)->transformSales($assets, $assets->count());
         }
         return response()->json(Helper::formatStandardApiResponse('error', null, 'Sale not found'), 200);
 
