@@ -201,6 +201,7 @@ class SyncBitrix extends Command
         $count = 0 ;
         foreach ($bitrix_contracts as &$value) {
             $count++;
+            print($value["ASSIGNED_BY_ID"]);
             $contract = Contract::updateOrCreate(
                 ['bitrix_id' =>  $value["ID"]],
                 [
@@ -210,6 +211,7 @@ class SyncBitrix extends Command
                     'type' => $value["TYPE_ID"],
                     'date_start' => $value["DATE_START"],
                     'date_end' => $value["DATE_END"],
+                    'assigned_by_id' => $value["ASSIGNED_BY_ID"],
                 ]
             );
         }
