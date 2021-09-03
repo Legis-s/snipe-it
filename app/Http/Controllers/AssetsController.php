@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Exceptions\CheckoutNotAllowed;
 use App\Helpers\Helper;
 use App\Http\Requests\AssetCheckinRequest;
 use App\Http\Requests\AssetCheckoutRequest;
@@ -14,6 +15,7 @@ use App\Models\Company;
 use App\Models\CustomField;
 use App\Models\Import;
 use App\Models\Location;
+use App\Models\Sale;
 use App\Models\Setting;
 use App\Models\Statuslabel;
 use App\Models\User;
@@ -23,6 +25,7 @@ use Carbon\Carbon;
 use Config;
 use DB;
 use Gate;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Image;
 use Input;
@@ -900,5 +903,109 @@ class AssetsController extends Controller
 
         return view('hardware/requested', compact('requestedItems'));
     }
+
+
+    /**
+     * Returns a view that presents a form to check an asset out to a
+     * user.
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @param int $assetId
+     * @since [v1.0]
+     * @return View
+     */
+    public function sellGet($assetId)
+    {
+        $this->authorize('sell', Asset::class);
+        // Check if the asset exists
+        if (is_null($item = Asset::find(e($assetId)))) {
+            return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));
+        }
+
+        $this->authorize('sell', $item);
+
+        if ($item->availableForSell()) {
+            return view('hardware/sell', compact('item'));
+        }
+        return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.checkout.not_available'));
+
+
+    }
+
+
+    /**
+     * Validate and process the form data to check out an asset to a user.
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @param AssetCheckoutRequest $request
+     * @param int $assetId
+     * @return Redirect
+     * @since [v1.0]
+     */
+    public function sellPost(Request $request, $assetId)
+    {
+        $this->authorize('sell', Asset::class);
+        try {
+            // Check if the asset exists
+            if (!$asset = Asset::find($assetId)) {
+                return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));
+            } elseif (!$asset->availableForSell()) {
+                return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.checkout.not_available'));
+            }
+            $admin = \Illuminate\Support\Facades\Auth::user();
+
+            $checkout_at = date("Y-m-d H:i:s");
+
+            if (($request->filled('contract_id')) && $request->get('contract_id')) {
+                $asset->contract_id = request('contract_id');
+            }
+
+            if (($request->filled('user_responsible_id')) && $request->get('user_responsible_id')) {
+                $asset->user_responsible_id =  request('user_responsible_id');
+            }
+
+            if (($request->filled('name')) && $request->get('name')) {
+                $asset->name =  $request->get('name');
+            }
+            if (($request->filled('note')) && $request->get('note')) {
+                $asset->note =  $request->get('note');
+            }
+
+            if (($request->filled('closing_documents')) && $request->get('closing_documents')) {
+                $asset->closing_documents =  $request->get('closing_documents');
+            }
+
+            if (($request->filled('sold_at')) && ($request->get('sold_at')!= date("Y-m-d"))) {
+                $asset->sold_at = $request->get('sold_at');
+            }
+
+            if ($asset->user_responsible_id>0 ){
+                $status = Statuslabel::where('name', 'Выдано')->first();
+                $sale->status_id = $status->id;
+            }
+
+            if ($sale->closing_documents > 0 && $sale->contract_id > 0){
+                $status = Statuslabel::where('name', 'Продано')->first();
+                $sale->status_id = $status->id;
+            }
+
+            if ($sale->save()) {
+                return redirect()->route("sales.index")->with('success', trans('admin/hardware/message.checkout.success'));
+            }
+
+//            if ($sale->checkOut($target, $admin, $checkout_at, $expected_checkin, e($request->get('note')), $request->get('name'),$location = null)) {
+//                return redirect()->route("hardware.index")->with('success', trans('admin/hardware/message.checkout.success'));
+//            }
+
+            // Redirect to the asset management page with error
+            return redirect()->to("sales/$assetId/sell")->with('error', trans('admin/hardware/message.checkout.error'))->withErrors($sale->getErrors());
+        } catch (ModelNotFoundException $e) {
+            return redirect()->back()->with('error', trans('admin/hardware/message.checkout.error'))->withErrors($sale->getErrors());
+        } catch (CheckoutNotAllowed $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+
 
 }

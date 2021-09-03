@@ -32,6 +32,7 @@ class Asset extends Depreciable
     const LOCATION = 'location';
     const ASSET = 'asset';
     const USER = 'user';
+    const CONTRACT = 'contract';
 
     const ACCEPTANCE_PENDING = 'pending';
     /**
@@ -104,6 +105,7 @@ class Asset extends Depreciable
         'company_id',
         'image',
         'location_id',
+        'contract_id',
         'model_id',
         'name',
         'notes',
@@ -202,6 +204,18 @@ class Asset extends Depreciable
         }
         return false;
     }
+
+    public function availableForSell()
+    {
+        if (
+            (empty($this->assigned_to)) &&
+            (empty($this->deleted_at)) &&
+            (($this->assetstatus) && ($this->assetstatus->deployable == 1))) {
+            return true;
+        }
+        return false;
+    }
+
 
     public function availableForReview()
     {
@@ -572,6 +586,13 @@ class Asset extends Depreciable
     {
         return $this->belongsTo('\App\Models\Location', 'location_id');
     }
+
+    public function contract()
+    {
+        return $this->belongsTo('\App\Models\Contract', 'contract_id');
+    }
+
+
 
 
     /**

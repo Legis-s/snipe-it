@@ -85,6 +85,7 @@ class AssetsTransformer
             'requests_counter' => (int) $asset->requests_counter,
             'user_can_checkout' => (bool) $asset->availableForCheckout(),
             'user_can_review' => (bool) $asset->availableForReview(),
+            'user_can_sell' => (bool) $asset->availableForSell(),
             'purchase_id' => (int) $asset->purchase_id,
             'quality' => (int) $asset->quality,
             'nds' => (int) $asset->nds,
@@ -122,6 +123,7 @@ class AssetsTransformer
         }
 
         $permissions_array['available_actions'] = [
+            'sell' => (bool) Gate::allows('sell', Asset::class),
             'inventory' => (bool) Gate::allows('update', Asset::class),
             'checkout' => (bool) Gate::allows('checkout', Asset::class),
             'checkin' => (bool) Gate::allows('checkin', Asset::class),
