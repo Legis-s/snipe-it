@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AssetRequest;
 use App\Http\Requests\AssetCheckoutRequest;
 use App\Http\Transformers\AssetsTransformer;
+use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\Company;

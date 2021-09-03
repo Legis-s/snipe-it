@@ -964,10 +964,11 @@ class AssetsController extends Controller
             if (($request->filled('sold_at')) && ($request->get('sold_at')!= date("Y-m-d"))) {
                 $sold_at = $request->get('sold_at');
             }
-            // This item is checked out to a location
+            
             switch (request('checkout_to_type_s')) {
                 case 'user':
                     $assigned_to = User::findOrFail(request('assigned_user'));
+                    \Debugbar::info($assigned_to);
                     $assigned_type = "App\Models\User";
                     $status = Statuslabel::where('name', 'Выдано')->first();
                     $asset->status_id = $status->id;
@@ -977,15 +978,17 @@ class AssetsController extends Controller
                     break;
                 case 'contract':
                     $assigned_to = Contract::findOrFail(request('assigned_contract'));
+                    \Debugbar::info($assigned_to);
                     $assigned_type = "App\Models\Contract";
                     $asset->contract_id = $assigned_to->id;
                     $status = Statuslabel::where('name', 'Продано')->first();
                     $asset->status_id = $status->id;
                     break;
             }
-            $asset->assigned_to=$assigned_to;
-            $asset->location_id=null;
+            $asset->assigned_to=$assigned_to->id;
             $asset->assigned_type=$assigned_type;
+
+            $asset->location_id=null;
 
             if (($request->filled('name')) && $request->get('name')) {
                 $asset->name =  $request->get('name');
