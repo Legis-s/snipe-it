@@ -79,6 +79,35 @@ class ContractPresenter extends Presenter
         return json_encode($layout);
     }
 
+    /**
+     * Link to this locations name
+     * @return string
+     */
+    public function nameUrl()
+    {
+        return (string)link_to_route('contracts.show', $this->name, $this->id);
+    }
+
+
+    /**
+     * Url to view this item.
+     * @return string
+     */
+    public function viewUrl()
+    {
+        return route('contracts.show', $this->id);
+    }
+
+
+    public function glyph()
+    {
+        return '<i class="fa fa-usd" aria-hidden="true"></i>';
+    }
+
+
+    public function fullName() {
+        return $this->name;
+    }
 
 
 
