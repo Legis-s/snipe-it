@@ -158,11 +158,11 @@ Route::group(
         ]);
 
         Route::get('{assetId}/sell/', [
-            'as' => 'sell',
+            'as' => 'hardware/sell',
             'uses' => 'AssetsController@sellGet'
         ]);
         Route::post('{assetId}/sell/', [
-            'as' => 'sell',
+            'as' => 'hardware/sell',
             'uses' => 'AssetsController@sellPost'
         ]);
 

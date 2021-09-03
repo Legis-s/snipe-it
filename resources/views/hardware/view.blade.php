@@ -32,8 +32,22 @@
             </a>
           </li>
        @endcan
+         @can('sell', \App\Models\Asset::class)
+           <li role="menuitem">
+             <a href="{{ route('hardware/sell', $asset->id)  }}">
+               Продать
+             </a>
+           </li>
+         @endcan
       @endif
     @endif
+      @if ($asset->availableForCloseSell())
+        @can('sell', \App\Models\Asset::class)
+          <li role="menuitem">
+            <a href="#" class="closesell" data-tooltip="true" title="Есть закр. док.">Есть закр. док.</a>
+          </li>
+        @endcan
+      @endif
 
       @can('update', \App\Models\Asset::class)
         <li role="menuitem">
@@ -1213,6 +1227,21 @@
   @include ('partials.bootstrap-table')
   <script>
     $(function() {
+
+      $('.closesell').click(function() {
+        $.ajax({
+          url: '/api/v1/hardware/{{ $asset->id }}/closesell',
+          {{--url: '{{ route('api.purchases.resend', ['id'=> row.id]) }}',--}}
+          method: "POST",
+          headers: {
+            "X-Requested-With": 'XMLHttpRequest',
+            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+          },
+          success: function () {
+            location.reload();
+          }
+        });
+      });
       $('#assetHistory').on('post-body.bs.table', function (e, data) {
         // console.log("assetHistory");
         // $('.aniimated-thumbnials').lightGallery({
