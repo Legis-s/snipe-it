@@ -916,6 +916,7 @@ class AssetsController extends Controller
      */
     public function sellGet($assetId)
     {
+        $this->authorize('sell', Asset::class);
         // Check if the asset exists
         if (is_null($item = Asset::find(e($assetId)))) {
             return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));
@@ -943,46 +944,42 @@ class AssetsController extends Controller
      */
     public function sellPost(Request $request, $assetId)
     {
+        $this->authorize('sell', Asset::class);
         try {
             // Check if the asset exists
-            if (!$sale = Sale::find($assetId)) {
-                return redirect()->route('sale.index')->with('error', trans('admin/hardware/message.does_not_exist'));
-            } elseif (!$sale->availableForSell()) {
-                return redirect()->route('sale.index')->with('error', trans('admin/hardware/message.checkout.not_available'));
+            if (!$asset = Asset::find($assetId)) {
+                return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));
+            } elseif (!$asset->availableForSell()) {
+                return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.checkout.not_available'));
             }
-            $this->authorize('view', $sale);
             $admin = \Illuminate\Support\Facades\Auth::user();
-
-
-
 
             $checkout_at = date("Y-m-d H:i:s");
 
             if (($request->filled('contract_id')) && $request->get('contract_id')) {
-                $sale->contract_id = request('contract_id');
+                $asset->contract_id = request('contract_id');
             }
 
             if (($request->filled('user_responsible_id')) && $request->get('user_responsible_id')) {
-                $sale->user_responsible_id =  request('user_responsible_id');
+                $asset->user_responsible_id =  request('user_responsible_id');
             }
 
             if (($request->filled('name')) && $request->get('name')) {
-                $sale->name =  $request->get('name');
+                $asset->name =  $request->get('name');
             }
             if (($request->filled('note')) && $request->get('note')) {
-                $sale->note =  $request->get('note');
+                $asset->note =  $request->get('note');
             }
 
             if (($request->filled('closing_documents')) && $request->get('closing_documents')) {
-                $sale->closing_documents =  $request->get('closing_documents');
+                $asset->closing_documents =  $request->get('closing_documents');
             }
-
 
             if (($request->filled('sold_at')) && ($request->get('sold_at')!= date("Y-m-d"))) {
-                $sale->sold_at = $request->get('sold_at');
+                $asset->sold_at = $request->get('sold_at');
             }
 
-            if ($sale->user_responsible_id>0 ){
+            if ($asset->user_responsible_id>0 ){
                 $status = Statuslabel::where('name', 'Выдано')->first();
                 $sale->status_id = $status->id;
             }

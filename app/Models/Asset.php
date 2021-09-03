@@ -105,6 +105,7 @@ class Asset extends Depreciable
         'company_id',
         'image',
         'location_id',
+        'contract_id',
         'model_id',
         'name',
         'notes',
@@ -585,6 +586,13 @@ class Asset extends Depreciable
     {
         return $this->belongsTo('\App\Models\Location', 'location_id');
     }
+
+    public function contract()
+    {
+        return $this->belongsTo('\App\Models\Contract', 'contract_id');
+    }
+
+
 
 
     /**
