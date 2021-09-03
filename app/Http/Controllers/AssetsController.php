@@ -978,7 +978,7 @@ class AssetsController extends Controller
                 case 'contract':
                     $assigned_to = Contract::findOrFail(request('assigned_contract'));
                     $assigned_type = "App\Models\Contract";
-                    $asset->contract_id = request('contract_id');
+                    $asset->contract_id = $assigned_to->id;
                     $status = Statuslabel::where('name', 'Продано')->first();
                     $asset->status_id = $status->id;
                     break;

@@ -25,6 +25,10 @@
     {{ trans('general.archived') }}
   @elseif (Input::get('status')=='Deleted')
     {{ trans('general.deleted') }}
+  @elseif (Input::get('status')=='Sold')
+    Проданные
+  @elseif (Input::get('status')=='Issued_for_sale')
+    Выданные на продажу
   @endif
 @else
 {{ trans('general.all') }}

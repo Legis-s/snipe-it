@@ -507,18 +507,31 @@
                                 </a>
                             </li>
 
-                            @can('audit', \App\Models\Asset::class)
-                                <li{!! (Request::is('hardware/audit/due') ? ' class="active"' : '') !!}>
-                                    <a href="{{ route('assets.audit.due') }}">
-                                        <i class="fa fa-clock-o text-yellow"></i> {{ trans('general.audit_due') }}
-                                    </a>
-                                </li>
-                                <li{!! (Request::is('hardware/audit/overdue') ? ' class="active"' : '') !!}>
-                                    <a href="{{ route('assets.audit.overdue') }}">
-                                        <i class="fa fa-warning text-red"></i> {{ trans('general.audit_overdue') }}
-                                    </a>
-                                </li>
-                            @endcan
+                            <li{!! (Request::query('status') == 'Sold' ? ' class="active"' : '') !!}><a
+                                        href="{{ url('hardware?status=Sold') }}"><i
+                                            class="fa fa-usd text-red"></i>
+                                   Проданные
+                                </a>
+                            </li>
+                            <li{!! (Request::query('status') == 'Issued_for_sale' ? ' class="active"' : '') !!}><a
+                                        href="{{ url('hardware?status=Issued_for_sale') }}"><i
+                                            class="fa fa-usd text-blue"></i>
+                                    Выданные на продажу
+                                </a>
+                            </li>
+
+{{--                            @can('audit', \App\Models\Asset::class)--}}
+{{--                                <li{!! (Request::is('hardware/audit/due') ? ' class="active"' : '') !!}>--}}
+{{--                                    <a href="{{ route('assets.audit.due') }}">--}}
+{{--                                        <i class="fa fa-clock-o text-yellow"></i> {{ trans('general.audit_due') }}--}}
+{{--                                    </a>--}}
+{{--                                </li>--}}
+{{--                                <li{!! (Request::is('hardware/audit/overdue') ? ' class="active"' : '') !!}>--}}
+{{--                                    <a href="{{ route('assets.audit.overdue') }}">--}}
+{{--                                        <i class="fa fa-warning text-red"></i> {{ trans('general.audit_overdue') }}--}}
+{{--                                    </a>--}}
+{{--                                </li>--}}
+{{--                            @endcan--}}
 
                             <li class="divider">&nbsp;</li>
                             @can('checkout', \App\Models\Asset::class)

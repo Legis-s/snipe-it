@@ -198,6 +198,20 @@ class AssetsController extends Controller
         // related to fulltext searches on complex queries.
         // I am sad. :(
         switch ($request->input('status')) {
+
+            case 'Sold':
+                $assets->join('status_labels AS status_alias', function ($join) {
+                    $join->on('status_alias.id', "=", "assets.status_id")
+                        ->where('status_alias.name', '=', "Продано");
+                });
+//                $assets->withTrashed()->Deleted();
+                break;
+            case 'Issued_for_sale':
+                $assets->join('status_labels AS status_alias', function ($join) {
+                    $join->on('status_alias.id', "=", "assets.status_id")
+                        ->where('status_alias.name', '=', "Выдано");
+                });
+                break;
             case 'Deleted':
                 $assets->withTrashed()->Deleted();
                 break;
