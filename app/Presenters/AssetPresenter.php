@@ -120,6 +120,13 @@ class AssetPresenter extends Presenter
                 "title" => trans('admin/hardware/form.default_location'),
                 "visible" => false,
                 "formatter" => "deployedLocationFormatter"
+            ],[
+                "field" => "contract",
+                "searchable" => true,
+                "sortable" => true,
+                "title" => "Договор",
+                "visible" => true,
+                "formatter" => "contractsLinkObjFormatter"
             ], [
                 "field" => "manufacturer",
                 "searchable" => true,
@@ -324,6 +331,7 @@ class AssetPresenter extends Presenter
             "title" => "Продажа",
             "visible" => true,
             "formatter" => "sellFormatter",
+            "events"=> "operateEvents"
         ];
 
 

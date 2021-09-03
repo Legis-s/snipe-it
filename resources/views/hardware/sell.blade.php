@@ -52,13 +52,14 @@
                                 {!! $errors->first('name', '<span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span>') !!}
                             </div>
                         </div>
-{{--                    @include ('partials.forms.sell-selector', ['user_select' => 'true','contract_select' => 'true', 'location_select' => 'true'])--}}
+                    @include ('partials.forms.sell-selector', ['user_select' => 'true','contract_select' => 'true'])
 
-                    @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.user'), 'fieldname' => 'user_responsible_id'  , 'hide_new' => true])
+                    @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.user'), 'fieldname' => 'assigned_user','unselect' => 'true'])
+                    @include ('partials.forms.edit.contract-select', ['translated_name' => "Договор",  'fieldname' => 'assigned_contract','unselect' => 'true', 'style' => 'display:none;', 'required'=>'true','help_text'=>'Укажите только договор когда уже есть закрывающие документы'])
 
-{{--                    @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'assigned_location', 'style' => 'display:none;', 'required'=>'true'])--}}
 
-                    @include ('partials.forms.edit.contract-select', ['translated_name' => "Договор", 'fieldname' => 'contract_id'])
+
+                    @include ('partials.forms.edit.contract-id-select', ['translated_name' => "Договор", 'fieldname' => 'contract_id'])
 
 
 
@@ -105,14 +106,14 @@
                             </div>
                         </div>
 
-                        <!-- Set as Default -->
-                        <div class="form-group{{ $errors->has('default_label') ? ' has-error' : '' }}">
+{{--                        <!-- Set as Default -->--}}
+{{--                        <div class="form-group{{ $errors->has('default_label') ? ' has-error' : '' }}">--}}
 
-                            <label class="col-md-offset-3" style="padding-left: 15px;">
-                                <input type="checkbox" value="1" name="closing_documents" id="closing_documents" class="minimal" {{ Input::old('default_label', $item->closing_documents) == '1' ? ' checked="checked"' : '' }}> Есть закрывающие документы
-                            </label>
+{{--                            <label class="col-md-offset-3" style="padding-left: 15px;">--}}
+{{--                                <input type="checkbox" value="1" name="closing_documents" id="closing_documents" class="minimal" {{ Input::old('default_label', $item->closing_documents) == '1' ? ' checked="checked"' : '' }}> Есть закрывающие документы--}}
+{{--                            </label>--}}
 {{--                            <p class="col-md-offset-3 help-block"> {{ trans('admin/statuslabels/table.default_label_help') }}</p>--}}
-                        </div>
+{{--                        </div>--}}
 
                         <!-- Note -->
                         <div class="form-group {{ $errors->has('note') ? 'error' : '' }}">
@@ -154,44 +155,49 @@
 
 @section('moar_scripts')
     <script nonce="{{ csrf_token() }}">
-        // $('input[name=checkout_to_type_s]').on("change",function () {
-        //     var assignto_type = $('input[name=checkout_to_type_sx]:checked').val();
-        //     var userid = $('#assigned_user option:selected').val();
-        //
-        //     if (assignto_type == 'asset') {
-        //         $('#current_assets_box').fadeOut();
-        //         $('#assigned_asset').show();
-        //         $('#assigned_user').hide();
-        //         $('#assigned_location').hide();
-        //         $('#assigned_contract').hide();
-        //         $('.notification-callout').fadeOut();
-        //
-        //     } else if (assignto_type == 'location') {
-        //         $('#current_assets_box').fadeOut();
-        //         $('#assigned_asset').hide();
-        //         $('#assigned_user').hide();
-        //         $('#assigned_location').show();
-        //         $('#assigned_contract').hide();
-        //         $('.notification-callout').fadeOut();
-        //     } else if (assignto_type == 'contract') {
-        //         $('#current_assets_box').fadeOut();
-        //         $('#assigned_asset').hide();
-        //         $('#assigned_user').hide();
-        //         $('#assigned_location').hide();
-        //         $('#assigned_contract').show();
-        //         $('.notification-callout').fadeOut();
-        //     } else  {
-        //
-        //         $('#assigned_asset').hide();
-        //         $('#assigned_user').show();
-        //         $('#assigned_location').hide();
-        //         $('#assigned_contract').hide();
-        //         if (userid) {
-        //             $('#current_assets_box').fadeIn();
-        //         }
-        //         $('.notification-callout').fadeIn();
-        //
-        //     }
-        // });
+        $(function () {
+
+            $('input[name=checkout_to_type_s]').on("change",function () {
+                var assignto_type = $('input[name=checkout_to_type_s]:checked').val();
+                var userid = $('#assigned_user option:selected').val();
+
+                if (assignto_type == 'asset') {
+                    $('#current_assets_box').fadeOut();
+                    $('#assigned_asset').show();
+                    $('#assigned_user').hide();
+                    $('#assigned_location').hide();
+                    $('#assigned_contract').hide();
+                    $('.notification-callout').fadeOut();
+
+                } else if (assignto_type == 'location') {
+                    $('#current_assets_box').fadeOut();
+                    $('#assigned_asset').hide();
+                    $('#assigned_user').hide();
+                    $('#assigned_location').show();
+                    $('#assigned_contract').hide();
+                    $('.notification-callout').fadeOut();
+                } else if (assignto_type == 'contract') {
+                    $('#current_assets_box').fadeOut();
+                    $('#assigned_asset').hide();
+                    $('#assigned_user').hide();
+                    $('#assigned_location').hide();
+                    $('#assigned_contract').show();
+                    $('#contract_id').hide();
+                    $('.notification-callout').fadeOut();
+                } else  {
+
+                    $('#assigned_asset').hide();
+                    $('#assigned_user').show();
+                    $('#assigned_location').hide();
+                    $('#assigned_contract').hide();
+                    $('#contract_id').show();
+                    if (userid) {
+                        $('#current_assets_box').fadeIn();
+                    }
+                    $('.notification-callout').fadeIn();
+
+                }
+            });
+        });
     </script>
 @stop

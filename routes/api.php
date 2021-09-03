@@ -413,13 +413,19 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api', 'middleware' => 'api'], fu
             'as' => 'api.asset.audit',
             'uses' => 'AssetsController@audit'
         ]);
-
+        Route::post('{asset_id}/closesell',
+            [
+                'as' => 'api.assets.closesell',
+                'uses' => 'AssetsController@closesell'
+            ]
+        );
         Route::post('{asset_id}/checkout',
             [
                 'as' => 'api.assets.checkout',
                 'uses' => 'AssetsController@checkout'
             ]
         );
+
 
         Route::post('{asset_id}/checkin',
             [

@@ -353,19 +353,13 @@
     }
 
     function sellFormatter(value, row) {
-        {{--if (row.user_can_sell== true) {--}}
-        {{--    return '<a href="{{ url('/') }}/sales/' + row.id + '/sell/" class="btn btn-sm bg-maroon" data-tooltip="true" title="Check this item out">Продать</a>';--}}
-        {{--}else{--}}
-        {{--    return "";--}}
-        {{--}--}}
-
             if ((row.available_actions.sell == true) && (row.user_can_sell == true) && ((!row.asset_id) && (!row.assigned_to))) {
                 return '<a href="{{ url('/') }}/hardware/' + row.id + '/sell/" class="btn btn-sm bg-maroon" data-tooltip="true" title="Check this item out">Продать</a>';
-            }
-            else {
+            } else if (row.available_actions.sell == true && row.user_can_close_sell == true){
+                return '<span class="btn btn-sm bg-maroon closesell" data-tooltip="true" title="Есть закр. док.">Есть закр. док.</span>';
+            }else{
                 return ""
             }
-
     }
 
 
@@ -916,6 +910,20 @@
     $(function () {
 
         operateEvents = {
+            'click .closesell': function (e, value, row, index) {
+                $.ajax({
+                    url: '/api/v1/hardware/' + row.id + '/closesell',
+                    {{--url: '{{ route('api.purchases.resend', ['id'=> row.id]) }}',--}}
+                    method: "POST",
+                    headers: {
+                        "X-Requested-With": 'XMLHttpRequest',
+                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function () {
+                        $(".table").bootstrapTable('refresh');
+                    }
+                });
+            },
             'click .inventory': function (e, value, row, index) {
 
                 Swal.fire({

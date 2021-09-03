@@ -215,6 +215,16 @@ class Asset extends Depreciable
         }
         return false;
     }
+    public function availableForCloseSell()
+    {
+        $status = Statuslabel::where('name', 'Выдано')->first();
+        if ($this->status_id == $status->id){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
 
 
     public function availableForReview()

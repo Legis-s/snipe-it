@@ -12,6 +12,8 @@ use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\Company;
+use App\Models\Consumable;
+use App\Models\Contract;
 use App\Models\CustomField;
 use App\Models\Import;
 use App\Models\Location;
@@ -25,6 +27,7 @@ use Carbon\Carbon;
 use Config;
 use DB;
 use Gate;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Image;
@@ -952,17 +955,37 @@ class AssetsController extends Controller
             } elseif (!$asset->availableForSell()) {
                 return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.checkout.not_available'));
             }
-            $admin = \Illuminate\Support\Facades\Auth::user();
 
-            $checkout_at = date("Y-m-d H:i:s");
+            $admin_user = Auth::user();
+            $sold_at= date("Y-m-d H:i:s");
+            $assigned_to = null;
+            $assigned_type=null;
 
-            if (($request->filled('contract_id')) && $request->get('contract_id')) {
-                $asset->contract_id = request('contract_id');
+            if (($request->filled('sold_at')) && ($request->get('sold_at')!= date("Y-m-d"))) {
+                $sold_at = $request->get('sold_at');
             }
-
-            if (($request->filled('user_responsible_id')) && $request->get('user_responsible_id')) {
-                $asset->user_responsible_id =  request('user_responsible_id');
+            // This item is checked out to a location
+            switch (request('checkout_to_type_s')) {
+                case 'user':
+                    $assigned_to = User::findOrFail(request('assigned_user'));
+                    $assigned_type = "App\Models\User";
+                    $status = Statuslabel::where('name', 'Выдано')->first();
+                    $asset->status_id = $status->id;
+                    if (($request->filled('contract_id')) && $request->get('contract_id')) {
+                        $asset->contract_id = request('contract_id');
+                    }
+                    break;
+                case 'contract':
+                    $assigned_to = Contract::findOrFail(request('assigned_contract'));
+                    $assigned_type = "App\Models\Contract";
+                    $asset->contract_id = request('contract_id');
+                    $status = Statuslabel::where('name', 'Продано')->first();
+                    $asset->status_id = $status->id;
+                    break;
             }
+            $asset->assigned_to=$assigned_to;
+            $asset->location_id=null;
+            $asset->assigned_type=$assigned_type;
 
             if (($request->filled('name')) && $request->get('name')) {
                 $asset->name =  $request->get('name');
@@ -971,36 +994,29 @@ class AssetsController extends Controller
                 $asset->note =  $request->get('note');
             }
 
-            if (($request->filled('closing_documents')) && $request->get('closing_documents')) {
-                $asset->closing_documents =  $request->get('closing_documents');
-            }
+            if ($asset->save()) {
 
-            if (($request->filled('sold_at')) && ($request->get('sold_at')!= date("Y-m-d"))) {
-                $asset->sold_at = $request->get('sold_at');
+                $log = new Actionlog();
+                $log->user_id = Auth::id();
+                if ($asset->assigned_type== "App\Models\User"){
+                    $log->action_type = 'issued_for_sale';
+                }
+                if ($asset->assigned_type== "App\Models\Contract"){
+                    $log->action_type = 'sell';
+                }
+                $log->target_type = $assigned_type;
+                $log->target_id = $assigned_to->id;
+                $log->item_id = $asset->id;
+                $log->item_type = Asset::class;
+                $log->note = json_encode($request->all());
+                $log->save();
+                return redirect()->route("hardware.index")->with('success', trans('admin/hardware/message.checkout.success'));
             }
-
-            if ($asset->user_responsible_id>0 ){
-                $status = Statuslabel::where('name', 'Выдано')->first();
-                $sale->status_id = $status->id;
-            }
-
-            if ($sale->closing_documents > 0 && $sale->contract_id > 0){
-                $status = Statuslabel::where('name', 'Продано')->first();
-                $sale->status_id = $status->id;
-            }
-
-            if ($sale->save()) {
-                return redirect()->route("sales.index")->with('success', trans('admin/hardware/message.checkout.success'));
-            }
-
-//            if ($sale->checkOut($target, $admin, $checkout_at, $expected_checkin, e($request->get('note')), $request->get('name'),$location = null)) {
-//                return redirect()->route("hardware.index")->with('success', trans('admin/hardware/message.checkout.success'));
-//            }
 
             // Redirect to the asset management page with error
-            return redirect()->to("sales/$assetId/sell")->with('error', trans('admin/hardware/message.checkout.error'))->withErrors($sale->getErrors());
+            return redirect()->to("hardware/$assetId/sell")->with('error', trans('admin/hardware/message.checkout.error'))->withErrors($asset->getErrors());
         } catch (ModelNotFoundException $e) {
-            return redirect()->back()->with('error', trans('admin/hardware/message.checkout.error'))->withErrors($sale->getErrors());
+            return redirect()->back()->with('error', trans('admin/hardware/message.checkout.error'))->withErrors($asset->getErrors());
         } catch (CheckoutNotAllowed $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

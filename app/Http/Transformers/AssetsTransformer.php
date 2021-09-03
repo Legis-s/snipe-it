@@ -66,6 +66,10 @@ class AssetsTransformer
                 'id' => (int) $asset->defaultLoc->id,
                 'name'=> e($asset->defaultLoc->name)
             ]  : null,
+            'contract' => ($asset->contract) ? [
+                'id' => (int) $asset->contract->id,
+                'name'=> e($asset->contract->name)
+            ]  : null,
             'image' => ($asset->getImageUrl()) ? $asset->getImageUrl() : null,
             'assigned_to' => $this->transformAssignedTo($asset),
             'warranty_months' =>  ($asset->warranty_months > 0) ? e($asset->warranty_months . ' ' . trans('admin/hardware/form.months')) : null,
@@ -86,6 +90,7 @@ class AssetsTransformer
             'user_can_checkout' => (bool) $asset->availableForCheckout(),
             'user_can_review' => (bool) $asset->availableForReview(),
             'user_can_sell' => (bool) $asset->availableForSell(),
+            'user_can_close_sell' => (bool) $asset->availableForCloseSell(),
             'purchase_id' => (int) $asset->purchase_id,
             'quality' => (int) $asset->quality,
             'nds' => (int) $asset->nds,
