@@ -97,6 +97,7 @@ class Migration extends Command
                 $asset->assigned_type = "App\Models\User";
                 $asset->assigned_to = $sale->user_responsible_id;
             }
+            $asset->save();
 
             $sale->delete();
         }
