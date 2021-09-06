@@ -127,9 +127,22 @@ class AssetsController extends Controller
             $assets->InCategory($request->input('category_id'));
         }
 
+
         if ($request->filled('location_id')) {
             $assets->where('assets.location_id', '=', $request->input('location_id'));
         }
+
+
+        if ($request->filled('contract_id')) {
+            $assets->where('assets.contract_id', '=', $request->input('contract_id'));
+            $settings->show_archived_in_list = "1";
+//            $assets->join('status_labels AS status_alias', function ($join) {
+//                $join->on('status_alias.id', "=", "assets.status_id")
+//                    ->where('status_alias.name', '=', "Продано")
+//                    ->orWhere('status_alias.name', '=', "Выдано");
+//            });
+        }
+
 
         if ($request->filled('bitrix_object_id')) {
             $bitrix_object_id = $request->input('bitrix_object_id');

@@ -13,7 +13,34 @@
 @section('content')
 
     <div class="row">
+
         <div class="col-md-9">
+            <div class="box box-default">
+                <div class="box-header with-border">
+                    <div class="box-heading">
+                        <h2 class="box-title">Активы</h2>
+                    </div>
+                </div>
+                <div class="box-body">
+                    <div class="table table-responsive">
+                        <table
+                                data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayout() }}"
+                                data-cookie-id-table="assetsTable"
+                                data-pagination="true"
+                                data-id-table="assetsTable"
+                                data-search="true"
+                                data-side-pagination="server"
+                                data-show-columns="true"
+                                data-show-export="true"
+                                data-show-refresh="true"
+                                data-sort-order="asc"
+                                id="assetsTable"
+                                class="table table-striped snipe-table"
+                                data-url="{{route('api.assets.index', ['contract_id' => $contract->id]) }}">
+                        </table>
+                    </div><!-- /.table-responsive -->
+                </div><!-- /.box-body -->
+            </div> <!--/.box-->
             <div class="box box-default">
                 <div class="box-header with-border">
                     <div class="box-heading">
@@ -76,7 +103,6 @@
                     </div><!-- /.table-responsive -->
                 </div><!-- /.box-body -->
             </div> <!--/.box-->
-
         </div><!--/.col-md-9-->
 
         <div class="col-md-3">
