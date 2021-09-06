@@ -74,29 +74,29 @@
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-md-12">
-            <div class="table table-responsive">
-                <div id="toolbar_sales">
-                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#modal_sales">
-                        Добавить актив на продажу
-                    </button>
-                </div>
-                <p class="activ text-center text-bold text-danger hidden">Добавте хотя бы один актив на проджажу</p>
-                <table id="table_sales" class="table table-striped snipe-table">
-                    <thead>
-                    <th>#</th>
-                    <th>Модель</th>
-                    <th>Склад</th>
-                    <th>Закупочная цена</th>
-                    <th>НДС</th>
-                    <th>Количество</th>
-                    <th>Удалить</th>
-                    </thead>
-                </table>
-            </div><!-- /.table-responsive -->
-        </div>
-    </div>
+{{--    <div class="row">--}}
+{{--        <div class="col-md-12">--}}
+{{--            <div class="table table-responsive">--}}
+{{--                <div id="toolbar_sales">--}}
+{{--                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#modal_sales">--}}
+{{--                        Добавить актив на продажу--}}
+{{--                    </button>--}}
+{{--                </div>--}}
+{{--                <p class="activ text-center text-bold text-danger hidden">Добавте хотя бы один актив на проджажу</p>--}}
+{{--                <table id="table_sales" class="table table-striped snipe-table">--}}
+{{--                    <thead>--}}
+{{--                    <th>#</th>--}}
+{{--                    <th>Модель</th>--}}
+{{--                    <th>Склад</th>--}}
+{{--                    <th>Закупочная цена</th>--}}
+{{--                    <th>НДС</th>--}}
+{{--                    <th>Количество</th>--}}
+{{--                    <th>Удалить</th>--}}
+{{--                    </thead>--}}
+{{--                </table>--}}
+{{--            </div><!-- /.table-responsive -->--}}
+{{--        </div>--}}
+{{--    </div>--}}
 @stop
 
 @section('content')
