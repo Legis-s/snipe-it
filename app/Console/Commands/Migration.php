@@ -49,12 +49,10 @@ class Migration extends Command
     {
 
         $sales = Sale::where('deleted_at', NULL)->get();
-        
+        $this->info(count($sales));
         foreach ($sales as $sale) {
-            $this->info($sale);
+//            $this->info($sale);
             $asset = new Asset();
-            $asset->model()->associate(AssetModel::find((int)$sale->model_id));
-
             $asset->name = $sale->name;
             $asset->serial =  $sale->serial;;
             $asset->model_id =  $sale->model_id;
