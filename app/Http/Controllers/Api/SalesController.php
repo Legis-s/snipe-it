@@ -292,7 +292,7 @@ class SalesController extends Controller
 
 
         $total = $assets->count();
-        $assets = $assets->skip($offset)->take($limit)->get();
+        $assets = $assets->skip($offset)->get();
         return (new SalesTransformer)->transformSales($assets, $total);
     }
 
