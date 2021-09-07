@@ -74,14 +74,16 @@ class Migration extends Command
             $asset->contract_id = $sale->contract_id;
             $asset->deleted_at = $sale->deleted_at;
             $asset->quality = 5;
+            if($sale->closing_documents>0 && $sale->contract_id>0){
+                $asset->assigned_type = "App\Models\Contract";
+                $asset->assigned_to = $sale->contract_id;
+            }else if ($sale->user_responsible_id>0){
+                $asset->assigned_type = "App\Models\User";
+                $asset->assigned_to = $sale->user_responsible_id;
+            }
             $asset->save();
             if ($asset->id>0){
-
                 if($sale->closing_documents>0 && $sale->contract_id>0){
-                    $asset->assigned_type = "App\Models\Contract";
-                    $asset->assigned_to = $sale->contract_id;
-                    $asset->save();
-
                     $log = new Actionlog();
                     $log->user_id = $sale->user_id;
                     $log->action_type = 'sell';
@@ -91,9 +93,6 @@ class Migration extends Command
                     $log->item_type = Asset::class;
                     $log->save();
                 }else if ($sale->user_responsible_id>0){
-                    $asset->assigned_type = "App\Models\User";
-                    $asset->assigned_to = $sale->user_responsible_id;
-                    $asset->save();
                     $log = new Actionlog();
                     $log->user_id = $sale->user_id;
                     $log->action_type = 'issued_for_sale';
@@ -104,7 +103,6 @@ class Migration extends Command
                     $log->save();
                 }
             }
-
             $sale->delete();
         }
     }
