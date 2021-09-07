@@ -48,7 +48,7 @@ class Migration extends Command
     public function handle()
     {
 
-        $sales = Sale::get();;
+        $sales = Sale::get();
         foreach ($sales as $sale) {
             $this->info($sale);
             $asset = new Asset();
@@ -75,31 +75,34 @@ class Migration extends Command
             $asset->deleted_at = $sale->deleted_at;
             $asset->quality = 5;
             $asset->save();
-            if($sale->closing_documents>0 && $sale->contract_id>0){
-                $asset->assigned_type = "App\Models\Contract";
-                $asset->assigned_to = $sale->contract_id;
-                $asset->save();
+            if ($asset->id>0){
 
-                $log = new Actionlog();
-                $log->user_id = $sale->user_id;
-                $log->action_type = 'sell';
-                $log->target_type = "App\Models\Contract";
-                $log->target_id = $sale->contract_id;
-                $log->item_id = $asset->id;
-                $log->item_type = Asset::class;
-                $log->save();
-            }else if ($sale->user_responsible_id>0){
-                $asset->assigned_type = "App\Models\User";
-                $asset->assigned_to = $sale->user_responsible_id;
-                $asset->save();
-                $log = new Actionlog();
-                $log->user_id = $sale->user_id;
-                $log->action_type = 'issued_for_sale';
-                $log->target_type = "App\Models\User";
-                $log->target_id = $sale->user_responsible_id;
-                $log->item_id = $asset->id;
-                $log->item_type = Asset::class;
-                $log->save();
+                if($sale->closing_documents>0 && $sale->contract_id>0){
+                    $asset->assigned_type = "App\Models\Contract";
+                    $asset->assigned_to = $sale->contract_id;
+                    $asset->save();
+
+                    $log = new Actionlog();
+                    $log->user_id = $sale->user_id;
+                    $log->action_type = 'sell';
+                    $log->target_type = "App\Models\Contract";
+                    $log->target_id = $sale->contract_id;
+                    $log->item_id = $asset->id;
+                    $log->item_type = Asset::class;
+                    $log->save();
+                }else if ($sale->user_responsible_id>0){
+                    $asset->assigned_type = "App\Models\User";
+                    $asset->assigned_to = $sale->user_responsible_id;
+                    $asset->save();
+                    $log = new Actionlog();
+                    $log->user_id = $sale->user_id;
+                    $log->action_type = 'issued_for_sale';
+                    $log->target_type = "App\Models\User";
+                    $log->target_id = $sale->user_responsible_id;
+                    $log->item_id = $asset->id;
+                    $log->item_type = Asset::class;
+                    $log->save();
+                }
             }
 
             $sale->delete();
