@@ -48,7 +48,8 @@ class Migration extends Command
     public function handle()
     {
 
-        $sales = Sale::all();
+        $sales = Sale::where('status_id', '!=' , 5)
+            ->get();
         $this->info($sales->count());
         foreach ($sales as $sale) {
 //            $this->info($sale);
