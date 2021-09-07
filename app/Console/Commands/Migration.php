@@ -48,7 +48,8 @@ class Migration extends Command
     public function handle()
     {
 
-        $sales = Sale::get();
+        $sales = Sale::where('deleted_at', NULL)->get();
+        
         foreach ($sales as $sale) {
             $this->info($sale);
             $asset = new Asset();
