@@ -15,6 +15,12 @@
     <span class="caret"></span>
   </button>
   <ul class="dropdown-menu pull-right" role="menu">
+
+    <li role="menuitem">
+      <a href="#" id="print_tag">
+        Напечатать этикетку
+      </a>
+    </li>
     @if (($asset->assetstatus) && ($asset->assetstatus->deployable=='1'))
       @if ($asset->assigned_to != '')
         @can('checkin', \App\Models\Asset::class)
@@ -1227,7 +1233,41 @@
   @include ('partials.bootstrap-table')
   <script>
     $(function() {
+      $('#print_tag').click(function() {
+        console.log("test");
+        {{--var dataToSend = {--}}
+        {{--  text: "{{ $sale->asset_tag }}"--}}
+        {{--};--}}
+        $.ajax('http://localhost:8001/termal_print?text={{ $asset->asset_tag }}', {
+          success: function (data, textStatus, xhr) {
+            console.log(xhr.status);
+            if (xhr.status === 200) {
+              console.log(data);
+              {{--$.ajax({--}}
+              {{--  method: "POST",--}}
+              {{--  url: "{{ route('api.sales.inventory', $sale->id ) }}",--}}
+              {{--  headers: {--}}
+              {{--    "X-Requested-With": 'XMLHttpRequest',--}}
+              {{--    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')--}}
+              {{--  },--}}
+              {{--  success: function(data) {--}}
+              {{--    //console.log('ajax fired');--}}
+              {{--    // do some stuff here--}}
 
+
+              {{--  }--}}
+              {{--});--}}
+
+            } else {
+              console.log(data);
+            }
+          },
+          error: function () {
+            console.log("error");
+          }
+        });
+
+      });
       $('.closesell').click(function() {
         $.ajax({
           url: '/api/v1/hardware/{{ $asset->id }}/closesell',
