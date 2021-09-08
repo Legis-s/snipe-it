@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AssetRequest;
 use App\Http\Requests\AssetCheckoutRequest;
 use App\Http\Transformers\AssetsTransformer;
+use App\Http\Transformers\SalesTransformer;
 use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\AssetModel;
@@ -14,6 +15,7 @@ use App\Models\Company;
 use App\Models\Contract;
 use App\Models\CustomField;
 use App\Models\Location;
+use App\Models\Sale;
 use App\Models\Setting;
 use App\Models\Statuslabel;
 use App\Models\User;
@@ -960,4 +962,25 @@ class AssetsController extends Controller
         return response()->json(Helper::formatStandardApiResponse('success', ['asset' => e($asset->asset_tag)], trans('admin/hardware/message.checkin.error')));
 
     }
+    /**
+     * Returns JSON with information about an asset for detail view.
+     *
+     * @param int $assetId
+     * @return JsonResponse
+     * @since [v4.0]
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     */
+    public function inventory($id)
+    {
+
+        $this->authorize('view', Asset::class);
+
+        if ($asset = Asset::with('assetstatus')->with('assignedTo')->withTrashed()->findOrFail($id)) {
+            $status = Statuslabel::where('name', 'Ожидает проверки')->first();
+            $asset->status_id = $status->id;
+            $asset->save();
+            return (new AssetsTransformer())->transformAsset($asset);
+        }
+    }
+
 }

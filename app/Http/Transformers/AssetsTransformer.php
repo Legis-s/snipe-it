@@ -128,6 +128,7 @@ class AssetsTransformer
         }
 
         $permissions_array['available_actions'] = [
+            'print_label' => true,
             'sell' => (bool) Gate::allows('sell', Asset::class),
             'inventory' => (bool) Gate::allows('update', Asset::class),
             'checkout' => (bool) Gate::allows('checkout', Asset::class),

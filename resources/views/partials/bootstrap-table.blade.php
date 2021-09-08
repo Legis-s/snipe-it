@@ -171,7 +171,6 @@
     }
 
 
-
     // Make the edit/delete buttons
     function genericActionsFormatter(destination) {
         return function (value, row) {
@@ -189,6 +188,10 @@
                 var dest = 'hardware/maintenances';
             }
 
+            if ((row.available_actions) && (row.available_actions.print_label === true)) {
+                actions += '<span class="btn btn-sm btn-warning print_label" data-tooltip="true" title="Print label"><i class="fa fa-barcode" aria-hidden="true"></i><span class="sr-only">Print label</span></span>&nbsp;';
+            }
+
 
             if ((row.available_actions) && (row.available_actions.inventory === true)) {
                 actions += '<span class="btn btn-sm btn-warning inventory" data-tooltip="true" title="Inventory Item"><i class="fa fa-key" aria-hidden="true"></i><span class="sr-only">Inventory</span></span>&nbsp;';
@@ -201,7 +204,7 @@
             if ((row.available_actions) && (row.available_actions.clone === true)) {
                 actions += '<a href="{{ url('/') }}/' + dest + '/' + row.id + '/clone" class="btn btn-sm btn-info" data-tooltip="true" title="Clone Item"><i class="fa fa-copy" aria-hidden="true"></i><span class="sr-only">Clone</span></a>&nbsp;';
             }
-            
+
             if ((row.available_actions) && (row.available_actions.update === true)) {
                 actions += '<a href="{{ url('/') }}/' + dest + '/' + row.id + '/edit" class="btn btn-sm btn-warning" data-tooltip="true" title="Update Item"><i class="fa fa-pencil" aria-hidden="true"></i><span class="sr-only">Update</span></a>&nbsp;';
             }
@@ -269,14 +272,13 @@
             } else if (value.type == 'purchase') {
                 item_destination = 'purchases'
                 item_icon = 'fa-shopping-basket';
-            }else if (value.type == 'contract') {
+            } else if (value.type == 'contract') {
                 item_destination = 'contracts'
                 item_icon = 'fa-file';
-            }else if (value.type == 'sale') {
+            } else if (value.type == 'sale') {
                 item_destination = 'sales'
                 item_icon = 'fa-usd';
             }
-
 
 
             return '<nobr><a href="{{ url('/') }}/' + item_destination + '/' + value.id + '" data-tooltip="true" title="' + value.type + '"><i class="fa ' + item_icon + ' text-{{ $snipeSettings->skin!='' ? $snipeSettings->skin : 'blue' }} "></i> ' + value.name + '</a></nobr>';
@@ -292,19 +294,19 @@
     function quantityItemFormatter(value, row) {
         console.log(row);
         if ((row) && (row.type)) {
-            switch (row.type){
+            switch (row.type) {
                 case "purchase":
-                    return "<span class='text-success'  style='font-size: 130%; font-weight: bold'> +"+value+"</span>";
+                    return "<span class='text-success'  style='font-size: 130%; font-weight: bold'> +" + value + "</span>";
                 case "issued":
-                    return "<span class='text-danger' style='font-size: 130%; font-weight: bold'> -"+value+"</span>";
+                    return "<span class='text-danger' style='font-size: 130%; font-weight: bold'> -" + value + "</span>";
                 case "converted":
-                    return "<span class='text-success' style='font-size: 130%; font-weight: bold'> +"+value+"</span>";
+                    return "<span class='text-success' style='font-size: 130%; font-weight: bold'> +" + value + "</span>";
                 case "sold":
-                    return "<span class='text-danger' style='font-size: 130%; font-weight: bold'> -"+value+"</span>";
+                    return "<span class='text-danger' style='font-size: 130%; font-weight: bold'> -" + value + "</span>";
                 case "manually":
-                    return "<span class='text-success' style='font-size: 130%; font-weight: bold'> +"+value+"</span>";
+                    return "<span class='text-success' style='font-size: 130%; font-weight: bold'> +" + value + "</span>";
                 case "collected":
-                    return "<span class='text-success' style='font-size: 130%; font-weight: bold'> +"+value+"</span>";
+                    return "<span class='text-success' style='font-size: 130%; font-weight: bold'> +" + value + "</span>";
             }
         }
     }
@@ -318,48 +320,49 @@
     }
 
 
-
     function reviewFormatter(value, row) {
         if ((row.available_actions.review == true) && (row.user_can_review == true)) {
             return '<button type="button" class="btn btn-primary btn-sm review">Проверено</button>';
-        }else{
+        } else {
             return "";
         }
     }
+
     function review_asset_for_saleFormatter(value, row) {
         if ((row.available_actions.review == true) && (row.user_can_review == true)) {
             return '<button type="button" class="btn btn-primary btn-sm review_asset_for_sale">Проверено</button>';
-        }else{
+        } else {
             return "";
         }
     }
 
     function consumablesSellFormatter(value, row) {
-        if (row.user_can_sell== true) {
+        if (row.user_can_sell == true) {
             return '<a href="{{ url('/') }}/consumables/' + row.id + '/sell/" class="btn btn-sm bg-maroon" data-tooltip="true" title="Sell this item out">Продать</a>';
-        }else{
+        } else {
             return '<a href="{{ url('/') }}/consumables/' + row.id + '/sell/" class="btn btn-sm bg-maroon" data-tooltip="true" title="Sell this item out" disabled>Продать</a>';
         }
     }
+
     function consumablesReturnFormatter(value, row) {
         if (row.can_return == true && row.quantity != 0) {
             if (row.can_close_documents == true) {
                 return '<button class="btn btn-sm bg-maroon return" data-tooltip="true" title="Вернуть">Вернуть</button><br><button class="btn btn-sm bg-maroon close_documents" data-tooltip="true" title="Вернуть">Получены закр. док.</button>';
             }
             return '<button class="btn btn-sm bg-maroon return" data-tooltip="true" title="Вернуть">Вернуть</button>';
-        }else{
+        } else {
             return '';
         }
     }
 
     function sellFormatter(value, row) {
-            if ((row.available_actions.sell == true) && (row.user_can_sell == true) && ((!row.asset_id) && (!row.assigned_to))) {
-                return '<a href="{{ url('/') }}/hardware/' + row.id + '/sell/" class="btn btn-sm bg-maroon" data-tooltip="true" title="Check this item out">Продать</a>';
-            } else if (row.available_actions.sell == true && row.user_can_close_sell == true){
-                return '<span class="btn btn-sm bg-maroon closesell" data-tooltip="true" title="Есть закр. док.">Есть закр. док.</span>';
-            }else{
-                return ""
-            }
+        if ((row.available_actions.sell == true) && (row.user_can_sell == true) && ((!row.asset_id) && (!row.assigned_to))) {
+            return '<a href="{{ url('/') }}/hardware/' + row.id + '/sell/" class="btn btn-sm bg-maroon" data-tooltip="true" title="Check this item out">Продать</a>';
+        } else if (row.available_actions.sell == true && row.user_can_close_sell == true) {
+            return '<span class="btn btn-sm bg-maroon closesell" data-tooltip="true" title="Есть закр. док.">Есть закр. док.</span>';
+        } else {
+            return ""
+        }
     }
 
 
@@ -502,23 +505,23 @@
 
     }
 
-    function photosFormatter(value,row) {
+    function photosFormatter(value, row) {
         var result = "";
-        if (value){
-            if (value.length>0){
+        if (value) {
+            if (value.length > 0) {
                 result = ' <div class="aniimated-thumbnials" >';
                 value.forEach((photo) => {
-                    if (!photo.comment){
+                    if (!photo.comment) {
                         photo.comment = "";
                     }
-                    result+='<a href="'+photo.path+'" data-lightbox="image-1" data-title="'+photo.comment+'"><img width="200" class="img-thumbnail"  data-toggle="tooltip" data-placement="bottom" title="'+photo.comment+'" src="'+photo.path+'" /></a>';
+                    result += '<a href="' + photo.path + '" data-lightbox="image-1" data-title="' + photo.comment + '"><img width="200" class="img-thumbnail"  data-toggle="tooltip" data-placement="bottom" title="' + photo.comment + '" src="' + photo.path + '" /></a>';
                 });
-                result+='  </div>';
+                result += '  </div>';
                 return result;
-            }else {
+            } else {
                 return '';
             }
-        }else {
+        } else {
             return '';
         }
 
@@ -755,7 +758,7 @@
 
 //https://bitrix.legis-s.ru/crm/object/details/2952/
         if (value) {
-            return '<a href="https://bitrix.legis-s.ru/crm/object/details/'+value+'/"   target="_blank" >'+value+'</a>';
+            return '<a href="https://bitrix.legis-s.ru/crm/object/details/' + value + '/"   target="_blank" >' + value + '</a>';
         }
     }
 
@@ -777,7 +780,7 @@
 
 //https://bitrix.legis-s.ru/crm/object/details/2952/
         if (value) {
-            return '<a href="https://bitrix.legis-s.ru/crm/object/details/'+value+'/"   target="_blank" >'+value+'</a>';
+            return '<a href="https://bitrix.legis-s.ru/crm/object/details/' + value + '/"   target="_blank" >' + value + '</a>';
         }
     }
 
@@ -796,19 +799,19 @@
     }
 
 
-    function assetsCountFormatter(value,row) {
-        if (row.assets_count_ok>0){
-            return row.assets_count_ok + "/"+value;
-        }else{
+    function assetsCountFormatter(value, row) {
+        if (row.assets_count_ok > 0) {
+            return row.assets_count_ok + "/" + value;
+        } else {
             return value;
         }
     }
 
 
-    function consumablesCountFormatter(value,row) {
-        if (row.consumables_count_real>0){
-            return row.consumables_count_real + "/"+value;
-        }else{
+    function consumablesCountFormatter(value, row) {
+        if (row.consumables_count_real > 0) {
+            return row.consumables_count_real + "/" + value;
+        } else {
             return value;
         }
     }
@@ -832,12 +835,12 @@
         return 'not an array';
     }
 
-    function lifetimeFormatter(value,row) {
-        if (row.model && row.model.lifetime){
+    function lifetimeFormatter(value, row) {
+        if (row.model && row.model.lifetime) {
             return row.model.lifetime
-        }else if(row.category && row.category.lifetime){
+        } else if (row.category && row.category.lifetime) {
 
-        }else {
+        } else {
             return "";
         }
     }
@@ -866,7 +869,7 @@
 
     function bitrixIdFormatter(value, row) {
         if (value) {
-            return "<a href='https://bitrix.legis-s.ru/services/lists/52/element/0/"+value+"/?list_section_id=' target='_blank'>"+value+"</a>";
+            return "<a href='https://bitrix.legis-s.ru/services/lists/52/element/0/" + value + "/?list_section_id=' target='_blank'>" + value + "</a>";
         } else {
             if (row.user) {
                 {{--return '<a href="{{ url('/') }}/api/v1/purchases/' + row.id + '/resend"> Отправить заново</a>';--}}
@@ -876,9 +879,10 @@
             }
         }
     }
+
     function bitrixTaskIdFormatter(value, row) {
         if (value) {
-            return "<a href='https://bitrix.legis-s.ru/company/personal/user/"+row.user.bitrix_id+"/tasks/task/view/"+value+"/' target='_blank'>"+value+"</a>";
+            return "<a href='https://bitrix.legis-s.ru/company/personal/user/" + row.user.bitrix_id + "/tasks/task/view/" + value + "/' target='_blank'>" + value + "</a>";
         } else {
             return ' ';
         }
@@ -886,14 +890,14 @@
 
     function priceFormatter(value, row) {
         if (row.currency && row.final_price) {
-            return "<span style='font-size: 120%; font-weight: bold;' class='text-primary'>"+row.final_price+"<br>"+row.currency+"</span>";
+            return "<span style='font-size: 120%; font-weight: bold;' class='text-primary'>" + row.final_price + "<br>" + row.currency + "</span>";
         } else {
         }
     }
 
     function bitrixIdContractFormatter(value, row) {
         if (value) { //https://bitrix.legis-s.ru/crm/contract/details/4537/
-            return "<a href='https://bitrix.legis-s.ru/crm/contract/details/"+value+"/' target='_blank'>"+value+"</a>";
+            return "<a href='https://bitrix.legis-s.ru/crm/contract/details/" + value + "/' target='_blank'>" + value + "</a>";
         }
     }
 
@@ -910,6 +914,32 @@
     $(function () {
 
         operateEvents = {
+            'click .print_label': function (e, value, row, index) {
+                $.ajax('http://localhost:8001/termal_print?text=' + row.asset_tag, {
+                    success: function (data, textStatus, xhr) {
+                        console.log(xhr.status);
+                        if (xhr.status === 200) {
+                            $.ajax({
+                                method: "POST",
+                                url: '/api/v1/hardware/' + row.id + '/inventory',
+                                headers: {
+                                    "X-Requested-With": 'XMLHttpRequest',
+                                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                                },
+                                success: function (data) {
+
+                                }
+                            });
+
+                        } else {
+                            console.log(data);
+                        }
+                    },
+                    error: function () {
+                        console.log("error");
+                    }
+                });
+            },
             'click .closesell': function (e, value, row, index) {
                 $.ajax({
                     url: '/api/v1/hardware/' + row.id + '/closesell',
@@ -945,7 +975,7 @@
                         var sendData = {
                             asset_tag: result.value,
                         };
-                        console.log("asset_tag: "+result.value);
+                        console.log("asset_tag: " + result.value);
                         $.ajax({
                             type: 'PATCH',
                             url: "/api/v1/hardware/" + row.id + "",
@@ -989,7 +1019,7 @@
                         $(".table").bootstrapTable('refresh');
                         $.ajax({
                             type: 'GET',
-                            url:"/api/v1/purchases/"+row.purchase_id,
+                            url: "/api/v1/purchases/" + row.purchase_id,
                             headers: {
                                 "X-Requested-With": 'XMLHttpRequest',
                                 "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
@@ -1000,25 +1030,25 @@
                                 var result = "";
                                 switch (status) {
                                     case "inventory":
-                                        result=  '<span class="label label-warning">В процессе инвентаризации</span>';
+                                        result = '<span class="label label-warning">В процессе инвентаризации</span>';
                                         break;
                                     case "in_payment":
-                                        result= '<span class="label label-primary">В оплате</span>';
+                                        result = '<span class="label label-primary">В оплате</span>';
                                         break;
                                     case "review":
-                                        result= '<span class="label label-warning">В процессе проверки</span>';
+                                        result = '<span class="label label-warning">В процессе проверки</span>';
                                         break;
                                     case "finished":
-                                        result= '<span class="label label-success">Завершено</span>';
+                                        result = '<span class="label label-success">Завершено</span>';
                                         break;
                                     case "rejected":
-                                        result= '<span class="label label-danger">Отклонено</span>';
+                                        result = '<span class="label label-danger">Отклонено</span>';
                                         break;
                                     case "paid":
-                                        result= '<span class="label label-success">Оплачено</span>';
+                                        result = '<span class="label label-success">Оплачено</span>';
                                         break;
                                     case "inprogress":
-                                        result= '<span class="label label-primary">На согласовании</span>';
+                                        result = '<span class="label label-primary">На согласовании</span>';
                                         break;
                                 }
                                 $('.status_label').html(result);
@@ -1042,7 +1072,7 @@
 
                         $.ajax({
                             type: 'GET',
-                            url:"/api/v1/purchases/"+row.purchase_id,
+                            url: "/api/v1/purchases/" + row.purchase_id,
                             headers: {
                                 "X-Requested-With": 'XMLHttpRequest',
                                 "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
@@ -1053,25 +1083,25 @@
                                 var result = "";
                                 switch (status) {
                                     case "inventory":
-                                        result=  '<span class="label label-warning">В процессе инвентаризации</span>';
+                                        result = '<span class="label label-warning">В процессе инвентаризации</span>';
                                         break;
                                     case "in_payment":
-                                        result= '<span class="label label-primary">В оплате</span>';
+                                        result = '<span class="label label-primary">В оплате</span>';
                                         break;
                                     case "review":
-                                        result= '<span class="label label-warning">В процессе проверки</span>';
+                                        result = '<span class="label label-warning">В процессе проверки</span>';
                                         break;
                                     case "finished":
-                                        result= '<span class="label label-success">Завершено</span>';
+                                        result = '<span class="label label-success">Завершено</span>';
                                         break;
                                     case "rejected":
-                                        result= '<span class="label label-danger">Отклонено</span>';
+                                        result = '<span class="label label-danger">Отклонено</span>';
                                         break;
                                     case "paid":
-                                        result= '<span class="label label-success">Оплачено</span>';
+                                        result = '<span class="label label-success">Оплачено</span>';
                                         break;
                                     case "inprogress":
-                                        result= '<span class="label label-primary">На согласовании</span>';
+                                        result = '<span class="label label-primary">На согласовании</span>';
                                         break;
                                 }
                                 $('.status_label').html(result);

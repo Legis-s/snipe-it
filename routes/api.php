@@ -441,6 +441,13 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api', 'middleware' => 'api'], fu
             ]
         );
 
+        Route::post('{asset_id}/inventory',
+            [
+                'as' => 'api.assets.inventory',
+                'uses' => 'AssetsController@inventory'
+            ]
+        );
+
     });
 
     /*--- Asset Maintenances API ---*/

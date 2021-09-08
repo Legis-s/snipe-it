@@ -1243,20 +1243,17 @@
             console.log(xhr.status);
             if (xhr.status === 200) {
               console.log(data);
-              {{--$.ajax({--}}
-              {{--  method: "POST",--}}
-              {{--  url: "{{ route('api.sales.inventory', $sale->id ) }}",--}}
-              {{--  headers: {--}}
-              {{--    "X-Requested-With": 'XMLHttpRequest',--}}
-              {{--    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')--}}
-              {{--  },--}}
-              {{--  success: function(data) {--}}
-              {{--    //console.log('ajax fired');--}}
-              {{--    // do some stuff here--}}
+              $.ajax({
+                method: "POST",
+                url: "{{ route('api.assets.inventory', $sale->id ) }}",
+                headers: {
+                  "X-Requested-With": 'XMLHttpRequest',
+                  "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(data) {
 
-
-              {{--  }--}}
-              {{--});--}}
+                }
+              });
 
             } else {
               console.log(data);
