@@ -1245,7 +1245,7 @@
               console.log(data);
               $.ajax({
                 method: "POST",
-                url: "{{ route('api.assets.inventory', $sale->id ) }}",
+                url: "{{ route('api.assets.inventory', $asset->id ) }}",
                 headers: {
                   "X-Requested-With": 'XMLHttpRequest',
                   "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
