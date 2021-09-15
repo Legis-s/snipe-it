@@ -137,32 +137,32 @@
 
 
 
-        <div class="box box-default">
-            <div class="box-header with-border">
-                <div class="box-heading">
-                    <h2 class="box-title">Активы на продажу</h2>
-                </div>
-            </div>
-            <div class="box-body">
-                <div class="table table-responsive">
-                    <table
-                            data-columns="{{ \App\Presenters\SalesPresenter::dataTableLayout() }}"
+{{--        <div class="box box-default">--}}
+{{--            <div class="box-header with-border">--}}
+{{--                <div class="box-heading">--}}
+{{--                    <h2 class="box-title">Активы на продажу</h2>--}}
+{{--                </div>--}}
+{{--            </div>--}}
+{{--            <div class="box-body">--}}
+{{--                <div class="table table-responsive">--}}
+{{--                    <table--}}
+{{--                            data-columns="{{ \App\Presenters\SalesPresenter::dataTableLayout() }}"--}}
 {{--                            data-cookie-id-table="salesListingTable"--}}
-                            data-pagination="true"
-                            data-id-table="salesListingTable"
-                            data-search="true"
-                            data-side-pagination="server"
-                            data-show-columns="true"
-                            data-show-export="true"
-                            data-show-refresh="true"
+{{--                            data-pagination="true"--}}
+{{--                            data-id-table="salesListingTable"--}}
+{{--                            data-search="true"--}}
+{{--                            data-side-pagination="server"--}}
+{{--                            data-show-columns="true"--}}
+{{--                            data-show-export="true"--}}
+{{--                            data-show-refresh="true"--}}
 {{--                            data-sort-order="asc"--}}
-                            id="salesListingTable"
-                            class="table table-striped snipe-table"
-                            data-url="{{route('api.sales.index', ['purchase_id' => $purchase->id]) }}">
-                    </table>
-                </div><!-- /.table-responsive -->
-            </div><!-- /.box-body -->
-        </div> <!--/.box-->
+{{--                            id="salesListingTable"--}}
+{{--                            class="table table-striped snipe-table"--}}
+{{--                            data-url="{{route('api.sales.index', ['purchase_id' => $purchase->id]) }}">--}}
+{{--                    </table>--}}
+{{--                </div><!-- /.table-responsive -->--}}
+{{--            </div><!-- /.box-body -->--}}
+{{--        </div> <!--/.box-->--}}
     </div><!--/.col-md-9-->
     <div class="col-md-2">
         <div class="box box-default">
@@ -300,6 +300,18 @@
                             </div>
                             <div class="col-md-6">
                                 {{ $purchase->comment }}
+                            </div>
+                        </div>
+                    @endif
+                    @if ($purchase->bitrix_task_id)
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>
+                                    Задача
+                                </strong>
+                            </div>
+                            <div class="col-md-6">
+                                <a href="https://bitrix.legis-s.ru/company/personal/user/290/tasks/task/view/{{ $purchase->bitrix_task_id }}/">{{ $purchase->bitrix_task_id }}</a>
                             </div>
                         </div>
                     @endif
