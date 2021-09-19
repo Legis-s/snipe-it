@@ -23,7 +23,18 @@ class Actionlog extends SnipeModel
 
     protected $table      = 'action_logs';
     public $timestamps = true;
-    protected $fillable   = [ 'created_at', 'item_type','user_id','item_id','action_type','note','target_id', 'target_type' ,'log_meta','photos'];
+    protected $fillable   = [ 'created_at',
+        'item_type',
+        'user_id',
+        'item_id',
+        'action_type',
+        'note',
+        'target_id',
+        'target_type',
+        'log_meta',
+        'biometric_uid',
+        'biometric_result',
+        'photos'];
 
     use Searchable;
     

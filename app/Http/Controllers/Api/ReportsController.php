@@ -51,7 +51,9 @@ class ReportsController extends Controller
             'user_id',
             'action_type',
             'note',
-            'photos'
+            'photos',
+            'biometric_uid',
+            'biometric_result',
         ];
         
         $sort = in_array($request->input('sort'), $allowed_columns) ? e($request->input('sort')) : 'created_at';

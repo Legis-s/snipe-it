@@ -16,6 +16,17 @@ use Illuminate\Http\Request;
 
 Route::group(['prefix' => 'v1', 'namespace' => 'Api', 'middleware' => 'api'], function () {
 
+
+    Route::group(['prefix' => 'biometric'], function () {
+        Route::get('check/{id}',
+            [
+                'as' => 'api.biometric.check',
+                'uses' => 'BiometricController@check'
+            ]
+        );
+
+    });
+
     Route::group(['prefix' => 'account'], function () {
         Route::get('requestable/hardware',
             [

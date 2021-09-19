@@ -250,7 +250,20 @@ class Asset extends Depreciable
      * @return bool
      */
     //FIXME: The admin parameter is never used. Can probably be removed.
-    public function checkOut($target, $admin = null, $checkout_at = null, $expected_checkin = null, $note = null, $name = null, $location = null,$quality= null,$depreciable_cost= null,$photos_json= null)
+    public function checkOut(
+        $target,
+        $admin = null,
+        $checkout_at = null,
+        $expected_checkin = null,
+        $note = null,
+        $name = null,
+        $location = null,
+        $quality= null,
+        $depreciable_cost= null,
+        $photos_json= null,
+        $biometric_uid = null,
+        $biometric_result = null
+    )
     {
         if (!$target) {
             return false;
@@ -308,7 +321,7 @@ class Asset extends Depreciable
             }
         }
         if ($this->save()) {
-            $this->logCheckout($note, $target,$changed,$photos_json);
+            $this->logCheckout($note, $target,$changed,$photos_json,$biometric_uid,$biometric_result);
             $this->increment('checkout_counter', 1);
             return true;
         }
@@ -671,6 +684,14 @@ class Asset extends Depreciable
     {
         if (($this->model) && ($this->model->category)) {
             return $this->model->category->require_acceptance;
+        }
+
+    }
+
+    public function requireBiometricConfirmation()
+    {
+        if (($this->model) && ($this->model->category)) {
+            return $this->model->category->require_biometric_confirmation;
         }
 
     }
