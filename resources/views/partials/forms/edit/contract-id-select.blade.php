@@ -6,7 +6,7 @@
         <select class="js-data-ajax" data-endpoint="contracts" data-placeholder="Выберите договор" name="{{ $fieldname }}" style="width: 100%" id="{{ $fieldname }}_contract_select" aria-label="{{ $fieldname }}">
             @if ($contract_id = Input::old($fieldname, (isset($item)) ? $item->{$fieldname} : ''))
                 <option value="{{ $contract_id }}" selected="selected" role="option" aria-selected="true"  role="option">
-                    {{ (\App\Models\Contract::find($contract_id)) ? \App\Models\Contract::find($contract_id)->name : '' }}
+                    {{ (\App\Models\Contract::find($contract_id)) ? \App\Models\Contract::find($contract_id)->present()->fullName : '' }}
                 </option>
             @else
                 <option value=""  role="option">Выберите договор</option>

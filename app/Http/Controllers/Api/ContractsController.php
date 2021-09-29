@@ -12,6 +12,7 @@ use App\Http\Transformers\LocationsTransformer;
 use App\Http\Transformers\SelectlistTransformer;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use vendor\project\StatusTest;
 
 class ContractsController extends Controller
 {
@@ -141,6 +142,7 @@ class ContractsController extends Controller
         $contracts = Contract::select([
             'contracts.id',
             'contracts.name',
+            'contracts.number',
         ]);
 
         $page = 1;
@@ -154,6 +156,16 @@ class ContractsController extends Controller
 
         $contracts = $contracts->orderBy('name', 'ASC')->get();
 
+        foreach ($contracts as $contract) {
+            $name_str = '';
+            if ($contract->number!='') {
+                $name_str .= "[".e($contract->number).'] ';
+            }
+            $name_str .= e($contract->name);
+
+
+            $contract->use_text = $name_str;
+        }
 
         $paginated_results =  new LengthAwarePaginator($contracts->forPage($page, 500), $contracts->count(), 500, $page, []);
 
