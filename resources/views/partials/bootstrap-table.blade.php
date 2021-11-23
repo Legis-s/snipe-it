@@ -59,6 +59,9 @@
             pageList: ['10', '20', '30', '50', '100', '150', '200', '500'],
             pageSize: {{  (($snipeSettings->per_page!='') && ($snipeSettings->per_page > 0)) ? $snipeSettings->per_page : 20 }},
             paginationVAlign: 'both',
+            onPreBody: function (data) {
+                $('[data-toggle="tooltip"]').tooltip();
+            },
             formatLoadingMessage: function () {
                 return '<h2><i class="fa fa-spinner fa-spin" aria-hidden="true"></i> Loading... please wait.... </h4>';
             },
@@ -239,7 +242,28 @@
         }
     }
 
+    function actionTypeFormatter(value, row) {
+        if (value == "выдать"){
+            if (row.biometric_uid && row.biometric_result){
+                var fio = "";
+                try {
+                    console.log(row.biometric_result)
+                    var result = JSON.parse(row.biometric_result);
+                    if (result.fio){
+                        fio = result.fio;
+                    }
+                } catch(e) {
+                   console.log(e);
+                }
+                return "<span data-toggle='tooltip' data-placement='top' title='Подтверждено: "+fio+"'><i class='fa fa-hand-o-up' aria-hidden='true'></i> "+value+"</span>";
+            }else {
+                return "<i class='fa fa-hand-o-up' aria-hidden='true'></i> "+value+"";
+            }
+        }else{
+            return value;
+        }
 
+    }
     // This handles the icons and display of polymorphic entries
     function polymorphicItemFormatter(value) {
 

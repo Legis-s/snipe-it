@@ -17,7 +17,7 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('css/sweetalert2.min.css') }}">
 
 <div class="row">
-    <div class="col-md-8">
+    <div class="col-md-10">
         <div class="box box-default">
             <div class="box-header with-border">
                 <div class="box-heading">
@@ -137,34 +137,34 @@
 
 
 
-        <div class="box box-default">
-            <div class="box-header with-border">
-                <div class="box-heading">
-                    <h2 class="box-title">Активы на продажу</h2>
-                </div>
-            </div>
-            <div class="box-body">
-                <div class="table table-responsive">
-                    <table
-                            data-columns="{{ \App\Presenters\SalesPresenter::dataTableLayout() }}"
+{{--        <div class="box box-default">--}}
+{{--            <div class="box-header with-border">--}}
+{{--                <div class="box-heading">--}}
+{{--                    <h2 class="box-title">Активы на продажу</h2>--}}
+{{--                </div>--}}
+{{--            </div>--}}
+{{--            <div class="box-body">--}}
+{{--                <div class="table table-responsive">--}}
+{{--                    <table--}}
+{{--                            data-columns="{{ \App\Presenters\SalesPresenter::dataTableLayout() }}"--}}
 {{--                            data-cookie-id-table="salesListingTable"--}}
-                            data-pagination="true"
-                            data-id-table="salesListingTable"
-                            data-search="true"
-                            data-side-pagination="server"
-                            data-show-columns="true"
-                            data-show-export="true"
-                            data-show-refresh="true"
+{{--                            data-pagination="true"--}}
+{{--                            data-id-table="salesListingTable"--}}
+{{--                            data-search="true"--}}
+{{--                            data-side-pagination="server"--}}
+{{--                            data-show-columns="true"--}}
+{{--                            data-show-export="true"--}}
+{{--                            data-show-refresh="true"--}}
 {{--                            data-sort-order="asc"--}}
-                            id="salesListingTable"
-                            class="table table-striped snipe-table"
-                            data-url="{{route('api.sales.index', ['purchase_id' => $purchase->id]) }}">
-                    </table>
-                </div><!-- /.table-responsive -->
-            </div><!-- /.box-body -->
-        </div> <!--/.box-->
+{{--                            id="salesListingTable"--}}
+{{--                            class="table table-striped snipe-table"--}}
+{{--                            data-url="{{route('api.sales.index', ['purchase_id' => $purchase->id]) }}">--}}
+{{--                    </table>--}}
+{{--                </div><!-- /.table-responsive -->--}}
+{{--            </div><!-- /.box-body -->--}}
+{{--        </div> <!--/.box-->--}}
     </div><!--/.col-md-9-->
-    <div class="col-md-4">
+    <div class="col-md-2">
         <div class="box box-default">
             <div class="box-header with-border">
                 <div class="box-heading">
@@ -225,6 +225,18 @@
                         </div>
                     </div>
                 @endif
+                    @if ($purchase->invoice_number)
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>
+                                    Название
+                                </strong>
+                            </div>
+                            <div class="col-md-6">
+                                {{ $purchase->invoice_number }}
+                            </div>
+                        </div>
+                    @endif
                 @if ($purchase->invoice_file)
                         <div class="row">
                             <div class="col-md-6">
@@ -298,8 +310,20 @@
                                     Комментарий
                                 </strong>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 {{ $purchase->comment }}
+                            </div>
+                        </div>
+                    @endif
+                    @if ($purchase->bitrix_task_id)
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>
+                                    Задача
+                                </strong>
+                            </div>
+                            <div class="col-md-6">
+                                <a href="https://bitrix.legis-s.ru/company/personal/user/290/tasks/task/view/{{ $purchase->bitrix_task_id }}/">{{ $purchase->bitrix_task_id }}</a>
                             </div>
                         </div>
                     @endif
@@ -319,31 +343,31 @@
     </div>
 </div>
 
-<!-- Modal Актив на продажу -->
-<div class="modal fade" id="check_consumable" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                            aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="myModalLabel">Принять расходник</h4>
-            </div>
-            <div class="modal-body2">
-                <div class="row">
-                    <div class="col-md-12">
-                        <form class="form-horizontal">
+{{--<!-- Modal Актив на продажу -->--}}
+{{--<div class="modal fade" id="check_consumable" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">--}}
+{{--    <div class="modal-dialog" role="document">--}}
+{{--        <div class="modal-content">--}}
+{{--            <div class="modal-header">--}}
+{{--                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span--}}
+{{--                            aria-hidden="true">&times;</span></button>--}}
+{{--                <h4 class="modal-title" id="myModalLabel">Принять расходник</h4>--}}
+{{--            </div>--}}
+{{--            <div class="modal-body2">--}}
+{{--                <div class="row">--}}
+{{--                    <div class="col-md-12">--}}
+{{--                        <form class="form-horizontal">--}}
 
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
-                <button type="button" class="btn btn-primary" id="addSalesButton">Принять</button>
-            </div>
-        </div>
-    </div>
-</div>
+{{--                        </form>--}}
+{{--                    </div>--}}
+{{--                </div>--}}
+{{--            </div>--}}
+{{--            <div class="modal-footer">--}}
+{{--                <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>--}}
+{{--                <button type="button" class="btn btn-primary" id="addSalesButton">Принять</button>--}}
+{{--            </div>--}}
+{{--        </div>--}}
+{{--    </div>--}}
+{{--</div>--}}
 
 
 @stop

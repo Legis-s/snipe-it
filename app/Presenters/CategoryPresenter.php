@@ -95,6 +95,13 @@ class CategoryPresenter extends Presenter
                 "title" => trans('admin/categories/table.require_acceptance'),
                 "visible" => true,
                 "formatter" => 'trueFalseFormatter',
+            ], [
+                "field" => "require_biometric_confirmation",
+                "searchable" => false,
+                "sortable" => true,
+                "title" => "Биометрическое подтверждение",
+                "visible" => true,
+                "formatter" => 'trueFalseFormatter',
             ],
            [
                 "field" => "actions",

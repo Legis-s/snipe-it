@@ -116,6 +116,8 @@ class ActionlogsTransformer
             ] : null,
 
             'note'          => ($actionlog->note) ? e($actionlog->note): null,
+            'biometric_uid'          => ($actionlog->biometric_uid) ? e($actionlog->biometric_uid): null,
+            'biometric_result'          => $actionlog->biometric_result,
             'signature_file'   => ($actionlog->accept_signature) ? route('log.signature.view', ['filename' => $actionlog->accept_signature ]) : null,
             'log_meta'          => ((isset($clean_meta)) && (is_array($clean_meta))) ? $clean_meta: null,
 //            'photos' => ($actionlog->photos) ? e($actionlog->photos): null,

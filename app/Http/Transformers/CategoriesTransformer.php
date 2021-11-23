@@ -30,6 +30,7 @@ class CategoriesTransformer
                 'eula' => ($category->getEula()) ? true : false,
                 'checkin_email' => ($category->checkin_email =='1') ? true : false,
                 'require_acceptance' => ($category->require_acceptance =='1') ? true : false,
+                'require_biometric_confirmation' => ($category->require_biometric_confirmation =='1') ? true : false,
                 'assets_count' => (int) $category->assets_count,
                 'accessories_count' => (int) $category->accessories_count,
                 'consumables_count' => (int) $category->consumables_count,

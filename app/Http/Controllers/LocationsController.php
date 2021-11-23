@@ -89,7 +89,11 @@ class LocationsController extends Controller
         $location->bitrix_id        = $request->input('bitrix_id');
         $location->user_id          = Auth::id();
         $location->notes            = $request->input('notes');
-        $location->sklad            = $request->input('sklad');
+        if ($request->input('sklad')){
+            $location->sklad            = $request->input('sklad');
+        }else{
+            $location->sklad = false;
+        }
 
         $location = $request->handleImages($location,600, public_path().'/uploads/locations');
 

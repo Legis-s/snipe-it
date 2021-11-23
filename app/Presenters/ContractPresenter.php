@@ -106,7 +106,7 @@ class ContractPresenter extends Presenter
 
 
     public function fullName() {
-        return $this->name;
+        return "[".$this->number."] ".$this->name;
     }
 
 
