@@ -185,6 +185,109 @@ class ConsumableAssignmentPresenter extends Presenter
     }
 
 
+    /**
+     * Json Column Layout for bootstrap table
+     * @return string
+     */
+    public static function dataTableLayoutNCD()
+    {
+        $layout = [
+            [
+                "field" => "id",
+                "searchable" => false,
+                "sortable" => true,
+                "switchable" => true,
+                "title" => trans('general.id'),
+                "visible" => false
+            ], [
+                "field" => "consumable",
+                "searchable" => true,
+                "sortable" => true,
+                "switchable" => true,
+                "title" => "Расходник",
+                "visible" => true,
+                "formatter" => "consumablesLinkObjFormatter"
+            ], [
+                "field" => "name",
+                "searchable" => true,
+                "sortable" => true,
+                "switchable" => true,
+                "title" => "Запись",
+                "visible" => true,
+            ], [
+                "field" => "assigned_to",
+                "searchable" => true,
+                "sortable" => true,
+                "title" => trans('admin/hardware/form.checkedout_to'),
+                "visible" => true,
+                "formatter" => "polymorphicItemFormatter"
+            ], [
+                "field" => "contract",
+                "searchable" => true,
+                "sortable" => true,
+                "switchable" => true,
+                "title" => "Договор",
+                "visible" => true,
+                "formatter" => "contractsLinkObjFormatter"
+            ], [
+                "field" => "quantity",
+                "searchable" => false,
+                "sortable" => true,
+                "switchable" => true,
+                "title" => "Количество",
+                "visible" => true,
+                "formatter" => "quantityItemFormatter"
+            ], [
+                "field" => "cost",
+                "searchable" => false,
+                "sortable" => true,
+                "switchable" => true,
+                "title" => "Cтоимость",
+                "visible" => true,
+            ], [
+                "field" => "user",
+                "searchable" => false,
+                "sortable" => true,
+                "switchable" => true,
+                "title" => "Ответственный",
+                "visible" => true,
+                "formatter" => "usersLinkObjFormatter"
+            ], [
+                "field" => "comment",
+                "searchable" => true,
+                "sortable" => true,
+                "visible" => false,
+                "title" => "Комментарий",
+            ], [
+                "field" => "created_at",
+                "searchable" => false,
+                "sortable" => true,
+                "visible" => false,
+                "title" => trans('general.created_at'),
+                "formatter" => "dateDisplayFormatter"
+            ], [
+                "field" => "updated_at",
+                "searchable" => false,
+                "sortable" => true,
+                "visible" => false,
+                "title" => trans('general.updated_at'),
+                "formatter" => "dateDisplayFormatter"
+            ],[
+                "field" => "return",
+                "searchable" => false,
+                "sortable" => false,
+                "visible" => true,
+                "title" => "Вернуть",
+                "events"=>"operateEvents",
+                "formatter" => "consumablesReturnFormatter",
+            ]
+        ];
+
+
+        return json_encode($layout);
+    }
+
+
 
     /**
      * Get Displayable Name

@@ -47,6 +47,7 @@ class ConsumableAssignment extends Model
         'user_id',
         'consumable_id',
         'assigned_to',
+        'contract_id',
         'cost',
     ];
 
@@ -177,6 +178,12 @@ class ConsumableAssignment extends Model
 
         }); //workaround for laravel bug
     }
+
+    public function contract()
+    {
+        return $this->belongsTo('\App\Models\Contract', 'contract_id');
+    }
+
 
 
 

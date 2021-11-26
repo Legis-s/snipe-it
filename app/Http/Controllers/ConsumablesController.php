@@ -50,6 +50,13 @@ class ConsumablesController extends Controller
         return view('consumables/index');
     }
 
+    public function noclosingdocuments()
+    {
+        $this->authorize('index', Consumable::class);
+        return view('consumables/noclosingdocuments');
+    }
+
+
 
     /**
      * Return a view to display the form view to create a new consumable
@@ -347,6 +354,8 @@ class ConsumablesController extends Controller
         $comment = e(Input::get('comment'));
 
         $assigned_to = null;
+        $contract_id = null;
+
         // This item is checked out to a location
         switch (request('checkout_to_type_s')) {
             case 'location':
@@ -360,12 +369,19 @@ class ConsumablesController extends Controller
             case 'user':
                 $assigned_to = User::findOrFail(request('assigned_user'));
                 $assigned_type = "App\Models\User";
+                if (($request->filled('contract_id')) && $request->get('contract_id')) {
+                    $contract_id = request('contract_id');
+                    $contract = Contract::findOrFail($contract_id);
+                    $comment = "Продано по договору: ".$contract->name;
+                }
                 break;
             case 'contract':
                 $assigned_to = Contract::findOrFail(request('assigned_contract'));
                 $assigned_type = "App\Models\Contract";
+                $contract_id = Contract::findOrFail(request('assigned_contract'))->id;
                 break;
         }
+
         $consumable->locations()->attach($consumable->id, [
             'consumable_id' => $consumable->id,
             'user_id' => $admin_user->id,
@@ -375,6 +391,7 @@ class ConsumablesController extends Controller
             'type' => ConsumableAssignment::SOLD,
             'assigned_to' => $assigned_to->id,
             'assigned_type' => $assigned_type,
+            'contract_id' => $contract_id,
         ]);
 
         $log = new Actionlog();

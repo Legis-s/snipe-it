@@ -33,6 +33,7 @@ class ConsumableAssignmentTransformer
                 'quantity' => e($consumableAssignment->quantity),
                 'type' => e($consumableAssignment->type),
                 'cost' => e($consumableAssignment->cost),
+                'contract' => ($consumableAssignment->contract) ? (new ContractsTransformer())->transformContract($consumableAssignment->contract) : null,
                 'user' => ($consumableAssignment->user) ? (new UsersTransformer)->transformUser($consumableAssignment->user) : null,
                 'assigned_to' => $this->transformAssignedTo($consumableAssignment),
                 'comment' => ($consumableAssignment->comment) ? e($consumableAssignment->comment) : null,

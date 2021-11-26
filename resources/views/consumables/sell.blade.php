@@ -43,6 +43,8 @@
                     @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.user'), 'fieldname' => 'assigned_user','required'=>'true'])
                     @include ('partials.forms.edit.contract-select', ['translated_name' => "Договор", 'fieldname' => 'assigned_contract', 'style' => 'display:none;','required'=>'true'])
 
+
+                    @include ('partials.forms.edit.contract-id-select', ['translated_name' => "Договор", 'fieldname' => 'contract_id'])
                     <!-- Purchase Cost -->
                         <div class="form-group {{ $errors->has('purchase_cost') ? ' has-error' : '' }}">
                             <label for="purchase_cost" class="col-md-3 control-label">Закупочная стоимость</label>
@@ -189,6 +191,7 @@
                     $('#assigned_user').hide();
                     $('#assigned_location').hide();
                     $('#assigned_contract').show();
+                    $('#contract_id').hide();
                     $('.notification-callout').fadeOut();
                 } else  {
 
@@ -196,6 +199,7 @@
                     $('#assigned_user').show();
                     $('#assigned_location').hide();
                     $('#assigned_contract').hide();
+                    $('#contract_id').show();
                     if (userid) {
                         $('#current_assets_box').fadeIn();
                     }

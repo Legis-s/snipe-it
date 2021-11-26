@@ -38,13 +38,14 @@ class ConsumableAssignmentController extends Controller
             'id','cost','assigned_to','consumable_id','user_id','assigned_type','comment','type',
             'quantity','created_at','updated_at'];
 
-        $consumableAssignments = ConsumableAssignment::with('user','assignedTo','consumable')->select([
+        $consumableAssignments = ConsumableAssignment::with('user','assignedTo','consumable','contract')->select([
             'consumables_locations.id',
             'consumables_locations.cost',
             'consumables_locations.consumable_id',
             'consumables_locations.user_id',
             'consumables_locations.assigned_type',
             'consumables_locations.assigned_to',
+            'consumables_locations.contract_id',
             'consumables_locations.comment',
             'consumables_locations.type',
             'consumables_locations.quantity',
@@ -59,6 +60,11 @@ class ConsumableAssignmentController extends Controller
 
         if ($request->filled('search')) {
             $consumableAssignments = $consumableAssignments->AssignedSearch($request->input('search'));
+        }
+
+        if ($request->filled('no_contract') ) {
+            $consumableAssignments->where('type','=','sold');
+            $consumableAssignments->where('assigned_type',"App\Models\User");
         }
 
 
