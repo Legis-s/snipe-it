@@ -117,17 +117,31 @@ class SyncBitrix extends Command
                 $bitrix_user =  $value["ASSIGNED_BY_ID"];
                 /** @var User $sklad_user */
                 $sklad_user = User::where('bitrix_id', $bitrix_user)->first();
-                $location = Location::updateOrCreate(
-                    ['bitrix_id' =>  $value["ID"]],
-                    [
-                        'name' => $value["NAME"],
-                        'city' => $value["ADDRESS_CITY"],
-                        'address' => $value["ADDRESS"],
-                        'address2' => $value["ADDRESS_2"],
-                        'coordinates' => $value["UF_MAP"],
-                        'active' => true
-                    ]
-                );
+                if  ($value["UF_TYPE"] == 456){
+                    $location = Location::updateOrCreate(
+                        ['bitrix_id' =>  $value["ID"]],
+                        [
+                            'name' => "[Пульт] ".$value["NAME"],
+                            'city' => $value["ADDRESS_CITY"],
+                            'address' => $value["ADDRESS"],
+                            'address2' => $value["ADDRESS_2"],
+                            'coordinates' => $value["UF_MAP"],
+                            'active' => true
+                        ]
+                    );
+                }else{
+                    $location = Location::updateOrCreate(
+                        ['bitrix_id' =>  $value["ID"]],
+                        [
+                            'name' => $value["NAME"],
+                            'city' => $value["ADDRESS_CITY"],
+                            'address' => $value["ADDRESS"],
+                            'address2' => $value["ADDRESS_2"],
+                            'coordinates' => $value["UF_MAP"],
+                            'active' => true
+                        ]
+                    );
+                }
                 if (!$sklad_user) {
                     print("Responsible at object '".$value["NAME"]."' [".$value["ID"]."] not found (Bitrix user id ".$bitrix_user.")\n");
                 }else{
