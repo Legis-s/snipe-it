@@ -71,6 +71,7 @@ class LocationsTransformer
                 ] : null,
                 'manager' => ($location->manager) ? (new UsersTransformer)->transformUser($location->manager) : null,
                 'bitrix_id' => ($location->bitrix_id) ? (int)$location->bitrix_id : null,
+                'pult_id' => ($location->pult_id) ? (int)$location->pult_id : null,
                 'children' => $children_arr,
                 'notes' => ($location->notes) ? e($location->notes) : null,
                 'sklad' => ($location->sklad) ? e($location->sklad) : null,
