@@ -87,6 +87,7 @@ class ConsumableAssignmentController extends Controller
         if ($request->filled('contract_id')) {
             $consumableAssignments->where('assigned_to', $request->input('contract_id'));
             $consumableAssignments->where('assigned_type',"App\Models\Contract");
+            $consumableAssignments->orWhere('contract_id', $request->input('contract_id'));
         }
 
         if ($request->filled('purchase_id')) {
