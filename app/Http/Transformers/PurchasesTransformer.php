@@ -64,7 +64,7 @@ class PurchasesTransformer
             'clone' => (Gate::allows('create', Purchase::class) && ($purchase->deleted_at == '')),
         ];
         if ($full) {
-            $array += ['consumables_json' => ($purchase->consumables_json) ? e($purchase->consumables_json) : null];
+            $array += ['consumables_json' => ($purchase->consumables_json) ? e($consumables) : null];
         }
         $array += $permissions_array;
 
