@@ -151,7 +151,8 @@ class ContractsController extends Controller
         }
 
         if ($request->filled('search')) {
-            $contracts = $contracts->where('contracts.name', 'LIKE', '%'.$request->input('search').'%');
+            $contracts = $contracts->where('contracts.name', 'LIKE', '%'.$request->input('search').'%')
+                ->orWhere('contracts.number', 'LIKE', '%'.$request->input('search').'%');
         }
 
         $contracts = $contracts->orderBy('name', 'ASC')->get();
