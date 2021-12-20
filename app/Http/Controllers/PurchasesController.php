@@ -257,6 +257,12 @@ class PurchasesController extends Controller
                 }
                 $data_list .="\n";
             }
+
+
+            if ( $purchase->delivery_cost) {
+                $data_list .= "Стоимость доставки:  ". $purchase->delivery_cost;
+            }
+
             $file_data = file_get_contents(public_path().'/uploads/purchases/'.$purchase->invoice_file);
 
             // Encode the image string data into base64
