@@ -443,6 +443,15 @@
                         </a>
                     </li>
                 @endcan
+
+                    @can('index', \App\Models\Asset::class)
+                        <li {!! (\Request::route()->getName()=='requests' ? ' class="active"' : '') !!}>
+                            <a href="{{ route('requests.index') }}">
+                                <i class="fa fa-list-ol" aria-hidden="true"></i> <span>Заявки</span>
+                            </a>
+                        </li>
+                    @endcan
+
                 @can('index', \App\Models\Asset::class)
                     <li class="treeview{{ (Request::is('hardware*') ? ' active' : '') }}">
                         <a href="#"><i class="fa fa-barcode" aria-hidden="true"></i>

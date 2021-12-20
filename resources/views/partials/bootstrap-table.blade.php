@@ -920,6 +920,13 @@
         }
     }
 
+    function deliveryСostFormatter(value, row) {
+        if (row.currency && row.delivery_cost) {
+            return "<span style='font-size: 120%; font-weight: bold;' class='text-primary'>" + row.delivery_cost + "<br>" + row.currency + "</span>";
+        } else {
+        }
+    }
+
     function bitrixIdContractFormatter(value, row) {
         if (value) { //https://bitrix.legis-s.ru/crm/contract/details/4537/
             return "<a href='https://bitrix.legis-s.ru/crm/contract/details/" + value + "/' target='_blank'>" + value + "</a>";

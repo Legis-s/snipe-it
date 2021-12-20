@@ -94,6 +94,8 @@ class AssetsController extends Controller
 
         ];
 
+
+
         $filter = array();
 
         if ($request->filled('filter')) {
@@ -152,6 +154,10 @@ class AssetsController extends Controller
             $assets->where('assets.location_id', '=', $location->id);
         }
 
+        if ($request->filled('bulk') && $request->input('bulk') == true) {
+            $data = json_decode($request->input('data'), true);
+            $assets->whereIn('assets.id', $data);
+        }
 
         if ($request->filled('purchase_id')) {
             $assets->where('assets.purchase_id', '=', $request->input('purchase_id'));

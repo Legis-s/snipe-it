@@ -61,6 +61,7 @@ class PurchasesController extends Controller
                 'purchases.deleted_at',
                 'purchases.bitrix_task_id',
                 'purchases.consumables_json',
+                'purchases.delivery_cost',
             ])->withCount([
                 'consumables as consumables_count',
                 'assets as assets_count',

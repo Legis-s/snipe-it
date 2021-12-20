@@ -11,9 +11,9 @@ use DateTime;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Watson\Validating\ValidatingTrait;
 
-class Purchase extends SnipeModel
+class Request extends SnipeModel
 {
-    protected $presenter = 'App\Presenters\PurchasePresenter';
+    protected $presenter = 'App\Presenters\RequestPresenter';
     use Presentable;
     use SoftDeletes;
 
@@ -23,16 +23,8 @@ class Purchase extends SnipeModel
     const INVENTORY = 'inventory';
 
     protected $dates = ['deleted_at'];
-    protected $table = 'purchases';
+    protected $table = 'requests';
     protected $rules = array(
-        'invoice_number'        => 'required|min:1|max:255',
-        'final_price'        => 'required',
-        'supplier_id'        => 'required',
-        'comment'        => 'required',
-        'currency'        => 'required',
-        'legal_person_id'=> 'required',
-        'invoice_type_id'=> 'required',
-        'invoice_file'=> 'required',
         'bitrix_id'  => 'min:1|max:10|nullable'
     );
 
@@ -54,27 +46,15 @@ class Purchase extends SnipeModel
      * @var array
      */
     protected $fillable = [
-        'invoice_number',
-        'invoice_file',
         'bitrix_id',
-        'final_price',
-        'paid',
-        'supplier_id',
-        'legal_person_id',
-        'invoice_type_id',
-        'comment',
-        "currency",
-        "status",
-        "assets_json",
-        "consumables_json",
-        "sales_json",
-        "bitrix_send_json",
+        'name',
+        'status',
+        'location_id',
+        'issued',
         "user_id",
-        "bitrix_result_at",
-        "verified_at",
-        "bitrix_task_id",
-        "user_verified_id",
-        "delivery_cost",
+        "price",
+        "type",
+        "contract_id",
     ];
 
     use Searchable;
@@ -84,7 +64,7 @@ class Purchase extends SnipeModel
      *
      * @var array
      */
-    protected $searchableAttributes = ['invoice_number', 'comment','final_price','delivery_cost'];
+    protected $searchableAttributes = ['name',];
 
     /**
      * The relations and their attributes that should be included when searching the model.

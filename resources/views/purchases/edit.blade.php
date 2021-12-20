@@ -11,6 +11,8 @@
 
     @include ('partials.forms.edit.final_price', ['translated_name' => "Цена"])
 
+    @include ('partials.forms.edit.delivery_cost', ['translated_name' => "Стоимость доставки"])
+
     @include ('partials.forms.edit.currency-select', ['translated_name' => "Валюта", 'fieldname' => 'currency_id'])
 
     @include ('partials.forms.edit.comment', ['translated_name' => "Комментарий"])

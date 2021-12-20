@@ -225,18 +225,6 @@
                         </div>
                     </div>
                 @endif
-                    @if ($purchase->invoice_number)
-                        <div class="row">
-                            <div class="col-md-6">
-                                <strong>
-                                    Название
-                                </strong>
-                            </div>
-                            <div class="col-md-6">
-                                {{ $purchase->invoice_number }}
-                            </div>
-                        </div>
-                    @endif
                 @if ($purchase->invoice_file)
                         <div class="row">
                             <div class="col-md-6">
@@ -270,6 +258,18 @@
                             </div>
                             <div class="col-md-6">
                                 {{ $purchase->final_price }}
+                            </div>
+                        </div>
+                    @endif
+                    @if ($purchase->delivery_cost)
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>
+                                    Стоимость доставки
+                                </strong>
+                            </div>
+                            <div class="col-md-6">
+                                {{ $purchase->delivery_cost }}
                             </div>
                         </div>
                     @endif

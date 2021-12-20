@@ -100,6 +100,14 @@ class PurchasePresenter extends Presenter
                 "title" => "Цена",
                 "visible" => true,
                 "formatter" => 'priceFormatter',
+            ],[
+                "field" => "delivery_cost",
+                "searchable" => true,
+                "sortable" => true,
+                "switchable" => true,
+                "title" => "Доставка",
+                "visible" => true,
+                "formatter" => 'deliveryСostFormatter',
             ]
 //            ,[
 //                "field" => "currency",

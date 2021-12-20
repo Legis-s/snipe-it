@@ -115,6 +115,7 @@ class PurchasesController extends Controller
         $purchase->consumables_json    = $request->input('consumables');
         $purchase->assets_json         = $request->input('assets');
         $purchase->sales_json         = $request->input('sales');
+        $purchase->delivery_cost         = $request->input('delivery_cost');
         $purchase->user_id             = Auth::id();
         $currency_id = $request->input('currency_id');
         $purchase->setStatusInprogress();
