@@ -259,7 +259,7 @@ class PurchasesController extends Controller
             }
 
 
-            if ( $purchase->delivery_cost) {
+            if ($purchase->delivery_cost > 0) {
                 $data_list .= "Стоимость доставки:  ". $purchase->delivery_cost;
             }
 

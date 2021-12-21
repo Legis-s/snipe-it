@@ -14,7 +14,7 @@ class PurchasesAddDeliveryCost extends Migration
     public function up()
     {
         Schema::table('purchases', function (Blueprint $table) {
-            $table->float('delivery_cost', 8, 2);
+            $table->float('delivery_cost', 8, 2)->nullable()->default(NULL);
         });
     }
 
