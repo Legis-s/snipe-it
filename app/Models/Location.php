@@ -69,6 +69,7 @@ class Location extends SnipeModel
         'active',
         'sklad',
         'pult_id',
+        'contract_number',
     ];
     protected $hidden = ['user_id'];
 

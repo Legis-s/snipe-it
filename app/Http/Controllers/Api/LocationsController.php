@@ -234,6 +234,7 @@ class LocationsController extends Controller
             'locations.parent_id',
             'locations.image',
             'locations.sklad',
+            'locations.contract_number',
         ]);
 
         $page = 1;
@@ -242,7 +243,8 @@ class LocationsController extends Controller
         }
 
         if ($request->filled('search')) {
-            $locations = $locations->where('locations.name', 'LIKE', '%'.$request->input('search').'%');
+            $locations = $locations->where('locations.name', 'LIKE', '%'.$request->input('search').'%')
+            ->orWhere('locations.contract_number', 'LIKE', '%'.$request->input('search').'%');
         }
 
         $locations = $locations->orderBy('sklad', 'desc');
@@ -271,6 +273,9 @@ class LocationsController extends Controller
             $locations_with_children[$location->parent_id][] = $location;
             if ($location->sklad){
                 $location->name =   "[Склад] ".$location->name;
+            }
+            if ($location->contract_number){
+                $location->name =  $location->name ."  " .$location->contract_number;
             }
         }
 

@@ -77,13 +77,17 @@
                             </div>
                         </div>
 
-                        @include ('partials.forms.edit.asset-select', [
-                          'translated_name' => trans('general.assets'),
-                          'fieldname' => 'selected_assets[]',
-                          'multiple' => true,
-                          'asset_status_type' => 'RTD',
-                          'select_id' => 'assigned_assets_select',
-                        ])
+                        <!-- We have to pass unselect here so that we don't default to the asset that's being checked out. We want that asset to be pre-selected everywhere else. -->
+                        @include ('partials.forms.edit.asset-select', ['translated_name' => trans('general.asset'), 'fieldname' => 'asset_select', 'unselect' => 'true'])
+
+
+{{--                        @include ('partials.forms.edit.asset-select', [--}}
+{{--                          'translated_name' => trans('general.assets'),--}}
+{{--                          'fieldname' => 'selected_assets[]',--}}
+{{--                          'multiple' => true,--}}
+{{--                          'asset_status_type' => 'RTD',--}}
+{{--                          'select_id' => 'assigned_assets_select',--}}
+{{--                        ])--}}
 
 
                         <table

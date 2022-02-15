@@ -113,11 +113,11 @@ class SyncBitrix extends Command
             }
             if(($value["TABEL_ID"] && $value["UF_TYPE"] == 455) || $value["UF_TYPE"] == 739 || $value["UF_TYPE"] == 457 || $value["UF_TYPE"] == 456 || $value["UF_TYPE"] == 741 || $value["ID"] == 2956){
                 $count++;
-
                 $bitrix_user =  $value["ASSIGNED_BY_ID"];
                 /** @var User $sklad_user */
                 $sklad_user = User::where('bitrix_id', $bitrix_user)->first();
                 if  ($value["UF_TYPE"] == 456){
+//                    print_r($value);
                     $location = Location::updateOrCreate(
                         ['bitrix_id' =>  $value["ID"]],
                         [
@@ -241,6 +241,16 @@ class SyncBitrix extends Command
                     'assigned_by_id' => $value["ASSIGNED_BY_ID"],
                 ]
             );
+            if ( is_array($value["UF_OBJECT"]) && count($value["UF_OBJECT"]) >0 && strlen($value["UF_NUMBER"])>0 ){
+                $location = Location::updateOrCreate(
+                    ['bitrix_id' =>  $value["UF_OBJECT"][0]] ,
+                    [
+                        'contract_number' => $value["UF_NUMBER"]
+                    ]
+
+                );
+                $location->save();
+            }
         }
         print("Синхрониизтрованно ".$count." договоров \n");
 
@@ -260,6 +270,7 @@ class SyncBitrix extends Command
                     'name' => $value["NAME"],
                 ]
             );
+
 
         }
         print("Синхрониизтрованно ".$count." типов закупок \n");
