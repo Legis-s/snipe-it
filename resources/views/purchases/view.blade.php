@@ -378,7 +378,7 @@
     'search' => true
  ])
 
-    <script src="{{ asset('js/sweetalert2.min.js') }}"></script>
+
     <script nonce="{{ csrf_token() }}">
 
         var table_consumables = $('#table_consumables');

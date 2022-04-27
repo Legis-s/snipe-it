@@ -8,7 +8,7 @@
 
 {{-- Page content --}}
 @section('content')
-
+    <script src="{{ asset('js/sweetalert2.min.js') }}"></script>
     <style>
         .input-group {
             padding-left: 0px !important;
@@ -90,16 +90,6 @@
                                      'select_id' => 'asset_select',
                                      ])
 
-                        <!-- Purchase Cost -->
-                        <style>
-                            @import 'star-rating';
-
-                            :root {
-                                --gl-star-empty: url(/img/star-empty.svg);
-                                --gl-star-full: url(/img/star-full.svg);
-                                --gl-star-size: 32px;
-                            }
-                        </style>
 
 
                         <select id="assigned_assets_select" name="selected_assets[]" multiple hidden></select>
@@ -237,14 +227,84 @@
 
                 function scanCode(code) {
                     console.log("scan: " + code);
+                    ///hardware/bytag/:asset_tag
+                    $.ajax({
+                        type: 'GET',
+                        url: '/api/v1/hardware/bytag/' + code,
+                        headers: {
+                            "X-Requested-With": 'XMLHttpRequest',
+                            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                        },
+
+                        dataType: 'json',
+                        success: function (data, textStatus, xhr) {
+                            console.log(data);
+                            if (xhr.status === 200) {
+
+                                if (data.hasOwnProperty("messages")){
+                                    Swal.fire({
+                                        title: "Актив "+ code+" не найден",
+                                        icon: 'info',
+                                        text: data.messages,
+                                        timer: 1500
+                                    });
+                                }else{
+
+                                    if (data.user_can_checkout){
+                                        if (!selected.includes(data.id)) {
+                                            selected.push(data.id);
+                                            updData();
+                                            Swal.fire({
+                                                title: "Актив "+ code+" найден",
+                                                icon: 'success',
+                                                text: data.messages,
+                                                timer: 1500
+                                            });
+                                        }else {
+                                            Swal.fire({
+                                                title: "Актив "+ code+" уже в списке",
+                                                icon: 'info',
+                                                text: data.messages,
+                                                timer: 1500
+                                            });
+                                        }
+
+                                    }else{
+                                        Swal.fire({
+                                            title: "Актив "+ code+" найден",
+                                            icon: 'info',
+                                            text: "Этот актив уже выдан, верните его на склад и попробуйте заново",
+                                            timer: 2000
+                                        });
+                                    }
+
+                                }
+                            } else {
+                                Swal.fire({
+                                    title: "Ошибка сервера",
+                                    icon: 'error',
+                                    text: 'Что то пошло не так!',
+                                    timer: 1500
+                                })
+                            }
+                        },
+                        error: function (data) {
+                            Swal.fire({
+                                title: "Ошибка сервера",
+                                icon: 'error',
+                                text: 'Что то пошло не так!',
+                                timer: 1500
+                            })
+                        }
+                    });
 
                     // var $select = $($(this).data('target'));
                     // select2_search(select, code);
 
 
-                    select.select2("trigger", "select", {
-                        data: {asset_tag: code}
-                    });
+                    // select.select2("trigger", "select", {
+                    //     data: {asset_tag: code}
+                    // });
 
                     // select.val(code).trigger("change");
                     // select.trigger({
