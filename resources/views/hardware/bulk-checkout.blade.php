@@ -315,6 +315,19 @@
                         return x == x.toLowerCase() ? replacer[x] : replacer[x.toLowerCase()].toUpperCase();
                     });
                 }
+
+                var operateEventsBulk = {
+                    'click .bulk-clear':function (e, value, row, index) {
+                        var selected_id =String(row.id);
+                        console.log(selected_id);
+                        console.log(selected);
+                        if (selected.includes(selected_id)) {
+                            selected = selected.filter(item => item !== selected_id)
+                            // selected.remove(selected_id);
+                            updData();
+                        }
+                    }
+                };
             </script>
 
 @stop

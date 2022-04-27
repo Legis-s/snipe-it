@@ -933,6 +933,9 @@
         }
     }
 
+    function bulkListRemoveFormatter(value, row) {
+        return "<button type='button' class='btn btn-danger  btn-sm bulk-clear'>Убрать</button>"
+    }
 
     $(function () {
         $('#bulkEdit').click(function () {
