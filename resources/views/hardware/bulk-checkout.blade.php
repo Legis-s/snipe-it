@@ -217,8 +217,11 @@
                 onScan.attachTo(document, {
                     suffixKeyCodes: [13], // enter-key expected at the end of a scan
                     // reactToPaste: true, // Compatibility to built-in scanners in paste-mode (as opposed to keyboard-mode)
+                    minLength:4,
                     onScan: function (sCode, iQty) { // Alternative to document.addEventListener('scan')
-                        scanCode(auto_layout_keyboard(sCode));
+                        console.log("sCode"+sCode);
+                        scanCode(auto_layout_keyboard(String(sCode)));
+
                     },
                     // onKeyDetect: function(iKeyCode){ // output all potentially relevant key events - great for debugging!
                     //     console.log('Pressed: ' + iKeyCode);
@@ -297,24 +300,6 @@
                             })
                         }
                     });
-
-                    // var $select = $($(this).data('target'));
-                    // select2_search(select, code);
-
-
-                    // select.select2("trigger", "select", {
-                    //     data: {asset_tag: code}
-                    // });
-
-                    // select.val(code).trigger("change");
-                    // select.trigger({
-                    //     type: 'select2:select',
-                    //     params: {
-                    //         data: {
-                    //             asset_tag:code
-                    //         }
-                    //     }
-                    // });
                 }
 
                 function auto_layout_keyboard(str) {
@@ -330,18 +315,6 @@
                         return x == x.toLowerCase() ? replacer[x] : replacer[x.toLowerCase()].toUpperCase();
                     });
                 }
-
-                // function select2_search($el, term) {
-                //     $el.select2('open');
-                //
-                //     // Get the search box within the dropdown or the selection
-                //     // Dropdown = single, Selection = multiple
-                //     var $search = $el.data('select2').dropdown.$search || $el.data('select2').selection.$search;
-                //     // This is undocumented and may change in the future
-                //
-                //     $search.val(term);
-                //     $search.trigger('input');
-                // }
             </script>
 
 @stop
