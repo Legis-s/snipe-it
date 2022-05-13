@@ -111,7 +111,7 @@ class SyncBitrix extends Command
                 }
                 continue;
             }
-            if(($value["TABEL_ID"] && $value["UF_TYPE"] == 455) || $value["UF_TYPE"] == 739 || $value["UF_TYPE"] == 457 || $value["UF_TYPE"] == 456 || $value["UF_TYPE"] == 741 || $value["ID"] == 2956){
+            if(($value["TABEL_ID"] && $value["UF_TYPE"] == 455) || $value["UF_TYPE"] == 739 || $value["UF_TYPE"] == 457 || $value["UF_TYPE"] == 456 || $value["UF_TYPE"] == 741 || $value["ID"] == 2956 || $value["UF_TYPE"] == 742){
                 $count++;
                 $bitrix_user =  $value["ASSIGNED_BY_ID"];
                 /** @var User $sklad_user */
