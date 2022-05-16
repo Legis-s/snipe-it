@@ -473,8 +473,14 @@
                         align: 'left',
                         valign: 'middle',
                         formatter:function (value,row) {
+                            console.log(row);
                             return "<a href='/consumables/"+row.consumable_id+"'>"+value+"</a>";
                         }
+                    },{
+                        field: 'model_number',
+                        name:'Модель',
+                        align: 'left',
+                        valign: 'middle'
                     },{
                         field: 'purchase_cost',
                         name: 'Закупочная цена',
