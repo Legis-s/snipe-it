@@ -161,6 +161,7 @@ class AssetsController extends Controller
 
         if ($request->filled('purchase_id')) {
             $assets->where('assets.purchase_id', '=', $request->input('purchase_id'));
+            $settings->show_archived_in_list = "1";
         }
 
         if ($request->filled('rtd_location_id')) {
