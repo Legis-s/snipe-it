@@ -413,7 +413,6 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api', 'middleware' => 'api'], fu
             'as' => 'assets.selectlist',
             'uses' => 'AssetsController@selectlist'
         ]);
-
         Route::get('audit/{audit}', [
             'as' => 'api.asset.to-audit',
             'uses' => 'AssetsController@index'
@@ -424,6 +423,16 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api', 'middleware' => 'api'], fu
             'as' => 'api.asset.audit',
             'uses' => 'AssetsController@audit'
         ]);
+
+
+        Route::post('bulkcheckout',
+            [
+                'as' => 'api.assets.bulkcheckout',
+                'uses' => 'BulkAssetsController@bulkCheckout'
+            ]
+        );
+
+
         Route::post('{asset_id}/closesell',
             [
                 'as' => 'api.assets.closesell',
@@ -458,6 +467,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api', 'middleware' => 'api'], fu
                 'uses' => 'AssetsController@inventory'
             ]
         );
+
 
     });
 
