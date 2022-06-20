@@ -163,7 +163,7 @@ class PurchasesController extends Controller
      */
     public function paid(Request $request, $purchaseId = null)
     {
-        $this->authorize('view', Purchase::class);
+//        $this->authorize('view', Purchase::class);
         $purchase = Purchase::findOrFail($purchaseId);
         $purchase->setStatusPaid();
 
