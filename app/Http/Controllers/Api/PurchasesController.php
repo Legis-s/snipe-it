@@ -42,7 +42,7 @@ class PurchasesController extends Controller
     {
         $this->authorize('view', Purchase::class);
         $status = Statuslabel::where('name', 'Доступные')->first();
-        $purchases = Purchase::with('supplier', 'assets', 'invoice_type', 'legal_person','user','consumables','sales')
+        $purchases = Purchase::with('supplier', 'assets', 'invoice_type', 'legal_person','user','consumables')
             ->select([
                 'purchases.id',
                 'purchases.invoice_number',
@@ -65,7 +65,6 @@ class PurchasesController extends Controller
             ])->withCount([
                 'consumables as consumables_count',
                 'assets as assets_count',
-                'sales as sales_count',
                 'assets as assets_count_ok' => function (Builder $query) use ($status) {
                     $query->where('status_id', $status->id);
                 },
@@ -80,6 +79,12 @@ class PurchasesController extends Controller
         }
         if ($request->filled('status')) {
             $purchases->where('status', '=', $request->input('status'));
+        }
+
+        if ($request->filled('not_finished')) {
+            if ($request->input('not_finished') == true){
+                $purchases->where('status', '!=', "finished");
+            }
         }
         if ($request->filled('supplier')) {
             $purchases->where('supplier_id', '=', $request->input('supplier'));
@@ -126,7 +131,7 @@ class PurchasesController extends Controller
     {
         $this->authorize('view', Purchase::class);
         $status = Statuslabel::where('name', 'Доступные')->first();
-        $purchise = Purchase::with('supplier', 'assets', 'invoice_type', 'legal_person','user','consumables','sales')
+        $purchise = Purchase::with('supplier', 'assets', 'invoice_type', 'legal_person','user','consumables')
             ->select([
                 'purchases.id',
                 'purchases.invoice_number',
@@ -148,7 +153,6 @@ class PurchasesController extends Controller
             ])->withCount([
                 'consumables as consumables_count',
                 'assets as assets_count',
-                'sales as sales_count',
                 'assets as assets_count_ok' => function (Builder $query) use ($status) {
                     $query->where('status_id', $status->id);
                 },
