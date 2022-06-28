@@ -158,7 +158,7 @@
 
                     if (data == true) {
                         $("#assignto_selector").show();
-                        $("#assigned_user").show();
+                        $("#assigned_location").show();
 
                         $("#selected_status_status").removeClass('text-danger');
                         $("#selected_status_status").addClass('text-success');
