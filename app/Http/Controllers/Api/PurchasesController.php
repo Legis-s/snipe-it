@@ -80,12 +80,6 @@ class PurchasesController extends Controller
         if ($request->filled('status')) {
             $purchases->where('status', '=', $request->input('status'));
         }
-
-        if ($request->filled('not_finished')) {
-            if ($request->input('not_finished') == true){
-                $purchases->where('status', '!=', "finished");
-            }
-        }
         if ($request->filled('supplier')) {
             $purchases->where('supplier_id', '=', $request->input('supplier'));
         }
