@@ -230,7 +230,7 @@ class SyncBitrix extends Command
         foreach ($bitrix_contracts as &$value) {
             $count++;
             if ( $value["ID"] == "5354"){
-                print($value);
+                print_r($value);
             }
             $contract = Contract::updateOrCreate(
                 ['bitrix_id' =>  $value["ID"]],
