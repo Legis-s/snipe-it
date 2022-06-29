@@ -19,7 +19,7 @@ class Contract  extends SnipeModel
     protected $dates = ['deleted_at'];
     protected $table = 'contracts';
     protected $rules = array(
-        'name' => 'required|min:2|max:255|unique_undeleted',
+        'name' => 'required|min:2|max:255',
         'bitrix_id' => 'min:1|nullable'
     );
 
