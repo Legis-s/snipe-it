@@ -232,6 +232,9 @@ class SyncBitrix extends Command
             if ( $value["ID"] == "5354"){
                 print_r($value);
             }
+            if ($value["STATUS_ID"]  == ""){
+                $value["STATUS_ID"] = "Пустой статус";
+            }
             $contract = Contract::updateOrCreate(
                 ['bitrix_id' =>  $value["ID"]],
                 [
