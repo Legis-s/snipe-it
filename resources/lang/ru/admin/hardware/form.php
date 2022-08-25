@@ -10,6 +10,7 @@ return array(
     'checkedout_to'		=> 'Привязан к',
     'checkout_date'		=> 'Дата выдачи',
     'checkin_date'		=> 'Дата возврата',
+    'sell_date'		    => 'Дата продажи',
     'checkout_to'		=> 'Привязать к',
     'cost'				=> 'Цена',
     'create'			=> 'Создать актив',

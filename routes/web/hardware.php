@@ -152,11 +152,18 @@ Route::group(
             'as' => 'hardware/bulkcheckout',
             'uses' => 'BulkAssetsController@showCheckout'
         ]);
+        Route::post('bulksell', [
+            'as' => 'hardware/bulksell',
+            'uses' => 'BulkAssetsController@storeSell'
+        ]);
+        Route::get('bulksell', [
+            'as' => 'hardware/bulksell',
+            'uses' => 'BulkAssetsController@showSell'
+        ]);
         Route::post('bulkcheckout', [
             'as' => 'hardware/bulkcheckout',
             'uses' => 'BulkAssetsController@storeCheckout'
         ]);
-
         Route::get('{assetId}/sell/', [
             'as' => 'hardware/sell',
             'uses' => 'AssetsController@sellGet'

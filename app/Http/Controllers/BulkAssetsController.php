@@ -2,10 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\CheckoutNotAllowed;
 use App\Helpers\Helper;
 use App\Http\Controllers\CheckInOutRequest;
+use App\Models\Actionlog;
 use App\Models\Asset;
+use App\Models\Contract;
+use App\Models\Sale;
 use App\Models\Setting;
+use App\Models\Statuslabel;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,6 +18,7 @@ use Illuminate\Support\Facades\DB;
 
 class BulkAssetsController extends Controller
 {
+
     use CheckInOutRequest;
     /**
      * Display the bulk edit page.
@@ -182,7 +188,16 @@ class BulkAssetsController extends Controller
 
         return view('hardware/bulk-checkout');
     }
-
+    /**
+     * Show Bulk Multiple Sell Page
+     * @return View View to sell multiple assets
+     */
+    public function showSell()
+    {
+        $this->authorize('sell', Asset::class);
+        // Filter out assets that are not deployable.
+        return view('hardware/bulk-sell');
+    }
     /**
      * Process Multiple Checkout Request
      * @return View
@@ -245,5 +260,152 @@ class BulkAssetsController extends Controller
         } catch (ModelNotFoundException $e) {
             return redirect()->to("hardware/bulk-checkout")->with('error', $e->getErrors());
         }
+    }
+
+    /**
+     * Validate and process the form data to check out an asset to a user.
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @param AssetCheckoutRequest $request
+     * @param int $assetId
+     * @return Redirect
+     * @since [v1.0]
+     */
+    public function sellAssetPost($request, $assetId, $contract_id, $note, $sold_at_req)
+    {
+        $this->authorize('sell', Asset::class);
+
+            // Check if the asset exists
+            if (!$asset = Asset::find($assetId)) {
+                return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));
+            } elseif (!$asset->availableForSell()) {
+                return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.checkout.not_available'));
+            }
+
+            $admin_user = Auth::user();
+            $sold_at= date("Y-m-d H:i:s");
+            $assigned_to = null;
+            $assigned_type=null;
+
+            if ($sold_at != date("Y-m-d")) {
+                $sold_at = $sold_at_req;
+            }
+
+            // если привязываем к юзеру, то пишем юзера и договор, отправляем на выдано
+            // если привязываем на договор, то пишем только договор и сразу продаем
+            switch (request('sell_to_type')) {
+                case 'user':
+                    $assigned_to = User::findOrFail(request('assigned_user'));
+                    \Debugbar::info($assigned_to);
+                    $assigned_type = "App\Models\User";
+                    $status = Statuslabel::where('name', 'Выдано')->first();
+                    $asset->status_id = $status->id;
+                    $asset->contract_id = $contract_id;
+                    break;
+                case 'contract':
+                    $assigned_to = Contract::findOrFail(request('assigned_contract'));
+                    \Debugbar::info($assigned_to);
+                    $assigned_type = "App\Models\Contract";
+                    $asset->contract_id = $contract_id;
+                    $status = Statuslabel::where('name', 'Продано')->first();
+                    $asset->status_id = $status->id;
+                    break;
+            }
+            $asset->assigned_to=$assigned_to->id;
+            $asset->assigned_type=$assigned_type;
+
+            if ($asset->save()) {
+
+                $log = new Actionlog();
+                $log->user_id = Auth::id();
+                if ($asset->assigned_type== "App\Models\User"){
+                    $log->action_type = 'issued_for_sale';
+                }
+                if ($asset->assigned_type== "App\Models\Contract"){
+                    $log->action_type = 'sell';
+                }
+                $log->target_type = $assigned_type;
+                $log->target_id = $assigned_to->id;
+                $log->item_id = $asset->id;
+                $log->item_type = Asset::class;
+                $service_info = json_encode($request->all()); // TODO: хотим хранить эту инфу в бд
+                $log->note = $note;
+                $log->save();
+                $this->ss_count += 1;
+            } else {
+                return false;
+            }
+
+
+
+
+    }
+
+    /**
+     * Process Multiple Sell Request
+     * @return View
+     */
+    public function storeSell(Request $request)
+    {
+
+        try {
+//        $this->renderForConsole("haha");
+            if(is_null($request->get('sell_to_type'))) {
+                return redirect()->route('hardware/bulksell')->withInput()->with('error', trans('admin/hardware/message.sell.no_type_selected'));
+            }
+
+            if ($request->get('sell_to_type') == 'user') {
+                if (is_null($request->get('assigned_user'))) {
+                    return redirect()->route('hardware/bulksell')->withInput()->with('error', trans('admin/hardware/message.sell.no_user_selected'));
+                } else if (is_null($request->get('assigned_contract'))) {
+                    return redirect()->route('hardware/bulksell')->withInput()->with('error', trans('admin/hardware/message.sell.no_contract_selected'));
+                }
+            }
+
+            if ($request->get('sell_to_type') == 'contract' && is_null($request->get('assigned_contract'))) {
+                    return redirect()->route('hardware/bulksell')->withInput()->with('error', trans('admin/hardware/message.sell.no_contract_selected'));
+            }
+
+            if (is_null($request->get('sold_at'))) {
+                return redirect()->route('hardware/bulksell')->withInput()->with('error', trans('admin/hardware/message.sell.no_date_selected'));
+            }
+
+            if (!is_array($request->get('selected_assets'))) {
+                return redirect()->route('hardware/bulksell')->withInput()->with('error', trans('admin/hardware/message.sell.no_assets_selected'));
+            }
+
+            $admin = \Illuminate\Support\Facades\Auth::user();
+            $target = $this->determineCheckoutTarget();
+            $asset_ids = array_filter($request->get('selected_assets'));
+
+            DB::transaction(function () use ($target, $admin, $asset_ids, $request) {
+                $contract_id = request('assigned_contract');
+                $note = request('note');
+                $sold_at = request('sold_at');
+                $this->ss_count = 0;
+
+                foreach ($asset_ids as $asset_id) {
+                    $this->sellAssetPost($request, $asset_id, $contract_id, $note, $sold_at);
+                }
+            });
+
+            if ($this->ss_count == count($asset_ids)) {
+                if (request('sell_to_type') == 'user') {
+                    return redirect()->to("hardware/bulksell")->with('success', trans('admin/hardware/message.sell.success_user'));
+                } else if (request('sell_to_type') == 'contract') {
+                    return redirect()->to("hardware/bulksell")->with('success', trans('admin/hardware/message.sell.success_contract'));
+                }
+            }
+
+        } catch (ModelNotFoundException $e) {
+            return redirect()->back()->with('error', trans('admin/hardware/message.sell.error'))->withErrors();
+        } catch (SaleNotAllowed $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    protected function renderForConsole($e)
+    {
+        $this->getExceptionHandler()->renderForConsole(new ConsoleOutput, $e);
     }
 }
