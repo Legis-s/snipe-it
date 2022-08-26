@@ -2,6 +2,7 @@
 .DS_Store
 .env
 .idea
+.github
 /bin/
 /bootstrap/compiled.php
 /node_modules
@@ -28,6 +29,6 @@ tests/_support/_generated/*
 /npm-debug.log
 /storage/oauth-private.key
 /storage/oauth-public.key
-
+/*.csv
 *.cache
 /public/storage

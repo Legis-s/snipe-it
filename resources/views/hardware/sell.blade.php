@@ -160,7 +160,7 @@
             $('input[name=checkout_to_type_s]').on("change",function () {
                 var assignto_type = $('input[name=checkout_to_type_s]:checked').val();
                 var userid = $('#assigned_user option:selected').val();
-
+                console.log("+");
                 if (assignto_type == 'asset') {
                     $('#current_assets_box').fadeOut();
                     $('#assigned_asset').show();
