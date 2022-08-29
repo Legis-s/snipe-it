@@ -229,4 +229,5 @@
         'login_enabled'         => 'Логин включен',
         'audit_due'             => 'Ожидают аудита',
         'audit_overdue'         => 'Аудит просрочен',
+        'mass_operations' => 'Массовые операции'
     ];
