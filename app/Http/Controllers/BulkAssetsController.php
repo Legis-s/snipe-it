@@ -9,6 +9,7 @@ use App\MassOperation;
 use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\Contract;
+use App\Models\Location;
 use App\Models\Sale;
 use App\Models\Setting;
 use App\Models\Statuslabel;
@@ -250,6 +251,46 @@ class BulkAssetsController extends Controller
                         array_merge_recursive($errors, $asset->getErrors()->toArray());
                     }
                 }
+            });
+
+            $operation_type = 'checkout';
+            $name = "Массовая выдача от " . date('d.m.Y');
+            $user_id = Auth::id();
+//            $assigned_type = ($request->get('checkout_to_type') == 'user') ? 'App\Models\User' : 'App\Models\Contract';
+//            $assigned_to = ($request->get('checkout_to_type') == 'user') ? request('assigned_user') : request('assigned_contract');
+
+            switch ($request->get('checkout_to_type')) {
+                case 'location':
+                    $assigned_type = 'App\Models\Location';
+                    $assigned_to = request('assigned_location');
+                    break;
+                case 'asset':
+                    $assigned_type = 'App\Models\Asset';
+                    $assigned_to = request('assigned_asset');
+                    break;
+                case 'user':
+                    $assigned_type = 'App\Models\User';
+                    $assigned_to = request('assigned_user');
+                    break;
+            }
+
+
+            $contract_id = request('assigned_contract');
+            $bitrix_task_id = request('bitrix_task_id');
+            $note = request('note');
+
+            DB::transaction(function () use ($operation_type, $name, $user_id, $assigned_type, $assigned_to, $contract_id, $bitrix_task_id, $note, $asset_ids) {
+                $mo = new MassOperation();
+                $mo->operation_type = $operation_type;
+                $mo->name = $name;
+                $mo->user_id = $user_id;
+                $mo->contract_id = $contract_id;
+                $mo->assigned_type = $assigned_type;
+                $mo->assigned_to = $assigned_to;
+                $mo->bitrix_task_id = $bitrix_task_id;
+                $mo->note = $note;
+                $mo->save();
+                $mo->assets()->attach($asset_ids);
             });
 
             if (!$errors) {
