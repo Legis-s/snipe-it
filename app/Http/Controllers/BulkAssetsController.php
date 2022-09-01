@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exceptions\CheckoutNotAllowed;
 use App\Helpers\Helper;
 use App\Http\Controllers\CheckInOutRequest;
+use App\MassOperation;
 use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\Contract;
@@ -349,7 +350,6 @@ class BulkAssetsController extends Controller
     {
 
         try {
-//        $this->renderForConsole("haha");
             if(is_null($request->get('sell_to_type'))) {
                 return redirect()->route('hardware/bulksell')->withInput()->with('error', trans('admin/hardware/message.sell.no_type_selected'));
             }
@@ -379,14 +379,38 @@ class BulkAssetsController extends Controller
             $asset_ids = array_filter($request->get('selected_assets'));
 
             DB::transaction(function () use ($target, $admin, $asset_ids, $request) {
-                $contract_id = request('assigned_contract');
                 $note = request('note');
+                $contract_id = request('assigned_contract');
                 $sold_at = request('sold_at');
                 $this->ss_count = 0;
 
                 foreach ($asset_ids as $asset_id) {
                     $this->sellAssetPost($request, $asset_id, $contract_id, $note, $sold_at);
                 }
+
+            });
+
+            $operation_type = 'sell';
+            $name = "Массовая продажа от " . date('d.m.Y');
+            $user_id = Auth::id();
+            $assigned_type = ($request->get('sell_to_type') == 'user') ? 'App\Models\User' : 'App\Models\Contract';
+            $assigned_to = ($request->get('sell_to_type') == 'user') ? request('assigned_user') : request('assigned_contract');
+            $contract_id = request('assigned_contract');
+            $bitrix_task_id = request('bitrix_task_id');
+            $note = request('note');
+
+            DB::transaction(function () use ($operation_type, $name, $user_id, $assigned_type, $assigned_to, $contract_id, $bitrix_task_id, $note, $asset_ids) {
+                $mo = new MassOperation();
+                $mo->operation_type = $operation_type;
+                $mo->name = $name;
+                $mo->user_id = $user_id;
+                $mo->contract_id = $contract_id;
+                $mo->assigned_type = $assigned_type;
+                $mo->assigned_to = $assigned_to;
+                $mo->bitrix_task_id = $bitrix_task_id;
+                $mo->note = $note;
+                $mo->save();
+                $mo->assets()->attach($asset_ids);
             });
 
             if ($this->ss_count == count($asset_ids)) {

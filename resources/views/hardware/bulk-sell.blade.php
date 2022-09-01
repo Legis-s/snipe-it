@@ -31,6 +31,15 @@
                         @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.user'), 'fieldname' => 'assigned_user', 'hide_new' => 'true', 'required'=>'true'])
                         @include ('partials.forms.edit.contract-id-select', ['translated_name' => "Договор", 'fieldname' => 'assigned_contract', 'unselect' => 'true', 'required'=>'true'])
 
+                        {{--                        Bitrix task id--}}
+                        <div class="form-group {{ $errors->has('bitrix_task_id') ? 'error' : '' }}">
+                            {{ Form::label('bitrix_task_id', trans('admin/hardware/form.bitrix_task_id'), array('class' => 'col-md-3 control-label')) }}
+                            <div class="col-md-8">
+                                <input type = 'text' class = 'form-control' name="bitrix_task_id">
+                                {!! $errors->first('bitrix_task_id', '<span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span>') !!}
+                            </div>
+                        </div>
+
                         <!-- sold_at date -->
                         <div class="form-group {{ $errors->has('sold_at') ? 'error' : '' }}">
                             {{ Form::label('sold_at', trans('admin/hardware/form.sell_date'), array('class' => 'col-md-3 control-label')) }}

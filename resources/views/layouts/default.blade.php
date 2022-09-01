@@ -587,14 +587,14 @@
                         </ul>
                     </li>
                 @endcan
-                    @can('view', \App\Models\License::class)
+{{--                    @can('view', \App\Models\License::class)--}}
                         <li{!! (Request::is('licenses*') ? ' class="active"' : '') !!}>
-                            <a href="{{ route('licenses.index') }}">
+                            <a href="{{ route('massoperations') }}">
                                 <i class="fa fa-th-list"></i>
                                 <span>{{ trans('general.mass_operations') }}</span>
                             </a>
                         </li>
-                    @endcan
+{{--                    @endcan--}}
                 @can('view', \App\Models\License::class)
                     <li{!! (Request::is('licenses*') ? ' class="active"' : '') !!}>
                         <a href="{{ route('licenses.index') }}">

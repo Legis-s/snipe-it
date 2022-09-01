@@ -607,6 +607,20 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api', 'middleware' => 'api'], fu
         ]
     ); // Licenses resource
 
+    Route::resource('massoperations', 'MassOperationsController',
+        [
+            'names' =>
+                [
+                    'index' => 'api.massoperations.index',
+//                    'show' => 'api.massoperations.show',
+//                    'store' => 'api.massoperations.store',
+//                    'update' => 'api.massoperations.update',
+//                    'destroy' => 'api.massoperations.destroy'
+                ],
+//            'except' => ['create', 'edit'],
+            'parameters' => ['massoperation' => 'massoperation_id']
+        ]
+    ); // Licenses resource
 
     /*--- Locations API ---*/
 
