@@ -563,6 +563,7 @@ Route::group(
     ['prefix' => '',
         'middleware' => ['auth']],function() {
     Route::get('massoperations', ['as' => 'massoperations', 'uses' => 'MassOperationsController@index']);
+    Route::get('massoperations/{purchaseId}', ['as' => 'massoperations_show', 'uses' => 'MassOperationsController@show']);
 });
 
 

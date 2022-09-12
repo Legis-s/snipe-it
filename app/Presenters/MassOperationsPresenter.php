@@ -6,10 +6,10 @@ use App\Helpers\Helper;
 use Illuminate\Support\Facades\Gate;
 
 /**
- * Class MassOperationPresenter
+ * Class MassOperationsPresenter
  * @package App\Presenters
  */
-class MassOperationPresenter extends Presenter
+class MassOperationsPresenter extends Presenter
 {
     /**
      * Json Column Layout for bootstrap table
@@ -18,184 +18,56 @@ class MassOperationPresenter extends Presenter
     public static function dataTableAllLayout()
     {
         $layout = [
-            [
-                "field" => "id",
-                "searchable" => false,
-                "sortable" => true,
-                "switchable" => true,
-                "title" => trans('general.id'),
-                "visible" => false
-            ],
 //            [
-//                "field" => "company",
-//                "searchable" => true,
+//                "field" => "id",
+//                "searchable" => false,
 //                "sortable" => true,
-//                "switchable" => true,
-//                "title" => trans('admin/companies/table.title'),
-//                "visible" => false,
-//                "formatter" => "companiesLinkObjFormatter"
+//                "title" => trans('general.id'),
+//                "visible" => false
 //            ],
             [
-                "field" => " type",
+                "field" => "operation_type",
                 "searchable" => true,
                 "sortable" => true,
+                "visible" => true,
                 "title" => trans('admin/massoperations/general.type_table'),
-                "formatter" => "licensesLinkFormatter"
             ],
             [
                 "field" => "name",
                 "searchable" => true,
                 "sortable" => true,
                 "title" => trans('admin/massoperations/general.title_table'),
-                "formatter" => "licensesLinkFormatter"
             ],
             [
                 "field" => "assets_count",
                 "searchable" => true,
                 "sortable" => true,
                 "title" => trans('admin/massoperations/general.assets_count'),
-                "formatter" => "licensesLinkFormatter"
             ],
             [
                 "field" => "date",
                 "searchable" => true,
-                "sortable" => true,
-                "title" => trans('admin/massoperations/general.assets_count'),
-                "formatter" => "licensesLinkFormatter"
-            ],
-            [
-                "field" => "creator",
-                "searchable" => true,
-                "sortable" => true,
-                "title" => trans('admin/massoperations/general.creator'),
-                "formatter" => "licensesLinkFormatter"
+                "sortable" => false,
+                "visible" => true,
+                "switchable" => true,
+                "title" => trans('admin/massoperations/general.date'),
             ],
             [
                 "field" => "purpose",
                 "searchable" => true,
-                "sortable" => true,
+                "sortable" => false,
+                "visible" => true,
+                "switchable" => true,
                 "title" => trans('admin/massoperations/general.purpose'),
-                "formatter" => "licensesLinkFormatter"
             ],
-//            [
-//                "field" => "product_key",
-//                "searchable" => true,
-//                "sortable" => true,
-//                "title" => trans('admin/licenses/form.license_key'),
-//                "formatter" => "licensesLinkFormatter"
-//            ],
-//            [
-//                "field" => "expiration_date",
-//                "searchable" => true,
-//                "sortable" => true,
-//                "title" => trans('admin/licenses/form.expiration'),
-//                'formatter' => 'dateDisplayFormatter'
-//            ],
-//            [
-//                "field" => "license_email",
-//                "searchable" => true,
-//                "sortable" => true,
-//                "title" => trans('admin/licenses/form.to_email')
-//            ],
-//            [
-//                "field" => "license_name",
-//                "searchable" => true,
-//                "sortable" => true,
-//                "title" => trans('admin/licenses/form.to_name'),
-//            ],
-//            [
-//                "field" => "category",
-//                "searchable" => true,
-//                "sortable" => true,
-//                "switchable" => true,
-//                "title" => trans('general.category'),
-//                "visible" => false,
-//                "formatter" => "categoriesLinkObjFormatter"
-//            ],
-//            [
-//                "field" => "supplier",
-//                "searchable" => true,
-//                "sortable" => true,
-//                "switchable" => true,
-//                "title" => trans('general.supplier'),
-//                "visible" => false,
-//                "formatter" => "suppliersLinkObjFormatter"
-//            ],
-//            [
-//                "field" => "manufacturer",
-//                "searchable" => true,
-//                "sortable" => true,
-//                "title" => trans('general.manufacturer'),
-//                "formatter" => "manufacturersLinkObjFormatter",
-//            ],
-//            [
-//                "field" => "seats",
-//                "searchable" => false,
-//                "sortable" => true,
-//                "title" => trans('admin/accessories/general.total'),
-//            ],
-//            [
-//                "field" => "free_seats_count",
-//                "searchable" => false,
-//                "sortable" => true,
-//                "title" => trans('admin/accessories/general.remaining'),
-//            ],
-//            [
-//                "field" => "purchase_date",
-//                "searchable" => true,
-//                "sortable" => true,
-//                "visible" => false,
-//                "title" => trans('general.purchase_date'),
-//                'formatter' => 'dateDisplayFormatter'
-//            ],
-//            [
-//                "field" => "purchase_cost",
-//                "searchable" => true,
-//                "sortable" => true,
-//                "visible" => false,
-//                "title" => trans('general.purchase_cost'),
-//                "footerFormatter" => 'sumFormatter',
-//            ], [
-//                "field" => "purchase_order",
-//                "searchable" => true,
-//                "sortable" => true,
-//                "visible" => false,
-//                "title" => trans('admin/licenses/form.purchase_order'),
-//            ], [
-//                "field" => "order_number",
-//                "searchable" => true,
-//                "sortable" => true,
-//                "visible" => false,
-//                "title" => trans('general.order_number'),
-//            ],
             [
                 "field" => "notes",
                 "searchable" => true,
                 "sortable" => false,
                 "visible" => true,
                 "title" => trans('general.notes'),
-                "formatter" => "notesFormatter"
-            ]
+            ],
         ];
-
-//        $layout[] = [
-//            "field" => "checkincheckout",
-//            "searchable" => false,
-//            "sortable" => false,
-//            "switchable" => true,
-//            "title" => trans('general.checkin').'/'.trans('general.checkout'),
-//            "visible" => true,
-//            "formatter" => "licensesInOutFormatter",
-//        ];
-
-//        $layout[] = [
-//            "field" => "actions",
-//            "searchable" => false,
-//            "sortable" => false,
-//            "switchable" => false,
-//            "title" => trans('table.actions'),
-//            "formatter" => "licensesActionsFormatter",
-//        ];
 
 
         return json_encode($layout);

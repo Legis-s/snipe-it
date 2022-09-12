@@ -25,7 +25,21 @@
                 </div>
             </div>
             <div class="box-body">
+                <div id="toolbar">
+                    @if ($purchase->status == "finished")
+                    <a href="{{ route('hardware/bulksell', ['purchase_bulk_id' => $purchase->id]) }}" class="btn btn-primary pull-right">
+                        {{ trans('admin/massoperations/general.sell') }}
+                    </a>
+                    <a href="{{ route('hardware/bulkcheckout', ['purchase_bulk_id' => $purchase->id]) }}" class="btn btn-primary pull-right">
+                        {{ trans('admin/massoperations/general.checkout') }}
+                    </a>
+                    {{--                        <a href="{{ route('licenses.create') }}" class="btn btn-primary pull-right">--}}
+                    {{--                            {{ trans('admin/massoperations/general.return') }}--}}
+                    {{--                        </a>--}}
+                    @endif
+                </div>
             <div class="table table-responsive">
+
                 <table
                         data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayout() }}"
 {{--                        data-cookie-id-table="assetsListingTable"--}}
@@ -177,7 +191,7 @@
                     <div class="row">
                         <div class="col-md-6">
                             <strong>
-                                Статаус
+                                Статус
                             </strong>
                         </div>
                         <div class="col-md-6 status_label">

@@ -34,7 +34,7 @@
 {{--                        </a>--}}
                     </div>
                     <table
-                            data-columns="{{ \App\Presenters\MassOperationPresenter::dataTableAllLayout() }}"
+                            data-columns="{{ \App\Presenters\MassOperationsPresenter::dataTableAllLayout() }}"
                             data-cookie-id-table="massOperationsPresenterTable"
                             data-pagination="true"
                             data-toolbar="#toolbar"
@@ -48,10 +48,9 @@
                             data-sort-name="name"
                             id="massOperationsTable"
                             class="table table-striped snipe-table"
-{{--                            data-url="{{ route('api.licenses.index') }}"--}}
+                            data-url="{{ route('api.massoperations.index') }}"
                             data-export-options='{
             "fileName": "export-massOperations-{{ date('Y-m-d') }}"
-{{--            "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]--}}
             }'>
                     </table>
 

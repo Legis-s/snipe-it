@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Asset;
+use App\Models\MassOperation;
 use Illuminate\Http\Request;
 
 class MassOperationsController extends Controller
@@ -45,9 +46,12 @@ class MassOperationsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($massoperationId)
     {
-        //
+        $this->authorize('view', Asset::class);
+        $mass_operation = MassOperation::find($massoperationId);
+        $assets = $mass_operation->assets;
+        return view('massoperations/view', ['massoperation' => MassOperation::find($massoperationId), 'assets' => $assets]);;
     }
 
     /**

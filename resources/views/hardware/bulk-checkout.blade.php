@@ -1,3 +1,5 @@
+
+
 @extends('layouts/default')
 
 {{-- Page title --}}
@@ -101,15 +103,11 @@
 
 
 
-                        <select id="assigned_assets_select" name="selected_assets[]" multiple hidden></select>
-
-                        {{--                        @include ('partials.forms.edit.asset-select', [--}}
-                        {{--                          'translated_name' => trans('general.assets'),--}}
-                        {{--                          'fieldname' => 'selected_assets[]',--}}
-                        {{--                          'multiple' => true,--}}
-                        {{--                          'asset_status_type' => 'RTD',--}}
-                        {{--                          'select_id' => 'assigned_assets_select',--}}
-                        {{--                        ])--}}
+                        <select id="assigned_assets_select" name="selected_assets[]" multiple hidden>
+                            @foreach ($ids as $a_id)
+                            <option value = '{{ $a_id }}' selected="selected">{{ $a_id }}</option>
+                            @endforeach
+                        </select>
 
                         <h2> Активы к выдаче:</h2>
                         <table
@@ -119,7 +117,10 @@
                                 data-cookie-id-table="assetsBulkTable"
                                 data-pagination="true"
                                 data-id-table="assetsBulkTable"
-                                data-search="true"
+                                data-search="false"
+                                {% if ids is defined %}
+                                data-query-params="queryParams"
+                                {% endif %}
                                 data-side-pagination="server"
                                 data-show-columns="true"
                                 data-show-footer="true"
@@ -141,20 +142,8 @@
                         </button>
                     </div>
                 </form>
-            </div> <!--/.col-md-7-->
+            </div>
 
-            <!-- right column -->
-            {{--            <div class="col-md-5" id="current_assets_box" style="display:none;">--}}
-            {{--                <div class="box box-primary">--}}
-            {{--                    <div class="box-header with-border">--}}
-            {{--                        <h2 class="box-title">{{ trans('admin/users/general.current_assets') }}</h2>--}}
-            {{--                    </div>--}}
-            {{--                    <div class="box-body">--}}
-            {{--                        <div id="current_assets_content">--}}
-            {{--                        </div>--}}
-            {{--                    </div>--}}
-            {{--                </div>--}}
-            {{--            </div>--}}
         </div>
         @stop
 
@@ -167,6 +156,16 @@
                 var add_asset = $('#add_asset');
                 var assigned_assets_select = $('#assigned_assets_select');
                 var selected = [];
+                Array.from(document.getElementById("assigned_assets_select")).forEach(function(item) {
+                    selected.push(item.innerHTML);
+                })
+
+                function queryParams(params) {
+                    params.data = JSON.stringify(selected);
+                    return params
+                }
+
+                updData();
                 add_asset.prop('disabled', true);
                 add_asset.click(function () {
                     var selected_id = select.val();
@@ -200,10 +199,9 @@
                 //     updData();
                 // });
 
-
                 function updData() {
                     // console.log("upd");
-                    // console.log(selected);
+                    console.log(selected);
                     $("#assetsBulkTable").bootstrapTable("refresh", {
                         "query": {
                             "data": JSON.stringify(selected),
@@ -219,8 +217,10 @@
                             selected: true
                         }));
                     });
+
                 }
 
+                updData();
 
                 // Enable scan events for the entire document
                 onScan.attachTo(document, {

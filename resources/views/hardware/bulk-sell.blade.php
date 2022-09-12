@@ -67,6 +67,7 @@
                         </div>
                         <br>
                         <br>
+
                         @include ('partials.forms.edit.asset-select-bulk-form', [
                                     'translated_name' => trans('general.asset'),
                                     'fieldname' => 'asset_select',
@@ -75,7 +76,13 @@
                                     'select_id' => 'asset_select',
                                      ])
 
-                        <select id="assigned_assets_select" name="selected_assets[]" multiple hidden></select>
+                        <select id="assigned_assets_select" name="selected_assets[]" multiple hidden>
+
+                            @foreach ($ids as $a_id)
+                                <option value = '{{ $a_id }}' selected="selected">{{ $a_id }}</option>
+                            @endforeach
+
+                        </select>
 
                         <h2> Активы к продаже:</h2>
                         <table
@@ -85,6 +92,9 @@
                                 data-cookie-id-table="assetsBulkTable"
                                 data-pagination="true"
                                 data-id-table="assetsBulkTable"
+                                {% if ids is defined %}
+                                data-query-params="queryParams"
+                                {% endif %}
                                 data-search="true"
                                 data-side-pagination="server"
                                 data-show-columns="true"
@@ -98,7 +108,6 @@
                                 class="table table-striped snipe-table"
                                 data-url="{{ route('api.assets.index',array('bulk' => true ))}}">
                         </table>
-
                     </div>
                     <div class="box-footer">
                         <a class="btn btn-link" href="{{ URL::previous() }}"> {{ trans('button.cancel') }}</a>
@@ -128,11 +137,18 @@
                     });
                 });
 
+
                 var select = $('#asset_select');
                 var add_asset = $('#add_asset');
                 var assigned_assets_select = $('#assigned_assets_select');
                 var selected = [];
-
+                Array.from(document.getElementById("assigned_assets_select")).forEach(function(item) {
+                    selected.push(item.innerHTML);
+                })
+                function queryParams(params) {
+                    params.data = JSON.stringify(selected);
+                    return params
+                }
                 add_asset.prop('disabled', true);
                 add_asset.click(function () {
                     var selected_id = select.val();

@@ -1050,6 +1050,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api', 'middleware' => 'api'], fu
         ]
     ); // Purchases resource
 
+
+
     Route::group(['prefix' => 'purchases'], function () {
 
         Route::post('{purchase}/paid',

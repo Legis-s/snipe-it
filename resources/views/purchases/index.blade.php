@@ -66,6 +66,7 @@
                             class="table table-striped snipe-table"
                             data-url="{{ route('api.purchases.index') }}">
                     </table>
+
                 </div>
             </div>
         </div>
