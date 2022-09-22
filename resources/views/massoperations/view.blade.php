@@ -1,4 +1,12 @@
 @extends('layouts/default')
+{{--bitrix задача: ссылка (актив)--}}
+{{--дату добавить--}}
+{{--цель отдельно--}}
+{{--тип--}}
+{{--договор--}}
+{{--ответсвенный--}}
+
+{{--массовый возврат--}}
 
 {{-- Page title --}}
 @section('title')
@@ -21,26 +29,22 @@
             <div class="box box-default">
                 <div class="box-header with-border">
                     <div class="box-heading">
-                        <h2 class="box-title">Активы </h2>
+                        <h2 class="box-title">Активы</h2>
                     </div>
                 </div>
                 <div class="box-body">
                     <div id="toolbar">
                     </div>
-                    <div class="table table-responsive">
+                    <div class="table">
                         <select id="assigned_assets_select" name="selected_assets[]" multiple hidden>
-
                             @foreach ($assets as $asset)
                                 <option value = '{{ $asset->id }}' selected="selected">{{ $asset->id }}</option>
                             @endforeach
-
                         </select>
-
-                        <h2> Активы к продаже:</h2>
                         <table
                                 data-advanced-search="true"
                                 data-click-to-select="true"
-                                data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayoutBulk() }}"
+                                data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayout() }}"
                                 data-cookie-id-table="assetsBulkTable"
                                 data-pagination="true"
                                 data-id-table="assetsBulkTable"
@@ -58,7 +62,7 @@
                                 data-queryParams="#toolbar"
                                 id="assetsBulkTable"
                                 class="table table-striped snipe-table"
-                                data-url="{{ route('api.assets.index',array('bulk' => true ))}}">
+                                data-url="{{ route('api.assets.index',array('massoperation_id' => $massoperation->id ))}}">
                         </table>
                     </div><!-- /.table-responsive -->
                 </div><!-- /.box-body -->
@@ -72,21 +76,86 @@
                     </div>
                 </div>
                 <div class="box-body">
-                    @if ($massoperation->name)
+{{--                    @if ($massoperation->name)--}}
+{{--                        <div class="row">--}}
+{{--                            <div class="col-md-6">--}}
+{{--                                <strong>--}}
+{{--                                    Название--}}
+{{--                                </strong>--}}
+{{--                            </div>--}}
+{{--                            <div class="col-md-6">--}}
+{{--                                {{ $massoperation->name }}--}}
+{{--                            </div>--}}
+{{--                        </div>--}}
+
+{{--                    @endif--}}
+                    @if ($massoperation->assets)
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <strong>
+                                        Кол-во активов
+                                    </strong>
+                                </div>
+                                <div class="col-md-2">
+                                    {{ count($massoperation->assets) }}
+                                </div>
+                            </div>
+                        @endif
+                        @if ($massoperation->bitrix_task_id)
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <strong>
+                                        Bitrix задача
+                                    </strong>
+                                </div>
+                                <div class="col-md-2">
+                                    <a href="https://bitrix.legis-s.ru/company/personal/user/290/tasks/task/view/{{ $massoperation->bitrix_task_id }}/">ссылка</a>
+                                </div>
+                            </div>
+                        @endif
+                    @if ($massoperation->operation_type)
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-8">
                                 <strong>
-                                    Название
+                                    Операция
                                 </strong>
                             </div>
-                            <div class="col-md-6">
-                                {{ $massoperation->name }}
+                            <div class="col-md-2">
+                                @if ($massoperation->operation_type == 'checkout')
+                                выдача
+                                @elseif($massoperation->operation_type == 'checkin')
+                                возврат
+                                @elseif($massoperation->operation_type == 'sell')
+                                продажа
+                                @endif
                             </div>
                         </div>
                     @endif
-
-
-                    @if ($massoperation->note)
+                    @if ($massoperation->created_at)
+                        <div class="row">
+                            <div class="col-md-8">
+                                <strong>
+                                    Дата
+                                </strong>
+                            </div>
+                            <div class="col-md-2">
+                                {{ date('Y.m.d', strtotime((string) $massoperation->created_at))}}
+                            </div>
+                        </div>
+                    @endif
+                    @if ($massoperation->contract_id)
+                        <div class="row">
+                            <div class="col-md-8">
+                                <strong>
+                                    Договор
+                                </strong>
+                            </div>
+                            <div class="col-md-2">
+                                {{ $massoperation->contract_id}}
+                            </div>
+                        </div>
+                    @endif
+                        @if ($massoperation->note)
                         <div class="row">
                             <div class="col-md-6">
                                 <strong>
@@ -98,18 +167,7 @@
                             </div>
                         </div>
                     @endif
-                    @if ($massoperation->bitrix_task_id)
-                        <div class="row">
-                            <div class="col-md-6">
-                                <strong>
-                                    Задача
-                                </strong>
-                            </div>
-                            <div class="col-md-6">
-                                <a href="https://bitrix.legis-s.ru/company/personal/user/290/tasks/task/view/{{ $massoperation->bitrix_task_id }}/">{{ $purchase->bitrix_task_id }}</a>
-                            </div>
-                        </div>
-                    @endif
+
 
                 </div><!-- /.box-body -->
             </div> <!--/.box-->

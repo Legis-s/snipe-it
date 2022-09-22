@@ -33,6 +33,9 @@
                     <a href="{{ route('hardware/bulkcheckout', ['purchase_bulk_id' => $purchase->id]) }}" class="btn btn-primary pull-right">
                         {{ trans('admin/massoperations/general.checkout') }}
                     </a>
+                        <a href="{{ route('hardware/bulkcheckin', ['purchase_bulk_id' => $purchase->id]) }}" class="btn btn-primary pull-right">
+                            {{ trans('admin/massoperations/general.checkin') }}
+                        </a>
                     {{--                        <a href="{{ route('licenses.create') }}" class="btn btn-primary pull-right">--}}
                     {{--                            {{ trans('admin/massoperations/general.return') }}--}}
                     {{--                        </a>--}}

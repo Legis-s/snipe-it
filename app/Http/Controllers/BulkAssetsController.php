@@ -227,6 +227,99 @@ class BulkAssetsController extends Controller
         return view('hardware/bulk-sell', ['ids' => request()->filled('purchase_bulk_id') ? $ids : []]);
     }
     /**
+     * Show Bulk Multiple Checkin Page
+     * @return View View to checkin multiple assets
+     */
+    public function showCheckin()
+    {
+        if (request()->filled('purchase_bulk_id')) {
+            $assets = Company::scopeCompanyables(Asset::select('assets.*'), "company_id", "assets")
+                ->with('location', 'assetstatus', 'assetlog', 'company', 'defaultLoc', 'assignedTo',
+                    'model.category', 'model.manufacturer', 'model.fieldset', 'supplier');
+            $assets->where('assets.purchase_id', '=', request()->input('purchase_bulk_id'))->where('status_id', '=', 2)->where('assigned_to', '!=', null);
+
+            $ids = [];
+            foreach ($assets->get() as $asset) {
+                array_push($ids, $asset->id);
+            }
+        }
+        $this->authorize('sell', Asset::class);
+        // Filter out assets that are not deployable.
+        return view('hardware/bulk-checkin'
+            , ['ids' => request()->filled('purchase_bulk_id') ? $ids : []]
+        );
+    }
+
+    /**
+     * Process Multiple Checkin Request
+     * @return View
+     */
+    public function storeCheckin(Request $request)
+    {
+        try {
+            $admin = Auth::user();
+
+            $target = $this->determineCheckoutTarget();
+
+            if (!is_array($request->get('selected_assets'))) {
+                return redirect()->route('hardware/bulkcheckin')->withInput()->with('error', trans('admin/hardware/message.checkout.no_assets_selected'));
+            }
+
+            $asset_ids = array_filter($request->get('selected_assets'));
+
+            $checkin_at = date("Y-m-d H:i:s");
+            if (($request->filled('checkin_at')) && ($request->get('checkin_at')!= date("Y-m-d"))) {
+                $checkout_at = e($request->get('checkin_at'));
+            }
+
+            $expected_checkin = '';
+
+            if ($request->filled('expected_checkin')) {
+                $expected_checkin = e($request->get('expected_checkin'));
+            }
+
+            $errors = [];
+            DB::transaction(function () use ($errors, $asset_ids, $request) {
+                foreach ($asset_ids as $asset_id) {
+                    $con = new Api\AssetsController();
+                    $con->checkin($request, $asset_id);
+                }
+            });
+
+            $operation_type = 'checkin';
+            $name = "Массовый возврат от " . date('d.m.Y');
+            $user_id = Auth::id();
+
+            $contract_id = request('assigned_contract');
+            $bitrix_task_id = request('bitrix_task_id');
+            $note = empty(request('note')) ? '' : request('note');
+
+            DB::transaction(function () use ($operation_type, $name, $user_id, $contract_id, $bitrix_task_id, $note, $asset_ids) {
+                $mo = new MassOperation();
+                $mo->operation_type = $operation_type;
+                $mo->assigned_type = 'App\Models\Location';
+                $mo->assigned_to = request('location_id');
+                $mo->name = $name;
+                $mo->user_id = $user_id;
+                $mo->contract_id = $contract_id;
+                $mo->bitrix_task_id = $bitrix_task_id;
+                $mo->note = $note;
+                $mo->save();
+                $mo->assets()->attach($asset_ids);
+            });
+
+            if (!$errors) {
+                // Redirect to the new asset page
+                return redirect()->to("hardware/bulkcheckin")->with('success', trans('admin/hardware/message.checkin.bulk_success'));
+            }
+            // Redirect to the asset management page with error
+            return redirect()->to("hardware/bulk-checkout")->with('error', trans('admin/hardware/message.checkout.error'))->withErrors($errors);
+        } catch (ModelNotFoundException $e) {
+            return redirect()->to("hardware/bulk-checkout")->with('error', $e->getErrors());
+        }
+    }
+
+    /**
      * Process Multiple Checkout Request
      * @return View
      */
@@ -303,7 +396,7 @@ class BulkAssetsController extends Controller
 
             $contract_id = request('assigned_contract');
             $bitrix_task_id = request('bitrix_task_id');
-            $note = request('note');
+            $note = empty(request('note')) ? '' : request('note');
 
             DB::transaction(function () use ($operation_type, $name, $user_id, $assigned_type, $assigned_to, $contract_id, $bitrix_task_id, $note, $asset_ids) {
                 $mo = new MassOperation();
@@ -349,7 +442,6 @@ class BulkAssetsController extends Controller
             } elseif (!$asset->availableForSell()) {
                 return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.checkout.not_available'));
             }
-var_dump("ok");
             $admin_user = Auth::user();
             $sold_at= date("Y-m-d H:i:s");
             $assigned_to = null;
@@ -446,7 +538,7 @@ var_dump("ok");
             $asset_ids = array_filter($request->get('selected_assets'));
 
             DB::transaction(function () use ($target, $admin, $asset_ids, $request) {
-                $note = request('note');
+                $note = empty(request('note')) ? '' : request('note');
                 $contract_id = request('assigned_contract');
                 $sold_at = request('sold_at');
                 $this->ss_count = 0;
@@ -467,7 +559,6 @@ var_dump("ok");
             $bitrix_task_id = request('bitrix_task_id');
             $note = request('note');
 
-//            dd($asset_ids);
             if ($this->ss_count == count($asset_ids)) {
                 DB::transaction(function () use ($operation_type, $name, $user_id, $assigned_type, $assigned_to, $contract_id, $bitrix_task_id, $note, $asset_ids) {
                     $mo = new MassOperation();

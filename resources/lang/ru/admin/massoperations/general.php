@@ -5,6 +5,7 @@ return array(
     'sell' => 'Продать',
     'checkout'=> 'Выдать',
     'return' => 'Вернуть',
+    'checkin' => 'Вернуть',
     'title_table' => 'Название',
     'type_table' => 'Тип',
     'assets_count' => 'Количество активов',

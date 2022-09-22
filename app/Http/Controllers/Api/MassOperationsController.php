@@ -42,30 +42,11 @@ class MassOperationsController extends Controller
                 'contracts.name as contract_name',
                 'locations.name as location_name'])
             ->withCount(['assets as assets_count']);
-//        \Log::info($massOperations->get());
-//
-
-//var_dump($massOperations);
-//        if ($request->filled('search')) {
-//            $massOperations = $massOperations->TextSearch($request->input('search'));
-//
-//        }
-//        if ($request->filled('user_id')) {
-//            $massOperations->where('user_id', '=', $request->input('user_id'));
-//        }
-//        if ($request->filled('status')) {
-//            $massOperations->where('status', '=', $request->input('status'));
-//        }
-//        if ($request->filled('supplier')) {
-//            $purchases->where('supplier_id', '=', $request->input('supplier'));
-//        }
 
         $allowed_columns =
             [
                 'id', 'name'
-//                'bitrix_id', 'final_price', 'status', 'created_at',
-//                'deleted_at'
-        ];
+            ];
 
 
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';

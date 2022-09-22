@@ -22,13 +22,16 @@
             <div class="box">
                 <div class="box-body">
                     <div id="toolbar">
-
+                        <a href="{{ route('hardware/bulkcheckin') }}" class="btn btn-primary pull-right">
+                            {{ trans('admin/massoperations/general.return') }}
+                        </a>
                         <a href="{{ route('hardware/bulksell') }}" class="btn btn-primary pull-right">
                             {{ trans('admin/massoperations/general.sell') }}
                         </a>
                         <a href="{{ route('hardware/bulkcheckout') }}" class="btn btn-primary pull-right">
                             {{ trans('admin/massoperations/general.checkout') }}
                         </a>
+
 {{--                        <a href="{{ route('licenses.create') }}" class="btn btn-primary pull-right">--}}
 {{--                            {{ trans('admin/massoperations/general.return') }}--}}
 {{--                        </a>--}}

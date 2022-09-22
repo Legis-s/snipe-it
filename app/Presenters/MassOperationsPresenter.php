@@ -18,25 +18,27 @@ class MassOperationsPresenter extends Presenter
     public static function dataTableAllLayout()
     {
         $layout = [
-//            [
-//                "field" => "id",
-//                "searchable" => false,
-//                "sortable" => true,
-//                "title" => trans('general.id'),
-//                "visible" => false
-//            ],
+            [
+                "field" => "id",
+                "searchable" => false,
+                "sortable" => true,
+                "title" => trans('general.id'),
+                "visible" => false
+            ],
             [
                 "field" => "operation_type",
                 "searchable" => true,
                 "sortable" => true,
                 "visible" => true,
                 "title" => trans('admin/massoperations/general.type_table'),
+
             ],
             [
                 "field" => "name",
                 "searchable" => true,
                 "sortable" => true,
                 "title" => trans('admin/massoperations/general.title_table'),
+                "formatter" => 'massOperationsFormatter'
             ],
             [
                 "field" => "assets_count",

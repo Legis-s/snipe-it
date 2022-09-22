@@ -36,13 +36,21 @@ class MassOperationsTransformer
             $purpose_name = "<li class='fa fa-map-marker text-black'></li> " . $mo->location_name;
         }
 
+
+        if ($mo->operation_type == 'sell') {
+            $operation_type = "<li class='fa fa-rub text-black'></li> Продажа";
+        } else if ($mo->operation_type == 'checkout') {
+            $operation_type = "<li class='fa fa-hand-o-right text-black'></li> Выдача";
+        } else if ($mo->operation_type == 'checkin') {
+            $operation_type = "<li class='fa fa-hand-o-left text-black'></li> Возврат";
+        }
+
         $array = [
-//            'id' => (int) $mo->id,
-        'operation_type' => $mo->operation_type == 'sell' ? "<li class='fa fa-rub text-black'></li> Продажа" : "<li class='fa fa-hand-o-right text-black'></li> Выдача",
+            'id' => (int) $mo->id,
+            'operation_type' => $operation_type,
             'name' => e($mo->name),
             'assets_count' => e($mo->assets_count),
             'date' => e($mo->created_at->format('m.d.Y')),
-//            'creator' => "<a href='/users/" . e($mo->user_id) . "'>" . e($mo->last_name . ' ' . $mo->first_name) . '</a>',
             'purpose' => "<a href='/" . $type . "/" . e($mo->assigned_to) . "' data-tooltip='true' title='" . substr($type, 0, -1) . "'>" . $purpose_name  . '</a>',
             'notes' => e($mo->note)
 
