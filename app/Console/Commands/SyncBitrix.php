@@ -263,7 +263,7 @@ class SyncBitrix extends Command
                             }catch (Exception $e) {
                                 $foo = new StdClass();
                                 $foo->id = $value["ID"];
-                                $foo->bar = $value["UF_NUMBER"];
+                                $foo->name = $value["UF_NUMBER"];
                                 $json = json_encode([$foo]);
                                 $location->contract_number = $json;
                                 $location->save();
@@ -271,7 +271,7 @@ class SyncBitrix extends Command
                         }else{
                             $foo = new StdClass();
                             $foo->id = $value["ID"];
-                            $foo->bar = $value["UF_NUMBER"];
+                            $foo->name = $value["UF_NUMBER"];
                             $json = json_encode([$foo]);
                             $location->contract_number = $json;
                             $location->save();
