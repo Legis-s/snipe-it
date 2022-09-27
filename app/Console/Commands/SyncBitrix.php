@@ -258,7 +258,7 @@ class SyncBitrix extends Command
                         $cn = $location->contract_number;
                         if (strlen($cn)>0){
                             try {
-                                $obj = json_decode($cn);
+                                $obj = json_decode($cn, true);
                                 $add = true;
                                 foreach ($obj as &$oneobj) {
                                     if ($oneobj["id"] ==$value["ID"]){
