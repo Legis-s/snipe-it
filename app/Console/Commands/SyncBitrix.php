@@ -249,7 +249,9 @@ class SyncBitrix extends Command
                 ]
             );
             if ( is_array($value["UF_OBJECT"]) && count($value["UF_OBJECT"]) >0 && strlen($value["UF_NUMBER"])>0 ){
-
+                print("UF_NUMBER");
+                print($value["UF_NUMBER"]);
+                print("UF_OBJECT");
                 print(count($value["UF_OBJECT"]));
 //                $location = Location::where('bitrix_id', '=',  $value["UF_OBJECT"][0])->firstOrFail();
 //                if ($location){
