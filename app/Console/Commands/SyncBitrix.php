@@ -258,12 +258,11 @@ class SyncBitrix extends Command
                         $cn = $location->contract_number;
                         $pos      = strripos($cn, $value["UF_NUMBER"]);
 
-//                        if ($pos === false) {
-//                            $location->contract_number =  $location->contract_number ." , ". $value["UF_NUMBER"];
-//                        }
-//                        print($location->contract_number);
+                        if ($pos === false) {
+                            $location->contract_number =  $location->contract_number ." , ". $value["UF_NUMBER"];
+                        }
+                        print($location->contract_number);
 
-                        $location->contract_number = null;
                         $location->save();
 
 //                        if (strlen($cn)>0){
