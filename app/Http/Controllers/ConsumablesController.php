@@ -258,7 +258,7 @@ class ConsumablesController extends Controller
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @see ConsumablesController::getCheckout() method that returns the form.
      */
-    public function postCheckout(Request $request, $consumableId)
+    public function postCheckout(Request $request, $consumableId, $consumableQuantity = null)
     {
         if (is_null($consumable = Consumable::find($consumableId))) {
             return redirect()->route('consumables.index')->with('error', trans('admin/consumables/message.not_found'));
@@ -267,7 +267,7 @@ class ConsumablesController extends Controller
         $this->authorize('checkout', $consumable);
 
         $admin_user = Auth::user();
-        $quantity = e(Input::get('quantity'));
+        $quantity = (isset($consumableQuantity)) ? $consumableQuantity : e(Input::get('quantity'));
         $comment = e(Input::get('comment'));
 
         $assigned_to = null;
@@ -341,7 +341,7 @@ class ConsumablesController extends Controller
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @see ConsumablesController::getCheckout() method that returns the form.
      */
-    public function postSell(Request $request, $consumableId)
+    public function postSell(Request $request, $consumableId, $consumableQuantity = null)
     {
         if (is_null($consumable = Consumable::find($consumableId))) {
             return redirect()->route('consumables.index')->with('error', trans('admin/consumables/message.not_found'));
@@ -350,14 +350,16 @@ class ConsumablesController extends Controller
         $this->authorize('checkout', $consumable);
 
         $admin_user = Auth::user();
-        $quantity = e(Input::get('quantity'));
-        $comment = e(Input::get('comment'));
+        $quantity = (isset($consumableQuantity)) ? $consumableQuantity : e(Input::get('quantity'));
+        $comment = e(Input::get('note'));
 
         $assigned_to = null;
         $contract_id = null;
 
         // This item is checked out to a location
-        switch (request('checkout_to_type_s')) {
+        $switch = request('checkout_to_type_s');
+        $switch = isset($switch) ? request('checkout_to_type_s') : request('sell_to_type');
+        switch ($switch) {
             case 'location':
                 $assigned_to = Location::findOrFail(request('assigned_location'));
                 $assigned_type = "App\Models\Location";
@@ -389,7 +391,7 @@ class ConsumablesController extends Controller
             'comment' => $comment,
             'cost' => $consumable->purchase_cost,
             'type' => ConsumableAssignment::SOLD,
-            'assigned_to' => $assigned_to->id,
+            'assigned_to' => isset($assigned_to->id) ? $assigned_to->id : $assigned_to,
             'assigned_type' => $assigned_type,
             'contract_id' => $contract_id,
         ]);

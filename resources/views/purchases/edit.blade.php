@@ -1,3 +1,4 @@
+
 @extends('layouts/edit-form', [
    'createText' => "Создать закупку" ,
    'updateText' => "Обновить закупку",

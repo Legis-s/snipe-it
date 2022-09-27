@@ -45,5 +45,10 @@ class MassOperation extends Model
         return $this->belongsToMany(Asset::class);
     }
 
+    public function consumables()
+    {
+        return $this->belongsToMany(Consumable::class);
+    }
+
     use Searchable;
 }

@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Models\Asset;
+use App\Models\Consumable;
 use App\Models\Traits\Searchable;
 use Illuminate\Database\Eloquent\Model;
 
@@ -15,7 +16,6 @@ class MassOperation extends Model
         'operation_type',
         'name',
         'user_id',
-        'contract_id',
         'assigned_type',
         'assigned_to',
         'bitrix_task_id',
@@ -31,7 +31,6 @@ class MassOperation extends Model
         'operation_type' => 'max:32',
         'name' => 'max:255|nullable',
         'user_id' => 'integer',
-        'contract_id' => 'integer',
         'assigned_type' => 'max:255|nullable',
         'assigned_to' => 'integer',
         'bitrix_task_id' => 'integer',
@@ -43,6 +42,11 @@ class MassOperation extends Model
     public function assets()
     {
         return $this->belongsToMany(Asset::class);
+    }
+
+    public function consumables()
+    {
+        return $this->belongsToMany(Consumable::class);
     }
 
     use Searchable;

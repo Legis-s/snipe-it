@@ -6,6 +6,7 @@ use App\Exceptions\CheckoutNotAllowed;
 use App\Helpers\Helper;
 use App\Http\Controllers\CheckInOutRequest;
 use App\Models\Company;
+use App\Models\Consumable;
 use App\Models\MassOperation;
 use App\Models\Actionlog;
 use App\Models\Asset;
@@ -335,7 +336,15 @@ class BulkAssetsController extends Controller
             }
 
             $asset_ids = array_filter($request->get('selected_assets'));
-
+            $consumbales_post = array_filter($request->get('selected_consumables'));
+            $consumbales_data = [];
+            foreach ($consumbales_post as $consumbale) {
+                array_push($consumbales_data, explode(":", $consumbale));
+            }
+            $consumbales_ids = [];
+            foreach ($consumbales_post as $consumbale) {
+                array_push($consumbales_ids, explode(":", $consumbale)[0]);
+            }
             foreach ($asset_ids as $asset_id) {
                 if ($target->id == $asset_id && request('checkout_to_type') =='asset') {
                     return redirect()->back()->with('error', 'You cannot check an asset out to itself.');
@@ -353,7 +362,7 @@ class BulkAssetsController extends Controller
             }
 
             $errors = [];
-            DB::transaction(function () use ($target, $admin, $checkout_at, $expected_checkin, $errors, $asset_ids, $request) {
+            DB::transaction(function () use ($target, $admin, $checkout_at, $expected_checkin, $errors, $asset_ids, $consumbales_data, $request) {
 
                 foreach ($asset_ids as $asset_id) {
                     $asset = Asset::findOrFail($asset_id);
@@ -368,6 +377,25 @@ class BulkAssetsController extends Controller
 
                     if ($error) {
                         array_merge_recursive($errors, $asset->getErrors()->toArray());
+                    }
+                }
+
+                foreach ($consumbales_data as $consumbale_item) {
+                    $consumbale = Consumable::findOrFail($consumbale_item[0]);
+                    $this->authorize('checkout', $consumbale);
+
+//                    dd($consumbale_item[0]);
+                    $con = new ConsumablesController();
+                    $error = $con->postCheckout($request, $consumbale_item[0], $consumbale_item[1]);
+
+                    if ($target->location_id!='') {
+                        $consumbale->location_id = $target->location_id;
+                        $consumbale->unsetEventDispatcher();
+                        $consumbale->save();
+                    }
+
+                    if ($error) {
+                        array_merge_recursive($errors, $consumbale->getErrors()->toArray());
                     }
                 }
             });
@@ -398,7 +426,7 @@ class BulkAssetsController extends Controller
             $bitrix_task_id = request('bitrix_task_id');
             $note = empty(request('note')) ? '' : request('note');
 
-            DB::transaction(function () use ($operation_type, $name, $user_id, $assigned_type, $assigned_to, $contract_id, $bitrix_task_id, $note, $asset_ids) {
+            DB::transaction(function () use ($operation_type, $name, $user_id, $assigned_type, $assigned_to, $contract_id, $bitrix_task_id, $note, $asset_ids, $consumbales_ids) {
                 $mo = new MassOperation();
                 $mo->operation_type = $operation_type;
                 $mo->name = $name;
@@ -410,6 +438,7 @@ class BulkAssetsController extends Controller
                 $mo->note = $note;
                 $mo->save();
                 $mo->assets()->attach($asset_ids);
+                $mo->consumables()->attach($consumbales_ids);
             });
 
             if (!$errors) {
@@ -537,7 +566,17 @@ class BulkAssetsController extends Controller
             $target = $this->determineCheckoutTarget();
             $asset_ids = array_filter($request->get('selected_assets'));
 
-            DB::transaction(function () use ($target, $admin, $asset_ids, $request) {
+            $consumbales_post = array_filter($request->get('selected_consumables'));
+            $consumbales_data = [];
+            foreach ($consumbales_post as $consumbale) {
+                array_push($consumbales_data, explode(":", $consumbale));
+            }
+            $consumbales_ids = [];
+            foreach ($consumbales_post as $consumbale) {
+                array_push($consumbales_ids, explode(":", $consumbale)[0]);
+            }
+
+            DB::transaction(function () use ($target, $admin, $asset_ids, $consumbales_data, $request) {
                 $note = empty(request('note')) ? '' : request('note');
                 $contract_id = request('assigned_contract');
                 $sold_at = request('sold_at');
@@ -546,6 +585,22 @@ class BulkAssetsController extends Controller
                 foreach ($asset_ids as $asset_id) {
 
                     $this->sellAssetPost($request, $asset_id, $contract_id, $note, $sold_at);
+                }
+
+                foreach ($consumbales_data as $consumbale_item) {
+                    $consumbale = Consumable::findOrFail($consumbale_item[0]);
+                    $this->authorize('checkout', $consumbale);
+
+//                    dd($consumbale_item[0]);
+                    $con = new ConsumablesController();
+                    $error = $con->postSell($request, $consumbale_item[0], $consumbale_item[1]);
+
+                    if (isset($target->location_id) && $target->location_id!='') {
+                        $consumbale->location_id = $target->location_id;
+                        $consumbale->unsetEventDispatcher();
+                        $consumbale->save();
+                    }
+
                 }
 
             });
@@ -560,7 +615,7 @@ class BulkAssetsController extends Controller
             $note = request('note');
 
             if ($this->ss_count == count($asset_ids)) {
-                DB::transaction(function () use ($operation_type, $name, $user_id, $assigned_type, $assigned_to, $contract_id, $bitrix_task_id, $note, $asset_ids) {
+                DB::transaction(function () use ($operation_type, $name, $user_id, $assigned_type, $assigned_to, $contract_id, $bitrix_task_id, $note, $asset_ids, $consumbales_ids) {
                     $mo = new MassOperation();
                     $mo->operation_type = $operation_type;
                     $mo->name = $name;
@@ -572,6 +627,7 @@ class BulkAssetsController extends Controller
                     $mo->note = $note;
                     $mo->save();
                     $mo->assets()->attach($asset_ids);
+                    $mo->consumables()->attach($consumbales_ids);
                 });
                 if (request('sell_to_type') == 'user') {
                     return redirect()->to("hardware/bulksell")->with('success', trans('admin/hardware/message.sell.success_user'));
