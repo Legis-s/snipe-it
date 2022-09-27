@@ -265,7 +265,7 @@ class SyncBitrix extends Command
                                         $add = false;
                                     }
                                 }
-                                if ($add){
+                                if ($add == true){
                                     $foo = new StdClass();
                                     $foo->id = $value["ID"];
                                     $foo->name = $value["UF_NUMBER"];
