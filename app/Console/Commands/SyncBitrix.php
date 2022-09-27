@@ -13,6 +13,7 @@ use App\Models\Asset;
 use App\Models\Location;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
+use stdClass;
 
 class SyncBitrix extends Command
 {
@@ -253,8 +254,28 @@ class SyncBitrix extends Command
                     print("ufobj".$ufobj);
                     $location = Location::where('bitrix_id', '=',  $ufobj)->first();
                     if ($location){
-                        print("location");
-                        print($location->contract_number);
+                        $cn = $location->contract_number;
+                        if (strlen($cn)>0){
+                            try {
+                                $obj = json_decode($cn);
+
+
+                            }catch (Exception $e) {
+                                $foo = new StdClass();
+                                $foo->id = $value["ID"];
+                                $foo->bar = $value["UF_NUMBER"];
+                                $json = json_encode([$foo]);
+                                $location->contract_number = $json;
+                                $location->save();
+                            }
+                        }else{
+                            $foo = new StdClass();
+                            $foo->id = $value["ID"];
+                            $foo->bar = $value["UF_NUMBER"];
+                            $json = json_encode([$foo]);
+                            $location->contract_number = $json;
+                            $location->save();
+                        }
                     }
                 }
 //                $location = Location::where('bitrix_id', '=',  $value["UF_OBJECT"][0])->firstOrFail();
