@@ -8,6 +8,7 @@ use App\Models\Supplier;
 use App\Models\LegalPerson;
 use App\Models\InvoiceType;
 use Exception;
+use False\True;
 use Illuminate\Console\Command;
 use App\Models\Asset;
 use App\Models\Location;
@@ -258,8 +259,20 @@ class SyncBitrix extends Command
                         if (strlen($cn)>0){
                             try {
                                 $obj = json_decode($cn);
-
-
+                                $add = true;
+                                foreach ($obj as &$oneobj) {
+                                    if ($oneobj["id"] ==$value["ID"]){
+                                        $add = false;
+                                    }
+                                }
+                                if ($add){
+                                    $foo = new StdClass();
+                                    $foo->id = $value["ID"];
+                                    $foo->name = $value["UF_NUMBER"];
+                                    array_push($obj,$foo);
+                                }
+                                $json = json_encode($obj);
+                                print($json);
                             }catch (Exception $e) {
                                 $foo = new StdClass();
                                 $foo->id = $value["ID"];
