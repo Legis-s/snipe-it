@@ -256,40 +256,49 @@ class SyncBitrix extends Command
                     $location = Location::where('bitrix_id', '=',  $ufobj)->first();
                     if ($location){
                         $cn = $location->contract_number;
-                        if (strlen($cn)>0){
-                            try {
-                                $obj = json_decode($cn, true);
-                                $add = true;
-                                foreach ($obj as &$oneobj) {
-                                    if ($oneobj["id"] ==$value["ID"]){
-                                        $add = false;
-                                    }
-                                }
-                                if ($add == true){
-                                    $foo = new StdClass();
-                                    $foo->id = $value["ID"];
-                                    $foo->name = $value["UF_NUMBER"];
-                                    array_push($obj,$foo);
-                                }
-                                $json = json_encode($obj);
-                                $location->contract_number = $json;
-                                $location->save();
-                            }catch (Exception $e) {
-                                $foo = new StdClass();
-                                $foo->id = $value["ID"];
-                                $foo->name = $value["UF_NUMBER"];
-                                $json = json_encode([$foo]);
-                                $location->contract_number = $json;
-                                $location->save();
-                            }
-                        }else{
-                            $foo = new StdClass();
-                            $foo->id = $value["ID"];
-                            $foo->name = $value["UF_NUMBER"];
-                            $json = json_encode([$foo]);
-                            $location->contract_number = $json;
-                            $location->save();
+                        $pos      = strripos($cn, $value["UF_NUMBER"]);
+
+                        if ($pos === false) {
+                            $location->contract_number =  $location->contract_number ." , ". $value["UF_NUMBER"];
                         }
+                        print($location->contract_number);
+
+//                        $location->save();
+
+//                        if (strlen($cn)>0){
+//                            try {
+//                                $obj = json_decode($cn, true);
+//                                $add = true;
+//                                foreach ($obj as &$oneobj) {
+//                                    if ($oneobj["id"] ==$value["ID"]){
+//                                        $add = false;
+//                                    }
+//                                }
+//                                if ($add == true){
+//                                    $foo = new StdClass();
+//                                    $foo->id = $value["ID"];
+//                                    $foo->name = $value["UF_NUMBER"];
+//                                    array_push($obj,$foo);
+//                                }
+//                                $json = json_encode($obj);
+//                                $location->contract_number = $json;
+//                                $location->save();
+//                            }catch (Exception $e) {
+//                                $foo = new StdClass();
+//                                $foo->id = $value["ID"];
+//                                $foo->name = $value["UF_NUMBER"];
+//                                $json = json_encode([$foo]);
+//                                $location->contract_number = $json;
+//                                $location->save();
+//                            }
+//                        }else{
+//                            $foo = new StdClass();
+//                            $foo->id = $value["ID"];
+//                            $foo->name = $value["UF_NUMBER"];
+//                            $json = json_encode([$foo]);
+//                            $location->contract_number = $json;
+//                            $location->save();
+//                        }
                     }
                 }
 //                $location = Location::where('bitrix_id', '=',  $value["UF_OBJECT"][0])->firstOrFail();
