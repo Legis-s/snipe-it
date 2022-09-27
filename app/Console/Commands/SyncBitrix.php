@@ -272,7 +272,8 @@ class SyncBitrix extends Command
                                     array_push($obj,$foo);
                                 }
                                 $json = json_encode($obj);
-                                print($json);
+                                $location->contract_number = $json;
+                                $location->save();
                             }catch (Exception $e) {
                                 $foo = new StdClass();
                                 $foo->id = $value["ID"];
