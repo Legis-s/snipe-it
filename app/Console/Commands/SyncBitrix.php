@@ -249,10 +249,13 @@ class SyncBitrix extends Command
                 ]
             );
             if ( is_array($value["UF_OBJECT"]) && count($value["UF_OBJECT"]) >0 && strlen($value["UF_NUMBER"])>0 ){
-                print("UF_NUMBER<br>");
-                print($value["UF_NUMBER"]);
-                print("UF_OBJECT<br>");
-                print(count($value["UF_OBJECT"]));
+                foreach ($value["UF_OBJECT"] as &$ufobj) {
+                    $location = Location::where('bitrix_id', '=',  $ufobj)->firstOrFail();
+                    if ($location){
+                        print("$location");
+                        print($location->id);
+                    }
+                }
 //                $location = Location::where('bitrix_id', '=',  $value["UF_OBJECT"][0])->firstOrFail();
 //                if ($location){
 //                    $cn = $location->contract_number;
