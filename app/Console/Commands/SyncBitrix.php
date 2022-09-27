@@ -250,11 +250,11 @@ class SyncBitrix extends Command
             );
             if ( is_array($value["UF_OBJECT"]) && count($value["UF_OBJECT"]) >0 && strlen($value["UF_NUMBER"])>0 ){
                 foreach ($value["UF_OBJECT"] as &$ufobj) {
-                    print($ufobj);
+                    print("ufobj".$ufobj);
                     $location = Location::where('bitrix_id', '=',  $ufobj)->firstOrFail();
                     if ($location){
                         print("location");
-                        print($location->id);
+                        print($location->contract_number);
                     }
                 }
 //                $location = Location::where('bitrix_id', '=',  $value["UF_OBJECT"][0])->firstOrFail();
