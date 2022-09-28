@@ -1,8 +1,10 @@
+<?php $item = new \App\Models\MassOperation() ?>
+
 @extends('layouts/default')
 
 {{-- Page title --}}
 @section('title')
-    Массовая выдача активов
+    Массовая выдача
     @parent
 @stop
 
@@ -21,7 +23,6 @@
         <div class="col-md-9">
             <div class="box box-default">
                 <div class="box-header with-border">
-                    <h2 class="box-title"> Массовая выдача активов </h2>
                 </div>
                 <form class="form-horizontal" method="post" action="" autocomplete="off">
                     <div class="box-body">
@@ -33,6 +34,15 @@
                         @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'assigned_location', 'required'=>'true'])
                         @include ('partials.forms.edit.user-select',     ['translated_name' => trans('general.user'),     'fieldname' => 'assigned_user', 'unselect' => 'true', 'style' => 'display:none;', 'required'=>'true'])
                         @include ('partials.forms.edit.asset-select',    ['translated_name' => trans('general.asset'),    'fieldname' => 'assigned_asset', 'unselect' => 'true', 'style' => 'display:none;', 'required'=>'true'])
+
+                        {{--                        Bitrix task id--}}
+                        <div class="form-group {{ $errors->has('bitrix_task_id') ? 'error' : '' }}">
+                            {{ Form::label('bitrix_task_id', trans('admin/hardware/form.bitrix_task_id'), array('class' => 'col-md-3 control-label')) }}
+                            <div class="col-md-8">
+                                <input type = 'text' class = 'form-control' name="bitrix_task_id">
+                                {!! $errors->first('bitrix_task_id', '<span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span>') !!}
+                            </div>
+                        </div>
 
                         <!-- Checkout/Checkin Date -->
                         <div class="form-group {{ $errors->has('checkout_at') ? 'error' : '' }}">
@@ -77,10 +87,7 @@
                             </div>
                         </div>
 
-
-                        <br>
-
-                        <br>
+                        <h2>Активы</h2>
                         <!-- We have to pass unselect here so that we don't default to the asset that's being checked out. We want that asset to be pre-selected everywhere else. -->
                         @include ('partials.forms.edit.asset-select-bulk-form', [
                                     'translated_name' => trans('general.asset'),
@@ -92,17 +99,18 @@
 
 
 
-                        <select id="assigned_assets_select" name="selected_assets[]" multiple hidden></select>
+                        <select id="assigned_assets_select" name="selected_assets[]" multiple hidden>
+                            @foreach ($ids as $a_id)
+                            <option value = '{{ $a_id }}' selected="selected">{{ $a_id }}</option>
+                            @endforeach
+                        </select>
 
-                        {{--                        @include ('partials.forms.edit.asset-select', [--}}
-                        {{--                          'translated_name' => trans('general.assets'),--}}
-                        {{--                          'fieldname' => 'selected_assets[]',--}}
-                        {{--                          'multiple' => true,--}}
-                        {{--                          'asset_status_type' => 'RTD',--}}
-                        {{--                          'select_id' => 'assigned_assets_select',--}}
-                        {{--                        ])--}}
+                        <select id="assigned_consumables_select" name="selected_consumables[]" multiple hidden>
+{{--                            @foreach ($ids as $a_id)--}}
+{{--                                <option value = '{{ $a_id }}' selected="selected">{{ $a_id }}</option>--}}
+{{--                            @endforeach--}}
+                        </select>
 
-                        <h2> Активы к выдаче:</h2>
                         <table
                                 data-advanced-search="true"
                                 data-click-to-select="true"
@@ -110,7 +118,10 @@
                                 data-cookie-id-table="assetsBulkTable"
                                 data-pagination="true"
                                 data-id-table="assetsBulkTable"
-                                data-search="true"
+                                data-search="false"
+                                {% if ids is defined %}
+                                data-query-params="queryParams"
+                                {% endif %}
                                 data-side-pagination="server"
                                 data-show-columns="true"
                                 data-show-footer="true"
@@ -123,7 +134,27 @@
                                 class="table table-striped snipe-table"
                                 data-url="{{ route('api.assets.index',array('bulk' => true ))}}">
                         </table>
-
+                        <h2>Расходники</h2>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="table table-responsive">
+                                    <div id="toolbar_consumables">
+                                        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#modal_consumables">
+                                            Добавить расходник
+                                        </button>
+                                    </div>
+                                    <p class="activ text-center text-bold text-danger hidden">Добавьте хотя бы один расходник</p>
+                                    <table id="table_consumables" class="table table-striped snipe-table">
+                                        <thead>
+                                        <th>#</th>
+                                        <th>Модель</th>
+                                        <th>Количество</th>
+                                        <th>Удалить</th>
+                                        </thead>
+                                    </table>
+                                </div><!-- /.table-responsive -->
+                            </div>
+                        </div>
                     </div> <!--./box-body-->
                     <div class="box-footer">
                         <a class="btn btn-link" href="{{ URL::previous() }}"> {{ trans('button.cancel') }}</a>
@@ -132,20 +163,36 @@
                         </button>
                     </div>
                 </form>
-            </div> <!--/.col-md-7-->
+            </div>
 
-            <!-- right column -->
-            {{--            <div class="col-md-5" id="current_assets_box" style="display:none;">--}}
-            {{--                <div class="box box-primary">--}}
-            {{--                    <div class="box-header with-border">--}}
-            {{--                        <h2 class="box-title">{{ trans('admin/users/general.current_assets') }}</h2>--}}
-            {{--                    </div>--}}
-            {{--                    <div class="box-body">--}}
-            {{--                        <div id="current_assets_content">--}}
-            {{--                        </div>--}}
-            {{--                    </div>--}}
-            {{--                </div>--}}
-            {{--            </div>--}}
+        </div>
+
+        <!-- Modal Расходник -->
+        <div class="modal fade" id="modal_consumables" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                    aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">Добавить</h4>
+                    </div>
+                    <div class="modal-body2">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <form class="form-horizontal">
+                                    @include ('partials.forms.edit.consumables-select', ['translated_name' => 'Название', 'fieldname' => 'consumable_id', 'required' => 'true'])
+                                    <p class="duble text-center text-bold text-danger hidden">Такая модель уже есть</p>
+                                    @include ('partials.forms.edit.quantity')
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+                        <button type="button" class="btn btn-primary" id="addСonsumablesButton">Добавить</button>
+                    </div>
+                </div>
+            </div>
         </div>
         @stop
 
@@ -158,6 +205,16 @@
                 var add_asset = $('#add_asset');
                 var assigned_assets_select = $('#assigned_assets_select');
                 var selected = [];
+                Array.from(document.getElementById("assigned_assets_select")).forEach(function(item) {
+                    selected.push(item.innerHTML);
+                })
+
+                function queryParams(params) {
+                    params.data = JSON.stringify(selected);
+                    return params
+                }
+
+                updData();
                 add_asset.prop('disabled', true);
                 add_asset.click(function () {
                     var selected_id = select.val();
@@ -191,10 +248,9 @@
                 //     updData();
                 // });
 
-
                 function updData() {
                     // console.log("upd");
-                    // console.log(selected);
+                    console.log(selected);
                     $("#assetsBulkTable").bootstrapTable("refresh", {
                         "query": {
                             "data": JSON.stringify(selected),
@@ -210,8 +266,10 @@
                             selected: true
                         }));
                     });
+
                 }
 
+                updData();
 
                 // Enable scan events for the entire document
                 onScan.attachTo(document, {
@@ -301,7 +359,6 @@
                         }
                     });
                 }
-
                 function auto_layout_keyboard(str) {
                     var replacer = {
                         "й": "q", "ц": "w", "у": "e", "к": "r", "е": "t", "н": "y", "г": "u",
@@ -328,6 +385,199 @@
                         }
                     }
                 };
+            </script>
+            @include ('partials.bootstrap-table')
+            <script nonce="{{ csrf_token() }}">
+                var table_asset = $('#table_asset');
+                var table_consumables = $('#table_consumables');
+                var table_sales = $('#table_sales');
+
+                $(function () {
+
+                    //select2 for no ajax lists activate
+                    $('.js-data-no-ajax').each(function (i, item) {
+                        var link = $(item);
+                        link.select2();
+                    });
+                    $('input.float').on('input', function () {
+                        this.value = this.value.replace(',', '.')
+                        this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+                        // $(this).val() // get the current value of the input field.
+                    });
+                    table_consumables.bootstrapTable('destroy').bootstrapTable({
+                        locale: 'ru',
+                        data: [],
+                        search: true,
+                        toolbar: '#toolbar_consumables',
+                        columns: [{
+                            field: 'id',
+                            name: '#',
+                            align: 'left',
+                            valign: 'middle'
+                        }, {
+                            field: 'consumable',
+                            name: 'Модель',
+                            align: 'left',
+                            valign: 'middle'
+                        }, {
+                            field: 'quantity',
+                            name: 'Количество',
+                            align: 'center',
+                            valign: 'middle'
+                        }
+                            , {
+                                align: 'center',
+                                valign: 'middle',
+                                events: {
+                                    'click .remove': function (e, value, row, index) {
+                                        table_consumables.bootstrapTable('remove', {
+                                            field: 'id',
+                                            values: [row.id]
+                                        });
+                                        var data = table_consumables.bootstrapTable('getData');
+                                        var newData = [];
+                                        var count = 0;
+                                        data.forEach(function callback(currentValue, index, array) {
+                                            count++;
+                                            currentValue.id = count;
+                                            newData.push(currentValue);
+                                        });
+                                        table_consumables.bootstrapTable('load', newData);
+                                    }
+                                },
+                                formatter: function (value, row, index) {
+                                    return [
+                                        '<a class="remove text-danger"  href="javascript:void(0)" title="Убрать">',
+                                        '<i class="remove fa fa-times fa-lg"></i>',
+                                        '</a>'
+                                    ].join('')
+                                }
+                            }
+                        ]
+                    });
+                    if ($('#consumables').val()) {
+                        table_consumables.bootstrapTable('load', JSON.parse($('#consumables').val()));
+                    }
+                    $('#modal_consumables').on("show.bs.modal", function (event) {
+                        var modal = $(this);
+                        modal.find('#name').val("");
+                        modal.find("#model_id").removeClass("has-error");
+                        modal.find("#model_select_id").val('');
+                        modal.find('#model_select_id').trigger('change');
+                        modal.find('#model_number').val('');
+                        modal.find('#quantity').val(1);
+                        modal.find('.duble').addClass('hidden');
+                        modal.find('select').each(function (i, item) {
+                            // $('.js-data-ajax2').each(function (i, item) {
+                            var link = $(item);
+                            var endpoint = link.data("endpoint");
+                            if (link.hasClass("select2-hidden-accessible")) {
+                                link.select2('destroy');
+                            }
+                            link.select2({
+                                dropdownParent: modal,
+                                ajax: {
+                                    // the baseUrl includes a trailing slash
+                                    url: baseUrl + 'api/v1/' + endpoint + '/selectlist',
+                                    dataType: 'json',
+                                    delay: 250,
+                                    headers: {
+                                        "X-Requested-With": 'XMLHttpRequest',
+                                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                                    },
+                                    data: function (params) {
+                                        var data = {
+                                            search: params.term,
+                                            page: params.page || 1,
+                                            assetStatusType: link.data("asset-status-type"),
+                                        };
+                                        return data;
+                                    },
+                                    processResults: function (data, params) {
+                                        console.log(data)
+                                        params.page = params.page || 1;
+
+                                        var answer = {
+                                            results: data.items,
+                                            pagination: {
+                                                more: "true" //(params.page  < data.page_count)
+                                            }
+                                        };
+
+                                        return answer;
+                                    },
+                                    cache: true
+                                },
+                                escapeMarkup: function (markup) {
+                                    return markup;
+                                }, // let our custom formatter work
+                                templateResult: formatDatalist,
+                                templateSelection: formatDataSelection
+                            });
+                        });
+                    });
+
+                    function formatDatalist(datalist) {
+                        var loading_markup = '<i class="fa fa-spinner fa-spin" aria-hidden="true"></i> Loading...';
+                        if (datalist.loading) {
+                            return loading_markup;
+                        }
+
+                        var markup = "<div class='clearfix'>";
+                        markup += "<div class='pull-left' style='padding-right: 10px;'>";
+                        if (datalist.image) {
+                            markup += "<div style='width: 30px;'><img src='" + datalist.image + "' alt='" + datalist.tex + "' style='max-height: 20px; max-width: 30px;'></div>";
+                        } else {
+                            markup += "<div style='height: 20px; width: 30px;'></div>";
+                        }
+
+                        markup += "</div><div>" + datalist.text + "</div>";
+                        markup += "</div>";
+                        return markup;
+                    }
+
+                    function formatDataSelection(datalist) {
+                        return datalist.text.replace(/>/g, '&gt;')
+                            .replace(/</g, '&lt;')
+                            .replace(/"/g, '&quot;')
+                            .replace(/'/g, '&#039;');
+                    }
+                    $('#addСonsumablesButton').click(function (e) {
+                        e.preventDefault();
+                        var modal = $('#modal_consumables');
+                        var consumable_id = modal.find('select[name=consumable_id] option').filter(':selected').val();
+                        var consumable_name = modal.find('select[name=consumable_id] option').filter(':selected').text();
+                        var quantity = modal.find('#quantity').val();
+
+                        var tabele_data = table_consumables.bootstrapTable('getData');
+                        if (consumable_id > 0) {
+                            var data = {
+                                id: tabele_data.length + 1,
+                                consumable_id: consumable_id,
+                                consumable: consumable_name,
+                                quantity: quantity,
+                                check: false,
+                                status: "На согласовании",
+                            };
+                            $('#assigned_consumables_select').append($('<option>', {
+                                value: consumable_id + ":" + quantity,
+                                text: consumable_id + ":" + quantity,
+                                selected: "selected"
+                            }));
+                            table_consumables.bootstrapTable('append', data);
+                            // console.log( Array.from(table_consumables.bootstrapTable('getData'))[0]);
+                            // Array.from(table_consumables.bootstrapTable('getData')).forEach(function(item) {
+                            //     selected.push(item['consumable_id']);
+                            // })
+
+                            $('#modal_consumables').modal('hide');
+                        } else {
+                            modal.find("#category_id").addClass("has-error");
+                            modal.find("#name").addClass("has-error");
+                        }
+                    });
+
+                });
             </script>
 
 @stop

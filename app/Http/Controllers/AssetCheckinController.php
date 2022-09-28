@@ -82,6 +82,7 @@ class AssetCheckinController extends Controller
 
         if ($request->filled('location_id')) {
             $asset->location_id =  e($request->get('location_id'));
+            $asset->rtd_location_id = e($request->input('location_id'));
         }
         $changed = [];
         foreach ($asset->getOriginal() as $key => $value) {

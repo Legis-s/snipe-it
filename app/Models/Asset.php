@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Exceptions\CheckoutNotAllowed;
 use App\Http\Traits\UniqueSerialTrait;
 use App\Http\Traits\UniqueUndeletedTrait;
+use App\MassOperation;
 use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
 use AssetPresenter;
@@ -225,7 +226,10 @@ class Asset extends Depreciable
         }
     }
 
-
+    public function mass_operations()
+    {
+        return $this->belongsToMany(MassOperation::class);
+    }
 
     public function availableForReview()
     {

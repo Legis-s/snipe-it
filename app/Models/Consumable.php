@@ -1,6 +1,7 @@
 <?php
 namespace App\Models;
 
+use App\MassOperation;
 use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -130,6 +131,11 @@ class Consumable extends SnipeModel
     public function category()
     {
         return $this->belongsTo('\App\Models\Category', 'category_id');
+    }
+
+    public function mass_operations()
+    {
+        return $this->belongsToMany(MassOperation::class);
     }
 
     /**

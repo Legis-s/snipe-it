@@ -15,6 +15,7 @@ use App\Models\Company;
 use App\Models\Contract;
 use App\Models\CustomField;
 use App\Models\Location;
+use App\Models\MassOperation;
 use App\Models\Sale;
 use App\Models\Setting;
 use App\Models\Statuslabel;
@@ -95,7 +96,6 @@ class AssetsController extends Controller
         ];
 
 
-
         $filter = array();
 
         if ($request->filled('filter')) {
@@ -140,6 +140,7 @@ class AssetsController extends Controller
         if ($request->filled('contract_id')) {
             $assets->where('assets.contract_id', '=', $request->input('contract_id'));
             $settings->show_archived_in_list = "1";
+
 //            $assets->join('status_labels AS status_alias', function ($join) {
 //                $join->on('status_alias.id', "=", "assets.status_id")
 //                    ->where('status_alias.name', '=', "Продано")
@@ -162,6 +163,12 @@ class AssetsController extends Controller
         if ($request->filled('purchase_id')) {
             $assets->where('assets.purchase_id', '=', $request->input('purchase_id'));
             $settings->show_archived_in_list = "1";
+        }
+
+        if ($request->filled('massoperation_id')) {
+            $assets->join('asset_mass_operation', 'asset_mass_operation.asset_id', '=', 'assets.id')->where('asset_mass_operation.mass_operation_id', '=', $request->input('massoperation_id'));
+            $settings->show_archived_in_list = "1";
+            $settings->show_pending_in_list = "1";
         }
 
         if ($request->filled('rtd_location_id')) {
@@ -279,6 +286,9 @@ class AssetsController extends Controller
             case 'Deployed':
                 // more sad, horrible workarounds for laravel bugs when doing full text searches
                 $assets->where('assets.assigned_to', '>', '0');
+                break;
+            case 'Issued':
+                $assets->whereNotNull('assets.assigned_to');
                 break;
             default:
 
@@ -744,7 +754,7 @@ class AssetsController extends Controller
 
         // Set the location ID to the RTD location id if there is one
         // Wait, why are we doing this? This overrides the stuff we set further up, which makes no sense.
-        // TODO: Follow up here. WTF. Commented out for now. 
+        // TODO: Follow up here. WTF. Commented out for now.
 
 //        if ((isset($target->rtd_location_id)) && ($asset->rtd_location_id!='')) {
 //            $asset->location_id = $target->rtd_location_id;
@@ -804,6 +814,7 @@ class AssetsController extends Controller
 
         if ($request->filled('location_id')) {
             $asset->location_id = $request->input('location_id');
+            $asset->rtd_location_id = $request->input('location_id');
         }
 
         if (Input::has('status_id')) {
@@ -969,6 +980,7 @@ class AssetsController extends Controller
         return response()->json(Helper::formatStandardApiResponse('success', ['asset' => e($asset->asset_tag)], trans('admin/hardware/message.checkin.error')));
 
     }
+
     /**
      * Returns JSON with information about an asset for detail view.
      *

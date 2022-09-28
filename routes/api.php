@@ -607,6 +607,20 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api', 'middleware' => 'api'], fu
         ]
     ); // Licenses resource
 
+    Route::resource('massoperations', 'MassOperationsController',
+        [
+            'names' =>
+                [
+                    'index' => 'api.massoperations.index',
+//                    'show' => 'api.massoperations.show',
+//                    'store' => 'api.massoperations.store',
+//                    'update' => 'api.massoperations.update',
+//                    'destroy' => 'api.massoperations.destroy'
+                ],
+//            'except' => ['create', 'edit'],
+            'parameters' => ['massoperation' => 'massoperation_id']
+        ]
+    ); // Licenses resource
 
     /*--- Locations API ---*/
 
@@ -1035,6 +1049,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api', 'middleware' => 'api'], fu
             'parameters' => ['purchase' => 'purchase_id']
         ]
     ); // Purchases resource
+
+
 
     Route::group(['prefix' => 'purchases'], function () {
 

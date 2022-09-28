@@ -356,7 +356,11 @@ Route::group(['prefix' => 'account', 'middleware' => ['auth']], function () {
     # Account Dashboard
     Route::get('/', ['as' => 'account', 'uses' => 'ViewAssetsController@getIndex']);
 
+
+
+
 });
+
 
 
 Route::group(['middleware' => ['auth']], function () {
@@ -554,6 +558,13 @@ Route::resource('sales', 'SalesController', [
     'middleware' => ['auth'],
     'parameters' => ['consumable' => 'consumable_id']
 ]);
+
+Route::group(
+    ['prefix' => '',
+        'middleware' => ['auth']],function() {
+    Route::get('massoperations', ['as' => 'massoperations', 'uses' => 'MassOperationsController@index']);
+    Route::get('massoperations/{purchaseId}', ['as' => 'massoperations_show', 'uses' => 'MassOperationsController@show']);
+});
 
 
 Route::group(

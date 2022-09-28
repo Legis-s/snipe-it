@@ -560,6 +560,13 @@
         }
     }
 
+    // Create a linked phone number in the table list
+    function massOperationsFormatter(value, row) {
+        console.log(row);
+        if (value) {
+            return '<a href="/massoperations/' + row.id + '">' + value + '</a>';
+        }
+    }
 
     function deployedLocationFormatter(row, value) {
         if ((row) && (row != undefined)) {

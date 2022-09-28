@@ -41,5 +41,6 @@ return array(
     'warranty'			=> 'Гарантия',
 		'warranty_expires'		=> 'Срок действия гарантии',
     'years'				=> 'Лет',
+    'bitrix_task_id' => 'Bitrix задача'
 )
 ;
