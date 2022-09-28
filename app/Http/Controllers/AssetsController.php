@@ -919,13 +919,12 @@ class AssetsController extends Controller
      */
     public function sellGet($assetId)
     {
-        $this->authorize('sell', Asset::class);
+        $this->authorize('checkout', Asset::class);
         // Check if the asset exists
         if (is_null($item = Asset::find(e($assetId)))) {
             return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));
         }
 
-        $this->authorize('sell', $item);
 
         if ($item->availableForSell()) {
             return view('hardware/sell', compact('item'));
@@ -947,7 +946,7 @@ class AssetsController extends Controller
      */
     public function sellPost(Request $request, $assetId)
     {
-        $this->authorize('sell', Asset::class);
+        $this->authorize('checkout', Asset::class);
         try {
             // Check if the asset exists
             if (!$asset = Asset::find($assetId)) {
