@@ -158,7 +158,7 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <form class="form-horizontal">
-                                    @include ('partials.forms.edit.consumables-select', ['translated_name' => 'Название', 'fieldname' => 'consumable_id', 'required' => 'true'])
+                                    @include ('partials.forms.edit.consumables-select', ['translated_name' => 'Название', 'fieldname' => 'consumable_id', 'required' => 'true','hide_new' => 'true'])
                                     <p class="duble text-center text-bold text-danger hidden">Такая модель уже есть</p>
                                     @include ('partials.forms.edit.quantity')
                                 </form>
