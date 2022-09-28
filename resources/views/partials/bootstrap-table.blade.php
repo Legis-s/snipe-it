@@ -381,6 +381,11 @@
     }
 
     function sellFormatter(value, row) {
+
+        console.log("row.available_actions.sell");
+        console.log(row.available_actions.sell );
+        console.log("row.user_can_sell");
+        console.log(row.user_can_sell);
         if ((row.available_actions.sell == true) && (row.user_can_sell == true) && ((!row.asset_id) && (!row.assigned_to))) {
             return '<a href="{{ url('/') }}/hardware/' + row.id + '/sell/" class="btn btn-sm bg-maroon" data-tooltip="true" title="Check this item out">Продать</a>';
         } else if (row.available_actions.sell == true && row.user_can_close_sell == true) {
