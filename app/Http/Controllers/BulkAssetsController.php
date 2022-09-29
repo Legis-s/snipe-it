@@ -566,15 +566,18 @@ class BulkAssetsController extends Controller
             $target = $this->determineCheckoutTarget();
             $asset_ids = array_filter($request->get('selected_assets'));
 
-            $consumbales_post = array_filter($request->get('selected_consumables'));
             $consumbales_data = [];
-            foreach ($consumbales_post as $consumbale) {
-                array_push($consumbales_data, explode(":", $consumbale));
-            }
             $consumbales_ids = [];
-            foreach ($consumbales_post as $consumbale) {
-                array_push($consumbales_ids, explode(":", $consumbale)[0]);
+            if ($request->get('selected_consumables')){
+                $consumbales_post = array_filter($request->get('selected_consumables'));
+                foreach ($consumbales_post as $consumbale) {
+                    array_push($consumbales_data, explode(":", $consumbale));
+                }
+                foreach ($consumbales_post as $consumbale) {
+                    array_push($consumbales_ids, explode(":", $consumbale)[0]);
+                }
             }
+
 
             DB::transaction(function () use ($target, $admin, $asset_ids, $consumbales_data, $request) {
                 $note = empty(request('note')) ? '' : request('note');
