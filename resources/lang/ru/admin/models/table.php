@@ -5,7 +5,7 @@ return array(
     'create'				=> 'Создать модель актива',
     'created_at' 			=> 'Создано',
     'eol'	 				=> 'Срок службы',
-    'modelnumber'   		=> 'Модель',
+    'modelnumber'   		=> 'Номер модели',
     'name'      			=> 'Название модели',
     'numassets' 			=> 'Активы',
     'title'					=> 'Модели активов',

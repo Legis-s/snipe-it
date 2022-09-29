@@ -36,7 +36,7 @@ trait Loggable
      * @since [v3.4]
      * @return \App\Models\Actionlog
      */
-    public function logCheckout($note, $target,$changed = null ,$photos_json = null /* What are we checking out to? */)
+    public function logCheckout($note, $target,$changed = null ,$photos_json = null,$biometric_uid = null,$biometric_result = null /* What are we checking out to? */)
     {
         $settings = Setting::getSettings();
         $log = new Actionlog;
@@ -74,6 +74,14 @@ trait Loggable
         if($photos_json){
             $log->photos = json_encode($photos_json);
         }
+
+        if($biometric_result){
+            $log->biometric_result = $biometric_result;
+        }
+        if($biometric_uid){
+            $log->biometric_uid =$biometric_uid;
+        }
+
         $log->logaction('checkout');
 
         $params = [

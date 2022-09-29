@@ -24,7 +24,7 @@ class UserPresenter extends Presenter
         $layout = [
             [
                 "field" => "checkbox",
-                "checkbox" => true
+                "checkbox" => true,
             ],[
                 "field" => "bitrix_id",
                 "searchable" => false,
@@ -170,6 +170,15 @@ class UserPresenter extends Presenter
                 "formatter" => "locationsLinkObjFormatter"
             ],
             [
+                "field" => "favorite_location",
+                "searchable" => true,
+                "sortable" => true,
+                "switchable" => true,
+                "title" =>"Основной склад",
+                "visible" => true,
+                "formatter" => "locationsLinkObjFormatter"
+            ],
+            [
                 "field" => "manager",
                 "searchable" => true,
                 "sortable" => true,
@@ -191,8 +200,7 @@ class UserPresenter extends Presenter
                 "searchable" => false,
                 "sortable" => true,
                 "switchable" => true,
-                "title" => ' <span class="hidden-md hidden-lg">Licenses</span>'
-                    .'<span class="hidden-xs"><i class="fa fa-floppy-o fa-lg"></i></span>',
+                "title" => ' <span class="hidden-md hidden-lg">Licenses</span><span class="hidden-xs"><i class="fa fa-floppy-o fa-lg"></i></span>',
                 "visible" => true,
             ],
             [
@@ -200,8 +208,7 @@ class UserPresenter extends Presenter
                 "searchable" => false,
                 "sortable" => true,
                 "switchable" => true,
-                "title" => ' <span class="hidden-md hidden-lg">Consumables</span>'
-                    .'<span class="hidden-xs"><i class="fa fa-tint fa-lg"></i></span>',
+                "title" => ' <span class="hidden-md hidden-lg">Consumables</span><span class="hidden-xs"><i class="fa fa-tint fa-lg"></i></span>',
                 "visible" => true,
             ],
             [
@@ -209,19 +216,16 @@ class UserPresenter extends Presenter
                 "searchable" => false,
                 "sortable" => true,
                 "switchable" => true,
-                "title" => ' <span class="hidden-md hidden-lg">Accessories</span>'
-                    .'<span class="hidden-xs"><i class="fa fa-keyboard-o fa-lg"></i></span>',
+                "title" => '<span class="hidden-md hidden-lg">Accessories</span><span class="hidden-xs"><i class="fa fa-keyboard-o fa-lg"></i></span>',
                 "visible" => true,
-            ],
-            [
+            ], [
                 "field" => "notes",
                 "searchable" => true,
                 "sortable" => true,
                 "switchable" => true,
                 "title" => trans('general.notes'),
                 "visible" => true,
-            ],
-            [
+            ], [
                 "field" => "groups",
                 "searchable" => false,
                 "sortable" => false,
@@ -229,8 +233,7 @@ class UserPresenter extends Presenter
                 "title" => trans('general.groups'),
                 "visible" => true,
                 'formatter' => 'groupsFormatter'
-            ],
-            [
+            ], [
                 "field" => "two_factor_enrolled",
                 "searchable" => false,
                 "sortable" => true,
@@ -285,6 +288,7 @@ class UserPresenter extends Presenter
                 "formatter" => "usersActionsFormatter",
             ]
         ];
+
 
         return json_encode($layout);
     }

@@ -10,6 +10,7 @@ return array(
     'checkedout_to'		=> 'Привязан к',
     'checkout_date'		=> 'Дата выдачи',
     'checkin_date'		=> 'Дата возврата',
+    'sell_date'		    => 'Дата продажи',
     'checkout_to'		=> 'Привязать к',
     'cost'				=> 'Цена',
     'create'			=> 'Создать актив',
@@ -40,5 +41,6 @@ return array(
     'warranty'			=> 'Гарантия',
 		'warranty_expires'		=> 'Срок действия гарантии',
     'years'				=> 'Лет',
+    'bitrix_task_id' => 'Bitrix задача'
 )
 ;

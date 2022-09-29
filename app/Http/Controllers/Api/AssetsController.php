@@ -7,11 +7,16 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AssetRequest;
 use App\Http\Requests\AssetCheckoutRequest;
 use App\Http\Transformers\AssetsTransformer;
+use App\Http\Transformers\SalesTransformer;
+use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\Company;
+use App\Models\Contract;
 use App\Models\CustomField;
 use App\Models\Location;
+use App\Models\MassOperation;
+use App\Models\Sale;
 use App\Models\Setting;
 use App\Models\Statuslabel;
 use App\Models\User;
@@ -21,6 +26,7 @@ use Carbon\Carbon;
 use Config;
 use DB;
 use Gate;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Input;
 use Lang;
@@ -89,6 +95,7 @@ class AssetsController extends Controller
 
         ];
 
+
         $filter = array();
 
         if ($request->filled('filter')) {
@@ -124,19 +131,44 @@ class AssetsController extends Controller
             $assets->InCategory($request->input('category_id'));
         }
 
+
         if ($request->filled('location_id')) {
             $assets->where('assets.location_id', '=', $request->input('location_id'));
         }
 
-        if ($request->filled('bitrix_object_id')) {
-            $bitrix_object_id = $request->input('bitrix_object_id');
-            $location = Location::where('bitrix_id',  $bitrix_object_id)->firstOrFail();
-            $assets->where('assets.location_id', '=',$location->id);
+
+        if ($request->filled('contract_id')) {
+            $assets->where('assets.contract_id', '=', $request->input('contract_id'));
+            $settings->show_archived_in_list = "1";
+
+//            $assets->join('status_labels AS status_alias', function ($join) {
+//                $join->on('status_alias.id', "=", "assets.status_id")
+//                    ->where('status_alias.name', '=', "Продано")
+//                    ->orWhere('status_alias.name', '=', "Выдано");
+//            });
         }
 
 
+        if ($request->filled('bitrix_object_id')) {
+            $bitrix_object_id = $request->input('bitrix_object_id');
+            $location = Location::where('bitrix_id', $bitrix_object_id)->firstOrFail();
+            $assets->where('assets.location_id', '=', $location->id);
+        }
+
+        if ($request->filled('bulk') && $request->input('bulk') == true) {
+            $data = json_decode($request->input('data'), true);
+            $assets->whereIn('assets.id', $data);
+        }
+
         if ($request->filled('purchase_id')) {
             $assets->where('assets.purchase_id', '=', $request->input('purchase_id'));
+            $settings->show_archived_in_list = "1";
+        }
+
+        if ($request->filled('massoperation_id')) {
+            $assets->join('asset_mass_operation', 'asset_mass_operation.asset_id', '=', 'assets.id')->where('asset_mass_operation.mass_operation_id', '=', $request->input('massoperation_id'));
+            $settings->show_archived_in_list = "1";
+            $settings->show_pending_in_list = "1";
         }
 
         if ($request->filled('rtd_location_id')) {
@@ -196,6 +228,20 @@ class AssetsController extends Controller
         // related to fulltext searches on complex queries.
         // I am sad. :(
         switch ($request->input('status')) {
+
+            case 'Sold':
+                $assets->join('status_labels AS status_alias', function ($join) {
+                    $join->on('status_alias.id', "=", "assets.status_id")
+                        ->where('status_alias.name', '=', "Продано");
+                });
+//                $assets->withTrashed()->Deleted();
+                break;
+            case 'Issued_for_sale':
+                $assets->join('status_labels AS status_alias', function ($join) {
+                    $join->on('status_alias.id', "=", "assets.status_id")
+                        ->where('status_alias.name', '=', "Выдано");
+                });
+                break;
             case 'Deleted':
                 $assets->withTrashed()->Deleted();
                 break;
@@ -240,6 +286,9 @@ class AssetsController extends Controller
             case 'Deployed':
                 // more sad, horrible workarounds for laravel bugs when doing full text searches
                 $assets->where('assets.assigned_to', '>', '0');
+                break;
+            case 'Issued':
+                $assets->whereNotNull('assets.assigned_to');
                 break;
             default:
 
@@ -388,16 +437,15 @@ class AssetsController extends Controller
     public function review($id)
     {
         if ($asset = Asset::with('assetstatus')->with('assignedTo')->withTrashed()->withCount('checkins as checkins_count', 'checkouts as checkouts_count', 'userRequests as userRequests_count')->findOrFail($id)) {
-            $this->authorize('review', Asset::class);
+            $this->authorize('review');
             $status = Statuslabel::where('name', 'Доступные')->first();
             $asset->status_id = $status->id;
             $user = Auth::user();
             $asset->user_verified_id = $user->id;
-            $asset ->save();
+            $asset->save();
             return (new AssetsTransformer)->transformAsset($asset);
         }
     }
-
 
 
     /**
@@ -567,9 +615,9 @@ class AssetsController extends Controller
 
 
             $status_inv = Statuslabel::where('name', 'Ожидает инвентаризации')->first();
-            $status_review= Statuslabel::where('name', 'Ожидает проверки')->first();
-            if ($asset->status_id == $status_inv->id && $request->filled('asset_tag')){
-                $asset->status_id=$status_review->id;
+            $status_review = Statuslabel::where('name', 'Ожидает проверки')->first();
+            if ($asset->status_id == $status_inv->id && $request->filled('asset_tag')) {
+                $asset->status_id = $status_review->id;
             }
 
             if ($asset->save()) {
@@ -690,11 +738,11 @@ class AssetsController extends Controller
         $asset_name = request('name', null);
         $photos = request('photos', null);
         $photos_json = [];
-        if($photos !=null && count($photos)>0){
+        if ($photos != null && count($photos) > 0) {
             foreach ($photos as &$photo) {
-                $imgBase64 = substr($photo['base64'], strpos($photo['base64'], ",")+1);
+                $imgBase64 = substr($photo['base64'], strpos($photo['base64'], ",") + 1);
                 $image = base64_decode($imgBase64);
-                $jpg_url = "/uploads/log_img/log_img-".time()."-".uniqid().".jpeg";
+                $jpg_url = "/uploads/log_img/log_img-" . time() . "-" . uniqid() . ".jpeg";
                 $path = public_path() . $jpg_url;
                 file_put_contents($path, $image);
                 array_push($photos_json, [
@@ -706,14 +754,14 @@ class AssetsController extends Controller
 
         // Set the location ID to the RTD location id if there is one
         // Wait, why are we doing this? This overrides the stuff we set further up, which makes no sense.
-        // TODO: Follow up here. WTF. Commented out for now. 
+        // TODO: Follow up here. WTF. Commented out for now.
 
 //        if ((isset($target->rtd_location_id)) && ($asset->rtd_location_id!='')) {
 //            $asset->location_id = $target->rtd_location_id;
 //        }
 
 
-        if ($asset->checkOut($target, Auth::user(), $checkout_at, $expected_checkin, $note, $asset_name, $asset->location_id,$quality,$depreciable_cost,$photos_json)) {
+        if ($asset->checkOut($target, Auth::user(), $checkout_at, $expected_checkin, $note, $asset_name, $asset->location_id, $quality, $depreciable_cost, $photos_json)) {
             return response()->json(Helper::formatStandardApiResponse('success', ['asset' => e($asset->asset_tag)], trans('admin/hardware/message.checkout.success')));
         }
 
@@ -755,17 +803,18 @@ class AssetsController extends Controller
             $asset->depreciable_cost = $request->get('depreciable_cost');
         }
         if ($request->filled('quality')) {
-            $asset->quality =intval( $request->get('quality'));
+            $asset->quality = intval($request->get('quality'));
         }
 
         if ($request->filled('quality')) {
-            $asset->quality =intval( $request->get('quality'));
+            $asset->quality = intval($request->get('quality'));
         }
 
         $asset->location_id = $asset->rtd_location_id;
 
         if ($request->filled('location_id')) {
             $asset->location_id = $request->input('location_id');
+            $asset->rtd_location_id = $request->input('location_id');
         }
 
         if (Input::has('status_id')) {
@@ -780,11 +829,11 @@ class AssetsController extends Controller
         }
         $photos = request('photos', null);
         $photos_json = [];
-        if($photos !=null && count($photos)>0){
+        if ($photos != null && count($photos) > 0) {
             foreach ($photos as &$photo) {
-                $imgBase64 = substr($photo['base64'], strpos($photo['base64'], ",")+1);
+                $imgBase64 = substr($photo['base64'], strpos($photo['base64'], ",") + 1);
                 $image = base64_decode($imgBase64);
-                $jpg_url = "/uploads/log_img/log_img-".time()."-".uniqid().".jpeg";
+                $jpg_url = "/uploads/log_img/log_img-" . time() . "-" . uniqid() . ".jpeg";
                 $path = public_path() . $jpg_url;
                 file_put_contents($path, $image);
                 array_push($photos_json, [
@@ -795,7 +844,7 @@ class AssetsController extends Controller
         }
 
         if ($asset->save()) {
-            $asset->logCheckin($target, e(request('note')),$changed,$photos_json);
+            $asset->logCheckin($target, e(request('note')), $changed, $photos_json);
             return response()->json(Helper::formatStandardApiResponse('success', ['asset' => e($asset->asset_tag)], trans('admin/hardware/message.checkin.success')));
         }
 
@@ -895,4 +944,62 @@ class AssetsController extends Controller
         $assets = $assets->skip($offset)->take($limit)->get();
         return (new AssetsTransformer)->transformRequestedAssets($assets, $total);
     }
+
+    /**
+     * Returns JSON listing of all requestable assets
+     *
+     * @return JsonResponse
+     * @since [v4.0]
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     */
+    public function closesell(Request $request, $asset_id)
+    {
+        $this->authorize('sell', Asset::class);
+
+        $asset = Asset::findOrFail($asset_id);
+        $this->authorize('sell', $asset);
+
+        $status = Statuslabel::where('name', 'Продано')->first();
+        $asset->status_id = $status->id;
+        $asset->assigned_to = $asset->contract_id;
+        $asset->assigned_type = "App\Models\Contract";
+        if ($asset->save()) {
+
+            $log = new Actionlog();
+            $log->user_id = Auth::id();
+            $log->action_type = 'sell';
+            $log->target_type = "App\Models\Contract";
+            $log->target_id = $asset->contract_id;
+            $log->item_id = $asset->id;
+            $log->item_type = Asset::class;
+            $log->note = json_encode($request->all());
+            $log->save();
+            return response()->json(Helper::formatStandardApiResponse('success', ['asset' => e($asset->asset_tag)], trans('admin/hardware/message.checkin.success')));
+        }
+
+        return response()->json(Helper::formatStandardApiResponse('success', ['asset' => e($asset->asset_tag)], trans('admin/hardware/message.checkin.error')));
+
+    }
+
+    /**
+     * Returns JSON with information about an asset for detail view.
+     *
+     * @param int $assetId
+     * @return JsonResponse
+     * @since [v4.0]
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     */
+    public function inventory($id)
+    {
+
+        $this->authorize('view', Asset::class);
+
+        if ($asset = Asset::with('assetstatus')->with('assignedTo')->withTrashed()->findOrFail($id)) {
+            $status = Statuslabel::where('name', 'Ожидает проверки')->first();
+            $asset->status_id = $status->id;
+            $asset->save();
+            return (new AssetsTransformer())->transformAsset($asset);
+        }
+    }
+
 }

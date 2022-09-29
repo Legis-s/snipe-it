@@ -2,8 +2,8 @@
 
 {{-- Page title --}}
 @section('title')
-Закупки
-@parent
+    Закупки
+    @parent
 @stop
 
 @section('header_right')
@@ -20,12 +20,41 @@
         <div class="col-md-12">
             <div class="box box-default">
                 <div class="box-body">
+                    <div id="toolbar">
+                        @isset($users)
+                            <select class="js-select-user">
+                                <option></option>
+                                @foreach($users as $user)
+                                    <option value="{{ $user->id }}">{{ $user->last_name }} {{ $user->first_name }}</option>
+                                @endforeach
+                            </select>
+                        @endisset
+                        <select class="js-select-status">
+                            <option></option>
+                            <option value="inventory">В процессе инвентаризации</option>
+                            <option value="in_payment">В оплате</option>
+                            <option value="review">В процессе проверки</option>
+                            <option value="finished">Завершено</option>
+                            <option value="rejected">Отклонено</option>
+                            <option value="paid">Оплачено</option>
+                            <option value="inprogress">>На согласовании</option>
+                        </select>
+
+                        @isset($suppliers)
+                            <select class="js-select-supplier">
+                                <option></option>
+                                @foreach($suppliers as $supplier)
+                                    <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
+                                @endforeach
+                            </select>
+                        @endisset
+                    </div>
                     <table
                             data-click-to-select="true"
                             data-columns="{{ \App\Presenters\PurchasePresenter::dataTableLayout() }}"
-                            data-cookie-id-table="usersTable"
+                            data-cookie-id-table="purchasesTable"
                             data-pagination="true"
-                            data-id-table="usersTable"
+                            data-id-table="purchasesTable"
                             data-search="true"
                             data-side-pagination="server"
                             data-show-columns="true"
@@ -33,10 +62,11 @@
                             data-show-refresh="true"
                             data-sort-order="asc"
                             data-toolbar="#toolbar"
-                            id="usersTable"
+                            id="purchasesTable"
                             class="table table-striped snipe-table"
                             data-url="{{ route('api.purchases.index') }}">
                     </table>
+
                 </div>
             </div>
         </div>
@@ -46,7 +76,62 @@
 
 @section('moar_scripts')
     @include ('partials.bootstrap-table')
+    <script>
+        $(document).ready(function () {
+            var query_holder = {};
 
+            $('.js-select-user').select2({
+                placeholder: 'Выберите пользователя',
+                allowClear: true,
+                width: "200px"
+            });
+            $('.js-select-status').select2({
+                placeholder: 'Выберите статус',
+                allowClear: true,
+                width: "200px"
+            });
+            $('.js-select-supplier').select2({
+                placeholder: 'Выберите поставщика',
+                allowClear: true,
+                width: "200px"
+            });
+            $('.js-select-user').on('select2:select', function (e) {
+                $('.js-select-status').val(null).trigger('change');
+                $('.js-select-supplier').val(null).trigger('change');
+                var data = e.params.data;
+                $('#purchasesTable').bootstrapTable('refresh', {
+                    query: {user_id: data.id}
+                })
+            });
+            $('.js-select-user').on('select2:clear', function (e) {
+                $('#purchasesTable').bootstrapTable('refresh')
+            });
+            $('.js-select-status').on('select2:select', function (e) {
+                $('.js-select-user').val(null).trigger('change');
+                $('.js-select-supplier').val(null).trigger('change');
+                var data = e.params.data;
+                $('#purchasesTable').bootstrapTable('refresh', {
+                    query: {status: data.id}
+                })
+            });
+            $('.js-select-status').on('select2:clear', function (e) {
+
+                $('#purchasesTable').bootstrapTable('refresh')
+            });
+            $('.js-select-supplier').on('select2:select', function (e) {
+                $('.js-select-user').val(null).trigger('change');
+                $('.js-select-status').val(null).trigger('change');
+                var data = e.params.data;
+                $('#purchasesTable').bootstrapTable('refresh', {
+                    query: {supplier: data.id}
+                })
+            });
+            $('.js-select-supplier').on('select2:clear', function (e) {
+
+                $('#purchasesTable').bootstrapTable('refresh')
+            });
+        });
+    </script>
 
 @stop
 

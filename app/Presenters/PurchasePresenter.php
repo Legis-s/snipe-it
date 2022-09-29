@@ -64,6 +64,12 @@ class PurchasePresenter extends Presenter
                 "visible" => true,
                 "formatter" => "consumablesCountFormatter"
             ],[
+                "field" => "sales_count",
+                "searchable" => false,
+                "sortable" => true,
+                "title" => "Активов на продажу",
+                "visible" => true,
+            ],[
                 "field" => "invoice_file",
                 "searchable" => false,
                 "sortable" => true,
@@ -94,6 +100,14 @@ class PurchasePresenter extends Presenter
                 "title" => "Цена",
                 "visible" => true,
                 "formatter" => 'priceFormatter',
+            ],[
+                "field" => "delivery_cost",
+                "searchable" => true,
+                "sortable" => true,
+                "switchable" => true,
+                "title" => "Доставка",
+                "visible" => true,
+                "formatter" => 'deliveryСostFormatter',
             ]
 //            ,[
 //                "field" => "currency",
@@ -112,7 +126,8 @@ class PurchasePresenter extends Presenter
                 "title" => "Добавил",
                 "visible" => true,
                 "formatter" => 'usersLinkObjFormatter',
-            ],[
+            ],
+            [
                 "field" => "user_verified",
                 "searchable" => true,
                 "sortable" => true,
@@ -120,7 +135,8 @@ class PurchasePresenter extends Presenter
                 "title" => "Проверил",
                 "visible" => true,
                 "formatter" => 'usersLinkObjFormatter',
-            ],[
+            ],
+            [
                 "field" => "status",
                 "searchable" => true,
                 "sortable" => true,
@@ -149,6 +165,14 @@ class PurchasePresenter extends Presenter
                 "visible" => false,
                 "title" => trans('general.created_at'),
                 "formatter" => "dateDisplayFormatter"
+            ], [
+                "field" => "actions",
+                "searchable" => false,
+                "sortable" => false,
+                "switchable" => true,
+                "title" => "Действия",
+                "visible" => true,
+                "formatter" => "purchasesActionsFormatter",
             ]
         ];
 

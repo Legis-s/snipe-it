@@ -20,7 +20,10 @@
         <!-- left column -->
         <div class="col-md-7">
             <div class="box box-default">
-                <form class="form-horizontal" method="post" action="" autocomplete="off">
+                <form class="form-horizontal" method="post" action="" autocomplete="off" id="formId">
+
+                    <input type="hidden" id="biometric_uid" name="biometric_uid">
+                    <input type="hidden" id="biometric_result" name="biometric_result">
                     <div class="box-header with-border">
                         <h2 class="box-title"> {{ trans('admin/hardware/form.tag') }} {{ $asset->asset_tag }}</h2>
                     </div>
@@ -54,13 +57,13 @@
                         </div>
                     @include ('partials.forms.checkout-selector', ['user_select' => 'true','asset_select' => 'true', 'location_select' => 'true'])
 
-                    @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.user'), 'fieldname' => 'assigned_user', 'required'=>'true'])
+                    @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'assigned_location', 'required'=>'true'])
+
+
+                    @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.user'), 'fieldname' => 'assigned_user','unselect' => 'true', 'style' => 'display:none;', 'required'=>'true'])
 
                     <!-- We have to pass unselect here so that we don't default to the asset that's being checked out. We want that asset to be pre-selected everywhere else. -->
                     @include ('partials.forms.edit.asset-select', ['translated_name' => trans('general.asset'), 'fieldname' => 'assigned_asset', 'unselect' => 'true', 'style' => 'display:none;', 'required'=>'true'])
-
-                    @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'assigned_location', 'style' => 'display:none;', 'required'=>'true'])
-
 
 
                     <!-- Checkout/Checkin Date -->
@@ -324,12 +327,21 @@
                             </div>
                         @endif
 
+
                     </div> <!--/.box-body-->
                     <div class="box-footer">
                         <a class="btn btn-link" href="{{ URL::previous() }}"> {{ trans('button.cancel') }}</a>
+
+
+                        @if ($asset->requireBiometricConfirmation())
+                            <a class="btn btn-primary pull-right" id="biometric"><i class="fa fa-hand-o-up icon-white"
+                                                                                        aria-hidden="true"></i> Подтвердить отпечатком пальца
+                            </a>
+                        @else
                         <button type="submit" class="btn btn-primary pull-right"><i class="fa fa-check icon-white"
                                                                                     aria-hidden="true"></i> {{ trans('general.checkout') }}
                         </button>
+                        @endif
                     </div>
                 </form>
             </div>
@@ -363,7 +375,64 @@
                 clearable: false,
             });
             calculeteCoast();
+
+
+            var biometric = $("#biometric")
+            biometric.click(function () {
+                $.ajax('http://localhost:8001/find ', {
+                    success: function (data, textStatus, xhr) {
+                        if (xhr.status === 200) {
+                            if (data.requestUID){
+                                var uid = data.requestUID
+                                startCheck(uid);
+                            }
+                        } else {
+                            console.log(data);
+                        }
+                    },
+                    error: function () {
+                        console.log("error");
+                    }
+                });
+            });
+
+            function startCheck(uid){
+                console.log("startCheck:"+ uid);
+                $.ajax({
+                    type: 'GET',
+                    url: '/api/v1/biometric/check/'+uid,
+                    headers: {
+                        "X-Requested-With": 'XMLHttpRequest',
+                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.status){
+                            if (data.status == "processing"){
+                                setTimeout(500);
+                                startCheck(uid);
+                            }else if(data.status == "finished"){
+                                if (data.answer){
+                                    var result = data.answer;
+                                    processBiometricResult(uid,result);
+                                }
+                            }
+                        }
+                    },
+                    error: function (data) {
+                        console.log(data);
+                        // window.location.reload(true);
+                    }
+                });
+            }
+
         });
+        function processBiometricResult(uid,result){
+            $("#biometric_uid").val(uid);
+            $("#biometric_result").val(JSON.stringify(result));
+            $("#formId").submit()
+        }
+
 
         function calculeteCoast() {
             $buyVal = $("#purchase_cost").val();

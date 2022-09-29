@@ -18,6 +18,7 @@ class Location extends SnipeModel
     protected $presenter = 'App\Presenters\LocationPresenter';
     use Presentable;
     use SoftDeletes;
+    use Searchable;
 
     protected $dates = ['deleted_at'];
     protected $table = 'locations';
@@ -65,18 +66,20 @@ class Location extends SnipeModel
         'bitrix_id',
         'notes',
         'coordinates',
-        'active'
+        'active',
+        'sklad',
+        'pult_id',
+        'contract_number',
     ];
     protected $hidden = ['user_id'];
 
-    use Searchable;
 
     /**
      * The attributes that should be included when searching the model.
      *
      * @var array
      */
-    protected $searchableAttributes = ['name', 'address', 'city', 'state', 'zip', 'created_at'];
+    protected $searchableAttributes = ['name', 'address', 'city', 'state', 'zip', 'created_at','pult_id'];
 
     /**
      * The relations and their attributes that should be included when searching the model.

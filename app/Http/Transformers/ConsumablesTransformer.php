@@ -39,12 +39,19 @@ class ConsumablesTransformer
             'qty'           => (int) $consumable->qty,
             'created_at' => Helper::getFormattedDateObject($consumable->created_at, 'datetime'),
             'updated_at' => Helper::getFormattedDateObject($consumable->updated_at, 'datetime'),
+            'model' => ($consumable->model) ? [
+                'id' => (int) $consumable->model->id,
+                'name'=> e($consumable->model->name),
+                'lifetime'=> e($consumable->model->lifetime)
+            ] : null,
         ];
 
         $permissions_array['user_can_checkout'] = false;
+        $permissions_array['user_can_sell'] = false;
 
         if ($consumable->numRemaining() > 0) {
             $permissions_array['user_can_checkout'] = true;
+            $permissions_array['user_can_sell'] = true;
         }
 
         $permissions_array['available_actions'] = [

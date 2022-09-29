@@ -16,6 +16,7 @@ use App\Http\Traits\UniqueUndeletedTrait;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 use DB;
+use Lab404\Impersonate\Models\Impersonate;
 
 class User extends SnipeModel implements AuthenticatableContract, CanResetPasswordContract
 {
@@ -25,6 +26,7 @@ class User extends SnipeModel implements AuthenticatableContract, CanResetPasswo
     use UniqueUndeletedTrait;
     use Notifiable;
     use Presentable;
+    use Impersonate;
     protected $dates = ['deleted_at'];
     protected $hidden = ['password','remember_token','permissions','reset_password_code','persist_code'];
     protected $table = 'users';
@@ -52,7 +54,8 @@ class User extends SnipeModel implements AuthenticatableContract, CanResetPasswo
         'username',
         'zip',
         'bitrix_id',
-        'bitrix_token'
+        'bitrix_token',
+        'favorite_location_id'
     ];
 
     protected $casts = [
@@ -203,6 +206,14 @@ class User extends SnipeModel implements AuthenticatableContract, CanResetPasswo
     }
 
     /**
+     * Get licenses assigned to this user
+     */
+    public function sales()
+    {
+        return $this->hasMany('\App\Models\Sale', 'user_responsible_id')->withTrashed();
+    }
+
+    /**
      * Get assets assigned to this user
      */
     public function assetmaintenances()
@@ -225,6 +236,7 @@ class User extends SnipeModel implements AuthenticatableContract, CanResetPasswo
 //    {
 //        return $this->belongsToMany('\App\Models\Consumable', 'consumables_users', 'assigned_to', 'consumable_id')->withPivot('id')->withTrashed();
 //    }
+
 
 
 
@@ -254,6 +266,7 @@ class User extends SnipeModel implements AuthenticatableContract, CanResetPasswo
         return $this->belongsTo('\App\Models\Location', 'location_id')->withTrashed();
     }
 
+
     /**
      * Get the asset's location based on the assigned user
      **/
@@ -261,6 +274,16 @@ class User extends SnipeModel implements AuthenticatableContract, CanResetPasswo
     {
         return $this->belongsTo('\App\Models\Location', 'location_id')->withTrashed();
     }
+
+
+    /**
+     * Get the asset's location based on the assigned user
+     **/
+    public function favoriteLocation()
+    {
+        return $this->belongsTo('\App\Models\Location', 'favorite_location_id')->withTrashed();
+    }
+
 
     /**
      * Get the user's manager based on the assigned user
@@ -574,5 +597,18 @@ class User extends SnipeModel implements AuthenticatableContract, CanResetPasswo
     public function purchases()
     {
         return $this->hasMany('\App\Models\Purchase', 'user_id');
+    }
+
+
+    /**
+     * @return bool
+     */
+    public function canImpersonate()
+    {
+        if ($this->isSuperUser()){
+            return true;
+        }else{
+            return false;
+        }
     }
 }

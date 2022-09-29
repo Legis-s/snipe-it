@@ -53,7 +53,6 @@
     </div>
 </div>
 
-
 <!-- Require Acceptance -->
 <div class="form-group">
     <div class="col-md-3">
@@ -62,6 +61,18 @@
         <label for="require_acceptance">
         {{ Form::checkbox('require_acceptance', '1', old('require_acceptance', $item->require_acceptance), ['class'=>'minimal', 'aria-label'=>'require_acceptance']) }}
         {{ trans('admin/categories/general.require_acceptance') }}
+        </label>
+    </div>
+</div>
+
+<!-- Require Acceptance -->
+<div class="form-group">
+    <div class="col-md-3">
+    </div>
+    <div class="col-md-9">
+        <label for="require_biometric_confirmation">
+            {{ Form::checkbox('require_biometric_confirmation', '1', old('require_biometric_confirmation', $item->require_biometric_confirmation), ['class'=>'minimal', 'aria-label'=>'require_biometric_confirmation']) }}
+            Требовать обязательного биометрического подтверждения пользователем прием активов в этой категории.
         </label>
     </div>
 </div>

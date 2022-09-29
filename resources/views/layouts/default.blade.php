@@ -20,7 +20,7 @@
     <!-- Select2 -->
     <link rel="stylesheet" href="{{ url(asset('js/plugins/select2/select2.min.css')) }}">
     <link rel="stylesheet" href="{{ url(asset('js/lightbox/css/lightbox.min.css')) }}">
-
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/sweetalert2.min.css') }}">
     <!-- iCheck for checkboxes and radio inputs -->
     <link rel="stylesheet" href="{{ url(asset('js/plugins/iCheck/all.css')) }}">
 
@@ -84,7 +84,6 @@
             {!! $snipeSettings->show_custom_css() !!}
         </style>
     @endif
-
     <script nonce="{{ csrf_token() }}">
         window.snipeit = {
             settings: {
@@ -391,12 +390,22 @@
                                     </li>
                                 @endcan
                                 <li class="divider"></li>
+                                @impersonating($guard = null)
+                                <li>
+                                    <a href="{{ route('impersonate.leave') }}">
+                                        <i class="fa fa-user-times fa-fw" aria-hidden="true"></i>
+                                        Leave impersonation
+                                    </a>
+                                </li>
+                                <li class="divider"></li>
+                                @endImpersonating
                                 <li>
                                     <a href="{{ url('/logout') }}">
                                         <i class="fa fa-sign-out fa-fw" aria-hidden="true"></i>
                                         {{ trans('general.logout') }}
                                     </a>
                                 </li>
+
                             </ul>
                         </li>
                     @endif
@@ -434,8 +443,17 @@
                         </a>
                     </li>
                 @endcan
+
+                    @can('index', \App\Models\Asset::class)
+                        <li {!! (\Request::route()->getName()=='requests' ? ' class="active"' : '') !!}>
+                            <a href="{{ route('requests.index') }}">
+                                <i class="fa fa-list-ol" aria-hidden="true"></i> <span>Заявки</span>
+                            </a>
+                        </li>
+                    @endcan
+
                 @can('index', \App\Models\Asset::class)
-                    <li class="treeview{{ (Request::is('hardware*') ? ' active' : '') }}">
+                    <li class="treeview{{ (Request::is('hardware*') && !Request::is('hardware/bulk*')) ? ' active' : '' }}">
                         <a href="#"><i class="fa fa-barcode" aria-hidden="true"></i>
                             <span>{{ trans('general.assets') }}</span>
                             <i class="fa fa-angle-left pull-right"></i>
@@ -498,26 +516,34 @@
                                 </a>
                             </li>
 
-                            @can('audit', \App\Models\Asset::class)
-                                <li{!! (Request::is('hardware/audit/due') ? ' class="active"' : '') !!}>
-                                    <a href="{{ route('assets.audit.due') }}">
-                                        <i class="fa fa-clock-o text-yellow"></i> {{ trans('general.audit_due') }}
-                                    </a>
-                                </li>
-                                <li{!! (Request::is('hardware/audit/overdue') ? ' class="active"' : '') !!}>
-                                    <a href="{{ route('assets.audit.overdue') }}">
-                                        <i class="fa fa-warning text-red"></i> {{ trans('general.audit_overdue') }}
-                                    </a>
-                                </li>
-                            @endcan
+                            <li{!! (Request::query('status') == 'Sold' ? ' class="active"' : '') !!}><a
+                                        href="{{ url('hardware?status=Sold') }}"><i
+                                            class="fa fa-usd text-red"></i>
+                                   Проданные
+                                </a>
+                            </li>
+                            <li{!! (Request::query('status') == 'Issued_for_sale' ? ' class="active"' : '') !!}><a
+                                        href="{{ url('hardware?status=Issued_for_sale') }}"><i
+                                            class="fa fa-usd text-blue"></i>
+                                    Выданные на продажу
+                                </a>
+                            </li>
+
+{{--                            @can('audit', \App\Models\Asset::class)--}}
+{{--                                <li{!! (Request::is('hardware/audit/due') ? ' class="active"' : '') !!}>--}}
+{{--                                    <a href="{{ route('assets.audit.due') }}">--}}
+{{--                                        <i class="fa fa-clock-o text-yellow"></i> {{ trans('general.audit_due') }}--}}
+{{--                                    </a>--}}
+{{--                                </li>--}}
+{{--                                <li{!! (Request::is('hardware/audit/overdue') ? ' class="active"' : '') !!}>--}}
+{{--                                    <a href="{{ route('assets.audit.overdue') }}">--}}
+{{--                                        <i class="fa fa-warning text-red"></i> {{ trans('general.audit_overdue') }}--}}
+{{--                                    </a>--}}
+{{--                                </li>--}}
+{{--                            @endcan--}}
 
                             <li class="divider">&nbsp;</li>
                             @can('checkout', \App\Models\Asset::class)
-                                <li{!! (Request::is('hardware/bulkcheckout') ? ' class="active"' : '') !!}>
-                                    <a href="{{ route('hardware/bulkcheckout') }}">
-                                        {{ trans('general.bulk_checkout') }}
-                                    </a>
-                                </li>
                                 <li{!! (Request::is('hardware/requested') ? ' class="active"' : '') !!}>
                                     <a href="{{ route('assets.requested') }}">
                                         {{ trans('general.requested') }}</a>
@@ -551,6 +577,37 @@
                         </ul>
                     </li>
                 @endcan
+                    @can('checkout', \App\Models\Asset::class)
+                    <li class="treeview{{ (Request::is('hardware/bulk*') || Request::is('massoperations')) ? ' active' : '' }}">
+                        <a href="#"><i class="fa fa-th-list" aria-hidden="true"></i>
+                            <span>{{ trans('general.mass_operations') }}</span>
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li>
+                                <a href="{{ route('hardware/bulkcheckout') }}">
+                                    {{ trans('general.checkouting') }}
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ url('hardware/bulkcheckin') }}">
+                                    {{ trans('general.checkining') }}
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ url('hardware/bulksell') }}">
+                                    {{ trans('general.selling') }}
+                                </a>
+                            </li>
+                            <hr>
+                            <li>
+                                <a href="{{ route('massoperations') }}">
+                                    {{ trans('general.mo_history') }}
+                                </a>
+                            </li>
+                        </ul>
+                        </li>
+                    @endcan
                 @can('view', \App\Models\License::class)
                     <li{!! (Request::is('licenses*') ? ' class="active"' : '') !!}>
                         <a href="{{ route('licenses.index') }}">
@@ -583,6 +640,14 @@
                         </a>
                     </li>
                 @endcan
+{{--                @can('view', \App\Models\Component::class)--}}
+{{--                    <li{!! (Request::is('sales*') ? ' class="active"' : '') !!}>--}}
+{{--                        <a href="{{ route('sales.index') }}">--}}
+{{--                            <i class="fa fa-usd"></i>--}}
+{{--                            <span>На продажу</span>--}}
+{{--                        </a>--}}
+{{--                    </li>--}}
+{{--                @endcan--}}
                 @can('view', \App\Models\User::class)
                     <li{!! (Request::is('users*') ? ' class="active"' : '') !!}>
                         <a href="{{ route('users.index') }}">
@@ -625,10 +690,21 @@
                                 </li>
                             @endcan
 
+
+
                             @can('view', \App\Models\Statuslabel::class)
                                 <li {!! (Request::is('inventorystatuslabels*') ? ' class="active"' : '') !!}>
                                     <a href="{{ route('inventorystatuslabels.index') }}">
-                                        Статусы инвенторизаций
+                                        Статусы инвентаризаций
+                                    </a>
+                                </li>
+                            @endcan
+
+
+                            @can('view', \App\Models\Contract::class)
+                                <li {!! (Request::is('contracts*') ? ' class="active"' : '') !!}>
+                                    <a href="{{ route('contracts.index') }}">
+                                        Договоры
                                     </a>
                                 </li>
                             @endcan
@@ -764,17 +840,17 @@
                 </li>
                 <li{!! (Request::is('purchases/*') ? ' class="active"' : '') !!}>
                     <a href="{{ route('purchases.index') }}">
-                        <i class="fa fa-usd"></i>
+                        <i class="fa fa-shopping-basket"></i>
                         <span>Закупки</span>
                     </a>
                 </li>
 
-                    <li{!! (Request::is('map/*') ? ' class="active"' : '') !!}>
-                        <a href="{{ route('map.index') }}">
-                            <i class="fa fa-map"></i>
-                            <span>Карта</span>
-                        </a>
-                    </li>
+                <li{!! (Request::is('map/*') ? ' class="active"' : '') !!}>
+                    <a href="{{ route('map.index') }}">
+                        <i class="fa fa-map"></i>
+                        <span>Карта</span>
+                    </a>
+                </li>
 
                 @can('viewRequestable', \App\Models\Asset::class)
                     <li{!! (Request::is('account/requestable-assets') ? ' class="active"' : '') !!}>
@@ -915,7 +991,7 @@
 <script src="{{ url(asset('js/lightgallery/js/lightgallery.min.js')) }}"></script>
 <script src="{{ url(mix('js/dist/all.js')) }}" nonce="{{ csrf_token() }}"></script>
 <script src="{{ url(asset('js/lightbox/js/lightbox.min.js')) }}" nonce="{{ csrf_token() }}"></script>
-
+<script src="{{ asset('js/sweetalert2.min.js') }}"></script>
 @section('moar_scripts')
 @show
 

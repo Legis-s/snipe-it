@@ -66,6 +66,10 @@ class AssetsTransformer
                 'id' => (int) $asset->defaultLoc->id,
                 'name'=> e($asset->defaultLoc->name)
             ]  : null,
+            'contract' => ($asset->contract) ? [
+                'id' => (int) $asset->contract->id,
+                'name'=> e($asset->contract->name)
+            ]  : null,
             'image' => ($asset->getImageUrl()) ? $asset->getImageUrl() : null,
             'assigned_to' => $this->transformAssignedTo($asset),
             'warranty_months' =>  ($asset->warranty_months > 0) ? e($asset->warranty_months . ' ' . trans('admin/hardware/form.months')) : null,
@@ -85,6 +89,8 @@ class AssetsTransformer
             'requests_counter' => (int) $asset->requests_counter,
             'user_can_checkout' => (bool) $asset->availableForCheckout(),
             'user_can_review' => (bool) $asset->availableForReview(),
+            'user_can_sell' => (bool) $asset->availableForSell(),
+            'user_can_close_sell' => (bool) $asset->availableForCloseSell(),
             'purchase_id' => (int) $asset->purchase_id,
             'quality' => (int) $asset->quality,
             'nds' => (int) $asset->nds,
@@ -122,13 +128,16 @@ class AssetsTransformer
         }
 
         $permissions_array['available_actions'] = [
+            'print_label' => true,
+            'sell' => (bool) Gate::allows('sell', Asset::class),
+            'inventory' => (bool) Gate::allows('update', Asset::class),
             'checkout' => (bool) Gate::allows('checkout', Asset::class),
             'checkin' => (bool) Gate::allows('checkin', Asset::class),
             'clone' => Gate::allows('create', Asset::class) ? true : false,
             'restore' => false,
             'update' => (bool) Gate::allows('update', Asset::class),
             'delete' => (bool) Gate::allows('delete', Asset::class),
-            'review' => (bool) Gate::allows('review', Asset::class),
+            'review' => (bool) Gate::allows('review'),
         ];
 
         if ($asset->deleted_at!='') {

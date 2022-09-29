@@ -59,8 +59,9 @@ class UsersController extends Controller
             'users.updated_at',
             'users.username',
             'users.zip',
+            'users.favorite_location_id',
 
-        ])->with('manager', 'groups', 'userloc', 'company', 'department','assets','licenses','accessories')
+        ])->with('manager', 'groups', 'userloc','location', 'company', 'department','assets','licenses','accessories')
 //        ])->with('manager', 'groups', 'userloc', 'company', 'department','assets','licenses','accessories','consumables')
 //            ->withCount('assets as assets_count','licenses as licenses_count','accessories as accessories_count','consumables as consumables_count');
             ->withCount('assets as assets_count','licenses as licenses_count','accessories as accessories_count');
@@ -448,4 +449,6 @@ class UsersController extends Controller
     {
         return (new UsersTransformer)->transformUser($request->user());
     }
+
+
 }

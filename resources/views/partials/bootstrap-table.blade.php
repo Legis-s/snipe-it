@@ -46,6 +46,7 @@
             undefinedText: '',
             iconsPrefix: 'fa',
             cookie: true,
+            cookiesEnabled: ['bs.table.sortOrder', 'bs.table.sortName', 'bs.table.columns', 'bs.table.searchText', 'bs.table.filterControl'],
             cookieExpire: '2y',
             cookieIdTable: '{{ Route::currentRouteName() }}',
             mobileResponsive: true,
@@ -58,6 +59,9 @@
             pageList: ['10', '20', '30', '50', '100', '150', '200', '500'],
             pageSize: {{  (($snipeSettings->per_page!='') && ($snipeSettings->per_page > 0)) ? $snipeSettings->per_page : 20 }},
             paginationVAlign: 'both',
+            onPreBody: function (data) {
+                $('[data-toggle="tooltip"]').tooltip();
+            },
             formatLoadingMessage: function () {
                 return '<h2><i class="fa fa-spinner fa-spin" aria-hidden="true"></i> Loading... please wait.... </h4>';
             },
@@ -117,6 +121,7 @@
     // Use this when we're introspecting into a column object and need to link
     function genericColumnObjLinkFormatter(destination) {
         return function (value, row) {
+            console.log(row);
             if ((value) && (value.status_meta)) {
 
                 var text_color;
@@ -186,6 +191,19 @@
                 var dest = 'hardware/maintenances';
             }
 
+            if ((row.available_actions) && (row.available_actions.print_label === true)) {
+                actions += '<span class="btn btn-sm btn-warning print_label" data-tooltip="true" title="Print label"><i class="fa fa-barcode" aria-hidden="true"></i><span class="sr-only">Print label</span></span>&nbsp;';
+            }
+
+
+            if ((row.available_actions) && (row.available_actions.inventory === true)) {
+                actions += '<span class="btn btn-sm btn-warning inventory" data-tooltip="true" title="Inventory Item"><i class="fa fa-key" aria-hidden="true"></i><span class="sr-only">Inventory</span></span>&nbsp;';
+            }
+
+            if ((row.available_actions) && (row.available_actions.impersonate === true)) {
+                actions += '<a href="{{ url('/') }}/impersonate/take/' + row.id + '/" class="btn btn-sm btn-danger" data-tooltip="true" title="Impersonate"><i class="fa fa-unlock" aria-hidden="true"></i><span class="sr-only">impersonate</span></a>&nbsp;';
+            }
+
             if ((row.available_actions) && (row.available_actions.clone === true)) {
                 actions += '<a href="{{ url('/') }}/' + dest + '/' + row.id + '/clone" class="btn btn-sm btn-info" data-tooltip="true" title="Clone Item"><i class="fa fa-copy" aria-hidden="true"></i><span class="sr-only">Clone</span></a>&nbsp;';
             }
@@ -216,6 +234,37 @@
     }
 
 
+    // This just prints out the item type in the activity report
+    function itemTypeFormatter(value, row) {
+
+        if ((row) && (row.item) && (row.item.type)) {
+            return row.item.type;
+        }
+    }
+
+    function actionTypeFormatter(value, row) {
+        if (value == "выдать") {
+            if (row.biometric_uid && row.biometric_result) {
+                var fio = "";
+                try {
+                    console.log(row.biometric_result)
+                    var result = JSON.parse(row.biometric_result);
+                    if (result.fio) {
+                        fio = result.fio;
+                    }
+                } catch (e) {
+                    console.log(e);
+                }
+                return "<span data-toggle='tooltip' data-placement='top' title='Подтверждено: " + fio + "'><i class='fa fa-hand-o-up' aria-hidden='true'></i> " + value + "</span>";
+            } else {
+                return "<i class='fa fa-hand-o-up' aria-hidden='true'></i> " + value + "";
+            }
+        } else {
+            return value;
+        }
+
+    }
+
     // This handles the icons and display of polymorphic entries
     function polymorphicItemFormatter(value) {
 
@@ -245,7 +294,17 @@
             } else if (value.type == 'location') {
                 item_destination = 'locations'
                 item_icon = 'fa-map-marker';
+            } else if (value.type == 'purchase') {
+                item_destination = 'purchases'
+                item_icon = 'fa-shopping-basket';
+            } else if (value.type == 'contract') {
+                item_destination = 'contracts'
+                item_icon = 'fa-file';
+            } else if (value.type == 'sale') {
+                item_destination = 'sales'
+                item_icon = 'fa-usd';
             }
+
 
             return '<nobr><a href="{{ url('/') }}/' + item_destination + '/' + value.id + '" data-tooltip="true" title="' + value.type + '"><i class="fa ' + item_icon + ' text-{{ $snipeSettings->skin!='' ? $snipeSettings->skin : 'blue' }} "></i> ' + value.name + '</a></nobr>';
 
@@ -257,10 +316,23 @@
     }
 
     // This just prints out the item type in the activity report
-    function itemTypeFormatter(value, row) {
-
-        if ((row) && (row.item) && (row.item.type)) {
-            return row.item.type;
+    function quantityItemFormatter(value, row) {
+        console.log(row);
+        if ((row) && (row.type)) {
+            switch (row.type) {
+                case "purchase":
+                    return "<span class='text-success'  style='font-size: 130%; font-weight: bold'> +" + value + "</span>";
+                case "issued":
+                    return "<span class='text-danger' style='font-size: 130%; font-weight: bold'> -" + value + "</span>";
+                case "converted":
+                    return "<span class='text-success' style='font-size: 130%; font-weight: bold'> +" + value + "</span>";
+                case "sold":
+                    return "<span class='text-danger' style='font-size: 130%; font-weight: bold'> -" + value + "</span>";
+                case "manually":
+                    return "<span class='text-success' style='font-size: 130%; font-weight: bold'> +" + value + "</span>";
+                case "collected":
+                    return "<span class='text-success' style='font-size: 130%; font-weight: bold'> +" + value + "</span>";
+            }
         }
     }
 
@@ -269,19 +341,55 @@
     function notesFormatter(value) {
         if (value) {
             return value.replace(/(?:\r\n|\r|\n)/g, '<br />');
-            ;
         }
     }
-
 
 
     function reviewFormatter(value, row) {
         if ((row.available_actions.review == true) && (row.user_can_review == true)) {
             return '<button type="button" class="btn btn-primary btn-sm review">Проверено</button>';
-        }else{
+        } else {
             return "";
         }
     }
+
+    function review_asset_for_saleFormatter(value, row) {
+        if ((row.available_actions.review == true) && (row.user_can_review == true)) {
+            return '<button type="button" class="btn btn-primary btn-sm review_asset_for_sale">Проверено</button>';
+        } else {
+            return "";
+        }
+    }
+
+    function consumablesSellFormatter(value, row) {
+        if (row.user_can_sell == true) {
+            return '<a href="{{ url('/') }}/consumables/' + row.id + '/sell/" class="btn btn-sm bg-maroon" data-tooltip="true" title="Sell this item out">Продать</a>';
+        } else {
+            return '<a href="{{ url('/') }}/consumables/' + row.id + '/sell/" class="btn btn-sm bg-maroon" data-tooltip="true" title="Sell this item out" disabled>Продать</a>';
+        }
+    }
+
+    function consumablesReturnFormatter(value, row) {
+        if (row.can_return == true && row.quantity != 0) {
+            if (row.can_close_documents == true) {
+                return '<button class="btn btn-sm bg-maroon return" data-tooltip="true" title="Вернуть">Вернуть</button><br><button class="btn btn-sm bg-maroon close_documents" data-tooltip="true" title="Вернуть">Получены закр. док.</button>';
+            }
+            return '<button class="btn btn-sm bg-maroon return" data-tooltip="true" title="Вернуть">Вернуть</button>';
+        } else {
+            return '';
+        }
+    }
+
+    function sellFormatter(value, row) {
+        if ((row.available_actions.sell == true) && (row.user_can_sell == true) && ((!row.asset_id) && (!row.assigned_to))) {
+            return '<a href="{{ url('/') }}/hardware/' + row.id + '/sell/" class="btn btn-sm bg-maroon" data-tooltip="true" title="Check this item out">Продать</a>';
+        } else if (row.available_actions.sell == true && row.user_can_close_sell == true) {
+            return '<span class="btn btn-sm bg-maroon closesell" data-tooltip="true" title="Есть закр. док.">Есть закр. док.</span>';
+        } else {
+            return ""
+        }
+    }
+
 
     // We need a special formatter for license seats, since they don't work exactly the same
     // Checkouts need the license ID, checkins need the specific seat ID
@@ -298,7 +406,6 @@
 
     function genericCheckinCheckoutFormatter(destination) {
         return function (value, row) {
-
             // The user is allowed to check items out, AND the item is deployable
             if ((row.available_actions.checkout == true) && (row.user_can_checkout == true) && ((!row.asset_id) && (!row.assigned_to))) {
                 return '<a href="{{ url('/') }}/' + destination + '/' + row.id + '/checkout" class="btn btn-sm bg-maroon" data-tooltip="true" title="Check this item out">{{ trans('general.checkout') }}</a>';
@@ -314,12 +421,8 @@
                 } else if (row.assigned_pivot_id) {
                     return '<a href="{{ url('/') }}/' + destination + '/' + row.assigned_pivot_id + '/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="Check this item in so it is available for re-imaging, re-issue, etc.">{{ trans('general.checkin') }}</a>';
                 }
-
             }
-
         }
-
-
     }
 
 
@@ -355,7 +458,9 @@
         'groups',
         'inventories',
         'purchases',
-        "inventorystatuslabels"
+        'sales',
+        "inventorystatuslabels",
+        "contracts"
     ];
 
     for (var i in formatters) {
@@ -425,23 +530,23 @@
 
     }
 
-    function photosFormatter(value,row) {
+    function photosFormatter(value, row) {
         var result = "";
-        if (value){
-            if (value.length>0){
+        if (value) {
+            if (value.length > 0) {
                 result = ' <div class="aniimated-thumbnials" >';
                 value.forEach((photo) => {
-                    if (!photo.comment){
+                    if (!photo.comment) {
                         photo.comment = "";
                     }
-                    result+='<a href="'+photo.path+'" data-lightbox="image-1" data-title="'+photo.comment+'"><img width="200" class="img-thumbnail"  data-toggle="tooltip" data-placement="bottom" title="'+photo.comment+'" src="'+photo.path+'" /></a>';
+                    result += '<a href="' + photo.path + '" data-lightbox="image-1" data-title="' + photo.comment + '"><img width="200" class="img-thumbnail"  data-toggle="tooltip" data-placement="bottom" title="' + photo.comment + '" src="' + photo.path + '" /></a>';
                 });
-                result+='  </div>';
+                result += '  </div>';
                 return result;
-            }else {
+            } else {
                 return '';
             }
-        }else {
+        } else {
             return '';
         }
 
@@ -455,6 +560,13 @@
         }
     }
 
+    // Create a linked phone number in the table list
+    function massOperationsFormatter(value, row) {
+        console.log(row);
+        if (value) {
+            return '<a href="/massoperations/' + row.id + '">' + value + '</a>';
+        }
+    }
 
     function deployedLocationFormatter(row, value) {
         if ((row) && (row != undefined)) {
@@ -674,6 +786,13 @@
         }
     }
 
+    function bitrixIdLocationFormatter(value, row) {
+
+//https://bitrix.legis-s.ru/crm/object/details/2952/
+        if (value) {
+            return '<a href="https://bitrix.legis-s.ru/crm/object/details/' + value + '/"   target="_blank" >' + value + '</a>';
+        }
+    }
 
     function imageFormatter(value, row) {
 
@@ -693,7 +812,7 @@
 
 //https://bitrix.legis-s.ru/crm/object/details/2952/
         if (value) {
-            return '<a href="https://bitrix.legis-s.ru/crm/object/details/'+value+'/"   target="_blank" >'+value+'</a>';
+            return '<a href="https://bitrix.legis-s.ru/crm/object/details/' + value + '/"   target="_blank" >' + value + '</a>';
         }
     }
 
@@ -712,19 +831,19 @@
     }
 
 
-    function assetsCountFormatter(value,row) {
-        if (row.assets_count_ok>0){
-            return row.assets_count_ok + "/"+value;
-        }else{
+    function assetsCountFormatter(value, row) {
+        if (row.assets_count_ok > 0) {
+            return row.assets_count_ok + "/" + value;
+        } else {
             return value;
         }
     }
 
 
-    function consumablesCountFormatter(value,row) {
-        if (row.consumables_count_real>0){
-            return row.consumables_count_real + "/"+value;
-        }else{
+    function consumablesCountFormatter(value, row) {
+        if (row.consumables_count_real > 0) {
+            return row.consumables_count_real + "/" + value;
+        } else {
             return value;
         }
     }
@@ -748,12 +867,12 @@
         return 'not an array';
     }
 
-    function lifetimeFormatter(value,row) {
-        if (row.model && row.model.lifetime){
+    function lifetimeFormatter(value, row) {
+        if (row.model && row.model.lifetime) {
             return row.model.lifetime
-        }else if(row.category && row.category.lifetime){
+        } else if (row.category && row.category.lifetime) {
 
-        }else {
+        } else {
             return "";
         }
     }
@@ -782,7 +901,7 @@
 
     function bitrixIdFormatter(value, row) {
         if (value) {
-            return "<a href='https://bitrix.legis-s.ru/services/lists/52/element/0/"+value+"/?list_section_id=' target='_blank'>"+value+"</a>";
+            return "<a href='https://bitrix.legis-s.ru/services/lists/52/element/0/" + value + "/?list_section_id=' target='_blank'>" + value + "</a>";
         } else {
             if (row.user) {
                 {{--return '<a href="{{ url('/') }}/api/v1/purchases/' + row.id + '/resend"> Отправить заново</a>';--}}
@@ -792,9 +911,10 @@
             }
         }
     }
+
     function bitrixTaskIdFormatter(value, row) {
         if (value) {
-            return "<a href='https://bitrix.legis-s.ru/company/personal/user/"+row.user.bitrix_id+"/tasks/task/view/"+value+"/' target='_blank'>"+value+"</a>";
+            return "<a href='https://bitrix.legis-s.ru/company/personal/user/" + row.user.bitrix_id + "/tasks/task/view/" + value + "/' target='_blank'>" + value + "</a>";
         } else {
             return ' ';
         }
@@ -802,11 +922,27 @@
 
     function priceFormatter(value, row) {
         if (row.currency && row.final_price) {
-            return "<span style='font-size: 120%; font-weight: bold;' class='text-primary'>"+row.final_price+"<br>"+row.currency+"</span>";
+            return "<span style='font-size: 120%; font-weight: bold;' class='text-primary'>" + row.final_price + "<br>" + row.currency + "</span>";
         } else {
         }
     }
 
+    function deliveryСostFormatter(value, row) {
+        if (row.currency && row.delivery_cost) {
+            return "<span style='font-size: 120%; font-weight: bold;' class='text-primary'>" + row.delivery_cost + "<br>" + row.currency + "</span>";
+        } else {
+        }
+    }
+
+    function bitrixIdContractFormatter(value, row) {
+        if (value) { //https://bitrix.legis-s.ru/crm/contract/details/4537/
+            return "<a href='https://bitrix.legis-s.ru/crm/contract/details/" + value + "/' target='_blank'>" + value + "</a>";
+        }
+    }
+
+    function bulkListRemoveFormatter(value, row) {
+        return "<button type='button' class='btn btn-danger  btn-sm bulk-clear'>Убрать</button>"
+    }
 
     $(function () {
         $('#bulkEdit').click(function () {
@@ -818,7 +954,86 @@
         });
     });
     $(function () {
+
         operateEvents = {
+            'click .print_label': function (e, value, row, index) {
+                $.ajax('http://localhost:8001/termal_print?text=' + row.asset_tag, {
+                    success: function (data, textStatus, xhr) {
+                        console.log(xhr.status);
+                        if (xhr.status === 200) {
+                            $.ajax({
+                                method: "POST",
+                                url: '/api/v1/hardware/' + row.id + '/inventory',
+                                headers: {
+                                    "X-Requested-With": 'XMLHttpRequest',
+                                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                                },
+                                success: function (data) {
+
+                                }
+                            });
+
+                        } else {
+                            console.log(data);
+                        }
+                    },
+                    error: function () {
+                        console.log("error");
+                    }
+                });
+            },
+            'click .closesell': function (e, value, row, index) {
+                $.ajax({
+                    url: '/api/v1/hardware/' + row.id + '/closesell',
+                    {{--url: '{{ route('api.purchases.resend', ['id'=> row.id]) }}',--}}
+                    method: "POST",
+                    headers: {
+                        "X-Requested-With": 'XMLHttpRequest',
+                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function () {
+                        $(".table").bootstrapTable('refresh');
+                    }
+                });
+            },
+            'click .inventory': function (e, value, row, index) {
+
+                Swal.fire({
+                    title: "Изменить тег актива <b>" + row.asset_tag + " </b>",
+                    // text: 'Do you want to continue',
+                    icon: 'question',
+                    input: "text",
+                    inputLabel: 'Новый тег',
+                    inputAttributes: {
+                        autocapitalize: 'on'
+                    },
+                    reverseButtons: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Подтвердить',
+                    cancelButtonText: 'Отменить',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+
+                        var sendData = {
+                            asset_tag: result.value,
+                        };
+                        console.log("asset_tag: " + result.value);
+                        $.ajax({
+                            type: 'PATCH',
+                            url: "/api/v1/hardware/" + row.id + "",
+                            headers: {
+                                "X-Requested-With": 'XMLHttpRequest',
+                                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                            },
+                            data: sendData,
+                            dataType: 'json',
+                            success: function (data) {
+                                $(".table").bootstrapTable('refresh');
+                            },
+                        });
+                    }
+                });
+            },
             'click .resend': function (e, value, row, index) {
                 $.ajax({
                     url: '/api/v1/purchases/' + row.id + '/resend',
@@ -844,9 +1059,264 @@
                     },
                     success: function () {
                         $(".table").bootstrapTable('refresh');
+                        $.ajax({
+                            type: 'GET',
+                            url: "/api/v1/purchases/" + row.purchase_id,
+                            headers: {
+                                "X-Requested-With": 'XMLHttpRequest',
+                                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                            },
+                            dataType: 'json',
+                            success: function (data) {
+                                var status = data.status;
+                                var result = "";
+                                switch (status) {
+                                    case "inventory":
+                                        result = '<span class="label label-warning">В процессе инвентаризации</span>';
+                                        break;
+                                    case "in_payment":
+                                        result = '<span class="label label-primary">В оплате</span>';
+                                        break;
+                                    case "review":
+                                        result = '<span class="label label-warning">В процессе проверки</span>';
+                                        break;
+                                    case "finished":
+                                        result = '<span class="label label-success">Завершено</span>';
+                                        break;
+                                    case "rejected":
+                                        result = '<span class="label label-danger">Отклонено</span>';
+                                        break;
+                                    case "paid":
+                                        result = '<span class="label label-success">Оплачено</span>';
+                                        break;
+                                    case "inprogress":
+                                        result = '<span class="label label-primary">На согласовании</span>';
+                                        break;
+                                }
+                                $('.status_label').html(result);
+
+                            },
+                        });
                     }
                 });
             },
+            'click .review_asset_for_sale': function (e, value, row, index) {
+                console.log(row);
+                $.ajax({
+                    url: '/api/v1/sale/' + row.id + '/review',
+                    method: "POST",
+                    headers: {
+                        "X-Requested-With": 'XMLHttpRequest',
+                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function () {
+                        $(".table").bootstrapTable('refresh');
+
+                        $.ajax({
+                            type: 'GET',
+                            url: "/api/v1/purchases/" + row.purchase_id,
+                            headers: {
+                                "X-Requested-With": 'XMLHttpRequest',
+                                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                            },
+                            dataType: 'json',
+                            success: function (data) {
+                                var status = data.status;
+                                var result = "";
+                                switch (status) {
+                                    case "inventory":
+                                        result = '<span class="label label-warning">В процессе инвентаризации</span>';
+                                        break;
+                                    case "in_payment":
+                                        result = '<span class="label label-primary">В оплате</span>';
+                                        break;
+                                    case "review":
+                                        result = '<span class="label label-warning">В процессе проверки</span>';
+                                        break;
+                                    case "finished":
+                                        result = '<span class="label label-success">Завершено</span>';
+                                        break;
+                                    case "rejected":
+                                        result = '<span class="label label-danger">Отклонено</span>';
+                                        break;
+                                    case "paid":
+                                        result = '<span class="label label-success">Оплачено</span>';
+                                        break;
+                                    case "inprogress":
+                                        result = '<span class="label label-primary">На согласовании</span>';
+                                        break;
+                                }
+                                $('.status_label').html(result);
+
+                            },
+                        });
+                    }
+                });
+            },
+            'click .return': function (e, value, row, index) {
+                Swal.fire({
+                    title: "Вернуть - " + row.name + " " + row.assigned_to.name,
+                    // text: 'Do you want to continue',
+                    icon: 'question',
+                    input: "range",
+                    inputLabel: 'Количество',
+                    inputAttributes: {
+                        min: 1,
+                        max: row.quantity,
+                        step: 1
+                    },
+                    inputValue: 1,
+                    reverseButtons: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Подтвердить',
+                    cancelButtonText: 'Отменить',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+
+                        var sendData = {
+                            quantity: result.value,
+                            nds: row.nds,
+                            purchase_cost: row.purchase_cost,
+                        };
+                        $.ajax({
+                            type: 'POST',
+                            url: "/api/v1/consumableassignments/" + row.id + "/return",
+                            headers: {
+                                "X-Requested-With": 'XMLHttpRequest',
+                                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                            },
+                            data: sendData,
+                            dataType: 'json',
+                            success: function (data) {
+                                $(".table").bootstrapTable('refresh');
+                            },
+                        });
+                    }
+                });
+            },
+            'click .close_documents': function (e, value, row, index) {
+                console.log(row);
+                if (row.contract) {
+                    var contract_id =row.contract.id;
+                    console.log(contract_id);
+                    var sendData = {
+                        contract_id: contract_id,
+                    };
+
+                    $.ajax({
+                        type: 'POST',
+                        url: "/api/v1/consumableassignments/" + row.id + "/close_documents",
+                        headers: {
+                            "X-Requested-With": 'XMLHttpRequest',
+                            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                        },
+                        data: sendData,
+                        dataType: 'json',
+                        success: function (data) {
+                            $(".table").bootstrapTable('refresh');
+                        },
+                    });
+                } else {
+                    Swal.fire({
+                        title: "Закрывающие документы - " + row.name + " " + row.assigned_to.name,
+                        // text: 'Do you want to continue',
+                        icon: 'question',
+                        html:
+                            '<select class="js-data-ajax" data-endpoint="contracts" data-placeholder="Выберите договор" name="assigned_contract" style="width: 100%" id="assigned_contract_contract_select" aria-label="assigned_contract">' +
+                            '<option value=""  role="option">Выберите договор</option>' +
+                            '</select>',
+                        reverseButtons: true,
+                        showCancelButton: true,
+                        confirmButtonText: 'Подтвердить',
+                        cancelButtonText: 'Отменить',
+                        preConfirm: () => {
+                            return [
+                                $('#assigned_contract_contract_select').val(),
+                            ]
+                        },
+                        didOpen: (toast) => {
+                            // Crazy select2 rich dropdowns with images!
+                            $('.js-data-ajax').each(function (i, item) {
+                                console.log("js-data-ajax")
+                                var link = $(item);
+                                var endpoint = link.data("endpoint");
+                                var select = link.data("select");
+                                link.select2({
+
+                                    /**
+                                     * Adds an empty placeholder, allowing every select2 instance to be cleared.
+                                     * This placeholder can be overridden with the "data-placeholder" attribute.
+                                     */
+                                    placeholder: '',
+                                    allowClear: true,
+
+                                    ajax: {
+
+                                        // the baseUrl includes a trailing slash
+                                        url: baseUrl + 'api/v1/' + endpoint + '/selectlist',
+                                        dataType: 'json',
+                                        delay: 250,
+                                        headers: {
+                                            "X-Requested-With": 'XMLHttpRequest',
+                                            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                                        },
+                                        data: function (params) {
+                                            var data = {
+                                                search: params.term,
+                                                page: params.page || 1,
+                                                assetStatusType: link.data("asset-status-type"),
+                                            };
+                                            return data;
+                                        },
+                                        processResults: function (data, params) {
+
+                                            params.page = params.page || 1;
+
+                                            var answer = {
+                                                results: data.items,
+                                                pagination: {
+                                                    more: "true" //(params.page  < data.page_count)
+                                                }
+                                            };
+
+                                            return answer;
+                                        },
+                                        cache: true
+                                    },
+                                    escapeMarkup: function (markup) {
+                                        return markup;
+                                    }, // let our custom formatter work
+                                    templateResult: formatDatalist,
+                                    templateSelection: formatDataSelection
+                                });
+
+                            });
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            var contract_id = result.value[0];
+                            console.log(contract_id);
+                            var sendData = {
+                                contract_id: contract_id,
+                            };
+
+                            $.ajax({
+                                type: 'POST',
+                                url: "/api/v1/consumableassignments/" + row.id + "/close_documents",
+                                headers: {
+                                    "X-Requested-With": 'XMLHttpRequest',
+                                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                                },
+                                data: sendData,
+                                dataType: 'json',
+                                success: function (data) {
+                                    $(".table").bootstrapTable('refresh');
+                                },
+                            });
+                        }
+                    });
+                }
+            }
         }
     });
 

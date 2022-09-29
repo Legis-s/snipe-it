@@ -11,6 +11,18 @@
             '{consumableID}/checkout',
             [ 'as' => 'checkout/consumable', 'uses' => 'ConsumablesController@postCheckout' ]
         );
+        Route::get(
+            '{consumableID}/sell',
+            [ 'as' => 'checkout/consumable','uses' => 'ConsumablesController@getSell' ]
+        );
+        Route::post(
+            '{consumableID}/sell',
+            [ 'as' => 'checkout/consumable', 'uses' => 'ConsumablesController@postSell' ]
+        );
+        Route::get(
+            '/ncd',
+            [ 'as' => 'ncd','uses' => 'ConsumablesController@noclosingdocuments' ]
+        );
     });
 
     Route::resource('consumables', 'ConsumablesController', [

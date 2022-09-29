@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Presenters;
 
 use App\Models\CustomField;
@@ -65,7 +66,7 @@ class AssetPresenter extends Presenter
                 "title" => trans('admin/hardware/form.serial'),
                 "visible" => true,
                 "formatter" => "hardwareLinkFormatter"
-            ],  [
+            ], [
                 "field" => "model",
                 "searchable" => true,
                 "sortable" => true,
@@ -106,7 +107,7 @@ class AssetPresenter extends Presenter
                 "title" => trans('admin/users/table.employee_num'),
                 "visible" => false,
                 "formatter" => "employeeNumFormatter"
-            ],[
+            ], [
                 "field" => "location",
                 "searchable" => true,
                 "sortable" => true,
@@ -121,13 +122,20 @@ class AssetPresenter extends Presenter
                 "visible" => false,
                 "formatter" => "deployedLocationFormatter"
             ], [
+                "field" => "contract",
+                "searchable" => true,
+                "sortable" => true,
+                "title" => "Договор",
+                "visible" => true,
+                "formatter" => "contractsLinkObjFormatter"
+            ], [
                 "field" => "manufacturer",
                 "searchable" => true,
                 "sortable" => true,
                 "title" => trans('general.manufacturer'),
                 "visible" => false,
                 "formatter" => "manufacturersLinkObjFormatter"
-            ],[
+            ], [
                 "field" => "supplier",
                 "searchable" => true,
                 "sortable" => true,
@@ -192,14 +200,14 @@ class AssetPresenter extends Presenter
                 "sortable" => true,
                 "visible" => false,
                 "title" => trans('admin/hardware/form.warranty')
-            ],[
+            ], [
                 "field" => "warranty_expires",
                 "searchable" => false,
                 "sortable" => false,
                 "visible" => false,
                 "title" => trans('admin/hardware/form.warranty_expires'),
                 "formatter" => "dateDisplayFormatter"
-            ],[
+            ], [
                 "field" => "notes",
                 "searchable" => true,
                 "sortable" => true,
@@ -213,7 +221,7 @@ class AssetPresenter extends Presenter
                 "visible" => false,
                 "title" => trans('general.checkouts_count')
 
-            ],[
+            ], [
                 "field" => "checkin_counter",
                 "searchable" => false,
                 "sortable" => true,
@@ -286,7 +294,7 @@ class AssetPresenter extends Presenter
         // models. We only pass the fieldsets that pertain to each asset (via their model) so that we
         // don't junk up the REST API with tons of custom fields that don't apply
 
-        $fields =  CustomField::whereHas('fieldset', function ($query) {
+        $fields = CustomField::whereHas('fieldset', function ($query) {
             $query->whereHas('models');
         })->get();
 
@@ -296,11 +304,11 @@ class AssetPresenter extends Presenter
         // name can break the listings page. - snipe
         foreach ($fields as $field) {
             $layout[] = [
-                "field" => 'custom_fields.'.$field->convertUnicodeDbSlug(),
+                "field" => 'custom_fields.' . $field->convertUnicodeDbSlug(),
                 "searchable" => true,
                 "sortable" => true,
                 "switchable" => true,
-                "title" => ($field->field_encrypted=='1') ?'<i class="fa fa-lock"></i> '.$field->name : $field->name,
+                "title" => ($field->field_encrypted == '1') ? '<i class="fa fa-lock"></i> ' . $field->name : $field->name,
                 "formatter" => "customFieldsFormatter"
             ];
 
@@ -311,10 +319,22 @@ class AssetPresenter extends Presenter
             "searchable" => false,
             "sortable" => false,
             "switchable" => true,
-            "title" => trans('general.checkin').'/'.trans('general.checkout'),
+            "title" => trans('general.checkin') . '/' . trans('general.checkout'),
             "visible" => true,
             "formatter" => "hardwareInOutFormatter",
         ];
+
+        $layout[] = [
+            "field" => "sellfield",
+            "searchable" => false,
+            "sortable" => false,
+            "switchable" => true,
+            "title" => "Продажа",
+            "visible" => true,
+            "formatter" => "sellFormatter",
+            "events" => "operateEvents"
+        ];
+
 
         $layout[] = [
             "field" => "review",
@@ -324,9 +344,8 @@ class AssetPresenter extends Presenter
             "title" => "Проверка",
             "visible" => true,
             "formatter" => "reviewFormatter",
-            "events"=> "operateEvents"
+            "events" => "operateEvents"
         ];
-
 
 
         $layout[] = [
@@ -336,12 +355,166 @@ class AssetPresenter extends Presenter
             "switchable" => false,
             "title" => trans('table.actions'),
             "formatter" => "hardwareActionsFormatter",
-//            "events"=> "operateEvents"
+            "events" => "operateEvents"
         ];
 
         return json_encode($layout);
     }
 
+
+    /**
+     * Json Column Layout for bootstrap table
+     * @return string
+     */
+    public static function dataTableLayoutBulk()
+    {
+        $layout = [[
+            "searchable" => false,
+            "switchable" => true,
+            "visible" => true,
+            "formatter" => "bulkListRemoveFormatter",
+            "events"=> "operateEventsBulk",
+        ], [
+            "field" => "id",
+            "searchable" => false,
+            "sortable" => true,
+            "switchable" => true,
+            "title" => trans('general.id'),
+            "visible" => false
+        ], [
+            "field" => "asset_tag",
+            "searchable" => true,
+            "sortable" => true,
+            "title" => trans('admin/hardware/table.asset_tag'),
+            "visible" => true,
+            "formatter" => "hardwareLinkFormatter"
+        ], [
+            "field" => "serial",
+            "searchable" => true,
+            "sortable" => true,
+            "title" => trans('admin/hardware/form.serial'),
+            "visible" => true,
+            "formatter" => "hardwareLinkFormatter"
+        ], [
+            "field" => "model",
+            "searchable" => true,
+            "sortable" => true,
+            "title" => trans('admin/hardware/form.model'),
+            "visible" => true,
+            "formatter" => "modelsLinkObjFormatter"
+        ], [
+            "field" => "model_number",
+            "searchable" => true,
+            "sortable" => true,
+            "title" => trans('admin/models/table.modelnumber'),
+            "visible" => false
+        ], [
+            "field" => "category",
+            "searchable" => true,
+            "sortable" => true,
+            "title" => trans('general.category'),
+            "visible" => true,
+            "formatter" => "categoriesLinkObjFormatter"
+        ], [
+            "field" => "status_label",
+            "searchable" => true,
+            "sortable" => true,
+            "title" => trans('admin/hardware/table.status'),
+            "visible" => true,
+            "formatter" => "statuslabelsLinkObjFormatter"
+        ], [
+            "field" => "manufacturer",
+            "searchable" => true,
+            "sortable" => true,
+            "title" => trans('general.manufacturer'),
+            "visible" => false,
+            "formatter" => "manufacturersLinkObjFormatter"
+        ], [
+            "field" => "purchase_date",
+            "searchable" => true,
+            "sortable" => true,
+            "visible" => false,
+            "title" => trans('general.purchase_date'),
+            "formatter" => "dateDisplayFormatter"
+        ], [
+            "field" => "purchase_cost",
+            "searchable" => true,
+            "sortable" => true,
+            "title" => trans('general.purchase_cost'),
+            "footerFormatter" => 'sumFormatter',
+        ], [
+            "field" => "depreciable_cost",
+            "searchable" => true,
+            "sortable" => true,
+            "title" => "Остаточная стоимость",
+            "footerFormatter" => 'sumFormatter',
+        ], [
+//                "field" => "depreciable_cost",
+//                "searchable" => true,
+            "sortable" => true,
+            "title" => "Срок эксплуатации",
+            "formatter" => 'lifetimeFormatter',
+        ], [
+            "field" => "quality",
+            "searchable" => true,
+            "sortable" => true,
+            "title" => "Состояние",
+            "formatter" => 'qualityFormatter',
+        ], [
+            "field" => "order_number",
+            "searchable" => true,
+            "sortable" => true,
+            "visible" => false,
+            "title" => trans('general.order_number'),
+            'formatter' => "orderNumberObjFilterFormatter"
+        ], [
+            "field" => "purchase_id",
+            "searchable" => false,
+            "sortable" => true,
+            "switchable" => true,
+            "title" => "ID закупки",
+            "visible" => false
+        ], [
+            "field" => "created_at",
+            "searchable" => false,
+            "sortable" => true,
+            "visible" => false,
+            "title" => trans('general.created_at'),
+            "formatter" => "dateDisplayFormatter"
+        ], [
+            "field" => "updated_at",
+            "searchable" => false,
+            "sortable" => true,
+            "visible" => false,
+            "title" => trans('general.updated_at'),
+            "formatter" => "dateDisplayFormatter"
+        ], [
+            "field" => "last_checkout",
+            "searchable" => false,
+            "sortable" => true,
+            "visible" => false,
+            "title" => trans('admin/hardware/table.checkout_date'),
+            "formatter" => "dateDisplayFormatter"
+        ], [
+            "field" => "nds",
+            "searchable" => false,
+            "sortable" => true,
+            "switchable" => true,
+            "title" => "НДС",
+            "visible" => false
+        ],
+        ];
+
+        // This looks complicated, but we have to confirm that the custom fields exist in custom fieldsets
+        // *and* those fieldsets are associated with models, otherwise we'll trigger
+        // javascript errors on the bootstrap tables side of things, since we're asking for properties
+        // on fields that will never be passed through the REST API since they're not associated with
+        // models. We only pass the fieldsets that pertain to each asset (via their model) so that we
+        // don't junk up the REST API with tons of custom fields that don't apply
+
+
+        return json_encode($layout);
+    }
 
 
     /**
@@ -350,7 +523,7 @@ class AssetPresenter extends Presenter
      */
     public function nameUrl()
     {
-        return (string) link_to_route('hardware.show', e($this->name), $this->id);
+        return (string)link_to_route('hardware.show', e($this->name), $this->id);
     }
 
     public function modelUrl()
@@ -377,7 +550,7 @@ class AssetPresenter extends Presenter
         }
         $url = config('app.url');
         if (!empty($imagePath)) {
-            $imagePath = '<img src="'.$url.'/uploads/assets/'.$imagePath.' height="50" width="50" alt="'.$imageAlt.'">';
+            $imagePath = '<img src="' . $url . '/uploads/assets/' . $imagePath . ' height="50" width="50" alt="' . $imageAlt . '">';
         }
         return $imagePath;
     }
@@ -395,7 +568,7 @@ class AssetPresenter extends Presenter
             $imagePath = $this->model->image;
         }
         if (!empty($imagePath)) {
-            return config('app.url').'/uploads/assets/'.$imagePath;
+            return config('app.url') . '/uploads/assets/' . $imagePath;
         }
         return $imagePath;
     }
@@ -409,7 +582,7 @@ class AssetPresenter extends Presenter
 
         if (empty($this->model->name)) {
             if (isset($this->model->model)) {
-                return $this->model->model->name.' ('.$this->model->asset_tag.')';
+                return $this->model->model->name . ' (' . $this->model->asset_tag . ')';
             }
             return $this->model->asset_tag;
         }
@@ -429,13 +602,14 @@ class AssetPresenter extends Presenter
         }
 
         if ($this->asset_tag) {
-            $str .= ' ('.$this->model->asset_tag.')';
+            $str .= ' (' . $this->model->asset_tag . ')';
         }
         if ($this->model->model) {
-            $str .= ' - '.$this->model->model->name;
+            $str .= ' - ' . $this->model->model->name;
         }
         return $str;
     }
+
     /**
      * Returns the date this item hits EOL.
      * @return false|string
@@ -443,7 +617,7 @@ class AssetPresenter extends Presenter
     public function eol_date()
     {
 
-        if (( $this->purchase_date ) && ( $this->model->model ) && ($this->model->model->eol) ) {
+        if (($this->purchase_date) && ($this->model->model) && ($this->model->model->eol)) {
             $date = date_create($this->purchase_date);
             date_add($date, date_interval_create_from_date_string($this->model->model->eol . ' months'));
             return date_format($date, 'Y-m-d');
@@ -459,8 +633,8 @@ class AssetPresenter extends Presenter
     {
 
         $today = date("Y-m-d");
-        $d1    = new DateTime($today);
-        $d2    = new DateTime($this->eol_date());
+        $d1 = new DateTime($today);
+        $d2 = new DateTime($this->eol_date());
 
         if ($this->eol_date() > $today) {
             $interval = $d2->diff($d1);
@@ -511,7 +685,8 @@ class AssetPresenter extends Presenter
      * (if not deployed:)
      * Another Status Label
      */
-    public function fullStatusText() {
+    public function fullStatusText()
+    {
         // Make sure the status is valid
         if ($this->assetstatus) {
 
@@ -520,7 +695,7 @@ class AssetPresenter extends Presenter
 
                 // If it's assigned and not set to the default "ready to deploy" status
                 if ($this->assetstatus->name != trans('general.ready_to_deploy')) {
-                    return trans('general.deployed'). ' (' . $this->model->assetstatus->name.')';
+                    return trans('general.deployed') . ' (' . $this->model->assetstatus->name . ')';
                 }
 
                 // If it's assigned to the default "ready to deploy" status, just

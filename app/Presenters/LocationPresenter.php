@@ -34,14 +34,28 @@ class LocationPresenter extends Presenter
                 "title" => "Bitrix id",
                 "visible" => true,
                 "formatter"=>"bitrixIdLocationFormatter"
-            ],
-            [
+            ],[
+                "field" => "pult_id",
+                "searchable" => false,
+                "sortable" => true,
+                "switchable" => true,
+                "title" => "Pult id",
+                "visible" => true,
+            ], [
                 "field" => "name",
                 "searchable" => true,
                 "sortable" => true,
                 "title" => trans('admin/locations/table.name'),
                 "visible" => true,
                 "formatter" => "locationsLinkFormatter"
+            ],
+            [
+                "field" => "sklad",
+                "searchable" => true,
+                "sortable" => true,
+                "title" => "Склад",
+                "visible" => true,
+                "formatter" => "checkFormatter"
             ],
             [
                 "field" => "image",

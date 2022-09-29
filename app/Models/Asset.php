@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Exceptions\CheckoutNotAllowed;
 use App\Http\Traits\UniqueSerialTrait;
 use App\Http\Traits\UniqueUndeletedTrait;
+use App\MassOperation;
 use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
 use AssetPresenter;
@@ -32,6 +33,7 @@ class Asset extends Depreciable
     const LOCATION = 'location';
     const ASSET = 'asset';
     const USER = 'user';
+    const CONTRACT = 'contract';
 
     const ACCEPTANCE_PENDING = 'pending';
     /**
@@ -104,6 +106,7 @@ class Asset extends Depreciable
         'company_id',
         'image',
         'location_id',
+        'contract_id',
         'model_id',
         'name',
         'notes',
@@ -203,6 +206,31 @@ class Asset extends Depreciable
         return false;
     }
 
+    public function availableForSell()
+    {
+        if (
+            (empty($this->assigned_to)) &&
+            (empty($this->deleted_at)) &&
+            (($this->assetstatus) && ($this->assetstatus->deployable == 1))) {
+            return true;
+        }
+        return false;
+    }
+    public function availableForCloseSell()
+    {
+        $status = Statuslabel::where('name', 'Выдано')->first();
+        if ($this->status_id == $status->id){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    public function mass_operations()
+    {
+        return $this->belongsToMany(MassOperation::class);
+    }
+
     public function availableForReview()
     {
         $status = Statuslabel::where('name', 'Ожидает проверки')->first();
@@ -226,7 +254,20 @@ class Asset extends Depreciable
      * @return bool
      */
     //FIXME: The admin parameter is never used. Can probably be removed.
-    public function checkOut($target, $admin = null, $checkout_at = null, $expected_checkin = null, $note = null, $name = null, $location = null,$quality= null,$depreciable_cost= null,$photos_json= null)
+    public function checkOut(
+        $target,
+        $admin = null,
+        $checkout_at = null,
+        $expected_checkin = null,
+        $note = null,
+        $name = null,
+        $location = null,
+        $quality= null,
+        $depreciable_cost= null,
+        $photos_json= null,
+        $biometric_uid = null,
+        $biometric_result = null
+    )
     {
         if (!$target) {
             return false;
@@ -284,7 +325,7 @@ class Asset extends Depreciable
             }
         }
         if ($this->save()) {
-            $this->logCheckout($note, $target,$changed,$photos_json);
+            $this->logCheckout($note, $target,$changed,$photos_json,$biometric_uid,$biometric_result);
             $this->increment('checkout_counter', 1);
             return true;
         }
@@ -573,6 +614,13 @@ class Asset extends Depreciable
         return $this->belongsTo('\App\Models\Location', 'location_id');
     }
 
+    public function contract()
+    {
+        return $this->belongsTo('\App\Models\Contract', 'contract_id');
+    }
+
+
+
 
     /**
      * Get auto-increment
@@ -640,6 +688,14 @@ class Asset extends Depreciable
     {
         if (($this->model) && ($this->model->category)) {
             return $this->model->category->require_acceptance;
+        }
+
+    }
+
+    public function requireBiometricConfirmation()
+    {
+        if (($this->model) && ($this->model->category)) {
+            return $this->model->category->require_biometric_confirmation;
         }
 
     }
@@ -1454,5 +1510,17 @@ class Asset extends Depreciable
     public function user_verified()
     {
         return $this->belongsTo('\App\Models\User', 'user_verified_id');
+    }
+
+
+    public function setStatusAfterPaid()
+    {
+        $status_in_purchase = Statuslabel::where('name', 'В закупке')->first();
+        $status_inventory_wait = Statuslabel::where('name', 'Ожидает инвентаризации')->first();
+
+        // меняем статус на Ожидает инвентаризации, только если актив в статусе "В закупке"
+        if ($this->status_id == $status_in_purchase->id) {
+            $this->status_id = $status_inventory_wait->id;
+        }
     }
 }

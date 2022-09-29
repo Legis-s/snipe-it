@@ -10,6 +10,7 @@ use App\Http\Transformers\LocationsTransformer;
 use App\Http\Transformers\SelectlistTransformer;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 
 class LocationsController extends Controller
 {
@@ -45,6 +46,8 @@ class LocationsController extends Controller
             'locations.image',
             'locations.currency',
             'locations.notes',
+            'locations.sklad',
+            'locations.pult_id',
         ])->withCount('assignedAssets as assigned_assets_count')
         ->withCount('assets as assets_count')
         ->withCount('users as users_count');
@@ -160,7 +163,6 @@ class LocationsController extends Controller
 
 
         $location->fill($request->all());
-
         if ($location->save()) {
             return response()->json(
                 Helper::formatStandardApiResponse(
@@ -223,11 +225,16 @@ class LocationsController extends Controller
     public function selectlist(Request $request)
     {
 
+        $user = Auth::user();
+        $favorite_location = $user->favoriteLocation;
+
         $locations = Location::select([
             'locations.id',
             'locations.name',
             'locations.parent_id',
             'locations.image',
+            'locations.sklad',
+            'locations.contract_number',
         ]);
 
         $page = 1;
@@ -236,19 +243,43 @@ class LocationsController extends Controller
         }
 
         if ($request->filled('search')) {
-            $locations = $locations->where('locations.name', 'LIKE', '%'.$request->input('search').'%');
+            $locations = $locations->where('locations.name', 'LIKE', '%'.$request->input('search').'%')
+            ->orWhere('locations.contract_number', 'LIKE', '%'.$request->input('search').'%');
         }
 
-        $locations = $locations->orderBy('name', 'ASC')->get();
+        $locations = $locations->orderBy('sklad', 'desc');
+        $locations = $locations->orderBy('name', 'ASC');
+        $locations = $locations->get();
 
         $locations_with_children = [];
+
+        $locations_new = collect([]);
+        if ($favorite_location){
+
+            foreach ($locations as $location) {
+                if ($location->id == $favorite_location->id){
+                    $locations_new->prepend($location);
+                }else{
+                    $locations_new->push($location);
+                }
+            }
+            $locations = $locations_new;
+        }
 
         foreach ($locations as $location) {
             if (!array_key_exists($location->parent_id, $locations_with_children)) {
                 $locations_with_children[$location->parent_id] = [];
             }
             $locations_with_children[$location->parent_id][] = $location;
+            if ($location->sklad){
+                $location->name =   "[Склад] ".$location->name;
+            }
+            if ($location->contract_number){
+                $location->name =  $location->name ."  " .$location->contract_number;
+            }
         }
+
+
 
         if ($request->filled('search')) {
             $locations_formatted =  $locations;

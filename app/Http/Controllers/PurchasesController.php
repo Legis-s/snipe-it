@@ -10,20 +10,44 @@ use App\Models\AssetModel;
 use App\Models\Company;
 use App\Models\Purchase;
 use App\Models\Location;
+use App\Models\Sale;
 use App\Models\Statuslabel;
+use App\Models\Supplier;
 use App\Models\User;
 use DateTime;
+use Facebook\WebDriver\AbstractWebDriverCheckboxOrRadio;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Crypt;
+use Illuminate\Support\Facades\DB;
 
 class PurchasesController extends Controller
 {
     public function index()
     {
-        // Grab all the locations
+
+        $purchases_d = DB::table('purchases')
+            ->select('user_id')
+            ->distinct()
+            ->get();
+        $ids = [];
+        foreach ($purchases_d as &$value) {
+            array_push($ids, $value->user_id);
+        }
+
+        $purchases_s = DB::table('purchases')
+            ->select('supplier_id')
+            ->distinct()
+            ->get();
+        $ids_s = [];
+        foreach ($purchases_s as &$value) {
+            array_push($ids_s, $value->supplier_id);
+        }
+
+        $users = User::find($ids);
+        $suppliers = Supplier::find($ids_s);
         $this->authorize('view', Location::class);
-       return view('purchases/index');
+       return view('purchases/index', compact('users','suppliers'));
     }
 
     /**
@@ -40,9 +64,14 @@ class PurchasesController extends Controller
         $this->authorize('view', Location::class);
 
         $purchase = Purchase::find($purchaseId);
-
+        $old = false;
         if (isset($purchase->id)) {
-            return view('purchases/view', compact('purchase'));
+            $consumables_json = $purchase->consumables_json;
+            $consumables = json_decode($consumables_json, true);
+            if (count($consumables)>0 && isset($consumables[0]["category_id"])){
+                $old = true;
+            }
+            return view('purchases/view', compact('purchase',"old"));
         }
 
         return redirect()->route('purchases.index')->with('error', trans('admin/locations/message.does_not_exist'));
@@ -85,9 +114,11 @@ class PurchasesController extends Controller
         $purchase->comment             = $request->input('comment');
         $purchase->consumables_json    = $request->input('consumables');
         $purchase->assets_json         = $request->input('assets');
-        $purchase->status             = "inprogress";
+        $purchase->sales_json         = $request->input('sales');
+        $purchase->delivery_cost         = $request->input('delivery_cost');
         $purchase->user_id             = Auth::id();
         $currency_id = $request->input('currency_id');
+        $purchase->setStatusInprogress();
 
         switch ($currency_id) {
             case 341:
@@ -102,6 +133,7 @@ class PurchasesController extends Controller
         }
         $assets = json_decode($request->input('assets'), true);
         $consumables = json_decode($request->input('consumables'), true);
+        $sales = json_decode($request->input('sales'), true);
         $purchase = $request->handleFile($purchase, public_path().'/uploads/purchases');
         $status = Statuslabel::updateOrCreate(
             ['name' =>"В закупке"],
@@ -124,6 +156,10 @@ class PurchasesController extends Controller
                     $nds = $value["nds"];
                     $warranty = $value["warranty"];
                     $quantity = $value["quantity"];
+                    $location_id = null;
+                    if (isset($value["location_id"]) && $value["location_id"]>0) {
+                        $location_id = $value["location_id"];
+                    }
                     $data_list .= "[".$value["id"]."] ".$model." - Количество: ".$quantity." Цена: ".$purchase_cost."\n";
 
                     $dt = new DateTime();
@@ -145,6 +181,8 @@ class PurchasesController extends Controller
                         $asset->supplier_id             = $purchase->supplier_id;
                         $asset->purchase_id             = $purchase->id;
                         $asset->user_id                 = Auth::id();
+                        $asset->location_id            = $location_id;
+
                         $settings = \App\Models\Setting::getSettings();
                         if($asset->save()){
                             if ($settings->zerofill_count > 0) {
@@ -165,12 +203,64 @@ class PurchasesController extends Controller
             if (count($consumables)>0) {
                 $data_list .= "Компоненты:"."\n";
                 foreach ($consumables as &$consumable) {
-                    $name = $consumable["name"];
-                    $category_name= $consumable["category_name"];
+                    $consumable_name= $consumable["consumable"];
+                    $consumable_id = $consumable["consumable_id"];
                     $purchase_cost = $consumable["purchase_cost"];
                     $quantity = $consumable["quantity"];
-                    $data_list .= "[".$consumable["id"]."] ".$category_name." - ".$name." - Количество: ".$quantity." Цена: ".$purchase_cost."\n";
+                    $data_list .= "[".$consumable["id"]."] ".$consumable_name." - Количество: ".$quantity." Цена: ".$purchase_cost."\n";
                 }
+            }
+            if (count($sales)>0) {
+                $asset_tag = Asset::autoincrement_asset();
+                $data_list .= "Активы на продажу:"."\n";
+                foreach ($sales as &$value) {
+                    $model= $value["model"];
+                    $model_id = $value["model_id"];
+                    $purchase_cost = $value["purchase_cost"];
+                    $nds = $value["nds"];
+//                    $warranty = $value["warranty"];
+                    $quantity = $value["quantity"];
+                    $data_list .= "[".$value["id"]."] ".$model." - Количество: ".$quantity." Цена: ".$purchase_cost."\n";
+                    $location_id = null;
+                    if (isset($value["location_id"]) && $value["location_id"]>0) {
+                        $location_id = $value["location_id"];
+                    }
+                    $dt = new DateTime();
+                    for ($i = 1; $i <= $quantity; $i++) {
+                        $sale = new Sale();
+                        $sale->model()->associate(AssetModel::find((int) $model_id));
+                        $sale->asset_tag               = $asset_tag;
+                        $sale->model_id                = $model_id;
+                        $sale->order_number            = $purchase->invoice_number;
+                        $sale->status_id               = $status->id;
+                        $sale->purchase_cost           = $purchase_cost;
+                        $sale->nds                     = $nds;
+                        $sale->purchase_date           = $dt->format('Y-m-d H:i:s');
+                        $sale->supplier_id             = $purchase->supplier_id;
+                        $sale->purchase_id             = $purchase->id;
+                        $sale->user_id                 = Auth::id();
+                        $sale->location_id            = $location_id;
+                        $settings = \App\Models\Setting::getSettings();
+                        if($sale->save()){
+                            if ($settings->zerofill_count > 0) {
+                                $asset_tag_digits = preg_replace('/\D/', '', $asset_tag);
+                                $asset_tag = preg_replace('/^0*/', '', $asset_tag_digits);
+                                $asset_tag++;
+                                $asset_tag =  $settings->auto_increment_prefix.Asset::zerofill($asset_tag, $settings->zerofill_count);
+                            }else{
+                                $asset_tag = $settings->auto_increment_prefix.$asset_tag;
+                            }
+                        }else{
+                            dd($sale->getErrors());
+                        }
+                    }
+                }
+                $data_list .="\n";
+            }
+
+
+            if ($purchase->delivery_cost > 0) {
+                $data_list .= "Стоимость доставки:  ". $purchase->delivery_cost;
             }
 
             $file_data = file_get_contents(public_path().'/uploads/purchases/'.$purchase->invoice_file);
@@ -224,7 +314,7 @@ class PurchasesController extends Controller
                 $response = $client->request('POST', 'https://bitrix.legis-s.ru/rest/'.$user->bitrix_id.'/'.$raw_bitrix_token.'/lists.element.add.json/',$params);
 
             }else{
-                $response = $client->request('POST', 'https://bitrix.legis-s.ru/rest/1/rzrrat22t46msv7v/lists.element.add.json/',$params);
+                $response = $client->request('POST', 'https://bitrix.legis-s.ru/rest/722/q7e6fc3qrkiok64x/lists.element.add.json/',$params);
 
             }
             $response = $response->getBody()->getContents();
@@ -262,5 +352,29 @@ class PurchasesController extends Controller
     }
 
 
+    /**
+     * Returns a view that presents a form to clone an asset.
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @param int $purchaseId
+     * @since [v1.0]
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function getClone($purchaseId = null)
+    {
+        // Check if the asset exists
+        if (is_null($purchase_to_clone = Purchase::find($purchaseId))) {
+            // Redirect to the asset management page
+            return redirect()->route('purchases.index')->with('error', trans('admin/hardware/message.does_not_exist'));
+        }
+
+        $this->authorize('create', $purchase_to_clone);
+
+        $purchase = clone $purchase_to_clone;
+        $purchase->id = null;
+
+        return view('purchases/edit')
+            ->with('item', $purchase);
+    }
 
 }

@@ -10,6 +10,7 @@ use App\Http\Transformers\LocationsTransformer;
 use App\Models\Asset;
 use App\Models\Consumable;
 use App\Models\Location;
+use App\Models\Sale;
 use App\Models\Statuslabel;
 use DateTime;
 use Illuminate\Http\Request;
@@ -60,16 +61,27 @@ class PurchasesController extends Controller
                 'purchases.deleted_at',
                 'purchases.bitrix_task_id',
                 'purchases.consumables_json',
+                'purchases.delivery_cost',
             ])->withCount([
                 'consumables as consumables_count',
                 'assets as assets_count',
                 'assets as assets_count_ok' => function (Builder $query) use ($status) {
                     $query->where('status_id', $status->id);
-                }
+                },
             ]);
 
         if ($request->filled('search')) {
             $purchases = $purchases->TextSearch($request->input('search'));
+
+        }
+        if ($request->filled('user_id')) {
+            $purchases->where('user_id', '=', $request->input('user_id'));
+        }
+        if ($request->filled('status')) {
+            $purchases->where('status', '=', $request->input('status'));
+        }
+        if ($request->filled('supplier')) {
+            $purchases->where('supplier_id', '=', $request->input('supplier'));
         }
 
         $allowed_columns =
@@ -100,6 +112,49 @@ class PurchasesController extends Controller
         return (new PurchasesTransformer)->transformPurchases($purchases, $total);
     }
 
+
+    /**
+     * Display the specified resource.
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v4.0]
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        $this->authorize('view', Purchase::class);
+        $status = Statuslabel::where('name', 'Доступные')->first();
+        $purchise = Purchase::with('supplier', 'assets', 'invoice_type', 'legal_person','user','consumables')
+            ->select([
+                'purchases.id',
+                'purchases.invoice_number',
+                'purchases.invoice_file',
+                'purchases.bitrix_id',
+                'purchases.final_price',
+                'purchases.status',
+                'purchases.supplier_id',
+                'purchases.legal_person_id',
+                'purchases.invoice_type_id',
+                'purchases.comment',
+                'purchases.currency',
+                'purchases.user_id',
+                'purchases.user_verified_id',
+                'purchases.created_at',
+                'purchases.deleted_at',
+                'purchases.bitrix_task_id',
+                'purchases.consumables_json',
+            ])->withCount([
+                'consumables as consumables_count',
+                'assets as assets_count',
+                'assets as assets_count_ok' => function (Builder $query) use ($status) {
+                    $query->where('status_id', $status->id);
+                },
+            ])
+            ->findOrFail($id);
+        return (new PurchasesTransformer)->transformPurchase($purchise,true);
+    }
+
     /**
      * Display a listing of the resource.
      * @return \Illuminate\Http\Response
@@ -108,51 +163,9 @@ class PurchasesController extends Controller
     {
         $this->authorize('view', Purchase::class);
         $purchase = Purchase::findOrFail($purchaseId);
-        // меняем статус на "В процессе инвентаризации", только если еще её не было у закупки
-        if ($purchase->status != "review" && $purchase->status != "finished") {
-            $purchase->status = "inventory";
-        }
+        $purchase->setStatusPaid();
 
-        $purchase->bitrix_result_at = new DateTime();
         if ($purchase->save()) {
-            $assets = Asset::where('purchase_id', $purchase->id)->get();
-            // меняем статус у активов только если закупка еще не обработана
-            if (count($assets) > 0) {
-                $status_in_purchase = Statuslabel::where('name', 'В закупке')->first();
-                $status_inventory_wait = Statuslabel::where('name', 'Ожидает инвентаризации')->first();
-                foreach ($assets as &$value) {
-
-                    // меняем статус на Ожидает инвентаризации, только если актив в статусе "В закупке"
-                    if ($value->status_id == $status_in_purchase->id) {
-                        $value->status_id = $status_inventory_wait->id;
-                        $value->save();
-                    }
-                }
-            }else{
-                if ($purchase->status != "finished") {
-                    $purchase->status = "review";
-                    $purchase->save();
-                }
-            }
-//            $consumables_server = Consumable::where('purchase_id', $purchase->id)->get();
-//            $consumables = json_decode($purchase->consumables_json, true);
-//            if ($purchase->consumables_json != null && count($consumables) > 0 && count($consumables_server) == 0) {
-//                foreach ($consumables as &$consumable_new) {
-//                    $consumable_server = new Consumable();
-//                    $consumable_server->name = $consumable_new["name"];
-//                    $consumable_server->category_id = $consumable_new["category_id"];
-////                    $consumable_server->location_id = 1;
-////                    $consumable_server->company_id = $consumable_new["company_id"];
-//                    $consumable_server->order_number = $purchase->id;
-//                    $consumable_server->manufacturer_id = $consumable_new["manufacturer_id"];
-//                    $consumable_server->model_number = $consumable_new["model_number"];
-//                    $consumable_server->purchase_date = $purchase->created_at;
-//                    $consumable_server->purchase_cost = Helper::ParseFloat($consumable_new["purchase_cost"]);
-//                    $consumable_server->qty = Helper::ParseFloat($consumable_new["quantity"]);
-//                    $consumable_server->purchase_id = $purchase->id;
-//                    $consumable_server->save();
-//                }
-//            }
             return response()->json(
                 Helper::formatStandardApiResponse(
                     'success',
@@ -198,11 +211,12 @@ class PurchasesController extends Controller
                     $consumable_server = new Consumable();
                     $consumable_server->name = $consumable_new["name"];
                     $consumable_server->category_id = $consumable_new["category_id"];
-//                    $consumable_server->location_id = 1;
-//                    $consumable_server->company_id = $consumable_new["company_id"];
+                    if(!empty($consumable_new["model_id"])) {
+                        $consumable_server->model_id = $consumable_new["model_id"];
+                    }
                     $consumable_server->order_number = $purchase->id;
                     $consumable_server->manufacturer_id = $consumable_new["manufacturer_id"];
-                    $consumable_server->model_number = $consumable_new["model_number"];
+//                    $consumable_server->model_number = $consumable_new["model_number"];
                     $consumable_server->purchase_date = $purchase->created_at;
                     $consumable_server->purchase_cost = Helper::ParseFloat($consumable_new["purchase_cost"]);
                     $consumable_server->qty = Helper::ParseFloat($consumable_new["quantity"]);
@@ -290,6 +304,12 @@ class PurchasesController extends Controller
                 $value->status_id = $status->id;
                 $value->save();
             }
+            $sales = Sale::where('purchase_id', $purchase->id)->get();
+            foreach ($sales as &$value) {
+                $value->status_id = $status->id;
+                $value->save();
+            }
+
             return response()->json(
                 Helper::formatStandardApiResponse(
                     'success',
@@ -325,7 +345,7 @@ class PurchasesController extends Controller
             $response = $client->request('POST', 'https://bitrix.legis-s.ru/rest/'.$user->bitrix_id.'/'.$raw_bitrix_token.'/lists.element.add.json/',$params);
 
         }else{
-            $response = $client->request('POST', 'https://bitrix.legis-s.ru/rest/1/rzrrat22t46msv7v/lists.element.add.json/',$params);
+            $response = $client->request('POST', 'https://bitrix.legis-s.ru/rest/722/q7e6fc3qrkiok64x/lists.element.add.json/',$params);
         }
         $response = $response->getBody()->getContents();
         $bitrix_result = json_decode($response, true);

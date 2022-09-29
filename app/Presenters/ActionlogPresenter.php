@@ -51,13 +51,16 @@ class ActionlogPresenter extends Presenter
             $itemicon  = 'fa fa-floppy-o';
         } elseif ($this->itemType()=="component") {
             $itemicon  = 'fa fa-hdd-o';
-        } 
+        } elseif ($this->itemType()=="sale") {
+            $itemicon  = 'fa fa-usd';
+        }
 
         return $itemicon;
     }
 
 
     public function actionType() {
+
         return mb_strtolower(trans('general.'.str_replace(' ', '_', $this->action_type)));
     }
 

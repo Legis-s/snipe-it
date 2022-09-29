@@ -31,7 +31,7 @@ class Category extends SnipeModel
     */
     public $rules = array(
         'user_id' => 'numeric|nullable',
-        'name'   => 'required|min:1|max:255|unique_undeleted',
+        'name'   => 'required|min:1|max:255',
         'require_acceptance'   => 'boolean',
         'use_default_eula'   => 'boolean',
         'lifetime'      => 'integer|nullable',
@@ -61,6 +61,7 @@ class Category extends SnipeModel
         'eula_text',
         'name',
         'require_acceptance',
+        'require_biometric_confirmation',
         'use_default_eula',
         'lifetime',
         'user_id',

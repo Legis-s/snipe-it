@@ -1,6 +1,7 @@
 <?php
 namespace App\Models;
 
+use App\MassOperation;
 use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -67,7 +68,6 @@ class Consumable extends SnipeModel
         'purchase_date',
         'qty',
         'requestable',
-        'consumables_json'
     ];
 
     use Searchable;
@@ -89,7 +89,10 @@ class Consumable extends SnipeModel
         'company'      => ['name'],
         'location'     => ['name'],  
         'manufacturer' => ['name'],
-    ];     
+        'model' => ['name', 'model_number'],
+        'model.category' => ['name'],
+        'model.manufacturer' => ['name'],
+    ];
 
     public function setRequestableAttribute($value)
     {
@@ -128,6 +131,11 @@ class Consumable extends SnipeModel
     public function category()
     {
         return $this->belongsTo('\App\Models\Category', 'category_id');
+    }
+
+    public function mass_operations()
+    {
+        return $this->belongsToMany(MassOperation::class);
     }
 
     /**
@@ -196,6 +204,7 @@ class Consumable extends SnipeModel
     public function numRemaining()
     {
         $consumable = ConsumableAssignment::where('consumable_id', $this->id)
+            ->whereIn("type",["sold", "issued"])
             ->get();
         $checkedout = 0 ;
         foreach ($consumable as &$consumabl) {
@@ -264,4 +273,34 @@ class Consumable extends SnipeModel
         return $this->belongsTo('\App\Models\Purchase');
     }
 
+    public function model()
+    {
+        return $this->belongsTo('\App\Models\AssetModel', 'model_id')->withTrashed();
+    }
+
+    /**
+     * Query builder scope to search on text, including catgeory and manufacturer name
+     *
+     * @param  Illuminate\Database\Query\Builder  $query  Query builder instance
+     * @param  text                              $search      Search term
+     *
+     * @return Illuminate\Database\Query\Builder          Modified query builder
+     */
+    public function scopeSearchByManufacturerOrCat($query, $search)
+    {
+
+        return $query->where('name', 'LIKE', "%$search%")
+            ->orWhere('model_number', 'LIKE', "%$search%")
+            ->orWhere(function ($query) use ($search) {
+                $query->whereHas('category', function ($query) use ($search) {
+                    $query->where('categories.name', 'LIKE', '%'.$search.'%');
+                });
+            })
+            ->orWhere(function ($query) use ($search) {
+                $query->whereHas('manufacturer', function ($query) use ($search) {
+                    $query->where('manufacturers.name', 'LIKE', '%'.$search.'%');
+                });
+            });
+
+    }
 }

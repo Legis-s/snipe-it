@@ -152,14 +152,45 @@ class InventoriesController extends Controller
     public function store(Request $request)
     {
         $data = $request->all();
-        $location = Location::where('bitrix_id',$data["bitrix_id"] )->firstOrFail();
+        if (isset($data['bitrix_id'])){
+            $location = Location::where('bitrix_id',$data["bitrix_id"] )->firstOrFail();
+        }elseif (isset($data['location_id'])){
+            $location = Location::where('id',$data["location_id"] )->firstOrFail();
+        }else{
+            return response()->json(Helper::formatStandardApiResponse('error'));
+        }
 
-        $assets = Company::scopeCompanyables(Asset::select('assets.*'),"company_id","assets")
-            ->with('location', 'assetstatus', 'assetlog', 'company', 'defaultLoc','assignedTo',
-                'model.category', 'model.manufacturer', 'model.fieldset','supplier');
+
+        $assets = Asset::with('assignedTo','model',
+                'model.category', 'model.manufacturer', 'assetstatus')->select([
+            'assets.id',
+            'assets.name',
+            'assets.notes',
+            'assets.asset_tag',
+            'assets.status_id',
+            'assets.model_id',
+            'assets.location_id',
+            'assets.serial',
+            'assets.created_at',
+            'assets.updated_at',
+            'assets.deleted_at',
+        ]);
+
+//        $assets = Company::scopeCompanyables(Asset::select('assets.*'),"company_id","assets")
+//            ->with('location', 'assetstatus', 'assetlog', 'company', 'defaultLoc','assignedTo',
+//                'model.category', 'model.manufacturer', 'model.fieldset','supplier');
         $assets->where('assets.location_id', '=', $location->id);
-        $assets= $assets->get();
-//        $this->authorize('create', Location::class);
+        $assets->whereNull('assets.deleted_at');
+
+        $assets->whereHas('assetstatus', function ($query) {
+            $query->where('deployable', '=', 1)
+                ->where('pending', '=', 0)
+                ->where('archived', '=', 0);
+        });
+
+
+        $assets = $assets->get();
+
         $inventory = new Inventory;
         $inventory->name = $location->name ."_".date("d.m.Y H:i:s");
         $inventory->location_id = $location->id;
@@ -190,7 +221,7 @@ class InventoriesController extends Controller
                 $inventory_item->save();
             }
 
-            return response()->json(Helper::formatStandardApiResponse('success', (new InventoriesTransformer)->transformInventory($inventory,true), trans('admin/locations/message.create.success')));
+            return response()->json(Helper::formatStandardApiResponse('success', (new InventoriesTransformer)->transformInventory($inventory,true), "Инвентаризация успешно создана"));
         }
         return response()->json(Helper::formatStandardApiResponse('error', null, $inventory->getErrors()));
     }

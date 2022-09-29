@@ -27,6 +27,16 @@ return array(
         )
     ),
 
+    'Review' => array(
+        array(
+            'permission' => 'review',
+            'label'      => '',
+            'note'       => 'Determines whether the user has access to most aspects of the admin. ',
+            'display'    => true,
+        )
+    ),
+
+
     'CSV Import' => array(
         array(
             'permission' => 'import',
@@ -107,8 +117,39 @@ return array(
         ),
 
         array(
-            'permission' => 'assets.review',
-            'label'      => 'Review',
+            'permission' => 'assets.sell',
+            'label'      => 'Sell ',
+            'note'       => 'Allows the user to sell',
+            'display'    => true,
+        ),
+
+
+    ),
+
+
+
+    'Sales' => array(
+        array(
+            'permission' => 'sales.view',
+            'label'      => 'View ',
+            'note'       => '',
+            'display'    => true,
+        ),
+        array(
+            'permission' => 'sales.create',
+            'label'      => 'Create ',
+            'note'       => '',
+            'display'    => true,
+        ),
+        array(
+            'permission' => 'sales.edit',
+            'label'      => 'Edit  ',
+            'note'       => '',
+            'display'    => true,
+        ),
+        array(
+            'permission' => 'sales.delete',
+            'label'      => 'Delete ',
             'note'       => '',
             'display'    => true,
         ),

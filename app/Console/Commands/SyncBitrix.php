@@ -2,15 +2,19 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Contract;
 use App\Models\CustomField;
 use App\Models\Supplier;
 use App\Models\LegalPerson;
 use App\Models\InvoiceType;
+use Exception;
+//use False\True;
 use Illuminate\Console\Command;
 use App\Models\Asset;
 use App\Models\Location;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
+use stdClass;
 
 class SyncBitrix extends Command
 {
@@ -110,23 +114,51 @@ class SyncBitrix extends Command
                 }
                 continue;
             }
-            if($value["TABEL_ID"] && $value["UF_TYPE"] == 455 || $value["UF_TYPE"] == 739 || $value["ID"] == 2956){
+            if(($value["TABEL_ID"] && $value["UF_TYPE"] == 455) || $value["UF_TYPE"] == 739 || $value["UF_TYPE"] == 457 || $value["UF_TYPE"] == 456 || $value["UF_TYPE"] == 741 || $value["ID"] == 2956 || $value["UF_TYPE"] == 742){
                 $count++;
-
                 $bitrix_user =  $value["ASSIGNED_BY_ID"];
                 /** @var User $sklad_user */
                 $sklad_user = User::where('bitrix_id', $bitrix_user)->first();
-                $location = Location::updateOrCreate(
-                    ['bitrix_id' =>  $value["ID"]],
-                    [
-                        'name' => $value["NAME"],
-                        'city' => $value["ADDRESS_CITY"],
-                        'address' => $value["ADDRESS"],
-                        'address2' => $value["ADDRESS_2"],
-                        'coordinates' => $value["UF_MAP"],
-                        'active' => true
-                    ]
-                );
+                if  ($value["UF_TYPE"] == 456){
+//                    print_r($value);
+                    $location = Location::updateOrCreate(
+                        ['bitrix_id' =>  $value["ID"]],
+                        [
+                            'name' => "[Пульт] ".$value["NAME"],
+                            'city' => $value["ADDRESS_CITY"],
+                            'address' => $value["ADDRESS"],
+                            'address2' => $value["ADDRESS_2"],
+                            'coordinates' => $value["UF_MAP"],
+                            'active' => true,
+                            'pult_id' => $value["UF_PULT_ID"],
+                        ]
+                    );
+                }else if ($value["UF_TYPE"] == 457) {
+                    $location = Location::updateOrCreate(
+                        ['bitrix_id' =>  $value["ID"]],
+                        [
+                            'name' => "[Тех. безопасность] ".$value["NAME"],
+                            'city' => $value["ADDRESS_CITY"],
+                            'address' => $value["ADDRESS"],
+                            'address2' => $value["ADDRESS_2"],
+                            'coordinates' => $value["UF_MAP"],
+                            'active' => true,
+                            'pult_id' => $value["UF_PULT_ID"],
+                        ]
+                    );
+                }else{
+                    $location = Location::updateOrCreate(
+                        ['bitrix_id' =>  $value["ID"]],
+                        [
+                            'name' => $value["NAME"],
+                            'city' => $value["ADDRESS_CITY"],
+                            'address' => $value["ADDRESS"],
+                            'address2' => $value["ADDRESS_2"],
+                            'coordinates' => $value["UF_MAP"],
+                            'active' => true
+                        ]
+                    );
+                }
                 if (!$sklad_user) {
                     print("Responsible at object '".$value["NAME"]."' [".$value["ID"]."] not found (Bitrix user id ".$bitrix_user.")\n");
                 }else{
@@ -193,6 +225,111 @@ class SyncBitrix extends Command
         print("Синхрониизтрованно ".$count." юр. лиц \n");
 
 
+        $response = $client->request('GET', 'https://bitrix.legis-s.ru/rest/1/rzrrat22t46msv7v/legis_crm.contracts.list?select[0]=UF_*&select[1]=*');
+        $response = $response->getBody()->getContents();
+        $bitrix_contracts = json_decode($response, true);
+        $bitrix_contracts = $bitrix_contracts["result"];
+        $count = 0 ;
+        foreach ($bitrix_contracts as &$value) {
+            $count++;
+            if ( $value["ID"] == "5354"){
+                print_r($value);
+            }
+            if ($value["STATUS_ID"]  == ""){
+                $value["STATUS_ID"] = "Пустой статус";
+            }
+            $contract = Contract::updateOrCreate(
+                ['bitrix_id' =>  $value["ID"]],
+                [
+                    'name' => $value["NAME"],
+                    'number' => $value["UF_NUMBER"],
+                    'status' => $value["STATUS_ID"],
+                    'type' => $value["TYPE_ID"],
+                    'date_start' => $value["DATE_START"],
+                    'date_end' => $value["DATE_END"],
+                    'assigned_by_id' => $value["ASSIGNED_BY_ID"],
+                ]
+            );
+            if ( is_array($value["UF_OBJECT"]) && count($value["UF_OBJECT"]) >0 && strlen($value["UF_NUMBER"])>0 ){
+                foreach ($value["UF_OBJECT"] as &$ufobj) {
+                    print("ufobj".$ufobj);
+                    $location = Location::where('bitrix_id', '=',  $ufobj)->first();
+                    if ($location){
+                        $cn = $location->contract_number;
+                        $pos      = strripos($cn, $value["UF_NUMBER"]);
+
+                        if ($pos === false) {
+                            $location->contract_number =  $location->contract_number ." , ". $value["UF_NUMBER"];
+                        }
+                        print($location->contract_number);
+
+                        $location->save();
+
+//                        if (strlen($cn)>0){
+//                            try {
+//                                $obj = json_decode($cn, true);
+//                                $add = true;
+//                                foreach ($obj as &$oneobj) {
+//                                    if ($oneobj["id"] ==$value["ID"]){
+//                                        $add = false;
+//                                    }
+//                                }
+//                                if ($add == true){
+//                                    $foo = new StdClass();
+//                                    $foo->id = $value["ID"];
+//                                    $foo->name = $value["UF_NUMBER"];
+//                                    array_push($obj,$foo);
+//                                }
+//                                $json = json_encode($obj);
+//                                $location->contract_number = $json;
+//                                $location->save();
+//                            }catch (Exception $e) {
+//                                $foo = new StdClass();
+//                                $foo->id = $value["ID"];
+//                                $foo->name = $value["UF_NUMBER"];
+//                                $json = json_encode([$foo]);
+//                                $location->contract_number = $json;
+//                                $location->save();
+//                            }
+//                        }else{
+//                            $foo = new StdClass();
+//                            $foo->id = $value["ID"];
+//                            $foo->name = $value["UF_NUMBER"];
+//                            $json = json_encode([$foo]);
+//                            $location->contract_number = $json;
+//                            $location->save();
+//                        }
+                    }
+                }
+//                $location = Location::where('bitrix_id', '=',  $value["UF_OBJECT"][0])->firstOrFail();
+//                if ($location){
+//                    $cn = $location->contract_number;
+//
+//                    try {
+//                        $obj = json_decode($cn);
+//                        if
+//
+//                    } catch (Exception $e) {
+//                        // handle exception
+//                    }
+//                }
+
+
+
+//                $location = Location::updateOrCreate(
+//                    ['bitrix_id' =>  $value["UF_OBJECT"][0]] ,
+//                    [
+//                        'contract_number' => $value["UF_NUMBER"]
+//                    ]
+//
+//                );
+//                $location->save();
+            }
+        }
+        print("Синхрониизтрованно ".$count." договоров \n");
+
+
+
         $response = $client->request('GET', 'https://bitrix.legis-s.ru/rest/1/rzrrat22t46msv7v/lists.element.get?IBLOCK_TYPE_ID=lists&IBLOCK_ID=166');
         $response = $response->getBody()->getContents();
         $bitrix_invoice_types = json_decode($response, true);
@@ -208,8 +345,10 @@ class SyncBitrix extends Command
                 ]
             );
 
+
         }
         print("Синхрониизтрованно ".$count." типов закупок \n");
+
 
         if (($this->option('output')=='all') || ($this->option('output')=='info')) {
             foreach ($output['info'] as $key => $output_text) {
