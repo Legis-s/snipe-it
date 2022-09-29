@@ -453,7 +453,7 @@
                     @endcan
 
                 @can('index', \App\Models\Asset::class)
-                    <li class="treeview{{ (Request::is('hardware*') ? ' active' : '') }}">
+                    <li class="treeview{{ (Request::is('hardware*') && !Request::is('hardware/bulk*')) ? ' active' : '' }}">
                         <a href="#"><i class="fa fa-barcode" aria-hidden="true"></i>
                             <span>{{ trans('general.assets') }}</span>
                             <i class="fa fa-angle-left pull-right"></i>
@@ -577,37 +577,37 @@
                         </ul>
                     </li>
                 @endcan
-{{--                    @can('view', \App\Models\License::class)--}}
-                    <li class="treeview{{ (Request::is('hardware/bulk*') ? ' active' : '') }}">
+                    @can('checkout', \App\Models\Asset::class)
+                    <li class="treeview{{ (Request::is('hardware/bulk*') || Request::is('massoperations')) ? ' active' : '' }}">
                         <a href="#"><i class="fa fa-th-list" aria-hidden="true"></i>
                             <span>{{ trans('general.mass_operations') }}</span>
                             <i class="fa fa-angle-left pull-right"></i>
                         </a>
                         <ul class="treeview-menu">
-
                             <li>
                                 <a href="{{ route('hardware/bulkcheckout') }}">
-                                    Выдача
+                                    {{ trans('general.checkouting') }}
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ url('hardware/bulkcheckin') }}">
-                                    Возврат
+                                    {{ trans('general.checkining') }}
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ url('hardware/bulksell') }}">
-                                    Продажа
+                                    {{ trans('general.selling') }}
                                 </a>
                             </li>
-{{--                        <li{!! (Request::is('licenses*') ? ' class="active"' : '') !!}>--}}
-{{--                            <a href="{{ route('massoperations') }}">--}}
-{{--                                <i class="fa fa-th-list"></i>--}}
-{{--                                <span>{{ trans('general.mass_operations') }}</span>--}}
-{{--                            </a>--}}
+                            <hr>
+                            <li>
+                                <a href="{{ route('massoperations') }}">
+                                    {{ trans('general.mo_history') }}
+                                </a>
+                            </li>
                         </ul>
                         </li>
-{{--                    @endcan--}}
+                    @endcan
                 @can('view', \App\Models\License::class)
                     <li{!! (Request::is('licenses*') ? ' class="active"' : '') !!}>
                         <a href="{{ route('licenses.index') }}">

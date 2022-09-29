@@ -229,5 +229,9 @@
         'login_enabled'         => 'Логин включен',
         'audit_due'             => 'Ожидают аудита',
         'audit_overdue'         => 'Аудит просрочен',
-        'mass_operations' => 'Массовые операции'
+        'mass_operations' => 'Массовые операции',
+        'selling' => 'Продажа',
+        'checkining' => 'Возврат',
+        'checkouting' => 'Выдача',
+        'mo_history' => 'Список операций'
     ];

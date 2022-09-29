@@ -331,12 +331,12 @@ class BulkAssetsController extends Controller
 
             $target = $this->determineCheckoutTarget();
 
-            if (!is_array($request->get('selected_assets'))) {
+            if (!is_array($request->get('selected_assets')) && !is_array($request->get('selected_consumables'))) {
                 return redirect()->route('hardware/bulkcheckout')->withInput()->with('error', trans('admin/hardware/message.checkout.no_assets_selected'));
             }
 
-            $asset_ids = array_filter($request->get('selected_assets'));
-            $consumbales_post = array_filter($request->get('selected_consumables'));
+            $asset_ids = is_array($request->get('selected_assets')) ? array_filter($request->get('selected_assets')) : [];
+            $consumbales_post = is_array($request->get('selected_consumables')) ? array_filter($request->get('selected_consumables')) : [];
             $consumbales_data = [];
             foreach ($consumbales_post as $consumbale) {
                 array_push($consumbales_data, explode(":", $consumbale));
@@ -558,13 +558,14 @@ class BulkAssetsController extends Controller
                 return redirect()->route('hardware/bulksell', ['purchase_bulk_id' => $request->get('purchase_bulk_id')])->withInput()->with('error', trans('admin/hardware/message.sell.no_date_selected'));
             }
 
-            if (!is_array($request->get('selected_assets'))) {
+            if (!is_array($request->get('selected_assets')) && !is_array($request->get('selected_consumables'))) {
                 return redirect()->route('hardware/bulksell', ['purchase_bulk_id' => $request->get('purchase_bulk_id')])->withInput()->with('error', trans('admin/hardware/message.sell.no_assets_selected'));
             }
 
             $admin = \Illuminate\Support\Facades\Auth::user();
             $target = $this->determineCheckoutTarget();
-            $asset_ids = array_filter($request->get('selected_assets'));
+            $asset_ids = is_array($request->get('selected_assets')) ? array_filter($request->get('selected_assets')) : [];
+            $consumbales_post = is_array($request->get('selected_consumables')) ? array_filter($request->get('selected_consumables')) : [];
 
             $consumbales_data = [];
             $consumbales_ids = [];
