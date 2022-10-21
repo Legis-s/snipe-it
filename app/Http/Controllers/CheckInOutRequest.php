@@ -42,6 +42,7 @@ trait CheckInOutRequest
         {
             case 'location':
                 $asset->location_id = $target->id;
+                $asset->rtd_location_id = $target->id;
                 break;
             case 'asset':
                 $asset->location_id = $target->rtd_location_id;
