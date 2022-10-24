@@ -32,7 +32,7 @@ class MapController extends Controller
             'locations.coordinates',
             'locations.bitrix_id',
             'locations.active',
-        ]) ->where('bitrix_id', '>', 0)
+        ]) ->where('pult_id', '=', null)
             ->withCount('assignedAssets as assigned_assets_count')
             ->withCount('assets as assets_count');
 
