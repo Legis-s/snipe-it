@@ -735,24 +735,24 @@
                                         </div>
                                     @endif
 
-                                    @if ($asset->defaultLoc)
-                                        <div class="row">
-                                            <div class="col-md-2">
-                                                <strong>
-                                                    {{ trans('admin/hardware/form.default_location') }}
-                                                </strong>
-                                            </div>
-                                            <div class="col-md-6">
-                                                @can('superuser')
-                                                    <a href="{{ route('locations.show', ['location' => $asset->defaultLoc->id]) }}">
-                                                        {{ $asset->defaultLoc->name }}
-                                                    </a>
-                                                @else
-                                                    {{ $asset->defaultLoc->name }}
-                                                @endcan
-                                            </div>
-                                        </div>
-                                    @endif
+{{--                                    @if ($asset->defaultLoc)--}}
+{{--                                        <div class="row">--}}
+{{--                                            <div class="col-md-2">--}}
+{{--                                                <strong>--}}
+{{--                                                    {{ trans('admin/hardware/form.default_location') }}--}}
+{{--                                                </strong>--}}
+{{--                                            </div>--}}
+{{--                                            <div class="col-md-6">--}}
+{{--                                                @can('superuser')--}}
+{{--                                                    <a href="{{ route('locations.show', ['location' => $asset->defaultLoc->id]) }}">--}}
+{{--                                                        {{ $asset->defaultLoc->name }}--}}
+{{--                                                    </a>--}}
+{{--                                                @else--}}
+{{--                                                    {{ $asset->defaultLoc->name }}--}}
+{{--                                                @endcan--}}
+{{--                                            </div>--}}
+{{--                                        </div>--}}
+{{--                                    @endif--}}
 
                                     @if ($asset->created_at!='')
                                         <div class="row">
