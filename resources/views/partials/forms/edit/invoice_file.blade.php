@@ -10,7 +10,7 @@
         </label>
         <span class='label label-default' id="upload-file-info"></span>
 
-        <p class="help-block" id="upload-file-status">Приемлемые типы файлов: pdf. Максимальный размер загружаемого файла 8M.</p>
+        <p class="help-block" id="upload-file-status">Приемлемые типы файлов: pdf. Максимальный размер загружаемого файла 2M.</p>
         {!! $errors->first('image', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
     </div>
 </div>
