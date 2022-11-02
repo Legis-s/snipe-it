@@ -130,15 +130,24 @@ class LocationsTransformer
             $max = $location->assets_count;
 
             $res = "808080";
-            if ($count > 0 && $max > 0) {
-                $res = self::redYellowGreen(0, $max,$count);
-            }
-            if ($max > 0 && $count==0){
-                $res = "FF0000";
-            }
-            if ($max != 0 && $max == $count){
+
+//            if ($count > 0 && $max > 0) {
+//                $res = self::redYellowGreen(0, $max,$count);
+//            }
+//            if ($max > 0 && $count==0){
+//                $res = "FF0000";
+//            }
+//            if ($max != 0 && $max == $count){
+//                $res = "00FF00";
+//            }
+
+            if ($max>0 && $count ==  $max){
                 $res = "00FF00";
             }
+            if ($max>0 && $count !=  $max){
+                $res = "FF0000";
+            }
+
             if ($location->active){
                 $options = [
                     "iconColor" => '#'.$res,
