@@ -11,6 +11,17 @@
     <div class="row">
         <div class="col-md-12">
             <div class="box box-default">
+                <div class="box-body" style="font-size: 120%">
+                    Всего: <span id="all_count" style="font-weight: bold"></span>
+                    Готово: <span id="ok_count" style="font-weight: bold"></span>
+                    Без имущества: <span id="null_count" style="font-weight: bold"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-default">
                 <div class="box-body">
                     <div id="map" style=" width: 100%; height: 900px"></div>
                 </div>
@@ -131,9 +142,21 @@
                 dataType: 'json',
             }).done(function (data) {
                 // console.log(data);
+                $ok_count = 0;
+                $null_count = 0;
                 data.features.forEach((element) => {
                     console.log(element)
+                    if (element.assets_count == 0){
+                        $null_count++;
+                    }else{
+                        if(element.assets_count == element.checked_assets_count){
+                            $ok_count++;
+                        }
+                    }
                 });
+                $("#all_count").html( data.features.length);
+                $("#ok_count").html( $ok_count);
+                $("#null_count").html( $null_count);
                 objectManager.add(data);
             });
         }
