@@ -130,7 +130,10 @@
                 },
                 dataType: 'json',
             }).done(function (data) {
-                console.log(data);
+                // console.log(data);
+                data.features.forEach((element) => {
+                    console.log(element)
+                });
                 objectManager.add(data);
             });
         }

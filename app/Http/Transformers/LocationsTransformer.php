@@ -115,18 +115,20 @@ class LocationsTransformer
             }
             $count = 0;
             $all_price= 0;
-            if ($location->assets) {
-                $assets = $location->assets;
-                foreach ($assets as $asset) {
-                    $all_price+= $asset->purchase_cost;
-                    $asset_tag = $asset->asset_tag;
-                    $first_s = substr($asset_tag, 0, 1);
-                    if ($first_s == "I" || $first_s == "X" || strlen($asset_tag) > 8) {
-                        $count++;
-                    }
-                }
-            }
+//            if ($location->assets) {
+//                $assets = $location->assets;
+//                foreach ($assets as $asset) {
+//                    $all_price+= $asset->purchase_cost;
+//                    $asset_tag = $asset->asset_tag;
+//                    $first_s = substr($asset_tag, 0, 1);
+//                    if ($first_s == "I" || $first_s == "X" || strlen($asset_tag) > 8) {
+//                        $count++;
+//                    }
+//                }
+//            }
+            $count = $location->checked_assets_count;
             $max = $location->assets_count;
+
             $res = "808080";
             if ($count > 0 && $max > 0) {
                 $res = self::redYellowGreen(0, $max,$count);
@@ -150,6 +152,9 @@ class LocationsTransformer
             $array = [
                 "id" => (int)$location->id,
                 "type" => "Feature",
+                "code"=> (int)$location->object_code,
+                "assets_count"=> $location->assets_count,
+                "checked_assets_count"=> $location->checked_assets_count,
                 "geometry" => [
                     "type" => "Point",
                     "coordinates" => $cords,
@@ -157,7 +162,7 @@ class LocationsTransformer
                 ],
                 "properties" => [
                     "balloonContentHeader" => e($location->name),
-                    "balloonContentBody" => "<a target='_blank'  href='/locations/".$location->id."'>Открыть список</a><br><a target='_blank'  href='https://bitrix.legis-s.ru/crm/object/details/".$location->bitrix_id."/'>Открыть Bitrix [".$location->bitrix_id."]</a><br>Адрес: " . e($location->address) ."<br>Общяя стоимость: ".$all_price." руб. <br>Активов: " . e($location->assets_count) . "<br>" . "Инвентаризированно: " . $count. "<br>",
+                    "balloonContentBody" => "<a target='_blank'  href='/locations/".$location->id."'>Открыть список</a><br><a target='_blank'  href='https://bitrix.legis-s.ru/crm/object/details/".$location->bitrix_id."/'>Открыть Bitrix [".$location->bitrix_id."]</a><br>Адрес: " . e($location->address) ."<br>Активов: " . e($location->assets_count) . "<br>" . "Инвентаризированно: " .  $location->checked_assets_count. "<br>",
                     "balloonContentFooter" => "",
                     "hintContent" => e($location->name)
                 ],

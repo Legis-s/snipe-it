@@ -99,6 +99,7 @@ class SyncBitrix extends Command
         $bitrix_objects = $bitrix_objects["result"];
         $count = 0 ;
         foreach ($bitrix_objects as &$value) {
+
             if ($value["DELETED"] == 1) {
                 $location = Location::where('bitrix_id',$value["ID"])->first();
                 if ($location){
@@ -108,6 +109,7 @@ class SyncBitrix extends Command
                         'address' => $value["ADDRESS"],
                         'address2' => $value["ADDRESS_2"],
                         'coordinates' => $value["UF_MAP"],
+                        'object_code' => intval($value["UF_TYPE"]),
                         'active' => false
                     ]);
                     $location->save();
@@ -120,7 +122,7 @@ class SyncBitrix extends Command
                 /** @var User $sklad_user */
                 $sklad_user = User::where('bitrix_id', $bitrix_user)->first();
                 if  ($value["UF_TYPE"] == 456){
-//                    print_r($value);
+//                    print_r($value["UF_TYPE"]);
                     $location = Location::updateOrCreate(
                         ['bitrix_id' =>  $value["ID"]],
                         [
@@ -129,6 +131,7 @@ class SyncBitrix extends Command
                             'address' => $value["ADDRESS"],
                             'address2' => $value["ADDRESS_2"],
                             'coordinates' => $value["UF_MAP"],
+                            'object_code' => intval($value["UF_TYPE"]),
                             'active' => true,
                             'pult_id' => $value["UF_PULT_ID"],
                         ]
@@ -142,6 +145,7 @@ class SyncBitrix extends Command
                             'address' => $value["ADDRESS"],
                             'address2' => $value["ADDRESS_2"],
                             'coordinates' => $value["UF_MAP"],
+                            'object_code' => intval($value["UF_TYPE"]),
                             'active' => true,
                             'pult_id' => $value["UF_PULT_ID"],
                         ]
@@ -155,6 +159,7 @@ class SyncBitrix extends Command
                             'address' => $value["ADDRESS"],
                             'address2' => $value["ADDRESS_2"],
                             'coordinates' => $value["UF_MAP"],
+                            'object_code' => intval($value["UF_TYPE"]),
                             'active' => true
                         ]
                     );
@@ -163,9 +168,9 @@ class SyncBitrix extends Command
                     print("Responsible at object '".$value["NAME"]."' [".$value["ID"]."] not found (Bitrix user id ".$bitrix_user.")\n");
                 }else{
                     $location->manager_id = $sklad_user->id;
+                    $location->save();
                 }
-
-                $location->save();
+                print("----------------------------------\n");
             }
         }
         print("Синхрониизтрованно ".$count." объектов Битрикс\n");
@@ -232,9 +237,9 @@ class SyncBitrix extends Command
         $count = 0 ;
         foreach ($bitrix_contracts as &$value) {
             $count++;
-            if ( $value["ID"] == "5354"){
-                print_r($value);
-            }
+//            if ( $value["ID"] == "5354"){
+//                print_r($value);
+//            }
             if ($value["STATUS_ID"]  == ""){
                 $value["STATUS_ID"] = "Пустой статус";
             }
@@ -252,7 +257,6 @@ class SyncBitrix extends Command
             );
             if ( is_array($value["UF_OBJECT"]) && count($value["UF_OBJECT"]) >0 && strlen($value["UF_NUMBER"])>0 ){
                 foreach ($value["UF_OBJECT"] as &$ufobj) {
-                    print("ufobj".$ufobj);
                     $location = Location::where('bitrix_id', '=',  $ufobj)->first();
                     if ($location){
                         $cn = $location->contract_number;
@@ -261,7 +265,7 @@ class SyncBitrix extends Command
                         if ($pos === false) {
                             $location->contract_number =  $location->contract_number ." , ". $value["UF_NUMBER"];
                         }
-                        print($location->contract_number);
+//                        print($location->contract_number);
 
                         $location->save();
 

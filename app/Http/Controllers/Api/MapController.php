@@ -3,6 +3,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Helpers\Helper;
@@ -31,10 +32,16 @@ class MapController extends Controller
             'locations.address',
             'locations.coordinates',
             'locations.bitrix_id',
+            'locations.object_code',
             'locations.active',
-        ]) ->where('pult_id', '=', null)
-            ->withCount('assignedAssets as assigned_assets_count')
-            ->withCount('assets as assets_count');
+        ]) ->where('object_code', '=', 455)
+            ->where('active',"=", true)
+            ->withCount(['assets as assets_count',
+                'assets as checked_assets_count' => function (Builder $query) {
+//                $query->where('last_audit_date', '!=', null);
+                $query->whereNotNull('assets.last_audit_date');
+            }]);
+
 
         $locations = $locations->get();
         return (new LocationsTransformer)->transformCollectionForMap($locations);
