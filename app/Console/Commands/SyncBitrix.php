@@ -7,6 +7,7 @@ use App\Models\CustomField;
 use App\Models\Supplier;
 use App\Models\LegalPerson;
 use App\Models\InvoiceType;
+use DateTime;
 use Exception;
 //use False\True;
 use Illuminate\Console\Command;
@@ -104,7 +105,7 @@ class SyncBitrix extends Command
                 $location = Location::where('bitrix_id',$value["ID"])->first();
                 if ($location){
                     $location->update(  [
-                        'name' => "[Закрыто]".$value["NAME"],
+                        'name' => "[Удалено]".$value["NAME"],
                         'city' => $value["ADDRESS_CITY"],
                         'address' => $value["ADDRESS"],
                         'address2' => $value["ADDRESS_2"],
@@ -115,6 +116,45 @@ class SyncBitrix extends Command
                     $location->save();
                 }
                 continue;
+            }
+            if ($value["DELETED"] == 1) {
+                $location = Location::where('bitrix_id',$value["ID"])->first();
+                if ($location){
+                    $location->update(  [
+                        'name' => "[Удалено]".$value["NAME"],
+                        'city' => $value["ADDRESS_CITY"],
+                        'address' => $value["ADDRESS"],
+                        'address2' => $value["ADDRESS_2"],
+                        'coordinates' => $value["UF_MAP"],
+                        'object_code' => intval($value["UF_TYPE"]),
+                        'active' => false
+                    ]);
+                    $location->save();
+                }
+                continue;
+            }
+            if (strlen($value["UF_CLOSEDATE"])>0){
+//                print($value["UF_CLOSEDATE"]);
+                $dateTime = DateTime::createFromFormat('d.m.Y', $value["UF_CLOSEDATE"]);
+                $now = new DateTime();
+//                print(date_format($dateTime, 'Y-m-d'));
+
+                if ($dateTime <=$now) {
+                    $location = Location::where('bitrix_id',$value["ID"])->first();
+                    if ($location){
+                        $location->update(  [
+                            'name' => "[Закрыто]".$value["NAME"],
+                            'city' => $value["ADDRESS_CITY"],
+                            'address' => $value["ADDRESS"],
+                            'address2' => $value["ADDRESS_2"],
+                            'coordinates' => $value["UF_MAP"],
+                            'object_code' => intval($value["UF_TYPE"]),
+                            'active' => false
+                        ]);
+                        $location->save();
+                    }
+                    continue;
+                }
             }
             if(($value["TABEL_ID"] && $value["UF_TYPE"] == 455) || $value["UF_TYPE"] == 739 || $value["UF_TYPE"] == 457 || $value["UF_TYPE"] == 456 || $value["UF_TYPE"] == 741 || $value["ID"] == 2956 || $value["UF_TYPE"] == 742){
                 $count++;
@@ -170,7 +210,6 @@ class SyncBitrix extends Command
                     $location->manager_id = $sklad_user->id;
                     $location->save();
                 }
-                print("----------------------------------\n");
             }
         }
         print("Синхрониизтрованно ".$count." объектов Битрикс\n");
