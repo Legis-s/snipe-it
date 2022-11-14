@@ -1,36 +1,65 @@
-FROM ubuntu:xenial
-LABEL maintainer="uberbrady, hinchk"
+FROM ubuntu:20.04
+LABEL maintainer="Brady Wetherington <bwetherington@grokability.com>"
 
-RUN apt-get update && apt-get install -y software-properties-common
-RUN LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php
-RUN apt-get update && apt-get install -y \
+# No need to add `apt-get clean` here, reference:
+# - https://github.com/snipe/snipe-it/pull/9201
+# - https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#apt-get
+
+RUN export DEBIAN_FRONTEND=noninteractive; \
+    export DEBCONF_NONINTERACTIVE_SEEN=true; \
+    echo 'tzdata tzdata/Areas select Etc' | debconf-set-selections; \
+    echo 'tzdata tzdata/Zones/Etc select UTC' | debconf-set-selections; \
+    apt-get update -qqy \
+ && apt-get install -qqy --no-install-recommends \
+apt-utils \
 apache2 \
 apache2-bin \
-libapache2-mod-php7.1 \
-php7.1-curl \
-php7.1-ldap \
-php7.1-mysql \
-php7.1-mcrypt \
-php7.1-gd \
-php7.1-xml \
-php7.1-mbstring \
-php7.1-zip \
-php7.1-bcmath \
+libapache2-mod-php7.4 \
+php7.4-curl \
+php7.4-ldap \
+php7.4-mysql \
+php7.4-gd \
+php7.4-xml \
+php7.4-mbstring \
+php7.4-zip \
+php7.4-bcmath \
+php7.4-redis \
+php-memcached \
 patch \
 curl \
+wget  \
 vim \
 git \
+cron \
 mysql-client \
 supervisor \
-&& apt-get clean \
+cron \
+gcc \
+make \
+autoconf \
+libc-dev \
+pkg-config \
+libmcrypt-dev \
+php7.4-dev \
+ca-certificates \
+unzip \
+dnsutils \
 && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+
+RUN curl -L -O https://github.com/pear/pearweb_phars/raw/master/go-pear.phar
+RUN php go-pear.phar
+
+RUN pecl install mcrypt-1.0.3
+
+RUN bash -c "echo extension=/usr/lib/php/20190902/mcrypt.so > /etc/php/7.4/mods-available/mcrypt.ini"
 
 RUN phpenmod mcrypt
 RUN phpenmod gd
 RUN phpenmod bcmath
 
-RUN sed -i 's/variables_order = .*/variables_order = "EGPCS"/' /etc/php/7.1/apache2/php.ini
-RUN sed -i 's/variables_order = .*/variables_order = "EGPCS"/' /etc/php/7.1/cli/php.ini
+RUN sed -i 's/variables_order = .*/variables_order = "EGPCS"/' /etc/php/7.4/apache2/php.ini
+RUN sed -i 's/variables_order = .*/variables_order = "EGPCS"/' /etc/php/7.4/cli/php.ini
 
 RUN useradd -m --uid 1000 --gid 50 docker
 
@@ -41,15 +70,17 @@ COPY docker/000-default.conf /etc/apache2/sites-enabled/000-default.conf
 
 #SSL
 RUN mkdir -p /var/lib/snipeit/ssl
-COPY docker/001-default-ssl.conf /etc/apache2/sites-enabled/001-default-ssl.conf
-#COPY docker/001-default-ssl.conf /etc/apache2/sites-available/001-default-ssl.conf
+#COPY docker/001-default-ssl.conf /etc/apache2/sites-enabled/001-default-ssl.conf
+COPY docker/001-default-ssl.conf /etc/apache2/sites-available/001-default-ssl.conf
 
 RUN a2enmod ssl
-#RUN a2ensite 001-default-ssl.conf
+RUN a2ensite 001-default-ssl.conf
 
 COPY . /var/www/html
 
 RUN a2enmod rewrite
+
+COPY docker/column-statistics.cnf /etc/mysql/conf.d/column-statistics.cnf
 
 ############ INITIAL APPLICATION SETUP #####################
 
@@ -68,20 +99,23 @@ RUN \
 	rm -r "/var/www/html/storage/private_uploads" && ln -fs "/var/lib/snipeit/data/private_uploads" "/var/www/html/storage/private_uploads" \
       && rm -rf "/var/www/html/public/uploads" && ln -fs "/var/lib/snipeit/data/uploads" "/var/www/html/public/uploads" \
       && rm -r "/var/www/html/storage/app/backups" && ln -fs "/var/lib/snipeit/dumps" "/var/www/html/storage/app/backups" \
-      && mkdir "/var/lib/snipeit/keys" && ln -fs "/var/lib/snipeit/keys/oauth-private.key" "/var/www/html/storage/oauth-private.key" \
+      && mkdir -p "/var/lib/snipeit/keys" && ln -fs "/var/lib/snipeit/keys/oauth-private.key" "/var/www/html/storage/oauth-private.key" \
       && ln -fs "/var/lib/snipeit/keys/oauth-public.key" "/var/www/html/storage/oauth-public.key" \
+      && ln -fs "/var/lib/snipeit/keys/ldap_client_tls.cert" "/var/www/html/storage/ldap_client_tls.cert" \
+      && ln -fs "/var/lib/snipeit/keys/ldap_client_tls.key" "/var/www/html/storage/ldap_client_tls.key" \
       && chown docker "/var/lib/snipeit/keys/" \
+      && chown -h docker "/var/www/html/storage/" \
       && chmod +x /var/www/html/artisan \
       && echo "Finished setting up application in /var/www/html"
 
 ############## DEPENDENCIES via COMPOSER ###################
 
 #global install of composer
-RUN cd /tmp;curl -sS https://getcomposer.org/installer | php;mv /tmp/composer.phar /usr/local/bin/composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Get dependencies
 USER docker
-RUN cd /var/www/html;composer install && rm -rf /home/docker/.composer/cache
+RUN composer install --no-dev --working-dir=/var/www/html
 USER root
 
 ############### APPLICATION INSTALL/INIT #################

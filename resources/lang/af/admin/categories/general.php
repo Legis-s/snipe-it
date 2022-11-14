@@ -1,8 +1,6 @@
 <?php
 
 return array(
-    'about_categories_title' 			=> 'Oor Kategorieë',
-    'about_categories'  				=> 'Kategorieë help jou om jou items te organiseer. Sommige voorbeeldkategorieë kan wees &quot;Desktops&quot;, &quot;Laptops&quot;, &quot;Mobile Phones&quot;, &quot;Tablets&quot;, ensovoorts, maar jy kan kategorieë gebruik wat vir jou sin maak.',
     'asset_categories' 					=> 'Bate kategorieë',
     'category_name'  					=> 'Kategorie Naam',
     'checkin_email'                     => 'Stuur e-pos aan gebruiker by aanmelding/afmelding.',
@@ -20,5 +18,6 @@ return array(
     'update'  							=> 'Opdateer kategorie',
     'use_default_eula'					=> 'Gebruik eerder die <a href="#" data-toggle="modal" data-target="#eulaModal">primary standaard EULA</a>.',
     'use_default_eula_disabled'			=> '<del>Gebruik die primêre standaardverlof in plaas daarvan.</del> Geen primêre standaard EULA is ingestel nie. Voeg asseblief een by Instellings.',
+    'use_default_eula_column'			=> 'Use default EULA',
 
 );

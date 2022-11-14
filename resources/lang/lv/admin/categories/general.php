@@ -1,8 +1,6 @@
 <?php
 
 return array(
-    'about_categories_title' 			=> 'Par kategorijām',
-    'about_categories'  				=> 'Kategorijas palīdz jums organizēt savus vienumus. Dažas piemēru kategorijas varētu būt &quot;Desktops&quot;, &quot;Laptops&quot;, &quot;Mobilie telefoni&quot;, &quot;Tablets&quot; un tā tālāk, bet jūs varat izmantot kategorijas tādā veidā, kas jums ir jēga.',
     'asset_categories' 					=> 'Aktīvu kategorijas',
     'category_name'  					=> 'Kategorijas nosaukums',
     'checkin_email'                     => 'Sūtiet e-pastu lietotājam kad tiek piešķirts / atgriezts aktīvs(i).',
@@ -20,5 +18,6 @@ return array(
     'update'  							=> 'Atjaunināt kategoriju',
     'use_default_eula'					=> 'Tā vietā izmantojiet <a href="#" data-toggle="modal" data-target="#eulaModal">pirmo noklusējuma EULA</a>.',
     'use_default_eula_disabled'			=> '<del>Izmantojiet galveno noklusējuma EULA</del>. Netiek iestatīta galvenā noklusējuma EULA. Lūdzu, pievienojiet vienu pakalpojumā Iestatījumi.',
+    'use_default_eula_column'			=> 'Lietot noklusēto EULA',
 
 );

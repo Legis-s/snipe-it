@@ -1,8 +1,6 @@
 <?php
 
 return array(
-    'about_categories_title' 			=> 'Informace o kategoriích',
-    'about_categories'  				=> 'Kategorie usnadňují organizovat majetek. Takovou kategorii může být např. &quot;Desktopy&quot;, &quot;Notebooky&quot;, &quot;Mobilní telefony&quot;, &quot;Tablety&quot;, apod., ale můžete použít kategorie jakýmkoli způsobem.',
     'asset_categories' 					=> 'Kategorie majetku',
     'category_name'  					=> 'Jméno kategorie',
     'checkin_email'                     => 'Při naskladnění/vyskladnění poslat uživateli e-mail.',
@@ -20,5 +18,6 @@ return array(
     'update'  							=> 'Upravit kategorii',
     'use_default_eula'					=> 'Použijte raději <a href="#" data-toggle="modal" data-target="#eulaModal">primární výchozí EULA</a>.',
     'use_default_eula_disabled'			=> '<del>Použijte raději primární výchozí EULA.</del> Nenalezena primární výchozí EULA. Přidejte ji v Nastaveních prosím.',
+    'use_default_eula_column'			=> 'Použít výchozí EULA',
 
 );

@@ -2,15 +2,27 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\Helper;
+use App\Helpers\StorageHelper;
+use App\Http\Transformers\DatatablesTransformer;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Ldap;
-use Validator;
 use App\Models\Setting;
 use Mail;
 use App\Notifications\SlackTest;
-use Notification;
 use App\Notifications\MailTest;
+use GuzzleHttp\Client;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator; 
+use App\Http\Requests\SlackSettingsRequest;
+use App\Http\Transformers\LoginAttemptsTransformer;
+
 
 class SettingsController extends Controller
 {
@@ -18,28 +30,59 @@ class SettingsController extends Controller
 
     public function ldaptest()
     {
+        $settings = Setting::getSettings();
 
-        if (Setting::getSettings()->ldap_enabled!='1') {
-            \Log::debug('LDAP is not enabled so cannot test.');
-            return response()->json(['message' => 'LDAP is not enabled, so we cannot test LDAP connections.'], 400);
+        if ($settings->ldap_enabled!='1') {
+            \Log::debug('LDAP is not enabled cannot test.');
+            return response()->json(['message' => 'LDAP is not enabled, cannot test.'], 400);
         }
 
         \Log::debug('Preparing to test LDAP connection');
 
+        $message = []; //where we collect together test messages
         try {
             $connection = Ldap::connectToLdap();
             try {
+                $message['bind'] = ['message' => 'Successfully bound to LDAP server.'];
                 \Log::debug('attempting to bind to LDAP for LDAP test');
                 Ldap::bindAdminToLdap($connection);
-                return response()->json(['message' => 'It worked!'], 200);
+                $message['login'] = [
+                    'message' => 'Successfully connected to LDAP server.',
+                ];
+
+                $users = collect(Ldap::findLdapUsers(null,10))->filter(function ($value, $key) {
+                    return is_int($key);
+                })->slice(0, 10)->map(function ($item) use ($settings) {
+                    return (object) [
+                        'username'        => $item[$settings['ldap_username_field']][0] ?? null,
+                        'employee_number' => $item[$settings['ldap_emp_num']][0] ?? null,
+                        'lastname'        => $item[$settings['ldap_lname_field']][0] ?? null,
+                        'firstname'       => $item[$settings['ldap_fname_field']][0] ?? null,
+                        'email'           => $item[$settings['ldap_email']][0] ?? null,
+                    ];
+                });
+                if ($users->count() > 0) {
+                    $message['user_sync'] = [
+                        'users' => $users,
+                    ];
+                } else {
+                    $message['user_sync'] = [
+                        'message' => 'Connection to LDAP was successful, however there were no users returned from your query. You should confirm the Base Bind DN above.',
+                    ];
+    
+                    return response()->json($message, 400);
+                }
+
+                return response()->json($message, 200);
             } catch (\Exception $e) {
-                \Log::debug('LDAP connected but Bind failed. Please check your LDAP settings and try again.');
+                \Log::debug('Bind failed');
+                \Log::debug("Exception was: ".$e->getMessage());
                 return response()->json(['message' => $e->getMessage()], 400);
                 //return response()->json(['message' => $e->getMessage()], 500);
             }
         } catch (\Exception $e) {
-            \Log::info('LDAP connection failed but we cannot debug it any further on our end.');
-            return response()->json(['message' => 'The LDAP connection failed but we cannot debug it any further on our end. The error from the server is: '.$e->getMessage()], 500);
+            \Log::debug('Connection failed but we cannot debug it any further on our end.');
+            return response()->json(['message' => $e->getMessage()], 500);
         }
 
 
@@ -48,7 +91,7 @@ class SettingsController extends Controller
     public function ldaptestlogin(Request $request)
     {
 
-        if (Setting::getSettings()->ldap_enabled!='1') {
+        if (Setting::getSettings()->ldap_enabled != '1') {
             \Log::debug('LDAP is not enabled. Cannot test.');
             return response()->json(['message' => 'LDAP is not enabled, cannot test.'], 400);
         }
@@ -66,6 +109,7 @@ class SettingsController extends Controller
             return response()->json(['message' => $validator->errors()->all()], 400);
         }
         
+
 
         \Log::debug('Preparing to test LDAP login');
         try {
@@ -99,26 +143,44 @@ class SettingsController extends Controller
 
     }
 
-
-    public function slacktest()
+    public function slacktest(SlackSettingsRequest $request)
     {
 
-        if ($settings = Setting::getSettings()->slack_channel=='') {
-            \Log::debug('Slack is not enabled. Cannot test.');
-            return response()->json(['message' => 'Slack is not enabled, cannot test.'], 400);
+        $validator = Validator::make($request->all(), [
+            'slack_endpoint'                      => 'url|required_with:slack_channel|starts_with:https://hooks.slack.com/|nullable',
+            'slack_channel'                       => 'required_with:slack_endpoint|starts_with:#|nullable',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => 'Validation failed', 'errors' => $validator->errors()], 422);
         }
 
-        \Log::debug('Preparing to test slack connection');
+        // If validation passes, continue to the curl request
+            $slack = new Client([
+                'base_url' => e($request->input('slack_endpoint')),
+                'defaults' => [
+                    'exceptions' => false,
+                ],
+            ]);
 
-        try {
-            Notification::send($settings = Setting::getSettings(), new SlackTest());
-            return response()->json(['message' => 'Success'], 200);
-        } catch (\Exception $e) {
-            \Log::debug('Slack connection failed');
-            return response()->json(['message' => $e->getMessage()], 400);
-        }
+            $payload = json_encode(
+                [
+                    'channel'    => e($request->input('slack_channel')),
+                    'text'       => trans('general.slack_test_msg'),
+                    'username'    => e($request->input('slack_botname')),
+                    'icon_emoji' => ':heart:',
+                ]);
 
+            try {
+                $slack->post($request->input('slack_endpoint'), ['body' => $payload]);
+                return response()->json(['message' => 'Success'], 200);
 
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Please check the channel name and webhook endpoint URL ('.e($request->input('slack_endpoint')).'). Slack responded with: '.$e->getMessage()], 400);
+            }
+
+        //} 
+        return response()->json(['message' => 'Something went wrong :( '], 400);
     }
 
 
@@ -135,7 +197,7 @@ class SettingsController extends Controller
             try {
                 Notification::send(Setting::first(), new MailTest());
                 return response()->json(['message' => 'Mail sent to '.config('mail.reply_to.address')], 200);
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 return response()->json(['message' => $e->getMessage()], 500);
             }
         }
@@ -144,5 +206,114 @@ class SettingsController extends Controller
     }
 
 
+    /**
+     * Delete server-cached barcodes
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v5.0.0]
+     * @return Response
+     */
+    public function purgeBarcodes()
+    {
+        $file_count = 0;
+        $files = Storage::disk('public')->files('barcodes');
 
+        foreach ($files as $file) { // iterate files
+
+            $file_parts = explode('.', $file);
+            $extension = end($file_parts);
+            \Log::debug($extension);
+
+            // Only generated barcodes would have a .png file extension
+            if ($extension == 'png') {
+                \Log::debug('Deleting: '.$file);
+
+
+                try {
+                    Storage::disk('public')->delete($file);
+                    \Log::debug('Deleting: '.$file);
+                    $file_count++;
+                } catch (\Exception $e) {
+                    \Log::debug($e);
+                }
+            }
+        }
+
+        return response()->json(['message' => 'Deleted '.$file_count.' barcodes'], 200);
+    }
+
+
+
+
+
+    /**
+     * Get a list of login attempts
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v5.0.0]
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
+     */
+    public function showLoginAttempts(Request $request)
+    {
+        $allowed_columns = ['id', 'username', 'remote_ip', 'user_agent', 'successful', 'created_at'];
+
+        $login_attempts = DB::table('login_attempts');
+        $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
+        $sort = in_array($request->get('sort'), $allowed_columns) ? $request->get('sort') : 'created_at';
+
+        $total = $login_attempts->count();
+        $login_attempts->orderBy($sort, $order);
+        $login_attempt_results = $login_attempts->skip(request('offset', 0))->take(request('limit', 20))->get();
+
+        return (new LoginAttemptsTransformer)->transformLoginAttempts($login_attempt_results, $total);
+    }
+
+
+    public function listBackups() {
+        $settings = Setting::getSettings();
+        $path = 'app/backups';
+        $backup_files = Storage::files($path);
+        $files_raw = [];
+        $count = 0;
+
+        if (count($backup_files) > 0) {
+
+            for ($f = 0; $f < count($backup_files); $f++) {
+
+                // Skip dotfiles like .gitignore and .DS_STORE
+                if ((substr(basename($backup_files[$f]), 0, 1) != '.')) {
+                    $file_timestamp = Storage::lastModified($backup_files[$f]);
+
+                    $files_raw[] = [
+                        'filename' => basename($backup_files[$f]),
+                        'filesize' => Setting::fileSizeConvert(Storage::size($backup_files[$f])),
+                        'modified_value' => $file_timestamp,
+                        'modified_display' => date($settings->date_display_format.' '.$settings->time_display_format, $file_timestamp),
+
+                    ];
+                    $count++;
+                }
+
+
+            }
+        }
+
+        $files = array_reverse($files_raw);
+        return (new DatatablesTransformer)->transformDatatables($files, $count);
+
+    }
+
+
+    public function downloadBackup($file) {
+
+        $path = 'app/backups';
+        if (Storage::exists($path.'/'.$file)) {
+            $headers = ['ContentType' => 'application/zip'];
+            return Storage::download($path.'/'.$file, $file, $headers);
+        } else {
+            return response()->json(Helper::formatStandardApiResponse('error', null, 'File not found'));
+        }
+
+    }
 }

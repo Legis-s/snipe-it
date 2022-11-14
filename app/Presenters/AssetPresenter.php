@@ -7,11 +7,9 @@ use DateTime;
 
 /**
  * Class AssetPresenter
- * @package App\Presenters
  */
 class AssetPresenter extends Presenter
 {
-
     /**
      * Json Column Layout for bootstrap table
      * @return string
@@ -20,108 +18,108 @@ class AssetPresenter extends Presenter
     {
         $layout = [
             [
-                "field" => "checkbox",
-                "checkbox" => true
+                'field' => 'checkbox',
+                'checkbox' => true,
             ], [
-                "field" => "id",
-                "searchable" => false,
-                "sortable" => true,
-                "switchable" => true,
-                "title" => trans('general.id'),
-                "visible" => false
+                'field' => 'id',
+                'searchable' => false,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('general.id'),
+                'visible' => false,
             ], [
-                "field" => "company",
-                "searchable" => true,
-                "sortable" => true,
-                "switchable" => true,
-                "title" => trans('general.company'),
-                "visible" => false,
-                "formatter" => 'assetCompanyObjFilterFormatter'
+                'field' => 'company',
+                'searchable' => true,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('general.company'),
+                'visible' => false,
+                'formatter' => 'assetCompanyObjFilterFormatter',
             ], [
-                "field" => "name",
-                "searchable" => true,
-                "sortable" => true,
-                "title" => trans('admin/hardware/form.name'),
-                "visible" => true,
-                "formatter" => "hardwareLinkFormatter"
+                'field' => 'name',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('admin/hardware/form.name'),
+                'visible' => true,
+                'formatter' => 'hardwareLinkFormatter',
             ], [
-                "field" => "image",
-                "searchable" => false,
-                "sortable" => true,
-                "switchable" => true,
-                "title" => trans('admin/hardware/table.image'),
-                "visible" => true,
-                "formatter" => "imageFormatter"
+                'field' => 'image',
+                'searchable' => false,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('admin/hardware/table.image'),
+                'visible' => true,
+                'formatter' => 'imageFormatter',
             ], [
-                "field" => "asset_tag",
-                "searchable" => true,
-                "sortable" => true,
-                "title" => trans('admin/hardware/table.asset_tag'),
-                "visible" => true,
-                "formatter" => "hardwareLinkFormatter"
+                'field' => 'asset_tag',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('admin/hardware/table.asset_tag'),
+                'visible' => true,
+                'formatter' => 'hardwareLinkFormatter',
             ], [
-                "field" => "serial",
-                "searchable" => true,
-                "sortable" => true,
-                "title" => trans('admin/hardware/form.serial'),
-                "visible" => true,
-                "formatter" => "hardwareLinkFormatter"
+                'field' => 'serial',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('admin/hardware/form.serial'),
+                'visible' => true,
+                'formatter' => 'hardwareLinkFormatter',
+            ],  [
+                'field' => 'model',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('admin/hardware/form.model'),
+                'visible' => true,
+                'formatter' => 'modelsLinkObjFormatter',
             ], [
-                "field" => "model",
-                "searchable" => true,
-                "sortable" => true,
-                "title" => trans('admin/hardware/form.model'),
-                "visible" => true,
-                "formatter" => "modelsLinkObjFormatter"
+                'field' => 'model_number',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('admin/models/table.modelnumber'),
+                'visible' => false,
             ], [
-                "field" => "model_number",
-                "searchable" => true,
-                "sortable" => true,
-                "title" => trans('admin/models/table.modelnumber'),
-                "visible" => false
+                'field' => 'category',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('general.category'),
+                'visible' => true,
+                'formatter' => 'categoriesLinkObjFormatter',
             ], [
-                "field" => "category",
-                "searchable" => true,
-                "sortable" => true,
-                "title" => trans('general.category'),
-                "visible" => true,
-                "formatter" => "categoriesLinkObjFormatter"
+                'field' => 'status_label',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('admin/hardware/table.status'),
+                'visible' => true,
+                'formatter' => 'statuslabelsLinkObjFormatter',
             ], [
-                "field" => "status_label",
-                "searchable" => true,
-                "sortable" => true,
-                "title" => trans('admin/hardware/table.status'),
-                "visible" => true,
-                "formatter" => "statuslabelsLinkObjFormatter"
+                'field' => 'assigned_to',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('admin/hardware/form.checkedout_to'),
+                'visible' => true,
+                'formatter' => 'polymorphicItemFormatter',
             ], [
-                "field" => "assigned_to",
-                "searchable" => true,
-                "sortable" => true,
-                "title" => trans('admin/hardware/form.checkedout_to'),
-                "visible" => true,
-                "formatter" => "polymorphicItemFormatter"
+                'field' => 'employee_number',
+                'searchable' => false,
+                'sortable' => false,
+                'title' => trans('general.employee_number'),
+                'visible' => false,
+                'formatter' => 'employeeNumFormatter',
             ], [
-                "field" => "employee_number",
-                "searchable" => false,
-                "sortable" => false,
-                "title" => trans('admin/users/table.employee_num'),
-                "visible" => false,
-                "formatter" => "employeeNumFormatter"
-            ], [
-                "field" => "location",
-                "searchable" => true,
-                "sortable" => true,
-                "title" => trans('admin/hardware/table.location'),
-                "visible" => true,
-                "formatter" => "deployedLocationFormatter"
+                'field' => 'location',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('admin/hardware/table.location'),
+                'visible' => true,
+                'formatter' => 'deployedLocationFormatter',
             ],
 //            [
-//                "field" => "rtd_location",
-//                "searchable" => true,
-//                "sortable" => true,
-//                "title" => trans('admin/hardware/form.default_location'),
-//                "visible" => false,
-//                "formatter" => "deployedLocationFormatter"
+//                'field' => 'rtd_location',
+//                'searchable' => true,
+//                'sortable' => true,
+//                'title' => trans('admin/hardware/form.default_location'),
+//                'visible' => false,
+//                'formatter' => 'deployedLocationFormatter',
 //            ],
             [
                 "field" => "contract",
@@ -130,33 +128,35 @@ class AssetPresenter extends Presenter
                 "title" => "Договор",
                 "visible" => true,
                 "formatter" => "contractsLinkObjFormatter"
+            ],
+            [
+                'field' => 'manufacturer',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('general.manufacturer'),
+                'visible' => false,
+                'formatter' => 'manufacturersLinkObjFormatter',
             ], [
-                "field" => "manufacturer",
-                "searchable" => true,
-                "sortable" => true,
-                "title" => trans('general.manufacturer'),
-                "visible" => false,
-                "formatter" => "manufacturersLinkObjFormatter"
+                'field' => 'supplier',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('general.supplier'),
+                'visible' => false,
+                'formatter' => 'suppliersLinkObjFormatter',
             ], [
-                "field" => "supplier",
-                "searchable" => true,
-                "sortable" => true,
-                "title" => trans('general.supplier'),
-                "visible" => false,
-                "formatter" => "suppliersLinkObjFormatter"
+                'field' => 'purchase_date',
+                'searchable' => true,
+                'sortable' => true,
+                'visible' => false,
+                'title' => trans('general.purchase_date'),
+                'formatter' => 'dateDisplayFormatter',
             ], [
-                "field" => "purchase_date",
-                "searchable" => true,
-                "sortable" => true,
-                "visible" => false,
-                "title" => trans('general.purchase_date'),
-                "formatter" => "dateDisplayFormatter"
-            ], [
-                "field" => "purchase_cost",
-                "searchable" => true,
-                "sortable" => true,
-                "title" => trans('general.purchase_cost'),
-                "footerFormatter" => 'sumFormatter',
+                'field' => 'purchase_cost',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('general.purchase_cost'),
+                'footerFormatter' => 'sumFormatter',
+                'class' => 'text-right',
             ], [
                 "field" => "depreciable_cost",
                 "searchable" => true,
@@ -176,12 +176,12 @@ class AssetPresenter extends Presenter
                 "title" => "Состояние",
                 "formatter" => 'qualityFormatter',
             ], [
-                "field" => "order_number",
-                "searchable" => true,
-                "sortable" => true,
-                "visible" => false,
-                "title" => trans('general.order_number'),
-                'formatter' => "orderNumberObjFilterFormatter"
+                'field' => 'order_number',
+                'searchable' => true,
+                'sortable' => true,
+                'visible' => false,
+                'title' => trans('general.order_number'),
+                'formatter' => 'orderNumberObjFilterFormatter',
             ], [
                 "field" => "purchase_id",
                 "searchable" => false,
@@ -190,95 +190,95 @@ class AssetPresenter extends Presenter
                 "title" => "ID закупки",
                 "visible" => false
             ], [
-                "field" => "eol",
-                "searchable" => false,
-                "sortable" => false,
-                "visible" => false,
-                "title" => trans('general.eol'),
-                "formatter" => "dateDisplayFormatter"
+                'field' => 'eol',
+                'searchable' => false,
+                'sortable' => false,
+                'visible' => false,
+                'title' => trans('general.eol'),
+                'formatter' => 'dateDisplayFormatter',
             ], [
-                "field" => "warranty_months",
-                "searchable" => true,
-                "sortable" => true,
-                "visible" => false,
-                "title" => trans('admin/hardware/form.warranty')
+                'field' => 'warranty_months',
+                'searchable' => true,
+                'sortable' => true,
+                'visible' => false,
+                'title' => trans('admin/hardware/form.warranty'),
             ], [
-                "field" => "warranty_expires",
-                "searchable" => false,
-                "sortable" => false,
-                "visible" => false,
-                "title" => trans('admin/hardware/form.warranty_expires'),
-                "formatter" => "dateDisplayFormatter"
+                'field' => 'warranty_expires',
+                'searchable' => false,
+                'sortable' => false,
+                'visible' => false,
+                'title' => trans('admin/hardware/form.warranty_expires'),
+                'formatter' => 'dateDisplayFormatter',
             ], [
-                "field" => "notes",
-                "searchable" => true,
-                "sortable" => true,
-                "visible" => false,
-                "title" => trans('general.notes'),
+                'field' => 'notes',
+                'searchable' => true,
+                'sortable' => true,
+                'visible' => false,
+                'title' => trans('general.notes'),
 
             ], [
-                "field" => "checkout_counter",
-                "searchable" => false,
-                "sortable" => true,
-                "visible" => false,
-                "title" => trans('general.checkouts_count')
+                'field' => 'checkout_counter',
+                'searchable' => false,
+                'sortable' => true,
+                'visible' => false,
+                'title' => trans('general.checkouts_count'),
 
             ], [
-                "field" => "checkin_counter",
-                "searchable" => false,
-                "sortable" => true,
-                "visible" => false,
-                "title" => trans('general.checkins_count')
+                'field' => 'checkin_counter',
+                'searchable' => false,
+                'sortable' => true,
+                'visible' => false,
+                'title' => trans('general.checkins_count'),
 
             ], [
-                "field" => "requests_counter",
-                "searchable" => false,
-                "sortable" => true,
-                "visible" => false,
-                "title" => trans('general.user_requests_count')
+                'field' => 'requests_counter',
+                'searchable' => false,
+                'sortable' => true,
+                'visible' => false,
+                'title' => trans('general.user_requests_count'),
 
             ], [
-                "field" => "created_at",
-                "searchable" => false,
-                "sortable" => true,
-                "visible" => false,
-                "title" => trans('general.created_at'),
-                "formatter" => "dateDisplayFormatter"
+                'field' => 'created_at',
+                'searchable' => false,
+                'sortable' => true,
+                'visible' => false,
+                'title' => trans('general.created_at'),
+                'formatter' => 'dateDisplayFormatter',
             ], [
-                "field" => "updated_at",
-                "searchable" => false,
-                "sortable" => true,
-                "visible" => false,
-                "title" => trans('general.updated_at'),
-                "formatter" => "dateDisplayFormatter"
+                'field' => 'updated_at',
+                'searchable' => false,
+                'sortable' => true,
+                'visible' => false,
+                'title' => trans('general.updated_at'),
+                'formatter' => 'dateDisplayFormatter',
             ], [
-                "field" => "last_checkout",
-                "searchable" => false,
-                "sortable" => true,
-                "visible" => false,
-                "title" => trans('admin/hardware/table.checkout_date'),
-                "formatter" => "dateDisplayFormatter"
+                'field' => 'last_checkout',
+                'searchable' => false,
+                'sortable' => true,
+                'visible' => false,
+                'title' => trans('admin/hardware/table.checkout_date'),
+                'formatter' => 'dateDisplayFormatter',
             ], [
-                "field" => "expected_checkin",
-                "searchable" => false,
-                "sortable" => true,
-                "visible" => false,
-                "title" => trans('admin/hardware/form.expected_checkin'),
-                "formatter" => "dateDisplayFormatter"
+                'field' => 'expected_checkin',
+                'searchable' => false,
+                'sortable' => true,
+                'visible' => false,
+                'title' => trans('admin/hardware/form.expected_checkin'),
+                'formatter' => 'dateDisplayFormatter',
             ], [
-                "field" => "last_audit_date",
-                "searchable" => false,
-                "sortable" => true,
-                "visible" => false,
-                "title" => trans('general.last_audit'),
-                "formatter" => "dateDisplayFormatter"
+                'field' => 'last_audit_date',
+                'searchable' => false,
+                'sortable' => true,
+                'visible' => false,
+                'title' => trans('general.last_audit'),
+                'formatter' => 'dateDisplayFormatter',
             ], [
-                "field" => "next_audit_date",
-                "searchable" => false,
-                "sortable" => true,
-                "visible" => false,
-                "title" => trans('general.next_audit_date'),
-                "formatter" => "dateDisplayFormatter"
+                'field' => 'next_audit_date',
+                'searchable' => false,
+                'sortable' => true,
+                'visible' => false,
+                'title' => trans('general.next_audit_date'),
+                'formatter' => 'dateDisplayFormatter',
             ], [
                 "field" => "nds",
                 "searchable" => false,
@@ -300,30 +300,31 @@ class AssetPresenter extends Presenter
             $query->whereHas('models');
         })->get();
 
-
         // Note: We do not need to e() escape the field names here, as they are already escaped when
         // they are presented in the blade view. If we escape them here, custom fields with quotes in their
         // name can break the listings page. - snipe
         foreach ($fields as $field) {
             $layout[] = [
-                "field" => 'custom_fields.' . $field->convertUnicodeDbSlug(),
-                "searchable" => true,
-                "sortable" => true,
-                "switchable" => true,
-                "title" => ($field->field_encrypted == '1') ? '<i class="fa fa-lock"></i> ' . $field->name : $field->name,
-                "formatter" => "customFieldsFormatter"
+                'field' => 'custom_fields.'.$field->db_column,
+                'searchable' => true,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => $field->name,
+                'formatter'=> 'customFieldsFormatter',
+                'escape' => true,
+                'class' => ($field->field_encrypted == '1') ? 'css-padlock' : '',
+                'visible' => true,
             ];
-
         }
 
         $layout[] = [
-            "field" => "checkincheckout",
-            "searchable" => false,
-            "sortable" => false,
-            "switchable" => true,
-            "title" => trans('general.checkin') . '/' . trans('general.checkout'),
-            "visible" => true,
-            "formatter" => "hardwareInOutFormatter",
+            'field' => 'checkincheckout',
+            'searchable' => false,
+            'sortable' => false,
+            'switchable' => true,
+            'title' => trans('general.checkin').'/'.trans('general.checkout'),
+            'visible' => true,
+            'formatter' => 'hardwareInOutFormatter',
         ];
 
         $layout[] = [
@@ -351,13 +352,12 @@ class AssetPresenter extends Presenter
 
 
         $layout[] = [
-            "field" => "actions",
-            "searchable" => false,
-            "sortable" => false,
-            "switchable" => false,
-            "title" => trans('table.actions'),
-            "formatter" => "hardwareActionsFormatter",
-            "events" => "operateEvents"
+            'field' => 'actions',
+            'searchable' => false,
+            'sortable' => false,
+            'switchable' => false,
+            'title' => trans('table.actions'),
+            'formatter' => 'hardwareActionsFormatter',
         ];
 
         return json_encode($layout);
@@ -525,7 +525,7 @@ class AssetPresenter extends Presenter
      */
     public function nameUrl()
     {
-        return (string)link_to_route('hardware.show', e($this->name), $this->id);
+        return (string) link_to_route('hardware.show', e($this->name), $this->id);
     }
 
     public function modelUrl()
@@ -533,6 +533,7 @@ class AssetPresenter extends Presenter
         if ($this->model->model) {
             return $this->model->model->present()->nameUrl();
         }
+
         return '';
     }
 
@@ -543,17 +544,18 @@ class AssetPresenter extends Presenter
     public function imageUrl()
     {
         $imagePath = '';
-        if ($this->image && !empty($this->image)) {
+        if ($this->image && ! empty($this->image)) {
             $imagePath = $this->image;
             $imageAlt = $this->name;
-        } elseif ($this->model && !empty($this->model->image)) {
+        } elseif ($this->model && ! empty($this->model->image)) {
             $imagePath = $this->model->image;
             $imageAlt = $this->model->name;
         }
         $url = config('app.url');
-        if (!empty($imagePath)) {
-            $imagePath = '<img src="' . $url . '/uploads/assets/' . $imagePath . ' height="50" width="50" alt="' . $imageAlt . '">';
+        if (! empty($imagePath)) {
+            $imagePath = '<img src="'.$url.'/uploads/assets/'.$imagePath.' height="50" width="50" alt="'.$imageAlt.'">';
         }
+
         return $imagePath;
     }
 
@@ -564,32 +566,28 @@ class AssetPresenter extends Presenter
     public function imageSrc()
     {
         $imagePath = '';
-        if ($this->image && !empty($this->image)) {
+        if ($this->image && ! empty($this->image)) {
             $imagePath = $this->image;
-        } elseif ($this->model && !empty($this->model->image)) {
+        } elseif ($this->model && ! empty($this->model->image)) {
             $imagePath = $this->model->image;
         }
-        if (!empty($imagePath)) {
-            return config('app.url') . '/uploads/assets/' . $imagePath;
+        if (! empty($imagePath)) {
+            return config('app.url').'/uploads/assets/'.$imagePath;
         }
+
         return $imagePath;
     }
 
     /**
      * Get Displayable Name
      * @return string
+     *
+     * @todo this should be factored out - it should be subsumed by fullName (below)
+     *
      **/
     public function name()
     {
-
-        if (empty($this->model->name)) {
-            if (isset($this->model->model)) {
-                return $this->model->model->name . ' (' . $this->model->asset_tag . ')';
-            }
-            return $this->model->asset_tag;
-        }
-        return $this->model->name . ' (' . $this->model->asset_tag . ')';
-
+        return $this->fullName;
     }
 
     /**
@@ -599,16 +597,22 @@ class AssetPresenter extends Presenter
     public function fullName()
     {
         $str = '';
+
+        // Asset name
         if ($this->model->name) {
-            $str .= $this->name;
+            $str .= $this->model->name;
         }
 
+        // Asset tag
         if ($this->asset_tag) {
-            $str .= ' (' . $this->model->asset_tag . ')';
+            $str .= ' ('.$this->model->asset_tag.')';
         }
+
+        // Asset Model name
         if ($this->model->model) {
-            $str .= ' - ' . $this->model->model->name;
+            $str .= ' - '.$this->model->model->name;
         }
+
         return $str;
     }
 
@@ -618,13 +622,12 @@ class AssetPresenter extends Presenter
      */
     public function eol_date()
     {
-
         if (($this->purchase_date) && ($this->model->model) && ($this->model->model->eol)) {
             $date = date_create($this->purchase_date);
-            date_add($date, date_interval_create_from_date_string($this->model->model->eol . ' months'));
+            date_add($date, date_interval_create_from_date_string($this->model->model->eol.' months'));
+
             return date_format($date, 'Y-m-d');
         }
-
     }
 
     /**
@@ -633,8 +636,7 @@ class AssetPresenter extends Presenter
      */
     public function months_until_eol()
     {
-
-        $today = date("Y-m-d");
+        $today = date('Y-m-d');
         $d1 = new DateTime($today);
         $d2 = new DateTime($this->eol_date());
 
@@ -657,6 +659,7 @@ class AssetPresenter extends Presenter
         if ($this->model->assigned) {
             return 'deployed';
         }
+
         return $this->model->assetstatus->getStatuslabelType();
     }
 
@@ -670,6 +673,7 @@ class AssetPresenter extends Presenter
         if ($this->model->assigned) {
             return trans('general.deployed');
         }
+
         return $this->model->assetstatus->name;
     }
 
@@ -697,7 +701,7 @@ class AssetPresenter extends Presenter
 
                 // If it's assigned and not set to the default "ready to deploy" status
                 if ($this->assetstatus->name != trans('general.ready_to_deploy')) {
-                    return trans('general.deployed') . ' (' . $this->model->assetstatus->name . ')';
+                    return trans('general.deployed').' ('.$this->model->assetstatus->name.')';
                 }
 
                 // If it's assigned to the default "ready to deploy" status, just
@@ -716,14 +720,15 @@ class AssetPresenter extends Presenter
     }
 
     /**
-     * Date the warantee expires.
+     * Date the warranty expires.
      * @return false|string
      */
-    public function warrantee_expires()
+    public function warranty_expires()
     {
         if (($this->purchase_date) && ($this->warranty_months)) {
             $date = date_create($this->purchase_date);
-            date_add($date, date_interval_create_from_date_string($this->warranty_months . ' months'));
+            date_add($date, date_interval_create_from_date_string($this->warranty_months.' months'));
+
             return date_format($date, 'Y-m-d');
         }
 
@@ -741,6 +746,6 @@ class AssetPresenter extends Presenter
 
     public function glyph()
     {
-        return '<i class="fa fa-barcode" aria-hidden="true"></i>';
+        return '<i class="fas fa-barcode" aria-hidden="true"></i>';
     }
 }

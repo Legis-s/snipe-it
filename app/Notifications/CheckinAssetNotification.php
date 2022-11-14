@@ -2,40 +2,35 @@
 
 namespace App\Notifications;
 
+use App\Models\Asset;
 use App\Models\Setting;
-use Illuminate\Bus\Queueable;
 use App\Models\User;
-use Illuminate\Notifications\Notification;
-use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Messages\SlackMessage;
+use Illuminate\Notifications\Notification;
 
 class CheckinAssetNotification extends Notification
 {
     use Queueable;
-
 
     /**
      * Create a new notification instance.
      *
      * @param $params
      */
-    public function __construct($params)
+    public function __construct(Asset $asset, $checkedOutTo, User $checkedInBy, $note)
     {
-        $this->target = $params['target'];
-        $this->item = $params['item'];
-        $this->admin = $params['admin'];
-        $this->note = '';
-        $this->expected_checkin = '';
-        $this->target_type = $params['target_type'];
-        $this->settings = $params['settings'];
+        $this->target = $checkedOutTo;
+        $this->item = $asset;
+        $this->admin = $checkedInBy;
+        $this->note = $note;
 
-        if (array_key_exists('note', $params)) {
-            $this->note = $params['note'];
-        }
+        $this->settings = Setting::getSettings();
+        $this->expected_checkin = '';
 
         if ($this->item->expected_checkin) {
-            $this->expected_checkin = \App\Helpers\Helper::getFormattedDateObject($this->item->expected_checkin, 'date',
+            $this->expected_checkin = Helper::getFormattedDateObject($this->item->expected_checkin, 'date',
                 false);
         }
     }
@@ -43,26 +38,22 @@ class CheckinAssetNotification extends Notification
     /**
      * Get the notification's delivery channels.
      *
-     * @param  mixed  $notifiable
      * @return array
      */
     public function via()
     {
-
         $notifyBy = [];
 
-        if (Setting::getSettings()->slack_endpoint!='') {
+        if (Setting::getSettings()->slack_endpoint != '') {
             \Log::debug('use slack');
             $notifyBy[] = 'slack';
         }
 
         /**
-         * Only send checkin notifications to users if the category 
+         * Only send checkin notifications to users if the category
          * has the corresponding checkbox checked.
          */
-        if ($this->item->checkin_email() && $this->target instanceof User && $this->target->email != '')
-        {
-            \Log::debug('use email');
+        if ($this->item->checkin_email() && $this->target instanceof User && $this->target->email != '') {
             $notifyBy[] = 'mail';
         }
 
@@ -71,40 +62,34 @@ class CheckinAssetNotification extends Notification
 
     public function toSlack()
     {
-
         $admin = $this->admin;
         $item = $this->item;
         $note = $this->note;
-        $botname = ($this->settings->slack_botname!='') ? $this->settings->slack_botname : 'Snipe-Bot' ;
+        $botname = ($this->settings->slack_botname != '') ? $this->settings->slack_botname : 'Snipe-Bot';
 
         $fields = [
             trans('general.administrator') => '<'.$admin->present()->viewUrl().'|'.$admin->present()->fullName().'>',
             trans('general.status') => $item->assetstatus->name,
             trans('general.location') => ($item->location) ? $item->location->name : '',
         ];
-        
+
         return (new SlackMessage)
-            ->content(':arrow_down: :computer: Asset Checked In')
+            ->content(':arrow_down: :computer: '.trans('mail.Asset_Checkin_Notification'))
             ->from($botname)
             ->attachment(function ($attachment) use ($item, $note, $admin, $fields) {
                 $attachment->title(htmlspecialchars_decode($item->present()->name), $item->present()->viewUrl())
                     ->fields($fields)
                     ->content($note);
             });
-
-
     }
 
     /**
      * Get the mail representation of the notification.
      *
-     * @param  mixed  $notifiable
      * @return \Illuminate\Notifications\Messages\MailMessage
      */
     public function toMail()
     {
-
-
         $fields = [];
 
         // Check if the item has custom fields associated with it
@@ -121,10 +106,8 @@ class CheckinAssetNotification extends Notification
                 'fields'        => $fields,
                 'expected_checkin'  => $this->expected_checkin,
             ])
-            ->subject('Asset checked in');
-
+            ->subject(trans('mail.Asset_Checkin_Notification'));
 
         return $message;
     }
-
 }

@@ -1,6 +1,7 @@
 <?php
+
 return [
-    'about_companies_title'            => 'A propos des entreprises',
-    'about_companies_text'                  => 'Les entreprises peuvent être utilisées comme simple champ d\'identification, ou bien afin de limité la visibilité des items, utilisateurs etc... Si le support complet de l\'entreprise est activé dans les paramètres d\'administration.',
     'select_company' => 'Sélectionnez une compagnie',
+    'about_companies' => 'A propos des organisations',
+    'about_companies_description' => '        Vous pouvez utiliser les compagnies comme un simple champ d\'information, ou vous pouvez les utiliser pour restreindre la visibilité et la disponibilité des actifs aux utilisateurs avec une compagnie spécifique en activant le Support complet des organisations multiples dans vos paramètres d\'administration.',
 ];

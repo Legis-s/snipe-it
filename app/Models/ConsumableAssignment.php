@@ -88,29 +88,29 @@ class ConsumableAssignment extends Model
 
     public function assignedAssets()
     {
-        return $this->morphMany('App\Models\Asset', 'assigned', 'assigned_type', 'assigned_to')->withTrashed();
+        return $this->morphMany(App\Models\Asset::class, 'assigned', 'assigned_type', 'assigned_to')->withTrashed();
     }
 
 
     public function consumable()
     {
-        return $this->belongsTo('\App\Models\Consumable')->withTrashed();
-    }
-
-
-    public function location()
-    {
-        return $this->belongsTo('\App\Models\Location', 'assigned_to');
+        return $this->belongsTo(\App\Models\Consumable::class);
     }
 
     public function user()
     {
-        return $this->belongsTo('\App\Models\User', 'user_id')->withTrashed();
+        return $this->belongsTo(\App\Models\User::class, 'assigned_to');
     }
+
+    public function location()
+    {
+        return $this->belongsTo(\App\Models\Location::class, 'assigned_to');
+    }
+
 
     public function purchase()
     {
-        return $this->belongsTo('\App\Models\Purchase', 'purchase_id')->withTrashed();
+        return $this->belongsTo(\App\Models\Purchase::class, 'purchase_id')->withTrashed();
     }
     public function availableForReturn()
     {
@@ -181,10 +181,6 @@ class ConsumableAssignment extends Model
 
     public function contract()
     {
-        return $this->belongsTo('\App\Models\Contract', 'contract_id');
+        return $this->belongsTo(\App\Models\Contract::class, 'user_id');
     }
-
-
-
-
 }

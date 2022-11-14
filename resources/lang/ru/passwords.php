@@ -1,11 +1,9 @@
 <?php
 
 return [
-    'sent'	        => 'Ваша ссылка с паролем отправлена!',
-    'user'			=> 'Активных пользователей с указанным email-ом не найдено.',
-    'user_inactive'	=> 'Письмо будет отправленно, если этот адрес электронной почты существует в нашей системе',
-    'token'         => 'Указанный вами токен сброса пароля недействителен',
-    'password'      => 'Пароли должны содержать не менее восьми символов и соответствовать требованиям.',
-    'reset'         => 'Ваш пароль был сброшен'
+    'sent'	        => 'If a matching user with a valid email address exists in our system, a password recovery email has been sent.',
+    'user'			=> 'If a matching user with a valid email address exists in our system, a password recovery email has been sent.',
+    'token'         => 'This password reset token is invalid or expired, or does not match the username provided.',
+    'reset'         => 'Your password has been reset!',
 ];
 

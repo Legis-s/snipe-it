@@ -1,8 +1,6 @@
 <?php
 
 return array(
-    'about_categories_title' 			=> '關於類別',
-    'about_categories'  				=> '資產類別可幫助您組織您的資產。例如：桌上型電腦、筆記型電腦、手機、平板...等，您可依需求自行定義類別。',
     'asset_categories' 					=> '資產類別',
     'category_name'  					=> '類別名稱',
     'checkin_email'                     => '在借出/繳回時發送郵件給使用者。',
@@ -20,5 +18,6 @@ return array(
     'update'  							=> '更新類別',
     'use_default_eula'					=> '用<a href="#" data-toggle="modal" data-target="#eulaModal">預設EULA（最終使用者許可協議）</a> 進行替換。',
     'use_default_eula_disabled'			=> '<del>使用預設EULA（最終使用者許可協議）替換。</del>沒有找到預設EULA（最終使用者許可協議）。請在設定中增加一個。',
+    'use_default_eula_column'			=> '使用預設的 EULA',
 
 );

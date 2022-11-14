@@ -1,8 +1,6 @@
 <?php
 
 return array(
-    'about_categories_title' 			=> 'Amdan Categoriau',
-    'about_categories'  				=> 'Mae categoriau yn cynorthwyo chi i cadw trefn ar eich eitemau. Enghreifftiau o categoriau yw &quot;Cyfrifiadur pen-bwrdd&quot;, &quot;Gliniadur&quot;, &quot;Ffôn Symudol&quot;, &quot;Tabledi&quot;, ac yn y blaen, ond cewch gosod rhain yn ol eich angen.',
     'asset_categories' 					=> 'Categoriau Asedau',
     'category_name'  					=> 'Enw categori',
     'checkin_email'                     => 'Gyrru ebost i defnyddiwr wrth nodi fewn/allan.',
@@ -20,5 +18,6 @@ return array(
     'update'  							=> 'Diweddaru Categori',
     'use_default_eula'					=> 'Defnyddio\'r <a href="#" data-toggle="modal" data-target="#eulaModal">prif CTDT diofyn</a> yn lle.',
     'use_default_eula_disabled'			=> '<del>Defnyddio\'r CTDT diofyn yn lle\'r un presennol.</del>Nid oes prif CTDT diofyn wedi gosod. Ychwanegwch yn ynj gosodiadau os gwelwch yn dda.',
+    'use_default_eula_column'			=> 'Use default EULA',
 
 );

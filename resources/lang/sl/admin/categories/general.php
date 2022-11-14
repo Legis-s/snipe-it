@@ -1,12 +1,10 @@
 <?php
 
 return array(
-    'about_categories_title' 			=> 'O kategorijah',
-    'about_categories'  				=> 'Kategorije vam pomagajo organizirati vaše predmete. Kategorije primerov so &quot;Namizni računalniki&quot;, &quot;Prenosni računalniki&quot;, &quot;Mobilni telefoni&quot;, &quot;Tablice&quot;in tako naprej, vendar lahko kategorije uporabite kakor koli je smiselno za vas.',
     'asset_categories' 					=> 'Kategorije sredstev',
     'category_name'  					=> 'Ime kategorije',
-    'checkin_email'                     => 'Send email to user on checkin/checkout.',
-    'checkin_email_notification'        => 'This user will be sent an email on checkin/checkout.',
+    'checkin_email'                     => 'Pošlji e-pošto uporabniku ob sprejemu/izdaji.',
+    'checkin_email_notification'        => 'Uporabnik bo poslan e-pošto ob sprejemu/izdaji.',
     'clone'                             => 'Kloniraj Karegorijo',
     'create'  							=> 'Ustvari kategorijo',
     'edit'                              => 'Uredi Kategorijo',
@@ -20,5 +18,6 @@ return array(
     'update'  							=> 'Posodobi kategorijo',
     'use_default_eula'					=> 'Uporabite <a href="#" data-toggle="modal" data-target="#eulaModal">privzeto EULA</a> namesto tega.',
     'use_default_eula_disabled'			=> '<del>Namesto tega uporabite privzeto EULA.</del> Ni privzete EULA. Dodajte jo v Nastavitvah.',
+    'use_default_eula_column'			=> 'Uporabi privzeto EULA',
 
 );

@@ -1,7 +1,8 @@
 <?php
 
 return [
-    'sent'	        => '귀하의 비밀번호 링크가 전송되었습니다!',
-    'user'			=> 'No matching active user found with that email.',
+    'sent'	        => 'If a matching user with a valid email address exists in our system, a password recovery email has been sent.',
+    'user'			=> 'If a matching user with a valid email address exists in our system, a password recovery email has been sent.',
+    'token'         => 'This password reset token is invalid or expired, or does not match the username provided.',
+    'reset'         => 'Your password has been reset!',
 ];
-

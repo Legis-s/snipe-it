@@ -1,4 +1,9 @@
 <?php
+
+use App\Http\Controllers\CustomFieldsController;
+use App\Http\Controllers\CustomFieldsetsController;
+use Illuminate\Support\Facades\Route;
+
 /*
 * Custom Fields Routes
 */
@@ -7,22 +12,35 @@
 
 Route::group([ 'prefix' => 'fields','middleware' => ['auth'] ], function () {
 
-    Route::get('{field_id}/fieldset/{fieldset_id}/disassociate',
-        ['uses' => 'CustomFieldsController@deleteFieldFromFieldset',
-        'as' => 'fields.disassociate']
-    );
+    Route::post(
+        'required/{fieldset_id}/{field_id}',
+        [CustomFieldsetsController::class, 'makeFieldRequired']
+    )->name('fields.required');
 
-    Route::post('fieldsets/{id}/associate',
-        ['uses' => 'CustomFieldsetsController@associate',
-        'as' => 'fieldsets.associate']
-    );
+    Route::post(
+        'optional/{fieldset_id}/{field_id}',
+        [CustomFieldsetsController::class, 'makeFieldOptional']
+    )->name('fields.optional');
 
-    Route::resource('fieldsets', 'CustomFieldsetsController', [
+    Route::post(
+        '{field_id}/fieldset/{fieldset_id}/disassociate',
+        [CustomFieldsController::class, 'deleteFieldFromFieldset']
+    )->name('fields.disassociate');
+
+    Route::post(
+        'fieldsets/{id}/associate',
+        [CustomFieldsetsController::class, 'associate']
+    )->name('fieldsets.associate');
+
+    Route::resource('fieldsets', CustomFieldsetsController::class, [
     'parameters' => ['fieldset' => 'field_id', 'field' => 'field_id']
     ]);
+
+
 });
 
-Route::resource('fields', 'CustomFieldsController', [
+Route::resource('fields', CustomFieldsController::class, [
     'middleware' => ['auth'],
-    'parameters' => ['field' => 'field_id', 'fieldset' => 'fieldset_id']
+    'parameters' => ['field' => 'field_id', 'fieldset' => 'fieldset_id'],
 ]);
+

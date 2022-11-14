@@ -1,8 +1,6 @@
 <?php
 
 return array(
-    'about_categories_title' 			=> '关于资产分类',
-    'about_categories'  				=> '资产分类帮助你管理你资产。你可以设置例如：台式机，笔记本，手机，平板 等等分类，当然你也可以自定义这些分类。',
     'asset_categories' 					=> '资产分类',
     'category_name'  					=> '分类名称',
     'checkin_email'                     => '在签入/签出时发送邮件给所有者。',
@@ -20,5 +18,6 @@ return array(
     'update'  							=> '更新分类',
     'use_default_eula'					=> '用<a href="#" data-toggle="modal" data-target="#eulaModal">默认EULA（最终用户许可协议）</a>进行替换',
     'use_default_eula_disabled'			=> '<del>使用默认EULA（最终用户许可协议）替换.</del>没有设置默认EULA（最终用户许可协议），请在设置中增加一个。',
+    'use_default_eula_column'			=> '使用默认的 EULA',
 
 );

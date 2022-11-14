@@ -14,7 +14,7 @@
 | licensed to email   | license_email    | License                                   |
 | licensed to name    | license_name     | License                                   |
 | maintained          | maintained       | License                                   |
-| manager_id          |                  | User                                         |
+| manager_id          |                  | User                                      |
 | manufacturer        | manufacturer     | All                                       |
 | model name          | asset_model      | Asset                                     |
 | model number        | model_number     | Asset                                     |
@@ -29,9 +29,15 @@
 | serial number       | serial           | Asset, license                            |
 | status              | status           | Asset ? All                               |
 | supplier            | supplier         | Asset ? All                               |
+| minimum quantity    | min_amt          | Consumable                                |
 | termination date    | termination_date | License                                   |
 | warranty months     | warranty_months  | Asset                                     |
 | User Related Fields | assigned_to      | Asset                                     |
 | name                |                  |                                           |
+| email               |                  |                                           |
 | username            |                  |                                           |
+| address             | address          |  User                                     |
+| city                | city             |  User                                     |
+| state               | state            |  User                                     |
+| country             | country          |  User                                     |
 

@@ -1,24 +1,30 @@
 <?php
 
-return array(
+return [
 
-    'asset_tag'   	=> '資產標籤',
-    'asset_model'       => '型號',
-    'book_value'  	=> '價值',
-    'change' 		=> '進/出',
-    'checkout_date' => '借出日期',
-    'checkoutto' 	=> '已借出',
-    'diff' 			=> '價差',
-    'dl_csv' 		=> '下載CSV檔',
+    'asset_tag'   	=> 'Asset Tag',
+    'asset_model'       => 'Model',
+    'book_value'  	=> 'Current Value',
+    'change' 		=> 'In/Out',
+    'checkout_date' => 'Checkout Date',
+    'checkoutto' 	=> 'Checked Out',
+    'current_value' => 'Current Value',
+    'diff' 			=> 'Diff',
+    'dl_csv' 		=> 'Download CSV',
     'eol' 			=> 'EOL',
     'id'      		=> 'ID',
-    'location' 		=> '位置',
-    'purchase_cost'	=> '成本',
-    'purchase_date'	=> '已購買',
-    'serial'   		=> '序號',
-    'status'   		=> '狀態',
-    'title'      	=> '資產',
-    'image'		=> '設備圖片',
-    'days_without_acceptance' => '過期天數'
-
-);
+    'location' 		=> 'Location',
+    'purchase_cost'	=> 'Cost',
+    'purchase_date'	=> 'Purchased',
+    'serial'   		=> 'Serial',
+    'status'   		=> 'Status',
+    'title'      	=> 'Asset ',
+    'image'		    => 'Device Image',
+    'days_without_acceptance' => 'Days Without Acceptance',
+    'monthly_depreciation' => 'Monthly Depreciation',
+    'assigned_to'    => 'Assigned To',
+    'requesting_user' => 'Requesting User',
+    'requested_date' => 'Requested Date',
+    'changed'       => 'Changed',
+    'icon' => 'Icon',
+];

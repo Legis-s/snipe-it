@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\Setting;
+use Illuminate\Console\Command;
 
 class DisableLDAP extends Command
 {
@@ -38,10 +38,8 @@ class DisableLDAP extends Command
      */
     public function handle()
     {
-
         if ($this->confirm("\n****************************************************\nThis will disable LDAP support. You will not be able \nto login with an account that does not exist \nlocally in the Snipe-IT local database. \n****************************************************\n\nDo you wish to continue? [y|N]")) {
-
-            $setting = Setting::first();
+            $setting = Setting::getSettings();
             $setting->ldap_enabled = 0;
             if ($setting->save()) {
                 $this->info('LDAP has been set to disabled.');
@@ -51,6 +49,5 @@ class DisableLDAP extends Command
         } else {
             $this->info('Canceled. No actions taken.');
         }
-
     }
 }

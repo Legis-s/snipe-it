@@ -1,8 +1,6 @@
 <?php
 
 return array(
-    'about_categories_title' 			=> 'About Categories',
-    'about_categories'  				=> 'Categories help you organize your items. Some example categories might be &quot;Desktops&quot;, &quot;Laptops&quot;, &quot;Mobile Phones&quot;, &quot;Tablets&quot;, and so on, but you can use categories any way that makes sense for you.',
     'asset_categories' 					=> 'Asset Categories',
     'category_name'  					=> 'Category Name',
     'checkin_email'                     => 'Send email to user on checkin/checkout.',
@@ -20,5 +18,6 @@ return array(
     'update'  							=> 'Update Category',
     'use_default_eula'					=> 'Use the <a href="#" data-toggle="modal" data-target="#eulaModal">primary default EULA</a> instead.',
     'use_default_eula_disabled'			=> '<del>Use the primary default EULA instead.</del> No primary default EULA is set. Please add one in Settings.',
+    'use_default_eula_column'			=> 'Use default EULA',
 
 );

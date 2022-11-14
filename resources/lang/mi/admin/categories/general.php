@@ -1,8 +1,6 @@
 <?php
 
 return array(
-    'about_categories_title' 			=> 'Mō Ngā Kāwai',
-    'about_categories'  				=> 'Ka awhina nga akomanga ki a koe ki te whakarite whakaritenga Ko etahi o nga tauira tauira ko &quot;Desktops&quot;, &quot;Laptops&quot;, &quot;Matau Phones&quot;, &quot;Tablets&quot;, me te pera ano, engari ka taea e koe te whakamahi i nga kāwai i tetahi ara e whai tikanga ana ki a koe.',
     'asset_categories' 					=> 'Ngā Kāwai Āhuatanga',
     'category_name'  					=> 'Ingoa Kāwai',
     'checkin_email'                     => 'Send email to user on checkin/checkout.',
@@ -20,5 +18,6 @@ return array(
     'update'  							=> 'Whakahōuhia te Kāwai',
     'use_default_eula'					=> 'Whakamahia te taunoa 123_57__321primary taunoa EULA</a> hei utu mo tenei.',
     'use_default_eula_disabled'			=> '<del>Me te taunoa tuatahi o te EULA instead.</del> Karekau he tautuhinga taunoa EULA. Tēnā tāpirihia tētahi i Ngā Tautuhinga.',
+    'use_default_eula_column'			=> 'Use default EULA',
 
 );

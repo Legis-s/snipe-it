@@ -2,12 +2,13 @@
 
 return array(
 
-    'does_not_exist' => 'Lisensie bestaan ​​nie.',
+    'does_not_exist' => 'License does not exist or you do not have permission to view it.',
     'user_does_not_exist' => 'Gebruiker bestaan ​​nie.',
     'asset_does_not_exist' 	=> 'Die bate wat u met hierdie lisensie probeer assosieer, bestaan ​​nie.',
     'owner_doesnt_match_asset' => 'Die bate wat u met hierdie lisensie probeer assosieer, is in besit van ander as die persoon wat in die opdrag toegeken is.',
     'assoc_users'	 => 'Hierdie lisensie word tans na \'n gebruiker nagegaan en kan nie uitgevee word nie. Gaan asseblief die lisensie eers in, en probeer dan weer uitvee.',
     'select_asset_or_person' => 'Jy moet \'n bate of \'n gebruiker kies, maar nie albei nie.',
+    'not_found' => 'License not found',
 
 
     'create' => array(

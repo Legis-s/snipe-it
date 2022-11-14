@@ -1,6 +1,7 @@
 <?php
+
 return [
-    'about_companies_title'            => 'Despre companii',
-    'about_companies_text'                  => 'Companiile pot fi utilizate ca câmp simplu de identificare sau pot fi utilizate pentru a limita vizibilitatea activelor, a utilizatorilor etc., dacă activarea completă a companiei este activată în setările de administrator.',
     'select_company' => 'Selectați Companie',
+    'about_companies' => 'Despre companii',
+    'about_companies_description' => '        Poți folosi câmpul "Companie" ca un câmp simplu de informare sau le puteți folosi pentru a restricționa vizibilitatea și disponibilitatea activelor la utilizatorii unei anumite companii prin activarea opțiunii "Suport complet companii" din setările administrative.',
 ];

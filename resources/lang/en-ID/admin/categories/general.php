@@ -1,8 +1,6 @@
 <?php
 
 return array(
-    'about_categories_title' 			=> 'Tentang Kategori',
-    'about_categories'  				=> 'Kategori membantu mengatur barang-barang anda. Beberapa contoh kategori seperti &quot;Desktop&quot;, &quot;Laptop&quot;, &quot;Mobile Phones&quot;, &quot;Tablet&quot;, dan sebagainya, namun Anda tetap dapat menggunakan kategori dengan cara apapun yang masuk akal bagi Anda.',
     'asset_categories' 					=> 'Kategori Aset',
     'category_name'  					=> 'Nama Kategori',
     'checkin_email'                     => 'Kirim email ke pengguna saat checkin/checkout.',
@@ -20,5 +18,6 @@ return array(
     'update'  							=> 'Update Kategori',
     'use_default_eula'					=> 'Gunakan <a href="#" data-toggle="modal" data-target="#eulaModal"> standar primer EULA </a> gantinya.',
     'use_default_eula_disabled'			=> '<del> Gunakan EULA standar utama sebagai gantinya. </ del> Tidak ada standar utama EULA diatur. Silakan menambahkan satu di Settings.',
+    'use_default_eula_column'			=> 'Gunakan kebijakan bawaan',
 
 );

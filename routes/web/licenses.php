@@ -1,49 +1,45 @@
 <?php
 
+use App\Http\Controllers\Licenses;
+use Illuminate\Support\Facades\Route;
 
-# Licenses
-Route::group([ 'prefix' => 'licenses', 'middleware' => ['auth'] ], function () {
+// Licenses
+Route::group(['prefix' => 'licenses', 'middleware' => ['auth']], function () {
+    Route::get('{licenseId}/clone', [Licenses\LicensesController::class, 'getClone'])->name('clone/license');
 
-    Route::get('{licenseId}/clone', [ 'as' => 'clone/license', 'uses' => 'LicensesController@getClone' ]);
-    Route::post('{licenseId}/clone', [ 'as' => 'clone/license', 'uses' => 'LicensesController@postCreate' ]);
-
-    Route::get('{licenseId}/freecheckout', [
-    'as' => 'licenses.freecheckout',
-    'uses' => 'LicensesController@getFreeLicense'
-    ]);
-    Route::get('{licenseId}/checkout/{seatId?}', [
-    'as' => 'licenses.checkout',
-    'uses' => 'LicensesController@getCheckout'
-    ]);
+    Route::get('{licenseId}/freecheckout',
+        [Licenses\LicensesController::class, 'getFreeLicense']
+    )->name('licenses.freecheckout');
+    Route::get('{licenseId}/checkout/{seatId?}', 
+        [Licenses\LicenseCheckoutController::class, 'create']
+    )->name('licenses.checkout');
     Route::post(
         '{licenseId}/checkout/{seatId?}',
-        [ 'as' => 'licenses.checkout', 'uses' => 'LicensesController@postCheckout' ]
-    );
-    Route::get('{licenseId}/checkin/{backto?}', [
-    'as' => 'licenses.checkin',
-    'uses' => 'LicensesController@getCheckin'
-    ]);
+        [Licenses\LicenseCheckoutController::class, 'store']
+    ); //name() would duplicate here, so we skip it.
+    Route::get('{licenseSeatId}/checkin/{backto?}',
+        [Licenses\LicenseCheckinController::class, 'create']
+    )->name('licenses.checkin');
 
-    Route::post('{licenseId}/checkin/{backto?}', [
-    'as' => 'licenses.checkin.save',
-    'uses' => 'LicensesController@postCheckin'
-    ]);
+    Route::post('{licenseId}/checkin/{backto?}',
+        [Licenses\LicenseCheckinController::class, 'store']
+    )->name('licenses.checkin.save');
 
     Route::post(
     '{licenseId}/upload',
-    [ 'as' => 'upload/license', 'uses' => 'LicensesController@postUpload' ]
-    );
+        [Licenses\LicenseFilesController::class, 'store']
+    )->name('upload/license');
     Route::delete(
     '{licenseId}/deletefile/{fileId}',
-    [ 'as' => 'delete/licensefile', 'uses' => 'LicensesController@getDeleteFile' ]
-    );
+        [Licenses\LicenseFilesController::class, 'destroy']
+    )->name('delete/licensefile');
     Route::get(
     '{licenseId}/showfile/{fileId}/{download?}',
-    [ 'as' => 'show.licensefile', 'uses' => 'LicensesController@displayFile' ]
-    );
+        [Licenses\LicenseFilesController::class, 'show']
+    )->name('show.licensefile');
 });
 
-Route::resource('licenses', 'LicensesController', [
+Route::resource('licenses', Licenses\LicensesController::class, [
     'middleware' => ['auth'],
-    'parameters' => ['license' => 'license_id']
+    'parameters' => ['license' => 'license_id'],
 ]);

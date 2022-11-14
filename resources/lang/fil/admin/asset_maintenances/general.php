@@ -7,5 +7,10 @@
         'view'               => 'Tingnan ang mga Detalye sa Pagpapanatili ng Asset',
         'repair'             => 'Ayusin',
         'maintenance'        => 'Ang Pagpapanatili',
-        'upgrade'            => 'I-upgrade'
+        'upgrade'            => 'I-upgrade',
+        'calibration'        => 'Calibration',
+        'software_support'   => 'Software Support',
+        'hardware_support'   => 'Hardware Support',
+        'configuration_change'   => 'Configuration Change',
+        'pat_test'           => 'PAT Test',
     ];

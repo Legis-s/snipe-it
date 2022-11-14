@@ -2,12 +2,13 @@
 
 return array(
 
-    'does_not_exist' => 'Лиценз байхгүй байна.',
+    'does_not_exist' => 'License does not exist or you do not have permission to view it.',
     'user_does_not_exist' => 'Хэрэглэгч байхгүй байна.',
     'asset_does_not_exist' 	=> 'Энэ лицензтэй холбогдохыг хүссэн хөрөнгө байхгүй байна.',
     'owner_doesnt_match_asset' => 'Энэ лицензтэй холбогдохыг хүсэж буй хөрөнгө нь тухайн сонгосон хүнээс доош сомдолоос өөр сомений эзэмшдэг.',
     'assoc_users'	 => 'Энэ лицензийг одоогоор хэрэглэгчид шалгаж, устгах боломжгүй байна. Лицензийг эхлээд шалгаад дахин устгахыг оролдоно уу.',
     'select_asset_or_person' => 'Та хөрөнгө эсвэл хэрэглэгчийг сонгох ёстой, гэхдээ хоёулаа биш.',
+    'not_found' => 'License not found',
 
 
     'create' => array(

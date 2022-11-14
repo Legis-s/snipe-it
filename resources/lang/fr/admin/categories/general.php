@@ -1,8 +1,6 @@
 <?php
 
 return array(
-    'about_categories_title' 			=> 'A propos des catégories',
-    'about_categories'  				=> 'Les catégories vous aident à organiser vos items. Des exemples de catégories peuvent être "Ordinateurs de bureau", "Ordinateurs portables", "Téléphones portables", "Tablettes", etc..., mais vous pouvez utiliser les catégories comme cela vous convient.',
     'asset_categories' 					=> 'Catégories',
     'category_name'  					=> 'Catégorie',
     'checkin_email'                     => 'Envoyer un courriel à l\'utilisateur lors de l\'association/dissociation.',
@@ -20,5 +18,6 @@ return array(
     'update'  							=> 'Actualiser Catégorie',
     'use_default_eula'					=> 'Utiliser la <a href="#" data-toggle="modal" data-target="#eulaModal">license primaire par défaut </a> à la place.',
     'use_default_eula_disabled'			=> '<del>Utilisez la licence par défaut à la place.</del> Aucune licence d\'utilisation par défaut trouvée. Ajoutez-en une dans la section "Préférences".',
+    'use_default_eula_column'			=> 'Utilisez les CGU par défaut',
 
 );

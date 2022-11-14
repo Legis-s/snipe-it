@@ -7,5 +7,10 @@
         'view'               => 'Засвар үйлчилгээний дэлгэрэнгүй',
         'repair'             => 'Засварлах',
         'maintenance'        => 'Засвар үйлчилгээ',
-        'upgrade'            => 'Шинэчлэх'
+        'upgrade'            => 'Шинэчлэх',
+        'calibration'        => 'Тохируулга',
+        'software_support'   => 'Программ хангамжийн дэмжих байдал',
+        'hardware_support'   => 'Тоног төхөөрөмжийн дэмжих байдал',
+        'configuration_change'   => 'Configuration Change',
+        'pat_test'           => 'PAT Test',
     ];

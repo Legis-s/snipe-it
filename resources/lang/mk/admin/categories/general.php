@@ -1,8 +1,6 @@
 <?php
 
 return array(
-    'about_categories_title' 			=> 'За категориите',
-    'about_categories'  				=> 'Категориите ви помагаат да ги организирате вашите средства. Некои примери може да бидат &quot;Десктоп компјутери&quot;, &quot;Лаптопи&quot;, &quot;Мобилни телефони&quot;, &quot;Таблети&quot;, и така натаму, но можете да користите категории и на кој било начин кој има смисла за вас.',
     'asset_categories' 					=> 'Категории на основни средства',
     'category_name'  					=> 'Име на категорија',
     'checkin_email'                     => 'Send email to user on checkin/checkout.',
@@ -20,5 +18,6 @@ return array(
     'update'  							=> 'Уреди категорија',
     'use_default_eula'					=> 'Наместо ова, користете <a href="#" data-toggle="modal" data-target="#eulaModal">стандардни Услови за користење</a>.',
     'use_default_eula_disabled'			=> '<del>Наместо ова, користете стандардни Услови за користење.</del> Не се внесени стандардни Услови за користење. Ве молиме внесете ги во Поставки.',
+    'use_default_eula_column'			=> 'Use default EULA',
 
 );

@@ -1,8 +1,10 @@
 <?php
+
 namespace App\Models;
 
 use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Watson\Validating\ValidatingTrait;
 
@@ -13,40 +15,37 @@ use Watson\Validating\ValidatingTrait;
  */
 class Component extends SnipeModel
 {
-    protected $presenter = 'App\Presenters\ComponentPresenter';
+    use HasFactory;
+
+    protected $presenter = \App\Presenters\ComponentPresenter::class;
     use CompanyableTrait;
     use Loggable, Presentable;
     use SoftDeletes;
-
-    protected $dates = ['deleted_at', 'purchase_date'];
+    protected $casts = [
+        'purchase_date' => 'datetime',
+    ];
     protected $table = 'components';
 
     /**
-     * Set static properties to determine which checkout/checkin handlers we should use
+     * Category validation rules
      */
-    public static $checkoutClass = null;
-    public static $checkinClass = null;
-
-    
-    /**
-    * Category validation rules
-    */
-    public $rules = array(
-        'name'        => 'required|min:3|max:255',
-        'qty'     => 'required|integer|min:1',
-        'category_id' => 'required|integer',
-        'company_id'  => 'integer|nullable',
+    public $rules = [
+        'name'           => 'required|min:3|max:255',
+        'qty'            => 'required|integer|min:1',
+        'category_id'    => 'required|integer|exists:categories,id',
+        'company_id'     => 'integer|nullable',
+        'min_amt'        => 'integer|min:0|nullable',
         'purchase_date'  => 'date|nullable',
-        'purchase_cost'   => 'numeric|nullable',
-    );
+        'purchase_cost'  => 'numeric|nullable|gte:0',
+    ];
 
     /**
-    * Whether the model should inject it's identifier to the unique
-    * validation rules before attempting validation. If this property
-    * is not set in the model it will default to true.
-    *
-    * @var boolean
-    */
+     * Whether the model should inject it's identifier to the unique
+     * validation rules before attempting validation. If this property
+     * is not set in the model it will default to true.
+     *
+     * @var bool
+     */
     protected $injectUniqueIdentifier = true;
     use ValidatingTrait;
 
@@ -66,112 +65,184 @@ class Component extends SnipeModel
         'order_number',
         'qty',
         'serial',
+        'notes',
     ];
 
     use Searchable;
-    
+
     /**
      * The attributes that should be included when searching the model.
-     * 
+     *
      * @var array
      */
-    protected $searchableAttributes = ['name', 'order_number', 'serial', 'purchase_cost', 'purchase_date'];
+    protected $searchableAttributes = ['name', 'order_number', 'serial', 'purchase_cost', 'purchase_date', 'notes'];
 
     /**
      * The relations and their attributes that should be included when searching the model.
-     * 
+     *
      * @var array
      */
     protected $searchableRelations = [
         'category'     => ['name'],
         'company'      => ['name'],
         'location'     => ['name'],
-    ];      
+    ];
 
+
+    /**
+     * Establishes the components -> action logs -> uploads relationship
+     *
+     * @author A. Gianotto <snipe@snipe.net>
+     * @since [v6.1.13]
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
+    public function uploads()
+    {
+        return $this->hasMany(\App\Models\Actionlog::class, 'item_id')
+            ->where('item_type', '=', self::class)
+            ->where('action_type', '=', 'uploaded')
+            ->whereNotNull('filename')
+            ->orderBy('created_at', 'desc');
+    }
+
+
+    /**
+     * Establishes the component -> location relationship
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v3.0]
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
     public function location()
     {
-        return $this->belongsTo('\App\Models\Location', 'location_id');
-    }
-
-    public function assets()
-    {
-        return $this->belongsToMany('\App\Models\Asset', 'components_assets')->withPivot('id', 'assigned_qty', 'created_at', 'user_id');
-    }
-
-    public function admin()
-    {
-        return $this->belongsTo('\App\Models\User', 'user_id');
-    }
-
-    public function company()
-    {
-        return $this->belongsTo('\App\Models\Company', 'company_id');
-    }
-
-
-    public function category()
-    {
-        return $this->belongsTo('\App\Models\Category', 'category_id');
+        return $this->belongsTo(\App\Models\Location::class, 'location_id');
     }
 
     /**
-    * Get action logs for this consumable
-    */
-    public function assetlog()
+     * Establishes the component -> assets relationship
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v3.0]
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
+    public function assets()
     {
-        return $this->hasMany('\App\Models\Actionlog', 'item_id')->where('item_type', Component::class)->orderBy('created_at', 'desc')->withTrashed();
+        return $this->belongsToMany(\App\Models\Asset::class, 'components_assets')->withPivot('id', 'assigned_qty', 'created_at', 'user_id', 'note');
     }
 
+    /**
+     * Establishes the component -> admin user relationship
+     *
+     * @todo this is probably not needed - refactor
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v3.0]
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
+    public function admin()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'user_id');
+    }
 
-    public function numRemaining()
+    /**
+     * Establishes the component -> company relationship
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v3.0]
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
+    public function company()
+    {
+        return $this->belongsTo(\App\Models\Company::class, 'company_id');
+    }
+
+    /**
+     * Establishes the component -> category relationship
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v3.0]
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
+    public function category()
+    {
+        return $this->belongsTo(\App\Models\Category::class, 'category_id');
+    }
+
+    /**
+     * Establishes the component -> action logs relationship
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v3.0]
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
+    public function assetlog()
+    {
+        return $this->hasMany(\App\Models\Actionlog::class, 'item_id')->where('item_type', self::class)->orderBy('created_at', 'desc')->withTrashed();
+    }
+
+    /**
+     * Check how many items within a component are checked out
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v5.0]
+     * @return int
+     */
+    public function numCheckedOut()
     {
         $checkedout = 0;
-
         foreach ($this->assets as $checkout) {
             $checkedout += $checkout->pivot->assigned_qty;
         }
 
-
-        $total = $this->qty;
-        $remaining = $total - $checkedout;
-        return $remaining;
-    }   
+        return $checkedout;
+    }
 
     /**
-    * Query builder scope to order on company
-    *
-    * @param  Illuminate\Database\Query\Builder  $query  Query builder instance
-    * @param  text                              $order       Order
-    *
-    * @return Illuminate\Database\Query\Builder          Modified query builder
-    */
+     * Check how many items within a component are remaining
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v3.0]
+     * @return int
+     */
+    public function numRemaining()
+    {
+        return $this->qty - $this->numCheckedOut();
+    }
+
+    /**
+     * Query builder scope to order on company
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query  Query builder instance
+     * @param  string                              $order       Order
+     *
+     * @return \Illuminate\Database\Query\Builder          Modified query builder
+     */
     public function scopeOrderCategory($query, $order)
     {
         return $query->join('categories', 'components.category_id', '=', 'categories.id')->orderBy('categories.name', $order);
     }
 
     /**
-    * Query builder scope to order on company
-    *
-    * @param  Illuminate\Database\Query\Builder  $query  Query builder instance
-    * @param  text                              $order       Order
-    *
-    * @return Illuminate\Database\Query\Builder          Modified query builder
-    */
+     * Query builder scope to order on company
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query  Query builder instance
+     * @param  string                              $order       Order
+     *
+     * @return \Illuminate\Database\Query\Builder          Modified query builder
+     */
     public function scopeOrderLocation($query, $order)
     {
         return $query->leftJoin('locations', 'components.location_id', '=', 'locations.id')->orderBy('locations.name', $order);
     }
 
-
     /**
-    * Query builder scope to order on company
-    *
-    * @param  Illuminate\Database\Query\Builder  $query  Query builder instance
-    * @param  text                              $order       Order
-    *
-    * @return Illuminate\Database\Query\Builder          Modified query builder
-    */
+     * Query builder scope to order on company
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query  Query builder instance
+     * @param  string                              $order       Order
+     *
+     * @return \Illuminate\Database\Query\Builder          Modified query builder
+     */
     public function scopeOrderCompany($query, $order)
     {
         return $query->leftJoin('companies', 'components.company_id', '=', 'companies.id')->orderBy('companies.name', $order);

@@ -9,6 +9,8 @@
         'maintenance'        => 'Обслуживание',
         'upgrade'            => 'Модернизировать',
         'calibration'        => 'Калибровка',
-        'software_support'   => 'Поддержка программного обеспечения',
+        'software_support'   => 'Программная поддержка',
         'hardware_support'   => 'Аппаратная поддержка',
+        'configuration_change'   => 'Configuration Change',
+        'pat_test'           => 'PAT Test',
     ];

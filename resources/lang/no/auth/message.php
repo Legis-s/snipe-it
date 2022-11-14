@@ -7,11 +7,23 @@ return array(
     'account_not_activated'  => 'Denne brukerkontoen er ikke aktiv.',
     'account_suspended'      => 'Denne brukerkontoen er deaktivert.',
     'account_banned'         => 'Denne brukerkontoen er forbudt.',
-    'throttle'               => 'For mange mislykkede påloggingsforsøk. Prøv igjen om :minutes minutt(er).',
+    'throttle'               => 'For mange mislykkede påloggingsforsøk. Prøv igjen om :minutes minutter.',
+
+    'two_factor' => array(
+        'already_enrolled'      => 'Enheten din er allerede registrert.',
+        'success'               => 'Du har logget inn.',
+        'code_required'         => 'To-faktor-kode er påkrevd.',
+        'invalid_code'          => 'To-faktor-koden er ugyldig.',
+    ),
 
     'signin' => array(
         'error'   => 'Det oppstod et problem under innlogging. Prøv igjen.',
         'success' => 'Vellykket innlogging.',
+    ),
+
+    'logout' => array(
+        'error'   => 'Det oppstod et problem med utlogging, prøv igjen.',
+        'success' => 'Du har logget ut.',
     ),
 
     'signup' => array(
@@ -19,19 +31,15 @@ return array(
         'success' => 'Opprettelse av konto vellykket.',
     ),
 
-        'forgot-password' => array(
-            'error'   => 'Det oppstod et problem under henting av kode for resetting av passord. Prøv igjen.',
-            'success' => 'E-post for resetting av passord sendt.',
-        ),
-
-        'forgot-password-confirm' => array(
-            'error'   => 'Det oppstod et problem under gjenopprettelse av passordet ditt. Prøv igjen.',
-            'success' => 'Ditt passord er resatt.',
-        ),
-
-    'activate' => array(
-        'error'   => 'Det oppstod et problem under aktivering av kontoen din. Prøv igjen.',
-        'success' => 'Din konto er aktivert.',
+    'forgot-password' => array(
+        'error'   => 'Det oppstod et problem under henting av kode for resetting av passord. Prøv igjen.',
+        'success' => 'Hvis den oppgitte e-postadressen finnes i systemet vårt har det blitt sendt en e-post med gjenopprettelse av passord.',
     ),
+
+    'forgot-password-confirm' => array(
+        'error'   => 'Det oppstod et problem under gjenopprettelse av passordet ditt. Prøv igjen.',
+        'success' => 'Ditt passord er resatt.',
+    ),
+
 
 );

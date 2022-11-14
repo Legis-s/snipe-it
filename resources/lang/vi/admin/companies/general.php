@@ -1,6 +1,7 @@
 <?php
+
 return [
-    'about_companies_title'            => 'Thông tin về các công ty',
-    'about_companies_text'                  => 'Danh mục các công ty có thể được swr dụng như là một trường định danh đơn giản hoặc có thể được swr dụng để lọc ra số lượng hạn chế các tài sản, người dùng, v. v nếu như hỗ chợ công ty được kích hoạt trong thiết lập quản trị (Admin settings) của bạn.',
     'select_company' => 'Chọn công ty',
+    'about_companies' => 'About Companies',
+    'about_companies_description' => '        You can use companies as a simple informative field, or you can use them to restrict asset visibility and availability to users with a specific company by enabling Full Company Support in your Admin Settings.',
 ];

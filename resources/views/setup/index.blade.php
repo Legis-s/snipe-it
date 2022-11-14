@@ -1,5 +1,5 @@
 @extends('layouts/setup')
-
+{{-- TODO: Translate --}}
 {{-- Page title --}}
 @section('title')
 Create a User ::
@@ -20,13 +20,33 @@ Create a User ::
     </tr>
   </thead>
   <tbody>
+  <tr {!! ($start_settings['php_version_min']) ? ' class="success"' : ' class="danger"' !!}>
+      <td>PHP</td>
+      <td>
+          @if ($start_settings['php_version_min'])
+              <i class="fas fa-check preflight-success"></i>
+          @else
+              <i class="fas fa-times preflight-error"></i>
+          @endif
+      </td>
+      <td>
+          @if ($start_settings['php_version_min'])
+              Yay!
+          @else
+              Oh no!
+          @endif
+
+              You're running PHP version {{ PHP_VERSION }}. ({{ config('app.min_php') }} or greater is required.)
+      </td>
+  </tr>
+
     <tr {!! ($start_settings['url_valid']) ? ' class="success"' : ' class="danger"' !!}>
       <td>URL</td>
       <td>
         @if ($start_settings['url_valid'])
-          <i class="fa fa-check preflight-success"></i>
+          <i class="fas fa-check preflight-success"></i>
         @else
-          <i class="fa fa-times preflight-error"></i>
+          <i class="fas fa-times preflight-error"></i>
         @endif
       </td>
       <td>
@@ -43,9 +63,9 @@ Create a User ::
       <td>Database</td>
       <td>
         @if ($start_settings['db_conn']===true)
-          <i class="fa fa-check preflight-success"></i>
+          <i class="fas fa-check preflight-success"></i>
         @else
-          <i class="fa fa-times preflight-error"></i>
+          <i class="fas fa-times preflight-error"></i>
         @endif
       </td>
       <td>
@@ -61,16 +81,16 @@ Create a User ::
       <td>Config File</td>
       <td>
         @if (!$start_settings['env_exposed'])
-          <i class="fa fa-check preflight-success"></i>
+          <i class="fas fa-check preflight-success"></i>
         @else
-          <i class="fa fa-times preflight-error"></i>
+          <i class="fas fa-times preflight-error"></i>
         @endif
       </td>
       <td>
         @if (!$start_settings['env_exposed'])
           Sweet. It doesn't look like your <code>.env</code> file is exposed to the outside world. (You should double check this in a browser though. You don't ever want anyone able to see that file. Ever. Ever ever.) <a href="../../.env">Click here to check now</a> (This should return a file not found or forbidden error.)
         @else
-          Please make sure your <code>.env</code> is not readable by the outside world via web browser. You don't ever want anyone able to see that file. Ever. Ever ever. An exposed <code>.env</code> file can disclose sensitive data about your system and database. <a href="../../.env">Click here to check now</a> (This should return a file not found or forbidden error.)
+          We cannot determine if your config file is exposed to the outside world, so you will have to manually verify this. You don't ever want anyone able to see that file. Ever. Ever ever. An exposed <code>.env</code> file can disclose sensitive data about your system and database.
         @endif
       </td>
     </tr>
@@ -79,9 +99,9 @@ Create a User ::
       <td>Environment</td>
       <td>
         @if ($start_settings['prod'])
-          <i class="fa fa-check preflight-success"></i>
+          <i class="fas fa-check preflight-success"></i>
         @else
-          <i class="fa fa-times preflight-error"></i>
+          <i class="fas fa-times preflight-error"></i>
         @endif
       </td>
       <td>
@@ -97,9 +117,9 @@ Create a User ::
       <td>File Owner</td>
       <td>
         @if (!$start_settings['owner_is_admin'])
-          <i class="fa fa-check preflight-success"></i>
+          <i class="fas fa-check preflight-success"></i>
         @else
-          <i class="fa fa-times preflight-error"></i>
+          <i class="fas fa-times preflight-error"></i>
         @endif
       </td>
       <td>
@@ -115,9 +135,9 @@ Create a User ::
       <td>Permissions</td>
       <td>
         @if ($start_settings['writable'])
-          <i class="fa fa-check preflight-success"></i>
+          <i class="fas fa-check preflight-success"></i>
         @else
-          <i class="fa fa-times preflight-error"></i>
+          <i class="fas fa-times preflight-error"></i>
         @endif
       </td>
       <td>
@@ -133,9 +153,9 @@ Create a User ::
       <td>Debug</td>
       <td>
         @if (!$start_settings['debug_exposed'])
-          <i class="fa fa-check preflight-success"></i>
+          <i class="fas fa-check preflight-success"></i>
         @else
-          <i class="fa fa-times preflight-error"></i>
+          <i class="fas fa-times preflight-error"></i>
         @endif
       </td>
       <td>
@@ -151,9 +171,9 @@ Create a User ::
       <td>Image Library</td>
       <td>
         @if ($start_settings['gd'])
-          <i class="fa fa-check preflight-success"></i>
+          <i class="fas fa-check preflight-success"></i>
         @else
-          <i class="fa fa-times preflight-warning"></i>
+          <i class="fas fa-times preflight-warning"></i>
         @endif
       </td>
       <td>
@@ -208,7 +228,7 @@ Create a User ::
             $("#mailtesticon").html('');
             $("#mailteststatus").html('');
             $('#mailteststatus-error').html('');
-            $("#mailtesticon").html('<i class="fa fa-spinner spin"></i> Sending Test Email...');
+            $("#mailtesticon").html('<i class="fas fa-spinner spin"></i> Sending Test Email...');
 
             $.ajax({
                 url: "{{ route('setup.mailtest') }}",
@@ -222,11 +242,11 @@ Create a User ::
                         $('#mailteststatus-error').html('');
                         $("#mailteststatus").removeClass('text-danger');
                         $("#mailteststatus").addClass('text-success');
-                        $("#mailteststatus").html('<i class="fa fa-check text-success"></i> Mail sent to {{ config('mail.from.address') }}!');
+                        $("#mailteststatus").html('<i class="fas fa-check text-success"></i> Mail sent to {{ config('mail.from.address') }}!');
                     } else {
                         $("#mailtestrow").removeClass('success').removeClass('info').removeClass('warning');
                         $("#mailtestrow").addClass('danger');
-                        $("#mailtesticon").html('<i class="fa fa-check preflight-error"></i>');
+                        $("#mailtesticon").html('<i class="fas fa-check preflight-error"></i>');
                         $("#mailtestresult").html('Something went wrong. Your email was not sent. Check your mail settings in your <code>.env</code> file.');
 
                     }
@@ -241,7 +261,7 @@ Create a User ::
                     $('#mailteststatus-error').html('');
                     $("#mailteststatus").removeClass('text-success');
                     $("#mailteststatus").addClass('text-danger');
-                    $("#mailtesticon").html('<i class="fa fa-exclamation-triangle text-danger"></i>');
+                    $("#mailtesticon").html('<i class="fas fa-exclamation-triangle text-danger"></i>');
                     $('#mailteststatus').html('Mail could not be sent.');
                     if (result.responseJSON) {
                         $('#mailteststatus-error').html('Error: ' + result.responseJSON.messages);

@@ -2,12 +2,13 @@
 
 return array(
 
-    'does_not_exist' => 'Licencja nie istnieje.',
+    'does_not_exist' => 'License does not exist or you do not have permission to view it.',
     'user_does_not_exist' => 'Użytkownik nie istnieje.',
     'asset_does_not_exist' 	=> 'Aktywa, które chcesz skojarzyć z licencją nie istnieją.',
     'owner_doesnt_match_asset' => 'Aktywa, które chcesz skojarzyć z tą licencją są własnością kogoś innego niż osoba wskazana z rozwijanej listy.',
     'assoc_users'	 => 'Ten nabytek/zasób jest przypisany do użytkownika i nie może być usunięty. Proszę sprawdzić przypisanie nabytków/zasobów a następnie spróbować ponownie. ',
     'select_asset_or_person' => 'Musisz wybrać składnik aktywów lub użytkownika, ale nie oba.',
+    'not_found' => 'Licencja nie została znaleziona',
 
 
     'create' => array(

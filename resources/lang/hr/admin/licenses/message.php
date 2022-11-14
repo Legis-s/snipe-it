@@ -2,12 +2,13 @@
 
 return array(
 
-    'does_not_exist' => 'Licenca ne postoji.',
+    'does_not_exist' => 'License does not exist or you do not have permission to view it.',
     'user_does_not_exist' => 'Korisnik ne postoji.',
     'asset_does_not_exist' 	=> 'Imovina koju pokušavate povezati s ovom licencom ne postoji.',
     'owner_doesnt_match_asset' => 'Imovina koju pokušavate povezati s ovom licencom u vlasništvu je nekog drugog osim osobe koja je odabrana u odjeljku za padajući izbornik.',
     'assoc_users'	 => 'Ova je licenca trenutno provjerena korisniku i ne može se izbrisati. Najprije provjerite licencu, a zatim pokušajte ponovno brisati.',
     'select_asset_or_person' => 'Morate odabrati neku vrstu imovine ili korisnika, ali ne oboje.',
+    'not_found' => 'License not found',
 
 
     'create' => array(

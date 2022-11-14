@@ -1,8 +1,6 @@
 <?php
 
 return array(
-    'about_categories_title' 			=> '분류란',
-    'about_categories'  				=> '분류는 품목들을 구성할 떄 유용합니다. 몇가지 예시 분류들로는 &quot;데스크탑&quot;,&quot;랩탑&quot;,&quot;휴대폰&quot;,&quot;타블렛&quot; 등이 있지만, 당신이 원하는 대로 분류들을 사용 할 수 있습니다.',
     'asset_categories' 					=> '자산 분류',
     'category_name'  					=> '분류 명',
     'checkin_email'                     => '반입/반출 시 사용자에게 이메일을 보냅니다.',
@@ -20,5 +18,6 @@ return array(
     'update'  							=> '분류 갱신',
     'use_default_eula'					=> '대체  <a href="#" data-toggle="modal" data-target="#eulaModal">기본 사용권 계약서</a>를 사용합니다.',
     'use_default_eula_disabled'			=> '<del>대체 기본 사용권 계약서를 사용합니다.</del> 기본 사용권 계약서가 정의되지 않았습니다. 설정에서 하나를 추가해 주세요.',
+    'use_default_eula_column'			=> '기본 EULA 사용',
 
 );

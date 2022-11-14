@@ -1,6 +1,7 @@
 <?php
+
 return [
-    'about_companies_title'            => 'Компанийн тухай',
-    'about_companies_text'                  => 'Компаниудыг энгийн тодорхойлогч талбар болгон ашиглаж болно, эсвэл Админ тохиргоонд компаний бүрэн дэмжлэгийг идэвхжүүлсэн тохиолдолд хөрөнгө, хэрэглэгчдийн харагдах байдлыг хязгаарлахад ашиглаж болно.',
     'select_company' => 'Компани сонгох',
+    'about_companies' => 'About Companies',
+    'about_companies_description' => '        You can use companies as a simple informative field, or you can use them to restrict asset visibility and availability to users with a specific company by enabling Full Company Support in your Admin Settings.',
 ];

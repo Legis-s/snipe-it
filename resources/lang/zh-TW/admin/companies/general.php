@@ -1,6 +1,7 @@
 <?php
+
 return [
-    'about_companies_title'            => '關於公司',
-    'about_companies_text'                  => '公司可以用作簡單的識別欄位，如果在管理設定中啟用了完整多企業功能，也可以用於限制資產、使用者的可見性。',
     'select_company' => '選擇公司',
+    'about_companies' => '關於公司',
+    'about_companies_description' => '        你可以將公司當做一個簡單資訊欄位, 也可以通過在管理設置中啟用全面公司支持來使用它們來限制特定公司的用戶的資產可見性和可用性.',
 ];

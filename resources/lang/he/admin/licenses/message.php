@@ -2,12 +2,13 @@
 
 return array(
 
-    'does_not_exist' => 'הרישיון אינו קיים.',
+    'does_not_exist' => 'License does not exist or you do not have permission to view it.',
     'user_does_not_exist' => 'משתמש לא קיים.',
     'asset_does_not_exist' 	=> 'הנכס שאתה מנסה לשייך לרישיון זה אינו קיים.',
     'owner_doesnt_match_asset' => 'הנכס שאתה מנסה לשייך לרישיון זה נמצא בבעלות somene אחר מאשר האדם שנבחר שהוקצה לתפריט הנפתח.',
     'assoc_users'	 => 'רישיון זה נבדק כעת למשתמש ולא ניתן למחוק אותו. בדוק תחילה את הרישיון ולאחר מכן נסה למחוק שוב.',
     'select_asset_or_person' => 'עליך לבחור נכס או משתמש, אך לא את שניהם.',
+    'not_found' => 'License not found',
 
 
     'create' => array(

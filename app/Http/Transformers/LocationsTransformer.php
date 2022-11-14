@@ -2,74 +2,61 @@
 
 namespace App\Http\Transformers;
 
-use App\Models\Location;
-use Illuminate\Database\Eloquent\Collection;
-use Gate;
 use App\Helpers\Helper;
+use App\Models\Location;
+use Gate;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Storage;
 
 class LocationsTransformer
 {
-    public function redYellowGreen($min, $max, $value)
-    {
-        $green_max = 200;
-        $red_max = 255;
-        $red = 0;
-        $green = 0;
-        $blue = 0;
-
-        if ($value < $max / 2) {
-            $red = $red_max;
-            $green = round(($value / ($max / 2)) * $green_max);
-        } else {
-            $green = $green_max;
-            $red = round((1 - (($value - ($max / 2)) / ($max / 2))) * $red_max);
-        }
-        return dechex($red) . dechex($green). "00";
-    }
-
     public function transformLocations(Collection $locations, $total)
     {
-        $array = array();
+        $array = [];
         foreach ($locations as $location) {
             $array[] = self::transformLocation($location);
         }
+
         return (new DatatablesTransformer)->transformDatatables($array, $total);
     }
-
 
     public function transformLocation(Location $location = null)
     {
         if ($location) {
-
             $children_arr = [];
-            foreach ($location->children as $child) {
-                $children_arr[] = [
-                    'id' => (int)$child->id,
-                    'name' => $child->name
-                ];
+            if (! is_null($location->children)) {
+                foreach ($location->children as $child) {
+                    $children_arr[] = [
+                        'id' => (int) $child->id,
+                        'name' => $child->name,
+                    ];
+                }
             }
 
             $array = [
-                'id' => (int)$location->id,
+                'id' => (int) $location->id,
                 'name' => e($location->name),
-                'image' => ($location->image) ? app('locations_upload_url') . e($location->image) : null,
-                'address' => ($location->address) ? e($location->address) : null,
-                'address2' => ($location->address2) ? e($location->address2) : null,
-                'city' => ($location->city) ? e($location->city) : null,
-                'state' => ($location->state) ? e($location->state) : null,
+                'image' =>   ($location->image) ? Storage::disk('public')->url('locations/'.e($location->image)) : null,
+                'address' =>  ($location->address) ? e($location->address) : null,
+                'address2' =>  ($location->address2) ? e($location->address2) : null,
+                'city' =>  ($location->city) ? e($location->city) : null,
+                'state' =>  ($location->state) ? e($location->state) : null,
                 'country' => ($location->country) ? e($location->country) : null,
                 'zip' => ($location->zip) ? e($location->zip) : null,
-                'assigned_assets_count' => (int)$location->assigned_assets_count,
-                'assets_count' => (int)$location->assets_count,
-                'users_count' => (int)$location->users_count,
-                'currency' => ($location->currency) ? e($location->currency) : null,
+                'assigned_assets_count' => (int) $location->assigned_assets_count,
+                'assets_count'    => (int) $location->assets_count,
+                'rtd_assets_count'    => (int) $location->rtd_assets_count,
+                'users_count'    => (int) $location->users_count,
+                'currency' =>  ($location->currency) ? e($location->currency) : null,
+                'ldap_ou' =>  ($location->ldap_ou) ? e($location->ldap_ou) : null,
                 'created_at' => Helper::getFormattedDateObject($location->created_at, 'datetime'),
                 'updated_at' => Helper::getFormattedDateObject($location->updated_at, 'datetime'),
                 'parent' => ($location->parent) ? [
-                    'id' => (int)$location->parent->id,
-                    'name' => e($location->parent->name)
+                    'id' => (int) $location->parent->id,
+                    'name'=> e($location->parent->name),
                 ] : null,
                 'manager' => ($location->manager) ? (new UsersTransformer)->transformUser($location->manager) : null,
+
                 'bitrix_id' => ($location->bitrix_id) ? (int)$location->bitrix_id : null,
                 'pult_id' => ($location->pult_id) ? (int)$location->pult_id : null,
                 'children' => $children_arr,
@@ -79,15 +66,13 @@ class LocationsTransformer
 
             $permissions_array['available_actions'] = [
                 'update' => Gate::allows('update', Location::class) ? true : false,
-                'delete' => (Gate::allows('delete', Location::class) && ($location->assigned_assets_count == 0) && ($location->assets_count == 0) && ($location->users_count == 0) && ($location->deleted_at == '')) ? true : false,
+                'delete' => $location->isDeletable(),
             ];
 
             $array += $permissions_array;
 
             return $array;
         }
-
-
     }
 
     public function transformCollectionForMap(Collection $locations)
@@ -115,31 +100,11 @@ class LocationsTransformer
             }
             $count = 0;
             $all_price= 0;
-//            if ($location->assets) {
-//                $assets = $location->assets;
-//                foreach ($assets as $asset) {
-//                    $all_price+= $asset->purchase_cost;
-//                    $asset_tag = $asset->asset_tag;
-//                    $first_s = substr($asset_tag, 0, 1);
-//                    if ($first_s == "I" || $first_s == "X" || strlen($asset_tag) > 8) {
-//                        $count++;
-//                    }
-//                }
-//            }
             $count = $location->checked_assets_count;
             $max = $location->assets_count;
 
             $res = "808080";
 
-//            if ($count > 0 && $max > 0) {
-//                $res = self::redYellowGreen(0, $max,$count);
-//            }
-//            if ($max > 0 && $count==0){
-//                $res = "FF0000";
-//            }
-//            if ($max != 0 && $max == $count){
-//                $res = "00FF00";
-//            }
 
             if ($max>0 && $count ==  $max){
                 $res = "00FF00";

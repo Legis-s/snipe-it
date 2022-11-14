@@ -1,17 +1,15 @@
 <?php
 
 return array(
-    'about_components_title' 			=> 'About Components',
-    'about_components_text'  			=> 'Components are items that are part of an asset, for example HDD, RAM, etc.',
-    'component_name'                  => 'Component Name',
+    'component_name'                  => 'Heiti íhlutar',
     'checkin'                             => 'Checkin Component',
     'checkout'                             => 'Checkout Component',
-    'cost'				=> 'Purchase Cost',
-    'create'                             => 'Create Component',
-    'edit'                             => 'Edit Component',
-    'date'					=> 'Purchase Date',
-    'order'					=> 'Order Number',
+    'cost'				=> 'Innkaupsverð',
+    'create'                             => 'Skrá íhlut',
+    'edit'                             => 'Breyta íhluti',
+    'date'					=> 'Innkaups dagsetning',
+    'order'					=> 'Pöntunarnúmer',
     'remaining' 			             => 'Remaining',
     'total' 			                 => 'Total',
-    'update'                            => 'Update Component',
+    'update'                            => 'Uppfæra íhlut',
 );

@@ -1,6 +1,7 @@
 <?php
+
 return [
-    'about_companies_title'            => 'Om selskaper',
-    'about_companies_text'                  => 'Selskaper kan brukes som et enkelt identifikator felt, eller kan brukes til å begrense eksponeringen av eiendeler, brukere, etc hvis hele selskapet støtter er aktivert i innstillingene for Admin.',
     'select_company' => 'Velg bedrift',
+    'about_companies' => 'Om bedrifter',
+    'about_companies_description' => '        Du kan bruke bedrifter som et enkelt informasjonsfelt, eller slå på Full Bedriftstøtte i Admin-innstillingene for å kunne begrense tilgangen til brukere fra forskjellige bedrifter.',
 ];

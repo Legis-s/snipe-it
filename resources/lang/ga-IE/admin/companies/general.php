@@ -1,6 +1,7 @@
 <?php
+
 return [
-    'about_companies_title'            => 'Maidir le Cuideachtaí',
-    'about_companies_text'                  => 'Is féidir cuideachtaí a úsáid mar réimse simplí aitheantóra, nó is féidir iad a úsáid chun infheictheacht na sócmhainní, na n-úsáideoirí, srl a theorannú má tá tacaíocht iomlán na cuideachta cumasaithe i do shocruithe Riaracháin.',
     'select_company' => 'Roghnaigh Cuideachta',
+    'about_companies' => 'About Companies',
+    'about_companies_description' => '        You can use companies as a simple informative field, or you can use them to restrict asset visibility and availability to users with a specific company by enabling Full Company Support in your Admin Settings.',
 ];

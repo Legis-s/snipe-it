@@ -2,12 +2,13 @@
 
 return array(
 
-    'does_not_exist' => 'A licença não existe.',
+    'does_not_exist' => 'License does not exist or you do not have permission to view it.',
     'user_does_not_exist' => 'O usuário não existe.',
     'asset_does_not_exist' 	=> 'O ativo do qual você está tentando associar com esta licença não existe.',
     'owner_doesnt_match_asset' => 'O bem que você está tentando associar a está licença é propriedade de alguma outra pessoa que não está selecionada na lista suspensa.',
     'assoc_users'	 => 'Esta licença é atualmente check-out para um usuário e não pode ser excluído. Por favor, atualize seu bem para que não referencie mais este usuário e, em seguida, tente apagar novamente. ',
     'select_asset_or_person' => 'Você deve selecionar um ativo ou um usuário, mas não ambos.',
+    'not_found' => 'Licença não encontrada',
 
 
     'create' => array(

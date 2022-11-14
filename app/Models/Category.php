@@ -1,13 +1,15 @@
 <?php
+
 namespace App\Models;
 
-use App\Http\Traits\UniqueUndeletedTrait;
-use App\Models\SnipeModel;
+use App\Http\Traits\TwoColumnUniqueUndeletedTrait;
 use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Gate;
 use Watson\Validating\ValidatingTrait;
+use App\Helpers\Helper;
 
 /**
  * Model for Categories. Categories are a higher-level group
@@ -19,35 +21,40 @@ use Watson\Validating\ValidatingTrait;
  */
 class Category extends SnipeModel
 {
-    protected $presenter = 'App\Presenters\CategoryPresenter';
+    use HasFactory;
+
+    protected $presenter = \App\Presenters\CategoryPresenter::class;
     use Presentable;
     use SoftDeletes;
-    protected $dates = ['deleted_at'];
+
     protected $table = 'categories';
-    protected $hidden = ['user_id','deleted_at'];
+    protected $hidden = ['user_id', 'deleted_at'];
+
+    protected $casts = [
+        'user_id'      => 'integer',
+    ];
 
     /**
-    * Category validation rules
-    */
-    public $rules = array(
+     * Category validation rules
+     */
+    public $rules = [
         'user_id' => 'numeric|nullable',
-        'name'   => 'required|min:1|max:255',
+        'name'   => 'required|min:1|max:255|two_column_unique_undeleted:category_type',
         'require_acceptance'   => 'boolean',
         'use_default_eula'   => 'boolean',
-        'lifetime'      => 'integer|nullable',
         'category_type'   => 'required|in:asset,accessory,consumable,component,license',
-    );
+    ];
 
     /**
-    * Whether the model should inject it's identifier to the unique
-    * validation rules before attempting validation. If this property
-    * is not set in the model it will default to true.
-    *
-    * @var boolean
-    */
+     * Whether the model should inject it's identifier to the unique
+     * validation rules before attempting validation. If this property
+     * is not set in the model it will default to true.
+     *
+     * @var bool
+     */
     protected $injectUniqueIdentifier = true;
     use ValidatingTrait;
-    use UniqueUndeletedTrait;
+    use TwoColumnUniqueUndeletedTrait;
 
 
     /**
@@ -68,46 +75,89 @@ class Category extends SnipeModel
     ];
 
     use Searchable;
-    
+
     /**
      * The attributes that should be included when searching the model.
-     * 
+     *
      * @var array
      */
     protected $searchableAttributes = ['name', 'category_type'];
 
     /**
      * The relations and their attributes that should be included when searching the model.
-     * 
+     *
      * @var array
      */
     protected $searchableRelations = [];
 
-    public function has_models()
+    /**
+     * Checks if category can be deleted
+     *
+     * @author [Dan Meltzer] [<dmeltzer.devel@gmail.com>]
+     * @since [v5.0]
+     * @return bool
+     */
+    public function isDeletable()
     {
-        return $this->hasMany('\App\Models\AssetModel', 'category_id')->count();
+        return Gate::allows('delete', $this)
+                && ($this->itemCount() == 0);
     }
 
+    /**
+     * Establishes the category -> accessories relationship
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v2.0]
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
     public function accessories()
     {
-        return $this->hasMany('\App\Models\Accessory');
+        return $this->hasMany(\App\Models\Accessory::class);
     }
 
+    /**
+     * Establishes the category -> licenses relationship
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v4.3]
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
     public function licenses()
     {
-        return $this->hasMany('\App\Models\License');
+        return $this->hasMany(\App\Models\License::class);
     }
 
+    /**
+     * Establishes the category -> consumables relationship
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v3.0]
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
     public function consumables()
     {
-        return $this->hasMany('\App\Models\Consumable');
+        return $this->hasMany(\App\Models\Consumable::class);
     }
 
+    /**
+     * Establishes the category -> consumables relationship
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v3.0]
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
     public function components()
     {
-        return $this->hasMany('\App\Models\Component');
+        return $this->hasMany(\App\Models\Component::class);
     }
 
+    /**
+     * Get the number of items in the category
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v2.0]
+     * @return int
+     */
     public function itemCount()
     {
         switch ($this->category_type) {
@@ -119,47 +169,73 @@ class Category extends SnipeModel
                 return $this->components()->count();
             case 'consumable':
                 return $this->consumables()->count();
+            case 'license':
+                return $this->licenses()->count();
         }
+
         return '0';
     }
 
+    /**
+     * Establishes the category -> assets relationship
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v2.0]
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
     public function assets()
     {
-        return $this->hasManyThrough('\App\Models\Asset', '\App\Models\AssetModel', 'category_id', 'model_id');
-    }
-
-    public function models()
-    {
-        return $this->hasMany('\App\Models\AssetModel', 'category_id');
-    }
-
-    public function getEula()
-    {
-
-        $Parsedown = new \Parsedown();
-
-        if ($this->eula_text) {
-            return $Parsedown->text(e($this->eula_text));
-        } elseif ((Setting::getSettings()->default_eula_text) && ($this->use_default_eula=='1')) {
-            return $Parsedown->text(e(Setting::getSettings()->default_eula_text));
-        } else {
-            return null;
-        }
-
+        return $this->hasManyThrough(\App\Models\Asset::class, \App\Models\AssetModel::class, 'category_id', 'model_id');
     }
 
     /**
-     * scopeRequiresAcceptance
+     * Establishes the category -> models relationship
      *
-     * @param $query
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v2.0]
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
+    public function models()
+    {
+        return $this->hasMany(\App\Models\AssetModel::class, 'category_id');
+    }
+
+    /**
+     * Checks for a category-specific EULA, and if that doesn't exist,
+     * checks for a settings level EULA
      *
-     * @return mixed
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v2.0]
+     * @return string | null
+     */
+    public function getEula()
+    {
+
+        if ($this->eula_text) {
+            return Helper::parseEscapedMarkedown($this->eula_text);
+        } elseif ((Setting::getSettings()->default_eula_text) && ($this->use_default_eula == '1')) {
+            return Helper::parseEscapedMarkedown(Setting::getSettings()->default_eula_text);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * -----------------------------------------------
+     * BEGIN QUERY SCOPES
+     * -----------------------------------------------
+     **/
+
+    /**
+     * Query builder scope for whether or not the category requires acceptance
+     *
      * @author  Vincent Sposato <vincent.sposato@gmail.com>
-     * @version v1.0
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query  Query builder instance
+     * @return \Illuminate\Database\Query\Builder          Modified query builder
      */
     public function scopeRequiresAcceptance($query)
     {
-
         return $query->where('require_acceptance', '=', true);
     }
 }

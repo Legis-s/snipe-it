@@ -1,6 +1,7 @@
 <?php
+
 return [
-    'about_companies_title'            => 'Apie įmones',
-    'about_companies_text'                  => 'Įmonės gali būti naudojamos kaip paprastas identifikatoriaus laukas arba gali būti naudojami norint apriboti turto, naudotojų ir tt matomumą, jei jūsų administratoriaus nustatymuose yra įjungta visa įmonės parama.',
     'select_company' => 'Pasirinkite kompaniją',
+    'about_companies' => 'About Companies',
+    'about_companies_description' => '        You can use companies as a simple informative field, or you can use them to restrict asset visibility and availability to users with a specific company by enabling Full Company Support in your Admin Settings.',
 ];

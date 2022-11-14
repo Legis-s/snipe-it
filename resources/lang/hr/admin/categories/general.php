@@ -1,8 +1,6 @@
 <?php
 
 return array(
-    'about_categories_title' 			=> 'O kategorijama',
-    'about_categories'  				=> 'Kategorije vam pomažu organizirati stavke. Neke kategorije primjera mogu biti &quot;Desktops&quot;, &quot;Laptops&quot;, &quot;Mobile Phones&quot;, &quot;Tablets&quot; i tako dalje, ali kategorije možete koristiti na bilo koji način koji ima smisla za vas.',
     'asset_categories' 					=> 'Kategorije sredstava',
     'category_name'  					=> 'Naziv kategorije',
     'checkin_email'                     => 'Pošalji e-mail korisniku prilikom checkin/checkout-a.',
@@ -20,5 +18,6 @@ return array(
     'update'  							=> 'Kategorija ažuriranja',
     'use_default_eula'					=> 'Umjesto toga upotrijebite <a href="#" data-toggle="modal" data-target="#eulaModal">primarnu postavku EULA</a>.',
     'use_default_eula_disabled'			=> '<del>Uporedi primarnu zadanu EULA.</del> Nije postavljena primarna zadana EULA. Dodajte jednu u Postavke.',
+    'use_default_eula_column'			=> 'Use default EULA',
 
 );

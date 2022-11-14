@@ -2,12 +2,13 @@
 
 return array(
 
-    'does_not_exist' => '许可证不存在',
+    'does_not_exist' => '许可证不存在或您没有查看权限。',
     'user_does_not_exist' => '用户不存在',
     'asset_does_not_exist' 	=> '您正在授权的资产不存在。',
     'owner_doesnt_match_asset' => '您正在授权的资产已经被占用，请选择其他人。',
     'assoc_users'	 => '此许可证已经分配给某个用户，目前不能被删除，请检查资产信息，然后再尝试删除。',
     'select_asset_or_person' => '您必须选择资产或用户，但不能同时选择两者。',
+    'not_found' => '找不到许可证',
 
 
     'create' => array(
