@@ -21,7 +21,7 @@ class MassOperation extends SnipeModel
     protected $presenter = \App\Presenters\MassOperationsPresenter::class;
     use Presentable;
     use SoftDeletes;
-    
+
     protected $table = 'mass_operations';
     protected $rules = [
         'operation_type' => 'max:32',
@@ -55,7 +55,8 @@ class MassOperation extends SnipeModel
 
     protected $dates = [
         'created_at',
-        'updated_at'
+        'updated_at',
+        'deleted_at'
     ];
 
     use Searchable;
