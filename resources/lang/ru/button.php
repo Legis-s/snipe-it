@@ -16,9 +16,9 @@ return [
     'select_files'				=> 'Выбрать файлы...',
     'generate_labels'           => '{1} Сгенерировать этикетку[2,*] Cгенерировать этикетки',
     'send_password_link'        => 'Отправить ссылку для сброса пароля',
-    'go'                        => 'Go',
-    'bulk_actions'              => 'Bulk Actions',
+    'go'                        => 'Применить',
+    'bulk_actions'              => 'Массовые операции',
     'add_maintenance'           => 'Add Maintenance',
-    'append'                    => 'Append',
+    'append'                    => 'Добавить',
     'new'                       => 'Создать',
 ];

@@ -1,5 +1,36 @@
 <?php
 
+use App\Http\Controllers\Account;
+use App\Http\Controllers\ActionlogController;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Assets\BulkAssetsController;
+use App\Http\Controllers\CategoriesController;
+use App\Http\Controllers\CompaniesController;
+use App\Http\Controllers\ContractsController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DepartmentsController;
+use App\Http\Controllers\DepreciationsController;
+use App\Http\Controllers\GroupsController;
+use App\Http\Controllers\HealthController;
+use App\Http\Controllers\ImportsController;
+use App\Http\Controllers\InventoryStatuslabelsController;
+use App\Http\Controllers\LocationsController;
+use App\Http\Controllers\ManufacturersController;
+use App\Http\Controllers\MassOperationsController;
+use App\Http\Controllers\ModalController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportsController;
+use App\Http\Controllers\RequestsController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\StatuslabelsController;
+use App\Http\Controllers\SuppliersController;
+use App\Http\Controllers\ViewAssetsController;
+use App\Http\Controllers\InventoriesController;
+use App\Http\Controllers\PurchasesController;
+use App\Http\Controllers\MapController;
+use App\Http\Controllers\Auth\LoginController;
+use Illuminate\Support\Facades\Route;
+
 Route::impersonate();
 
 Route::group(['middleware' => 'auth'], function () {
@@ -33,13 +64,6 @@ Route::group(['middleware' => 'auth'], function () {
         'locations/{locationId}/printallassigned',
         [LocationsController::class, 'print_all_assigned']
     )->name('locations.print_all_assigned');
-
-    /*
-    * Contracts
-    */
-    Route::resource('contracts', ContractsController::class, [
-        'parameters' => ['contract' => 'contract_id']
-    ]);
 
 
     /*
@@ -76,18 +100,12 @@ Route::group(['middleware' => 'auth'], function () {
       ]);
 
     /*
-    * inventory Status Labels
-    */
-    Route::resource('inventorystatuslabels', InventoryStatuslabelsController::class, [
-        'parameters' => ['inventorystatuslabel' => 'inventorystatuslabel_id']
-    ]);
-
-    /*
     * Departments
     */
     Route::resource('departments', DepartmentsController::class, [
         'parameters' => ['department' => 'department_id'],
     ]);
+
 });
 
 /*
@@ -220,18 +238,6 @@ Route::group(['prefix' => 'import', 'middleware' => ['auth']], function () {
     )->name('imports.index');
 });
 
-/*
-|--------------------------------------------------------------------------
-| Invent Routes
-|--------------------------------------------------------------------------
-|
-|
-|
-*/
-
-Route::resource('inventories', InventoriesController::class, [
-    'parameters' => ['inventory' => 'inventory_id']
-]);
 
 /*
 |--------------------------------------------------------------------------
@@ -247,43 +253,106 @@ Route::resource('requests', RequestsController::class, [
 ]);
 
 
-/*
+/**
 |--------------------------------------------------------------------------
-| Purchases Routes
+| BEGIN CUSTOM ROUTES
 |--------------------------------------------------------------------------
-|
-|
-|
 */
 
-Route::resource('purchases', PurchasesController::class, [
-    'parameters' => ['purchase' => 'purchase_id']
-]);
+Route::group(['middleware' => 'auth'], function () {
+
+    /**
+    * Contracts
+    */
+    Route::resource('contracts', ContractsController::class, [
+        'parameters' => ['contract' => 'contract_id']
+    ]);
+
+    /**
+    * Inventories
+    */
+    Route::resource('inventories', InventoriesController::class, [
+        'parameters' => ['inventory' => 'inventory_id']
+    ]);
+
+    /**
+     * Inventory Status Labels
+     */
+    Route::resource('inventorystatuslabels', InventoryStatuslabelsController::class, [
+        'parameters' => ['inventorystatuslabel' => 'inventorystatuslabel_id']
+    ]);
+
+    /**
+     * Purchases
+     */
+
+    Route::resource('purchases', PurchasesController::class, [
+        'parameters' => ['purchase' => 'purchase_id']
+    ]);
+    Route::get(
+        'purchases/{assetId}/clone',
+        [PurchasesController::class, 'getClone']
+    )->name('clone/purchases');
 
 
-Route::group(
-    ['prefix' => 'purchases',
-        'middleware' => ['auth']],
-    function () {
+    /**
+     * Map
+     */
+    Route::get(
+        'map',
+        [MapController::class, 'index']
+    )->name('map');
 
-        Route::get('{assetId}/clone', [
-            'as' => 'clone/purchases',
-            'uses' => 'PurchasesController@getClone'
-        ]);
-    });
+    /**
+     * MassOperations
+     */
+    Route::group(
+        [
+            'prefix' => 'bulk',
+        ],
+
+        function () {
+            // Bulk sell
+            Route::get('sell',
+                [MassOperationsController::class, 'showSell']
+            )->name('bulk.sell.show');
+
+            Route::post('sell',
+                [MassOperationsController::class, 'storeSell']
+            )->name('bulk.sell.store');
 
 
-/*
+            // Bulk checkin
+            Route::get('checkin',
+                [MassOperationsController::class, 'showCheckin']
+            )->name('bulk.checkin.show');
+
+            Route::post('checkin',
+                [MassOperationsController::class, 'storeCheckin']
+            )->name('bulk.checkin.store');
+
+
+            // Bulk checkout
+            Route::get('checkout',
+                [MassOperationsController::class, 'showCheckout']
+            )->name('bulk.checkout.show');
+
+            Route::post('checkout',
+                [MassOperationsController::class, 'storeCheckout']
+            )->name('bulk.checkout.store');
+        }
+    );
+    Route::resource('bulk', MassOperationsController::class, [
+        'parameters' => ['bulk' => 'bulk_id']
+    ]);
+
+});
+
+/**
 |--------------------------------------------------------------------------
-| Map Routes
+| END CUSTOM ROUTES
 |--------------------------------------------------------------------------
-|
-|
-|
-*/
-
-Route::resource('map', 'MapController', []);
-
+ */
 
 /*
 |--------------------------------------------------------------------------
@@ -560,3 +629,12 @@ Route::middleware(['auth'])->get(
     '/',
     [DashboardController::class, 'index']
 )->name('home');
+
+Route::group(['middleware' => 'web'], function () {
+
+    Route::get(
+        'auth',
+        [AuthController::class, 'getToken']
+    )->name('token_get');
+
+});

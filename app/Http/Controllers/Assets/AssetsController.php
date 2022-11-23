@@ -10,10 +10,6 @@ use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\CheckoutRequest;
 use App\Models\Company;
-use App\Models\Consumable;
-use App\Models\Contract;
-use App\Models\CustomField;
-use App\Models\Import;
 use App\Models\Location;
 use App\Models\Setting;
 use App\Models\Statuslabel;
@@ -87,12 +83,9 @@ class AssetsController extends Controller
     public function create(Request $request)
     {
         $this->authorize('create', Asset::class);
-        $asset = new Asset;
-        $asset->nds = 20;
-        $asset->quality = 5;
         $view = View::make('hardware/edit')
             ->with('statuslabel_list', Helper::statusLabelList())
-            ->with('item', $asset)
+            ->with('item', new Asset)
             ->with('statuslabel_types', Helper::statusTypeList());
 
         if ($request->filled('model_id')) {
@@ -155,9 +148,8 @@ class AssetsController extends Controller
             $asset->requestable             = request('requestable', 0);
             $asset->rtd_location_id         = request('rtd_location_id', null);
             $asset->depreciable_cost        = Helper::ParseFloat($request->get('depreciable_cost'));
-            $asset->quality                 = $request->input('quality');;
-            $asset->quality                 = $request->input('quality');
-            $asset->nds                     = intval(request('nds', 0));
+            $asset->quality                 = intval(request('quality', 5));
+            $asset->nds                     = intval(request('nds', 20));
 
             if (! empty($settings->audit_interval)) {
                 $asset->next_audit_date = Carbon::now()->addMonths($settings->audit_interval)->toDateString();
@@ -236,7 +228,7 @@ class AssetsController extends Controller
         $value = $request->cookie('optional_info');
         echo $value;
         return $value;
-     }
+    }
 
     /**
      * Returns a view that presents a form to edit an existing asset.
@@ -325,7 +317,7 @@ class AssetsController extends Controller
         $asset->purchase_cost = Helper::ParseCurrency($request->input('purchase_cost', null));
         $asset->purchase_date = $request->input('purchase_date', null);
         $asset->supplier_id = $request->input('supplier_id', null);
-        $asset->nds = intval(request('nds', 0));
+        $asset->nds = $request->input('nds', 20);
         $asset->expected_checkin = $request->input('expected_checkin', null);
 
         // If the box isn't checked, it's not in the request at all.
@@ -362,12 +354,11 @@ class AssetsController extends Controller
         $asset->company_id = Company::getIdForCurrentUser($request->input('company_id'));
         $asset->model_id = $request->input('model_id');
         $asset->order_number = $request->input('order_number');
-        $asset->asset_tag    = $request->input('asset_tag');
-        $asset->notes        = $request->input('notes');
-        $asset->physical     = '1';
-        $asset->quality        = $request->input('quality');
-        $asset->depreciable_cost        = $request->input('depreciable_cost');
-
+        $asset->asset_tag = $asset_tag[1];
+        $asset->notes = $request->input('notes');
+        $asset->physical = '1';
+        $asset->quality = $request->input('quality');
+        $asset->depreciable_cost = $request->input('depreciable_cost');
         $asset = $request->handleImages($asset);
 
         // Update custom fields in the database.
@@ -914,124 +905,5 @@ class AssetsController extends Controller
 
         return view('hardware/requested', compact('requestedItems'));
     }
-
-
-    /**
-     * Returns a view that presents a form to check an asset out to a
-     * user.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @param int $assetId
-     * @since [v1.0]
-     * @return View
-     */
-    public function sellGet($assetId)
-    {
-        $this->authorize('checkout', Asset::class);
-        // Check if the asset exists
-        if (is_null($item = Asset::find(e($assetId)))) {
-            return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));
-        }
-
-
-        if ($item->availableForSell()) {
-            return view('hardware/sell', compact('item'));
-        }
-        return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.checkout.not_available'));
-
-
-    }
-
-
-    /**
-     * Validate and process the form data to check out an asset to a user.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @param AssetCheckoutRequest $request
-     * @param int $assetId
-     * @return Redirect
-     * @since [v1.0]
-     */
-    public function sellPost(Request $request, $assetId)
-    {
-        $this->authorize('checkout', Asset::class);
-        try {
-            // Check if the asset exists
-            if (!$asset = Asset::find($assetId)) {
-                return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));
-            } elseif (!$asset->availableForSell()) {
-                return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.checkout.not_available'));
-            }
-
-            $admin_user = Auth::user();
-            $sold_at= date("Y-m-d H:i:s");
-            $assigned_to = null;
-            $assigned_type=null;
-
-            if (($request->filled('sold_at')) && ($request->get('sold_at')!= date("Y-m-d"))) {
-                $sold_at = $request->get('sold_at');
-            }
-
-            switch (request('checkout_to_type_s')) {
-                case 'user':
-                    $assigned_to = User::findOrFail(request('assigned_user'));
-                    \Debugbar::info($assigned_to);
-                    $assigned_type = "App\Models\User";
-                    $status = Statuslabel::where('name', 'Выдано')->first();
-                    $asset->status_id = $status->id;
-                    if (($request->filled('contract_id')) && $request->get('contract_id')) {
-                        $asset->contract_id = request('contract_id');
-                    }
-                    break;
-                case 'contract':
-                    $assigned_to = Contract::findOrFail(request('assigned_contract'));
-                    \Debugbar::info($assigned_to);
-                    $assigned_type = "App\Models\Contract";
-                    $asset->contract_id = $assigned_to->id;
-                    $status = Statuslabel::where('name', 'Продано')->first();
-                    $asset->status_id = $status->id;
-                    break;
-            }
-            $asset->assigned_to=$assigned_to->id;
-            $asset->assigned_type=$assigned_type;
-
-            $asset->location_id=null;
-
-            if (($request->filled('name')) && $request->get('name')) {
-                $asset->name =  $request->get('name');
-            }
-            if (($request->filled('note')) && $request->get('note')) {
-                $asset->note =  $request->get('note');
-            }
-
-            if ($asset->save()) {
-
-                $log = new Actionlog();
-                $log->user_id = Auth::id();
-                if ($asset->assigned_type== "App\Models\User"){
-                    $log->action_type = 'issued_for_sale';
-                }
-                if ($asset->assigned_type== "App\Models\Contract"){
-                    $log->action_type = 'sell';
-                }
-                $log->target_type = $assigned_type;
-                $log->target_id = $assigned_to->id;
-                $log->item_id = $asset->id;
-                $log->item_type = Asset::class;
-                $log->note = json_encode($request->all());
-                $log->save();
-                return redirect()->route("hardware.index")->with('success', trans('admin/hardware/message.checkout.success'));
-            }
-
-            // Redirect to the asset management page with error
-            return redirect()->to("hardware/$assetId/sell")->with('error', trans('admin/hardware/message.checkout.error'))->withErrors($asset->getErrors());
-        } catch (ModelNotFoundException $e) {
-            return redirect()->back()->with('error', trans('admin/hardware/message.checkout.error'))->withErrors($asset->getErrors());
-        } catch (CheckoutNotAllowed $e) {
-            return redirect()->back()->with('error', $e->getMessage());
-        }
-    }
-
-
 
 }

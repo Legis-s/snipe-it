@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\AssetMaintenancesController;
+use App\Http\Controllers\Assets\AssetRentController;
 use App\Http\Controllers\Assets\AssetsController;
+use App\Http\Controllers\Assets\AssetSellController;
 use App\Http\Controllers\Assets\BulkAssetsController;
 use App\Http\Controllers\Assets\AssetCheckoutController;
 use App\Http\Controllers\Assets\AssetCheckinController;
@@ -35,11 +37,11 @@ Route::group(
         // Asset Maintenances
         Route::resource('maintenances',
             AssetMaintenancesController::class, [
-            'parameters' => ['maintenance' => 'maintenance_id', 'asset' => 'asset_id'],
-        ]);
+                'parameters' => ['maintenance' => 'maintenance_id', 'asset' => 'asset_id'],
+            ]);
 
         Route::get('requested', [
-            AssetsController::class, 'getRequestedIndex']
+                AssetsController::class, 'getRequestedIndex']
         )->name('assets.requested');
 
         Route::get('scan',
@@ -173,41 +175,65 @@ Route::group(
         Route::post('bulkcheckout',
             [BulkAssetsController::class, 'storeCheckout']
         )->name('hardware.bulkcheckout.store');
-        // Bulk sell
-        Route::get('bulksell', [
-            'as' => 'hardware/bulksell',
-            'uses' => 'BulkAssetsController@showSell'
-        ]);
-        Route::post('bulksell', [
-            'as' => 'hardware/bulksell',
-            'uses' => 'BulkAssetsController@storeSell'
-        ]);
-        //sell
-        Route::get('{assetId}/sell/', [
-            'as' => 'hardware/sell',
-            'uses' => 'AssetsController@sellGet'
-        ]);
-        Route::post('{assetId}/sell/', [
-            'as' => 'hardware/sell',
-            'uses' => 'AssetsController@sellPost'
-        ]);
 
-        Route::get('bulkcheckin', [
-            'as' => 'hardware/bulkcheckin',
-            'uses' => 'BulkAssetsController@showCheckin'
-        ]);
-        Route::post('bulkcheckin', [
-            'as' => 'hardware/bulkcheckin',
-            'uses' => 'BulkAssetsController@storeCheckin'
-        ]);
+
+        /**
+        |--------------------------------------------------------------------------
+        | BEGIN CUSTOM ROUTES
+        |--------------------------------------------------------------------------
+         */
+
+        // Sell
+        Route::get('{assetId}/sell/',
+            [AssetSellController::class, 'create']
+        )->name('hardware.sell.create');
+
+        Route::post('{assetId}/sell/',
+            [AssetSellController::class, 'store']
+        )->name('hardware.sell.store');
+
+        // Rent
+        Route::get('{assetId}/rent/',
+            [AssetRentController::class, 'create']
+        )->name('hardware.rent.create');
+
+        Route::post('{assetId}/rent/',
+            [AssetRentController::class, 'store']
+        )->name('hardware.rent.store');
+
+//        // Bulk sell
+//        Route::get('bulksell',
+//            [BulkAssetsController::class, 'showSell']
+//        )->name('hardware.bulksell.show');
+//
+//        Route::post('bulksell',
+//            [BulkAssetsController::class, 'storeSell']
+//        )->name('hardware.bulksell.store');
+//
+//
+//        // Bulk checkin
+//        Route::get('bulkcheckin',
+//            [BulkAssetsController::class, 'showCheckin']
+//        )->name('hardware.bulkcheckin.show');
+//
+//        Route::post('bulkcheckin',
+//            [BulkAssetsController::class, 'storeCheckin']
+//        )->name('hardware.bulkcheckin.store');
+
+        /**
+        |--------------------------------------------------------------------------
+        | END CUSTOM ROUTES
+        |--------------------------------------------------------------------------
+         */
+
 
 
     });
 
 Route::resource('hardware',
-        AssetsController::class,
-        [
-            'middleware' => ['auth'],
-            'parameters' => ['asset' => 'asset_id'
+    AssetsController::class,
+    [
+        'middleware' => ['auth'],
+        'parameters' => ['asset' => 'asset_id'
         ],
-]);
+    ]);

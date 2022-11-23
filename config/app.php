@@ -312,7 +312,7 @@ return [
         App\Providers\SamlServiceProvider::class,
 
         Lab404\Impersonate\ImpersonateServiceProvider::class,
-
+        Barryvdh\Debugbar\ServiceProvider::class
     ],
 
     /*

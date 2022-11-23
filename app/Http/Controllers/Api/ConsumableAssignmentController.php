@@ -11,6 +11,7 @@ use App\Http\Transformers\ConsumableAssignmentTransformer;
 use App\Http\Transformers\LocationsTransformer;
 use App\Models\Actionlog;
 use App\Models\Company;
+use App\Models\Contract;
 use App\Models\User;
 use App\Models\Component;
 use App\Models\Consumable;
@@ -54,10 +55,6 @@ class ConsumableAssignmentController extends Controller
         ]);
 
 
-//        if ($request->filled('search')) {
-//            $consumableAssignments = $consumableAssignments->TextSearch($request->input('search'));
-//        }
-
         if ($request->filled('search')) {
             $consumableAssignments = $consumableAssignments->AssignedSearch($request->input('search'));
         }
@@ -93,6 +90,11 @@ class ConsumableAssignmentController extends Controller
         if ($request->filled('purchase_id')) {
             $consumableAssignments->where('assigned_to', $request->input('purchase_id'));
             $consumableAssignments->where('assigned_type',"App\Models\Purchase");
+        }
+
+
+        if ($request->filled('massoperation_id')) {
+            $consumableAssignments->join('cons_assignment_mass_operation', 'cons_assignment_mass_operation.consumable_assignment_id', '=', 'consumables_locations.id')->where('cons_assignment_mass_operation.mass_operation_id', '=', $request->input('massoperation_id'));
         }
 
 
@@ -167,12 +169,9 @@ class ConsumableAssignmentController extends Controller
         $consumableAssignment = ConsumableAssignment::findOrFail($id);
         if ($request->filled('contract_id')) {
             $contract_id = $request->input('contract_id');
-            \Debugbar::info($request->filled('contract_id'));
             $user_pre = User::findOrFail($consumableAssignment->assigned_to);
             $consumableAssignment->assigned_type = "App\Models\Contract";
             $consumableAssignment->assigned_to = $contract_id;
-            \Debugbar::info($request);
-            \Debugbar::info($contract_id);
             $user = Auth::user();
             $user_name = "(".$user->id.") ".$user->last_name." ".$user->first_name;
             $user_name_pre = "(".$user_pre->id.") ".$user_pre->last_name." ".$user_pre->first_name;
@@ -181,7 +180,7 @@ class ConsumableAssignmentController extends Controller
                 $log = new Actionlog();
                 $log->user_id = Auth::id();
                 $log->action_type = 'sell';
-                $log->target_type = "App\Models\Contract";
+                $log->target_type = Contract::class;
                 $log->target_id = $contract_id;
                 $log->item_id = $consumableAssignment->consumable_id;
                 $log->item_type = Consumable::class;

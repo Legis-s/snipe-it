@@ -4,6 +4,9 @@ namespace App\Models;
 
 use App\Events\AssetCheckedOut;
 use App\Events\CheckoutableCheckedOut;
+use App\Events\CheckoutableForInstall;
+use App\Events\CheckoutableRent;
+use App\Events\CheckoutableSell;
 use App\Exceptions\CheckoutNotAllowed;
 use App\Helpers\Helper;
 use App\Http\Traits\UniqueSerialTrait;
@@ -72,6 +75,11 @@ class Asset extends Depreciable
     */
     protected $injectUniqueIdentifier = true;
 
+    protected $attributes = [
+        'quality' => 5,
+        'nds' => 20,
+    ];
+
     // We set these as protected dates so that they will be easily accessible via Carbon
     protected $dates = [
         'created_at',
@@ -117,7 +125,6 @@ class Asset extends Depreciable
         'purchase_cost'   => 'numeric|nullable|gte:0',
         'next_audit_date' => 'date|nullable',
         'last_audit_date' => 'date|nullable',
-        'supplier_id'     => 'exists:suppliers,id|nullable',
         'depreciable_cost'=> 'numeric|nullable',
         'quality'         => 'integer|between:1,5|nullable',
         'purchase_id'     => 'integer|nullable',
@@ -298,16 +305,6 @@ class Asset extends Depreciable
         return false;
     }
 
-    public function availableForSell()
-    {
-        if (
-            (empty($this->assigned_to)) &&
-            (empty($this->deleted_at)) &&
-            (($this->assetstatus) && ($this->assetstatus->deployable == 1))) {
-            return true;
-        }
-        return false;
-    }
     public function availableForCloseSell()
     {
         $status = Statuslabel::where('name', 'Выдано')->first();
@@ -352,20 +349,7 @@ class Asset extends Depreciable
      * @return bool
      */
     //FIXME: The admin parameter is never used. Can probably be removed.
-    public function checkOut(
-        $target,
-        $admin = null,
-        $checkout_at = null,
-        $expected_checkin = null,
-        $note = null,
-        $name = null,
-        $location = null,
-        $quality= null,
-        $depreciable_cost= null,
-        $photos_json= null,
-        $biometric_uid = null,
-        $biometric_result = null
-    )
+    public function checkOut($target, $admin = null, $checkout_at = null, $expected_checkin = null, $note = null, $name = null, $location = null, $quality= null, $depreciable_cost= null)
     {
         if (! $target) {
             return false;
@@ -405,26 +389,16 @@ class Asset extends Depreciable
                 $this->location_id = $target->id;
             }
         }
-//
-//        /**
-//         * Does the user have to confirm that they accept the asset?
-//         *
-//         * If so, set the acceptance-status to "pending".
-//         * This value is used in the unaccepted assets reports, for example
-//         *
-//         * @see https://github.com/snipe/snipe-it/issues/5772
-//         */
-//        if ($this->requireAcceptance() && $target instanceof User) {
-//          $this->accepted = self::ACCEPTANCE_PENDING;
-//        }
 
-//        $changed = [];
-//        foreach ($this->getOriginal() as $key => $value) {
-//            if ($this->getOriginal()[$key] != $this->getAttributes()[$key]) {
-//                $changed[$key]['old'] = $this->getOriginal()[$key];
-//                $changed[$key]['new'] = $this->getAttributes()[$key];
-//            }
-//        }
+        $changed = [];
+
+        foreach ($this->getRawOriginal() as $key => $value) {
+            if ($this->getRawOriginal()[$key] != $this->getAttributes()[$key]) {
+                $changed[$key]['old'] = $this->getRawOriginal()[$key];
+                $changed[$key]['new'] = $this->getAttributes()[$key];
+            }
+        }
+
         if ($this->save()) {
             if (is_int($admin)) {
                 $checkedOutBy = User::findOrFail($admin);
@@ -433,7 +407,7 @@ class Asset extends Depreciable
             } else {
                 $checkedOutBy = Auth::user();
             }
-            event(new CheckoutableCheckedOut($this, $target, $checkedOutBy, $note));
+            event(new CheckoutableCheckedOut($this, $target, $checkedOutBy, $note,$changed));
 
             $this->increment('checkout_counter', 1);
 
@@ -850,13 +824,13 @@ class Asset extends Depreciable
     /**
      * Establishes the asset -> contract relationship
      *
-     * @author [S. MArkin] [<markin@legis-s.ru>]
+     * @author [S. Markin] [<markin@legis-s.ru>]
      * @since [v2.0]
      * @return \Illuminate\Database\Eloquent\Relations\Relation
      */
     public function contract()
     {
-        return $this->belongsTo('\App\Models\Contract', 'contract_id');
+        return $this->belongsTo(\App\Models\Contract::class, 'contract_id');
     }
 
 
@@ -1856,4 +1830,213 @@ class Asset extends Depreciable
             $this->status_id = $status_inventory_wait->id;
         }
     }
+
+
+
+    /**
+     * Checks the asset out to the target
+     *
+     * @todo The admin parameter is never used. Can probably be removed.
+     *
+     * @author [S. Markin] [<markin@legis-s.ru>]
+     * @param User $user
+     * @param Carbon $checkout_at
+     * @param string $note
+     * @param null $name
+     * @return bool
+     * @since [v3.0]
+     * @return bool
+     */
+    public function sell($target,$admin = null, $checkout_at = null, $contract_id = null, $note = null, $name = null)
+    {
+        if (! $target) {
+            return false;
+        }
+        if ($this->is($target)) {
+            throw new CheckoutNotAllowed('You cannot check an asset out to itself.');
+        }
+
+        $this->last_checkout = $checkout_at;
+        $this->location_id = null;
+        $this->rtd_location_id = null;
+
+
+
+        if ($name != null) {
+            $this->name = $name;
+        }
+
+        if($target instanceof User) {
+            $this->assignedTo()->associate($target);
+            $status = Statuslabel::where('name', 'Выдано')->first();
+            $this->status_id = $status->id;
+            $this->contract_id = $contract_id;
+        }
+        if($target instanceof Contract) {
+            $status = Statuslabel::where('name', 'Продано')->first();
+            $this->status_id = $status->id;
+            $this->contract_id = $target->id;
+            $this->assigned_to = null;
+            $this->assigned_type = null;
+        }
+
+        $changed = [];
+
+        foreach ($this->getRawOriginal() as $key => $value) {
+            if ($this->getRawOriginal()[$key] != $this->getAttributes()[$key]) {
+                $changed[$key]['old'] = $this->getRawOriginal()[$key];
+                $changed[$key]['new'] = $this->getAttributes()[$key];
+            }
+        }
+
+        if ($this->save()) {
+            if (is_int($admin)) {
+                $checkedOutBy = User::findOrFail($admin);
+            } elseif (get_class($admin) === \App\Models\User::class) {
+                $checkedOutBy = $admin;
+            } else {
+                $checkedOutBy = Auth::user();
+            }
+            if($target instanceof User) {
+                event(new CheckoutableForInstall($this, $target, $checkedOutBy, $note, $changed));
+            }
+            if($target instanceof Contract) {
+                event(new CheckoutableSell($this, $target, $checkedOutBy, $note, $changed));
+            }
+            $this->increment('checkout_counter', 1);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks the asset out to the target
+     *
+     * @todo The admin parameter is never used. Can probably be removed.
+     *
+     * @author [S. Markin] [<markin@legis-s.ru>]
+     * @param User $user
+     * @param Carbon $checkout_at
+     * @param string $note
+     * @param null $name
+     * @return bool
+     * @since [v3.0]
+     * @return bool
+     */
+    public function closeSell($target,$admin = null, $checkout_at = null, $note = null, $name = null)
+    {
+        if (! $target) {
+            return false;
+        }
+        if ($this->is($target)) {
+            throw new CheckoutNotAllowed('You cannot check an asset out to itself.');
+        }
+
+        $this->last_checkout = $checkout_at;
+        $this->location_id = null;
+        $this->rtd_location_id = null;
+
+        if ($name != null) {
+            $this->name = $name;
+        }
+
+        if($target instanceof Contract) {
+            $status = Statuslabel::where('name', 'Продано')->first();
+            $this->status_id = $status->id;
+            $this->contract_id = $target->id;
+            $this->assigned_to = null;
+            $this->assigned_type = null;
+        }
+
+        $changed = [];
+
+        foreach ($this->getRawOriginal() as $key => $value) {
+            if ($this->getRawOriginal()[$key] != $this->getAttributes()[$key]) {
+                $changed[$key]['old'] = $this->getRawOriginal()[$key];
+                $changed[$key]['new'] = $this->getAttributes()[$key];
+            }
+        }
+
+        if ($this->save()) {
+            if (is_int($admin)) {
+                $checkedOutBy = User::findOrFail($admin);
+            } elseif (get_class($admin) === \App\Models\User::class) {
+                $checkedOutBy = $admin;
+            } else {
+                $checkedOutBy = Auth::user();
+            }
+            event(new CheckoutableSell($this, $target, $checkedOutBy, $note, $changed));
+            $this->increment('checkout_counter', 1);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks the asset out to the target
+     *
+     * @todo The admin parameter is never used. Can probably be removed.
+     *
+     * @author [S. Markin] [<markin@legis-s.ru>]
+     * @param User $user
+     * @param Carbon $checkout_at
+     * @param string $note
+     * @param null $name
+     * @return bool
+     * @since [v3.0]
+     * @return bool
+     */
+    public function rent($target,$admin = null, $checkout_at = null, $user = null, $note = null, $name = null)
+    {
+        if (! $target) {
+            return false;
+        }
+        if ($this->is($target)) {
+            throw new CheckoutNotAllowed('You cannot check an asset out to itself.');
+        }
+        $this->last_checkout = $checkout_at;
+        $this->location_id =null;
+        $this->rtd_location_id = null;
+        $this->contract_id =$target->id;
+        $status = Statuslabel::where('name', 'В аренде')->first();
+        $this->status_id = $status->id;
+
+        if ($name != null) {
+            $this->name = $name;
+        }
+        $this->assignedTo()->associate($target);
+
+
+        $changed = [];
+
+        foreach ($this->getRawOriginal() as $key => $value) {
+            if ($this->getRawOriginal()[$key] != $this->getAttributes()[$key]) {
+                $changed[$key]['old'] = $this->getRawOriginal()[$key];
+                $changed[$key]['new'] = $this->getAttributes()[$key];
+            }
+        }
+
+        if ($this->save()) {
+            if (is_int($admin)) {
+                $checkedOutBy = User::findOrFail($admin);
+            } elseif (get_class($admin) === \App\Models\User::class) {
+                $checkedOutBy = $admin;
+            } else {
+                $checkedOutBy = Auth::user();
+            }
+            event(new CheckoutableForInstall($this, $user, $checkedOutBy, $note, $changed));
+            event(new CheckoutableRent($this, $target, $checkedOutBy, $note, $changed));
+
+            $this->increment('checkout_counter', 1);
+
+            return true;
+        }
+
+        return false;
+    }
+
 }

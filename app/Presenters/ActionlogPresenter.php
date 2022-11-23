@@ -49,9 +49,7 @@ class ActionlogPresenter extends Presenter
         } elseif ($this->itemType() == 'license') {
             return 'far fa-save';
         } elseif ($this->itemType() == 'component') {
-            return 'far fa-hdd';
-        } elseif ($this->itemType()=="sale") {
-            return 'far fa-usd';
+            return 'fas fa-hdd';
         }
 
     }

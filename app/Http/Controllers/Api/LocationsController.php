@@ -11,6 +11,7 @@ use App\Models\Location;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 
 class LocationsController extends Controller
 {
@@ -159,7 +160,9 @@ class LocationsController extends Controller
                 'locations.updated_at',
                 'locations.image',
                 'locations.currency',
-                'locations.notes'
+                'locations.notes',
+                'locations.sklad',
+                'locations.pult_id',
             ])
             ->withCount('assignedAssets as assigned_assets_count')
             ->withCount('assets as assets_count')
@@ -257,6 +260,7 @@ class LocationsController extends Controller
     {
 
         $this->authorize('view.selectlists');
+        $user = Auth::user();
         $favorite_location = $user->favoriteLocation;
         $locations = Location::select([
             'locations.id',

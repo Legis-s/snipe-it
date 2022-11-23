@@ -8,19 +8,22 @@ use App\Http\Transformers\ConsumablesTransformer;
 use App\Http\Transformers\SelectlistTransformer;
 use App\Models\Company;
 use App\Models\Consumable;
+use App\Models\ConsumableAssignment;
+use App\Models\Purchase;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Requests\ImageUploadRequest;
+use Illuminate\Support\Facades\Auth;
 
 class ConsumablesController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @return \Illuminate\Http\Response
      * @since [v4.0]
      *
-     * @return \Illuminate\Http\Response
+     * @author [A. Gianotto] [<snipe@snipe.net>]
      */
     public function index(Request $request)
     {
@@ -43,12 +46,13 @@ class ConsumablesController extends Controller
                 'qty',
                 'image',
                 'notes',
-                ];
+            ];
 
 
         $consumables = Company::scopeCompanyables(
             Consumable::select('consumables.*')
-                ->with('company', 'location', 'category', 'users', 'manufacturer')
+//                ->with('company', 'location', 'category', 'users', 'manufacturer')
+                ->with('company', 'location', 'category', 'manufacturer', 'purchase')
         );
 
         if ($request->filled('search')) {
@@ -65,12 +69,10 @@ class ConsumablesController extends Controller
 
         if ($request->filled('category_id')) {
             $consumables->where('category_id', '=', $request->input('category_id'));
-        if ($request->filled('purchase_id')) {
-            $consumables->where('purchase_id', '=', $request->input('purchase_id'));
         }
 
         if ($request->filled('model_number')) {
-            $consumables->where('model_number','=',$request->input('model_number'));
+            $consumables->where('model_number', '=', $request->input('model_number'));
         }
 
         if ($request->filled('manufacturer_id')) {
@@ -78,11 +80,15 @@ class ConsumablesController extends Controller
         }
 
         if ($request->filled('location_id')) {
-            $consumables->where('location_id','=',$request->input('location_id'));
+            $consumables->where('location_id', '=', $request->input('location_id'));
         }
 
         if ($request->filled('notes')) {
-            $consumables->where('notes','=',$request->input('notes'));
+            $consumables->where('notes', '=', $request->input('notes'));
+        }
+
+        if ($request->filled('purchase_id')) {
+            $consumables->where('purchase_id', '=', $request->input('purchase_id'));
         }
 
 
@@ -96,7 +102,7 @@ class ConsumablesController extends Controller
         $allowed_columns = ['id', 'name', 'order_number', 'min_amt', 'purchase_date', 'purchase_cost', 'company', 'category', 'model_number', 'item_no', 'manufacturer', 'location', 'qty', 'image'];
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
 
-        $sort_override =  $request->input('sort');
+        $sort_override = $request->input('sort');
         $column_sort = in_array($sort_override, $allowed_columns) ? $sort_override : 'created_at';
 
 
@@ -127,10 +133,10 @@ class ConsumablesController extends Controller
     /**
      * Store a newly created resource in storage.
      *
+     * @param \App\Http\Requests\ImageUploadRequest $request
+     * @return \Illuminate\Http\Response
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @since [v4.0]
-     * @param  \App\Http\Requests\ImageUploadRequest $request
-     * @return \Illuminate\Http\Response
      */
     public function store(ImageUploadRequest $request)
     {
@@ -157,9 +163,9 @@ class ConsumablesController extends Controller
     /**
      * Display the specified resource.
      *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @param  int $id
+     * @param int $id
      * @return \Illuminate\Http\Response
+     * @author [A. Gianotto] [<snipe@snipe.net>]
      */
     public function show($id)
     {
@@ -172,11 +178,11 @@ class ConsumablesController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v4.0]
-     * @param  \App\Http\Requests\ImageUploadRequest $request
-     * @param  int $id
+     * @param \App\Http\Requests\ImageUploadRequest $request
+     * @param int $id
      * @return \Illuminate\Http\Response
+     * @since [v4.0]
+     * @author [A. Gianotto] [<snipe@snipe.net>]
      */
     public function update(ImageUploadRequest $request, $id)
     {
@@ -195,10 +201,10 @@ class ConsumablesController extends Controller
     /**
      * Remove the specified resource from storage.
      *
+     * @param int $id
+     * @return \Illuminate\Http\Response
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @since [v4.0]
-     * @param  int $id
-     * @return \Illuminate\Http\Response
      */
     public function destroy($id)
     {
@@ -210,243 +216,42 @@ class ConsumablesController extends Controller
         return response()->json(Helper::formatStandardApiResponse('success', null, trans('admin/consumables/message.delete.success')));
     }
 
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param int $id
-     * @return \Illuminate\Http\Response
-     * @since [v4.0]
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     */
-    public function review(Request $request, $id)
-    {
-        $this->authorize('review');
-        $consumable = Consumable::withTrashed()->findOrFail($id);
-        if ($consumable->trashed()){
-            $consumable->qty = 0;
-            $consumable->save();
-            $consumable->restore();
-        }
-        if ($request->filled('purchase_id') && $request->filled('quantity')) {
-
-            $purchase_id = $request->input("purchase_id");
-            $purchase = Purchase::findOrFail($purchase_id);
-
-            $consumables_json = $purchase->consumables_json;
-            $consumables = json_decode($consumables_json, true);
-
-            $quantity = $request->input("quantity");
-            $purchase_cost = $request->input("purchase_cost");
-            $assigned_type = "App\Models\Purchase";
-            foreach ($consumables as &$consumable_json) {
-                if ($consumable_json["consumable_id"] == $consumable->id) {
-                    $quantity_in_json = $consumable_json["quantity"];
-
-                    $reviewed=0;
-                    if (isset($consumable_json["reviewed"])){
-                        $reviewed = $consumable_json["reviewed"];
-                    }
-                    $max_quantity = $quantity_in_json - $reviewed;
-
-                    if ($quantity>$max_quantity){
-                        return response()->json(Helper::formatStandardApiResponse('error', null, $consumable->getErrors()));
-                    }else{
-                        $consumable_json["reviewed"] = $quantity+$reviewed;
-                    }
-
-                }
-            }
-            $purchase->consumables_json = json_encode($consumables);
-
-            if ($consumable->purchase_cost < $purchase_cost){
-                $consumable->purchase_cost = $purchase_cost;
-            }
-            $consumable->qty = $consumable->qty+$quantity;
-            $consumable->locations()->attach($consumable->id, [
-                'consumable_id' => $consumable->id,
-                'user_id' => Auth::id(),
-                'quantity' => $quantity,
-                'cost' => $purchase_cost,
-                'type' => ConsumableAssignment::PURCHASE,
-                'assigned_to' => $purchase->id,
-                'assigned_type' => $assigned_type,
-            ]);
-
-
-            if ($consumable->save()) {
-                \Log::error("consumables review");
-                $purchase->checkStatus();
-                $purchase->save();
-                return response()->json(Helper::formatStandardApiResponse('success', $consumable, trans('admin/consumables/message.update.success')));
-            }
-
-        } else {
-            return response()->json(Helper::formatStandardApiResponse('error', null, $consumable->getErrors()));
-        }
-
-
-        return response()->json(Helper::formatStandardApiResponse('error', null, $consumable->getErrors()));
-    }
-
-
-    /**
-     * Gets a paginated collection for the select2 menus
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v4.0.16]
-     * @see \App\Http\Transformers\SelectlistTransformer
-     *
-     */
-    public function selectlist(Request $request)
-    {
-
-        $this->authorize('index', Consumable::class);
-
-        $consumables = Consumable::select([
-            'consumables.id',
-            'consumables.name',
-            'consumables.model_number',
-            'consumables.category_id',
-            'consumables.manufacturer_id',
-        ])->with('manufacturer','category');
-
-        $settings = \App\Models\Setting::getSettings();
-
-        if ($request->filled('search')) {
-            $consumables = $consumables->SearchByManufacturerOrCat($request->input('search'));
-        }
-
-//        if ($request->filled('search')) {
-//            $consumables = $consumables
-//                ->where('consumables.name', 'LIKE', '%' . $request->get('search') . '%')
-//                ->orWhere('consumables.model_number', 'LIKE', '%' . $request->get('search') . '%')
-//                ->orWhere('manufacturers.name', 'LIKE', '%' . $request->get('search') . '%')
-//                ->orWhere('categories.name', 'LIKE', '%' . $request->get('search') . '%')
-//                ->paginate(50);
-//        }
-
-        $consumables = $consumables->paginate(50);
-        foreach ($consumables as $consumable) {
-
-            $consumable->use_text = '';
-
-            $consumable->use_text .= (($consumable->category) ? e($consumable->category->name).' - ' : '');
-
-            $consumable->use_text .= (($consumable->manufacturer) ? e($consumable->manufacturer->name).' - ' : '');
-
-            $consumable->use_text .=  e($consumable->name).' - ';
-            $consumable->use_text .=  e($consumable->model_number);
-
-       }
-
-        return (new SelectlistTransformer)->transformSelectlist($consumables);
-
-
-    }
-
-
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param int $id
-     * @return \Illuminate\Http\Response
-     * @since [v4.0]
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     */
-    public function compact(Request $request, $id)
-    {
-        $this->authorize('edit', Consumable::class);
-        $main_consumable = Consumable::findOrFail($id);
-
-        if ($request->filled('id_array')) {
-
-            $id_array= $request->input("id_array");
-
-            $consumables = Consumable::findMany($id_array);
-            ConsumableAssignment::whereIn('consumable_id', $id_array)->update(['consumable_id' => $main_consumable->id]);
-            Actionlog::where("item_type","App\Models\Consumable")->whereNotIn("action_type",["create","delete","update"])->whereIn('item_id', $id_array)->update(['item_id' => $main_consumable->id]);
-            $all_amount = 0;
-            foreach ($consumables as &$consumable_delete) {
-                $all_amount+=$consumable_delete->qty;
-                $consumable_delete->delete();
-            }
-
-            $main_consumable->qty=$main_consumable->qty+$all_amount;
-
-
-            if ($main_consumable->save()) {
-                return response()->json(Helper::formatStandardApiResponse('success', $main_consumable, trans('admin/consumables/message.update.success')));
-            }
-
-        } else {
-            return response()->json(Helper::formatStandardApiResponse('error', null, $main_consumable->getErrors()));
-        }
-
-
-        return response()->json(Helper::formatStandardApiResponse('error', null, $main_consumable->getErrors()));
-    }
     /**
      * Returns a JSON response containing details on the users associated with this consumable.
      *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @see ConsumablesController::getDataViewLocation() method that returns the form.
-     * @since [v1.0]
-     * @param int $locationId
+     * @param int $consumableId
      * @return array
+     * @since [v1.0]
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @see \App\Http\Controllers\Consumables\ConsumablesController::getView() method that returns the form.
      */
-    public function getDataViewLocation($locationId)
+    public function getDataView($consumableId)
     {
-        $consumable = Consumable::with(['consumableAssignments'=> function ($query) {
-            $query->orderBy($query->getModel()->getTable().'.created_at', 'DESC');
+        $consumable = Consumable::with(['consumableAssignments' => function ($query) {
+            $query->orderBy($query->getModel()->getTable() . '.created_at', 'DESC');
         },
-        'consumableAssignments.admin'=> function ($query) {
-        },
-        'consumableAssignments.user'=> function ($query) {
-        },
+            'consumableAssignments.admin' => function ($query) {
+            },
+            'consumableAssignments.user' => function ($query) {
+            },
         ])->find($consumableId);
 
-        if (! Company::isCurrentUserHasAccess($consumable)) {
+        if (!Company::isCurrentUserHasAccess($consumable)) {
             return ['total' => 0, 'rows' => []];
         }
-//        $location = Location::findOrFail($locationId);
-        $consumableAssignments = ConsumableAssignment::where('assigned_to', $locationId)->where('assigned_type',"App\Models\Location")->get();
-//        $location = Location::with(array('consumables'=>
-//            function ($query) {
-//                $query->orderBy($query->getModel()->getTable().'.created_at', 'DESC');
-//            },
-//            'consumables.admin'=> function ($query) {
-//            },
-//            'consumables.location'=> function ($query) {
-//            },
-////            'consumables.consumable'=> function ($query) {
-////            },
-//        ))->find($locationId);
-
         $this->authorize('view', Consumable::class);
         $rows = [];
 
-
-        foreach ($consumableAssignments as $consumable_assignment) {
+        foreach ($consumable->consumableAssignments as $consumable_assignment) {
             $rows[] = [
                 'avatar' => ($consumable_assignment->user) ? e($consumable_assignment->user->present()->gravatar) : '',
                 'name' => ($consumable_assignment->user) ? $consumable_assignment->user->present()->nameUrl() : 'Deleted User',
-//                'name' => ($consumable_assignment->location) ? $consumable_assignment->location->present()->nameUrl() : 'Deleted Location',
-                'name' => ($consumable_assignment->consumable) ? $consumable_assignment->consumable->present()->nameUrl() : 'Удаленный расходник',
                 'created_at' => Helper::getFormattedDateObject($consumable_assignment->created_at, 'datetime'),
                 'note' => ($consumable_assignment->note) ? e($consumable_assignment->note) : null,
                 'admin' => ($consumable_assignment->admin) ? $consumable_assignment->admin->present()->nameUrl() : null,
-                'quantity' =>($consumable_assignment->quantity) ? $consumable_assignment->quantity: '',
-                'admin' => ($consumable_assignment->user) ? $consumable_assignment->user->present()->nameUrl() : '',
             ];
         }
 
-//        $locationCount = $location->consumables->count();
-        $locationCount = $consumableAssignments->count();
-        $data = array('total' => $locationCount, 'rows' => $rows);
         $consumableCount = $consumable->users->count();
         $data = ['total' => $consumableCount, 'rows' => $rows];
 
@@ -456,10 +261,10 @@ class ConsumablesController extends Controller
     /**
      * Checkout a consumable
      *
-     * @author [A. Gutierrez] [<andres@baller.tv>]
      * @param int $id
-     * @since [v4.9.5]
      * @return JsonResponse
+     * @since [v4.9.5]
+     * @author [A. Gutierrez] [<andres@baller.tv>]
      */
     public function checkout(Request $request, $id)
     {
@@ -505,24 +310,206 @@ class ConsumablesController extends Controller
         return response()->json(Helper::formatStandardApiResponse('error', null, 'No consumables remaining'));
     }
 
+
     /**
-    * Gets a paginated collection for the select2 menus
-    *
-    * @see \App\Http\Transformers\SelectlistTransformer
-    */
+     * Update the specified resource in storage.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param int $id
+     * @return \Illuminate\Http\Response
+     * @since [v4.0]
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     */
+    public function review(Request $request, $id)
+    {
+        $this->authorize('review');
+        $consumable = Consumable::withTrashed()->findOrFail($id);
+        if ($consumable->trashed()) {
+            $consumable->qty = 0;
+            $consumable->save();
+            $consumable->restore();
+        }
+        if ($request->filled('purchase_id') && $request->filled('quantity')) {
+
+            $purchase_id = $request->input("purchase_id");
+            $purchase = Purchase::findOrFail($purchase_id);
+
+            $consumables_json = $purchase->consumables_json;
+            $consumables = json_decode($consumables_json, true);
+
+            $quantity = $request->input("quantity");
+            $purchase_cost = $request->input("purchase_cost");
+            $assigned_type = "App\Models\Purchase";
+            foreach ($consumables as &$consumable_json) {
+                if ($consumable_json["consumable_id"] == $consumable->id) {
+                    $quantity_in_json = $consumable_json["quantity"];
+
+                    $reviewed = 0;
+                    if (isset($consumable_json["reviewed"])) {
+                        $reviewed = $consumable_json["reviewed"];
+                    }
+                    $max_quantity = $quantity_in_json - $reviewed;
+
+                    if ($quantity > $max_quantity) {
+                        return response()->json(Helper::formatStandardApiResponse('error', null, $consumable->getErrors()));
+                    } else {
+                        $consumable_json["reviewed"] = $quantity + $reviewed;
+                    }
+
+                }
+            }
+            $purchase->consumables_json = json_encode($consumables);
+
+            if ($consumable->purchase_cost < $purchase_cost) {
+                $consumable->purchase_cost = $purchase_cost;
+            }
+            $consumable->qty = $consumable->qty + $quantity;
+            $consumable->locations()->attach($consumable->id, [
+                'consumable_id' => $consumable->id,
+                'user_id' => Auth::id(),
+                'quantity' => $quantity,
+                'cost' => $purchase_cost,
+                'type' => ConsumableAssignment::PURCHASE,
+                'assigned_to' => $purchase->id,
+                'assigned_type' => $assigned_type,
+            ]);
+
+
+            if ($consumable->save()) {
+                $purchase->checkStatus();
+                $purchase->save();
+                return response()->json(Helper::formatStandardApiResponse('success', $consumable, trans('admin/consumables/message.update.success')));
+            }
+
+        } else {
+            return response()->json(Helper::formatStandardApiResponse('error', null, $consumable->getErrors()));
+        }
+
+
+        return response()->json(Helper::formatStandardApiResponse('error', null, $consumable->getErrors()));
+    }
+
+
+    /**
+     * Gets a paginated collection for the select2 menus
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v4.0.16]
+     * @see \App\Http\Transformers\SelectlistTransformer
+     *
+     */
     public function selectlist(Request $request)
     {
+
+        $this->authorize('index', Consumable::class);
+
         $consumables = Consumable::select([
             'consumables.id',
             'consumables.name',
-        ]);
+            'consumables.model_number',
+            'consumables.category_id',
+            'consumables.manufacturer_id',
+            'consumables.qty',
+        ])->with('manufacturer', 'category');
+
 
         if ($request->filled('search')) {
-            $consumables = $consumables->where('consumables.name', 'LIKE', '%'.$request->get('search').'%');
+            $consumables = $consumables->SearchByManufacturerOrCat($request->input('search'));
         }
 
-        $consumables = $consumables->orderBy('name', 'ASC')->paginate(50);
+//        if ($request->filled('assetStatusType') && $request->input('assetStatusType') === 'notnull') {
+//
+//            $consumables = $consumables->filter(function ($value) {
+//                return $value->numRemaining()>0;
+//            });
+//
+//        }
+        $consumables = $consumables->paginate(50);
 
-        return (new SelectlistTransformer)->transformSelectlist($consumables);
+        foreach ($consumables as $consumable) {
+            $consumable->use_text = '';
+
+            $consumable->use_text .= "[" . $consumable->numRemaining() . "] ";
+            $consumable->use_text .= (($consumable->category) ? e($consumable->category->name) . ' - ' : '');
+
+            $consumable->use_text .= (($consumable->manufacturer) ? e($consumable->manufacturer->name) . ' - ' : '');
+
+            $consumable->use_text .= e($consumable->name) . ' - ';
+            $consumable->use_text .= e($consumable->model_number);
+
+        }
+        if ($request->filled('assetStatusType') && $request->input('assetStatusType') === 'notnull') {
+            return (new SelectlistTransformer)->transformSelectlistConsumables($consumables);
+        } else {
+            return (new SelectlistTransformer)->transformSelectlist($consumables);
+        }
+
+
     }
+
+
+
+//    /**
+//     * Gets a paginated collection for the select2 menus
+//     *
+//     * @see \App\Http\Transformers\SelectlistTransformer
+//     */
+//    public function selectlist(Request $request)
+//    {
+//        $consumables = Consumable::select([
+//            'consumables.id',
+//            'consumables.name',
+//        ]);
+//
+//        if ($request->filled('search')) {
+//            $consumables = $consumables->where('consumables.name', 'LIKE', '%'.$request->get('search').'%');
+//        }
+//
+//        $consumables = $consumables->orderBy('name', 'ASC')->paginate(50);
+//
+//        return (new SelectlistTransformer)->transformSelectlist($consumables);
+//    }
+
+
+//    /**
+//     * Update the specified resource in storage.
+//     *
+//     * @param \Illuminate\Http\Request $request
+//     * @param int $id
+//     * @return \Illuminate\Http\Response
+//     * @since [v4.0]
+//     * @author [A. Gianotto] [<snipe@snipe.net>]
+//     */
+//    public function compact(Request $request, $id)
+//    {
+//        $this->authorize('edit', Consumable::class);
+//        $main_consumable = Consumable::findOrFail($id);
+//
+//        if ($request->filled('id_array')) {
+//
+//            $id_array= $request->input("id_array");
+//
+//            $consumables = Consumable::findMany($id_array);
+//            ConsumableAssignment::whereIn('consumable_id', $id_array)->update(['consumable_id' => $main_consumable->id]);
+//            Actionlog::where("item_type","App\Models\Consumable")->whereNotIn("action_type",["create","delete","update"])->whereIn('item_id', $id_array)->update(['item_id' => $main_consumable->id]);
+//            $all_amount = 0;
+//            foreach ($consumables as &$consumable_delete) {
+//                $all_amount+=$consumable_delete->qty;
+//                $consumable_delete->delete();
+//            }
+//
+//            $main_consumable->qty=$main_consumable->qty+$all_amount;
+//
+//
+//            if ($main_consumable->save()) {
+//                return response()->json(Helper::formatStandardApiResponse('success', $main_consumable, trans('admin/consumables/message.update.success')));
+//            }
+//
+//        } else {
+//            return response()->json(Helper::formatStandardApiResponse('error', null, $main_consumable->getErrors()));
+//        }
+//
+//
+//        return response()->json(Helper::formatStandardApiResponse('error', null, $main_consumable->getErrors()));
+//    }
 }

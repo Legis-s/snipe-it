@@ -6,11 +6,11 @@
 
         <label class="btn btn-default" aria-hidden="true">
             {{ trans('button.select_file')  }}
-            <input type="file" name="invoice_file" id="uploadFile" data-maxsize="{{ \App\Helpers\Helper::file_upload_max_size() }}" accept="application/pdf,application/x-pdf,application/x-bzpdf,application/x-gzpdf" style="display:none" aria-label="image" aria-hidden="true">
+           <input type="file" name="invoice_file" class="js-uploadFile" id="uploadFile" data-maxsize="{{ Helper::file_upload_max_size() }}" accept="application/pdf,application/x-pdf,application/x-bzpdf,application/x-gzpdf" style="display:none; max-width: 90%" aria-label="image" aria-hidden="true">
         </label>
-        <span class='label label-default' id="upload-file-info"></span>
+        <span class='label label-default' id="uploadFile-info"></span>
 
-        <p class="help-block" id="upload-file-status">Приемлемые типы файлов: pdf. Максимальный размер загружаемого файла 2M.</p>
+        <p class="help-block" id="uploadFile-status">{{ trans('general.document_filetypes_help', ['size' => Helper::file_upload_max_size_readable()]) }}</p>
         {!! $errors->first('image', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
     </div>
 </div>

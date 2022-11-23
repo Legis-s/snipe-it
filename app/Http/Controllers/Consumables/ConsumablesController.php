@@ -206,4 +206,14 @@ class ConsumablesController extends Controller
         return redirect()->route('consumables.index')
             ->with('error', trans('admin/consumables/message.does_not_exist'));
     }
+
+
+
+    public function noclosingdocuments()
+    {
+        $this->authorize('index', Consumable::class);
+        return view('consumables/noclosingdocuments');
+    }
+
+
 }

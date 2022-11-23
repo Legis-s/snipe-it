@@ -25,9 +25,7 @@ class Actionlog extends SnipeModel
 
     protected $table = 'action_logs';
     public $timestamps = true;
-    protected $fillable = ['created_at', 'item_type', 'user_id', 'item_id', 'action_type', 'note', 'target_id', 'target_type', 'stored_eula','biometric_uid',
-        'biometric_result',
-        'photos'];
+    protected $fillable = ['created_at', 'item_type', 'user_id', 'item_id', 'action_type', 'note', 'target_id', 'target_type', 'stored_eula'];
 
     use Searchable;
 
@@ -144,28 +142,6 @@ class Actionlog extends SnipeModel
         return camel_case(class_basename($this->target_type));
     }
 
-    public function parseItemRoute()
-    {
-        if ($this->itemType() == "asset") {
-            $itemroute = 'assets';
-        } elseif ($this->itemType() == "accessory") {
-            $itemroute = 'accessories';
-        } elseif ($this->itemType()=="consumable") {
-            $itemroute = 'consumables';
-        } elseif ($this->itemType()=="license") {
-            $itemroute = 'licenses';
-        } elseif ($this->itemType()=="component") {
-            $itemroute = 'components';
-        } elseif ($this->itemType()=="sale") {
-            $itemroute = 'sales';
-        }  else {
-            $itemroute = '';
-        }
-
-        return $itemroute;
-    }
-
-
 
     /**
      * Establishes the actionlog -> uploads relationship
@@ -177,8 +153,8 @@ class Actionlog extends SnipeModel
     public function uploads()
     {
         return $this->morphTo('item')
-                    ->where('action_type', '=', 'uploaded')
-                    ->withTrashed();
+            ->where('action_type', '=', 'uploaded')
+            ->withTrashed();
     }
 
     /**
@@ -203,7 +179,7 @@ class Actionlog extends SnipeModel
     public function admin()
     {
         return $this->belongsTo(User::class, 'user_id')
-                    ->withTrashed();
+            ->withTrashed();
     }
 
     /**
@@ -331,9 +307,9 @@ class Actionlog extends SnipeModel
     public function getListingOfActionLogsChronologicalOrder()
     {
         return $this->all()
-                 ->where('action_type', '!=', 'uploaded')
-                 ->orderBy('item_id', 'asc')
-                 ->orderBy('created_at', 'asc')
-                 ->get();
+            ->where('action_type', '!=', 'uploaded')
+            ->orderBy('item_id', 'asc')
+            ->orderBy('created_at', 'asc')
+            ->get();
     }
 }

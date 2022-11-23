@@ -30,7 +30,7 @@ class Consumable extends SnipeModel
         'company_id'     => 'integer',
         'qty'            => 'integer',
         'min_amt'        => 'integer',
-     ];
+    ];
 
     /**
      * Category validation rules
@@ -196,12 +196,19 @@ class Consumable extends SnipeModel
      */
     public function location()
     {
-        return $this->belongsTo('\App\Models\Location', 'location_id');
+        return $this->belongsTo(\App\Models\Location::class, 'location_id');
     }
 
+    /**
+     * Establishes the component -> category relationship
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v3.0]
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
     public function category()
     {
-        return $this->belongsTo('\App\Models\Category', 'category_id');
+        return $this->belongsTo(\App\Models\Category::class, 'category_id');
     }
 
     public function mass_operations()
@@ -247,14 +254,8 @@ class Consumable extends SnipeModel
 //    public function users()
 //    {
 //        return $this->belongsToMany(\App\Models\User::class, 'consumables_users', 'consumable_id', 'assigned_to')->withPivot('user_id')->withTrashed()->withTimestamps();
-        return $this->belongsToMany('\App\Models\Location', 'consumables_locations', 'consumable_id', 'assigned_to')->withPivot('user_id')->withTrashed()->withTimestamps();
 //    }
-
-    public function hasLocations()
-    {
-        return $this->belongsToMany('\App\Models\Location', 'consumables_locations', 'consumable_id', 'assigned_to')->count();
-    }
-
+//
 
     /**
      * Determine whether to send a checkin/checkout email based on
@@ -299,21 +300,21 @@ class Consumable extends SnipeModel
             return null;
         }
     }
-
-    /**
-     * Check how many items within a consumable are checked out
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v5.0]
-     * @return int
-     */
-    public function numCheckedOut()
-    {
-        $checkedout = 0;
-        $checkedout = $this->users->count();
-
-        return $checkedout;
-    }
+//
+//    /**
+//     * Check how many items within a consumable are checked out
+//     *
+//     * @author [A. Gianotto] [<snipe@snipe.net>]
+//     * @since [v5.0]
+//     * @return int
+//     */
+//    public function numCheckedOut()
+//    {
+//        $checkedout = 0;
+//        $checkedout = $this->users->count();
+//
+//        return $checkedout;
+//    }
 
     /**
      * Checks the number of available consumables
@@ -324,6 +325,8 @@ class Consumable extends SnipeModel
      */
     public function numRemaining()
     {
+//        $checkedout = $this->users->count();
+
         $consumable = ConsumableAssignment::where('consumable_id', $this->id)
             ->whereIn("type",["sold", "issued"])
             ->get();
@@ -389,15 +392,31 @@ class Consumable extends SnipeModel
         return $query->leftJoin('companies', 'consumables.company_id', '=', 'companies.id')->orderBy('companies.name', $order);
     }
 
+
+
+
+
+
+
     public function purchase()
     {
-        return $this->belongsTo('\App\Models\Purchase');
+        return $this->belongsTo(\App\Models\Purchase::class);
     }
 
     public function model()
     {
-        return $this->belongsTo('\App\Models\AssetModel', 'model_id')->withTrashed();
+        return $this->belongsTo(\App\Models\AssetModel::class, 'model_id')->withTrashed();
     }
 
+
+    public function locations()
+    {
+        return $this->belongsToMany(\App\Models\Location::class, 'consumables_locations', 'consumable_id', 'assigned_to')->withPivot('user_id')->withTrashed()->withTimestamps();
+    }
+
+    public function hasLocations()
+    {
+        return $this->belongsToMany(\App\Models\Location::class, 'consumables_locations', 'consumable_id', 'assigned_to')->count();
+    }
 
 }

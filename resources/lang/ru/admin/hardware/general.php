@@ -8,7 +8,7 @@ return [
     'bulk_checkout'             => 'Выдать актив пользователю',
     'bulk_checkin'              => 'Checkin Assets',
     'checkin'  					=> 'Вернуть актив на склад',
-    'checkout'  				=> 'Выдать актив пользователю',
+    'checkout'  				=> 'Выдать актив',
     'clone'  					=> 'Клонировать актив',
     'deployable'  				=> 'Доступные',
     'deleted'  					=> 'Этот актив был удален.',
@@ -40,5 +40,5 @@ return [
     'error_messages' => 'Сообщения об ошибках:',
     'success_messages' => 'Success messages:',
     'alert_details' => 'Подробности смотрите ниже.',
-    'custom_export' => 'Custom Export'
+    'custom_export' => 'Отчет об использовании'
 ];

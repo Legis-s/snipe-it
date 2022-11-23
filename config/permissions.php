@@ -135,7 +135,7 @@ return [
             'label'      => 'Create ',
             'note'       => '',
             'display'    => true,
-        ),
+        ],
     ],
 
     'Accessories' => [

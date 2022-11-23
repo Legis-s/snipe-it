@@ -93,7 +93,6 @@ class AssetsTransformer
             'requests_counter' => (int) $asset->requests_counter,
             'user_can_checkout' => (bool) $asset->availableForCheckout(),
             'user_can_review' => (bool) $asset->availableForReview(),
-            'user_can_sell' => (bool) $asset->availableForSell(),
             'user_can_close_sell' => (bool) $asset->availableForCloseSell(),
             'purchase_id' => (int) $asset->purchase_id,
             'quality' => (int) $asset->quality,
@@ -153,9 +152,8 @@ class AssetsTransformer
             'update'        => ($asset->deleted_at=='' && Gate::allows('update', Asset::class)) ? true : false,
             'delete'        => ($asset->deleted_at=='' && $asset->assigned_to =='' && Gate::allows('delete', Asset::class)) ? true : false,
             'print_label'   => true,
-            'sell'          => (bool) Gate::allows('checkout', Asset::class),
-            'inventory'     => (bool) Gate::allows('update', Asset::class),
-            'review'        => (bool) Gate::allows('review'),
+            'inventory'     => ($asset->deleted_at=='' && Gate::allows('update', Asset::class)) ? true : false,
+            'review'        =>  ($asset->deleted_at=='' && Gate::allows('review', Asset::class)) ? true : false,
         ];
 
 
@@ -174,7 +172,6 @@ class AssetsTransformer
                             'price_cost' => $component->purchase_cost,
                             'purchase_total' => $component->purchase_cost * $component->pivot->assigned_qty,
                             'checkout_date' => Helper::getFormattedDateObject($component->pivot->created_at, 'datetime') ,
-
                     ];
                 }
             }

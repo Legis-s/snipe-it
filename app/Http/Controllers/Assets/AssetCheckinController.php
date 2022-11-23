@@ -126,9 +126,19 @@ class AssetCheckinController extends Controller
             $acceptance->delete();
         });
 
+
+        $changed = [];
+
+        foreach ($asset->getRawOriginal() as $key => $value) {
+            if ($asset->getRawOriginal()[$key] != $asset->getAttributes()[$key]) {
+                $changed[$key]['old'] = $asset->getRawOriginal()[$key];
+                $changed[$key]['new'] = $asset->getAttributes()[$key];
+            }
+        }
+
         // Was the asset updated?
         if ($asset->save()) {
-            event(new CheckoutableCheckedIn($asset, $target, Auth::user(), $request->input('note'), $checkin_at));
+            event(new CheckoutableCheckedIn($asset, $target, Auth::user(), $request->input('note'), $checkin_at,$changed));
 
             if ((isset($user)) && ($backto == 'user')) {
                 return redirect()->route('users.show', $user->id)->with('success', trans('admin/hardware/message.checkin.success'));

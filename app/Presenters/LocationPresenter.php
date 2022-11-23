@@ -30,13 +30,13 @@ class LocationPresenter extends Presenter
                 "title" => "Bitrix id",
                 "visible" => true,
                 "formatter"=>"bitrixIdLocationFormatter"
-            ]  ,  [
+            ],[
                 "field" => "sklad",
                 "searchable" => true,
                 "sortable" => true,
                 "title" => "Склад",
                 "visible" => true,
-                "formatter" => "checkFormatter"
+                "formatter" => "trueFalseFormatter"
             ],[
                 'field' => 'name',
                 'searchable' => true,
@@ -44,8 +44,7 @@ class LocationPresenter extends Presenter
                 'title' => trans('admin/locations/table.name'),
                 'visible' => true,
                 'formatter' => 'locationsLinkFormatter',
-            ],
-            [
+            ], [
                 'field' => 'image',
                 'searchable' => false,
                 'sortable' => true,
@@ -53,8 +52,7 @@ class LocationPresenter extends Presenter
                 'title' => trans('general.image'),
                 'visible' => true,
                 'formatter' => 'imageFormatter',
-            ],
-            [
+            ], [
                 'field' => 'parent',
                 'searchable' => false,
                 'sortable' => true,
@@ -62,36 +60,28 @@ class LocationPresenter extends Presenter
                 'title' => trans('admin/locations/table.parent'),
                 'visible' => true,
                 'formatter' => 'locationsLinkObjFormatter',
-            ],
-
-            [
+            ], [
                 'field' => 'assets_count',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
                 'title' =>  trans('admin/locations/message.current_location'),
                 'visible' => true,
-            ],
-
-            [
+            ], [
                 'field' => 'rtd_assets_count',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
                 'title' =>  trans('admin/hardware/form.default_location'),
                 'visible' => false,
-            ],
-
-            [
+            ], [
                 'field' => 'assigned_assets_count',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
                 'title' =>  trans('admin/locations/message.assigned_assets'),
                 'visible' => true,
-            ],
-
-            [
+            ], [
                 'field' => 'users_count',
                 'searchable' => false,
                 'sortable' => true,

@@ -12,77 +12,78 @@
 
     @can('manage', \App\Models\Asset::class)
         @if ($asset->deleted_at=='')
-        <div class="dropdown pull-right">
-            <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">{{ trans('button.actions') }}
-                <span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu pull-right" role="menu">
-
-              <li role="menuitem">
-                <a href="#" id="print_tag">
-                  Напечатать этикетку
-                </a>
-              </li>
-                @if (($asset->assetstatus) && ($asset->assetstatus->deployable=='1'))
-                    @if (($asset->assigned_to != '') && ($asset->deleted_at==''))
-                        @can('checkin', \App\Models\Asset::class)
-                            <li role="menuitem">
-                                <a href="{{ route('hardware.checkin.create', $asset->id) }}">
-                                    {{ trans('admin/hardware/general.checkin') }}
-                                </a>
-                            </li>
-                        @endcan
-                    @elseif (($asset->assigned_to == '') && ($asset->deleted_at==''))
+            <div class="dropdown pull-right">
+                <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">{{ trans('button.actions') }}
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu pull-right" role="menu">
+                    <li role="menuitem">
+                        <a id="print_tag">
+                            Напечатать этикетку
+                        </a>
+                    </li>
+                    @if ($asset->availableForCloseSell())
                         @can('checkout', \App\Models\Asset::class)
                             <li role="menuitem">
-                                <a href="{{ route('hardware.checkout.create', $asset->id)  }}">
-                                    {{ trans('admin/hardware/general.checkout') }}
-                                </a>
+                                <a id="closesell" data-tooltip="true" title="Есть закр. док.">Есть закр.док.</a>
                             </li>
                         @endcan
-                    @can('sell', \App\Models\Asset::class)
-                            <li role="menuitem">
-                              <a href="{{ route('hardware/sell', $asset->id)  }}">
-                                Продать
-                              </a>
-                            </li>
-                          @endcan
                     @endif
-                @endif
-              @if ($asset->availableForCloseSell())
-                @can('sell', \App\Models\Asset::class)
-                  <li role="menuitem">
-                    <a href="#" class="closesell" data-tooltip="true" title="Есть закр. док.">Есть закр.
-                      док.</a>
-                  </li>
-                @endcan
-              @endif
+                    @if (($asset->assetstatus) && ($asset->assetstatus->deployable=='1'))
+                        @if (($asset->assigned_to != '') && ($asset->deleted_at==''))
+                            @can('checkin', \App\Models\Asset::class)
+                                <li role="menuitem">
+                                    <a href="{{ route('hardware.checkin.create', $asset->id) }}">
+                                        {{ trans('admin/hardware/general.checkin') }}
+                                    </a>
+                                </li>
+                            @endcan
+                        @elseif (($asset->assigned_to == '') && ($asset->deleted_at==''))
+                            @can('checkout', \App\Models\Asset::class)
+                                <li role="menuitem">
+                                    <a href="{{ route('hardware.checkout.create', $asset->id)  }}">
+                                        {{ trans('admin/hardware/general.checkout') }}
+                                    </a>
+                                </li>
+                                <li role="menuitem">
+                                    <a href="{{ route('hardware.sell.create', $asset->id)  }}">
+                                        {{ trans('general.sell') }}
+                                    </a>
+                                </li>
+                                <li role="menuitem">
+                                    <a href="{{ route('hardware.rent.create', $asset->id)  }}">
+                                        {{ trans('general.rent') }}
+                                    </a>
+                                </li>
+                            @endcan
+                        @endif
+                    @endif
 
-                @can('update', \App\Models\Asset::class)
-                    <li role="menuitem">
-                        <a href="{{ route('hardware.edit', $asset->id) }}">
-                            {{ trans('admin/hardware/general.edit') }}
-                        </a>
-                    </li>
-                @endcan
+                    @can('update', \App\Models\Asset::class)
+                        <li role="menuitem">
+                            <a href="{{ route('hardware.edit', $asset->id) }}">
+                                {{ trans('admin/hardware/general.edit') }}
+                            </a>
+                        </li>
+                    @endcan
 
-                @can('create', \App\Models\Asset::class)
-                    <li role="menuitem">
-                        <a href="{{ route('clone/hardware', $asset->id) }}">
-                            {{ trans('admin/hardware/general.clone') }}
-                        </a>
-                    </li>
-                @endcan
+                    @can('create', \App\Models\Asset::class)
+                        <li role="menuitem">
+                            <a href="{{ route('clone/hardware', $asset->id) }}">
+                                {{ trans('admin/hardware/general.clone') }}
+                            </a>
+                        </li>
+                    @endcan
 
-                @can('audit', \App\Models\Asset::class)
-                    <li role="menuitem">
-                        <a href="{{ route('asset.audit.create', $asset->id)  }}">
-                            {{ trans('general.audit') }}
-                        </a>
-                    </li>
-                @endcan
-            </ul>
-        </div>
+                    @can('audit', \App\Models\Asset::class)
+                        <li role="menuitem">
+                            <a href="{{ route('asset.audit.create', $asset->id)  }}">
+                                {{ trans('general.audit') }}
+                            </a>
+                        </li>
+                    @endcan
+                </ul>
+            </div>
         @endif
     @endcan
 @stop
@@ -96,7 +97,7 @@
             <div class="col-md-12">
                 <div class="callout callout-danger">
                     <h2>NO MODEL ASSOCIATED</h2>
-                        <p>This will break things in weird and horrible ways. Edit this asset now to assign it a model. </p>
+                    <p>This will break things in weird and horrible ways. Edit this asset now to assign it a model. </p>
                 </div>
             </div>
         @endif
@@ -126,7 +127,7 @@
                           <span class="hidden-lg hidden-md">
                           <i class="fas fa-info-circle fa-2x"></i>
                           </span>
-                          <span class="hidden-xs hidden-sm">{{ trans('admin/users/general.info') }}</span>
+                            <span class="hidden-xs hidden-sm">{{ trans('admin/users/general.info') }}</span>
                         </a>
                     </li>
 
@@ -135,8 +136,8 @@
                           <span class="hidden-lg hidden-md">
                             <i class="far fa-save fa-2x" aria-hidden="true"></i>
                           </span>
-                          <span class="hidden-xs hidden-sm">{{ trans('general.licenses') }}
-                            {!! ($asset->licenses->count() > 0 ) ? '<badge class="badge badge-secondary">'.number_format($asset->licenses->count()).'</badge>' : '' !!}
+                            <span class="hidden-xs hidden-sm">{{ trans('general.licenses') }}
+                                {!! ($asset->licenses->count() > 0 ) ? '<badge class="badge badge-secondary">'.number_format($asset->licenses->count()).'</badge>' : '' !!}
                           </span>
                         </a>
                     </li>
@@ -146,8 +147,8 @@
                           <span class="hidden-lg hidden-md">
                             <i class="far fa-hdd fa-2x" aria-hidden="true"></i>
                           </span>
-                          <span class="hidden-xs hidden-sm">{{ trans('general.components') }}
-                            {!! ($asset->components->count() > 0 ) ? '<badge class="badge badge-secondary">'.number_format($asset->components->count()).'</badge>' : '' !!}
+                            <span class="hidden-xs hidden-sm">{{ trans('general.components') }}
+                                {!! ($asset->components->count() > 0 ) ? '<badge class="badge badge-secondary">'.number_format($asset->components->count()).'</badge>' : '' !!}
                           </span>
                         </a>
                     </li>
@@ -157,20 +158,20 @@
                           <span class="hidden-lg hidden-md">
                             <i class="fas fa-barcode fa-2x" aria-hidden="true"></i>
                           </span>
-                          <span class="hidden-xs hidden-sm">{{ trans('general.assets') }}
-                            {!! ($asset->assignedAssets()->count() > 0 ) ? '<badge class="badge badge-secondary">'.number_format($asset->assignedAssets()->count()).'</badge>' : '' !!}
+                            <span class="hidden-xs hidden-sm">{{ trans('general.assets') }}
+                                {!! ($asset->assignedAssets()->count() > 0 ) ? '<badge class="badge badge-secondary">'.number_format($asset->assignedAssets()->count()).'</badge>' : '' !!}
 
                           </span>
                         </a>
                     </li>
                   <li>
                         <a href="#consumables" data-toggle="tab">
-                  <span class="hidden-lg hidden-md">
-                    <i class="fa fa-barcode" aria-hidden="true"></i>
-                  </span>
+                            <span class="hidden-lg hidden-md">
+                                <i class="fas fa-barcode" aria-hidden="true"></i>
+                                </span>
                           <span class="hidden-xs hidden-sm">
-                    {{ trans('general.consumables') }}
-                  </span>
+                            {{ trans('general.consumables') }}
+                            </span>
                         </a>
                   </li>
                     <li>
@@ -178,7 +179,7 @@
                           <span class="hidden-lg hidden-md">
                             <i class="fas fa-history fa-2x" aria-hidden="true"></i>
                           </span>
-                          <span class="hidden-xs hidden-sm">{{ trans('general.history') }}
+                            <span class="hidden-xs hidden-sm">{{ trans('general.history') }}
                           </span>
                         </a>
                     </li>
@@ -188,8 +189,8 @@
                           <span class="hidden-lg hidden-md">
                             <i class="fas fa-wrench fa-2x" aria-hidden="true"></i>
                           </span>
-                          <span class="hidden-xs hidden-sm">{{ trans('general.maintenances') }}
-                            {!! ($asset->assetmaintenances()->count() > 0 ) ? '<badge class="badge badge-secondary">'.number_format($asset->assetmaintenances()->count()).'</badge>' : '' !!}
+                            <span class="hidden-xs hidden-sm">{{ trans('general.maintenances') }}
+                                {!! ($asset->assetmaintenances()->count() > 0 ) ? '<badge class="badge badge-secondary">'.number_format($asset->assetmaintenances()->count()).'</badge>' : '' !!}
                           </span>
                         </a>
                     </li>
@@ -199,22 +200,22 @@
                           <span class="hidden-lg hidden-md">
                             <i class="far fa-file fa-2x" aria-hidden="true"></i>
                           </span>
-                          <span class="hidden-xs hidden-sm">{{ trans('general.files') }}
-                            {!! ($asset->uploads->count() > 0 ) ? '<badge class="badge badge-secondary">'.number_format($asset->uploads->count()).'</badge>' : '' !!}
+                            <span class="hidden-xs hidden-sm">{{ trans('general.files') }}
+                                {!! ($asset->uploads->count() > 0 ) ? '<badge class="badge badge-secondary">'.number_format($asset->uploads->count()).'</badge>' : '' !!}
                           </span>
                         </a>
                     </li>
 
                     <li>
-                    <a href="#modelfiles" data-toggle="tab">
+                        <a href="#modelfiles" data-toggle="tab">
                           <span class="hidden-lg hidden-md">
                               <i class="fa-solid fa-laptop-file fa-2x" aria-hidden="true"></i>
                           </span>
-                        <span class="hidden-xs hidden-sm">
+                            <span class="hidden-xs hidden-sm">
                             {{ trans('general.additional_files') }}
-                            {!! ($asset->model->uploads->count() > 0 ) ? '<badge class="badge badge-secondary">'.number_format($asset->model->uploads->count()).'</badge>' : '' !!}
+                                {!! ($asset->model->uploads->count() > 0 ) ? '<badge class="badge badge-secondary">'.number_format($asset->model->uploads->count()).'</badge>' : '' !!}
                           </span>
-                    </a>
+                        </a>
                     </li>
 
 
@@ -516,7 +517,20 @@
                                         @endforeach
                                     @endif
 
-
+                                        @if ($asset->purchase)
+                                            <div class="row">
+                                                <div class="col-md-2">
+                                                    <strong>
+                                                        Закупка
+                                                    </strong>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <a href="{{ route('purchases.show', $asset->purchase->id) }}">
+                                                        {{ $asset->purchase->invoice_number }}
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        @endif
                                     @if ($asset->purchase_date)
                                         <div class="row">
                                             <div class="col-md-2">
@@ -550,25 +564,73 @@
                                             </div>
                                         </div>
                                     @endif
-                                      @if ($asset->depreciable_cost)
+
                                         <div class="row">
-                                          <div class="col-md-2">
-                                            <strong>
-                                              Остаточная стоимость
-                                            </strong>
-                                          </div>
-                                          <div class="col-md-6">
-                                            @if (($asset->id) && ($asset->location))
-                                              {{ $asset->location->currency }}
-                                            @elseif (($asset->id) && ($asset->location))
-                                              {{ $asset->location->currency }}
-                                            @else
-                                              {{ $snipeSettings->default_currency }}
-                                            @endif
-                                            {{ \App\Helpers\Helper::formatCurrencyOutput($asset->depreciable_cost)}}
-                                          </div>
+                                            <div class="col-md-2">
+                                                <strong>
+                                                    Состояние
+                                                </strong>
+                                            </div>
+                                            <div class="col-md-6">
+                                                @if ($asset->quality == 5)
+                                                    <i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star"
+                                                                                                    aria-hidden="true"></i>
+                                                    <i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star"
+                                                                                                    aria-hidden="true"></i>
+                                                    <i class="fas fa-star" aria-hidden="true"></i>
+                                                @elseif  ($asset->quality == 4)
+                                                    <i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star"
+                                                                                                    aria-hidden="true"></i>
+                                                    <i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star"
+                                                                                                    aria-hidden="true"></i>
+                                                    <i class="fas fa-star-o" aria-hidden="true"></i>
+                                                @elseif  ($asset->quality == 3)
+                                                    <i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star"
+                                                                                                    aria-hidden="true"></i>
+                                                    <i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star-o"
+                                                                                                    aria-hidden="true"></i>
+                                                    <i class="fas fa-star-o" aria-hidden="true"></i>
+                                                @elseif  ($asset->quality == 2)
+                                                    <i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star"
+                                                                                                    aria-hidden="true"></i>
+                                                    <i class="fas fa-star-o" aria-hidden="true"></i><i class="fas fa-star-o"
+                                                                                                      aria-hidden="true"></i>
+                                                    <i class="fas fa-star-o" aria-hidden="true"></i>
+                                                @elseif  ($asset->quality == 1)
+                                                    <i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star-o"
+                                                                                                    aria-hidden="true"></i>
+                                                    <i class="fas fa-star-o" aria-hidden="true"></i><i class="fas fa-star-o"
+                                                                                                      aria-hidden="true"></i>
+                                                    <i class="fas fa-star-o" aria-hidden="true"></i>
+                                                @else
+                                                    <i class="fas fa-star-o" aria-hidden="true"></i><i class="fas fa-star-o"
+                                                                                                      aria-hidden="true"></i>
+                                                    <i class="fas fa-star-o" aria-hidden="true"></i><i class="fas fa-star-o"
+                                                                                                      aria-hidden="true"></i>
+                                                    <i class="fas fa-star-o" aria-hidden="true"></i>
+                                                @endif
+
+                                            </div>
                                         </div>
-                                      @endif
+                                        @if ($asset->depreciable_cost)
+                                            <div class="row">
+                                                <div class="col-md-2">
+                                                    <strong>
+                                                        Остаточная стоимость
+                                                    </strong>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    @if (($asset->id) && ($asset->location))
+                                                        {{ $asset->location->currency }}
+                                                    @elseif (($asset->id) && ($asset->location))
+                                                        {{ $asset->location->currency }}
+                                                    @else
+                                                        {{ $snipeSettings->default_currency }}
+                                                    @endif
+                                                    {{ Helper::formatCurrencyOutput($asset->depreciable_cost)}}
+                                                </div>
+                                            </div>
+                                        @endif
                                     @if (($asset->model) && ($asset->depreciation) && ($asset->purchase_date))
                                         <div class="row">
                                             <div class="col-md-2">
@@ -577,77 +639,34 @@
                                                 </strong>
                                             </div>
                                             <div class="col-md-6">
-                                                    @if (($asset->id) && ($asset->location))
-                                                        {{ $asset->location->currency }}
-                                                    @elseif (($asset->id) && ($asset->location))
-                                                        {{ $asset->location->currency }}
-                                                    @else
-                                                        {{ $snipeSettings->default_currency }}
-                                                    @endif
-                                                    {{ Helper::formatCurrencyOutput($asset->getDepreciatedValue() )}}
-
-                  @if ($asset->order_number)
-                  <div class="row">
-                    <div class="col-md-2">
-                      <strong>
-                        {{ trans('general.order_number') }}
-                      </strong>
-                    </div>
-                    <div class="col-md-6">
-                      #{{ $asset->order_number }}
-                    </div>
-                  </div>
-                  @endif
-                                                      <div class="row">
-                                                        <div class="col-md-2">
-                                                          <strong>
-                                                            Состояние
-                                                          </strong>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                          @if ($asset->quality == 5)
-                                                            <i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star"
-                                                                                                            aria-hidden="true"></i>
-                                                            <i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star"
-                                                                                                            aria-hidden="true"></i>
-                                                            <i class="fa fa-star" aria-hidden="true"></i>
-                                                          @elseif  ($asset->quality == 4)
-                                                            <i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star"
-                                                                                                            aria-hidden="true"></i>
-                                                            <i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star"
-                                                                                                            aria-hidden="true"></i>
-                                                            <i class="fa fa-star-o" aria-hidden="true"></i>
-                                                          @elseif  ($asset->quality == 3)
-                                                            <i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star"
-                                                                                                            aria-hidden="true"></i>
-                                                            <i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star-o"
-                                                                                                            aria-hidden="true"></i>
-                                                            <i class="fa fa-star-o" aria-hidden="true"></i>
-                                                          @elseif  ($asset->quality == 2)
-                                                            <i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star"
-                                                                                                            aria-hidden="true"></i>
-                                                            <i class="fa fa-star-o" aria-hidden="true"></i><i class="fa fa-star-o"
-                                                                                                              aria-hidden="true"></i>
-                                                            <i class="fa fa-star-o" aria-hidden="true"></i>
-                                                          @elseif  ($asset->quality == 1)
-                                                            <i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star-o"
-                                                                                                            aria-hidden="true"></i>
-                                                            <i class="fa fa-star-o" aria-hidden="true"></i><i class="fa fa-star-o"
-                                                                                                              aria-hidden="true"></i>
-                                                            <i class="fa fa-star-o" aria-hidden="true"></i>
-                                                          @else
-                                                            <i class="fa fa-star-o" aria-hidden="true"></i><i class="fa fa-star-o"
-                                                                                                              aria-hidden="true"></i>
-                                                            <i class="fa fa-star-o" aria-hidden="true"></i><i class="fa fa-star-o"
-                                                                                                              aria-hidden="true"></i>
-                                                            <i class="fa fa-star-o" aria-hidden="true"></i>
-                                                          @endif
-
-                                                        </div>
-                                                      </div>
+                                                @if (($asset->id) && ($asset->location))
+                                                    {{ $asset->location->currency }}
+                                                @elseif (($asset->id) && ($asset->location))
+                                                    {{ $asset->location->currency }}
+                                                @else
+                                                    {{ $snipeSettings->default_currency }}
+                                                @endif
+                                                {{ Helper::formatCurrencyOutput($asset->getDepreciatedValue() )}}
+                                            </div>
+                                        </div>
+                                    @endif
 
 
-                                                    @if ($asset->supplier)
+
+                                    @if ($asset->order_number)
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <strong>
+                                                    {{ trans('general.order_number') }}
+                                                </strong>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <a href="{{ route('hardware.index', ['order_number' => $asset->order_number]) }}">#{{ $asset->order_number }}</a>
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    @if ($asset->supplier)
                                         <div class="row">
                                             <div class="col-md-2">
                                                 <strong>
@@ -686,26 +705,26 @@
                                             </div>
                                         </div>
 
-                                            <div class="row">
-                                                <div class="col-md-2">
-                                                    <strong>
-                                                        {{ trans('admin/hardware/form.warranty_expires') }}
-                                                        @if ($asset->purchase_date)
-                                                        {!! $asset->present()->warranty_expires() < date("Y-m-d") ? '<i class="fas fa-exclamation-triangle text-orange" aria-hidden="true"></i>' : '' !!}
-                                                        @endif
-
-                                                    </strong>
-                                                </div>
-                                                <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <strong>
+                                                    {{ trans('admin/hardware/form.warranty_expires') }}
                                                     @if ($asset->purchase_date)
+                                                        {!! $asset->present()->warranty_expires() < date("Y-m-d") ? '<i class="fas fa-exclamation-triangle text-orange" aria-hidden="true"></i>' : '' !!}
+                                                    @endif
+
+                                                </strong>
+                                            </div>
+                                            <div class="col-md-6">
+                                                @if ($asset->purchase_date)
                                                     {{ Helper::getFormattedDateObject($asset->present()->warranty_expires(), 'date', false) }}
                                                     -
                                                     {{ Carbon::parse($asset->present()->warranty_expires())->diffForHumans(['parts' => 2]) }}
-                                                    @else
-                                                        {{ trans('general.na_no_purchase_date') }}
-                                                    @endif
-                                                </div>
+                                                @else
+                                                    {{ trans('general.na_no_purchase_date') }}
+                                                @endif
                                             </div>
+                                        </div>
 
                                     @endif
 
@@ -730,9 +749,9 @@
                                             </div>
                                             <div class="col-md-6">
                                                 @if ($asset->purchase_date)
-                                                {{ Helper::getFormattedDateObject($asset->depreciated_date()->format('Y-m-d'), 'date', false) }}
-                                                -
-                                                {{ Carbon::parse($asset->depreciated_date())->diffForHumans(['parts' => 2]) }}
+                                                    {{ Helper::getFormattedDateObject($asset->depreciated_date()->format('Y-m-d'), 'date', false) }}
+                                                    -
+                                                    {{ Carbon::parse($asset->depreciated_date())->diffForHumans(['parts' => 2]) }}
                                                 @else
                                                     {{ trans('general.na_no_purchase_date') }}
                                                 @endif
@@ -763,9 +782,9 @@
                                             </div>
                                             <div class="col-md-6">
                                                 @if ($asset->purchase_date)
-                                                {{ Helper::getFormattedDateObject($asset->present()->eol_date(), 'date', false) }}
-                                                -
-                                                {{ Carbon::parse($asset->present()->eol_date())->diffForHumans(['parts' => 2]) }}
+                                                    {{ Helper::getFormattedDateObject($asset->present()->eol_date(), 'date', false) }}
+                                                    -
+                                                    {{ Carbon::parse($asset->present()->eol_date())->diffForHumans(['parts' => 2]) }}
                                                 @else
                                                     {{ trans('general.na_no_purchase_date') }}
                                                 @endif
@@ -860,7 +879,7 @@
                                             </div>
                                         </div>
                                     @endif
-                                     @if ($asset->last_checkout!='')
+                                    @if ($asset->last_checkout!='')
                                         <div class="row">
                                             <div class="col-md-2">
                                                 <strong>
@@ -871,7 +890,7 @@
                                                 {{ Helper::getFormattedDateObject($asset->last_checkout, 'datetime', false) }}
                                             </div>
                                         </div>
-                                     @endif
+                                    @endif
 
 
 
@@ -912,7 +931,7 @@
                                     <div class="row">
                                         <div class="col-md-2">
                                             <strong>
-                                               Labels
+                                                Labels
                                             </strong>
                                         </div>
                                         <div class="col-md-6">
@@ -921,9 +940,9 @@
                                                       'route' => ['hardware/bulkedit'],
                                                       'class' => 'form-inline',
                                                        'id' => 'bulkForm']) }}
-                                                <input type="hidden" name="bulk_actions" value="labels" />
-                                                <input type="hidden" name="ids[{{$asset->id}}]" value="{{ $asset->id }}" />
-                                                <button class="btn btn-sm btn-default" id="bulkEdit" ><i class="fas fa-barcode" aria-hidden="true"></i> {{ trans_choice('button.generate_labels', 1) }}</button>
+                                            <input type="hidden" name="bulk_actions" value="labels" />
+                                            <input type="hidden" name="ids[{{$asset->id}}]" value="{{ $asset->id }}" />
+                                            <button class="btn btn-sm btn-default" id="bulkEdit" ><i class="fas fa-barcode" aria-hidden="true"></i> {{ trans_choice('button.generate_labels', 1) }}</button>
 
                                             {{ Form::close() }}
 
@@ -948,8 +967,8 @@
                                 @if ($asset->deleted_at!='')
                                     <div class="text-center col-md-12" style="padding-bottom: 15px;">
                                         <form method="POST" action="{{ route('restore/hardware', ['assetId' => $asset->id]) }}">
-                                        @csrf
-                                        <button class="btn btn-danger col-md-12">{{ trans('general.restore') }}</button>
+                                            @csrf
+                                            <button class="btn btn-danger col-md-12">{{ trans('general.restore') }}</button>
                                         </form>
                                     </div>
                                 @endif
@@ -960,44 +979,44 @@
 
                                 @if (($asset->assignedTo) && ($asset->deleted_at==''))
                                     <h2>{{ trans('admin/hardware/form.checkedout_to') }}</h2>
-                                        <p>
+                                    <p>
                                         @if($asset->checkedOutToUser()) <!-- Only users have avatars currently-->
-                                            <img src="{{ $asset->assignedTo->present()->gravatar() }}" class="user-image-inline" alt="{{ $asset->assignedTo->present()->fullName() }}">
-                                            @endif
-                                            {!! $asset->assignedTo->present()->glyph() . ' ' .$asset->assignedTo->present()->nameUrl() !!}
-                                        </p>
+                                        <img src="{{ $asset->assignedTo->present()->gravatar() }}" class="user-image-inline" alt="{{ $asset->assignedTo->present()->fullName() }}">
+                                        @endif
+                                        {!! $asset->assignedTo->present()->glyph() . ' ' .$asset->assignedTo->present()->nameUrl() !!}
+                                    </p>
 
-                                        <ul class="list-unstyled" style="line-height: 25px;">
-                                            @if ((isset($asset->assignedTo->email)) && ($asset->assignedTo->email!=''))
-                                                <li>
-                                                    <i class="far fa-envelope" aria-hidden="true"></i>
-                                                    <a href="mailto:{{ $asset->assignedTo->email }}">{{ $asset->assignedTo->email }}</a>
-                                                </li>
-                                            @endif
+                                    <ul class="list-unstyled" style="line-height: 25px;">
+                                        @if ((isset($asset->assignedTo->email)) && ($asset->assignedTo->email!=''))
+                                            <li>
+                                                <i class="far fa-envelope" aria-hidden="true"></i>
+                                                <a href="mailto:{{ $asset->assignedTo->email }}">{{ $asset->assignedTo->email }}</a>
+                                            </li>
+                                        @endif
 
-                                            @if ((isset($asset->assignedTo)) && ($asset->assignedTo->phone!=''))
-                                                <li>
-                                                    <i class="fas fa-phone" aria-hidden="true"></i>
-                                                    <a href="tel:{{ $asset->assignedTo->phone }}">{{ $asset->assignedTo->phone }}</a>
-                                                </li>
-                                            @endif
+                                        @if ((isset($asset->assignedTo)) && ($asset->assignedTo->phone!=''))
+                                            <li>
+                                                <i class="fas fa-phone" aria-hidden="true"></i>
+                                                <a href="tel:{{ $asset->assignedTo->phone }}">{{ $asset->assignedTo->phone }}</a>
+                                            </li>
+                                        @endif
 
-                                            @if (isset($asset->location))
-                                                <li>{{ $asset->location->name }}</li>
-                                                <li>{{ $asset->location->address }}
-                                                    @if ($asset->location->address2!='')
-                                                        {{ $asset->location->address2 }}
-                                                    @endif
-                                                </li>
+                                        @if (isset($asset->location))
+                                            <li>{{ $asset->location->name }}</li>
+                                            <li>{{ $asset->location->address }}
+                                                @if ($asset->location->address2!='')
+                                                    {{ $asset->location->address2 }}
+                                                @endif
+                                            </li>
 
-                                                <li>{{ $asset->location->city }}
-                                                    @if (($asset->location->city!='') && ($asset->location->state!=''))
-                                                        ,
-                                                    @endif
-                                                    {{ $asset->location->state }} {{ $asset->location->zip }}
-                                                </li>
-                                            @endif
-                                        </ul>
+                                            <li>{{ $asset->location->city }}
+                                                @if (($asset->location->city!='') && ($asset->location->state!=''))
+                                                    ,
+                                                @endif
+                                                {{ $asset->location->state }} {{ $asset->location->zip }}
+                                            </li>
+                                        @endif
+                                    </ul>
 
                                 @endif
                             </div> <!-- div.col-md-4 -->
@@ -1060,7 +1079,7 @@
                                         <th>{{ trans('general.purchase_cost') }}</th>
                                         </thead>
                                         <tbody>
-                                        <?php $totalCost = 0; ?>
+                                            <?php $totalCost = 0; ?>
                                         @foreach ($asset->components as $component)
 
 
@@ -1072,7 +1091,7 @@
                                                     <td>{{ $component->pivot->assigned_qty }}</td>
                                                     <td>{{ Helper::formatCurrencyOutput($component->purchase_cost) }} each</td>
 
-                                                    <?php $totalCost = $totalCost + ($component->purchase_cost *$component->pivot->assigned_qty) ?>
+                                                        <?php $totalCost = $totalCost + ($component->purchase_cost *$component->pivot->assigned_qty) ?>
                                                 </tr>
                                             @endif
                                         @endforeach
@@ -1161,45 +1180,45 @@
                         </div> <!-- row -->
                     </div> <!-- /.tab-pane software -->
 
-                    <div class="tab-pane fade" id="consumables">
-                        <div class="row">
-                            <div class="col-md-12">
+{{--                    <div class="tab-pane fade" id="consumables">--}}
+{{--                        <div class="row">--}}
+{{--                            <div class="col-md-12">--}}
 
-                                <div id="toolbar">
-                                </div>
-                                <!-- checked out assets table -->
-                                <div class="table-responsive">
-                                    <table
-                                            data-columns="{{ \App\Presenters\ConsumableAssignmentPresenter::dataTableLayoutIn() }}"
-                                            data-cookie-id-table="consumablesCheckedoutTable"
-                                            data-pagination="true"
-                                            data-id-table="consumablesCheckedoutTable"
-                                            data-search="false"
-                                            data-side-pagination="server"
-                                            data-show-columns="true"
-                                            data-show-export="true"
-                                            data-show-footer="true"
-                                            data-show-refresh="true"
-                                            data-sort-order="asc"
-                                            data-sort-name="name"
-                                            id="consumablesCheckedoutTable"
-                                            class="table table-striped snipe-table"
-                                            data-url="{{route('api.consumableassignments.index',['asset_id'=> $asset->id])}}">
-                                        {{--                    <thead>--}}
-                                        {{--                    <tr>--}}
-                                        {{--                      <th data-searchable="false" data-sortable="false" data-field="name">Наименование</th>--}}
-                                        {{--                      <th data-searchable="false" data-sortable="false" data-field="quantity">Количество</th>--}}
-                                        {{--                      <th data-searchable="false" data-sortable="false" data-field="created_at" data-formatter="dateDisplayFormatter">{{ trans('general.date') }}</th>--}}
-                                        {{--                      <th data-searchable="false" data-sortable="false" data-field="admin">Выдал</th>--}}
-                                        {{--                    </tr>--}}
-                                        {{--                    </thead>--}}
-                                    </table>
-                                </div>
+{{--                                <div id="toolbar">--}}
+{{--                                </div>--}}
+{{--                                <!-- checked out assets table -->--}}
+{{--                                <div class="table-responsive">--}}
+{{--                                    <table--}}
+{{--                                            data-columns="{{ \App\Presenters\ConsumableAssignmentPresenter::dataTableLayoutIn() }}"--}}
+{{--                                            data-cookie-id-table="consumablesCheckedoutTable"--}}
+{{--                                            data-pagination="true"--}}
+{{--                                            data-id-table="consumablesCheckedoutTable"--}}
+{{--                                            data-search="false"--}}
+{{--                                            data-side-pagination="server"--}}
+{{--                                            data-show-columns="true"--}}
+{{--                                            data-show-export="true"--}}
+{{--                                            data-show-footer="true"--}}
+{{--                                            data-show-refresh="true"--}}
+{{--                                            data-sort-order="asc"--}}
+{{--                                            data-sort-name="name"--}}
+{{--                                            id="consumablesCheckedoutTable"--}}
+{{--                                            class="table table-striped snipe-table"--}}
+{{--                                            data-url="{{route('api.consumableassignments.index',['asset_id'=> $asset->id])}}">--}}
+{{--                                        --}}{{--                    <thead>--}}
+{{--                                        --}}{{--                    <tr>--}}
+{{--                                        --}}{{--                      <th data-searchable="false" data-sortable="false" data-field="name">Наименование</th>--}}
+{{--                                        --}}{{--                      <th data-searchable="false" data-sortable="false" data-field="quantity">Количество</th>--}}
+{{--                                        --}}{{--                      <th data-searchable="false" data-sortable="false" data-field="created_at" data-formatter="dateDisplayFormatter">{{ trans('general.date') }}</th>--}}
+{{--                                        --}}{{--                      <th data-searchable="false" data-sortable="false" data-field="admin">Выдал</th>--}}
+{{--                                        --}}{{--                    </tr>--}}
+{{--                                        --}}{{--                    </thead>--}}
+{{--                                    </table>--}}
+{{--                                </div>--}}
 
 
-                            </div><!-- /col -->
-                        </div> <!-- row -->
-                    </div> <!-- /.tab-pane software -->
+{{--                            </div><!-- /col -->--}}
+{{--                        </div> <!-- row -->--}}
+{{--                    </div> <!-- /.tab-pane software -->--}}
 
 
                     <div class="tab-pane fade" id="maintenances">
@@ -1209,9 +1228,9 @@
                                     <div id="maintenance-toolbar">
                                         <a href="{{ route('maintenances.create', ['asset_id' => $asset->id]) }}" class="btn btn-primary">{{ trans('button.add_maintenance') }}</a>
                                     </div>
-                            @endcan
+                                @endcan
 
-                            <!-- Asset Maintenance table -->
+                                <!-- Asset Maintenance table -->
                                 <table
                                         data-columns="{{ \App\Presenters\AssetMaintenancesPresenter::dataTableLayout() }}"
                                         class="table table-striped snipe-table"
@@ -1252,65 +1271,58 @@
                                         data-show-fullscreen="true"
                                         data-show-refresh="true"
                                         data-sort-order="desc"
-                                        data-sort-name="created_at"
+                                        data-sort-name="id"
                                         data-show-export="true"
                                         data-export-options='{
                          "fileName": "export-asset-{{  $asset->id }}-history",
                          "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
                        }'
 
-                      data-url="{{ route('api.activity.index', ['item_id' => $asset->id, 'item_type' => 'asset']) }}"
-                      data-cookie-id-table="assetHistory"
-                      data-cookie="true">
-                <thead>
-                <tr>
-                  <th data-visible="true" style="width: 40px;" class="hidden-xs">{{ trans('admin/hardware/table.icon') }}</th>
-                  <th class="col-sm-2" data-visible="true" data-field="action_date" data-formatter="dateDisplayFormatter">{{ trans('general.date') }}</th>
-                  <th class="col-sm-1" data-visible="true" data-field="admin" data-formatter="usersLinkObjFormatter">{{ trans('general.admin') }}</th>
-                  <th class="col-sm-1" data-visible="true" data-field="action_type">{{ trans('general.action') }}</th>
-                  <th class="col-sm-2" data-visible="true" data-field="item" data-formatter="polymorphicItemFormatter">{{ trans('general.item') }}</th>
-                  <th class="col-sm-2" data-visible="true" data-field="target" data-formatter="polymorphicItemFormatter">{{ trans('general.target') }}</th>
-                  <th class="col-sm-2" data-field="note">{{ trans('general.notes') }}</th>
-                    @if  ($snipeSettings->require_accept_signature=='1')
-                        <th class="col-md-3" data-field="signature_file" data-visible="false"  data-formatter="imageFormatter">{{ trans('general.signature') }}</th>
-                    @endif
-                    <th class="col-md-3" data-visible="false" data-field="file" data-visible="false"  data-formatter="fileUploadFormatter">{{ trans('general.download') }}</th>
-                  <th class="col-sm-2" data-field="log_meta" data-visible="true" data-formatter="changeLogFormatter">{{ trans('admin/hardware/table.changed')}}</th>
-                  <th class="col-md-3" data-visible="false" data-field="file" data-visible="false"
-                      data-formatter="fileUploadFormatter">{{ trans('general.download') }}</th>
-                  <th class="col-sm-2" data-field="log_meta" data-visible="true"
-                      data-formatter="changeLogFormatter">Изменения
-                  </th>
-                  <th class="col-sm-2" data-field="photos" data-visible="true"
-                      data-formatter="photosFormatter">Фото
-                  </th>
-                </tr>
-                </thead>
-              </table>
-            </div>
-          </div> <!-- /.row -->
-        </div> <!-- /.tab-pane history -->
+                                        data-url="{{ route('api.activity.index', ['item_id' => $asset->id, 'item_type' => 'asset']) }}"
+                                        data-cookie-id-table="assetHistory"
+                                        data-cookie="true">
+                                    <thead>
+                                    <tr>
+                                        <th data-visible="true" style="width: 40px;" class="hidden-xs">{{ trans('admin/hardware/table.icon') }}</th>
+                                        <th class="col-sm-1" data-visible="true" data-field="id">ID</th>
+                                        <th class="col-sm-2" data-visible="true" data-field="action_date" data-formatter="dateDisplayFormatter">{{ trans('general.date') }}</th>
+                                        <th class="col-sm-1" data-visible="true" data-field="admin" data-formatter="usersLinkObjFormatter">{{ trans('general.admin') }}</th>
+                                        <th class="col-sm-1" data-visible="true" data-field="action_type">{{ trans('general.action') }}</th>
+                                        <th class="col-sm-2" data-visible="true" data-field="item" data-formatter="polymorphicItemFormatter">{{ trans('general.item') }}</th>
+                                        <th class="col-sm-2" data-visible="true" data-field="target" data-formatter="polymorphicItemFormatter">{{ trans('general.target') }}</th>
+                                        <th class="col-sm-2" data-field="note">{{ trans('general.notes') }}</th>
+                                        @if  ($snipeSettings->require_accept_signature=='1')
+                                            <th class="col-md-3" data-field="signature_file" data-visible="false"  data-formatter="imageFormatter">{{ trans('general.signature') }}</th>
+                                        @endif
+                                        <th class="col-md-3" data-visible="false" data-field="file" data-visible="false"  data-formatter="fileUploadFormatter">{{ trans('general.download') }}</th>
+                                        <th class="col-sm-2" data-field="log_meta" data-visible="true" data-formatter="changeLogFormatter">{{ trans('admin/hardware/table.changed')}}</th>
+                                    </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div> <!-- /.row -->
+                    </div> <!-- /.tab-pane history -->
 
-        <div class="tab-pane fade" id="files">
-          <div class="row">
-            <div class="col-md-12">
+                    <div class="tab-pane fade" id="files">
+                        <div class="row">
+                            <div class="col-md-12">
 
-              @if ($asset->uploads->count() > 0)
-              <table
-                      class="table table-striped snipe-table"
-                      id="assetFileHistory"
-                      data-pagination="true"
-                      data-id-table="assetFileHistory"
-                      data-search="true"
-                      data-side-pagination="client"
-                      data-sortable="true"
-                      data-show-columns="true"
-                      data-show-fullscreen="true"
-                      data-show-refresh="true"
-                      data-sort-order="desc"
-                      data-sort-name="created_at"
-                      data-show-export="true"
-                      data-export-options='{
+                                @if ($asset->uploads->count() > 0)
+                                    <table
+                                            class="table table-striped snipe-table"
+                                            id="assetFileHistory"
+                                            data-pagination="true"
+                                            data-id-table="assetFileHistory"
+                                            data-search="true"
+                                            data-side-pagination="client"
+                                            data-sortable="true"
+                                            data-show-columns="true"
+                                            data-show-fullscreen="true"
+                                            data-show-refresh="true"
+                                            data-sort-order="desc"
+                                            data-sort-name="created_at"
+                                            data-show-export="true"
+                                            data-export-options='{
                          "fileName": "export-asset-{{ $asset->id }}-files",
                          "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
                        }'
@@ -1341,9 +1353,9 @@
                                                 </td>
                                                 <td>
                                                     @if (Storage::exists('private_uploads/assets/'.$file->filename))
-                                                    {{ $file->filename }}
+                                                        {{ $file->filename }}
                                                     @else
-                                                    <del>{{ $file->filename }}</del>
+                                                        <del>{{ $file->filename }}</del>
                                                     @endif
                                                 </td>
                                                 <td data-value="{{ (Storage::exists('private_uploads/assets/'.$file->filename) ? Storage::size('private_uploads/assets/'.$file->filename) : '') }}">
@@ -1443,8 +1455,8 @@
                                                         <del>{{ $file->filename }}</del>
                                                     @endif
                                                 </td>
-                                                <td data-value="{{ (Storage::exists('private_uploads/assetmodels/'.$file->filename) ? Storage::size('private_uploads/assetmodels/'.$file->filename) : '') }}">
-                                                    {{ Helper::formatFilesizeUnits(@Storage::size('private_uploads/assetmodels/'.$file->filename)) }}
+                                                <td data-value="{{ (Storage::exists('private_uploads/assetmodels/'.$file->filename)) ? Storage::size('private_uploads/assetmodels/'.$file->filename) : '' }}">
+                                                    {{ (Storage::exists('private_uploads/assetmodels/'.$file->filename)) ? Helper::formatFilesizeUnits(Storage::size('private_uploads/assetmodels/'.$file->filename)) : '' }}
                                                 </td>
                                                 <td>
                                                     @if ($file->note)
@@ -1497,9 +1509,9 @@
 
 @section('moar_scripts')
     @include ('partials.bootstrap-table')
-            <script>
-              $(function () {
-                $('#print_tag').click(function () {
+    <script>
+        $(function () {
+            $('#print_tag').click(function () {
                   console.log("test");
                   {{--var dataToSend = {--}}
                   {{--  text: "{{ $sale->asset_tag }}"--}}
@@ -1531,10 +1543,9 @@
                   });
 
                 });
-                $('.closesell').click(function () {
-                  $.ajax({
+            $('#closesell').click(function () {
+                $.ajax({
                     url: '/api/v1/hardware/{{ $asset->id }}/closesell',
-                    {{--url: '{{ route('api.purchases.resend', ['id'=> row.id]) }}',--}}
                     method: "POST",
                     headers: {
                       "X-Requested-With": 'XMLHttpRequest',
@@ -1544,18 +1555,18 @@
                       location.reload();
                     }
                   });
-                });
-                $('#assetHistory').on('post-body.bs.table', function (e, data) {
-// console.log("assetHistory");
-// $('.aniimated-thumbnials').lightGallery({
-//   // thumbnail:true,
-// });
-                  lightbox.option({
-                    'resizeDuration': 200,
-                    'wrapAround': true
-                  })
-                });
-              });
-            </script>
+            });
+        });
+//                 $('#assetHistory').on('post-body.bs.table', function (e, data) {
+// // console.log("assetHistory");
+// // $('.aniimated-thumbnials').lightGallery({
+// //   // thumbnail:true,
+// // });
+//                   lightbox.option({
+//                     'resizeDuration': 200,
+//                     'wrapAround': true
+//                   })
+//                 });
+    </script>
 
 @stop

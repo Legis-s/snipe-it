@@ -3,8 +3,8 @@
 return array(
     'accessory_category' 				=> 'Категория аксессуара',
     'accessory_name'  					=> 'Имя аксессуара',
-    'checkout'  							=> 'Отвязать прочее',
-    'checkin'  							=> 'Привязать прочее',
+    'checkout'  						=> 'Выдать прочее',
+    'checkin'  							=> 'Вернуть прочее',
     'create'  							=> 'Создать аксесуар',
     'edit'  							=> 'Править прочее',
     'eula_text'							=> 'Категория EULA',

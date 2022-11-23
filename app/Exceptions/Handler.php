@@ -6,7 +6,7 @@ use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use App\Helpers\Helper;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\AuthenticationException;
-use Log;
+//use Log;
 use Throwable;
 use JsonException;
 
@@ -41,7 +41,7 @@ class Handler extends ExceptionHandler
     public function report(Throwable $exception)
     {
         if ($this->shouldReport($exception)) {
-            \Log::error($exception);
+//            \Log::error($exception);
             return parent::report($exception);
         }
     }

@@ -34,7 +34,7 @@ class ConsumableAssignmentTransformer
                 'type' => e($consumableAssignment->type),
                 'cost' => e($consumableAssignment->cost),
                 'contract' => ($consumableAssignment->contract) ? (new ContractsTransformer())->transformContract($consumableAssignment->contract) : null,
-                'user' => ($consumableAssignment->user) ? (new UsersTransformer)->transformUser($consumableAssignment->user) : null,
+                'responsibleUser' => ($consumableAssignment->responsibleUser) ? (new UsersTransformer)->transformUser($consumableAssignment->responsibleUser) : null,
                 'assigned_to' => $this->transformAssignedTo($consumableAssignment),
                 'comment' => ($consumableAssignment->comment) ? e($consumableAssignment->comment) : null,
                 'created_at' => Helper::getFormattedDateObject($consumableAssignment->created_at, 'datetime'),

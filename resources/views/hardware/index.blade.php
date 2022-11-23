@@ -25,9 +25,9 @@
     {{ trans('general.archived') }}
   @elseif (Request::get('status')=='Deleted')
     {{ trans('general.deleted') }}
-  @elseif (Input::get('status')=='Sold')
+  @elseif (Request::get('status')=='Sold')
     Проданные
-  @elseif (Input::get('status')=='Issued_for_sale')
+  @elseif (Request::get('status')=='Issued_for_sale')
     Выданные на продажу
   @endif
 @else
@@ -65,12 +65,9 @@
           <div class="row">
             <div class="col-md-12">
               
-              @if (Request::get('status')!='Deleted')
-
-
+              @if (Request::get('status')!='Deleted' or Request::get('status')!='Sold')
 
                 @include('partials.asset-bulk-actions')
-                   
               @endif
 
               <table

@@ -322,34 +322,21 @@ class AssetPresenter extends Presenter
             'searchable' => false,
             'sortable' => false,
             'switchable' => true,
-            'title' => trans('general.checkin').'/'.trans('general.checkout'),
+            'title' => trans('general.checkin').'/'.trans('general.checkout'),'/'.trans('general.sell').'/'.trans('general.rent'),
             'visible' => true,
-            'formatter' => 'hardwareInOutFormatter',
-        ];
-
-        $layout[] = [
-            "field" => "sellfield",
-            "searchable" => false,
-            "sortable" => false,
-            "switchable" => true,
-            "title" => "Продажа",
-            "visible" => true,
-            "formatter" => "sellFormatter",
+            'formatter' => 'hardwareCustomInOutFormatter',
             "events" => "operateEvents"
         ];
-
-
-        $layout[] = [
-            "field" => "review",
-            "searchable" => false,
-            "sortable" => false,
-            "switchable" => true,
-            "title" => "Проверка",
-            "visible" => true,
-            "formatter" => "reviewFormatter",
-            "events" => "operateEvents"
-        ];
-
+//        $layout[] = [
+//            "field" => "review",
+//            "searchable" => false,
+//            "sortable" => false,
+//            "switchable" => true,
+//            "title" => "Проверка",
+//            "visible" => true,
+//            "formatter" => "reviewFormatter",
+//            "events" => "operateEvents"
+//        ];
 
         $layout[] = [
             'field' => 'actions',
@@ -358,6 +345,7 @@ class AssetPresenter extends Presenter
             'switchable' => false,
             'title' => trans('table.actions'),
             'formatter' => 'hardwareActionsFormatter',
+            "events" => "operateEvents"
         ];
 
         return json_encode($layout);

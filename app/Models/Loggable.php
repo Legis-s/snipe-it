@@ -23,7 +23,7 @@ trait Loggable
      * @since [v3.4]
      * @return \App\Models\Actionlog
      */
-    public function logCheckout($note, $target,$changed = null ,$photos_json = null,$biometric_uid = null,$biometric_result = null /* What are we checking out to? */)
+    public function logCheckout($note, $target, $action_date = null,$changed = null)
     {
         $log = new Actionlog;
         $log = $this->determineLogItemType($log);
@@ -56,27 +56,63 @@ trait Loggable
         }
 
         $log->note = $note;
-        if ($changed){
-            $log->log_meta = json_encode($changed);
-        }
-        if($photos_json){
-            $log->photos = json_encode($photos_json);
-        }
-
-        if($biometric_result){
-            $log->biometric_result = $biometric_result;
-        }
-        if($biometric_uid){
-            $log->biometric_uid =$biometric_uid;
-        }
-
         $log->action_date = $action_date;
 
         if (! $log->action_date) {
             $log->action_date = date('Y-m-d H:i:s');
         }
-
+        $log->log_meta = json_encode($changed);
         $log->logaction('checkout');
+
+        return $log;
+    }
+
+
+    /**
+     * @author  Daniel Meltzer <dmeltzer.devel@gmail.com>
+     * @since [v3.4]
+     * @return \App\Models\Actionlog
+     */
+    public function logForInstall($note, $target, $action_date = null,$changed = null)
+    {
+        $log = new Actionlog;
+        $log = $this->determineLogItemType($log);
+        if (Auth::user()) {
+            $log->user_id = Auth::user()->id;
+        }
+
+        if (! isset($target)) {
+            throw new \Exception('All checkout logs require a target.');
+
+            return;
+        }
+
+        if (! isset($target->id)) {
+            throw new \Exception('That target seems invalid (no target ID available).');
+
+            return;
+        }
+
+        $log->target_type = get_class($target);
+        $log->target_id = $target->id;
+
+        // Figure out what the target is
+        if ($log->target_type == Location::class) {
+            $log->location_id = $target->id;
+        } elseif ($log->target_type == Asset::class) {
+            $log->location_id = $target->location_id;
+        } else {
+            $log->location_id = $target->location_id;
+        }
+
+        $log->note = $note;
+        $log->action_date = $action_date;
+
+        if (! $log->action_date) {
+            $log->action_date = date('Y-m-d H:i:s');
+        }
+        $log->log_meta = json_encode($changed);
+        $log->logaction('issued_for_install');
 
         return $log;
     }
@@ -103,7 +139,7 @@ trait Loggable
      * @since [v3.4]
      * @return \App\Models\Actionlog
      */
-    public function logCheckin($target, $note,$changed = null,$photos_json = null )
+    public function logCheckin($target, $note, $action_date = null, $changed = null)
     {
         $settings = Setting::getSettings();
         $log = new Actionlog;
@@ -127,14 +163,6 @@ trait Loggable
 
         $log->location_id = null;
         $log->note = $note;
-        $log->user_id = Auth::user()->id;
-
-        if ($changed){
-            $log->log_meta = json_encode($changed);
-        }
-        if ($photos_json){
-            $log->photos = json_encode($photos_json);
-        }
         $log->action_date = $action_date;
         if (! $log->action_date) {
             $log->action_date = date('Y-m-d H:i:s');
@@ -147,7 +175,7 @@ trait Loggable
         if (Auth::user()) {
             $log->user_id = Auth::user()->id;
         }
-
+        $log->log_meta = json_encode($changed);
         $log->logaction('checkin from');
 
 //        $params = [
@@ -182,6 +210,113 @@ trait Loggable
 //            }
 //
 //        }
+
+        return $log;
+    }
+
+
+    /**
+     * @author  Daniel Meltzer <dmeltzer.devel@gmail.com>
+     * @since [v3.4]
+     * @return \App\Models\Actionlog
+     */
+    public function logSell($note, $target, $action_date = null,$changed = null)
+    {
+        $log = new Actionlog;
+        $log = $this->determineLogItemType($log);
+        if (Auth::user()) {
+            $log->user_id = Auth::user()->id;
+        }
+
+        if (! isset($target)) {
+            throw new \Exception('All checkout logs require a target.');
+
+            return;
+        }
+
+        if (! isset($target->id)) {
+            throw new \Exception('That target seems invalid (no target ID available).');
+
+            return;
+        }
+
+        $log->target_type = get_class($target);
+        $log->target_id = $target->id;
+
+        // Figure out what the target is
+        if ($log->target_type == Location::class) {
+            $log->location_id = $target->id;
+        } elseif ($log->target_type == Asset::class) {
+            $log->location_id = $target->location_id;
+        } else {
+            $log->location_id = $target->location_id;
+        }
+
+        $log->note = $note;
+        $log->action_date = $action_date;
+
+        if (! $log->action_date) {
+            $log->action_date = date('Y-m-d H:i:s');
+        }
+        $log->log_meta = json_encode($changed);
+        if($log->target_type == User::class){
+            $log->logaction('issued_for_sale');
+        }
+        if($log->target_type == Contract::class){
+            $log->logaction('sell');
+        }
+
+
+        return $log;
+    }
+
+
+    /**
+     * @author  Daniel Meltzer <dmeltzer.devel@gmail.com>
+     * @since [v3.4]
+     * @return \App\Models\Actionlog
+     */
+    public function logRent($note, $target, $action_date = null,$changed = null)
+    {
+        $log = new Actionlog;
+        $log = $this->determineLogItemType($log);
+        if (Auth::user()) {
+            $log->user_id = Auth::user()->id;
+        }
+
+        if (! isset($target)) {
+            throw new \Exception('All checkout logs require a target.');
+
+            return;
+        }
+
+        if (! isset($target->id)) {
+            throw new \Exception('That target seems invalid (no target ID available).');
+
+            return;
+        }
+
+        $log->target_type = get_class($target);
+        $log->target_id = $target->id;
+
+        // Figure out what the target is
+        if ($log->target_type == Location::class) {
+            $log->location_id = $target->id;
+        } elseif ($log->target_type == Asset::class) {
+            $log->location_id = $target->location_id;
+        } else {
+            $log->location_id = $target->location_id;
+        }
+
+        $log->note = $note;
+        $log->action_date = $action_date;
+
+        if (! $log->action_date) {
+            $log->action_date = date('Y-m-d H:i:s');
+        }
+        $log->log_meta = json_encode($changed);
+
+        $log->logaction('issued_for_rent');
 
         return $log;
     }

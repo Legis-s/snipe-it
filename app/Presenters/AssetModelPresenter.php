@@ -100,6 +100,14 @@ class AssetModelPresenter extends Presenter
                 'visible' => true,
             ],
             [
+                'field' => 'lifetime',
+                'searchable' => false,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('general.lifetime'),
+                'visible' => true,
+            ],
+            [
                 'field' => 'fieldset',
                 'searchable' => false,
                 'sortable' => true,

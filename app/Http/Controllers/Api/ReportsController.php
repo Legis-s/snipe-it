@@ -54,11 +54,9 @@ class ReportsController extends Controller
             'note',
             'note',
             'photos',
-            'biometric_uid',
-            'biometric_result',
         ];
 
-        $sort = in_array($request->input('sort'), $allowed_columns) ? e($request->input('sort')) : 'created_at';
+        $sort = in_array($request->input('sort'), $allowed_columns) ? e($request->input('sort')) : 'id';
         $order = ($request->input('order') == 'asc') ? 'asc' : 'desc';
         $offset = request('offset', 0);
         $limit = request('limit', 50);

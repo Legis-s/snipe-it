@@ -83,6 +83,12 @@ class CategoryPresenter extends Presenter
                 'visible' => true,
                 "formatter" => 'trueFalseFormatter',
             ],[
+                "field" => "require_biometric_confirmation",
+                "searchable" => false,
+                "title" => "Биометрическое подтверждение",
+                "sortable" => true,
+                'formatter' => 'trueFalseFormatter',
+            ],[
                 "field" => "checkin_email",
                 "searchable" => false,
                 "sortable" => true,
@@ -101,12 +107,6 @@ class CategoryPresenter extends Presenter
                 "searchable" => false,
                 "sortable" => true,
                 'formatter' => 'categoriesActionsFormatter',
-            ],[
-                "field" => "require_biometric_confirmation",
-                "searchable" => false,
-                "title" => "Биометрическое подтверждение",
-                "sortable" => true,
-                'formatter' => 'trueFalseFormatter',
             ],
             [
                 'field' => 'created_at',

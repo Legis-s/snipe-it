@@ -41,14 +41,12 @@ class PurchasePresenter extends Presenter
                 "sortable" => true,
                 "title" => "Тип счета",
                 "visible" => false,
-               // "formatter" => "suppliersLinkObjFormatter"
             ],[
                 "field" => "legal_person",
                 "searchable" => true,
                 "sortable" => true,
                 "title" => "Юр. лицо",
                 "visible" => false,
-              //  "formatter" => "suppliersLinkObjFormatter"
             ],[
                 "field" => "assets_count",
                 "searchable" => false,
@@ -63,12 +61,6 @@ class PurchasePresenter extends Presenter
                 "title" => "Расходников",
                 "visible" => true,
                 "formatter" => "consumablesCountFormatter"
-            ],[
-                "field" => "sales_count",
-                "searchable" => false,
-                "sortable" => true,
-                "title" => "Активов на продажу",
-                "visible" => true,
             ],[
                 "field" => "invoice_file",
                 "searchable" => false,
@@ -91,14 +83,14 @@ class PurchasePresenter extends Presenter
                 "title" => "ID задачи Bitrix",
                 "visible" => true,
                 "formatter" => 'bitrixTaskIdFormatter',
-                "events"=> "operateEvents"
             ],[
                 "field" => "final_price",
                 "searchable" => true,
                 "sortable" => true,
                 "switchable" => true,
-                "title" => "Цена",
+                "title" => "Сумма",
                 "visible" => true,
+                "align" => 'right',
                 "formatter" => 'priceFormatter',
             ],[
                 "field" => "delivery_cost",
@@ -107,32 +99,15 @@ class PurchasePresenter extends Presenter
                 "switchable" => true,
                 "title" => "Доставка",
                 "visible" => true,
+                "align" => 'right',
                 "formatter" => 'deliveryСostFormatter',
             ]
-//            ,[
-//                "field" => "currency",
-//                "searchable" => false,
-//                "sortable" => true,
-//                "switchable" => true,
-//                "title" => "Валюта",
-//                "visible" => true,
-//                "formatter" => 'companiesLinkFormatter',
-//            ]
             ,[
                 "field" => "user",
                 "searchable" => true,
                 "sortable" => true,
                 "switchable" => true,
                 "title" => "Добавил",
-                "visible" => true,
-                "formatter" => 'usersLinkObjFormatter',
-            ],
-            [
-                "field" => "user_verified",
-                "searchable" => true,
-                "sortable" => true,
-                "switchable" => true,
-                "title" => "Проверил",
                 "visible" => true,
                 "formatter" => 'usersLinkObjFormatter',
             ],

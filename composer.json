@@ -69,7 +69,8 @@
     "spatie/laravel-backup": "^6.16",
     "tecnickcom/tc-lib-barcode": "^1.15",
     "unicodeveloper/laravel-password": "^1.0",
-    "watson/validating": "^6.1"
+    "watson/validating": "^6.1",
+    "lab404/laravel-impersonate": "^1.2"
   },
   "require-dev": {
     "fakerphp/faker": "^1.16",
@@ -123,6 +124,9 @@
     "sort-packages": true,
     "optimize-autoloader": true,
     "discard-changes": true,
-    "process-timeout": 3000
+    "process-timeout": 3000,
+    "allow-plugins": {
+      "kylekatarnls/update-helper": true
+    }
   }
 }

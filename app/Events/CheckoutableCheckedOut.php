@@ -14,17 +14,19 @@ class CheckoutableCheckedOut
     public $checkedOutTo;
     public $checkedOutBy;
     public $note;
+    public $changed;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct($checkoutable, $checkedOutTo, User $checkedOutBy, $note)
+    public function __construct($checkoutable, $checkedOutTo, User $checkedOutBy, $note,$changed)
     {
         $this->checkoutable = $checkoutable;
         $this->checkedOutTo = $checkedOutTo;
         $this->checkedOutBy = $checkedOutBy;
         $this->note = $note;
+        $this->changed = $changed;
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-return array(
+return [
     'activated'  			=> 'Активен',
     'allow'  				=> 'Разрешить',
     'checkedout'  			=> 'Активы',
@@ -35,4 +35,6 @@ return array(
     'username_note' 		=> '(Это используется для связи с Active Directory, а не для входа.)',
     'cloneuser'             => 'Дублировать пользователя',
     'viewusers' 			=> 'Просмотр пользователей',
-);
+    'favorite_location'     => 'Основной склад',
+    'bitrix_token'          => 'Ключ Bitrix',
+];

@@ -62,7 +62,7 @@ class AssetCheckoutController extends Controller
             $this->authorize('checkout', $asset);
             $admin = Auth::user();
 
-            $target = $this->determineCheckoutTarget($asset);
+            $target = $this->determineCheckoutTarget();
 
             $asset = $this->updateAssetLocation($asset, $target);
 
@@ -83,14 +83,6 @@ class AssetCheckoutController extends Controller
             if ($request->filled('quality')) {
                 $quality =intval( $request->get('quality'));
             }
-            $biometric_result = null;
-            $biometric_uid = null;
-            if ($request->filled('biometric_result') && $request->filled('biometric_uid')) {
-                $biometric_result = $request->get('biometric_result');
-                $biometric_uid = $request->get('biometric_uid');
-                \Debugbar::info($biometric_result);
-                \Debugbar::info($biometric_uid);
-            }
 
             if ($request->filled('status_id')) {
                 $asset->status_id = $request->get('status_id');
@@ -105,7 +97,7 @@ class AssetCheckoutController extends Controller
                 }
             }
 
-            if ($asset->checkOut($target, $admin, $checkout_at, $expected_checkin, e($request->get('note')), $request->get('name'), $location = null, $quality, $depreciable_cost, null, $biometric_uid, $biometric_result)) {
+            if ($asset->checkOut($target, $admin, $checkout_at, $expected_checkin, e($request->get('note')), $request->get('name'), $location = null, $quality, $depreciable_cost, null)) {
                 return redirect()->route('hardware.index')->with('success', trans('admin/hardware/message.checkout.success'));
             }
 

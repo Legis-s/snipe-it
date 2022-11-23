@@ -7,9 +7,9 @@ return array(
     'return' => 'Вернуть',
     'checkin' => 'Вернуть',
     'title_table' => 'Название',
-    'type_table' => 'Тип',
+    'type_table' => 'Действие',
     'assets_count' => 'Количество активов',
-    'date' => 'Дата',
-    'creator' => 'Выполнил',
+    'consumables_count' => 'Количество расходников',
+    'creator' => 'Ответственный',
     'purpose' => 'Цель'
 );

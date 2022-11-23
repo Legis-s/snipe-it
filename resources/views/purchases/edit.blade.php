@@ -1,16 +1,19 @@
 
 @extends('layouts/edit-form', [
-   'createText' => "Создать закупку" ,
-   'updateText' => "Обновить закупку",
-   'formAction' => ($item) ? route('purchases.update', ['purchase' => $item->id]) : route('purchases.store'),
+    'createText' =>"Создать закупку" ,
+    'updateText' => "Обновить закупку",
+    'topSubmit' => false,
+//    'helpPosition' => 'right',
+//    'helpText' => trans('admin/locations/table.about_locations'),
+   'formAction' =>  route('purchases.store'),
 ])
+
 
 {{-- Page content --}}
 @section('inputFields')
-
     @include ('partials.forms.edit.invoice_number', ['translated_name' => "Название"])
 
-    @include ('partials.forms.edit.final_price', ['translated_name' => "Цена"])
+    @include ('partials.forms.edit.final_price', ['translated_name' => "Стоимость"])
 
     @include ('partials.forms.edit.delivery_cost', ['translated_name' => "Стоимость доставки"])
 
@@ -18,26 +21,22 @@
 
     @include ('partials.forms.edit.comment', ['translated_name' => "Комментарий"])
 
-    @include ('partials.forms.edit.supplier-select', ['translated_name' => trans('general.supplier'), 'fieldname' => 'supplier_id'])
+    @include ('partials.forms.edit.supplier-select', ['translated_name' => trans('general.supplier'), 'fieldname' => 'supplier_id','required'=>true])
 
-    @include ('partials.forms.edit.invoice-type-select', ['translated_name' => "Тип счета", 'fieldname' => 'invoice_type_id'])
+    @include ('partials.forms.edit.invoice-type-select', ['translated_name' => "Тип счета", 'fieldname' => 'invoice_type_id','required'=>true])
 
-    @include ('partials.forms.edit.legal_person-select', ['translated_name' => "Юр. лицо", 'fieldname' => 'legal_person_id'])
+    @include ('partials.forms.edit.legal_person-select', ['translated_name' => "Юр. лицо", 'fieldname' => 'legal_person_id','required'=>true])
 
-    @include ('partials.forms.edit.invoice_file')
+    @include ('partials.forms.purchases.invoice_file')
 
-    <input type="hidden" id="assets" name="assets" value="{{ Input::old('assets_json', $item->assets_json) }}">
-    <input type="hidden" id="consumables" name="consumables"
-           value="{{ Input::old('consumables_json', $item->consumables_json) }}">
-    <input type="hidden" id="sales" name="sales" value="{{ Input::old('sales_json', $item->sales_json) }}">
+    <input type="hidden" id="assets" name="assets" value="{{ old('assets_json', $item->assets_json) }}">
+    <input type="hidden" id="consumables" name="consumables" value="{{ old('consumables_json', $item->consumables_json) }}">
 
     <div class="row">
         <div class="col-md-12">
             <div class="table table-responsive">
                 <div id="toolbar_asset">
-                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#modal_asset">
-                        Добавить актив
-                    </button>
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal_asset" >Добавить актив</button>
                 </div>
                 <p class="activ text-center text-bold text-danger hidden">Добавте хотя бы один актив</p>
                 <table id="table_asset" class="table table-striped snipe-table">
@@ -54,11 +53,12 @@
             </div><!-- /.table-responsive -->
         </div>
     </div>
+
     <div class="row">
         <div class="col-md-12">
             <div class="table table-responsive">
                 <div id="toolbar_consumables">
-                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#modal_consumables">
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal_consumables">
                         Добавить расходник
                     </button>
                 </div>
@@ -67,6 +67,7 @@
                     <thead>
                     <th>#</th>
                     <th>Модель</th>
+                    <th>Склад</th>
                     <th>Закупочная цена</th>
                     <th>НДС</th>
                     <th>Количество</th>
@@ -77,29 +78,6 @@
         </div>
     </div>
 
-{{--    <div class="row">--}}
-{{--        <div class="col-md-12">--}}
-{{--            <div class="table table-responsive">--}}
-{{--                <div id="toolbar_sales">--}}
-{{--                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#modal_sales">--}}
-{{--                        Добавить актив на продажу--}}
-{{--                    </button>--}}
-{{--                </div>--}}
-{{--                <p class="activ text-center text-bold text-danger hidden">Добавте хотя бы один актив на проджажу</p>--}}
-{{--                <table id="table_sales" class="table table-striped snipe-table">--}}
-{{--                    <thead>--}}
-{{--                    <th>#</th>--}}
-{{--                    <th>Модель</th>--}}
-{{--                    <th>Склад</th>--}}
-{{--                    <th>Закупочная цена</th>--}}
-{{--                    <th>НДС</th>--}}
-{{--                    <th>Количество</th>--}}
-{{--                    <th>Удалить</th>--}}
-{{--                    </thead>--}}
-{{--                </table>--}}
-{{--            </div><!-- /.table-responsive -->--}}
-{{--        </div>--}}
-{{--    </div>--}}
 @stop
 
 @section('content')
@@ -111,22 +89,22 @@
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                                 aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="myModalLabel">Добавить</h4>
+                    <h4 class="modal-title">Добавить актив</h4>
                 </div>
-                <div class="modal-body2">
+                <div class="modal-body">
                     <div class="row">
                         <div class="col-md-12">
                             <form class="form-horizontal">
-                                @include ('partials.forms.edit.model-select2', ['translated_name' => trans('admin/hardware/form.model'), 'fieldname' => 'model_id', 'required' => 'true'])
+                                @include ('partials.forms.purchases.model-select', ['translated_name' => trans('admin/hardware/form.model'), 'fieldname' => 'model_id', 'required' => 'true'])
                                 <p class="duble text-center text-bold text-danger hidden">Такая модель уже есть</p>
-                                @include ('partials.forms.edit.purchase_cost')
-                                @include ('partials.forms.edit.nds')
-                                @include ('partials.forms.edit.warranty')
-                                @include ('partials.forms.edit.quantity')
+                                @include ('partials.forms.purchases.purchase_cost')
+                                @include ('partials.forms.purchases.nds')
+                                @include ('partials.forms.purchases.warranty')
+                                @include ('partials.forms.purchases.quantity')
                                 @if(Auth::user()->favoriteLocation)
-                                    @include ('partials.forms.edit.location-select-checkin', ['translated_name' =>"Ожидаемый склад", 'fieldname' => 'location_id'])
+                                    @include ('partials.forms.purchases.location-select-checkin', ['translated_name' =>"Ожидаемый склад", 'fieldname' => 'location_id','hide_new'=>true])
                                 @else
-                                    @include ('partials.forms.edit.location-select', ['translated_name' =>"Ожидаемый склад", 'fieldname' => 'location_id' ])
+                                    @include ('partials.forms.purchases.location-select', ['translated_name' =>"Ожидаемый склад", 'fieldname' => 'location_id','hide_new'=>true ])
                                 @endif
                             </form>
                         </div>
@@ -147,57 +125,21 @@
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                                 aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="myModalLabel">Добавить</h4>
+                    <h4 class="modal-title">Добавить расходник</h4>
                 </div>
-                <div class="modal-body2">
+                <div class="modal-body">
                     <div class="row">
                         <div class="col-md-12">
                             <form class="form-horizontal">
-                                {{--                                @include ('partials.forms.edit.name', ['translated_name' => trans('admin/consumables/table.title')])--}}
-                                @include ('partials.forms.edit.consumables-select', ['translated_name' => 'Название', 'fieldname' => 'consumable_id', 'required' => 'true'])
-                                {{--                                @include ('partials.forms.edit.category-select2', ['translated_name' => trans('general.category'), 'fieldname' => 'category_id', 'required' => 'true', 'category_type' => 'consumable'])--}}
-                                {{--                                <p class="duble text-center text-bold text-danger hidden">Такая категория уже есть</p>--}}
-                                {{--                                @include ('partials.forms.edit.manufacturer-select2', ['translated_name' => trans('general.manufacturer'), 'fieldname' => 'manufacturer_id', 'required' => 'true'])--}}
-                                {{--                                @include ('partials.forms.edit.model_number')--}}
+                                @include ('partials.forms.purchases.consumables-select', ['translated_name' => 'Название', 'fieldname' => 'consumable_id', 'required' => 'true'])
                                 <p class="duble text-center text-bold text-danger hidden">Такая модель уже есть</p>
-                                @include ('partials.forms.edit.purchase_cost')
-                                @include ('partials.forms.edit.nds')
-                                @include ('partials.forms.edit.quantity')
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
-                    <button type="button" class="btn btn-primary" id="addСonsumablesButton">Добавить</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Актив на продажу -->
-    <div class="modal fade" id="modal_sales" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="myModalLabel">Добавить</h4>
-                </div>
-                <div class="modal-body2">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <form class="form-horizontal">
-                                @include ('partials.forms.edit.model-select3', ['translated_name' => trans('admin/hardware/form.model'), 'fieldname' => 'model_id', 'required' => 'true'])
-                                <p class="duble text-center text-bold text-danger hidden">Такая модель уже есть</p>
-                                @include ('partials.forms.edit.purchase_cost')
-                                @include ('partials.forms.edit.nds')
-                                {{--                                @include ('partials.forms.edit.warranty')--}}
-                                @include ('partials.forms.edit.quantity')
+                                @include ('partials.forms.purchases.purchase_cost')
+                                @include ('partials.forms.purchases.nds')
+                                @include ('partials.forms.purchases.quantity')
                                 @if(Auth::user()->favoriteLocation)
-                                    @include ('partials.forms.edit.location-select-checkin', ['translated_name' =>"Ожидаемый склад", 'fieldname' => 'location_id'])
+                                    @include ('partials.forms.purchases.location-select-checkin', ['translated_name' =>"Ожидаемый склад", 'fieldname' => 'location_id','hide_new'=>true])
                                 @else
-                                    @include ('partials.forms.edit.location-select', ['translated_name' =>"Ожидаемый склад", 'fieldname' => 'location_id' ])
+                                    @include ('partials.forms.purchases.location-select', ['translated_name' =>"Ожидаемый склад", 'fieldname' => 'location_id','hide_new'=>true ])
                                 @endif
                             </form>
                         </div>
@@ -205,7 +147,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
-                    <button type="button" class="btn btn-primary" id="addSalesButton">Добавить</button>
+                    <button type="button" class="btn btn-primary" id="addСonsumablesButton">Добавить</button>
                 </div>
             </div>
         </div>
@@ -224,10 +166,9 @@
     <script nonce="{{ csrf_token() }}">
         var table_asset = $('#table_asset');
         var table_consumables = $('#table_consumables');
-        var table_sales = $('#table_sales');
 
         $(function () {
-
+            var baseUrl = $('meta[name="baseUrl"]').attr('content');
             //select2 for no ajax lists activate
             $('.js-data-no-ajax').each(function (i, item) {
                 var link = $(item);
@@ -239,10 +180,6 @@
                 // $(this).val() // get the current value of the input field.
             });
             //generate tables vith raw data
-            console.log($('#assets').val())
-            console.log($('#consumables').val())
-            console.log($('#sales').val())
-
             table_asset.bootstrapTable('destroy').bootstrapTable({
                 locale: 'ru',
                 data: [],
@@ -301,7 +238,7 @@
                     formatter: function (value, row, index) {
                         return [
                             '<a class="remove text-danger"  href="javascript:void(0)" title="Убрать">',
-                            '<i class="remove fa fa-times fa-lg"></i>',
+                            '<i class="remove fas fa-times fa-lg"></i>',
                             '</a>'
                         ].join('')
                     }
@@ -324,6 +261,11 @@
                     field: 'consumable',
                     name: 'Модель',
                     align: 'left',
+                    valign: 'middle'
+                }, {
+                    field: 'location',
+                    name: 'Склад',
+                    align: 'center',
                     valign: 'middle'
                 }, {
                     field: 'purchase_cost',
@@ -364,7 +306,7 @@
                         formatter: function (value, row, index) {
                             return [
                                 '<a class="remove text-danger"  href="javascript:void(0)" title="Убрать">',
-                                '<i class="remove fa fa-times fa-lg"></i>',
+                                '<i class="remove fas fa-times fa-lg"></i>',
                                 '</a>'
                             ].join('')
                         }
@@ -373,72 +315,6 @@
             });
             if ($('#consumables').val()) {
                 table_consumables.bootstrapTable('load', JSON.parse($('#consumables').val()));
-            }
-            table_sales.bootstrapTable('destroy').bootstrapTable({
-                data: [],
-                search: true,
-                toolbar: '#toolbar_sales',
-                columns: [{
-                    field: 'id',
-                    name: '#',
-                    align: 'left',
-                    valign: 'middle'
-                }, {
-                    field: 'model',
-                    name: 'Модель',
-                    align: 'left',
-                    valign: 'middle'
-                }, {
-                    field: 'location',
-                    name: 'Склад',
-                    align: 'center',
-                    valign: 'middle'
-                }, {
-                    field: 'purchase_cost',
-                    name: 'Закупочная цена',
-                    align: 'center',
-                    valign: 'middle'
-                }, {
-                    field: 'nds',
-                    name: 'НДС',
-                    align: 'center',
-                    valign: 'middle'
-                }, {
-                    field: 'quantity',
-                    name: 'Количество',
-                    align: 'center',
-                    valign: 'middle'
-                }, {
-                    align: 'center',
-                    valign: 'middle',
-                    events: {
-                        'click .remove': function (e, value, row, index) {
-                            table_sales.bootstrapTable('remove', {
-                                field: 'id',
-                                values: [row.id]
-                            });
-                            var data = table_sales.bootstrapTable('getData');
-                            var newData = [];
-                            var count = 0;
-                            data.forEach(function callback(currentValue, index, array) {
-                                count++;
-                                currentValue.id = count;
-                                newData.push(currentValue);
-                            });
-                            table_sales.bootstrapTable('load', newData);
-                        }
-                    },
-                    formatter: function (value, row, index) {
-                        return [
-                            '<a class="remove text-danger"  href="javascript:void(0)" title="Убрать">',
-                            '<i class="remove fa fa-times fa-lg"></i>',
-                            '</a>'
-                        ].join('')
-                    }
-                }]
-            });
-            if ($('#sales').val()) {
-                table_sales.bootstrapTable('load', JSON.parse($('#sales').val()));
             }
             $('#modal_asset').on("show.bs.modal", function (event) {
                 var modal = $(this);
@@ -451,14 +327,12 @@
                 modal.find('#quantity').val(1);
                 modal.find('.duble').addClass('hidden');
                 modal.find('select').each(function (i, item) {
-                    // $('.js-data-ajax2').each(function (i, item) {
                     var link = $(item);
                     var endpoint = link.data("endpoint");
-                    if (link.hasClass("select2-hidden-accessible")) {
-                        link.select2('destroy');
-                    }
+                    var select = link.data("select");
                     link.select2({
-                        dropdownParent: modal,
+                        placeholder: '',
+                        allowClear: true,
                         ajax: {
 
                             // the baseUrl includes a trailing slash
@@ -477,26 +351,9 @@
                                 };
                                 return data;
                             },
-                            processResults: function (data, params) {
-                                console.log(data)
-                                params.page = params.page || 1;
-
-                                var answer = {
-                                    results: data.items,
-                                    pagination: {
-                                        more: "true" //(params.page  < data.page_count)
-                                    }
-                                };
-
-                                return answer;
-                            },
                             cache: true
                         },
-                        escapeMarkup: function (markup) {
-                            return markup;
-                        }, // let our custom formatter work
-                        templateResult: formatDatalist,
-                        templateSelection: formatDataSelection
+                        templateResult: formatDatalistSafe,
                     });
                 });
             });
@@ -512,73 +369,12 @@
                 modal.find('#quantity').val(1);
                 modal.find('.duble').addClass('hidden');
                 modal.find('select').each(function (i, item) {
-                    // $('.js-data-ajax2').each(function (i, item) {
                     var link = $(item);
                     var endpoint = link.data("endpoint");
-                    if (link.hasClass("select2-hidden-accessible")) {
-                        link.select2('destroy');
-                    }
+                    var select = link.data("select");
                     link.select2({
-                        dropdownParent: modal,
-                        ajax: {
-                            // the baseUrl includes a trailing slash
-                            url: baseUrl + 'api/v1/' + endpoint + '/selectlist',
-                            dataType: 'json',
-                            delay: 250,
-                            headers: {
-                                "X-Requested-With": 'XMLHttpRequest',
-                                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                            },
-                            data: function (params) {
-                                var data = {
-                                    search: params.term,
-                                    page: params.page || 1,
-                                    assetStatusType: link.data("asset-status-type"),
-                                };
-                                return data;
-                            },
-                            processResults: function (data, params) {
-                                console.log(data)
-                                params.page = params.page || 1;
-
-                                var answer = {
-                                    results: data.items,
-                                    pagination: {
-                                        more: "true" //(params.page  < data.page_count)
-                                    }
-                                };
-
-                                return answer;
-                            },
-                            cache: true
-                        },
-                        escapeMarkup: function (markup) {
-                            return markup;
-                        }, // let our custom formatter work
-                        templateResult: formatDatalist,
-                        templateSelection: formatDataSelection
-                    });
-                });
-            });
-            $('#modal_sales').on("show.bs.modal", function (event) {
-                var modal = $(this);
-                modal.find("#model_id").removeClass("has-error");
-                modal.find("#model_select_id").val('');
-                modal.find('#model_select_id').trigger('change');
-                modal.find('#purchase_cost').val('');
-                modal.find('#nds').val(20);
-                modal.find('#warranty_months').val(12);
-                modal.find('#quantity').val(1);
-                modal.find('.duble').addClass('hidden');
-                modal.find('select').each(function (i, item) {
-                    // $('.js-data-ajax3').each(function (i, item) {
-                    var link = $(item);
-                    var endpoint = link.data("endpoint");
-                    if (link.hasClass("select2-hidden-accessible")) {
-                        link.select2('destroy');
-                    }
-                    link.select2({
-                        dropdownParent: modal,
+                        placeholder: '',
+                        allowClear: true,
                         ajax: {
 
                             // the baseUrl includes a trailing slash
@@ -597,55 +393,12 @@
                                 };
                                 return data;
                             },
-                            processResults: function (data, params) {
-                                console.log(data)
-                                params.page = params.page || 1;
-
-                                var answer = {
-                                    results: data.items,
-                                    pagination: {
-                                        more: "true" //(params.page  < data.page_count)
-                                    }
-                                };
-
-                                return answer;
-                            },
                             cache: true
                         },
-                        escapeMarkup: function (markup) {
-                            return markup;
-                        }, // let our custom formatter work
-                        templateResult: formatDatalist,
-                        templateSelection: formatDataSelection
+                        templateResult: formatDatalistSafe,
                     });
                 });
             });
-
-            function formatDatalist(datalist) {
-                var loading_markup = '<i class="fa fa-spinner fa-spin" aria-hidden="true"></i> Loading...';
-                if (datalist.loading) {
-                    return loading_markup;
-                }
-
-                var markup = "<div class='clearfix'>";
-                markup += "<div class='pull-left' style='padding-right: 10px;'>";
-                if (datalist.image) {
-                    markup += "<div style='width: 30px;'><img src='" + datalist.image + "' alt='" + datalist.tex + "' style='max-height: 20px; max-width: 30px;'></div>";
-                } else {
-                    markup += "<div style='height: 20px; width: 30px;'></div>";
-                }
-
-                markup += "</div><div>" + datalist.text + "</div>";
-                markup += "</div>";
-                return markup;
-            }
-
-            function formatDataSelection(datalist) {
-                return datalist.text.replace(/>/g, '&gt;')
-                    .replace(/</g, '&lt;')
-                    .replace(/"/g, '&quot;')
-                    .replace(/'/g, '&#039;');
-            }
 
             $('#addAssetButton').click(function (e) {
                 e.preventDefault();
@@ -678,6 +431,7 @@
                             warranty: warranty,
                             quantity: quantity,
                         };
+                        console.log(data);
                         table_asset.bootstrapTable('append', data);
                         $('#modal_asset').modal('hide');
                         $('.duble').addClass('hidden');
@@ -693,6 +447,8 @@
                 var modal = $('#modal_consumables');
                 var consumable_id = modal.find('select[name=consumable_id] option').filter(':selected').val();
                 var consumable_name = modal.find('select[name=consumable_id] option').filter(':selected').text();
+                var location_id = modal.find('select[name=location_id] option').filter(':selected').val();
+                var location_name = modal.find('select[name=location_id] option').filter(':selected').text();
                 var purchase_cost = modal.find('#purchase_cost').val();
                 var nds = modal.find('#nds').val();
                 var quantity = modal.find('#quantity').val();
@@ -703,6 +459,8 @@
                         id: tabele_data.length + 1,
                         consumable_id: consumable_id,
                         consumable: consumable_name,
+                        location_id: location_id,
+                        location: location_name,
                         purchase_cost: purchase_cost,
                         nds: nds,
                         quantity: quantity,
@@ -716,51 +474,10 @@
                     modal.find("#name").addClass("has-error");
                 }
             });
-            $('#addSalesButton').click(function (e) {
-                e.preventDefault();
-                var modal = $('#modal_sales');
-                var model_id = modal.find('select[name=model_id] option').filter(':selected').val();
-                var model_name = modal.find('select[name=model_id] option').filter(':selected').text();
-                var purchase_cost = modal.find('#purchase_cost').val();
-                var location_id = modal.find('select[name=location_id] option').filter(':selected').val();
-                var location_name = modal.find('select[name=location_id] option').filter(':selected').text();
-                var nds = modal.find('#nds').val();
-                var quantity = modal.find('#quantity').val();
-                var table_data = table_sales.bootstrapTable('getData');
-                if (model_id > 0) {
-                    var rez = true;
-                    table_data.forEach(function callback(currentValue, index, array) {
-                        if (currentValue.model_id == model_id) {
-                            rez = false;
-                        }
-                    });
-                    if (rez) {
-                        var data = {
-                            id: table_data.length + 1,
-                            model_id: model_id,
-                            model: model_name,
-                            location_id: location_id,
-                            location: location_name,
-                            purchase_cost: purchase_cost,
-                            nds: nds,
-                            // warranty: warranty,
-                            quantity: quantity,
-                        };
-                        table_sales.bootstrapTable('append', data);
-                        modal.modal('hide');
-                        $('.duble').addClass('hidden');
-                    } else {
-                        $('.duble').removeClass('hidden');
-                    }
-                } else {
-                    modal.find("#model_id").addClass("has-error");
-                }
-            });
 
             $("#create-form").on("submit", function () {
                 var data_asset = table_asset.bootstrapTable('getData');
                 var data_consumables = table_consumables.bootstrapTable('getData');
-                var data_sales = table_sales.bootstrapTable('getData');
                 var check_name = false;
                 var check_final_price = false;
                 var check_comment = false;
@@ -819,10 +536,9 @@
                     $('#uploadFile').closest(".form-group").removeClass("has-error");
                 }
 
-                if ((data_asset.length > 0 || data_consumables.length > 0 || data_sales.length > 0) && check_name && check_final_price && check_comment && check_supplier_id && check_invoice_type_id && check_ilegal_person_id && check_uploadFile) {
+                if ((data_asset.length > 0 || data_consumables.length > 0) && check_name && check_final_price && check_comment && check_supplier_id && check_invoice_type_id && check_ilegal_person_id && check_uploadFile) {
                     $('#assets').val(JSON.stringify(data_asset));
                     $('#consumables').val(JSON.stringify(data_consumables));
-                    $('#sales').val(JSON.stringify(data_sales));
                     $('.activ').addClass("hidden");
                     return true;
                 } else {
@@ -830,6 +546,77 @@
                     return false;
                 }
             })
+
+            function formatDatalistSafe(datalist) {
+                // console.warn("What in the hell is going on with Select2?!?!!?!?");
+                // console.warn($.select2);
+                if (datalist.loading) {
+                    return $('<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Loading...');
+                }
+
+                var root_div = $("<div class='clearfix'>") ;
+                var left_pull = $("<div class='pull-left' style='padding-right: 10px;'>");
+                if (datalist.image) {
+                    var inner_div = $("<div style='width: 30px;'>");
+                    /******************************************************************
+                     *
+                     * We are specifically chosing empty alt-text below, because this
+                     * image conveys no additional information, relative to the text
+                     * that will *always* be there in any select2 list that is in use
+                     * in Snipe-IT. If that changes, we would probably want to change
+                     * some signatures of some functions, but right now, we don't want
+                     * screen readers to say "HP SuperJet 5000, .... picture of HP
+                     * SuperJet 5000..." and so on, for every single row in a list of
+                     * assets or models or whatever.
+                     *
+                     *******************************************************************/
+                    var img = $("<img src='' style='max-height: 20px; max-width: 30px;' alt=''>");
+                    // console.warn("Img is: ");
+                    // console.dir(img);
+                    // console.warn("Strigularly, that's: ");
+                    // console.log(img);
+                    img.attr("src", datalist.image );
+                    inner_div.append(img)
+                } else {
+                    var inner_div=$("<div style='height: 20px; width: 30px;'></div>");
+                }
+                left_pull.append(inner_div);
+                root_div.append(left_pull);
+                var name_div = $("<div>");
+                name_div.text(datalist.text);
+                root_div.append(name_div)
+                var safe_html = root_div.get(0).outerHTML;
+                var old_html = formatDatalist(datalist);
+                if(safe_html != old_html) {
+                    //console.log("HTML MISMATCH: ");
+                    //console.log("FormatDatalistSafe: ");
+                    // console.dir(root_div.get(0));
+                    //console.log(safe_html);
+                    //console.log("FormatDataList: ");
+                    //console.log(old_html);
+                }
+                return root_div;
+
+            }
+            function formatDatalist (datalist) {
+                var loading_markup = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Loading...';
+                if (datalist.loading) {
+                    return loading_markup;
+                }
+
+                var markup = '<div class="clearfix">' ;
+                markup += '<div class="pull-left" style="padding-right: 10px;">';
+                if (datalist.image) {
+                    markup += "<div style='width: 30px;'><img src='" + datalist.image + "' style='max-height: 20px; max-width: 30px;' alt='" +  datalist.text + "'></div>";
+                } else {
+                    markup += '<div style="height: 20px; width: 30px;"></div>';
+                }
+
+                markup += "</div><div>" + datalist.text + "</div>";
+                markup += "</div>";
+                return markup;
+            }
+
         });
     </script>
 @stop

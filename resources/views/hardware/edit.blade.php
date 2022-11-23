@@ -66,19 +66,12 @@
     @include ('partials.forms.edit.notes')
     @include ('partials.forms.edit.location-select', ['translated_name' => trans('admin/hardware/form.default_location'), 'fieldname' => 'rtd_location_id'])
     @include ('partials.forms.edit.requestable', ['requestable_text' => trans('admin/hardware/general.requestable')])
-    @include ('partials.forms.edit.purchase_date')
-    @include ('partials.forms.edit.supplier-select', ['translated_name' => trans('general.supplier'), 'fieldname' => 'supplier_id'])
-    @include ('partials.forms.edit.order_number')
     <?php
     $currency_type=null;
     if ($item->id && $item->location) {
         $currency_type = $item->location->currency;
     }
     ?>
-    @include ('partials.forms.edit.purchase_cost', ['currency_type' => $currency_type])
-    @include ('partials.forms.edit.depreciable_cost', ['currency_type' => $currency_type])
-    @include ('partials.forms.edit.quality')
-    @include ('partials.forms.edit.nds')
     <!-- Image -->
     @if ($item->image)
     <div class="form-group {{ $errors->has('image_delete') ? 'has-error' : '' }}">
@@ -158,6 +151,9 @@
                 @endphp
 
             @include ('partials.forms.edit.purchase_cost', ['currency_type' => $currency_type])
+            @include ('partials.forms.edit.depreciable_cost', ['currency_type' => $currency_type])
+            @include ('partials.forms.edit.quality')
+            @include ('partials.forms.edit.nds')
 
         </div>
     </div>
@@ -258,7 +254,6 @@
 
 
     $(function () {
-        console.log("test");
 
         var starRatingControl = new StarRating( '.star-rating',{
             maxStars: 5,

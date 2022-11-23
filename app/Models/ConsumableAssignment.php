@@ -97,9 +97,15 @@ class ConsumableAssignment extends Model
         return $this->belongsTo(\App\Models\Consumable::class);
     }
 
+
     public function user()
     {
         return $this->belongsTo(\App\Models\User::class, 'assigned_to');
+    }
+
+    public function responsibleUser()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'user_id');
     }
 
     public function location()
@@ -112,6 +118,7 @@ class ConsumableAssignment extends Model
     {
         return $this->belongsTo(\App\Models\Purchase::class, 'purchase_id')->withTrashed();
     }
+
     public function availableForReturn()
     {
         if ($this->type==$this::SOLD || $this->type==$this::ISSUED){
@@ -182,5 +189,10 @@ class ConsumableAssignment extends Model
     public function contract()
     {
         return $this->belongsTo(\App\Models\Contract::class, 'user_id');
+    }
+
+    public function mass_operations()
+    {
+        return $this->belongsToMany(MassOperation::class,'cons_assignment_mass_operation');
     }
 }

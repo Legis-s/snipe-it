@@ -14,6 +14,7 @@ use App\Models\Sale;
 use App\Models\Statuslabel;
 use App\Models\Supplier;
 use App\Models\User;
+use Carbon\Carbon;
 use DateTime;
 use Facebook\WebDriver\AbstractWebDriverCheckboxOrRadio;
 use Illuminate\Database\Eloquent\Model;
@@ -61,7 +62,7 @@ class PurchasesController extends Controller
      */
     public function show($purchaseId = null)
     {
-        $this->authorize('view', Location::class);
+        $this->authorize('view', Asset::class);
 
         $purchase = Purchase::find($purchaseId);
         $old = false;
@@ -88,7 +89,7 @@ class PurchasesController extends Controller
      */
     public function create()
     {
-        $this->authorize('create', Purchase::class);
+        $this->authorize('create', Asset::class);
         return view('purchases/edit')
             ->with('item', new Purchase);
     }
@@ -114,8 +115,8 @@ class PurchasesController extends Controller
         $purchase->comment             = $request->input('comment');
         $purchase->consumables_json    = $request->input('consumables');
         $purchase->assets_json         = $request->input('assets');
-        $purchase->sales_json         = $request->input('sales');
-        $purchase->delivery_cost         = $request->input('delivery_cost');
+        $purchase->sales_json          = $request->input('sales');
+        $purchase->delivery_cost       = $request->input('delivery_cost');
         $purchase->user_id             = Auth::id();
         $currency_id = $request->input('currency_id');
         $purchase->setStatusInprogress();
@@ -133,17 +134,15 @@ class PurchasesController extends Controller
         }
         $assets = json_decode($request->input('assets'), true);
         $consumables = json_decode($request->input('consumables'), true);
-        $sales = json_decode($request->input('sales'), true);
         $purchase = $request->handleFile($purchase, public_path().'/uploads/purchases');
-        $status = Statuslabel::updateOrCreate(
-            ['name' =>"В закупке"],
-            [
-                'pending' => 1,
-                'deployable' => 0,
-                'archived' => 0,
-            ]
-        );
 
+
+        $status = Statuslabel::where('name', 'В закупке')->first();
+        $settings = \App\Models\Setting::getSettings();
+        \Debugbar::info("assets");
+        \Debugbar::info(count($assets));
+        \Debugbar::info("consumables");
+        \Debugbar::info(count($consumables));
         if ($purchase->save()) {
             $data_list = "";
             if (count($assets)>0) {
@@ -172,7 +171,7 @@ class PurchasesController extends Controller
                         $asset->archived                = '0';
                         $asset->physical                = '1';
                         $asset->depreciate              = '0';
-                        $asset->quality             = 5;
+                        $asset->quality                 = 5;
                         $asset->status_id               = $status->id;
                         $asset->warranty_months         = $warranty;
                         $asset->purchase_cost           = $purchase_cost;
@@ -183,7 +182,11 @@ class PurchasesController extends Controller
                         $asset->user_id                 = Auth::id();
                         $asset->location_id            = $location_id;
 
-                        $settings = \App\Models\Setting::getSettings();
+
+                        if (! empty($settings->audit_interval)) {
+                            $asset->next_audit_date = Carbon::now()->addMonths($settings->audit_interval)->toDateString();
+                        }
+
                         if($asset->save()){
                             if ($settings->zerofill_count > 0) {
                                 $asset_tag_digits = preg_replace('/\D/', '', $asset_tag);
@@ -194,7 +197,7 @@ class PurchasesController extends Controller
                                 $asset_tag = $settings->auto_increment_prefix.$asset_tag;
                             }
                         }else{
-                            dd($asset->getErrors());
+                            \Debugbar::info($consumables);
                         }
                     }
                 }
@@ -207,55 +210,8 @@ class PurchasesController extends Controller
                     $consumable_id = $consumable["consumable_id"];
                     $purchase_cost = $consumable["purchase_cost"];
                     $quantity = $consumable["quantity"];
-                    $data_list .= "[".$consumable["id"]."] ".$consumable_name." - Количество: ".$quantity." Цена: ".$purchase_cost."\n";
+                    $data_list .= "[".$consumable_id."] ".$consumable_name." - Количество: ".$quantity." Цена: ".$purchase_cost."\n";
                 }
-            }
-            if (count($sales)>0) {
-                $asset_tag = Asset::autoincrement_asset();
-                $data_list .= "Активы на продажу:"."\n";
-                foreach ($sales as &$value) {
-                    $model= $value["model"];
-                    $model_id = $value["model_id"];
-                    $purchase_cost = $value["purchase_cost"];
-                    $nds = $value["nds"];
-//                    $warranty = $value["warranty"];
-                    $quantity = $value["quantity"];
-                    $data_list .= "[".$value["id"]."] ".$model." - Количество: ".$quantity." Цена: ".$purchase_cost."\n";
-                    $location_id = null;
-                    if (isset($value["location_id"]) && $value["location_id"]>0) {
-                        $location_id = $value["location_id"];
-                    }
-                    $dt = new DateTime();
-                    for ($i = 1; $i <= $quantity; $i++) {
-                        $sale = new Sale();
-                        $sale->model()->associate(AssetModel::find((int) $model_id));
-                        $sale->asset_tag               = $asset_tag;
-                        $sale->model_id                = $model_id;
-                        $sale->order_number            = $purchase->invoice_number;
-                        $sale->status_id               = $status->id;
-                        $sale->purchase_cost           = $purchase_cost;
-                        $sale->nds                     = $nds;
-                        $sale->purchase_date           = $dt->format('Y-m-d H:i:s');
-                        $sale->supplier_id             = $purchase->supplier_id;
-                        $sale->purchase_id             = $purchase->id;
-                        $sale->user_id                 = Auth::id();
-                        $sale->location_id            = $location_id;
-                        $settings = \App\Models\Setting::getSettings();
-                        if($sale->save()){
-                            if ($settings->zerofill_count > 0) {
-                                $asset_tag_digits = preg_replace('/\D/', '', $asset_tag);
-                                $asset_tag = preg_replace('/^0*/', '', $asset_tag_digits);
-                                $asset_tag++;
-                                $asset_tag =  $settings->auto_increment_prefix.Asset::zerofill($asset_tag, $settings->zerofill_count);
-                            }else{
-                                $asset_tag = $settings->auto_increment_prefix.$asset_tag;
-                            }
-                        }else{
-                            dd($sale->getErrors());
-                        }
-                    }
-                }
-                $data_list .="\n";
             }
 
 
@@ -290,9 +246,6 @@ class PurchasesController extends Controller
                     "FIELDS[PROPERTY_824]" => $purchase->supplier->bitrix_id , //Поставщик bitrix_id
                     "FIELDS[PROPERTY_143][0]" => $purchase->invoice_file , //файл имя
                     "FIELDS[PROPERTY_143][1]" => $file_data_base64 , //файл base64
-//                    "FIELDS[PROPERTY_1122]" => $data_list , // что покупаем
-//                    "FIELDS[PROPERTY_1123]" => $purchase->id."" , //id заказа
-//                    "FIELDS[PROPERTY_1121]" => "1" , //покупка из системы
                     "FIELDS[PROPERTY_1132]" => $data_list , // что покупаем
                     "FIELDS[PROPERTY_1134]" => $purchase->id."" , //id заказа
                     "FIELDS[PROPERTY_1120]" => "1" , //покупка из системы
@@ -303,12 +256,12 @@ class PurchasesController extends Controller
             $params_json = json_encode($params);
             file_put_contents(public_path().'/uploads/purchases/'.$purchase->id.'.json', $params_json);
 
-//            \Log::debug($params_json);
             $purchase->bitrix_send_json = $purchase->id.'.json';
             $purchase->save();
 
 //            $response = $client->request('POST', 'https://bitrixdev.legis-s.ru/rest/1/lp06vc4xgkxjbo3t/lists.element.add.json/',$params);
 
+            \Debugbar::info("send bitrix");
             if ($user->bitrix_token && $user->bitrix_id){
                 $raw_bitrix_token  = Crypt::decryptString($user->bitrix_token);
                 $response = $client->request('POST', 'https://bitrix.legis-s.ru/rest/'.$user->bitrix_id.'/'.$raw_bitrix_token.'/lists.element.add.json/',$params);
@@ -317,6 +270,7 @@ class PurchasesController extends Controller
                 $response = $client->request('POST', 'https://bitrix.legis-s.ru/rest/722/q7e6fc3qrkiok64x/lists.element.add.json/',$params);
 
             }
+            \Debugbar::info("cant Crypt ");
             $response = $response->getBody()->getContents();
 
             $purchase->bitrix_result = $response;

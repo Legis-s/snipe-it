@@ -101,7 +101,7 @@ class ContractPresenter extends Presenter
 
     public function glyph()
     {
-        return '<i class="fa fa-usd" aria-hidden="true"></i>';
+        return '<i class="fas fa-file-lines" aria-hidden="true"></i>';
     }
 
 

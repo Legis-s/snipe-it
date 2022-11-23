@@ -1,5 +1,6 @@
 @extends('layouts/default')
 
+{{-- Вернуть актив на склад --}}
 {{-- Page title --}}
 @section('title')
   {{ trans('admin/hardware/general.checkin') }}
@@ -13,6 +14,14 @@
     .input-group {
       padding-left: 0px !important;
     }
+
+    @import 'star-rating';
+
+    :root {
+        --gl-star-empty: url(/img/star-empty.svg);
+        --gl-star-full: url(/img/star-full.svg);
+        --gl-star-size: 32px;
+    }
   </style>
 
 
@@ -21,7 +30,7 @@
     <div class="col-md-9">
       <div class="box box-default">
         <div class="box-header with-border">
-          <h2 class="box-title">{{ trans('admin/hardware/form.tag') }} {{ $asset->asset_tag }}</h2>
+            <h2 class="box-title">{{ trans('admin/hardware/form.tag') }}:  <b style="font-size: 120%">{{ $asset->asset_tag }}</b></h2>
         </div><!-- /.box-header -->
 
         <div class="box-body">
@@ -93,6 +102,17 @@
                       </div>
                     </div>
 
+                      <!-- Note -->
+                      <div class="form-group {{ $errors->has('note') ? 'error' : '' }}">
+
+                          {{ Form::label('note', trans('admin/hardware/form.notes'), array('class' => 'col-md-3 control-label')) }}
+
+                          <div class="col-md-8">
+                              <textarea class="col-md-6 form-control" id="note" name="note">{{ old('note', $asset->note) }}</textarea>
+                              {!! $errors->first('note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                          </div>
+                      </div>
+
                     <!-- Purchase Cost -->
                     <style>
                       @import 'star-rating';
@@ -108,7 +128,7 @@
                       <div class="col-md-9">
                         <div class="input-group col-md-4" style="padding-left: 0px;">
                           <select class="star-rating" name="quality" id="quality">
-                            @if ($quality = Input::old('quality', (isset($asset)) ? $asset->quality : ''))
+                            @if ($quality = Request::old('quality', (isset($asset)) ? $asset->quality : ''))
                               @if ($quality == 1)
                                 <option value="">Оцените состояние</option>
                                 <option value="5">Новое запакованное</option>
@@ -186,8 +206,8 @@
                                $result =  $interval->m + 12*$interval->y;
 
                            }else{
-      $result = "???";
-  }
+                                  $result = "???";
+                              }
                            if($asset->model->lifetime){
                                 $lifetime = $asset->model->lifetime;
                            }else if($asset->model->category->lifetime){
@@ -212,14 +232,14 @@
                                  name="purchase_cost" aria-label="Purchase_cost"
                                  id="purchase_cost"
                                  disabled
-                                 value="{{ Input::old('purchase_cost', \App\Helpers\Helper::formatCurrencyOutput($asset->purchase_cost)) }}"/>
+                                 value="{{ Request::old('purchase_cost', \App\Helpers\Helper::formatCurrencyOutput($asset->purchase_cost)) }}"/>
                           <span class="input-group-addon">
-                @if (isset($currency_type))
+                            @if (isset($currency_type))
                               {{ $currency_type }}
                             @else
                               {{ $snipeSettings->default_currency }}
                             @endif
-            </span>
+                            </span>
                         </div>
 
                         <div class="col-md-9" style="padding-left: 0px;">
@@ -229,22 +249,21 @@
                     </div>
                     <!-- depreciable Cost -->
                     <div class="form-group {{ $errors->has('depreciable_cost') ? ' has-error' : '' }}">
-                      <label for="purchase_cost" class="col-md-3 control-label">Старая остаточная
-                        стоимость</label>
+                      <label for="purchase_cost" class="col-md-3 control-label">Старая остаточная стоимость</label>
                       <div class="col-md-9">
                         <div class="input-group col-md-4" style="padding-left: 0px;">
                           <input class="form-control float" type="text"
                                  name="depreciable_cost" aria-label="depreciable_cost"
                                  id="depreciable_cost"
                                  disabled
-                                 value="{{ Input::old('depreciable_cost', \App\Helpers\Helper::formatCurrencyOutput($asset->depreciable_cost)) }}"/>
+                                 value="{{ Request::old('depreciable_cost', \App\Helpers\Helper::formatCurrencyOutput($asset->depreciable_cost)) }}"/>
                           <span class="input-group-addon">
-                @if (isset($currency_type))
+                            @if (isset($currency_type))
                               {{ $currency_type }}
                             @else
                               {{ $snipeSettings->default_currency }}
                             @endif
-            </span>
+                          </span>
                         </div>
 
                         <div class="col-md-9" style="padding-left: 0px;">
@@ -261,14 +280,14 @@
                           <input class="form-control float" type="text"
                                  name="new_depreciable_cost" aria-label="depreciable_cost"
                                  id="new_depreciable_cost"
-                                 value="{{ Input::old('new_depreciable_cost', \App\Helpers\Helper::formatCurrencyOutput($asset->new_depreciable_cost)) }}"/>
+                                 value="{{ Request::old('new_depreciable_cost', \App\Helpers\Helper::formatCurrencyOutput($asset->new_depreciable_cost)) }}"/>
                           <span class="input-group-addon">
-                @if (isset($currency_type))
+                            @if (isset($currency_type))
                               {{ $currency_type }}
                             @else
                               {{ $snipeSettings->default_currency }}
                             @endif
-            </span>
+                            </span>
                         </div>
 
                         <div class="col-md-9" style="padding-left: 0px;">
@@ -277,22 +296,10 @@
                       </div>
                     </div>
 
-
-                    <!-- Note -->
-                    <div class="form-group {{ $errors->has('note') ? 'error' : '' }}">
-
-                      {{ Form::label('note', trans('admin/hardware/form.notes'), array('class' => 'col-md-3 control-label')) }}
-
-                      <div class="col-md-8">
-                  <textarea class="col-md-6 form-control" id="note"
-                            name="note">{{ old('note', $asset->note) }}</textarea>
-                        {!! $errors->first('note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                      <div class="box-footer">
+                          <a class="btn btn-link" href="{{ URL::previous() }}"> {{ trans('button.cancel') }}</a>
+                          <button type="submit" class="btn btn-primary pull-right"><i class="fas fa-check icon-white" aria-hidden="true"></i> {{ trans('general.checkin') }}</button>
                       </div>
-                    </div>
-                    <div class="box-footer">
-                      <a class="btn btn-link" href="{{ URL::previous() }}"> {{ trans('button.cancel') }}</a>
-                      <button type="submit" class="btn btn-primary pull-right"><i class="fas fa-check icon-white" aria-hidden="true"></i> {{ trans('general.checkin') }}</button>
-                    </div>
                   </form>
           </div> <!--/.col-md-12-->
         </div> <!--/.box-body-->
@@ -351,7 +358,7 @@
             $time_divider = 0;
           }
           @else
-                  $time_divider = 1/3;
+              $time_divider = 1/3;
           @endif
 
           //final count

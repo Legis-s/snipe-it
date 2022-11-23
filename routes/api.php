@@ -1189,182 +1189,244 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
 
 
 
-    /*--- Inventory API ---*/
+        /**
+         * CUSTOM API ROUTES START
+         */
+
+        /**
+         * Consumable API routes
+         */
+
+        Route::group(['prefix' => 'consumables'], function () {
+            Route::post('{id}/review',
+                [
+                    Api\ConsumablesController::class,
+                    'review'
+                ]
+            )->name('api.consumables.review');
+        });// end Consumables API routes
 
 
-    Route::resource('inventories', 'InventoriesController',
-        [
-            'names' =>
+        /**
+         * Assets API routes
+         */
+        Route::group(['prefix' => 'hardware'], function () {
+
+            Route::post('{asset_id}/review',
+                [
+                    Api\AssetsController::class,
+                    'review'
+                ]
+            )->name('api.assets.review');
+
+            Route::post('{asset_id}/inventory',
+                [
+                    Api\AssetsController::class,
+                    'inventory'
+                ]
+            )->name('api.assets.inventory');
+
+            Route::post('{asset_id}/closesell',
+                [
+                    Api\AssetsController::class,
+                    'closesell'
+                ]
+            )->name('api.assets.closesell');
+        });
+
+        /**
+         * Inventories API routes
+         */
+
+        Route::resource('inventories',
+            Api\InventoriesController::class,
+            ['names' =>
                 [
                     'index' => 'api.inventories.index',
                     'show' => 'api.inventories.show',
-                    'store' => 'api.inventories.store',
                     'update' => 'api.inventories.update',
+                    'store' => 'api.inventories.store',
                 ],
-            'except' => ['create', 'edit'],
-            'parameters' => ['inventory' => 'inventory_id']
-        ]
-    ); // Inventory resource
+                'except' => ['create', 'edit'],
+                'parameters' => ['inventory' => 'inventory_id'],
+            ]
+        ); // end Inventories API routes
 
-    /*--- InventoryItem API ---*/
+        /**
+         * Inventory items API routes
+         */
 
-
-    Route::resource('inventory_items', 'InventoryItemController',
-        [
-            'names' =>
+        Route::resource('inventory_items',
+            Api\InventoryItemController::class,
+            ['names' =>
                 [
                     'index' => 'api.inventory_items.index',
                     'show' => 'api.inventory_items.show',
                     'update' => 'api.inventory_items.update',
                 ],
-            'except' => ['create', 'edit'],
-            'parameters' => ['inventory_item' => 'inventory_item_id']
-        ]
-    ); // Inventory resource
+                'except' => ['create', 'edit'],
+                'parameters' => ['inventory_item' => 'inventory_item_id'],
+            ]
+        ); // end Inventory items API routes
 
+        /**
+         * Inventory status labels API routes
+         */
 
-    /*--- Map API ---*/
+        Route::resource('inventorystatuslabels',
+            Api\InventoryStatuslabelsController::class,
+            ['names' =>
+                [
+                    'index' => 'api.inventorystatuslabels.index',
+                    'show' => 'api.inventorystatuslabels.show',
+                    'update' => 'api.inventorystatuslabels.update',
+                ],
+                'except' => ['create', 'edit'],
+                'parameters' => ['inventorystatuslabel' => 'iinventorystatuslabel_id'],
+            ]
+        ); // end nventory status labels API routes
 
-    Route::resource('map', 'MapController',
-        [
-            'names' =>
+        /**
+         * Inventories API routes
+         */
+
+        Route::resource('inventory_items',
+            Api\InventoryItemController::class,
+            ['names' =>
+                [
+                    'index' => 'api.inventory_items.index',
+                    'show' => 'api.inventory_items.show',
+                    'update' => 'api.inventory_items.update',
+                ],
+                'except' => ['create', 'edit'],
+                'parameters' => ['inventory_item' => 'inventory_item_id'],
+            ]
+        ); // end Inventories API routes
+
+        /**
+         * Map API routes
+         */
+
+        Route::resource('map',
+            Api\MapController::class,
+            ['names' =>
                 [
                     'index' => 'api.map.index',
                 ],
-//            'except' => ['create', 'edit'],
-//            'parameters' => ['purchase' => 'purchase_id']
-        ]
-    ); // Purchases resource
+            ]
+        );// end Map API routes
 
-    /*--- Purchases API ---*/
+        /**
+         * Purchases API routes
+         */
+        Route::group(['prefix' => 'purchases'], function () {
 
-    Route::resource('purchases', 'PurchasesController',
-        [
-            'names' =>
+            Route::post('{purchase}/paid',
+                [
+                    Api\PurchasesController::class,
+                    'paid'
+                ]
+            )->name('api.purchases.paid');
+
+            Route::post('{purchase}/consumables_check',
+                [
+                    Api\PurchasesController::class,
+                    'consumables_check'
+                ]
+            )->name('api.purchases.consumables_check');
+
+
+            Route::post('{purchase}/in_payment',
+                [
+                    Api\PurchasesController::class,
+                    'in_payment'
+                ]
+            )->name('api.purchases.in_payment');
+
+            Route::post('{purchase}/reject',
+                [
+                    Api\PurchasesController::class,
+                    'reject'
+                ]
+            )->name('api.purchases.reject');
+
+            Route::post('{purchase}/resend',
+                [
+                    Api\PurchasesController::class,
+                    'resend'
+                ]
+            )->name('api.purchases.resend');
+
+            Route::post('{purchase}/bitrix_task/{bitrix_task}',
+                [
+                    Api\PurchasesController::class,
+                    'bitrix_task'
+                ]
+            )->name('api.purchases.bitrix_task');
+        });
+
+        Route::resource('purchases',
+            Api\PurchasesController::class,
+            ['names' =>
                 [
                     'index' => 'api.purchases.index',
                     'show' => 'api.purchases.show',
                     'store' => 'api.purchases.store',
                     'update' => 'api.purchases.update',
                 ],
-            'except' => ['create', 'edit'],
-            'parameters' => ['purchase' => 'purchase_id']
-        ]
-    ); // Purchases resource
-
-
-
-    Route::group(['prefix' => 'purchases'], function () {
-
-        Route::post('{purchase}/paid',
-            [
-                'as' => 'api.purchases.paid',
-                'uses' => 'PurchasesController@paid'
+                'except' => ['create', 'edit'],
+                'parameters' => ['purchase' => 'purchase_id'],
             ]
-        );
+        ); // end Purchases API routes
 
-        Route::post('{purchase}/consumables_check',
-            [
-                'as' => 'api.purchases.consumables_check',
-                'uses' => 'PurchasesController@consumables_check'
-            ]
-        );
+        /**
+         * InvoiceTypes API routes
+         */
+        Route::group(['prefix' => 'invoice_types'], function () {
 
-        Route::post('{purchase}/in_payment',
-            [
-                'as' => 'api.purchases.in_payment',
-                'uses' => 'PurchasesController@in_payment'
-            ]
-        );
-
-        Route::post('{purchase}/reject',
-            [
-                'as' => 'api.purchases.reject',
-                'uses' => 'PurchasesController@reject'
-            ]
-        );
-        Route::post('{purchase}/resend',
-            [
-                'as' => 'api.purchases.resend',
-                'uses' => 'PurchasesController@resend'
-            ]
-        );
-
-        Route::post('{purchase}/bitrix_task/{bitrix_task}',
-            [
-                'as' => 'api.purchases.bitrix_task',
-                'uses' => 'PurchasesController@bitrix_task'
-            ]
-        );
-    }); // Users group
+            Route::get('selectlist',
+                [
+                    Api\InvoiceTypesController::class,
+                    'selectlist'
+                ]
+            )->name('api.invoice_types.selectlist');
 
 
-    /*--- InvoiceTypes API ---*/
+        });// end InvoiceTypes API routes
 
-    Route::group(['prefix' => 'invoice_types'], function () {
+        /**
+         * LegalPersons API routes
+         */
+        Route::group(['prefix' => 'legal_persons'], function () {
 
-        Route::get('selectlist', [
-            'as' => 'invoice_types.selectlist',
-            'uses' => 'InvoiceTypesController@selectlist'
-        ]);
-    });
-
-    /*--- LegalPersons API ---*/
-
-    Route::group(['prefix' => 'legal_persons'], function () {
-
-        Route::get('selectlist', [
-            'as' => 'legal_persons.selectlist',
-            'uses' => 'LegalPersonsController@selectlist'
-        ]);
-    });
-
-    /*--- BitrixSync API ---*/
-
-    Route::group(['prefix' => 'bitrix_sync'], function () {
-
-        Route::post('users', [
-            'as' => 'bitrix_sync.users',
-            'uses' => 'BitrixSyncController@syncUsers'
-        ]);
-
-        Route::post('locations', [
-            'as' => 'bitrix_sync.locations',
-            'uses' => 'BitrixSyncController@syncLocations'
-        ]);
-
-        Route::post('suppliers', [
-            'as' => 'bitrix_sync.suppliers',
-            'uses' => 'BitrixSyncController@syncSuppliers'
-        ]);
-
-        Route::post('legal_persons', [
-            'as' => 'bitrix_sync.legal_persons',
-            'uses' => 'BitrixSyncController@syncLegalPersons'
-        ]);
-
-        Route::post('invoice_types', [
-            'as' => 'bitrix_sync.invoice_types',
-            'uses' => 'BitrixSyncController@syncInvoiceTypes'
-        ]);
-    });
+            Route::get('selectlist',
+                [
+                    Api\LegalPersonsController::class,
+                    'selectlist'
+                ]
+            )->name('api.legal_persons.selectlist');
 
 
-
-    Route::group(['prefix' => 'contracts'], function () {
-
-        Route::get('selectlist',
-            [
-                'as' => 'api.contracts.selectlist',
-                'uses' => 'ContractsController@selectlist'
-            ]
-        );
-    }); // Contracts group
+        });// end LegalPersons API routes
 
 
-    Route::resource('contracts', 'ContractsController',
-        [
-            'names' =>
+        /**
+         * Contracts API routes
+         */
+        Route::group(['prefix' => 'contracts'], function () {
+
+            Route::get('selectlist',
+                [
+                    Api\ContractsController::class,
+                    'selectlist'
+                ]
+            )->name('api.contracts.selectlist');
+
+
+        });
+        Route::resource('contracts',
+            Api\ContractsController::class,
+            ['names' =>
                 [
                     'index' => 'api.contracts.index',
                     'show' => 'api.contracts.show',
@@ -1372,10 +1434,104 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
                     'update' => 'api.contracts.update',
                     'destroy' => 'api.contracts.destroy'
                 ],
-            'except' => ['create', 'edit'],
-            'parameters' => ['contract' => 'contract_id']
-        ]
-    ); // Contracts resource
+                'except' => ['create', 'edit'],
+                'parameters' => ['contract' => 'contract_id'],
+            ]
+        );// end Contracts API routes
 
+        /**
+         * BitrixSync API routes
+         */
+        Route::group(['prefix' => 'bitrix_sync'], function () {
+
+            Route::post('users',
+                [
+                    Api\BitrixSyncController::class,
+                    'syncUsers'
+                ]
+            )->name('api.bitrix_sync.users');
+
+            Route::post('locations',
+                [
+                    Api\BitrixSyncController::class,
+                    'syncLocations'
+                ]
+            )->name('api.bitrix_sync.locations');
+
+            Route::post('suppliers',
+                [
+                    Api\BitrixSyncController::class,
+                    'syncSuppliers'
+                ]
+            )->name('api.bitrix_sync.suppliers');
+
+            Route::post('legal_persons',
+                [
+                    Api\BitrixSyncController::class,
+                    'syncLegalPersons'
+                ]
+            )->name('api.bitrix_sync.legal_persons');
+
+            Route::post('invoice_types',
+                [
+                    Api\BitrixSyncController::class,
+                    'syncInvoiceTypes'
+                ]
+            )->name('api.bitrix_sync.invoice_types');
+
+        });// end BitrixSync API routes
+
+        /**
+         * ConsumableAssignment API routes
+         */
+
+        Route::group(['prefix' => 'consumableassignments'], function () {
+
+            Route::post('{id}/return',
+                [
+                    Api\ConsumableAssignmentController::class,
+                    'return'
+                ]
+            )->name('api.consumableassignments.return');
+
+            Route::post('{id}/close_documents',
+                [
+                    Api\ConsumableAssignmentController::class,
+                    'close_documents'
+                ]
+            )->name('api.consumableassignments.close_documents');
+
+
+        });
+
+        Route::resource('consumableassignments',
+            Api\ConsumableAssignmentController::class,
+            ['names' =>
+                [
+                    'index' => 'api.consumableassignments.index',
+                ],
+                'except' => ['create', 'edit'],
+                'parameters' => ['consumableassignment' => 'consumableassignment_id'],
+            ]
+        );// end ConsumableAssignment API routes
+
+        /**
+         * Massoperations API routes
+         */
+
+        Route::resource('massoperations', Api\MassOperationsController::class,
+            [
+                'names' =>
+                    [
+                        'index' => 'api.massoperations.index',
+                    ],
+                'parameters' => ['massoperation' => 'massoperation_id']
+            ]
+        ); // Massoperations resource
+
+
+        /**
+         * CUSTOM API ROUTES END
+         */
 
 }); // end API routes

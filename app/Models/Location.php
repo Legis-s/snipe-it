@@ -164,17 +164,17 @@ class Location extends SnipeModel
         return $this->hasMany(\App\Models\Asset::class, 'rtd_location_id');
     }
 
-    /**
-     * Establishes the consumable -> location relationship
-     *
-     * @author A. Gianotto <snipe@snipe.net>
-     * @since [v3.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
-     */
-    public function consumables()
-    {
-        return $this->hasMany(\App\Models\Consumable::class, 'location_id');
-    }
+//    /**
+//     * Establishes the consumable -> location relationship
+//     *
+//     * @author A. Gianotto <snipe@snipe.net>
+//     * @since [v3.0]
+//     * @return \Illuminate\Database\Eloquent\Relations\Relation
+//     */
+//    public function consumables()
+//    {
+//        return $this->hasMany(\App\Models\Consumable::class, 'location_id');
+//    }
 
     /**
      * Establishes the component -> location relationship

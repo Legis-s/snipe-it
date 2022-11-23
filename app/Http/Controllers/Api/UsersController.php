@@ -32,7 +32,7 @@ class UsersController extends Controller
      */
     public function index(Request $request)
     {
-        $this->authorize('view', User::class);
+//        $this->authorize('view', User::class);
 
         $users = User::select([
             'users.activated',

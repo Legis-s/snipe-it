@@ -43,4 +43,44 @@ class SelectlistTransformer
 
         return $results;
     }
+
+    public function transformSelectlistConsumables(LengthAwarePaginator $select_items)
+    {
+        $items_array = [];
+
+        // Loop through the paginated collection to set the array values
+        foreach ($select_items as $select_item) {
+
+            if ($select_item->numRemaining()>0){
+                $items_array[] = [
+                    'id' => (int) $select_item->id,
+                    'text' => ($select_item->use_text) ? $select_item->use_text : $select_item->name,
+                    'image' => ($select_item->use_image) ? $select_item->use_image : null,
+                    'numRemaining' => $select_item->numRemaining(),
+                ];
+            }else{
+                $items_array[] = [
+                    'id' => (int) $select_item->id,
+                    'text' => ($select_item->use_text) ? $select_item->use_text : $select_item->name,
+                    'image' => ($select_item->use_image) ? $select_item->use_image : null,
+                    'numRemaining' => $select_item->numRemaining(),
+                    'disabled'=>true
+                ];
+            }
+
+        }
+
+        $results = [
+            'results' => $items_array,
+            'pagination' => [
+                'more' => ($select_items->currentPage() >= $select_items->lastPage()) ? false : true,
+                'per_page' => $select_items->perPage(),
+            ],
+            'total_count' => $select_items->total(),
+            'page' => $select_items->currentPage(),
+            'page_count' => $select_items->lastPage(),
+        ];
+
+        return $results;
+    }
 }
