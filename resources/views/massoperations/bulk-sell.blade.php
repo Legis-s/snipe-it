@@ -68,6 +68,7 @@
                       'multiple' => true,
                       'asset_status_type' => 'RTD',
                       'select_id' => 'assigned_assets_select',
+                      'required' => false,
                     ])
 
                         <select id="assigned_consumables_select" name="selected_consumables[]" multiple hidden></select>

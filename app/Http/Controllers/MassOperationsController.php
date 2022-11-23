@@ -88,12 +88,13 @@ class MassOperationsController extends Controller
             $admin = Auth::user();
 
             $target = $this->determineCheckoutTarget();
-            if (! is_array($request->get('selected_assets'))) {
+            if (! is_array($request->get('selected_assets')) and ! is_array($request->get('selected_consumables'))) {
                 return redirect()->route('bulk.checkout.show')->withInput()->with('error', trans('admin/hardware/message.checkout.no_assets_selected'));
             }
-
-            $asset_ids = array_filter($request->get('selected_assets'));
-
+            $asset_ids=[];
+            if (is_array($request->get('selected_assets')) and count($request->get('selected_assets'))>0){
+                $asset_ids = array_filter($request->get('selected_assets'));
+            }
 
 
             $consumbales_post  = is_array($request->get('selected_consumables')) ? array_filter($request->get('selected_consumables')) : [];
@@ -128,6 +129,7 @@ class MassOperationsController extends Controller
             $errors = [];
             DB::transaction(function () use ($target, $admin, $checkout_at, $expected_checkin, $errors, $asset_ids,$consumbales_ids,$consumbales_data, $request) {
                 $consumbales_assigned_ids = [];
+
                 foreach ($asset_ids as $asset_id) {
                     $asset = Asset::findOrFail($asset_id);
                     $this->authorize('checkout', $asset);
@@ -171,9 +173,6 @@ class MassOperationsController extends Controller
 //                        'assigned_type' => get_class($target),
 //                    ]);
                     event(new CheckoutableCheckedOut($consumable, $target, $admin,e($request->get('note')),null));
-                    if ($error) {
-                        array_merge_recursive($errors, $consumable->getErrors()->toArray());
-                    }
                 }
 
                 $bitrix_task_id = intval($request->get('bitrix_task_id'));
@@ -245,11 +244,14 @@ class MassOperationsController extends Controller
             $target = $this->determineSellTarget();
 
 
-            if (! is_array($request->get('selected_assets'))) {
+            if (! is_array($request->get('selected_assets')) and ! is_array($request->get('selected_consumables'))) {
                 return redirect()->route('bulk.sell.show')->withInput()->with('error', trans('admin/hardware/message.checkout.no_assets_selected'));
             }
 
-            $asset_ids = array_filter($request->get('selected_assets'));
+            $asset_ids=[];
+            if (is_array($request->get('selected_assets')) and count($request->get('selected_assets'))>0){
+                $asset_ids = array_filter($request->get('selected_assets'));
+            }
 
             $consumbales_post  = is_array($request->get('selected_consumables')) ? array_filter($request->get('selected_consumables')) : [];
             $consumbales_data = [];
@@ -318,10 +320,6 @@ class MassOperationsController extends Controller
 //                    ]);
 
                     event(new CheckoutableSell($consumable, $target, $admin,e($request->get('note')),null));
-
-                    if ($error) {
-                        array_merge_recursive($errors, $consumable->getErrors()->toArray());
-                    }
                 }
 
                 $bitrix_task_id = intval($request->get('bitrix_task_id'));
