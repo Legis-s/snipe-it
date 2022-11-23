@@ -1,12 +1,10 @@
 <?php
 
 return array(
-    'about_categories_title' 			=> 'Ang Tungkol sa mga Kategorya',
-    'about_categories'  				=> 'Ang mga kategorya ay tumutulong sa iyo i-organisa ang iyong nga aytem. Maaaring ang iilang halimbawa ng mga kategorya ay ang &quot;Mga Desktop&quot;, &quot;Mga Laptop&quot;, &quot;Mga Mobile Phones&quot;, &quot;Mga Tablet&quot;, at iba pa, ngunit pwede kang gumamit ng mga kategorya na para sa iyo ay may kabuluhan.',
     'asset_categories' 					=> 'Ang mga Kategorya ng Asset',
     'category_name'  					=> 'Ang Pangalan ng Kategorya',
-    'checkin_email'                     => 'Send email to user on checkin/checkout.',
-    'checkin_email_notification'        => 'This user will be sent an email on checkin/checkout.',
+    'checkin_email'                     => 'Padalhan ng email yung user pag mag-checkin/checkout.',
+    'checkin_email_notification'        => 'Ang user ay papadalhan ng email sa checkin/checkout.',
     'clone'                             => 'Ang Kategrya ay I-clone',
     'create'  							=> 'Magsagawa ng Kategorya',
     'edit'                              => 'I-edit ang Kategorya',
@@ -20,5 +18,6 @@ return array(
     'update'  							=> 'I-update ang Katergorya',
     'use_default_eula'					=> 'Sa halip ay gamitin ang <a href="#" data-toggle="modal" data-target="#eulaModal">ang pangunahing default ng EULA</a>.',
     'use_default_eula_disabled'			=> '<del>Sa halip ay gumamit ng pangunahing default na EULA.</del> Walang pangunahing default na EULA na nai-set. Paki-dagdag ng isa sa mga setting.',
+    'use_default_eula_column'			=> 'Use default EULA',
 
 );

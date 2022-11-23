@@ -1,8 +1,6 @@
 <?php
 
 return array(
-    'about_categories_title' 			=> 'Catagóirí Maidir',
-    'about_categories'  				=> 'Cuidíonn catagóirí leat do chuid míreanna a eagrú. D\'fhéadfadh roinnt catagóirí samplaí a bheith &quot;Desktops&quot;, &quot;Laptops&quot;, &quot;Mócaí Póca&quot;, &quot;Tablets&quot;, agus mar sin de, ach is féidir leat catagóirí a úsáid ar bhealach ar bith a dhéanann ciall duit.',
     'asset_categories' 					=> 'Catagóirí Sócmhainne',
     'category_name'  					=> 'Ainm Chatagóir',
     'checkin_email'                     => 'Send email to user on checkin/checkout.',
@@ -20,5 +18,6 @@ return array(
     'update'  							=> 'Catagóir Nuashonraithe',
     'use_default_eula'					=> 'Bain úsáid as an réamhshocraithe <a href="#" data-toggle="modal" data-target="#eulaModal"> réamhshocrú EULA</a> ina ionad.',
     'use_default_eula_disabled'			=> '<del>Cuir an príomh-réamhshocraithe EULA in ionad.</del> Níl aon réamhshocraithe EULA leagtha síos. Cuir ceann amháin i Socruithe le do thoil.',
+    'use_default_eula_column'			=> 'Use default EULA',
 
 );

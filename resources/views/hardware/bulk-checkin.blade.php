@@ -2,297 +2,115 @@
 
 {{-- Page title --}}
 @section('title')
-    Массовый возврат активов
+    {{ trans('admin/hardware/general.checkin') }}
     @parent
 @stop
 
 {{-- Page content --}}
 @section('content')
-    <script src="{{ asset('js/sweetalert2.min.js') }}"></script>
     <style>
+
         .input-group {
             padding-left: 0px !important;
         }
     </style>
+
 
     <div class="row">
         <!-- left column -->
         <div class="col-md-9">
             <div class="box box-default">
                 <div class="box-header with-border">
-                    <h2 class="box-title"> Массовый возврат активов </h2>
-                </div>
-                <form class="form-horizontal" method="post" action="" autocomplete="off">
-                    <div class="box-body">
-                        {{ csrf_field() }}
+                    <h2 class="box-title">{{ trans('admin/hardware/form.tag') }} {{ $asset->asset_tag }}</h2>
+                </div><!-- /.box-header -->
 
-                        <!-- Checkout selector -->
-{{--                        @include ('partials.forms.sellbulk-selector', ['user_select' => 'true','contract_select' => 'true'])--}}
-                        @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'location_id', 'hide_new' => 'true', 'required'=>'true'])
-{{--                        @include ('partials.forms.edit.contract-id-select', ['translated_name' => "Договор", 'fieldname' => 'assigned_contract', 'unselect' => 'true', 'required'=>'true'])--}}
+                <div class="box-body">
+                    <div class="col-md-12">
+                        @if ($backto=='user')
+                            <form class="form-horizontal" method="post"
+                                  action="{{ route('hardware.checkin.store', array('assetId'=> $asset->id, 'backto'=>'user')) }}"
+                                  autocomplete="off">
+                                @else
+                                    <form class="form-horizontal" method="post"
+                                          action="{{ route('hardware.checkin.store', array('assetId'=> $asset->id)) }}" autocomplete="off">
+                                        @endif
+                                        {{csrf_field()}}
 
-                        {{--                        Bitrix task id--}}
-                        <div class="form-group {{ $errors->has('bitrix_task_id') ? 'error' : '' }}">
-                            {{ Form::label('bitrix_task_id', trans('admin/hardware/form.bitrix_task_id'), array('class' => 'col-md-3 control-label')) }}
-                            <div class="col-md-8">
-                                <input type = 'text' class = 'form-control' name="bitrix_task_id">
-                                {!! $errors->first('bitrix_task_id', '<span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span>') !!}
-                            </div>
-                        </div>
+                                        <!-- AssetModel name -->
+                                        <div class="form-group">
+                                            {{ Form::label('model', trans('admin/hardware/form.model'), array('class' => 'col-md-3 control-label')) }}
+                                            <div class="col-md-8">
+                                                <p class="form-control-static">
+                                                    @if (($asset->model) && ($asset->model->name))
+                                                        {{ $asset->model->name }}
 
-                        <!-- sold_at date -->
-                        <div class="form-group {{ $errors->has('sold_at') ? 'error' : '' }}">
-                            {{ Form::label('sold_at', trans('admin/hardware/form.checkin_date'), array('class' => 'col-md-3 control-label')) }}
-                            <div class="col-md-8">
-                                <div class="input-group date col-md-5" data-provide="datepicker"
-                                     data-date-format="yyyy-mm-dd" data-date-end-date="0d">
-                                    <input type="text" class="form-control"
-                                           placeholder="{{ trans('general.select_date') }}" name="checkin_at"
-                                           id="checkout_at" value="{{ Input::old('checkin_at') }}">
-                                    <span class="input-group-addon"><i class="fa fa-calendar"
-                                                                       aria-hidden="true"></i></span>
-                                </div>
-                                {!! $errors->first('checkin_at', '<span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span>') !!}
-                            </div>
-                        </div>
+                                                    @else
+                                                        <span class="text-danger text-bold">
+                      <i class="fas fa-exclamation-triangle"></i>This asset's model is invalid!
+                      The asset <a href="{{ route('hardware.edit', $asset->id) }}">should be edited</a> to correct this before attempting to check it in or out.</span>
+                                                    @endif
+                                                </p>
+                                            </div>
+                                        </div>
 
-                        <!-- Note -->
-                        <div class="form-group {{ $errors->has('note') ? 'error' : '' }}">
-                            {{ Form::label('note', trans('admin/hardware/form.notes'), array('class' => 'col-md-3 control-label')) }}
-                            <div class="col-md-8">
-                                                        <textarea class="col-md-6 form-control" id="note"
-                                                                  name="note">{{ Input::old('note') }}</textarea>
-                                {!! $errors->first('note', '<span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span>') !!}
-                            </div>
-                        </div>
-                        <br>
-                        <br>
 
-                        @include ('partials.forms.edit.asset-select-bulk-form', [
-                                    'translated_name' => trans('general.asset'),
-                                    'fieldname' => 'asset_select',
-                                    'unselect' => 'true',
-                                    'asset_status_type' => 'Issued_for_sale',
-                                    'select_id' => 'asset_select',
-                                     ])
+                                        <!-- Asset Name -->
+                                        <div class="form-group {{ $errors->has('name') ? 'error' : '' }}">
+                                            {{ Form::label('name', trans('admin/hardware/form.name'), array('class' => 'col-md-3 control-label')) }}
+                                            <div class="col-md-8">
+                                                <input class="form-control" type="text" name="name" aria-label="name" id="name"
+                                                       value="{{ old('name', $asset->name) }}"/>
+                                                {!! $errors->first('name', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                            </div>
+                                        </div>
 
-                        <select id="assigned_assets_select" name="selected_assets[]" multiple hidden>
+                                        <!-- Status -->
+                                        <div class="form-group {{ $errors->has('status_id') ? 'error' : '' }}">
+                                            {{ Form::label('status_id', trans('admin/hardware/form.status'), array('class' => 'col-md-3 control-label')) }}
+                                            <div class="col-md-7 required">
+                                                {{ Form::select('status_id', $statusLabel_list, '', array('class'=>'select2', 'style'=>'width:100%','id' =>'modal-statuslabel_types', 'aria-label'=>'status_id')) }}
+                                                {!! $errors->first('status_id', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                            </div>
+                                        </div>
 
-                            @foreach ($ids as $a_id)
-                                <option value = '{{ $a_id }}' selected="selected">{{ $a_id }}</option>
-                            @endforeach
+                                        @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'location_id', 'help_text' => ($asset->defaultLoc) ? 'You can choose to check this asset in to a location other than the default location of '.$asset->defaultLoc->name.' if one is set.' : null])
 
-                        </select>
+                                        <!-- Checkout/Checkin Date -->
+                                        <div class="form-group{{ $errors->has('checkin_at') ? ' has-error' : '' }}">
+                                            {{ Form::label('checkin_at', trans('admin/hardware/form.checkin_date'), array('class' => 'col-md-3 control-label')) }}
+                                            <div class="col-md-8">
+                                                <div class="input-group col-md-5 required">
+                                                    <div class="input-group date" data-provide="datepicker" data-date-format="yyyy-mm-dd"  data-autoclose="true">
+                                                        <input type="text" class="form-control" placeholder="{{ trans('general.select_date') }}" name="checkin_at" id="checkin_at" value="{{ old('checkin_at', date('Y-m-d')) }}">
+                                                        <span class="input-group-addon"><i class="fas fa-calendar" aria-hidden="true"></i></span>
+                                                    </div>
+                                                    {!! $errors->first('checkin_at', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                                </div>
+                                            </div>
+                                        </div>
 
-                        <h2> Активы к возврату:</h2>
-                        <table
-                                data-advanced-search="true"
-                                data-click-to-select="true"
-                                data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayoutBulk() }}"
-                                data-cookie-id-table="assetsBulkTable"
-                                data-pagination="true"
-                                data-id-table="assetsBulkTable"
-                                {% if ids is defined %}
-                                data-query-params="queryParams"
-                                {% endif %}
-                                data-search="true"
-                                data-side-pagination="server"
-                                data-show-columns="true"
-                                data-show-footer="true"
-                                data-show-refresh="true"
-                                data-sort-order="asc"
-                                data-sort-name="name"
-                                data-toolbar="#toolbar"
-                                data-queryParams="#toolbar"
-                                id="assetsBulkTable"
-                                class="table table-striped snipe-table"
-                                data-url="{{ route('api.assets.index',array('bulk' => true))}}">
-                        </table>
-                    </div>
-                    <div class="box-footer">
-                        <a class="btn btn-link" href="{{ URL::previous() }}"> {{ trans('button.cancel') }}</a>
-                        <button type="submit" class="btn btn-primary pull-right"><i class="fa fa-check icon-white"
-                                                                                    aria-hidden="true"></i> {{ trans('general.checkin') }}
-                        </button>
-                    </div>
-                </form>
-            </div>
+
+                                        <!-- Note -->
+                                        <div class="form-group {{ $errors->has('note') ? 'error' : '' }}">
+
+                                            {{ Form::label('note', trans('admin/hardware/form.notes'), array('class' => 'col-md-3 control-label')) }}
+
+                                            <div class="col-md-8">
+                  <textarea class="col-md-6 form-control" id="note"
+                            name="note">{{ old('note', $asset->note) }}</textarea>
+                                                {!! $errors->first('note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                            </div>
+                                        </div>
+                                        <div class="box-footer">
+                                            <a class="btn btn-link" href="{{ URL::previous() }}"> {{ trans('button.cancel') }}</a>
+                                            <button type="submit" class="btn btn-primary pull-right"><i class="fas fa-check icon-white" aria-hidden="true"></i> {{ trans('general.checkin') }}</button>
+                                        </div>
+                                    </form>
+                    </div> <!--/.col-md-12-->
+                </div> <!--/.box-body-->
+
+            </div> <!--/.box.box-default-->
         </div>
-        @stop
+    </div>
 
-        @section('moar_scripts')
-            @include('partials.bootstrap-table')
-            @include('partials/assets-assigned')
-            <script src="{{ asset('js/onscan.js') }}"></script>
-            <script nonce="{{ csrf_token() }}">
-                $(function () {
-                    $('input[name=sell_to_type]').on("change", function () {
-                        var assignto_type = $('input[name=sell_to_type]:checked').val();
-
-                        if (assignto_type == 'contract') {
-                            $('#assigned_user').hide();
-                        } else if (assignto_type == 'user') {
-                            $('#assigned_user').show();
-                        }
-                    });
-                });
-
-
-                var select = $('#asset_select');
-                var add_asset = $('#add_asset');
-                var assigned_assets_select = $('#assigned_assets_select');
-                var selected = [];
-                Array.from(document.getElementById("assigned_assets_select")).forEach(function(item) {
-                    selected.push(item.innerHTML);
-                })
-                function queryParams(params) {
-                    params.data = JSON.stringify(selected);
-                    return params
-                }
-                add_asset.prop('disabled', true);
-                add_asset.click(function () {
-                    var selected_id = select.val();
-                    if (!selected.includes(selected_id)) {
-                        selected.push(selected_id);
-                    }
-                    updData();
-                    select.val(null).trigger('change');
-                    add_asset.prop('disabled', true);
-                });
-
-                select.on('select2:select', function (e) {
-                    add_asset.prop('disabled', false);
-                });
-                select.on('select2:unselect', function (e) {
-                    add_asset.prop('disabled', true);
-                });
-
-                function updData() {
-                    $("#assetsBulkTable").bootstrapTable("refresh", {
-                        "query": {
-                            "data": JSON.stringify(selected),
-                        },
-                        "silent": true,
-                    });
-                    $('#assigned_assets_select').empty();
-                    $.each(selected, function (i, item) {
-
-                        $('#assigned_assets_select').append($('<option>', {
-                            value: item,
-                            text: item,
-                            selected: true
-                        }));
-                    });
-                }
-
-                // Enable scan events for the entire document
-                onScan.attachTo(document, {
-                    suffixKeyCodes: [13], // enter-key expected at the end of a scan
-                    minLength:4,
-                    onScan: function (sCode, iQty) { // Alternative to document.addEventListener('scan')
-                        console.log("sCode" + sCode);
-                        scanCode(auto_layout_keyboard(String(sCode)));
-
-                    },
-                });
-
-                function scanCode(code) {
-                    console.log("scan: " + code);
-                    $.ajax({
-                        type: 'GET',
-                        url: '/api/v1/hardware/bytag/' + code,
-                        headers: {
-                            "X-Requested-With": 'XMLHttpRequest',
-                            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                        },
-
-                        dataType: 'json',
-                        success: function (data, textStatus, xhr) {
-                            console.log(data);
-                            if (xhr.status === 200) {
-
-                                if (data.hasOwnProperty("messages")){
-                                    Swal.fire({
-                                        title: "Актив " + code + " не найден",
-                                        icon: 'info',
-                                        text: data.messages,
-                                        timer: 1500
-                                    });
-                                }else{
-
-                                    if (data.user_can_checkout){
-                                        if (!selected.includes(data.id)) {
-                                            selected.push(data.id);
-                                            updData();
-                                            Swal.fire({
-                                                title: "Актив " + code + " найден",
-                                                icon: 'success',
-                                                text: data.messages,
-                                                timer: 1500
-                                            });
-                                        }else {
-                                            Swal.fire({
-                                                title: "Актив " + code + " уже в списке",
-                                                icon: 'info',
-                                                text: data.messages,
-                                                timer: 1500
-                                            });
-                                        }
-
-                                    }else{
-                                        Swal.fire({
-                                            title: "Актив " + code + " найден",
-                                            icon: 'info',
-                                            text: "Этот актив уже выдан, верните его на склад и попробуйте заново",
-                                            timer: 2000
-                                        });
-                                    }
-
-                                }
-                            } else {
-                                Swal.fire({
-                                    title: "Ошибка сервера",
-                                    icon: 'error',
-                                    text: 'Что то пошло не так!',
-                                    timer: 1500
-                                })
-                            }
-                        },
-                        error: function (data) {
-                            Swal.fire({
-                                title: "Ошибка сервера",
-                                icon: 'error',
-                                text: 'Что то пошло не так!',
-                                timer: 1500
-                            })
-                        }
-                    });
-                }
-
-                function auto_layout_keyboard(str) {
-                    var replacer = {
-                        "й": "q", "ц": "w", "у": "e", "к": "r", "е": "t", "н": "y", "г": "u",
-                        "ш": "i", "щ": "o", "з": "p", "х": "[", "ъ": "]", "ф": "a", "ы": "s",
-                        "в": "d", "а": "f", "п": "g", "р": "h", "о": "j", "л": "k", "д": "l",
-                        "ж": ";", "э": "'", "я": "z", "ч": "x", "с": "c", "м": "v", "и": "b",
-                        "т": "n", "ь": "m", "б": ",", "ю": ".", ".": "/"
-                    };
-
-                    return str.replace(/[А-я/,.;\'\]\[]/g, function (x) {
-                        return x == x.toLowerCase() ? replacer[x] : replacer[x.toLowerCase()].toUpperCase();
-                    });
-                }
-
-                var operateEventsBulk = {
-                    'click .bulk-clear':function (e, value, row, index) {
-                        var selected_id =String(row.id);
-                        console.log(selected_id);
-                        console.log(selected);
-                        if (selected.includes(selected_id)) {
-                            selected = selected.filter(item => item !== selected_id)
-                            updData();
-                        }
-                    }
-                };
-            </script>
 @stop

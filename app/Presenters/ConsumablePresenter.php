@@ -102,12 +102,12 @@ class ConsumablePresenter extends Presenter
                 "visible" => false,
                 "formatter" => "manufacturersLinkObjFormatter"
             ], [
-                "field" => "purchase_id",
+                "field" => "purchase",
                 "searchable" => false,
                 "sortable" => true,
                 "switchable" => true,
-                "title" => "ID закупки",
-                "visible" => false
+                "title" => "Закупка",
+                "formatter" => "purchasesLinkObjFormatter"
             ], [
                 "field" => "order_number",
                 "searchable" => true,
@@ -134,14 +134,7 @@ class ConsumablePresenter extends Presenter
                 "sortable" => false,
                 "visible" => true,
                 "title" =>"Выдать",
-                "formatter" => "consumablesInOutFormatter",
-            ],[
-                "field" => "sell",
-                "searchable" => false,
-                "sortable" => false,
-                "visible" => true,
-                "title" => "Продать",
-                "formatter" => "consumablesSellFormatter",
+                "formatter" => "consumablesCustomInOutFormatter",
             ], [
                 "field" => "actions",
                 "searchable" => false,

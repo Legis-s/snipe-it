@@ -2,12 +2,13 @@
 
 return array(
 
-    'does_not_exist' => 'Lisans mevcut değil.',
+    'does_not_exist' => 'License does not exist or you do not have permission to view it.',
     'user_does_not_exist' => 'Kullanıcı mevcut değil.',
     'asset_does_not_exist' 	=> 'Lisans ile ilişkilendirmek istediğiniz demirbaş mevcut değil.',
     'owner_doesnt_match_asset' => 'Lisans ile ilişkilendirmek istediğiniz demirbaş ilişkilendirmek istediğiniz kişiden başkasına atanmış durumda.',
     'assoc_users'	 => 'Bu demirbaş kullanıcıya çıkış yapılmış olaran görülüyor ve silinemez. Lütfen önce demirbaş girişi yapınız, ardından tekrar siliniz. ',
     'select_asset_or_person' => 'Bir varlık veya kullanıcı seçmelisiniz, ancak her ikisini birden değil.',
+    'not_found' => 'Lisans bulunamadı',
 
 
     'create' => array(

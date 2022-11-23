@@ -2,12 +2,13 @@
 
 return array(
 
-    'does_not_exist' => 'الترخيص غير موجود.',
+    'does_not_exist' => 'License does not exist or you do not have permission to view it.',
     'user_does_not_exist' => 'المستخدم غير موجود.',
     'asset_does_not_exist' 	=> 'الأصل اللذي تحاول ربطه مع هذا الترخيص غير موجود.',
     'owner_doesnt_match_asset' => 'الأصل اللذي تحاول ربطه مع هذا الترخيص حاليا مملوك لشخص اخر غير اللذي تم اختياره من القائمة المنسدلة.',
     'assoc_users'	 => 'هذا الترخيص حاليا مخرج لمستخدم ولا يمكن حذفه. يرجى التحقق من الترخيص في البداية، ثم محاولة الحذف مرة أخرى. ',
     'select_asset_or_person' => 'يجب تحديد أصل أو مستخدم، وليس كليهما.',
+    'not_found' => 'لم يتم العثور على الترخيص',
 
 
     'create' => array(

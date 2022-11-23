@@ -1,6 +1,7 @@
 <?php
+
 return [
-    'about_companies_title'            => 'Mengenai Syarikat',
-    'about_companies_text'                  => 'Syarikat boleh digunakan sebagai medan pengecam ringkas, atau boleh digunakan untuk membatasi penglihatan aset, pengguna, dan lain-lain jika sokongan syarikat penuh diaktifkan dalam tetapan Admin anda.',
     'select_company' => 'Pilih Syarikat',
+    'about_companies' => 'About Companies',
+    'about_companies_description' => '        You can use companies as a simple informative field, or you can use them to restrict asset visibility and availability to users with a specific company by enabling Full Company Support in your Admin Settings.',
 ];

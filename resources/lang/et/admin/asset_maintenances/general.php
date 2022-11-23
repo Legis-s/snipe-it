@@ -7,5 +7,10 @@
         'view'               => 'Vaadake varahalduse üksikasju',
         'repair'             => 'Remont',
         'maintenance'        => 'Hooldus',
-        'upgrade'            => 'Uuendage'
+        'upgrade'            => 'Uuendage',
+        'calibration'        => 'Kalibreerimine',
+        'software_support'   => 'Tarkvara tugi',
+        'hardware_support'   => 'Riistvara tugi',
+        'configuration_change'   => 'Configuration Change',
+        'pat_test'           => 'PAT Test',
     ];

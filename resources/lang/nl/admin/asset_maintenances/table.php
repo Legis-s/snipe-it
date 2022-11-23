@@ -1,8 +1,8 @@
 <?php
 
     return [
-        'title'         => 'Materiaal onderhoud',
-        'asset_name'    => 'Objectnaam',
+        'title'         => 'Activaonderhoud',
+        'asset_name'    => 'Activanaam',
         'is_warranty'   => 'Garantie',
-        'dl_csv'        => 'CSV downloaden'
+        'dl_csv'        => 'CSV downloaden',
     ];

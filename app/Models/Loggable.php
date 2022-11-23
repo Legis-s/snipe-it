@@ -2,30 +2,17 @@
 
 namespace App\Models;
 
-use App\Models\Actionlog;
-use App\Models\Asset;
-use App\Models\CheckoutRequest;
-use App\Models\User;
-use App\Notifications\CheckinAssetNotification;
+use App\Models\Setting;
 use App\Notifications\AuditNotification;
-use App\Notifications\CheckoutAssetNotification;
-use App\Notifications\CheckoutAccessoryNotification;
-use App\Notifications\CheckinAccessoryNotification;
-use App\Notifications\CheckoutConsumableNotification;
-use App\Notifications\CheckoutLicenseNotification;
-use App\Notifications\CheckinLicenseNotification;
 use Illuminate\Support\Facades\Auth;
-
 
 trait Loggable
 {
-
     /**
      * @author  Daniel Meltzer <dmeltzer.devel@gmail.com>
      * @since [v3.4]
      * @return \App\Models\Actionlog
      */
-
     public function log()
     {
         return $this->morphMany(Actionlog::class, 'item');
@@ -36,27 +23,28 @@ trait Loggable
      * @since [v3.4]
      * @return \App\Models\Actionlog
      */
-    public function logCheckout($note, $target,$changed = null ,$photos_json = null,$biometric_uid = null,$biometric_result = null /* What are we checking out to? */)
+    public function logCheckout($note, $target, $action_date = null,$changed = null)
     {
-        $settings = Setting::getSettings();
         $log = new Actionlog;
         $log = $this->determineLogItemType($log);
-        if(Auth::user())
+        if (Auth::user()) {
             $log->user_id = Auth::user()->id;
+        }
 
-        if (!isset($target)) {
+        if (! isset($target)) {
             throw new \Exception('All checkout logs require a target.');
+
             return;
         }
 
-        if (!isset($target->id)) {
+        if (! isset($target->id)) {
             throw new \Exception('That target seems invalid (no target ID available).');
+
             return;
         }
 
         $log->target_type = get_class($target);
         $log->target_id = $target->id;
-
 
         // Figure out what the target is
         if ($log->target_type == Location::class) {
@@ -68,51 +56,70 @@ trait Loggable
         }
 
         $log->note = $note;
-        if ($changed){
-            $log->log_meta = json_encode($changed);
-        }
-        if($photos_json){
-            $log->photos = json_encode($photos_json);
-        }
+        $log->action_date = $action_date;
 
-        if($biometric_result){
-            $log->biometric_result = $biometric_result;
+        if (! $log->action_date) {
+            $log->action_date = date('Y-m-d H:i:s');
         }
-        if($biometric_uid){
-            $log->biometric_uid =$biometric_uid;
-        }
-
+        $log->log_meta = json_encode($changed);
         $log->logaction('checkout');
 
-        $params = [
-            'item' => $log->item,
-            'target_type' => $log->target_type,
-            'target' => $target,
-            'admin' => $log->user,
-            'note' => $note,
-            'log_id' => $log->id,
-            'settings' => $settings,
-        ];
+        return $log;
+    }
 
-        $checkoutClass = null;
 
-        if (method_exists($target, 'notify')) {
-            $target->notify(new static::$checkoutClass($params));
+    /**
+     * @author  Daniel Meltzer <dmeltzer.devel@gmail.com>
+     * @since [v3.4]
+     * @return \App\Models\Actionlog
+     */
+    public function logForInstall($note, $target, $action_date = null,$changed = null)
+    {
+        $log = new Actionlog;
+        $log = $this->determineLogItemType($log);
+        if (Auth::user()) {
+            $log->user_id = Auth::user()->id;
         }
 
-        // Send to the admin, if settings dictate
-        $recipient = new \App\Models\Recipients\AdminRecipient();
+        if (! isset($target)) {
+            throw new \Exception('All checkout logs require a target.');
 
-        if (($settings->admin_cc_email!='') && (static::$checkoutClass!='')) {
-            $recipient->notify(new static::$checkoutClass($params));
+            return;
         }
+
+        if (! isset($target->id)) {
+            throw new \Exception('That target seems invalid (no target ID available).');
+
+            return;
+        }
+
+        $log->target_type = get_class($target);
+        $log->target_id = $target->id;
+
+        // Figure out what the target is
+        if ($log->target_type == Location::class) {
+            $log->location_id = $target->id;
+        } elseif ($log->target_type == Asset::class) {
+            $log->location_id = $target->location_id;
+        } else {
+            $log->location_id = $target->location_id;
+        }
+
+        $log->note = $note;
+        $log->action_date = $action_date;
+
+        if (! $log->action_date) {
+            $log->action_date = date('Y-m-d H:i:s');
+        }
+        $log->log_meta = json_encode($changed);
+        $log->logaction('issued_for_install');
 
         return $log;
     }
 
     /**
-    * Helper method to determine the log item type
-    */
+     * Helper method to determine the log item type
+     */
     private function determineLogItemType($log)
     {
         // We need to special case licenses because of license_seat vs license.  So much for clean polymorphism :
@@ -126,12 +133,13 @@ trait Loggable
 
         return $log;
     }
+
     /**
      * @author  Daniel Meltzer <dmeltzer.devel@gmail.com>
      * @since [v3.4]
      * @return \App\Models\Actionlog
      */
-    public function logCheckin($target, $note,$changed = null,$photos_json = null )
+    public function logCheckin($target, $note, $action_date = null, $changed = null)
     {
         $settings = Setting::getSettings();
         $log = new Actionlog;
@@ -142,58 +150,176 @@ trait Loggable
             $log->item_type = License::class;
             $log->item_id = $this->license_id;
         } else {
-
             $log->item_type = static::class;
             $log->item_id = $this->id;
 
             if (static::class == Asset::class) {
                 if ($asset = Asset::find($log->item_id)) {
-                    \Log::debug('Increment the checkin count for asset: '.$log->item_id);
                     $asset->increment('checkin_counter', 1);
                 }
             }
-
         }
 
 
         $log->location_id = null;
         $log->note = $note;
-        $log->user_id = Auth::user()->id;
+        $log->action_date = $action_date;
+        if (! $log->action_date) {
+            $log->action_date = date('Y-m-d H:i:s');
+        }
 
-        if ($changed){
-            $log->log_meta = json_encode($changed);
+        if (! $log->action_date) {
+            $log->action_date = date('Y-m-d H:i:s');
         }
-        if ($photos_json){
-            $log->photos = json_encode($photos_json);
+
+        if (Auth::user()) {
+            $log->user_id = Auth::user()->id;
         }
+        $log->log_meta = json_encode($changed);
         $log->logaction('checkin from');
 
-        $params = [
-            'target' => $target,
-            'item' => $log->item,
-            'admin' => $log->user,
-            'note' => $note,
-            'target_type' => $log->target_type,
-            'settings' => $settings,
-        ];
-
-
-        $checkinClass = null;
-
-        if (method_exists($target, 'notify')) {
-            $target->notify(new static::$checkinClass($params));
-        }
-
-        // Send to the admin, if settings dictate
-        $recipient = new \App\Models\Recipients\AdminRecipient();
-
-        if (($settings->admin_cc_email!='') && (static::$checkinClass!='')) {
-            $recipient->notify(new static::$checkinClass($params));
-        }
+//        $params = [
+//            'target' => $target,
+//            'item' => $log->item,
+//            'admin' => $log->user,
+//            'note' => $note,
+//            'target_type' => $log->target_type,
+//            'settings' => $settings,
+//        ];
+//
+//
+//        $checkinClass = null;
+//
+//        if (method_exists($target, 'notify')) {
+//            try {
+//                $target->notify(new static::$checkinClass($params));
+//            } catch (\Exception $e) {
+//                \Log::debug($e);
+//            }
+//
+//        }
+//
+//        // Send to the admin, if settings dictate
+//        $recipient = new \App\Models\Recipients\AdminRecipient();
+//
+//        if (($settings->admin_cc_email!='') && (static::$checkinClass!='')) {
+//            try {
+//                $recipient->notify(new static::$checkinClass($params));
+//            } catch (\Exception $e) {
+//                \Log::debug($e);
+//            }
+//
+//        }
 
         return $log;
     }
 
+
+    /**
+     * @author  Daniel Meltzer <dmeltzer.devel@gmail.com>
+     * @since [v3.4]
+     * @return \App\Models\Actionlog
+     */
+    public function logSell($note, $target, $action_date = null,$changed = null)
+    {
+        $log = new Actionlog;
+        $log = $this->determineLogItemType($log);
+        if (Auth::user()) {
+            $log->user_id = Auth::user()->id;
+        }
+
+        if (! isset($target)) {
+            throw new \Exception('All checkout logs require a target.');
+
+            return;
+        }
+
+        if (! isset($target->id)) {
+            throw new \Exception('That target seems invalid (no target ID available).');
+
+            return;
+        }
+
+        $log->target_type = get_class($target);
+        $log->target_id = $target->id;
+
+        // Figure out what the target is
+        if ($log->target_type == Location::class) {
+            $log->location_id = $target->id;
+        } elseif ($log->target_type == Asset::class) {
+            $log->location_id = $target->location_id;
+        } else {
+            $log->location_id = $target->location_id;
+        }
+
+        $log->note = $note;
+        $log->action_date = $action_date;
+
+        if (! $log->action_date) {
+            $log->action_date = date('Y-m-d H:i:s');
+        }
+        $log->log_meta = json_encode($changed);
+        if($log->target_type == User::class){
+            $log->logaction('issued_for_sale');
+        }
+        if($log->target_type == Contract::class){
+            $log->logaction('sell');
+        }
+
+
+        return $log;
+    }
+
+
+    /**
+     * @author  Daniel Meltzer <dmeltzer.devel@gmail.com>
+     * @since [v3.4]
+     * @return \App\Models\Actionlog
+     */
+    public function logRent($note, $target, $action_date = null,$changed = null)
+    {
+        $log = new Actionlog;
+        $log = $this->determineLogItemType($log);
+        if (Auth::user()) {
+            $log->user_id = Auth::user()->id;
+        }
+
+        if (! isset($target)) {
+            throw new \Exception('All checkout logs require a target.');
+
+            return;
+        }
+
+        if (! isset($target->id)) {
+            throw new \Exception('That target seems invalid (no target ID available).');
+
+            return;
+        }
+
+        $log->target_type = get_class($target);
+        $log->target_id = $target->id;
+
+        // Figure out what the target is
+        if ($log->target_type == Location::class) {
+            $log->location_id = $target->id;
+        } elseif ($log->target_type == Asset::class) {
+            $log->location_id = $target->location_id;
+        } else {
+            $log->location_id = $target->location_id;
+        }
+
+        $log->note = $note;
+        $log->action_date = $action_date;
+
+        if (! $log->action_date) {
+            $log->action_date = date('Y-m-d H:i:s');
+        }
+        $log->log_meta = json_encode($changed);
+
+        $log->logaction('issued_for_rent');
+
+        return $log;
+    }
 
     /**
      * @author  A. Gianotto <snipe@snipe.net>
@@ -220,16 +346,14 @@ trait Loggable
         $params = [
             'item' => $log->item,
             'filename' => $log->filename,
-            'admin' => $log->user,
+            'admin' => $log->admin,
             'location' => ($location) ? $location->name : '',
-            'note' => $note
+            'note' => $note,
         ];
         Setting::getSettings()->notify(new AuditNotification($params));
 
         return $log;
     }
-
-
 
     /**
      * @author  Daniel Meltzer <dmeltzer.devel@gmail.com>
@@ -255,6 +379,7 @@ trait Loggable
         $log->user_id = $user_id;
         $log->logaction('create');
         $log->save();
+
         return $log;
     }
 
@@ -275,9 +400,9 @@ trait Loggable
         }
         $log->user_id = Auth::user()->id;
         $log->note = $note;
-        $log->target_id =  null;
-        $log->created_at =  date("Y-m-d H:i:s");
-        $log->filename =  $filename;
+        $log->target_id = null;
+        $log->created_at = date('Y-m-d H:i:s');
+        $log->filename = $filename;
         $log->logaction('uploaded');
 
         return $log;

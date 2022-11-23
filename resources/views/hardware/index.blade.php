@@ -2,32 +2,32 @@
 
 @section('title0')
 
-  @if ((Input::get('company_id')) && ($company))
+  @if ((Request::get('company_id')) && ($company))
     {{ $company->name }}
   @endif
 
 
 
-@if (Input::get('status'))
-  @if (Input::get('status')=='Pending')
+@if (Request::get('status'))
+  @if (Request::get('status')=='Pending')
     {{ trans('general.pending') }}
-  @elseif (Input::get('status')=='RTD')
+  @elseif (Request::get('status')=='RTD')
     {{ trans('general.ready_to_deploy') }}
-  @elseif (Input::get('status')=='Deployed')
+  @elseif (Request::get('status')=='Deployed')
     {{ trans('general.deployed') }}
-  @elseif (Input::get('status')=='Undeployable')
+  @elseif (Request::get('status')=='Undeployable')
     {{ trans('general.undeployable') }}
-  @elseif (Input::get('status')=='Deployable')
+  @elseif (Request::get('status')=='Deployable')
     {{ trans('general.deployed') }}
-  @elseif (Input::get('status')=='Requestable')
+  @elseif (Request::get('status')=='Requestable')
     {{ trans('admin/hardware/general.requestable') }}
-  @elseif (Input::get('status')=='Archived')
+  @elseif (Request::get('status')=='Archived')
     {{ trans('general.archived') }}
-  @elseif (Input::get('status')=='Deleted')
+  @elseif (Request::get('status')=='Deleted')
     {{ trans('general.deleted') }}
-  @elseif (Input::get('status')=='Sold')
+  @elseif (Request::get('status')=='Sold')
     Проданные
-  @elseif (Input::get('status')=='Issued_for_sale')
+  @elseif (Request::get('status')=='Issued_for_sale')
     Выданные на продажу
   @endif
 @else
@@ -35,8 +35,8 @@
 @endif
 {{ trans('general.assets') }}
 
-  @if (Input::has('order_number'))
-    : Order #{{ Input::get('order_number') }}
+  @if (Request::has('order_number'))
+    : Order #{{ Request::get('order_number') }}
   @endif
 @stop
 
@@ -47,8 +47,11 @@
 
 @section('header_right')
   <a href="{{ route('reports/custom') }}" style="margin-right: 5px;" class="btn btn-default">
-    Custom Export</a>
-  <a href="{{ route('hardware.create') }}" class="btn btn-primary pull-right"></i> {{ trans('general.create') }}</a>
+    {{ trans('admin/hardware/general.custom_export') }}</a>
+  @can('create', \App\Models\Asset::class)
+  <a href="{{ route('hardware.create') }}" accesskey="n" class="btn btn-primary pull-right"></i> {{ trans('general.create') }}</a>
+  @endcan
+
 @stop
 
 {{-- Page content --}}
@@ -58,23 +61,13 @@
   <div class="col-md-12">
     <div class="box">
       <div class="box-body">
-        {{ Form::open([
-          'method' => 'POST',
-          'route' => ['hardware/bulkedit'],
-          'class' => 'form-inline',
-           'id' => 'bulkForm']) }}
+       
           <div class="row">
             <div class="col-md-12">
-              @if (Input::get('status')!='Deleted')
-              <div id="toolbar">
-                <label for="bulk_actions"><span class="sr-only">Bulk Actions</span></label>
-                <select name="bulk_actions" class="form-control select2" aria-label="bulk_actions">
-                  <option value="edit">Edit</option>
-                  <option value="delete">Delete</option>
-                  <option value="labels">Generate Labels</option>
-                </select>
-                <button class="btn btn-primary" id="bulkEdit" disabled>Go</button>
-              </div>
+              
+              @if (Request::get('status')!='Deleted' or Request::get('status')!='Sold')
+
+                @include('partials.asset-bulk-actions')
               @endif
 
               <table
@@ -92,23 +85,26 @@
                 data-show-refresh="true"
                 data-sort-order="asc"
                 data-sort-name="name"
-                data-toolbar="#toolbar"
+                data-show-fullscreen="true"
+                data-toolbar="#assetsBulkEditToolbar"
+                data-bulk-button-id="#bulkAssetEditButton"
+                data-bulk-form-id="#assetsBulkForm"
                 id="assetsListingTable"
                 class="table table-striped snipe-table"
                 data-url="{{ route('api.assets.index',
-                    array('status' => e(Input::get('status')),
-                    'order_number'=>e(Input::get('order_number')),
-                    'company_id'=>e(Input::get('company_id')),
-                    'status_id'=>e(Input::get('status_id')))) }}"
+                    array('status' => e(Request::get('status')),
+                    'order_number'=>e(Request::get('order_number')),
+                    'company_id'=>e(Request::get('company_id')),
+                    'status_id'=>e(Request::get('status_id')))) }}"
                 data-export-options='{
-                "fileName": "export{{ (Input::has('status')) ? '-'.str_slug(Input::get('status')) : '' }}-assets-{{ date('Y-m-d') }}",
+                "fileName": "export{{ (Request::has('status')) ? '-'.str_slug(Request::get('status')) : '' }}-assets-{{ date('Y-m-d') }}",
                 "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
                 }'>
               </table>
 
             </div><!-- /.col -->
           </div><!-- /.row -->
-        {{ Form::close() }}
+        
       </div><!-- ./box-body -->
     </div><!-- /.box -->
   </div>

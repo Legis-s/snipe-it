@@ -2,10 +2,9 @@
 
 namespace App\Listeners;
 
-use Illuminate\Auth\Events\Failed;
-use Illuminate\Http\Request;
-use DB;
 use Carbon\Carbon;
+use DB;
+use Illuminate\Auth\Events\Failed;
 
 class LogFailedLogin
 {
@@ -41,6 +40,5 @@ class LogFailedLogin
         } catch (\Exception $e) {
             \Log::debug($e);
         }
-
     }
 }

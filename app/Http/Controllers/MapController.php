@@ -1,29 +1,25 @@
 <?php
 
-
 namespace App\Http\Controllers;
 
-use App\Helpers\Helper;
-use App\Http\Requests\FileUploadRequest;
-use App\Models\Asset;
-use App\Models\AssetModel;
-use App\Models\Company;
-use App\Models\Purchase;
 use App\Models\Location;
-use App\Models\Statuslabel;
-use App\Models\User;
-use DateTime;
-use Illuminate\Support\Facades\Auth;
 
+/**
+ * This controller for map
+ *
+ * @version    v1.0
+ */
 class MapController extends Controller
 {
+    /**
+     * Returns a view that shows map
+     *
+     * @author [S. Markin] [<markin@legis-s.ru>]
+     */
     public function index()
     {
-        // Grab all the locations
         $this->authorize('view', Location::class);
         return view('map/index');
     }
-
-
 
 }

@@ -2,17 +2,16 @@
 
 namespace App\Console\Commands;
 
-
 use App\Models\Asset;
+use App\Models\Recipients\AlertRecipient;
 use App\Models\Setting;
-use Illuminate\Console\Command;
-use App\Notifications\ExpectedCheckinNotification;
 use App\Notifications\ExpectedCheckinAdminNotification;
+use App\Notifications\ExpectedCheckinNotification;
 use Carbon\Carbon;
+use Illuminate\Console\Command;
 
 class SendExpectedCheckinAlerts extends Command
 {
-
     /**
      * The console command name.
      *
@@ -29,8 +28,6 @@ class SendExpectedCheckinAlerts extends Command
 
     /**
      * Create a new command instance.
-     *
-     * @return void
      */
     public function __construct()
     {
@@ -52,7 +49,7 @@ class SendExpectedCheckinAlerts extends Command
         $this->info($assets->count().' assets');
 
         foreach ($assets as $asset) {
-            if ($asset->assigned  && $asset->checkedOutToUser()) {
+            if ($asset->assigned && $asset->checkedOutToUser()) {
                 $asset->assigned->notify((new ExpectedCheckinNotification($asset)));
             }
         }
@@ -60,14 +57,9 @@ class SendExpectedCheckinAlerts extends Command
         if (($assets) && ($assets->count() > 0) && ($settings->alert_email != '')) {
             // Send a rollup to the admin, if settings dictate
             $recipients = collect(explode(',', $settings->alert_email))->map(function ($item, $key) {
-                return new \App\Models\Recipients\AlertRecipient($item);
+                return new AlertRecipient($item);
             });
             \Notification::send($recipients, new ExpectedCheckinAdminNotification($assets));
         }
-
-
-
-
-
     }
 }

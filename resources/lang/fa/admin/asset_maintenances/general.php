@@ -7,5 +7,12 @@
         'view'               => 'نمایش جزییات نگهداشت دارایی',
         'repair'             => 'بازسازی',
         'maintenance'        => 'نگهداشت',
-        'upgrade'            => 'ارتقا'
+        'upgrade'            => 'ارتقا',
+        'calibration'        => 'کالیبره کردن',
+        'software_support'   => 'پشتیبانی نرم‌افزار',
+        'hardware_support'   => 'پشتیبانی سخت‌افزار',
+        'configuration_change'   => 'تغییرات پیکربندی:
+',
+        'pat_test'           => 'تست PAT
+',
     ];

@@ -1,26 +1,30 @@
 <?php
+
 namespace App\Http\Transformers;
 
-use App\Models\Asset;
-use Illuminate\Database\Eloquent\Collection;
-use App\Http\Transformers\UsersTransformer;
-use Gate;
 use App\Helpers\Helper;
+use App\Models\Asset;
+use App\Models\Setting;
+use Gate;
+use Illuminate\Database\Eloquent\Collection;
 
 class AssetsTransformer
 {
     public function transformAssets(Collection $assets, $total)
     {
-        $array = array();
+        $array = [];
         foreach ($assets as $asset) {
             $array[] = self::transformAsset($asset);
         }
+
         return (new DatatablesTransformer)->transformDatatables($array, $total);
     }
 
-
     public function transformAsset(Asset $asset)
     {
+        // This uses the getSettings() method so we're pulling from the cache versus querying the settings on single asset
+        $setting = Setting::getSettings();
+
         $array = [
             'id' => (int) $asset->id,
             'name' => e($asset->name),
@@ -29,10 +33,9 @@ class AssetsTransformer
             'model' => ($asset->model) ? [
                 'id' => (int) $asset->model->id,
                 'name'=> e($asset->model->name),
-                'lifetime'=> e($asset->model->lifetime)
             ] : null,
             'model_number' => (($asset->model) && ($asset->model->model_number)) ? e($asset->model->model_number) : null,
-            'eol' => ($asset->purchase_date!='') ? Helper::getFormattedDateObject($asset->present()->eol_date(), 'date') : null ,
+            'eol' => ($asset->purchase_date != '') ? Helper::getFormattedDateObject($asset->present()->eol_date(), 'date') : null,
             'status_label' => ($asset->assetstatus) ? [
                 'id' => (int) $asset->assetstatus->id,
                 'name'=> e($asset->assetstatus->name),
@@ -42,38 +45,39 @@ class AssetsTransformer
             'category' => (($asset->model) && ($asset->model->category)) ? [
                 'id' => (int) $asset->model->category->id,
                 'name'=> e($asset->model->category->name),
-                'lifetime'=> e($asset->model->lifetime)
-            ]  : null,
+            ] : null,
             'manufacturer' => (($asset->model) && ($asset->model->manufacturer)) ? [
                 'id' => (int) $asset->model->manufacturer->id,
-                'name'=> e($asset->model->manufacturer->name)
+                'name'=> e($asset->model->manufacturer->name),
             ] : null,
             'supplier' => ($asset->supplier) ? [
                 'id' => (int) $asset->supplier->id,
-                'name'=> e($asset->supplier->name)
-            ]  : null,
+                'name'=> e($asset->supplier->name),
+            ] : null,
             'notes' => ($asset->notes) ? e($asset->notes) : null,
             'order_number' => ($asset->order_number) ? e($asset->order_number) : null,
             'company' => ($asset->company) ? [
                 'id' => (int) $asset->company->id,
-                'name'=> e($asset->company->name)
+                'name'=> e($asset->company->name),
             ] : null,
             'location' => ($asset->location) ? [
                 'id' => (int) $asset->location->id,
-                'name'=> e($asset->location->name)
-            ]  : null,
+                'name'=> e($asset->location->name),
+            ] : null,
             'rtd_location' => ($asset->defaultLoc) ? [
                 'id' => (int) $asset->defaultLoc->id,
-                'name'=> e($asset->defaultLoc->name)
-            ]  : null,
+                'name'=> e($asset->defaultLoc->name),
+            ] : null,
             'contract' => ($asset->contract) ? [
                 'id' => (int) $asset->contract->id,
                 'name'=> e($asset->contract->name)
             ]  : null,
             'image' => ($asset->getImageUrl()) ? $asset->getImageUrl() : null,
+            'qr' => ($setting->qr_code=='1') ? config('app.url').'/uploads/barcodes/qr-'.str_slug($asset->asset_tag).'-'.str_slug($asset->id).'.png' : null,
+            'alt_barcode' => ($setting->alt_barcode_enabled=='1') ? config('app.url').'/uploads/barcodes/'.str_slug($setting->alt_barcode).'-'.str_slug($asset->asset_tag).'.png' : null,
             'assigned_to' => $this->transformAssignedTo($asset),
-            'warranty_months' =>  ($asset->warranty_months > 0) ? e($asset->warranty_months . ' ' . trans('admin/hardware/form.months')) : null,
-            'warranty_expires' => ($asset->warranty_months > 0) ?  Helper::getFormattedDateObject($asset->warranty_expires, 'date') : null,
+            'warranty_months' =>  ($asset->warranty_months > 0) ? e($asset->warranty_months.' '.trans('admin/hardware/form.months')) : null,
+            'warranty_expires' => ($asset->warranty_months > 0) ? Helper::getFormattedDateObject($asset->warranty_expires, 'date') : null,
             'created_at' => Helper::getFormattedDateObject($asset->created_at, 'datetime'),
             'updated_at' => Helper::getFormattedDateObject($asset->updated_at, 'datetime'),
             'last_audit_date' => Helper::getFormattedDateObject($asset->last_audit_date, 'datetime'),
@@ -89,7 +93,6 @@ class AssetsTransformer
             'requests_counter' => (int) $asset->requests_counter,
             'user_can_checkout' => (bool) $asset->availableForCheckout(),
             'user_can_review' => (bool) $asset->availableForReview(),
-            'user_can_sell' => (bool) $asset->availableForSell(),
             'user_can_close_sell' => (bool) $asset->availableForCloseSell(),
             'purchase_id' => (int) $asset->purchase_id,
             'quality' => (int) $asset->quality,
@@ -98,61 +101,85 @@ class AssetsTransformer
 
 
         if (($asset->model) && ($asset->model->fieldset) && ($asset->model->fieldset->fields->count() > 0)) {
-            $fields_array = array();
+            $fields_array = [];
 
             foreach ($asset->model->fieldset->fields as $field) {
-
-                if ($field->isFieldDecryptable($asset->{$field->convertUnicodeDbSlug()})) {
-                    $decrypted = \App\Helpers\Helper::gracefulDecrypt($field,$asset->{$field->convertUnicodeDbSlug()});
+                if ($field->isFieldDecryptable($asset->{$field->db_column})) {
+                    $decrypted = Helper::gracefulDecrypt($field, $asset->{$field->db_column});
                     $value = (Gate::allows('superadmin')) ? $decrypted : strtoupper(trans('admin/custom_fields/general.encrypted'));
 
+                    if ($field->format == 'DATE'){
+                        if (Gate::allows('superadmin')){
+                            $value = Helper::getFormattedDateObject($value, 'date', false);
+                        } else {
+                           $value = strtoupper(trans('admin/custom_fields/general.encrypted'));
+                        }
+                    }
+
                     $fields_array[$field->name] = [
-                            'field' => $field->convertUnicodeDbSlug(),
-                            'value' => $value,
+                            'field' => e($field->db_column),
+                            'value' => e($value),
                             'field_format' => $field->format,
+                            'element' => $field->element,
                         ];
 
                 } else {
+                    $value = $asset->{$field->db_column};
+
+                    if (($field->format == 'DATE') && (!is_null($value)) && ($value!='')){
+                        $value = Helper::getFormattedDateObject($value, 'date', false);
+                    }
+
                     $fields_array[$field->name] = [
-                        'field' => $field->convertUnicodeDbSlug(),
-                        'value' => $asset->{$field->convertUnicodeDbSlug()},
+                        'field' => e($field->db_column),
+                        'value' => e($value),
                         'field_format' => $field->format,
+                        'element' => $field->element,
                     ];
-
-
                 }
+
                 $array['custom_fields'] = $fields_array;
             }
         } else {
-            $array['custom_fields'] = array();
+            $array['custom_fields'] = [];
         }
 
         $permissions_array['available_actions'] = [
-            'print_label' => true,
-            'sell' => (bool) Gate::allows('checkout', Asset::class),
-            'inventory' => (bool) Gate::allows('update', Asset::class),
-            'checkout' => (bool) Gate::allows('checkout', Asset::class),
-            'checkin' => (bool) Gate::allows('checkin', Asset::class),
-            'clone' => Gate::allows('create', Asset::class) ? true : false,
-            'restore' => false,
-            'update' => (bool) Gate::allows('update', Asset::class),
-            'delete' => (bool) Gate::allows('delete', Asset::class),
-            'review' => (bool) Gate::allows('review'),
+            'checkout'      => ($asset->deleted_at=='' && Gate::allows('checkout', Asset::class)) ? true : false,
+            'checkin'       => ($asset->deleted_at=='' && Gate::allows('checkin', Asset::class)) ? true : false,
+            'clone'         => Gate::allows('create', Asset::class) ? true : false,
+            'restore'       => ($asset->deleted_at!='' && Gate::allows('create', Asset::class)) ? true : false,
+            'update'        => ($asset->deleted_at=='' && Gate::allows('update', Asset::class)) ? true : false,
+            'delete'        => ($asset->deleted_at=='' && $asset->assigned_to =='' && Gate::allows('delete', Asset::class)) ? true : false,
+            'print_label'   => true,
+            'inventory'     => ($asset->deleted_at=='' && Gate::allows('update', Asset::class)) ? true : false,
+            'review'        =>  ($asset->deleted_at=='' && Gate::allows('review', Asset::class)) ? true : false,
         ];
 
-        if ($asset->deleted_at!='') {
-            $permissions_array['available_actions'] = [
-                'checkout' => true,
-                'checkin' => false,
-                'clone' => Gate::allows('create', Asset::class) ? true : false,
-                'restore' => Gate::allows('create', Asset::class) ? true : false,
-                'update' => false,
-                'delete' => false,
-            ];
+
+        if (request('components')=='true') {
+
+            if ($asset->components) {
+                $array['components'] = [];
+
+                foreach ($asset->components as $component) {
+                    $array['components'][] = [
+
+                            'id' => $component->id,
+                            'pivot_id' => $component->pivot->id,
+                            'name' => e($component->name),
+                            'qty' => $component->pivot->assigned_qty,
+                            'price_cost' => $component->purchase_cost,
+                            'purchase_total' => $component->purchase_cost * $component->pivot->assigned_qty,
+                            'checkout_date' => Helper::getFormattedDateObject($component->pivot->created_at, 'datetime') ,
+                    ];
+                }
+            }
+
         }
 
-
         $array += $permissions_array;
+
         return $array;
     }
 
@@ -171,12 +198,13 @@ class AssetsTransformer
                     'first_name'=> e($asset->assigned->first_name),
                     'last_name'=> ($asset->assigned->last_name) ? e($asset->assigned->last_name) : null,
                     'employee_number' =>  ($asset->assigned->employee_num) ? e($asset->assigned->employee_num) : null,
-                    'type' => 'user'
+                    'type' => 'user',
                 ] : null;
         }
+
         return $asset->assigned ? [
             'id' => $asset->assigned->id,
-            'name' => $asset->assigned->display_name,
+            'name' => e($asset->assigned->display_name),
             'type' => $asset->assignedType()
         ] : null;
     }
@@ -184,14 +212,16 @@ class AssetsTransformer
 
     public function transformRequestedAssets(Collection $assets, $total)
     {
-        $array = array();
+        $array = [];
         foreach ($assets as $asset) {
             $array[] = self::transformRequestedAsset($asset);
         }
+
         return (new DatatablesTransformer)->transformDatatables($array, $total);
     }
 
-    public function transformRequestedAsset(Asset $asset) {
+    public function transformRequestedAsset(Asset $asset)
+    {
         $array = [
             'id' => (int) $asset->id,
             'name' => e($asset->name),
@@ -203,16 +233,17 @@ class AssetsTransformer
             'expected_checkin' => Helper::getFormattedDateObject($asset->expected_checkin, 'date'),
             'location' => ($asset->location) ? e($asset->location->name) : null,
             'status'=> ($asset->assetstatus) ? $asset->present()->statusMeta : null,
+            'assigned_to_self' => ($asset->assigned_to == \Auth::user()->id),
         ];
 
         $permissions_array['available_actions'] = [
             'cancel' => ($asset->isRequestedBy(\Auth::user())) ? true : false,
             'request' => ($asset->isRequestedBy(\Auth::user())) ? false : true,
-
         ];
 
-         $array += $permissions_array;
+        $array += $permissions_array;
         return $array;
+
 
     }
 }

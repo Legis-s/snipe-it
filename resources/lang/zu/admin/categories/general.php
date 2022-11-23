@@ -1,8 +1,6 @@
 <?php
 
 return array(
-    'about_categories_title' 			=> 'Mayelana nezigaba',
-    'about_categories'  				=> 'Izigaba zikusiza ukuthi uhlele izinto zakho. Ezinye izigaba zesibonelo zingase zibe &quot;Izinkinobho&quot;, &quot;Izinketho&quot;, &quot;Amafoni omakhalekhukhwini&quot;, &quot;Amakhodi&quot;, njalonjalo, kodwa ungasebenzisa izigaba noma iyiphi indlela enengqondo kuwe.',
     'asset_categories' 					=> 'Izigaba zefa',
     'category_name'  					=> 'Igama lesigaba',
     'checkin_email'                     => 'Send email to user on checkin/checkout.',
@@ -20,5 +18,6 @@ return array(
     'update'  							=> 'Isigaba sokuvuselela',
     'use_default_eula'					=> 'Sebenzisa okungu-<a href="#" data-toggle="modal" data-target="#eulaModal">kuzenzakalela okuzenzakalelayo ku-EULA</a> kunalokho.',
     'use_default_eula_disabled'			=> '<del>Sebenzisa i-EULA eyinhloko yokuzenzakalela esikhundleni.</del> Ayikho i-EULA eyimilayezo eyisisekelo esethiwe. Sicela ungeze eyodwa kuzilungiselelo.',
+    'use_default_eula_column'			=> 'Use default EULA',
 
 );

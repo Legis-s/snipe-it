@@ -9,7 +9,7 @@
             @endif
             @if ((isset($contract_select)) && ($contract_select!='false'))
                     <label class="btn btn-default">
-                        <input name="sell_to_type" value="contract" aria-label="sell_to_type" class="active" type="radio"><i class="fa fa-file-text-o" aria-hidden="true"></i> Договор
+                        <input name="sell_to_type" value="contract" aria-label="sell_to_type" class="active" type="radio"><i class="fas fa-file-lines" aria-hidden="true"></i> Договор
                     </label>
                 @endif
             {!! $errors->first('checkout_to_type', '<span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span>') !!}

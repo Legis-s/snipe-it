@@ -54,7 +54,7 @@ class ConsumableAssignmentPresenter extends Presenter
                 "title" => "Cтоимость",
                 "visible" => true,
             ], [
-                "field" => "user",
+                "field" => "responsibleUser",
                 "searchable" => false,
                 "sortable" => true,
                 "switchable" => true,

@@ -1,6 +1,7 @@
 <?php
+
 return [
-    'about_companies_title'            => 'Om virksomheder',
-    'about_companies_text'                  => 'Virksomheder kan bruges som en simpel id-felt, eller kan bruges til at begrænse synligheden af aktiver, brugere, osv. hvis fuld selskab understøttelse er aktiveret i din Admin indstillinger.',
     'select_company' => 'Vælg firma',
+    'about_companies' => 'About Companies',
+    'about_companies_description' => '        You can use companies as a simple informative field, or you can use them to restrict asset visibility and availability to users with a specific company by enabling Full Company Support in your Admin Settings.',
 ];

@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use App\Helpers\Helper;
-use App\Models\Manufacturer;
-use App\Http\Transformers\DatatablesTransformer;
+use App\Http\Controllers\Controller;
 use App\Http\Transformers\ManufacturersTransformer;
 use App\Http\Transformers\SelectlistTransformer;
+use App\Models\Manufacturer;
+use Illuminate\Http\Request;
+use App\Http\Requests\ImageUploadRequest;
+use Illuminate\Support\Facades\Storage;
 
 class ManufacturersController extends Controller
 {
@@ -22,13 +23,13 @@ class ManufacturersController extends Controller
     public function index(Request $request)
     {
         $this->authorize('view', Manufacturer::class);
-        $allowed_columns = ['id','name','url','support_url','support_email','support_phone','created_at','updated_at','image', 'assets_count', 'consumables_count', 'components_count', 'licenses_count'];
+        $allowed_columns = ['id', 'name', 'url', 'support_url', 'support_email', 'support_phone', 'created_at', 'updated_at', 'image', 'assets_count', 'consumables_count', 'components_count', 'licenses_count'];
 
         $manufacturers = Manufacturer::select(
-            array('id','name','url','support_url','support_email','support_phone','created_at','updated_at','image', 'deleted_at')
+            ['id', 'name', 'url', 'support_url', 'support_email', 'support_phone', 'created_at', 'updated_at', 'image', 'deleted_at']
         )->withCount('assets as assets_count')->withCount('licenses as licenses_count')->withCount('consumables as consumables_count')->withCount('accessories as accessories_count');
 
-        if ($request->input('deleted')=='true') {
+        if ($request->input('deleted') == 'true') {
             $manufacturers->onlyTrashed();
         }
 
@@ -36,6 +37,25 @@ class ManufacturersController extends Controller
             $manufacturers = $manufacturers->TextSearch($request->input('search'));
         }
 
+        if ($request->filled('name')) {
+            $manufacturers->where('name', '=', $request->input('name'));
+        }
+
+        if ($request->filled('url')) {
+            $manufacturers->where('url', '=', $request->input('url'));
+        }
+
+        if ($request->filled('support_url')) {
+            $manufacturers->where('support_url', '=', $request->input('support_url'));
+        }
+
+        if ($request->filled('support_phone')) {
+            $manufacturers->where('support_phone', '=', $request->input('support_phone'));
+        }
+
+        if ($request->filled('support_email')) {
+            $manufacturers->where('support_email', '=', $request->input('support_email'));
+        }
 
         // Set the offset to the API call's offset, unless the offset is higher than the actual count of items in which
         // case we override with the actual count, so we should return 0 items.
@@ -50,23 +70,24 @@ class ManufacturersController extends Controller
 
         $total = $manufacturers->count();
         $manufacturers = $manufacturers->skip($offset)->take($limit)->get();
+
         return (new ManufacturersTransformer)->transformManufacturers($manufacturers, $total);
     }
-
 
     /**
      * Store a newly created resource in storage.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @since [v4.0]
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\ImageUploadRequest $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(ImageUploadRequest $request)
     {
         $this->authorize('create', Manufacturer::class);
         $manufacturer = new Manufacturer;
         $manufacturer->fill($request->all());
+        $manufacturer = $request->handleImages($manufacturer);
 
         if ($manufacturer->save()) {
             return response()->json(Helper::formatStandardApiResponse('success', $manufacturer, trans('admin/manufacturers/message.create.success')));
@@ -87,24 +108,25 @@ class ManufacturersController extends Controller
     {
         $this->authorize('view', Manufacturer::class);
         $manufacturer = Manufacturer::withCount('assets as assets_count')->withCount('licenses as licenses_count')->withCount('consumables as consumables_count')->withCount('accessories as accessories_count')->findOrFail($id);
+
         return (new ManufacturersTransformer)->transformManufacturer($manufacturer);
     }
-
 
     /**
      * Update the specified resource in storage.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @since [v4.0]
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\ImageUploadRequest  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(ImageUploadRequest $request, $id)
     {
         $this->authorize('update', Manufacturer::class);
         $manufacturer = Manufacturer::findOrFail($id);
         $manufacturer->fill($request->all());
+        $manufacturer = $request->handleImages($manufacturer);
 
         if ($manufacturer->save()) {
             return response()->json(Helper::formatStandardApiResponse('success', $manufacturer, trans('admin/manufacturers/message.update.success')));
@@ -126,8 +148,13 @@ class ManufacturersController extends Controller
         $this->authorize('delete', Manufacturer::class);
         $manufacturer = Manufacturer::findOrFail($id);
         $this->authorize('delete', $manufacturer);
-        $manufacturer->delete();
-        return response()->json(Helper::formatStandardApiResponse('success', null,  trans('admin/manufacturers/message.delete.success')));
+
+        if ($manufacturer->isDeletable()) {
+            $manufacturer->delete();
+            return response()->json(Helper::formatStandardApiResponse('success', null,  trans('admin/manufacturers/message.delete.success')));
+        }
+
+        return response()->json(Helper::formatStandardApiResponse('error', null,  trans('admin/manufacturers/message.assoc_users')));
 
     }
 
@@ -137,11 +164,11 @@ class ManufacturersController extends Controller
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @since [v4.0.16]
      * @see \App\Http\Transformers\SelectlistTransformer
-     *
      */
     public function selectlist(Request $request)
     {
 
+        $this->authorize('view.selectlists');
         $manufacturers = Manufacturer::select([
             'id',
             'name',
@@ -159,10 +186,9 @@ class ManufacturersController extends Controller
         // they may not have a ->name value but we want to display something anyway
         foreach ($manufacturers as $manufacturer) {
             $manufacturer->use_text = $manufacturer->name;
-            $manufacturer->use_image = ($manufacturer->image) ? url('/').'/uploads/manufacturers/'.$manufacturer->image : null;
+            $manufacturer->use_image = ($manufacturer->image) ? Storage::disk('public')->url('manufacturers/'.$manufacturer->image, $manufacturer->image) : null;
         }
 
         return (new SelectlistTransformer)->transformSelectlist($manufacturers);
-
     }
 }

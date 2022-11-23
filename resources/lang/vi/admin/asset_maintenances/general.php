@@ -7,5 +7,10 @@
         'view'               => 'Chi tiết tài sản đang bảo trì',
         'repair'             => 'Sửa chữa',
         'maintenance'        => 'Bảo trì',
-        'upgrade'            => 'Nâng cấp'
+        'upgrade'            => 'Nâng cấp',
+        'calibration'        => 'Hiệu chỉnh',
+        'software_support'   => 'Hỗ trợ phần mềm',
+        'hardware_support'   => 'Hỗ trợ phần cứng',
+        'configuration_change'   => 'Configuration Change',
+        'pat_test'           => 'PAT Test',
     ];

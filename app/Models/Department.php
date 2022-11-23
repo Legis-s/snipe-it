@@ -4,25 +4,29 @@ namespace App\Models;
 
 use App\Http\Traits\UniqueUndeletedTrait;
 use App\Models\Traits\Searchable;
-use Illuminate\Database\Eloquent\Model;
-use Log;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Watson\Validating\ValidatingTrait;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Models\SnipeModel;
-use App\Models\User;
 
 class Department extends SnipeModel
 {
+    use HasFactory;
+
     /**
      * Whether the model should inject it's identifier to the unique
      * validation rules before attempting validation. If this property
      * is not set in the model it will default to true.
      *
-     * @var boolean
+     * @var bool
      */
     protected $injectUniqueIdentifier = true;
 
     use ValidatingTrait, UniqueUndeletedTrait;
+
+    protected $casts = [
+        'manager_id'   => 'integer',
+        'location_id'  => 'integer',
+        'company_id'   => 'integer',
+    ];
 
     protected $rules = [
         'name'                  => 'required|max:255',
@@ -46,53 +50,69 @@ class Department extends SnipeModel
     ];
 
     use Searchable;
-    
+
     /**
      * The attributes that should be included when searching the model.
-     * 
+     *
      * @var array
      */
     protected $searchableAttributes = ['name', 'notes'];
 
     /**
      * The relations and their attributes that should be included when searching the model.
-     * 
+     *
      * @var array
      */
-    protected $searchableRelations = [];    
+    protected $searchableRelations = [];
 
-
+    /**
+     * Establishes the department -> company relationship
+     *
+     * @author A. Gianotto <snipe@snipe.net>
+     * @since [v4.0]
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
     public function company()
     {
-        return $this->belongsTo('\App\Models\Company', 'company_id');
+        return $this->belongsTo(\App\Models\Company::class, 'company_id');
     }
 
     /**
-     * Even though we allow allow for checkout to things beyond users
-     * this method is an easy way of seeing if we are checked out to a user.
-     * @return mixed
+     * Establishes the department -> users relationship
+     *
+     * @author A. Gianotto <snipe@snipe.net>
+     * @since [v4.0]
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
      */
     public function users()
     {
-        return $this->hasMany('\App\Models\User', 'department_id');
+        return $this->hasMany(\App\Models\User::class, 'department_id');
     }
-
 
     /**
-    * Return the manager in charge of the dept
-    * @return mixed
-    */
+     * Establishes the department -> manager relationship
+     *
+     * @author A. Gianotto <snipe@snipe.net>
+     * @since [v4.0]
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
     public function manager()
     {
-        return $this->belongsTo('\App\Models\User', 'manager_id');
+        return $this->belongsTo(\App\Models\User::class, 'manager_id');
     }
 
-
+    /**
+     * Establishes the department -> location relationship
+     *
+     * @author A. Gianotto <snipe@snipe.net>
+     * @since [v4.0]
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
     public function location()
     {
-        return $this->belongsTo('\App\Models\Location', 'location_id');
+        return $this->belongsTo(\App\Models\Location::class, 'location_id');
     }
-    
+
     /**
      * Query builder scope to order on location name
      *
@@ -118,6 +138,4 @@ class Department extends SnipeModel
     {
         return $query->leftJoin('users as department_user', 'departments.manager_id', '=', 'department_user.id')->orderBy('department_user.first_name', $order)->orderBy('department_user.last_name', $order);
     }
-
-
 }

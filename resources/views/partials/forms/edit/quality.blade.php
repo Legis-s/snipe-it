@@ -13,7 +13,7 @@
     <div class="col-md-9">
         <div class="input-group col-md-4" style="padding-left: 0px;">
             <select class="star-rating" name="quality" id="quality">
-                @if ($quality = Input::old('quality', (isset($item)) ? $item->quality : ''))
+                @if ($quality = Request::old('quality', (isset($item)) ? $item->quality : ''))
                     @if ($quality == 1)
                         <option value="">Оцените состояние</option>
                         <option value="5">Новое запакованное</option>
@@ -72,7 +72,7 @@
 {{--                    <option value="2">Частично рабочее или сильно загрязненное</option>--}}
 {{--                    <option value="1">Полностью не рабочее</option>--}}
             </select>
-            {{--            <input class="form-control" type="text" name="quality" aria-label="quality" id="quality" value="{{ Input::old('depreciable_cost', \App\Helpers\Helper::formatCurrencyOutput($item->depreciable_cost)) }}" />--}}
+            {{--            <input class="form-control" type="text" name="quality" aria-label="quality" id="quality" value="{{ old('depreciable_cost', \App\Helpers\Helper::formatCurrencyOutput($item->depreciable_cost)) }}" />--}}
         </div>
         <div class="col-md-9" style="padding-left: 0px;">
             {!! $errors->first('quality', '<span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span>') !!}

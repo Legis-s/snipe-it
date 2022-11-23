@@ -1,6 +1,7 @@
 <?php
+
 return [
-    'about_companies_title'            => 'Acerca de compañías',
-    'about_companies_text'                  => 'Las compañías pueden ser usadas como un campo simple de identificación, o pueden ser usadas para limitar la visibilidad de los activos, usuarios, etc si el soporte completo a la compañía está activado en tus configuraciones de administrador.',
     'select_company' => 'Seleccionar Compañía',
+    'about_companies' => 'Acerca de la compañias',
+    'about_companies_description' => '        Puede usar las empresas como un campo informativo simple, o puede usarlas para restringir la visibilidad y la disponibilidad de los activos a los usuarios con una empresa específica al habilitar el Soporte completo de la empresa en su Configuración de administrador.',
 ];

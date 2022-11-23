@@ -2,7 +2,7 @@
 
 {{-- Page title --}}
 @section('title')
-    Карта
+    {{ trans('general.map') }}
     @parent
 @stop
 
@@ -141,7 +141,7 @@
                 },
                 dataType: 'json',
             }).done(function (data) {
-                // console.log(data);
+                console.log(data);
                 $ok_count = 0;
                 $null_count = 0;
                 data.features.forEach((element) => {

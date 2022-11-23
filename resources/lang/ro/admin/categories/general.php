@@ -1,8 +1,6 @@
 <?php
 
 return array(
-    'about_categories_title' 			=> 'Despre categorii',
-    'about_categories'  				=> 'Categoriile vă ajută să vă organizați articolele. Unele categorii de exemple ar putea fi &quot;Desktops&quot;, &quot;Laptops&quot;, &quot;Mobile Phones&quot;, &quot;Tablets&quot; și așa mai departe, dar puteți utiliza categoriile în orice mod care vă poate face sens.',
     'asset_categories' 					=> 'Categoriile de active',
     'category_name'  					=> 'Nume categorii',
     'checkin_email'                     => 'Trimiteți e-mail utilizatorului la logare / iesire.',
@@ -20,5 +18,6 @@ return array(
     'update'  							=> 'Actualizeaza categorie',
     'use_default_eula'					=> 'Utilizați în schimb <a href="#" data-toggle="modal" data-target="#eulaModal"> implicit EULA</a>.',
     'use_default_eula_disabled'			=> '<del>Foloseste EULA general implicita.</del> EULA implicita nu a fost gasita. A se crea una in Setari.',
+    'use_default_eula_column'			=> 'Folosește EULA implicită',
 
 );

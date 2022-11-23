@@ -30,7 +30,7 @@ class InventoryItemPresenter extends Presenter
                 "switchable" => true,
                 "title" => "Проверено",
                 "visible" => true,
-                "formatter" => 'checkFormatter',
+                "formatter" => 'trueFalseFormatter',
             ],[
                 "field" => "successfully",
                 "searchable" => true,
@@ -38,7 +38,7 @@ class InventoryItemPresenter extends Presenter
                 "switchable" => true,
                 "title" => "Успешно",
                 "visible" => true,
-                "formatter" => 'checkFormatter',
+                "formatter" => 'trueFalseFormatter',
             ],[
                 "field" => "status",
                 "searchable" => true,
@@ -69,24 +69,13 @@ class InventoryItemPresenter extends Presenter
                 "title" => "Инв.н.",
                 "visible" => true,
                 "formatter" => "assetTagLinkFormatter"
-            ]
-//            ,[
-//                "field" => "asset",
-//                "searchable" => true,
-//                "sortable" => true,
-//                "title" => "Актив",
-//                "visible" => true,
-////                "formatter" => "componentsLinkObjFormatter"
-//                "formatter" => "assetObjLinkFormatter"
-//            ]
-            ,[
+            ],[
                 "field" => "name",
                 "searchable" => true,
                 "sortable" => true,
                 "switchable" => true,
                 "title" => "Название",
                 "visible" => true,
-            //    "formatter" => "inventoriesLinkFormatter"
             ],[
                 "field" => "model",
                 "searchable" => true,
@@ -94,7 +83,6 @@ class InventoryItemPresenter extends Presenter
                 "switchable" => true,
                 "title" => "Модель",
                 "visible" => true,
-                //    "formatter" => "inventoriesLinkFormatter"
             ],[
                 "field" => "category",
                 "searchable" => true,
@@ -102,7 +90,6 @@ class InventoryItemPresenter extends Presenter
                 "switchable" => true,
                 "title" => "Категория",
                 "visible" => true,
-                //    "formatter" => "inventoriesLinkFormatter"
             ],[
                 "field" => "manufacturer",
                 "searchable" => true,
@@ -110,7 +97,6 @@ class InventoryItemPresenter extends Presenter
                 "switchable" => true,
                 "title" => "Производитель",
                 "visible" => true,
-                //    "formatter" => "inventoriesLinkFormatter"
             ],[
                 "field" => "updated_at",
                 "searchable" => false,

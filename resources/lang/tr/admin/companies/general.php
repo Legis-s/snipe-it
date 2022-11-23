@@ -1,6 +1,7 @@
 <?php
+
 return [
-    'about_companies_title'            => 'Firmalar Hakkında',
-    'about_companies_text'                  => 'Şirketler basit bir tanımlayıcı alanı olarak kullanılabilir veya Yönetici ayarlarınızda tam şirket desteğinin etkinleştirilmesi durumunda varlıkların, kullanıcıların vb. Görünürlüklerini sınırlamak için kullanılabilir.',
     'select_company' => 'Firma Seç',
+    'about_companies' => 'Firmalar Hakkında',
+    'about_companies_description' => '        Firmaları basit bir bilgi alanı olarak kullanabilir veya Yönetici Ayarlarında "Tam Firma Desteği"ni aktifleştirerek envanter görünürlüğü ve müsaitliğini belirtilen firmanın kullanıcılarına kısıtlayabilirsiniz.',
 ];

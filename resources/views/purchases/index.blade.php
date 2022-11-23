@@ -2,7 +2,7 @@
 
 {{-- Page title --}}
 @section('title')
-    Закупки
+    {{ trans('general.purchases') }}
     @parent
 @stop
 
@@ -77,7 +77,7 @@
 @section('moar_scripts')
     @include ('partials.bootstrap-table')
     <script>
-        $(document).ready(function () {
+        $(function ()  {
             var query_holder = {};
 
             $('.js-select-user').select2({

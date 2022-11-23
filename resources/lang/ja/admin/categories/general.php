@@ -1,8 +1,6 @@
 <?php
 
 return array(
-    'about_categories_title' 			=> 'カテゴリについて',
-    'about_categories'  				=> 'カテゴリーはアイテムを整理するのに役立ちます。カテゴリーの例としては &quot;デスクトップ&quot;、&quot; ラップトップ&quot;、&quot； 携帯電話 &quot;、&quot; タブレット&quot; などがあります。資産カテゴリは任意に設定することができます。',
     'asset_categories' 					=> '資産カテゴリー',
     'category_name'  					=> 'カテゴリー名',
     'checkin_email'                     => 'チェックイン/チェックアウト時、ユーザーに電子メールを送信します。',
@@ -20,5 +18,6 @@ return array(
     'update'  							=> 'カテゴリーの更新',
     'use_default_eula'					=> '<a href="#" data-toggle="modal" data-target="#eulaModal">初期設定EULA</a> を代わりに利用する。',
     'use_default_eula_disabled'			=> '<del>初期設定EULAを代わりに利用する。</del> 初期設定EULAが設定されていません。最低一つは追加してください。',
+    'use_default_eula_column'			=> 'デフォルトのEULAを使用する',
 
 );

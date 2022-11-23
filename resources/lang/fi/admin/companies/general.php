@@ -1,6 +1,7 @@
 <?php
+
 return [
-    'about_companies_title'            => 'Yrityksistä',
-    'about_companies_text'                  => 'Yrityksiä voidaan käyttää yksinkertaisena tunnistekenttänä tai niitä voidaan käyttää rajoittamaan omaisuuden, käyttäjien jne. Näkyvyyttä, jos järjestelmänvalvojan asetuksissa on käytössä koko yrityksen tuki.',
     'select_company' => 'Valitse yritys',
+    'about_companies' => 'About Companies',
+    'about_companies_description' => '        You can use companies as a simple informative field, or you can use them to restrict asset visibility and availability to users with a specific company by enabling Full Company Support in your Admin Settings.',
 ];

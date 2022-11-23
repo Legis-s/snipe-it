@@ -7,5 +7,10 @@
         'view'               => 'Papar Terperinci Penyelenggaraan Aset',
         'repair'             => 'Baiki',
         'maintenance'        => 'Penyelenggaraan',
-        'upgrade'            => 'Naik taraf'
+        'upgrade'            => 'Naik taraf',
+        'calibration'        => 'Kalibrasi',
+        'software_support'   => 'Sokongan Perisian',
+        'hardware_support'   => 'Sokongan Perkakasan',
+        'configuration_change'   => 'Configuration Change',
+        'pat_test'           => 'PAT Test',
     ];

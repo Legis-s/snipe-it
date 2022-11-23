@@ -2,7 +2,7 @@
 
 {{-- Page title --}}
 @section('title')
-Договоры
+  {{ trans('general.contracts') }}
 @parent
 @stop
 
@@ -16,9 +16,9 @@
 
           <table
                   data-columns="{{ \App\Presenters\ContractPresenter::dataTableLayout() }}"
-                  data-cookie-id-table="locationTable"
+                  data-cookie-id-table="contractTable"
                   data-pagination="true"
-                  data-id-table="locationTable"
+                  data-id-table="contractTable"
                   data-search="true"
                   data-show-footer="true"
                   data-side-pagination="server"
@@ -26,11 +26,11 @@
                   data-show-export="true"
                   data-show-refresh="true"
                   data-sort-order="asc"
-                  id="locationTable"
+                  id="contractTable"
                   class="table table-striped snipe-table"
                   data-url="{{ route('api.contracts.index') }}"
                   data-export-options='{
-              "fileName": "export-locations-{{ date('Y-m-d') }}",
+              "fileName": "export-contracts-{{ date('Y-m-d') }}",
               "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
               }'>
           </table>
@@ -43,6 +43,6 @@
 @stop
 
 @section('moar_scripts')
-@include ('partials.bootstrap-table', ['exportFile' => 'locations-export', 'search' => true])
+@include ('partials.bootstrap-table', ['exportFile' => 'contracts-export', 'search' => true])
 
 @stop

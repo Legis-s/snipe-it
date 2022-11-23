@@ -1,24 +1,25 @@
 <?php
+
 namespace App\Http\Transformers;
 
-use App\Models\Group;
-use Illuminate\Database\Eloquent\Collection;
-use Gate;
 use App\Helpers\Helper;
+use App\Models\Group;
+use Gate;
+use Illuminate\Database\Eloquent\Collection;
 
 class GroupsTransformer
 {
-
-    public function transformGroups (Collection $groups)
+    public function transformGroups (Collection $groups, $total = null)
     {
-        $array = array();
+        $array = [];
         foreach ($groups as $group) {
             $array[] = self::transformGroup($group);
         }
-        return (new DatatablesTransformer)->transformDatatables($array);
+
+        return (new DatatablesTransformer)->transformDatatables($array, $total);
     }
 
-    public function transformGroup (Group $group)
+    public function transformGroup(Group $group)
     {
         $array = [
             'id' => (int) $group->id,
@@ -38,7 +39,4 @@ class GroupsTransformer
 
         return $array;
     }
-
-
-
 }

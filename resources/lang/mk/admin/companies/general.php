@@ -1,6 +1,7 @@
 <?php
+
 return [
-    'about_companies_title'            => 'За компаниите',
-    'about_companies_text'                  => 'Компаниите можат да се користат како поле за едноставен идентификатор, или може да се користат за да се ограничи видливоста на средствата, корисниците, итн, ако е овозможена целосна поддршка за компании во администраторските поставки.',
     'select_company' => 'Изберете компанија',
+    'about_companies' => 'About Companies',
+    'about_companies_description' => '        You can use companies as a simple informative field, or you can use them to restrict asset visibility and availability to users with a specific company by enabling Full Company Support in your Admin Settings.',
 ];

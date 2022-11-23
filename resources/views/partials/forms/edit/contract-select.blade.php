@@ -4,7 +4,7 @@
     {{ Form::label($fieldname, $translated_name, array('class' => 'col-md-3 control-label')) }}
     <div class="col-md-7{{  ((isset($required) && ($required =='true'))) ?  ' required' : '' }}">
         <select class="js-data-ajax" data-endpoint="contracts" data-placeholder="Выберите договор" name="{{ $fieldname }}" style="width: 100%" id="{{ $fieldname }}_contract_select" aria-label="{{ $fieldname }}">
-            @if ($contract_id = Input::old($fieldname, (isset($item)) ? $item->{$fieldname} : ''))
+            @if ($contract_id = Request::old($fieldname, (isset($item)) ? $item->{$fieldname} : ''))
                 <option value="{{ $contract_id }}" selected="selected" role="option" aria-selected="true"  role="option">
                     {{ (\App\Models\Contract::find($contract_id)) ? \App\Models\Contract::find($contract_id)->present()->fullName : '' }}
                 </option>

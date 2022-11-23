@@ -7,11 +7,23 @@ return array(
     'account_not_activated'  => 'Ta uporabniški račun ni aktiviran.',
     'account_suspended'      => 'Ta uporabniški račun je onemogočen.',
     'account_banned'         => 'Ta uporabniški račun je onemogočen.',
-    'throttle'               => 'Preveč poskusov za prijavo. Poskusite znova v nekaj minutah.',
+    'throttle'               => 'Preveč neuspešnih prijav. Prosim poskusi ponovno čez :minutes minut.',
+
+    'two_factor' => array(
+        'already_enrolled'      => 'Tvoja naprava je že vpisana.',
+        'success'               => 'Uspešna prijava.',
+        'code_required'         => 'Dvo-faktorska koda je obvezna.',
+        'invalid_code'          => 'Dvo-faktorska koda je neveljavna.',
+    ),
 
     'signin' => array(
         'error'   => 'Pri poskusu prijave je prišlo do težave, poskusite znova.',
         'success' => 'Uspešno ste se prijavili.',
+    ),
+
+    'logout' => array(
+        'error'   => 'Prišlo je do napake ob odjavi, prosim poskusi ponovno.',
+        'success' => 'Odjava uspešna.',
     ),
 
     'signup' => array(
@@ -19,19 +31,15 @@ return array(
         'success' => 'Račun je uspešno ustvarjen.',
     ),
 
-        'forgot-password' => array(
-            'error'   => 'Med poskusom ponastavitve gesla za ponastavitev je prišlo do težave, poskusite znova.',
-            'success' => 'E-poštno sporočilo za obnovitev gesla je uspešno poslano.',
-        ),
-
-        'forgot-password-confirm' => array(
-            'error'   => 'Pri poskusu ponastavitve gesla je prišlo do težave, poskusite znova.',
-            'success' => 'Vaše geslo je bilo uspešno ponastavljeno.',
-        ),
-
-    'activate' => array(
-        'error'   => 'Pri poskusu aktiviranja računa je prišlo do težave, poskusite znova.',
-        'success' => 'Vaš račun je bil uspešno aktiviran.',
+    'forgot-password' => array(
+        'error'   => 'Med poskusom ponastavitve gesla za ponastavitev je prišlo do težave, poskusite znova.',
+        'success' => 'V kolikor ta e-poštni naslov obstaja v sistemu je nanj bilo poslano sporočilo za ponastavitev gesla.',
     ),
+
+    'forgot-password-confirm' => array(
+        'error'   => 'Pri poskusu ponastavitve gesla je prišlo do težave, poskusite znova.',
+        'success' => 'Vaše geslo je bilo uspešno ponastavljeno.',
+    ),
+
 
 );

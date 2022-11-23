@@ -1,6 +1,7 @@
 <?php
+
 return [
-    'about_companies_title'            => 'Om företag',
-    'about_companies_text'                  => 'Företag kan användas som ett enkelt identifieringsfält, eller kan användas för att begränsa synligheten för tillgångar, användare etc. om fullständigt företagsstöd är aktiverat i dina administratörsinställningar.',
     'select_company' => 'Välj företag',
+    'about_companies' => 'Om företag',
+    'about_companies_description' => '        Du kan använda företag som ett enkelt informativt fält, eller så kan du använda dem för att begränsa tillgångar och tillgängligheten för användare med ett visst företag genom att aktivera Full Företagssupport i dina administratörsinställningar.',
 ];

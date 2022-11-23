@@ -1,8 +1,6 @@
 <?php
 
 return array(
-    'about_categories_title' 			=> 'Tentang Kategori',
-    'about_categories'  				=> 'Kategori membantu meng-organisir aset anda. Beberapa contoh kategori mungkin seperti &quot;Desktops&quot;, &quot;Laptops&quot;, &quot;Mobile Phones&quot;, &quot;Tablets&quot;, dan seterusnya, tapi anda bisa menggunakan kategori sesuai kebutuhan anda.',
     'asset_categories' 					=> 'Kategori Aset',
     'category_name'  					=> 'Nama Kategori',
     'checkin_email'                     => 'Kirim email ke pengguna saat check in / checkout.',
@@ -20,5 +18,6 @@ return array(
     'update'  							=> 'Perbarui kategori',
     'use_default_eula'					=> 'Gunakan <a href="#" data-toggle="modal" data-target="#eulaModal"> pilihan utama</a> sebagai gantinya.',
     'use_default_eula_disabled'			=> '<del>Gunakan pilihan EULA utama sebagai gantinya.</del> Tidak ada pilihan utama yang diatur. Silahkan tambahkan di Pengaturan.',
+    'use_default_eula_column'			=> 'Gunakan aturan baku',
 
 );

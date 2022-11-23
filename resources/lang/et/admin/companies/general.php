@@ -1,6 +1,7 @@
 <?php
+
 return [
-    'about_companies_title'            => 'Ettevõtetest',
-    'about_companies_text'                  => 'Ettevõtteid saab kasutada kui lihtsa identifikaatorina või kui vahendite, kasutajate jms nähtavuse piiramiseks kui täielik ettevõtete tugi on seadetes peale keeratud.',
     'select_company' => 'Vali ettevõte',
+    'about_companies' => 'About Companies',
+    'about_companies_description' => '        You can use companies as a simple informative field, or you can use them to restrict asset visibility and availability to users with a specific company by enabling Full Company Support in your Admin Settings.',
 ];

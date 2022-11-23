@@ -1,8 +1,7 @@
 @extends('layouts/default')
-
 {{-- Page title --}}
 @section('title')
-LDAP User Sync
+{{ trans('general.ldap_user_sync') }}
 @parent
 @stop
 
@@ -27,14 +26,25 @@ LDAP User Sync
         <div class="box-body">
           <!-- location_id-->
           <div class="form-group {{ $errors->has('location_id') ? 'has-error' : '' }}">
-              <!-- Location -->
+            
+            <div class="col-md-12">
+               <!-- Location -->
               @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'location_id'])
-            <div class="col-md-4">
-              <button type="submit" class="btn btn-warning" id="sync">
-                  <i id="sync-button-icon" class="fa fa-refresh icon-white" aria-hidden="true"></i> <span id="sync-button-text">Synchronize</span>
-              </button>
             </div>
           </div>
+
+            <div class="box-footer">
+                <div class="text-left col-md-6">
+                    <a class="btn btn-link" href="{{ route('users.index') }}">{{ trans('button.cancel') }}</a>
+                </div>
+                <div class="text-right col-md-6">
+                    <button type="submit" class="btn btn-primary" id="sync">
+                        <i id="sync-button-icon" class="fas fa-sync-alt icon-white" aria-hidden="true"></i> <span id="sync-button-text">{{ trans('general.synchronize') }}</span>
+                    </button>
+                </div>
+
+            </div>
+
         </div>
       </div>
     </form>
@@ -43,6 +53,7 @@ LDAP User Sync
     <p>
         {{ trans('admin/users/general.ldap_config_text') }}
     </p>
+  <p><a href="{{ route('settings.ldap.index') }}">{{ trans('admin/settings/general.ldap_settings_link') }}</a></p>
   </div>
 </div>
 
@@ -52,14 +63,14 @@ LDAP User Sync
 
     <div class="box box-default">
       <div class="box-header with-border">
-        <h2 class="box-title">Synchronization Results</h2>
+        <h2 class="box-title">{{ trans('general.sync_results') }}</h2>
       </div><!-- /.box-header -->
       <div class="box-body">
         <table class="table table-bordered">
           <tr>
-              <th>Username</th><th>Employee Number</th>
-              <th>First Name</th><th>Last Name</th>
-              <th>Email</th><th>Notes</th>
+              <th>{{ trans('general.username') }}</th><th>{{ trans('general.employee_number') }}</th>
+              <th>{{ trans('general.first_name') }}</th><th>{{ trans('general.last_name') }}</th>
+              <th>{{ trans('general.email') }}</th><th>{{ trans('general.notes') }}</th>
           </tr>
 
           @foreach (Session::get('summary') as $entry)
@@ -71,7 +82,7 @@ LDAP User Sync
               <td>{{ $entry['email'] }}</td>
               <td>
                 @if ($entry['status']=='success')
-                  <i class="fa fa-check"></i> {!! $entry['note'] !!}
+                  <i class="fas fa-check"></i> {!! $entry['note'] !!}
                 @else
                   <span class="alert-msg" aria-hidden="true">{!! $entry['note'] !!}</span>
                 @endif
@@ -98,7 +109,7 @@ LDAP User Sync
             $("#sync").removeClass("btn-warning");
             $("#sync").addClass("btn-success");
             $("#sync-button-icon").addClass("fa-spin");
-            $("#sync-button-text").html(" Processing...");
+            $("#sync-button-text").html("{{ trans('general.processing') }}");
         });
     });
 </script>

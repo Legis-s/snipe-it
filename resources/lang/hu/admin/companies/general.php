@@ -1,6 +1,7 @@
 <?php
+
 return [
-    'about_companies_title'            => 'A vállalatokról',
-    'about_companies_text'                  => 'A vállalatok használhatóak egyszerű azonosító mezőként, vagy az eszközök, felhasználók, stb. láthatóságának korlátozására, ha a teljes vállalati támogatás engedélyezve van az Admin beállításokban.',
     'select_company' => 'Vállalat kiválasztása',
+    'about_companies' => 'A vállalatokról',
+    'about_companies_description' => '        Használhatja a vállalatokat egyszerű tájékoztató mezőként, vagy használhatja őket arra, hogy az eszközök láthatóságát és elérhetőségét egy adott vállalathoz tartozó felhasználókra korlátozza, ha engedélyezi a Teljes vállalat-támogatást a Rendszergazdai beállításokban.',
 ];

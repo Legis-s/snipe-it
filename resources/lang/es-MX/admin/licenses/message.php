@@ -2,12 +2,13 @@
 
 return array(
 
-    'does_not_exist' => 'Categoría inexistente.',
+    'does_not_exist' => 'License does not exist or you do not have permission to view it.',
     'user_does_not_exist' => 'Usuario inexistente.',
     'asset_does_not_exist' 	=> 'El equipo que intentas asignar a esta licencia no existe.',
     'owner_doesnt_match_asset' => 'El equipo al que estas intentando asignar esta licenciam, está asignado a un usuario diferente que el de la licencia.',
     'assoc_users'	 => 'Esta categoría está asignada al menos a un modelo y no puede ser eliminada.',
     'select_asset_or_person' => 'Debe seleccionar un activo o un usuario, pero no ambos.',
+    'not_found' => 'Licencia no encontrada',
 
 
     'create' => array(

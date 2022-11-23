@@ -3,21 +3,16 @@
 {{-- Page title --}}
 @section('title')
 
- Закупка - {{ $purchase->invoice_number }}
- 
-@parent
-@stop
+    Закупка - {{ $purchase->invoice_number }}
 
-@section('header_right')
-{{--<a href="{{ route('locations.edit', ['location' => $inventory->id]) }}" class="btn btn-sm btn-primary pull-right">{{ trans('admin/locations/table.update') }} </a>--}}
+    @parent
 @stop
 
 {{-- Page content --}}
 @section('content')
-    <link rel="stylesheet" type="text/css" href="{{ asset('css/sweetalert2.min.css') }}">
 
 <div class="row">
-    <div class="col-md-10">
+    <div class="col-md-9">
         <div class="box box-default">
             <div class="box-header with-border">
                 <div class="box-heading">
@@ -25,27 +20,10 @@
                 </div>
             </div>
             <div class="box-body">
-                <div id="toolbar">
-                    @if ($purchase->status == "finished")
-                    <a href="{{ route('hardware/bulksell', ['purchase_bulk_id' => $purchase->id]) }}" class="btn btn-primary pull-right">
-                        {{ trans('admin/massoperations/general.sell') }}
-                    </a>
-                    <a href="{{ route('hardware/bulkcheckout', ['purchase_bulk_id' => $purchase->id]) }}" class="btn btn-primary pull-right">
-                        {{ trans('admin/massoperations/general.checkout') }}
-                    </a>
-                        <a href="{{ route('hardware/bulkcheckin', ['purchase_bulk_id' => $purchase->id]) }}" class="btn btn-primary pull-right">
-                            {{ trans('admin/massoperations/general.checkin') }}
-                        </a>
-                    {{--                        <a href="{{ route('licenses.create') }}" class="btn btn-primary pull-right">--}}
-                    {{--                            {{ trans('admin/massoperations/general.return') }}--}}
-                    {{--                        </a>--}}
-                    @endif
-                </div>
-            <div class="table table-responsive">
+                <div class="table table-responsive">
 
-                <table
+                    <table
                         data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayout() }}"
-{{--                        data-cookie-id-table="assetsListingTable"--}}
                         data-pagination="true"
                         data-id-table="assetsListingTable"
                         data-search="true"
@@ -53,19 +31,18 @@
                         data-show-columns="true"
                         data-show-export="true"
                         data-show-refresh="true"
-{{--                        data-sort-order="asc"--}}
                         id="assetsListingTable"
                         class="table table-striped snipe-table"
                         data-url="{{route('api.assets.index', ['purchase_id' => $purchase->id]) }}">
-                </table>
-            </div><!-- /.table-responsive -->
+                    </table>
+                </div><!-- /.table-responsive -->
           </div><!-- /.box-body -->
         </div> <!--/.box-->
         @if ($purchase->status!='paid')
             <div class="box box-default">
                 <div class="box-header with-border">
                     <div class="box-heading">
-                        <h2 class="box-title">Расходники</h2>
+                        <h2 class="box-title">Расходники не принятые</h2>
                     </div>
                 </div>
                 <div class="box-body">
@@ -99,7 +76,13 @@
                         </table>
                     </div><!-- /.table-responsive -->
                 </div><!-- /.box-body -->
-
+            </div> <!--/.box-->
+            <div class="box box-default">
+                <div class="box-header with-border">
+                    <div class="box-heading">
+                        <h2 class="box-title">Расходники принятые </h2>
+                    </div>
+                </div>
                 <div class="box-body">
                     <div class="table table-responsive">
                         <table
@@ -121,68 +104,11 @@
                     </div><!-- /.table-responsive -->
                 </div><!-- /.box-body -->
             </div> <!--/.box-->
-        @else
-{{--            <div class="box box-default">--}}
-{{--                <div class="box-header with-border">--}}
-{{--                    <div class="box-heading">--}}
-{{--                        <h2 class="box-title">Расходники</h2>--}}
-{{--                    </div>--}}
-{{--                </div>--}}
-{{--                <div class="box-body">--}}
-{{--                    <div class="table table-responsive">--}}
-{{--                        <table--}}
-{{--                                data-columns="{{ \App\Presenters\ConsumablePresenter::dataTableLayout() }}"--}}
-{{--                                data-cookie-id-table="consumablesTable"--}}
-{{--                                data-pagination="true"--}}
-{{--                                data-id-table="consumablesTable"--}}
-{{--                                data-search="true"--}}
-{{--                                data-side-pagination="server"--}}
-{{--                                data-show-columns="true"--}}
-{{--                                data-show-export="true"--}}
-{{--                                data-shconsumablesTableow-footer="true"--}}
-{{--                                data-show-refresh="true"--}}
-{{--                                data-sort-order="asc"--}}
-{{--                                data-sort-name="name"--}}
-{{--                                data-toolbar="#toolbar"--}}
-{{--                                id=""--}}
-{{--                                class="table table-striped snipe-table"--}}
-{{--                                data-url="{{ route('api.consumables.index', ['purchase_id' => $purchase->id]) }}">--}}
-{{--                        </table>--}}
-{{--                    </div><!-- /.table-responsive -->--}}
-{{--                </div><!-- /.box-body -->--}}
-{{--            </div> <!--/.box-->--}}
+
+
         @endif
-
-
-
-{{--        <div class="box box-default">--}}
-{{--            <div class="box-header with-border">--}}
-{{--                <div class="box-heading">--}}
-{{--                    <h2 class="box-title">Активы на продажу</h2>--}}
-{{--                </div>--}}
-{{--            </div>--}}
-{{--            <div class="box-body">--}}
-{{--                <div class="table table-responsive">--}}
-{{--                    <table--}}
-{{--                            data-columns="{{ \App\Presenters\SalesPresenter::dataTableLayout() }}"--}}
-{{--                            data-cookie-id-table="salesListingTable"--}}
-{{--                            data-pagination="true"--}}
-{{--                            data-id-table="salesListingTable"--}}
-{{--                            data-search="true"--}}
-{{--                            data-side-pagination="server"--}}
-{{--                            data-show-columns="true"--}}
-{{--                            data-show-export="true"--}}
-{{--                            data-show-refresh="true"--}}
-{{--                            data-sort-order="asc"--}}
-{{--                            id="salesListingTable"--}}
-{{--                            class="table table-striped snipe-table"--}}
-{{--                            data-url="{{route('api.sales.index', ['purchase_id' => $purchase->id]) }}">--}}
-{{--                    </table>--}}
-{{--                </div><!-- /.table-responsive -->--}}
-{{--            </div><!-- /.box-body -->--}}
-{{--        </div> <!--/.box-->--}}
     </div><!--/.col-md-9-->
-    <div class="col-md-2">
+    <div class="col-md-3">
         <div class="box box-default">
             <div class="box-header with-border">
                 <div class="box-heading">
@@ -356,36 +282,25 @@
                             @endif
                         @endcan
                     @endif
+                    @can('checkout', \App\Models\Asset::class)
+
+                        <div class="col-md-12">
+                            <br><br>
+                            @if ($purchase->status == "finished")
+                                <a href="{{ route('hardware.bulkcheckout.show', ['purchase_bulk_id' => $purchase->id]) }}" style="margin-bottom:10px; width:100%" class="btn btn-primary btn-sm">
+                                    {{ trans('admin/massoperations/general.checkout') }}
+                                </a>
+                                <a href="{{ route('hardware.bulksell.show', ['purchase_bulk_id' => $purchase->id]) }}" style="margin-bottom:10px; width:100%" class="btn btn-primary btn-sm">
+                                    {{ trans('admin/massoperations/general.sell') }}
+                                </a>
+                            @endif
+                        </div>
+
+                    @endcan
             </div><!-- /.box-body -->
         </div> <!--/.box-->
     </div>
 </div>
-
-{{--<!-- Modal Актив на продажу -->--}}
-{{--<div class="modal fade" id="check_consumable" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">--}}
-{{--    <div class="modal-dialog" role="document">--}}
-{{--        <div class="modal-content">--}}
-{{--            <div class="modal-header">--}}
-{{--                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span--}}
-{{--                            aria-hidden="true">&times;</span></button>--}}
-{{--                <h4 class="modal-title" id="myModalLabel">Принять расходник</h4>--}}
-{{--            </div>--}}
-{{--            <div class="modal-body2">--}}
-{{--                <div class="row">--}}
-{{--                    <div class="col-md-12">--}}
-{{--                        <form class="form-horizontal">--}}
-
-{{--                        </form>--}}
-{{--                    </div>--}}
-{{--                </div>--}}
-{{--            </div>--}}
-{{--            <div class="modal-footer">--}}
-{{--                <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>--}}
-{{--                <button type="button" class="btn btn-primary" id="addSalesButton">Принять</button>--}}
-{{--            </div>--}}
-{{--        </div>--}}
-{{--    </div>--}}
-{{--</div>--}}
 
 
 @stop
@@ -491,7 +406,6 @@
                         align: 'left',
                         valign: 'middle',
                         formatter:function (value,row) {
-                            console.log(row);
                             return "<a href='/consumables/"+row.consumable_id+"'>"+value+"</a>";
                         }
                     },{
@@ -607,7 +521,7 @@
                                                                 break;
                                                         }
                                                         $('.status_label').html(result);
-
+                                                        $('#сonsumableAssignmentTable').bootstrapTable('refresh');
                                                     },
                                                 });
 

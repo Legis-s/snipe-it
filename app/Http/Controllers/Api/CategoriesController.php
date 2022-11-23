@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use App\Helpers\Helper;
-use App\Models\Category;
+use App\Http\Controllers\Controller;
 use App\Http\Transformers\CategoriesTransformer;
 use App\Http\Transformers\SelectlistTransformer;
+use App\Models\Category;
+use Illuminate\Http\Request;
+use App\Http\Requests\ImageUploadRequest;
+use Illuminate\Support\Facades\Storage;
 
 class CategoriesController extends Controller
 {
@@ -21,14 +23,36 @@ class CategoriesController extends Controller
     public function index(Request $request)
     {
         $this->authorize('view', Category::class);
-        $allowed_columns = ['id', 'name','lifetime','category_type', 'category_type','use_default_eula','eula_text', 'require_acceptance','checkin_email', 'assets_count', 'accessories_count', 'consumables_count', 'components_count','licenses_count', 'image'];
+        $allowed_columns = ['id', 'name', 'lifetime','category_type', 'category_type', 'use_default_eula', 'eula_text', 'require_acceptance', 'checkin_email', 'assets_count', 'accessories_count', 'consumables_count', 'components_count', 'licenses_count', 'image'];
 
-        $categories = Category::select(['id', 'created_at','lifetime', 'updated_at', 'name','category_type','use_default_eula','eula_text', 'require_acceptance','require_biometric_confirmation','checkin_email','image'])
-            ->withCount('assets as assets_count', 'accessories as accessories_count', 'consumables as consumables_count', 'components as components_count','licenses as licenses_count');
+        $categories = Category::select(['id', 'created_at', 'lifetime', 'updated_at', 'name', 'category_type', 'use_default_eula', 'eula_text', 'require_acceptance', 'checkin_email', 'image'])
+            ->withCount('assets as assets_count', 'accessories as accessories_count', 'consumables as consumables_count', 'components as components_count', 'licenses as licenses_count');
 
         if ($request->filled('search')) {
             $categories = $categories->TextSearch($request->input('search'));
         }
+
+        if ($request->filled('name')) {
+            $categories->where('name', '=', $request->input('name'));
+        }
+
+        if ($request->filled('category_type')) {
+            $categories->where('category_type', '=', $request->input('category_type'));
+        }
+
+        if ($request->filled('use_default_eula')) {
+            $categories->where('use_default_eula', '=', $request->input('use_default_eula'));
+        }
+
+        if ($request->filled('require_acceptance')) {
+            $categories->where('require_acceptance', '=', $request->input('require_acceptance'));
+        }
+
+        if ($request->filled('checkin_email')) {
+            $categories->where('checkin_email', '=', $request->input('checkin_email'));
+        }
+
+
 
         // Set the offset to the API call's offset, unless the offset is higher than the actual count of items in which
         // case we override with the actual count, so we should return 0 items.
@@ -43,6 +67,7 @@ class CategoriesController extends Controller
 
         $total = $categories->count();
         $categories = $categories->skip($offset)->take($limit)->get();
+
         return (new CategoriesTransformer)->transformCategories($categories, $total);
 
     }
@@ -53,14 +78,16 @@ class CategoriesController extends Controller
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @since [v4.0]
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\ImageUploadRequest $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(ImageUploadRequest $request)
     {
         $this->authorize('create', Category::class);
         $category = new Category;
         $category->fill($request->all());
+        $category->category_type = strtolower($request->input('category_type'));
+        $category = $request->handleImages($category);
 
         if ($category->save()) {
             return response()->json(Helper::formatStandardApiResponse('success', $category, trans('admin/categories/message.create.success')));
@@ -91,15 +118,17 @@ class CategoriesController extends Controller
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @since [v4.0]
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\ImageUploadRequest  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(ImageUploadRequest $request, $id)
     {
         $this->authorize('update', Category::class);
         $category = Category::findOrFail($id);
         $category->fill($request->all());
+        $category->category_type = strtolower($request->input('category_type'));
+        $category = $request->handleImages($category);
 
         if ($category->save()) {
             return response()->json(Helper::formatStandardApiResponse('success', $category, trans('admin/categories/message.update.success')));
@@ -121,18 +150,14 @@ class CategoriesController extends Controller
         $this->authorize('delete', Category::class);
         $category = Category::findOrFail($id);
 
-        if ($category->has_models() > 0) {
-            return response()->json(Helper::formatStandardApiResponse('error', null,  trans('admin/categories/message.assoc_items', ['asset_type'=>'model'])));
-        } elseif ($category->accessories()->count() > 0) {
-            return response()->json(Helper::formatStandardApiResponse('error', null,  trans('admin/categories/message.assoc_items', ['asset_type'=>'accessory'])));
-        } elseif ($category->consumables()->count() > 0) {
-            return response()->json(Helper::formatStandardApiResponse('error', null,  trans('admin/categories/message.assoc_items', ['asset_type'=>'consumable'])));
-        } elseif ($category->components()->count() > 0) {
-            return response()->json(Helper::formatStandardApiResponse('error', null,  trans('admin/categories/message.assoc_items', ['asset_type'=>'component'])));
+        if (! $category->isDeletable()) {
+            return response()->json(
+                Helper::formatStandardApiResponse('error', null, trans('admin/categories/message.assoc_items', ['asset_type'=>$category->category_type]))
+            );
         }
         $category->delete();
-        return response()->json(Helper::formatStandardApiResponse('success', null,  trans('admin/categories/message.delete.success')));
 
+        return response()->json(Helper::formatStandardApiResponse('success', null, trans('admin/categories/message.delete.success')));
     }
 
 
@@ -142,11 +167,10 @@ class CategoriesController extends Controller
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @since [v4.0.16]
      * @see \App\Http\Transformers\SelectlistTransformer
-     *
      */
     public function selectlist(Request $request, $category_type = 'asset')
     {
-
+        $this->authorize('view.selectlists');
         $categories = Category::select([
             'id',
             'name',
@@ -163,11 +187,9 @@ class CategoriesController extends Controller
         // This lets us have more flexibility in special cases like assets, where
         // they may not have a ->name value but we want to display something anyway
         foreach ($categories as $category) {
-            $category->use_image = ($category->image) ? url('/').'/uploads/categories/'.$category->image : null;
+            $category->use_image = ($category->image) ? Storage::disk('public')->url('categories/'.$category->image, $category->image) : null;
         }
 
         return (new SelectlistTransformer)->transformSelectlist($categories);
-
     }
-
 }

@@ -1,9 +1,7 @@
 <?php
 
 return array(
-    'about_categories_title' 			=> 'Um Flokk',
-    'about_categories'  				=> 'Categories help you organize your items. Some example categories might be &quot;Desktops&quot;, &quot;Laptops&quot;, &quot;Mobile Phones&quot;, &quot;Tablets&quot;, and so on, but you can use categories any way that makes sense for you.',
-    'asset_categories' 					=> 'Asset Categories',
+    'asset_categories' 					=> 'Eignaflokkar',
     'category_name'  					=> 'Heiti Vöruflokks',
     'checkin_email'                     => 'Senda tölvupóst til notenda til að skrá sig inn / út.',
     'checkin_email_notification'        => 'Þessi notandi fær tölvupóst til að skrá sig inn/út.',
@@ -20,5 +18,6 @@ return array(
     'update'  							=> 'Breyta vöruflokk',
     'use_default_eula'					=> 'Notaðu frekar <a href="#" data-toggle="modal" data-target="#eulaModal">',
     'use_default_eula_disabled'			=> '<del>Notaðu frekar sjálfgefna notendaskilmálana.</del>Sjálfgefnu notendaskilmálarnir eru ekki í notkun. Vinsamlegast bættu einhverjum notendaskilmálum við í undir "Stillingar"',
+    'use_default_eula_column'			=> 'Use default EULA',
 
 );

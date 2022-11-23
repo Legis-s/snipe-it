@@ -28,19 +28,14 @@ class ExpiringAssetsNotification extends Notification
     /**
      * Get the notification's delivery channels.
      *
-     * @param  mixed  $notifiable
      * @return array
      */
-    public function via($notifiable)
+    public function via()
     {
         $notifyBy = [];
-        $notifyBy[]='mail';
+        $notifyBy[] = 'mail';
+
         return $notifyBy;
-    }
-
-    public function toSlack($notifiable)
-    {
-
     }
 
     /**
@@ -49,9 +44,8 @@ class ExpiringAssetsNotification extends Notification
      * @param  mixed  $asset
      * @return \Illuminate\Notifications\Messages\MailMessage
      */
-    public function toMail($params)
+    public function toMail()
     {
-
         $message = (new MailMessage)->markdown('notifications.markdown.report-expiring-assets',
             [
                 'assets'  => $this->assets,
@@ -60,20 +54,5 @@ class ExpiringAssetsNotification extends Notification
             ->subject(trans('mail.Expiring_Assets_Report'));
 
         return $message;
-
-
-    }
-
-    /**
-     * Get the array representation of the notification.
-     *
-     * @param  mixed  $notifiable
-     * @return array
-     */
-    public function toArray($notifiable)
-    {
-        return [
-            //
-        ];
     }
 }

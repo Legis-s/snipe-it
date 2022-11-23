@@ -1,6 +1,7 @@
 <?php
+
 return [
-    'about_companies_title'            => 'Informazioni sulle aziende',
-    'about_companies_text'                  => 'Le aziende possono essere utilizzate come un campo di identificazione semplice oppure possono essere utilizzate per limitare la visibilità degli asset, degli utenti ecc. Se il supporto aziendale completo è abilitato nelle impostazioni di amministratore.',
     'select_company' => 'Seleziona Azienda',
+    'about_companies' => 'Informazioni sulle aziende',
+    'about_companies_description' => '        È possibile utilizzare le aziende come un semplice campo informativo, oppure puoi utilizzarle per limitare la visibilità e la disponibilità degli asset agli utenti di una specifica azienda abilitando il Supporto Aziendale Completo nelle impostazioni di amministrazione.',
 ];

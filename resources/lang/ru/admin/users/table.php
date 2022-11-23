@@ -1,6 +1,6 @@
 <?php
 
-return array(
+return [
     'activated'  			=> 'Активен',
     'allow'  				=> 'Разрешить',
     'checkedout'  			=> 'Активы',
@@ -10,7 +10,7 @@ return array(
     'email'      			=> 'Электронная почта',
     'employee_num'      	=> 'Сотрудник №',
     'first_name' 			=> 'Имя',
-    'groupnotes'			=> 'Выберите группу для привязки к пользователю, помните пользователь получает права доступа группы к которой он привязан.',
+    'groupnotes'			=> 'Select a group to assign to the user, remember that a user takes on the permissions of the group they are assigned. Use ctrl+click (or cmd+click on MacOS) to deselect groups.',
     'id'         			=> 'Id',
     'inherit'  				=> 'Наследование',
     'job' 					=> 'Должность',
@@ -35,4 +35,6 @@ return array(
     'username_note' 		=> '(Это используется для связи с Active Directory, а не для входа.)',
     'cloneuser'             => 'Дублировать пользователя',
     'viewusers' 			=> 'Просмотр пользователей',
-);
+    'favorite_location'     => 'Основной склад',
+    'bitrix_token'          => 'Ключ Bitrix',
+];

@@ -1,6 +1,7 @@
 <?php
+
 return [
-    'about_companies_title'            => 'על חברות',
-    'about_companies_text'                  => 'חברות יכולות לשמש כשדה מזהה פשוט, או שניתן להשתמש בהן להגבלת החשיפה של נכסים, משתמשים וכו \', אם תמיכה מלאה בחברה מופעלת בהגדרות מנהל המערכת.',
     'select_company' => 'בחר חברה',
+    'about_companies' => 'About Companies',
+    'about_companies_description' => '        You can use companies as a simple informative field, or you can use them to restrict asset visibility and availability to users with a specific company by enabling Full Company Support in your Admin Settings.',
 ];

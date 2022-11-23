@@ -1,8 +1,6 @@
 <?php
 
 return array(
-    'about_categories_title' 			=> 'Informazioni sulle categorie',
-    'about_categories'  				=> 'Le categorie ti aiutano a organizzare i tuoi articoli. Alcune categorie di esempio potrebbero essere &quot;Desktops&quot;, &quot;Laptops&quot;, &quot;Mobile Phones&quot;, &quot;Tablets&quot; e così via, ma è possibile utilizzare categorie in qualsiasi modo che ha senso per te.',
     'asset_categories' 					=> 'Categorie dei Beni',
     'category_name'  					=> 'Nome categoria',
     'checkin_email'                     => 'Invia email all\'utente al ritiro / consegna.',
@@ -21,5 +19,6 @@ return array(
     'use_default_eula'					=> '
 Usa <a href="#" data-toggle="modal" data-target="#eulaModal">L\'EULA predefinita</a> invece.',
     'use_default_eula_disabled'			=> '<del>Usa L\'EULA predefinita.</del> Nessuna EULA predefinita è in uso. Per favore aggiungine una nei Settaggi.',
+    'use_default_eula_column'			=> 'Utilizza EULA predefinita',
 
 );

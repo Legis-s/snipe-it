@@ -3,9 +3,7 @@
 {{-- Page title --}}
 @section('title')
 
-    Договор:
-    {{ $contract->name }}
-
+    {{ trans('general.contract') }}:{{ $contract->name }}
     @parent
 @stop
 
@@ -18,7 +16,7 @@
             <div class="box box-default">
                 <div class="box-header with-border">
                     <div class="box-heading">
-                        <h2 class="box-title">Активы</h2>
+                        <h2 class="box-title">{{ trans('general.assets') }}</h2>
                     </div>
                 </div>
                 <div class="box-body">
@@ -44,7 +42,7 @@
             <div class="box box-default">
                 <div class="box-header with-border">
                     <div class="box-heading">
-                        <h2 class="box-title">Расходники на продажу</h2>
+                        <h2 class="box-title">Расходники</h2>
                     </div>
                 </div>
                 <div class="box-body">
@@ -65,14 +63,6 @@
                                 id="consumablesCheckedoutTable"
                                 class="table table-striped snipe-table"
                                 data-url="{{route('api.consumableassignments.index',['contract_id'=> $contract->id])}}">
-                            {{--                    <thead>--}}
-                            {{--                    <tr>--}}
-                            {{--                      <th data-searchable="false" data-sortable="false" data-field="name">Наименование</th>--}}
-                            {{--                      <th data-searchable="false" data-sortable="false" data-field="quantity">Количество</th>--}}
-                            {{--                      <th data-searchable="false" data-sortable="false" data-field="created_at" data-formatter="dateDisplayFormatter">{{ trans('general.date') }}</th>--}}
-                            {{--                      <th data-searchable="false" data-sortable="false" data-field="admin">Выдал</th>--}}
-                            {{--                    </tr>--}}
-                            {{--                    </thead>--}}
                         </table>
                     </div><!-- /.table-responsive -->
                 </div><!-- /.box-body -->
@@ -98,8 +88,7 @@
 
 @section('moar_scripts')
     @include ('partials.bootstrap-table', [
-        'exportFile' => 'locations-export',
+        'exportFile' => 'contracts-export',
         'search' => true
      ])
-
 @stop

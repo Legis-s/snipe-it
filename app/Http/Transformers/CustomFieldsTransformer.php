@@ -1,20 +1,20 @@
 <?php
+
 namespace App\Http\Transformers;
 
+use App\Helpers\Helper;
 use App\Models\CustomField;
 use Illuminate\Database\Eloquent\Collection;
-use App\Helpers\Helper;
-use Gate;
 
 class CustomFieldsTransformer
 {
-
-    public function transformCustomFields (Collection $fields, $total)
+    public function transformCustomFields(Collection $fields, $total)
     {
-        $array = array();
+        $array = [];
         foreach ($fields as $field) {
             $array[] = self::transformCustomField($field);
         }
+
         return (new DatatablesTransformer)->transformDatatables($array, $total);
     }
 
@@ -25,7 +25,7 @@ class CustomFieldsTransformer
      * @param  int     $total
      * @return array
      */
-    public function transformCustomFieldsWithDefaultValues (Collection $fields, $modelId, $total)
+    public function transformCustomFieldsWithDefaultValues(Collection $fields, $modelId, $total)
     {
         $array = [];
 
@@ -36,20 +36,21 @@ class CustomFieldsTransformer
         return (new DatatablesTransformer)->transformDatatables($array, $total);
     }
 
-    public function transformCustomField (CustomField $field)
+    public function transformCustomField(CustomField $field)
     {
         $array = [
             'id' => $field->id,
             'name' => e($field->name),
             'db_column_name' => e($field->db_column_name()),
             'format'   =>  e($field->format),
-            'field_values'   => ($field->field_values) ?  e($field->field_values) : null,
-            'field_values_array'   => ($field->field_values) ?  explode("\r\n", e($field->field_values)) : null,
+            'field_values'   => ($field->field_values) ? e($field->field_values) : null,
+            'field_values_array'   => ($field->field_values) ? explode("\r\n", e($field->field_values)) : null,
             'type'   =>  e($field->element),
-            'required'   =>  $field->pivot ? $field->pivot->required : false,
+            'required'   =>  (($field->pivot) && ($field->pivot->required=='1')) ? true : false,
             'created_at' => Helper::getFormattedDateObject($field->created_at, 'datetime'),
             'updated_at' => Helper::getFormattedDateObject($field->updated_at, 'datetime'),
         ];
+
         return $array;
     }
 
@@ -61,13 +62,13 @@ class CustomFieldsTransformer
      * @param  int      $modelId
      * @return array
      */
-    public function transformCustomFieldWithDefaultValue (CustomField $field, $modelId)
+    public function transformCustomFieldWithDefaultValue(CustomField $field, $modelId)
     {
         return [
             'id' => $field->id,
             'name' => e($field->name),
             'type'   =>  e($field->element),
-            'field_values_array'   => ($field->field_values) ?  explode("\r\n", e($field->field_values)) : null,
+            'field_values_array'   => ($field->field_values) ? explode("\r\n", e($field->field_values)) : null,
             'default_value' => $field->defaultValue($modelId),
         ];
     }

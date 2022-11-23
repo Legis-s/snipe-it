@@ -2,12 +2,13 @@
 
 return array(
 
-    'does_not_exist' => 'Ilayisense ayikho.',
+    'does_not_exist' => 'License does not exist or you do not have permission to view it.',
     'user_does_not_exist' => 'Umsebenzisi akakho.',
     'asset_does_not_exist' 	=> 'Impahla ozama ukuyihlanganisa nale layisensi ayikho.',
     'owner_doesnt_match_asset' => 'Ifa ozama ukulihlobanisa nale layisensi linomunye umuntu ngaphandle komuntu okhethiwe ekudonsweni kokunikezelwa.',
     'assoc_users'	 => 'Leli layisensi okwamanje lihlolwe kumsebenzisi futhi alikwazi ukususwa. Sicela uhlole ilayisensi ekuqaleni, bese uzama ukususa futhi.',
     'select_asset_or_person' => 'Kumele ukhethe ifa noma umsebenzisi, kodwa hhayi kokubili.',
+    'not_found' => 'License not found',
 
 
     'create' => array(

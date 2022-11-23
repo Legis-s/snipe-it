@@ -1,33 +1,33 @@
 @extends('layouts/default')
-
 {{-- Page title --}}
 @section('title')
 
-@if (Input::get('status')=='deleted')
-    {{ trans('general.deleted') }}
-@else
-    {{ trans('general.current') }}
-@endif
- {{ trans('general.users') }}
+    @if (request('status')=='deleted')
+        {{ trans('general.deleted') }}
+    @else
+        {{ trans('general.current') }}
+    @endif
+    {{ trans('general.users') }}
+    @parent
 
-@parent
 @stop
 
 @section('header_right')
+
     @can('create', \App\Models\User::class)
-      @if ($snipeSettings->ldap_enabled == 1)
-      <a href="{{ route('ldap/user') }}" class="btn btn-default pull-right"><span class="fa fa-sitemap"></span> LDAP Sync</a>
-      @endif
-      <a href="{{ route('users.create') }}" class="btn btn-primary pull-right" style="margin-right: 5px;">  {{ trans('general.create') }}</a>
+        @if ($snipeSettings->ldap_enabled == 1)
+            <a href="{{ route('ldap/user') }}" class="btn btn-default pull-right"><span class="fas fa-sitemap"></span>{{trans('general.ldap_sync')}}</a>
+        @endif
+        <a href="{{ route('users.create') }}" accesskey="n" class="btn btn-primary pull-right" style="margin-right: 5px;">  {{ trans('general.create') }}</a>
     @endcan
 
-    @if (Input::get('status')=='deleted')
-      <a class="btn btn-default pull-right" href="{{ route('users.index') }}" style="margin-right: 5px;">{{ trans('admin/users/table.show_current') }}</a>
+    @if (request('status')=='deleted')
+        <a class="btn btn-default pull-right" href="{{ route('users.index') }}" style="margin-right: 5px;">{{ trans('admin/users/table.show_current') }}</a>
     @else
-      <a class="btn btn-default pull-right" href="{{ route('users.index', ['status' => 'deleted']) }}" style="margin-right: 5px;">{{ trans('admin/users/table.show_deleted') }}</a>
+        <a class="btn btn-default pull-right" href="{{ route('users.index', ['status' => 'deleted']) }}" style="margin-right: 5px;">{{ trans('admin/users/table.show_deleted') }}</a>
     @endif
     @can('view', \App\Models\User::class)
-        <a class="btn btn-default pull-right" href="{{ route('users.export') }}" style="margin-right: 5px;">Export</a>
+        <a class="btn btn-default pull-right" href="{{ route('users.export') }}" style="margin-right: 5px;">{{ trans('general.export') }}</a>
     @endcan
 @stop
 
@@ -38,25 +38,8 @@
   <div class="col-md-12">
     <div class="box box-default">
         <div class="box-body">
-          {{ Form::open([
-               'method' => 'POST',
-               'route' => ['users/bulkedit'],
-               'class' => 'form-inline',
-                'id' => 'bulkForm']) }}
 
-            @if (Input::get('status')!='deleted')
-              @can('delete', \App\Models\User::class)
-                <div id="toolbar">
-                    <label for="bulk_actions" class="sr-only">Bulk Actions</label>
-                  <select name="bulk_actions" class="form-control select2" style="width: 200px;" aria-label="bulk_actions">
-                    <option value="delete">Bulk Checkin &amp; Delete</option>
-                    <option value="edit">Bulk Edit</option>
-                  </select>
-                  <button class="btn btn-default" id="bulkEdit" disabled>Go</button>
-                </div>
-              @endcan
-            @endif
-
+            @include('partials.users-bulk-actions')
 
             <table
                     data-click-to-select="true"
@@ -67,30 +50,35 @@
                     data-search="true"
                     data-side-pagination="server"
                     data-show-columns="true"
+                    data-show-fullscreen="true"
                     data-show-export="true"
                     data-show-refresh="true"
                     data-sort-order="asc"
-                    data-toolbar="#toolbar"
+                    data-toolbar="#userBulkEditToolbar"
+                    data-bulk-button-id="#bulkUserEditButton"
+                    data-bulk-form-id="#usersBulkForm"
                     id="usersTable"
                     class="table table-striped snipe-table"
                     data-url="{{ route('api.users.index',
-              array('deleted'=> (Input::get('status')=='deleted') ? 'true' : 'false','company_id'=>e(Input::get('company_id')))) }}"
+              array('deleted'=> (request('status')=='deleted') ? 'true' : 'false','company_id' => e(request('company_id')))) }}"
                     data-export-options='{
                 "fileName": "export-users-{{ date('Y-m-d') }}",
                 "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
                 }'>
-            </table>
+                    </table>
 
 
-          {{ Form::close() }}
-        </div><!-- /.box-body -->
-      </div><!-- /.box -->
-  </div>
-</div>
+                    {{ Form::close() }}
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+        </div>
+    </div>
 
 @stop
 
 @section('moar_scripts')
+
+
 @include ('partials.bootstrap-table')
 
 

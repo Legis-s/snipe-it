@@ -1,6 +1,7 @@
 <?php
+
 return [
-    'about_companies_title'            => 'Um fyrirtæki',
-    'about_companies_text'                  => 'Companies can be used as a simple identifier field, or can be used to limit visibility of assets, users, etc if full company support is enabled in your Admin settings.',
-    'select_company' => 'Select Company',
+    'select_company' => 'Veldu fyrirtæki',
+    'about_companies' => 'About Companies',
+    'about_companies_description' => '        You can use companies as a simple informative field, or you can use them to restrict asset visibility and availability to users with a specific company by enabling Full Company Support in your Admin Settings.',
 ];

@@ -1,16 +1,24 @@
 <?php
 
-return array(
+return [
     'actions' 	                => 'Toiminnot',
     'add'    	                => 'Lisää uusi',
     'cancel'                    => 'Peruuta',
-    'checkin_and_delete'  	    => 'Tarkista & Poista käyttäjä',
+    'checkin_and_delete'  	    => 'Checkin All / Delete User',
     'delete'  	                => 'Poista',
     'edit'    	                => 'Muokkaa',
     'restore' 	                => 'Palauta',
-    'request'                   => 'Pyyntö',
+    'remove'                    => 'Remove',
+    'request'                   => 'Pyydä',
     'submit'  	                => 'Lähetä',
     'upload'                    => 'Lähetä',
-	'select_file'				=> 'Valitse tiedosto...',
-    'select_files'				=> 'Select Files...',
-);
+    'select_file'				=> 'Valitse tiedosto...',
+    'select_files'				=> 'Valitse tiedostot...',
+    'generate_labels'           => '{1} Luo tunniste |[2, *] Luo tunnisteet',
+    'send_password_link'        => 'Lähetä salasanan palautuslinkki',
+    'go'                        => 'Go',
+    'bulk_actions'              => 'Bulk Actions',
+    'add_maintenance'           => 'Add Maintenance',
+    'append'                    => 'Append',
+    'new'                       => 'New',
+];

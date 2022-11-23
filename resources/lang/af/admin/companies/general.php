@@ -1,6 +1,7 @@
 <?php
+
 return [
-    'about_companies_title'            => 'Oor Maatskappye',
-    'about_companies_text'                  => 'Maatskappye kan gebruik word as \'n eenvoudige identifikasie veld, of kan gebruik word om sigbaarheid van bates, gebruikers, ens beperk as volle maatskappy ondersteuning geaktiveer is in jou Admin instellings.',
     'select_company' => 'Kies Maatskappy',
+    'about_companies' => 'About Companies',
+    'about_companies_description' => '        You can use companies as a simple informative field, or you can use them to restrict asset visibility and availability to users with a specific company by enabling Full Company Support in your Admin Settings.',
 ];

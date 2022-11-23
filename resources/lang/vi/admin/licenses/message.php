@@ -2,12 +2,13 @@
 
 return array(
 
-    'does_not_exist' => 'Bản quyền không tồn tại.',
+    'does_not_exist' => 'License does not exist or you do not have permission to view it.',
     'user_does_not_exist' => 'Người dùng không tồn tại.',
     'asset_does_not_exist' 	=> 'Tài sản bản đang cố gắng liên kết với bản quyền này không tồn tại.',
     'owner_doesnt_match_asset' => 'Tài sản bạn đang cố gắng liên kết với bản quyền đã được sở hữu hởi một người nào đó khác với người đang được lựa chọn để gán trong danh sách xổ xuống.',
     'assoc_users'	 => 'Bản quyền này hiện tại đã được checkout đến một người dùng và có thể đã bị xóa. Xin vui lòng kiểm tra lại bản quyền đầu tiên, và kế đến có gắng xóa thêm lần nữa. ',
     'select_asset_or_person' => 'Bạn phải chọn một nội dung hoặc người dùng, nhưng không phải cả hai.',
+    'not_found' => 'License not found',
 
 
     'create' => array(

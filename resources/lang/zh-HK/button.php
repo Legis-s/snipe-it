@@ -1,16 +1,24 @@
 <?php
 
-return array(
-    'actions' 	                => '操作',
-    'add'    	                => '新增',
-    'cancel'                    => '取消',
-    'checkin_and_delete'  	    => '繳回並刪除使用者',
-    'delete'  	                => '刪除',
-    'edit'    	                => '編輯',
-    'restore' 	                => '還原',
-    'request'                   => '申請',
-    'submit'  	                => '送出',
-    'upload'                    => '上傳',
-	'select_file'				=> '選擇檔案…',
-    'select_files'				=> '選擇檔案…',
-);
+return [
+    'actions' 	                => 'Actions',
+    'add'    	                => 'Add New',
+    'cancel'                    => 'Cancel',
+    'checkin_and_delete'  	    => 'Checkin All / Delete User',
+    'delete'  	                => 'Delete',
+    'edit'    	                => 'Edit',
+    'restore' 	                => 'Restore',
+    'remove'                    => 'Remove',
+    'request'                   => 'Request',
+    'submit'  	                => 'Submit',
+    'upload'                    => 'Upload',
+    'select_file'				=> 'Select File...',
+    'select_files'				=> 'Select Files...',
+    'generate_labels'           => '{1} Generate Label|[2,*] Generate Labels',
+    'send_password_link'        => 'Send Password Reset Link',
+    'go'                        => 'Go',
+    'bulk_actions'              => 'Bulk Actions',
+    'add_maintenance'           => 'Add Maintenance',
+    'append'                    => 'Append',
+    'new'                       => 'New',
+];

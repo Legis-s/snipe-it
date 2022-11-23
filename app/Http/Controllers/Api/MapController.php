@@ -18,8 +18,8 @@ class MapController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v4.0]
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $licenseId
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
@@ -38,7 +38,6 @@ class MapController extends Controller
             ->where('active',"=", true)
             ->withCount(['assets as assets_count',
                 'assets as checked_assets_count' => function (Builder $query) {
-//                $query->where('last_audit_date', '!=', null);
                 $query->whereNotNull('assets.last_audit_date');
             }]);
 

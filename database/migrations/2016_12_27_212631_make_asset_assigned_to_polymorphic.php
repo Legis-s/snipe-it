@@ -1,10 +1,10 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Database\Migrations\Migration;
 use App\Models\Asset;
 use App\Models\User;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class MakeAssetAssignedToPolymorphic extends Migration
 {
@@ -15,12 +15,12 @@ class MakeAssetAssignedToPolymorphic extends Migration
      */
     public function up()
     {
-         Schema::table('assets', function (Blueprint $table) {
-             $table->string('assigned_type')->nullable();
-         });
-
-        // Prior to this migration, asset's could only be assigned to users.
-        Asset::whereNotNull('assigned_to')->orWhere('assigned_to', '!=', null)->update(['assigned_type' => User::class]);
+        Schema::table('assets', function (Blueprint $table) {
+            $table->string('assigned_type')->nullable();
+        });
+        if (config('database.default') == 'mysql') {
+            Asset::whereNotNull('assigned_to')->orWhere('assigned_to', '!=', '')->update(['assigned_type' => User::class]);
+        }
     }
 
     /**

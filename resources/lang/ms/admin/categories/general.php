@@ -1,8 +1,6 @@
 <?php
 
 return array(
-    'about_categories_title' 			=> 'Mengenai Kategori',
-    'about_categories'  				=> 'Kategori membantu anda menyusun item anda. Sesetengah kategori contoh mungkin &quot;Desktops&quot;, &quot;Laptops&quot;, &quot;Mobile Phones&quot;, &quot;Tablets&quot;, dan sebagainya, tetapi anda boleh menggunakan kategori dengan cara yang masuk akal untuk anda.',
     'asset_categories' 					=> 'Kategori aset',
     'category_name'  					=> 'Nama Kategori',
     'checkin_email'                     => 'Hantar e-mel kepada pengguna selepas semak masuk / semak keluar.',
@@ -20,5 +18,6 @@ return array(
     'update'  							=> 'Kemaskini Kategori',
     'use_default_eula'					=> 'Gunakan <a href="#" data-toggle="modal" data-target="#eulaModal">pilihan utama lalai EULA</a> sebaliknya.',
     'use_default_eula_disabled'			=> '<del>Gunakan EULA lalai utama bukannya.</del> Tiada seting utama EULA ditetapkan. Sila tambah satu dalam Tetapan.',
+    'use_default_eula_column'			=> 'Guna EULA lalai',
 
 );

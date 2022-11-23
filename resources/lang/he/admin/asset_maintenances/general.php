@@ -7,5 +7,10 @@
         'view'               => 'הצג פרטי אחזקת נכס',
         'repair'             => 'תיקון',
         'maintenance'        => 'תחזוקה',
-        'upgrade'            => 'שדרוג'
+        'upgrade'            => 'שדרוג',
+        'calibration'        => 'כיול',
+        'software_support'   => 'תמיכה בתכנה',
+        'hardware_support'   => 'תמיכה בחומרה',
+        'configuration_change'   => 'Configuration Change',
+        'pat_test'           => 'PAT Test',
     ];

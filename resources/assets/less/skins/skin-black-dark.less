@@ -1,5 +1,5 @@
 /*
- * Skin: orange
+ * Skin: black dark
  * ----------
  */
 @import "../bootstrap-less/mixins.less";
@@ -26,7 +26,7 @@
               color: #fff;
             }
             a {
-              color: #fff;
+              color: #333;
               &:hover {
                 background: darken(@black, 5%);
                 color: #fff;
@@ -34,6 +34,11 @@
             }
           }
         }
+      }
+    }
+    @media (max-width: 991px) {
+      .navbar-custom-menu > .navbar-nav > li > .dropdown-menu {
+        background-color: var(--back-sub);
       }
     }
     //Logo
@@ -87,6 +92,12 @@
   }
 }
 
+/**
+The dropdown is white, so use a darker color
+ */
+li.dropdown-item-marker {
+  color: var(--button-primary);
+}
 
 a {
   &:hover {
@@ -107,13 +118,22 @@ a {
 :root {
   --background: #222;
   --back-main: #333;
-  --back-sub: #444;
+  --back-sub: #3d4144;
+  --back-sub-alt: rgba(0, 0, 0, 0.36);
+  --button-default: darken(@black, 15%);
+  --button-primary: darken(@black, 25%);
+  --button-hover: darken(@black, 30%);
   --header: @black; /* Use same as Header picker */
-  --text-main: #FFF;
-  --text-sub: #BBB;
-  --link: lighten(@black, 50%); /* Use same as Header picker */
+  --text-main: #BBB;
+  --text-sub: #9b9b9b;
+  --link: #AAA; /* Use same as Header picker, lighten by 70% */
+  --visited-link: lighten(@black, 40%); /* Use same as Header picker, lighten by 70% */
+  --hover-link: lighten(@black, 45%); /* Use same as Header picker, lighten by 70% */
   --nav-link: #FFF; /* Use same as Header picker */
   --light-link: #fff; /* Use same as Header picker */
+}
+#ldapad_test_results.well.well-sm{
+  color: var(--back-main);
 }
 
 .main-header .navbar, .main-header .logo {
@@ -123,7 +143,13 @@ a {
   border-color: var(--header);
 }
 
-.navbar-nav>li>a:link {
+.bootstrap-table .fixed-table-container .table thead th .sortable {
+  color: var(--nav-link);
+}
+.bootstrap-table .fixed-table-toolbar .columns label {
+  color:#000;
+}
+.thead, .navbar-nav>li>a:link {
   color: var(--nav-link);
 }
 
@@ -132,15 +158,51 @@ a {
   color: var(--text-main);
 }
 
-a, a:link, a:visited, .btn-primary.hover {
-  color: var(--header);
+a:link {
+  color: var(--link);
 }
+
+a:visited {
+  color: var(--nav-link);
+}
+
+a:hover {
+  color: var(--hover-link);
+}
+
+.btn-primary.hover {
+  color: var(--nav-link);
+}
+
+.small-box h3, .small-box p {
+  color: var(--nav-link) !important;
+  a:hover {
+    text-decoration: none;
+    color: var(--nav-link) !important;
+  }
+}
+a:link.btn-default{
+  color: var(--nav-link);
+}
+/* Trying to figure out a way of having links different shades based on what row they are on (even/odd).
+a unique challenge for this dark mode skin.
+Probably writing the specificity for this incorrectly. --Godfrey Martinez 02/04/21
+
+.table-striped>tbody>tr:nth-of-type(even)>a:link{
+  color:#000d07;
+}
+.table-striped>tbody>tr:nth-of-type(odd)>a:link{
+  color:#bfbfbf;
+
+}*/
+
 #accessoriesTable>tbody>tr>td>nobr>a>i.fa {
   color: var(--text-main);
 }
 #assetsListingTable>tbody>tr>td>nobr>a>i.fa {
   color: var(--text-main);
 }
+
 #assetsListingTable>tbody>tr.selected>td {
   background-color: var(--back-main);
 }
@@ -153,22 +215,28 @@ body {
 }
 .box-body, .box-footer, .box-header {
   background-color: var(--back-sub);
-  color: var(--text-main);
+  color: var(--header);
 }
 .btn-default{
-  background-color: var(--back-main);
-  color: var(--header);
+  background-color: var(--button-default);
+  color: var(--nav-link);
 }
+
+.btn-default dropdown-toggle {
+  background-color: var(--button-default);
+  color: var(--nav-link);
+}
+
 .btn-default:active, .btn-default:focus, .btn-default:hover, .btn-default.active {
-  background-color: var(--back-sub);
-  color: var(--header);
+  background-color: var(--button-hover);
+  color: var(--nav-link);
 }
-.btn-primary, .btn-primary.hover, .btn-primary:active, .text-blue {
-  color: var(--text-main)!important;
+.btn-primary, .btn-primary.hover, .btn-primary:active, .text-black {
+  color: var(--nav-link)!important;
 }
 .btn-primary:hover {
-  background-color: var(--back-main);
-  color: var(--header)!important;
+  background-color: var(--button-primary);
+  color: var(--link)!important;
 }
 #componentsTable>tbody>tr>td>nobr>a>i.fa {
   color: var(--text-main);
@@ -193,15 +261,15 @@ body {
 #details>div>div>div>table {
   background-color: transparent;
 }
-.dropdown-menu, .dropdown-menu>li>a {
-  background-color: var(--back-sub);
-  color: var(--text-main);
-}
 .dropdown-menu>li>a:hover {
+  background-color: var(--back-main);
+  color: var(--nav-link);
+}
+.form-control {
   background-color: var(--back-main);
   color: var(--text-main);
 }
-.form-control {
+.form-control[disabled], .form-control[readonly], fieldset[disabled] .form-control{
   background-color: var(--back-main);
   color: var(--text-main);
 }
@@ -269,6 +337,9 @@ input[type=text], input[type=search] {
 .select2-container--default .select2-selection--single .select2-selection__rendered {
   color: var(--text-main);
 }
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+  background-color: var(--header);
+}
 .select2-selection--single {
   background-color: var(--back-sub)!important;
   color: var(--text-main)!important;
@@ -289,21 +360,39 @@ input[type=text], input[type=search] {
 }
 .table-striped>tbody>tr:nth-of-type(odd) {
   background-color: var(--back-sub);
-}
-#webui>div>div>div>div>div>table>tbody>tr>td>a>i.fa {
   color: var(--text-main);
+}
+.table-striped>tbody>tr:nth-of-type(even){
+  background-color: var(--back-sub-alt);
+  color: var(--text-main);
+}
+.row-new-striped > .row:nth-of-type(odd){
+  background-color: var(--back-sub);
+  color: var(--text-main);
+}
+.row-new-striped > .row:nth-of-type(even){
+  background-color: var(--back-sub-alt);
+  color: var(--text-main);
+}
+#webui>div>div>div>div>div>table>tbody>tr>td>a>i.fa, .box-body, .box-footer, .box-header {
+  color: var(--text-main);
+}
+
+.box-header.with-border {
+  border-bottom: #000;
 }
 
 a {
   color: var(--link);
+
   &:link {
-    color: var(--link);
-  }
+    color: var(--link)  }
   &:hover {
-    color: var(--light-link);
+    color: var(--hover-link);
+    text-decoration: underline;
   }
   &:visited {
-    color: var(--link);
+    color: var(--visited-link)
   }
 }
 
@@ -334,3 +423,9 @@ a {
   display: table-cell;
 }
 
+.search-highlight, .search-highlight:hover {
+  background-color: #e9d15b;
+}
+div.container.row-new-striped{
+  background-color:  var(--back-sub);
+}

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+{{-- TODO: Translate --}}
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,9 +8,8 @@
 
     <title>{{ config('app.name') }} - Authorization</title>
 
-    <!-- Styles -->
-    <link href="/css/app.css" rel="stylesheet">
-
+    {{-- stylesheets --}}
+    <link rel="stylesheet" href="{{ url(mix('css/all.css')) }}">
     <style>
         .passport-authorize .container {
             margin-top: 30px;

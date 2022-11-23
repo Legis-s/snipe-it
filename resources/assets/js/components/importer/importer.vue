@@ -2,6 +2,7 @@
 
 <script>
     require('blueimp-file-upload');
+    var baseUrl = $('meta[name="baseUrl"]').attr('content');
     export default {
         /*
          * The component's data.
@@ -63,7 +64,7 @@
 
         methods: {
             fetchFiles() {
-                this.$http.get(route('api.imports.index'))
+                this.$http.get(baseUrl + 'api/v1/imports')
                 .then( ({data}) => this.files = data, // Success
                     //Fail
                 (response) => {
@@ -73,7 +74,7 @@
                 });
             },
             fetchCustomFields() {
-                this.$http.get(route('api.customfields.index'))
+                this.$http.get(baseUrl + 'api/v1/fields')
                 .then( ({data}) => {
                     data = data.rows;
                     data.forEach((item) => {
@@ -85,10 +86,18 @@
                 });
             },
             deleteFile(file, key) {
-                this.$http.delete(route('api.imports.destroy', file.id))
-                .then((response) => this.files.splice(key, 1), // Success, remove file from array.
+                this.$http.delete(baseUrl + 'api/v1/imports/' + file.id)
+                .then(
+                    // Success, remove file from array.
+                    (response) => {
+                        this.files.splice(key, 1);
+                        this.alert.type = response.body.status; // A failed delete can still cause a 200 status code.
+                        this.alert.visible = true;
+                        this.alert.message = response.body.messages;
+                    },
                     (response) => {// Fail
-                        this.alert.type="danger";
+                        // this.files.splice(key, 1);
+                        this.alert.type="error";
                         this.alert.visible=true;
                         this.alert.message=response.body.messages;
                     }
@@ -112,9 +121,9 @@
         },
 
         components: {
-            alert: require('../alert.vue'),
-            errors: require('./importer-errors.vue'),
-            importFile: require('./importer-file.vue'),
+            alert: require('../alert.vue').default,
+            errors: require('./importer-errors.vue').default,
+            importFile: require('./importer-file.vue').default,
         }
     }
 
