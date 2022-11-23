@@ -287,10 +287,10 @@
                         <div class="col-md-12">
                             <br><br>
                             @if ($purchase->status == "finished")
-                                <a href="{{ route('hardware.bulkcheckout.show', ['purchase_bulk_id' => $purchase->id]) }}" style="margin-bottom:10px; width:100%" class="btn btn-primary btn-sm">
+                                <a href="{{ route('bulk.checkout.show', ['purchase_bulk_id' => $purchase->id]) }}" style="margin-bottom:10px; width:100%" class="btn btn-primary btn-sm">
                                     {{ trans('admin/massoperations/general.checkout') }}
                                 </a>
-                                <a href="{{ route('hardware.bulksell.show', ['purchase_bulk_id' => $purchase->id]) }}" style="margin-bottom:10px; width:100%" class="btn btn-primary btn-sm">
+                                <a href="{{ route('bulk.sell.show', ['purchase_bulk_id' => $purchase->id]) }}" style="margin-bottom:10px; width:100%" class="btn btn-primary btn-sm">
                                     {{ trans('admin/massoperations/general.sell') }}
                                 </a>
                             @endif
