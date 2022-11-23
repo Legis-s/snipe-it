@@ -20,7 +20,8 @@ class MassOperation extends SnipeModel
     use HasFactory;
     protected $presenter = \App\Presenters\MassOperationsPresenter::class;
     use Presentable;
-
+    use SoftDeletes;
+    
     protected $table = 'mass_operations';
     protected $rules = [
         'operation_type' => 'max:32',
