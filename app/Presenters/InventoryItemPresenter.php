@@ -98,6 +98,13 @@ class InventoryItemPresenter extends Presenter
                 "title" => "Производитель",
                 "visible" => true,
             ],[
+                "field" => "notes",
+                "searchable" => true,
+                "sortable" => true,
+                "switchable" => true,
+                "title" => "Комментарий",
+                "visible" => true,
+            ],[
                 "field" => "updated_at",
                 "searchable" => false,
                 "sortable" => true,

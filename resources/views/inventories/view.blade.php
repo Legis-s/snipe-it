@@ -9,10 +9,6 @@
 @parent
 @stop
 
-@section('header_right')
-{{--<a href="{{ route('locations.edit', ['location' => $inventory->id]) }}" class="btn btn-sm btn-primary pull-right">{{ trans('admin/locations/table.update') }} </a>--}}
-@stop
-
 {{-- Page content --}}
 @section('content')
 
