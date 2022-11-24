@@ -327,7 +327,7 @@ class Asset extends Depreciable
 
     public function mass_operations()
     {
-        return $this->belongsToMany(MassOperation::class);
+        return $this->belongsToMany(\App\Models\MassOperation::class);
     }
 
 

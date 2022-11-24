@@ -85,6 +85,13 @@ class AssetPresenter extends Presenter
                 'visible' => true,
                 'formatter' => 'categoriesLinkObjFormatter',
             ], [
+                'field' => 'manufacturer',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('general.manufacturer'),
+                'visible' => false,
+                'formatter' => 'manufacturersLinkObjFormatter',
+            ], [
                 'field' => 'status_label',
                 'searchable' => true,
                 'sortable' => true,
@@ -128,14 +135,6 @@ class AssetPresenter extends Presenter
                 "title" => "Договор",
                 "visible" => true,
                 "formatter" => "contractsLinkObjFormatter"
-            ],
-            [
-                'field' => 'manufacturer',
-                'searchable' => true,
-                'sortable' => true,
-                'title' => trans('general.manufacturer'),
-                'visible' => false,
-                'formatter' => 'manufacturersLinkObjFormatter',
             ], [
                 'field' => 'supplier',
                 'searchable' => true,
