@@ -419,4 +419,33 @@ class Consumable extends SnipeModel
         return $this->belongsToMany(\App\Models\Location::class, 'consumables_locations', 'consumable_id', 'assigned_to')->count();
     }
 
+
+
+
+    /**
+     * Query builder scope to search on text, including catgeory and manufacturer name
+     *
+     * @param  Illuminate\Database\Query\Builder  $query  Query builder instance
+     * @param  text                              $search      Search term
+     *
+     * @return Illuminate\Database\Query\Builder          Modified query builder
+     */
+    public function scopeSearchByManufacturerOrCat($query, $search)
+    {
+
+        return $query->where('name', 'LIKE', "%$search%")
+            ->orWhere('model_number', 'LIKE', "%$search%")
+            ->orWhere(function ($query) use ($search) {
+                $query->whereHas('category', function ($query) use ($search) {
+                    $query->where('categories.name', 'LIKE', '%'.$search.'%');
+                });
+            })
+            ->orWhere(function ($query) use ($search) {
+                $query->whereHas('manufacturer', function ($query) use ($search) {
+                    $query->where('manufacturers.name', 'LIKE', '%'.$search.'%');
+                });
+            });
+
+    }
+
 }

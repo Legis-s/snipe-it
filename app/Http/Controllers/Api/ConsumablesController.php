@@ -417,13 +417,6 @@ class ConsumablesController extends Controller
             $consumables = $consumables->SearchByManufacturerOrCat($request->input('search'));
         }
 
-//        if ($request->filled('assetStatusType') && $request->input('assetStatusType') === 'notnull') {
-//
-//            $consumables = $consumables->filter(function ($value) {
-//                return $value->numRemaining()>0;
-//            });
-//
-//        }
         $consumables = $consumables->paginate(50);
 
         foreach ($consumables as $consumable) {
