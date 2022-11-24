@@ -1180,45 +1180,45 @@
                         </div> <!-- row -->
                     </div> <!-- /.tab-pane software -->
 
-{{--                    <div class="tab-pane fade" id="consumables">--}}
-{{--                        <div class="row">--}}
-{{--                            <div class="col-md-12">--}}
+                    <div class="tab-pane fade" id="consumables">
+                        <div class="row">
+                            <div class="col-md-12">
 
-{{--                                <div id="toolbar">--}}
-{{--                                </div>--}}
-{{--                                <!-- checked out assets table -->--}}
-{{--                                <div class="table-responsive">--}}
-{{--                                    <table--}}
-{{--                                            data-columns="{{ \App\Presenters\ConsumableAssignmentPresenter::dataTableLayoutIn() }}"--}}
-{{--                                            data-cookie-id-table="consumablesCheckedoutTable"--}}
-{{--                                            data-pagination="true"--}}
-{{--                                            data-id-table="consumablesCheckedoutTable"--}}
-{{--                                            data-search="false"--}}
-{{--                                            data-side-pagination="server"--}}
-{{--                                            data-show-columns="true"--}}
-{{--                                            data-show-export="true"--}}
-{{--                                            data-show-footer="true"--}}
-{{--                                            data-show-refresh="true"--}}
-{{--                                            data-sort-order="asc"--}}
-{{--                                            data-sort-name="name"--}}
-{{--                                            id="consumablesCheckedoutTable"--}}
-{{--                                            class="table table-striped snipe-table"--}}
-{{--                                            data-url="{{route('api.consumableassignments.index',['asset_id'=> $asset->id])}}">--}}
-{{--                                        --}}{{--                    <thead>--}}
-{{--                                        --}}{{--                    <tr>--}}
-{{--                                        --}}{{--                      <th data-searchable="false" data-sortable="false" data-field="name">Наименование</th>--}}
-{{--                                        --}}{{--                      <th data-searchable="false" data-sortable="false" data-field="quantity">Количество</th>--}}
-{{--                                        --}}{{--                      <th data-searchable="false" data-sortable="false" data-field="created_at" data-formatter="dateDisplayFormatter">{{ trans('general.date') }}</th>--}}
-{{--                                        --}}{{--                      <th data-searchable="false" data-sortable="false" data-field="admin">Выдал</th>--}}
-{{--                                        --}}{{--                    </tr>--}}
-{{--                                        --}}{{--                    </thead>--}}
-{{--                                    </table>--}}
-{{--                                </div>--}}
+                                <div id="toolbar">
+                                </div>
+                                <!-- checked out assets table -->
+                                <div class="table-responsive">
+                                    <table
+                                            data-columns="{{ \App\Presenters\ConsumableAssignmentPresenter::dataTableLayoutIn() }}"
+                                            data-cookie-id-table="consumablesCheckedoutTable"
+                                            data-pagination="true"
+                                            data-id-table="consumablesCheckedoutTable"
+                                            data-search="false"
+                                            data-side-pagination="server"
+                                            data-show-columns="true"
+                                            data-show-export="true"
+                                            data-show-footer="true"
+                                            data-show-refresh="true"
+                                            data-sort-order="asc"
+                                            data-sort-name="name"
+                                            id="consumablesCheckedoutTable"
+                                            class="table table-striped snipe-table"
+                                            data-url="{{route('api.consumableassignments.index',['asset_id'=> $asset->id])}}">
+                                                            <thead>
+                                                            <tr>
+                                                              <th data-searchable="false" data-sortable="false" data-field="name">Наименование</th>
+                                                              <th data-searchable="false" data-sortable="false" data-field="quantity">Количество</th>
+                                                              <th data-searchable="false" data-sortable="false" data-field="created_at" data-formatter="dateDisplayFormatter">{{ trans('general.date') }}</th>
+                                                              <th data-searchable="false" data-sortable="false" data-field="admin">Выдал</th>
+                                                            </tr>
+                                                            </thead>
+                                    </table>
+                                </div>
 
 
-{{--                            </div><!-- /col -->--}}
-{{--                        </div> <!-- row -->--}}
-{{--                    </div> <!-- /.tab-pane software -->--}}
+                            </div><!-- /col -->
+                        </div> <!-- row -->
+                    </div> <!-- /.tab-pane software -->
 
 
                     <div class="tab-pane fade" id="maintenances">
