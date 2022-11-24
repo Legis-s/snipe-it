@@ -44,17 +44,17 @@
                     </li>
 
 
-                    <li>
-                        <a href="#rtd_assets" data-toggle="tab">
-                    <span class="hidden-lg hidden-md">
-                        <i class="fas fa-barcode fa-2x" aria-hidden="true"></i>
-                    </span>
-                            <span class="hidden-xs hidden-sm">
-                          {{ trans('admin/hardware/form.default_location') }}
-                                {!! (($location->rtd_assets) && ($location->rtd_assets()->AssetsForShow()->count() > 0 )) ? '<badge class="badge badge-secondary">'.number_format($location->rtd_assets()->AssetsForShow()->count()).'</badge>' : '' !!}
-                    </span>
-                        </a>
-                    </li>
+{{--                    <li>--}}
+{{--                        <a href="#rtd_assets" data-toggle="tab">--}}
+{{--                    <span class="hidden-lg hidden-md">--}}
+{{--                        <i class="fas fa-barcode fa-2x" aria-hidden="true"></i>--}}
+{{--                    </span>--}}
+{{--                            <span class="hidden-xs hidden-sm">--}}
+{{--                          {{ trans('admin/hardware/form.default_location') }}--}}
+{{--                                {!! (($location->rtd_assets) && ($location->rtd_assets()->AssetsForShow()->count() > 0 )) ? '<badge class="badge badge-secondary">'.number_format($location->rtd_assets()->AssetsForShow()->count()).'</badge>' : '' !!}--}}
+{{--                    </span>--}}
+{{--                        </a>--}}
+{{--                    </li>--}}
 
                     <li>
                         <a href="#assets_assigned" data-toggle="tab">
@@ -98,10 +98,9 @@
                     <span class="hidden-lg hidden-md">
                         <i class="fas fa-tint fa-2x" aria-hidden="true"></i>
                     </span>
-                            <span class="hidden-xs hidden-sm">
-                          Выданные расходные материалы
-                                {!! (($location->consumables) && ($location->consumables->count() > 0 )) ? '<badge class="badge badge-secondary">'.number_format($location->consumables->count()).'</badge>' : '' !!}
-                    </span>
+                            <span class="hidden-xs hidden-sm">Выданные расходные материалы</span>
+                            {!! (($location->assignedConsumables) && ($location->assignedConsumables->count() > 0 )) ? '<badge class="badge badge-secondary">'.number_format($location->assignedConsumables->count()).'</badge>' : '' !!}
+
                         </a>
                     </li>
 
@@ -123,6 +122,8 @@
                     </span>
                             <span class="hidden-xs hidden-sm">
                           Инвентаризации
+                          {!! (($location->inventories) && ($location->inventories->count() > 0 )) ? '<badge class="badge badge-secondary">'.number_format($location->inventories->count()).'</badge>' : '' !!}
+
                     </span>
                         </a>
                     </li>

@@ -300,21 +300,28 @@ class Consumable extends SnipeModel
             return null;
         }
     }
-//
-//    /**
-//     * Check how many items within a consumable are checked out
-//     *
-//     * @author [A. Gianotto] [<snipe@snipe.net>]
-//     * @since [v5.0]
-//     * @return int
-//     */
-//    public function numCheckedOut()
-//    {
-//        $checkedout = 0;
-//        $checkedout = $this->users->count();
-//
-//        return $checkedout;
-//    }
+
+    /**
+     * Check how many items within a consumable are checked out
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v5.0]
+     * @return int
+     */
+    public function numCheckedOut()
+    {
+        $checkedout = 0;
+        $consumable = ConsumableAssignment::where('consumable_id', $this->id)
+            ->whereIn("type",["sold", "issued"])
+            ->get();
+        $checkedout = 0 ;
+        foreach ($consumable as &$consumabl) {
+            $checkedout += $consumabl->quantity;
+        }
+
+
+        return $checkedout;
+    }
 
     /**
      * Checks the number of available consumables
@@ -325,7 +332,6 @@ class Consumable extends SnipeModel
      */
     public function numRemaining()
     {
-//        $checkedout = $this->users->count();
 
         $consumable = ConsumableAssignment::where('consumable_id', $this->id)
             ->whereIn("type",["sold", "issued"])

@@ -164,17 +164,17 @@ class Location extends SnipeModel
         return $this->hasMany(\App\Models\Asset::class, 'rtd_location_id');
     }
 
-//    /**
-//     * Establishes the consumable -> location relationship
-//     *
-//     * @author A. Gianotto <snipe@snipe.net>
-//     * @since [v3.0]
-//     * @return \Illuminate\Database\Eloquent\Relations\Relation
-//     */
-//    public function consumables()
-//    {
-//        return $this->hasMany(\App\Models\Consumable::class, 'location_id');
-//    }
+    /**
+     * Establishes the consumable -> location relationship
+     *
+     * @author A. Gianotto <snipe@snipe.net>
+     * @since [v3.0]
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
+    public function consumables()
+    {
+        return $this->hasMany(\App\Models\Consumable::class, 'location_id');
+    }
 
     /**
      * Establishes the component -> location relationship
@@ -315,15 +315,20 @@ class Location extends SnipeModel
 
     public function inventories()
     {
-        return $this->hasMany('\App\Models\Inventory');
+        return $this->hasMany(\App\Models\Inventory::class);
     }
 
+
     /**
-     * Get consumables assigned to this user
+     * Establishes the assignedConsumables -> location assignment relationship
+     *
+     * @author A. Gianotto <snipe@snipe.net>
+     * @since [v3.0]
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
      */
-    public function consumables()
+    public function assignedConsumables()
     {
-        return $this->belongsToMany('\App\Models\Consumable', 'consumables_locations', 'assigned_to', 'consumable_id')->withPivot('id')->withTrashed();
+        return $this->morphMany(\App\Models\ConsumableAssignment::class, 'assigned', 'assigned_type', 'assigned_to');
     }
 
 }
