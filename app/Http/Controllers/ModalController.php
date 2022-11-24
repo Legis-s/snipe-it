@@ -33,6 +33,7 @@ class ModalController extends Controller
             'supplier',
             'upload-file',
             'user',
+            'consumable'
         ];
 
 

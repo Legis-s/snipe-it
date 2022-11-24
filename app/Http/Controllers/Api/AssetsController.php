@@ -120,7 +120,7 @@ class AssetsController extends Controller
             $allowed_columns[] = $field->db_column_name();
         }
 
-        $assets = Company::scopeCompanyrables(Asset::select('assets.*'), 'company_id', 'assets')
+        $assets = Company::scopeCompanyables(Asset::select('assets.*'), 'company_id', 'assets')
             ->with('location', 'assetstatus', 'company', 'defaultLoc','assignedTo',
                 'model.category', 'model.manufacturer', 'model.fieldset','supplier'); //it might be tempting to add 'assetlog' here, but don't. It blows up update-heavy users.
 
