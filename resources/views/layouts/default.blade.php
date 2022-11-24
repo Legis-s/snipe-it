@@ -360,6 +360,15 @@
                                             </li>
                                         @endcan
                                         <li class="divider"></li>
+                                        @impersonating($guard = null)
+                                        <li>
+                                            <a href="{{ route('impersonate.leave') }}">
+                                                <i class="fas fa-user-times fa-fw" aria-hidden="true"></i>
+                                                Leave impersonation
+                                            </a>
+                                        </li>
+                                        <li class="divider"></li>
+                                        @endImpersonating
                                         <li>
 
                                             <a href="{{ route('logout.get') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
