@@ -34,7 +34,7 @@
     </div>
 
     <!-- Custom Fieldset -->
-    @livewire('custom-field-set-default-values-for-model',["model_id" => $item->id])
+{{--    @livewire('custom-field-set-default-values-for-model',["model_id" => $item->id])--}}
 
     @include ('partials.forms.edit.notes')
     @include ('partials.forms.edit.requestable', ['requestable_text' => trans('admin/models/general.requestable')])
