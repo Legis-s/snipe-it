@@ -787,10 +787,10 @@
                 }
                 // The user is allowed to check items out, AND the item is deployable
                 if ((row.available_actions.checkout == true) && (row.user_can_checkout == true) && ((!row.asset_id) && (!row.assigned_to))) {
-                    return '<div class="btn-group">' +
+                    return '<div class="btn-group" style="min-width:270px">' +
                         '<a href="{{ url('/') }}/' + destination + '/' + row.id + '/checkout" class="btn btn-sm bg-maroon" data-toggle="tooltip" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>'+
-                        '<a href="{{ url('/') }}/' + destination + '/' + row.id + '/sell" class="btn btn-sm bg-maroon" data-toggle="tooltip" title="{{ trans('general.sell_tooltip') }}">{{ trans('general.sell') }}</a>'+
-                        '<a href="{{ url('/') }}/' + destination + '/' + row.id + '/rent" class="btn btn-sm bg-maroon" data-toggle="tooltip" title="{{ trans('general.rent_tooltip') }}">{{ trans('general.rent') }}</a>'+
+                        '<a href="{{ url('/') }}/' + destination + '/' + row.id + '/sell" class="btn btn-sm bg-red" data-toggle="tooltip" title="{{ trans('general.sell_tooltip') }}">{{ trans('general.sell') }}</a>'+
+                        '<a href="{{ url('/') }}/' + destination + '/' + row.id + '/rent" class="btn btn-sm bg-yellow" data-toggle="tooltip" title="{{ trans('general.rent_tooltip') }}">{{ trans('general.rent') }}</a>'+
                         '</div>';
 
                     // The user is allowed to check items out, but the item is not deployable
@@ -814,9 +814,9 @@
             var destination = "consumables";
             // The user is allowed to check items out, AND the item is deployable
             if ((row.available_actions.checkout == true) && (row.user_can_checkout == true) && ((!row.asset_id) && (!row.assigned_to))) {
-                return '<div class="btn-group">' +
+                return '<div class="btn-group" style="min-width:180px">' +
                     '<a href="{{ url('/') }}/' + destination + '/' + row.id + '/checkout" class="btn btn-sm bg-maroon" data-toggle="tooltip" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>'+
-                    '<a href="{{ url('/') }}/' + destination + '/' + row.id + '/sell" class="btn btn-sm bg-maroon" data-toggle="tooltip" title="{{ trans('general.sell_tooltip') }}">{{ trans('general.sell') }}</a>'+
+                    '<a href="{{ url('/') }}/' + destination + '/' + row.id + '/sell" class="btn btn-sm bg-red" data-toggle="tooltip" title="{{ trans('general.sell_tooltip') }}">{{ trans('general.sell') }}</a>'+
                     '</div>';
 
                 // The user is allowed to check items out, but the item is not deployable
