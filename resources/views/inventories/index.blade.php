@@ -16,9 +16,9 @@
                     <table
                             data-click-to-select="true"
                             data-columns="{{ \App\Presenters\InventoryPresenter::dataTableLayout() }}"
-                            data-cookie-id-table="usersTable"
+                            data-cookie-id-table="inventoryTable"
                             data-pagination="true"
-                            data-id-table="usersTable"
+                            data-id-table="inventoryTable"
                             data-search="true"
                             data-side-pagination="server"
                             data-show-columns="true"
@@ -26,7 +26,7 @@
                             data-show-refresh="true"
                             data-sort-order="asc"
                             data-toolbar="#toolbar"
-                            id="usersTable"
+                            id="inventoryTable"
                             class="table table-striped snipe-table"
                             data-url="{{ route('api.inventories.index') }}">
                     </table>
