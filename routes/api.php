@@ -1204,6 +1204,12 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
                     'review'
                 ]
             )->name('api.consumables.review');
+            Route::post('{id}/compact',
+                [
+                    Api\ConsumablesController::class,
+                    'compact'
+                ]
+            )->name('api.consumables.compact');
         });// end Consumables API routes
 
 

@@ -6,6 +6,7 @@ use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Transformers\ConsumablesTransformer;
 use App\Http\Transformers\SelectlistTransformer;
+use App\Models\Actionlog;
 use App\Models\Company;
 use App\Models\Consumable;
 use App\Models\ConsumableAssignment;
@@ -464,45 +465,45 @@ class ConsumablesController extends Controller
 //    }
 
 
-//    /**
-//     * Update the specified resource in storage.
-//     *
-//     * @param \Illuminate\Http\Request $request
-//     * @param int $id
-//     * @return \Illuminate\Http\Response
-//     * @since [v4.0]
-//     * @author [A. Gianotto] [<snipe@snipe.net>]
-//     */
-//    public function compact(Request $request, $id)
-//    {
-//        $this->authorize('edit', Consumable::class);
-//        $main_consumable = Consumable::findOrFail($id);
-//
-//        if ($request->filled('id_array')) {
-//
-//            $id_array= $request->input("id_array");
-//
-//            $consumables = Consumable::findMany($id_array);
-//            ConsumableAssignment::whereIn('consumable_id', $id_array)->update(['consumable_id' => $main_consumable->id]);
-//            Actionlog::where("item_type","App\Models\Consumable")->whereNotIn("action_type",["create","delete","update"])->whereIn('item_id', $id_array)->update(['item_id' => $main_consumable->id]);
-//            $all_amount = 0;
-//            foreach ($consumables as &$consumable_delete) {
-//                $all_amount+=$consumable_delete->qty;
-//                $consumable_delete->delete();
-//            }
-//
-//            $main_consumable->qty=$main_consumable->qty+$all_amount;
-//
-//
-//            if ($main_consumable->save()) {
-//                return response()->json(Helper::formatStandardApiResponse('success', $main_consumable, trans('admin/consumables/message.update.success')));
-//            }
-//
-//        } else {
-//            return response()->json(Helper::formatStandardApiResponse('error', null, $main_consumable->getErrors()));
-//        }
-//
-//
-//        return response()->json(Helper::formatStandardApiResponse('error', null, $main_consumable->getErrors()));
-//    }
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param int $id
+     * @return \Illuminate\Http\Response
+     * @since [v4.0]
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     */
+    public function compact(Request $request, $id)
+    {
+        $this->authorize('edit', Consumable::class);
+        $main_consumable = Consumable::findOrFail($id);
+
+        if ($request->filled('id_array')) {
+
+            $id_array= $request->input("id_array");
+
+            $consumables = Consumable::findMany($id_array);
+            ConsumableAssignment::whereIn('consumable_id', $id_array)->update(['consumable_id' => $main_consumable->id]);
+            Actionlog::where("item_type","App\Models\Consumable")->whereNotIn("action_type",["create","delete","update"])->whereIn('item_id', $id_array)->update(['item_id' => $main_consumable->id]);
+            $all_amount = 0;
+            foreach ($consumables as &$consumable_delete) {
+                $all_amount+=$consumable_delete->qty;
+                $consumable_delete->delete();
+            }
+
+            $main_consumable->qty=$main_consumable->qty+$all_amount;
+
+
+            if ($main_consumable->save()) {
+                return response()->json(Helper::formatStandardApiResponse('success', $main_consumable, trans('admin/consumables/message.update.success')));
+            }
+
+        } else {
+            return response()->json(Helper::formatStandardApiResponse('error', null, $main_consumable->getErrors()));
+        }
+
+
+        return response()->json(Helper::formatStandardApiResponse('error', null, $main_consumable->getErrors()));
+    }
 }
