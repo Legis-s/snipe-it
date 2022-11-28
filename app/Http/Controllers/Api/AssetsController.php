@@ -185,9 +185,16 @@ class AssetsController extends Controller
             $assets->where('assets.location_id', '=', $location->id);
         }
 
-        if ($request->filled('bulk') && $request->input('bulk') == true) {
+        if ($request->filled('bulk')) {
             $data = json_decode($request->input('data'), true);
-            $assets->whereIn('assets.id', $data);
+            if (is_array($data)){
+                \Debugbar::info("is_array");
+                \Debugbar::info($data);
+                $assets->whereIn('assets.id', $data);
+            }else{
+                \Debugbar::info("not array");
+                $assets->whereIn('assets.id', []);
+            }
         }
 
         if ($request->filled('purchase_id')) {
