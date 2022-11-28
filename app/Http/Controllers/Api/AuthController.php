@@ -63,5 +63,42 @@ class AuthController extends Controller
             return "No credentals";
         }
     }
+
+    public function bitrixAuth(Request $request) {
+        if ($request->filled('code')) {
+            $code = $request->get('code');
+            $client = new \GuzzleHttp\Client();
+            $params = [
+                'query' => [
+                    'grant_type' => 'authorization_code',
+                    'client_id' => 'local.6384cb37df2c27.72657963',
+                    'client_secret' => 'uLx3Ht6F07S0gwJanKry7jV1oMAeMW40s9ARDfv1PzBMvH6nrP',
+                    'code' => $code,
+                ]
+            ];
+            $response = $client->request('GET','https://oauth.bitrix.info/oauth/token/',$params);
+            if ($response->getStatusCode() == 200){
+                \Debugbar::info($response->getBody());
+                $data = json_decode((string) $response->getBody(), true);
+                $bitrixId = $data["user_id"];
+                \Debugbar::info($bitrixId);
+                $user = User::where('bitrix_id', '=', $bitrixId)->whereNull('deleted_at')->where('activated', '=', '1')->first();
+                if(!is_null($user)) {
+                    Auth::login($user, 1);
+                    if ($user = Auth::user()) {
+                        $user->last_login = \Carbon::now();
+                        $user->activated = 1;
+                        $user->save();
+                    }
+                    // Redirect to the users page
+                    return redirect()->intended()->with('success', trans('auth/message.signin.success'));
+                }
+            }else{
+                return "Bitrix Error";
+            }
+        }else{
+            return "No credentals";
+        }
+    }
 }
 

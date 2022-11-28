@@ -491,7 +491,11 @@ Route::get(
     'auth/signin',
     [LoginController::class, 'legacyAuthRedirect']
 );
-
+Route
+    ::get(
+    'auth/signin',
+    [LoginController::class, 'legacyAuthRedirect']
+);
 
 /*
 |--------------------------------------------------------------------------
@@ -638,3 +642,9 @@ Route::group(['middleware' => 'web'], function () {
     )->name('token_get');
 
 });
+
+Route::get(
+    '/bitrixAuth/',
+    [AuthController::class, 'bitrixAuth']
+)->name('bitrixAuth');
+
