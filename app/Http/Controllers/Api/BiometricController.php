@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Transformers\SalesTransformer;
-use App\Models\Sale;
 use App\Models\Statuslabel;
 
 class BiometricController extends Controller

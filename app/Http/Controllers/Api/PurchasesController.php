@@ -10,7 +10,6 @@ use App\Http\Transformers\LocationsTransformer;
 use App\Models\Asset;
 use App\Models\Consumable;
 use App\Models\Location;
-use App\Models\Sale;
 use App\Models\Statuslabel;
 use DateTime;
 use Illuminate\Http\Request;
@@ -301,11 +300,6 @@ class PurchasesController extends Controller
             $status = Statuslabel::where('name', 'Отклонено')->first();
             $assets = Asset::where('purchase_id', $purchase->id)->get();
             foreach ($assets as &$value) {
-                $value->status_id = $status->id;
-                $value->save();
-            }
-            $sales = Sale::where('purchase_id', $purchase->id)->get();
-            foreach ($sales as &$value) {
                 $value->status_id = $status->id;
                 $value->save();
             }

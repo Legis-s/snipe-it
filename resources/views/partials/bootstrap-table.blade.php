@@ -456,7 +456,6 @@
             'kits',
             'inventories',
             'purchases',
-            'sales',
             'inventorystatuslabels',
             'contracts',
             'bulk'

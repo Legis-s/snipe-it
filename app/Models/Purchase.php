@@ -9,6 +9,7 @@ use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
 use DateTime;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Crypt;
 use Watson\Validating\ValidatingTrait;
 
 class Purchase extends SnipeModel
@@ -67,7 +68,6 @@ class Purchase extends SnipeModel
         "status",
         "assets_json",
         "consumables_json",
-        "sales_json",
         "bitrix_send_json",
         "user_id",
         "bitrix_result_at",
@@ -110,27 +110,22 @@ class Purchase extends SnipeModel
 
     public function consumables()
     {
-        return $this->hasMany('\App\Models\Consumable', 'purchase_id');
-    }
-
-    public function sales()
-    {
-        return $this->hasMany('\App\Models\Sale', 'purchase_id');
+        return $this->hasMany(\App\Models\Consumable::class, 'purchase_id');
     }
 
     public function supplier()
     {
-        return $this->belongsTo('\App\Models\Supplier');
+        return $this->belongsTo(\App\Models\Supplier::class);
     }
 
     public function invoice_type()
     {
-        return $this->belongsTo('\App\Models\InvoiceType');
+        return $this->belongsTo(\App\Models\InvoiceType::class);
     }
 
     public function legal_person()
     {
-        return $this->belongsTo('\App\Models\LegalPerson');
+        return $this->belongsTo(\App\Models\LegalPerson::class);
     }
 
 
@@ -144,12 +139,12 @@ class Purchase extends SnipeModel
 
     public function user()
     {
-        return $this->belongsTo('\App\Models\User', 'user_id');
+        return $this->belongsTo(\App\Models\User::class, 'user_id');
     }
 
     public function user_verified()
     {
-        return $this->belongsTo('\App\Models\User', 'user_verified_id');
+        return $this->belongsTo(\App\Models\User::class, 'user_verified_id');
     }
 
 
@@ -163,20 +158,12 @@ class Purchase extends SnipeModel
         $this->bitrix_result_at = new DateTime();
 
         $assets = Asset::where('purchase_id', $this->id)->get();
-        $sales = Sale::where('purchase_id', $this->id)->get();
         $need_to_inventrory = false;
         if(count($assets)>0){
             $need_to_inventrory = true;
             foreach ($assets as &$asset) {
                 $asset->setStatusAfterPaid();
                 $asset->save();
-            }
-        }
-        if(count($sales)>0){
-            $need_to_inventrory= true;
-            foreach ($sales as &$sale) {
-                $sale->setStatusAfterPaid();
-                $sale->save();
             }
         }
 
@@ -198,7 +185,6 @@ class Purchase extends SnipeModel
         $status_ok_id = intval($status_ok->id);
 
         $assets = Asset::where('purchase_id', $this->id)->get();
-        $sales = Sale::where('purchase_id', $this->id)->get();
         $consumables_json = $this->consumables_json;
         $consumables = json_decode($consumables_json, true);
         $consumables_count = count($consumables);
@@ -210,10 +196,6 @@ class Purchase extends SnipeModel
         $assets_count = count($assets);
         $assets_review_wait_count=0;
         $assets_status_ok_count=0;
-        $sales_status = "inventory";
-        $sales_count = count($sales);
-        $sales_review_wait_count=0;
-        $sales_status_ok_count=0;
 
         if($assets_count>0){
             foreach ($assets as &$asset) {
@@ -240,31 +222,6 @@ class Purchase extends SnipeModel
             $asset_status = "finished";
         }
 
-        if($sales_count>0){
-            foreach ($sales as &$sale) {
-
-                if ($asset_new != null && $asset_new instanceof Sale) {
-                    if ($asset_new->id == $sale->id){
-                        $sale->status_id = $asset_new->status_id;
-                    }
-                }
-
-                if($sale->status_id==$status_review_wait_id) {
-                    $sales_review_wait_count++;
-                }
-                if($sale->status_id==$status_ok_id) {
-                    $sales_status_ok_count++;
-                }
-            }
-            if($sales_count==$sales_review_wait_count+$sales_status_ok_count){
-                $sales_status = "review";
-            }
-            if($sales_count==$sales_status_ok_count){
-                $sales_status = "finished";
-            }
-        }else{
-            $sales_status = "finished";
-        }
         if($consumables_count>0){
             $consumable_all_count=0;
             $consumable_review_count=0;
@@ -281,13 +238,13 @@ class Purchase extends SnipeModel
             $consumables_status = "finished";
         }
 
-        if(($asset_status=="review")||( $consumables_status=="review" )||($sales_status=="review")){
+        if(($asset_status=="review")||( $consumables_status=="review" )){
             $all_status ="review";
         }
-        if(($asset_status=="inventory")||( $consumables_status=="inventory" )||($sales_status=="inventory")){
+        if(($asset_status=="inventory")||( $consumables_status=="inventory" )){
             $all_status ="inventory";
         }
-        if($asset_status==$sales_status &&$asset_status == $consumables_status && $asset_status=="finished"){
+        if($asset_status == $consumables_status && $asset_status=="finished"){
             $all_status ="finished";
         }
         if ($all_status =="review"){
@@ -299,7 +256,6 @@ class Purchase extends SnipeModel
                 $this->closeBitrixTask($asset_new);
             }
         }
-//        \Log::error("asset ".$asset_status);
         return $all_status;
 
     }

@@ -10,7 +10,6 @@ use App\Models\AssetModel;
 use App\Models\Company;
 use App\Models\Purchase;
 use App\Models\Location;
-use App\Models\Sale;
 use App\Models\Statuslabel;
 use App\Models\Supplier;
 use App\Models\User;
@@ -115,7 +114,6 @@ class PurchasesController extends Controller
         $purchase->comment             = $request->input('comment');
         $purchase->consumables_json    = $request->input('consumables');
         $purchase->assets_json         = $request->input('assets');
-        $purchase->sales_json          = $request->input('sales');
         $purchase->delivery_cost       = $request->input('delivery_cost');
         $purchase->user_id             = Auth::id();
         $currency_id = $request->input('currency_id');
@@ -139,10 +137,6 @@ class PurchasesController extends Controller
 
         $status = Statuslabel::where('name', 'В закупке')->first();
         $settings = \App\Models\Setting::getSettings();
-        \Debugbar::info("assets");
-        \Debugbar::info(count($assets));
-        \Debugbar::info("consumables");
-        \Debugbar::info(count($consumables));
         if ($purchase->save()) {
             $data_list = "";
             if (count($assets)>0) {
