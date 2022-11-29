@@ -809,7 +809,6 @@
 
 
         function consumablesCustomInOutFormatter(value,row) {
-            console.log(row);
             var destination = "consumables";
             // The user is allowed to check items out, AND the item is deployable
             if ((row.available_actions.checkout == true) && (row.user_can_checkout == true) && ((!row.asset_id) && (!row.assigned_to))) {

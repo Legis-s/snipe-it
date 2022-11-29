@@ -22,7 +22,10 @@
             <div class="box box-default">
                 <div class="box-body">
                     <div id="toolbar">
-                        <button class="btn btn-primary  pull-right" id="compact" disabled>Собрать</button>
+                        <button class="btn btn-primary" id="compact" disabled>Собрать</button>
+{{--                        <button type="button" class="btn btn-primary"  id="show_active" data-toggle="button" aria-pressed="false">--}}
+{{--                            Показать доступные к выдаче--}}
+{{--                        </button>--}}
                     </div>
                     <table
                             data-columns="{{ \App\Presenters\ConsumablePresenter::dataTableLayout() }}"
@@ -60,6 +63,7 @@
     <script nonce="{{ csrf_token() }}">
         $(function () {
             var compact = $('#compact');
+            var show_active = $('#show_active');
             var table = $('#consumablesTable');
             var selections = []
 
@@ -68,6 +72,24 @@
             //         return row.id
             //     })
             // }
+            // show_active.click(function () {
+            //     if(show_active.hasClass( "active" )){
+            //         show_active.html("Показать все");
+            //         table.bootstrapTable('refresh', {
+            //             query: {
+            //                 only_active: true
+            //             }
+            //         });
+            //     }else{
+            //         show_active.html("Показать доступные к выдаче");
+            //         table.bootstrapTable('refresh', {
+            //             query: {
+            //                 only_active: false
+            //             }
+            //         });
+            //     }
+            //
+            // });
 
             table.on('check.bs.table uncheck.bs.table ' + 'check-all.bs.table uncheck-all.bs.table',
                 function () {
