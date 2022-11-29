@@ -29,6 +29,12 @@
                     <div class="col-md-4 col-xs-12"><label for="model_number">{{ trans('general.model_no') }}:</label></div>
                     <div class="col-md-8 col-xs-12"><input type='text' name="model_number" id='modal-model_number' class="form-control"></div>
                 </div>
+                <div class="dynamic-form-row">
+                    <div class="col-md-4 col-xs-12"><label for="modal-location_id">{{ trans('general.location') }}:</label></div>
+                    <div class="col-md-8 col-xs-12 required">
+                        <select class="js-data-ajax" data-endpoint="locations" name="location_id" style="width: 100%" id="modal-location_id"></select>
+                    </div>
+                </div>
                 <input type='text' name="qty" id="qty"  value="0" hidden>
             </form>
         </div>
