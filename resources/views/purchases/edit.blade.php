@@ -136,11 +136,6 @@
                                 @include ('partials.forms.purchases.purchase_cost')
                                 @include ('partials.forms.purchases.nds')
                                 @include ('partials.forms.purchases.quantity')
-                                @if(Auth::user()->favoriteLocation)
-                                    @include ('partials.forms.purchases.location-select-checkin', ['translated_name' =>"Ожидаемый склад", 'fieldname' => 'location_id','hide_new'=>true])
-                                @else
-                                    @include ('partials.forms.purchases.location-select', ['translated_name' =>"Ожидаемый склад", 'fieldname' => 'location_id','hide_new'=>true ])
-                                @endif
                             </form>
                         </div>
                     </div>
@@ -261,11 +256,6 @@
                     field: 'consumable',
                     name: 'Модель',
                     align: 'left',
-                    valign: 'middle'
-                }, {
-                    field: 'location',
-                    name: 'Склад',
-                    align: 'center',
                     valign: 'middle'
                 }, {
                     field: 'purchase_cost',
@@ -447,8 +437,8 @@
                 var modal = $('#modal_consumables');
                 var consumable_id = modal.find('select[name=consumable_id] option').filter(':selected').val();
                 var consumable_name = modal.find('select[name=consumable_id] option').filter(':selected').text();
-                var location_id = modal.find('select[name=location_id] option').filter(':selected').val();
-                var location_name = modal.find('select[name=location_id] option').filter(':selected').text();
+                // var location_id = modal.find('select[name=location_id] option').filter(':selected').val();
+                // var location_name = modal.find('select[name=location_id] option').filter(':selected').text();
                 var purchase_cost = modal.find('#purchase_cost').val();
                 var nds = modal.find('#nds').val();
                 var quantity = modal.find('#quantity').val();
@@ -459,8 +449,8 @@
                         id: tabele_data.length + 1,
                         consumable_id: consumable_id,
                         consumable: consumable_name,
-                        location_id: location_id,
-                        location: location_name,
+                        // location_id: location_id,
+                        // location: location_name,
                         purchase_cost: purchase_cost,
                         nds: nds,
                         quantity: quantity,

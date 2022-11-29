@@ -67,26 +67,33 @@
             var table = $('#consumablesTable');
             var selections = []
 
-            // function getIdSelections() {
-            //     return $.map(table.bootstrapTable('getSelections'), function (row) {
-            //         return row.id
-            //     })
-            // }
+            function getIdSelections() {
+                return $.map(table.bootstrapTable('getSelections'), function (row) {
+                    return row.id
+                })
+            }
             // show_active.click(function () {
             //     if(show_active.hasClass( "active" )){
             //         show_active.html("Показать все");
-            //         table.bootstrapTable('refresh', {
-            //             query: {
-            //                 only_active: true
-            //             }
-            //         });
+            //         // table.bootstrapTable('refresh', {
+            //         //     query: {
+            //         //         only_active: true
+            //         //     }
+            //         // });
+            //         // table.bootstrapTable('filterBy', {remaining: >0});
+            //         // table.bootstrapTable('filterBy',{
+            //         //     'filterAlgorithm': (row, filters) => {
+            //         //         console.log(row);
+            //         //         return row.remaining > 0;
+            //         //     }
+            //         // })
+            //         table.bootstrapTable('filterBy',function (row, filters) {
+            //                 console.log(row);
+            //                 return row.remaining > 0;
+            //             })
             //     }else{
             //         show_active.html("Показать доступные к выдаче");
-            //         table.bootstrapTable('refresh', {
-            //             query: {
-            //                 only_active: false
-            //             }
-            //         });
+            //
             //     }
             //
             // });
