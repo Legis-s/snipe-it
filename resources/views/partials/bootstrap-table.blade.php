@@ -1364,7 +1364,7 @@
                         },
                         dataType: 'json',
                         success: function (data) {
-                            $(".table").bootstrapTable('refresh');
+                            $(".table").bootstrapTable('refresh',{"silent":true});
                         },
                     });
                 } else {

@@ -175,6 +175,10 @@ class ConsumableAssignmentController extends Controller
 
 
         $contract = $consumableAssignment->contract;
+        if (!$contract && $request->filled('contract_id')){
+            $contract_id = $request->input('contract_id');
+            $contract = Contract::findOrFail($contract_id);
+        }
         $consumableAssignment->assigned_type = Contract::class;
         $consumableAssignment->assigned_to = $contract->id;
 
