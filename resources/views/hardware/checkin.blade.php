@@ -114,15 +114,6 @@
                       </div>
 
                     <!-- Purchase Cost -->
-                    <style>
-                      @import 'star-rating';
-
-                      :root {
-                        --gl-star-empty: url(/img/star-empty.svg);
-                        --gl-star-full: url(/img/star-full.svg);
-                        --gl-star-size: 32px;
-                      }
-                    </style>
                     <div class="form-group {{ $errors->has('quality') ? ' has-error' : '' }}">
                       <label for="quality" class="col-md-3 control-label">Состояние</label>
                       <div class="col-md-9">
@@ -321,50 +312,50 @@
       calculeteCoast();
 
       function calculeteCoast() {
-        $buyVal = $("#purchase_cost").val();
-        $quality = $("#quality").val();
-        if ($buyVal > 0 && $quality > 0) {
-          //quality count
-          $quality_divider = 1;
-          switch (parseInt($quality)) {
-            case 4:
-              $quality_divider = 0.75
-              break;
-            case 3:
-              $quality_divider = 0.50
-              break;
-            case 2:
-              $quality_divider = 0.25
-              break;
-            case 1:
-              $quality_divider = 0
-              break;
-          }
-          //lifetime count
-          @if (isset($asset->model->lifetime))
+          $buyVal = {{$asset->purchase_cost}};
+          $quality = $("#quality").val();
+          if ($buyVal > 0 && $quality > 0) {
+              $quality_divider = 1;
+              switch (parseInt($quality)) {
+                  case 4:
+                      $quality_divider = 0.75
+                      break;
+                  case 3:
+                      $quality_divider = 0.50
+                      break;
+                  case 2:
+                      $quality_divider = 0.25
+                      break;
+                  case 1:
+                      $quality_divider = 0
+                      break;
+              }
+              //lifetime count
+              @if (isset($asset->model->lifetime))
                   $lifetime = {{$asset->model->lifetime}};
-          @elseif (isset($asset->model->category->lifetime))
+              @elseif (isset($asset->model->category->lifetime))
                   $lifetime = {{$asset->model->category->lifetime}};
-          @else
+              @else
                   $lifetime = 36;
-          @endif
+              @endif
 
-                  @if (isset($asset->purchase_date))
-                  $buydate = "{{$asset->purchase_date}}";
-          $buydate = new Date($buydate.substr(0, 10));
-          $usetime = monthDiff($buydate);
-          $time_divider = ($lifetime - $usetime) / $lifetime;
-          if ($time_divider < 0) {
-            $time_divider = 0;
-          }
-          @else
-              $time_divider = 1/3;
-          @endif
+              @if (isset($asset->purchase_date))
+                    $buydate = "{{$asset->purchase_date}}";
+                    $buydate = new Date($buydate.substr(0, 10));
+                    $usetime = monthDiff($buydate);
+                    $time_divider = ($lifetime - $usetime) / $lifetime;
+                    if ($time_divider < 0) {
+                        $time_divider = 0;
+                    }
+              @else
+                  $time_divider = 1/3;
+              @endif
 
-          //final count
-          $newVal = $buyVal * $quality_divider * $time_divider;
-          $newVal = $newVal.toFixed(2);
-          $("#new_depreciable_cost").val($newVal);
+              
+              //final count
+              $newVal = $buyVal * $quality_divider * $time_divider;
+              $newVal = $newVal.toFixed(2);
+              $("#new_depreciable_cost").val($newVal);
         }
       }
 
