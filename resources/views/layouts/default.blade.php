@@ -995,6 +995,12 @@
                 $('[data-toggle="popover"]').popover();
                 $('.select2 span').addClass('needsclick');
                 $('.select2 span').removeAttr('title');
+                
+                $('input.float').on('input', function () {
+                    this.value = this.value.replace(',', '.')
+                    this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+                    // $(this).val() // get the current value of the input field.
+                });
 
                 // This javascript handles saving the state of the menu (expanded or not)
                 $('body').bind('expanded.pushMenu', function() {
