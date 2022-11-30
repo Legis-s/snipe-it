@@ -105,6 +105,7 @@ class Asset extends Depreciable
         'location_id'    => 'integer',
         'rtd_company_id' => 'integer',
         'supplier_id'    => 'integer',
+        'contract_id'    => 'integer',
     ];
 
     protected $rules = [
