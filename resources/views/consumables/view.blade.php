@@ -184,7 +184,32 @@
                 <div class="box-body">
                     <div class="row">
                         <div class="col-md-12">
-
+                            @if ($consumable->manufacturer)
+                                <div class="col-md-12">
+                                    <strong>{{ trans('general.manufacturer') }}:</strong>
+                                    <a href="{{ route('manufacturers.show', $consumable->manufacturer->id) }}">{{ $consumable->manufacturer->name }}</a>
+                                </div>
+                            @endif
+                            @if ($consumable->category)
+                                <div class="col-md-12">
+                                    <strong>Категория: </strong>
+                                    <a href="{{ route('categories.show', $consumable->category->id) }}">
+                                        {{ $consumable->category->name }}
+                                    </a>
+                                </div>
+                            @endif
+                            @if ($consumable->name)
+                                <div class="col-md-12">
+                                    <strong>Название: </strong>
+                                    {{$consumable->name}}
+                                </div>
+                            @endif
+                                @if ($consumable->model_number)
+                                    <div class="col-md-12">
+                                        <strong>{{ trans('general.model_no') }}:</strong>
+                                        {{ $consumable->model_number }}
+                                    </div>
+                                @endif
                             <div class="col-md-12" style="font-size: 200%">
                                 <strong>Всего: </strong>
                                 {{$consumable->qty}}
@@ -201,6 +226,12 @@
                                 </div>
                             @endif
 
+                            @if ($consumable->location)
+                                <div class="col-md-12">
+                                    <strong>{{ trans('general.location') }}: </strong>
+                                    <a href="{{ route('locations.show', $consumable->location->id) }}">{{ $consumable->location->name }}</a>
+                                </div>
+                            @endif
                             @if ($consumable->purchase_date)
                                 <div class="col-md-12">
                                     <strong>{{ trans('general.purchase_date') }}: </strong>
@@ -223,19 +254,7 @@
                                 </div>
                             @endif
 
-                            @if ($consumable->model_number)
-                                <div class="col-md-12">
-                                    <strong>{{ trans('general.model_no') }}:</strong>
-                                    {{ $consumable->model_number }}
-                                </div>
-                            @endif
 
-                            @if ($consumable->manufacturer)
-                                <div class="col-md-12">
-                                    <strong>{{ trans('general.manufacturer') }}:</strong>
-                                    <a href="{{ route('manufacturers.show', $consumable->manufacturer->id) }}">{{ $consumable->manufacturer->name }}</a>
-                                </div>
-                            @endif
 
                             @if ($consumable->order_number)
                                 <div class="col-md-12">

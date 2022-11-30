@@ -438,7 +438,7 @@ class Consumable extends SnipeModel
      */
     public function scopeSearchByManufacturerOrCatOrLocation($query, $search)
     {
-        
+
         return $query->where('name', 'LIKE', "%$search%")
             ->orWhere('model_number', 'LIKE', "%$search%")
             ->orWhere(function ($query) use ($search) {
