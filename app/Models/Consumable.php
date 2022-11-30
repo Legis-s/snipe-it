@@ -436,9 +436,9 @@ class Consumable extends SnipeModel
      *
      * @return Illuminate\Database\Query\Builder          Modified query builder
      */
-    public function scopeSearchByManufacturerOrCat($query, $search)
+    public function scopeSearchByManufacturerOrCatOrLocation($query, $search)
     {
-
+        
         return $query->where('name', 'LIKE', "%$search%")
             ->orWhere('model_number', 'LIKE', "%$search%")
             ->orWhere(function ($query) use ($search) {
@@ -449,6 +449,11 @@ class Consumable extends SnipeModel
             ->orWhere(function ($query) use ($search) {
                 $query->whereHas('manufacturer', function ($query) use ($search) {
                     $query->where('manufacturers.name', 'LIKE', '%'.$search.'%');
+                });
+            })
+            ->orWhere(function ($query) use ($search) {
+                $query->whereHas('location', function ($query) use ($search) {
+                    $query->where('locations.name', 'LIKE', '%'.$search.'%');
                 });
             });
 

@@ -29,7 +29,7 @@
                     </div>
                     <table
                             data-columns="{{ \App\Presenters\ConsumablePresenter::dataTableLayout() }}"
-                            data-cookie-id-table="consumablesTable"
+                            data-cookie-id-table="consumablesTableMain"
                             data-pagination="true"
                             data-id-table="consumablesTable"
                             data-search="true"

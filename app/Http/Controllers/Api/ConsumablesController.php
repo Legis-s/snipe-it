@@ -409,13 +409,14 @@ class ConsumablesController extends Controller
             'consumables.name',
             'consumables.model_number',
             'consumables.category_id',
+            'consumables.location_id',
             'consumables.manufacturer_id',
             'consumables.qty',
-        ])->with('manufacturer', 'category');
+        ])->with('manufacturer', 'category','location');
 
 
         if ($request->filled('search')) {
-            $consumables = $consumables->SearchByManufacturerOrCat($request->input('search'));
+            $consumables = $consumables->SearchByManufacturerOrCatOrLocation($request->input('search'));
         }
 
         $consumables = $consumables->paginate(50);
@@ -424,6 +425,7 @@ class ConsumablesController extends Controller
             $consumable->use_text = '';
 
             $consumable->use_text .= "[" . $consumable->numRemaining() . "] ";
+            $consumable->use_text .= (($consumable->location) ? " (".e($consumable->location->name) . ') - ' : '');
             $consumable->use_text .= (($consumable->category) ? e($consumable->category->name) . ' - ' : '');
 
             $consumable->use_text .= (($consumable->manufacturer) ? e($consumable->manufacturer->name) . ' - ' : '');
