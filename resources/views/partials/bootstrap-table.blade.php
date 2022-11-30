@@ -1355,12 +1355,6 @@
             'click .close_documents': function (e, value, row, index) {
                 console.log(row);
                 if (row.contract) {
-                    var contract_id =row.contract.id;
-                    console.log(contract_id);
-                    var sendData = {
-                        contract_id: contract_id,
-                    };
-
                     $.ajax({
                         type: 'POST',
                         url: "/api/v1/consumableassignments/" + row.id + "/close_documents",
@@ -1368,7 +1362,6 @@
                             "X-Requested-With": 'XMLHttpRequest',
                             "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
                         },
-                        data: sendData,
                         dataType: 'json',
                         success: function (data) {
                             $(".table").bootstrapTable('refresh');

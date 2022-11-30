@@ -128,9 +128,11 @@ class ConsumableAssignmentController extends Controller
     {
         $this->authorize('view', Consumable::class);
         $consumableAssignment = ConsumableAssignment::findOrFail($id);
+        $user = Auth::user();
+
+
         if ($request->filled('quantity')) {
             $consumableAssignment->quantity = $consumableAssignment->quantity - $request->input('quantity');
-            $user = Auth::user();
             $user_name = "(".$user->id.") ".$user->last_name." ".$user->first_name;
             $consumableAssignment->comment = $consumableAssignment->comment." Возвращено: ".$request->input('quantity').", ".date("Y-m-d H:i:s").", ".$user_name;
             if ($consumableAssignment->save()) {
@@ -167,28 +169,33 @@ class ConsumableAssignmentController extends Controller
         $this->authorize('view', Consumable::class);
 
         $consumableAssignment = ConsumableAssignment::findOrFail($id);
-        if ($request->filled('contract_id')) {
-            $contract_id = $request->input('contract_id');
-            $user_pre = User::findOrFail($consumableAssignment->assigned_to);
-            $consumableAssignment->assigned_type = "App\Models\Contract";
-            $consumableAssignment->assigned_to = $contract_id;
-            $user = Auth::user();
-            $user_name = "(".$user->id.") ".$user->last_name." ".$user->first_name;
-            $user_name_pre = "(".$user_pre->id.") ".$user_pre->last_name." ".$user_pre->first_name;
-            $consumableAssignment->comment = $consumableAssignment->comment." Закрывающие документы получены ".date("Y-m-d H:i:s").", ".$user_name." Расходник списан с пользователя: ".$user_name_pre;
-            if ($consumableAssignment->save()) {
-                $log = new Actionlog();
-                $log->user_id = Auth::id();
-                $log->action_type = 'sell';
-                $log->target_type = Contract::class;
-                $log->target_id = $contract_id;
-                $log->item_id = $consumableAssignment->consumable_id;
-                $log->item_type = Consumable::class;
-                $log->note = json_encode($request->all());
-                $log->save();
-                return response()->json(Helper::formatStandardApiResponse('success', $consumableAssignment, trans('admin/consumables/message.update.success')));
-            }
-        } else {
+
+        $user_pre = User::findOrFail($consumableAssignment->assigned_to);
+        $user = Auth::user();
+
+
+        $contract = $consumableAssignment->contract;
+        $consumableAssignment->assigned_type = Contract::class;
+        $consumableAssignment->assigned_to = $contract->id;
+
+
+        $user_name = "(".$user->id.") ".$user->last_name." ".$user->first_name;
+        $user_name_pre = "(".$user_pre->id.") ".$user_pre->last_name." ".$user_pre->first_name;
+        $consumableAssignment->comment = $consumableAssignment->comment." Закрывающие документы получены ".date("Y-m-d H:i:s").", ".$user_name." Расходник списан с пользователя: ".$user_name_pre;
+
+        if ($consumableAssignment->save()) {
+            $log = new Actionlog();
+            $log->user_id = Auth::id();
+            $log->action_type = 'sell';
+            $log->target_type = Contract::class;
+            $log->target_id = $contract->id;
+            $log->item_id = $consumableAssignment->consumable_id;
+            $log->item_type = Consumable::class;
+            $log->note = json_encode($request->all());
+            $log->save();
+
+            return response()->json(Helper::formatStandardApiResponse('success', $consumableAssignment, trans('admin/consumables/message.update.success')));
+        }else {
             return response()->json(Helper::formatStandardApiResponse('error', null, $consumableAssignment->getErrors()));
         }
         return response()->json(Helper::formatStandardApiResponse('error', null, $consumableAssignment->getErrors()));
