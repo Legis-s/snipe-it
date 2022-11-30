@@ -188,7 +188,7 @@ class ConsumableAssignment extends Model
 
     public function contract()
     {
-        return $this->belongsTo(\App\Models\Contract::class, 'user_id');
+        return $this->belongsTo(\App\Models\Contract::class, 'contract_id');
     }
 
     public function mass_operations()

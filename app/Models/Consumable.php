@@ -401,7 +401,10 @@ class Consumable extends SnipeModel
 
 
 
-
+//    public function contract()
+//    {
+//        return $this->belongsTo(\App\Models\Contract::class);
+//    }
 
 
     public function purchase()

@@ -1204,14 +1204,14 @@
                                             id="consumablesCheckedoutTable"
                                             class="table table-striped snipe-table"
                                             data-url="{{route('api.consumableassignments.index',['asset_id'=> $asset->id])}}">
-                                                            <thead>
-                                                            <tr>
-                                                              <th data-searchable="false" data-sortable="false" data-field="name">Наименование</th>
-                                                              <th data-searchable="false" data-sortable="false" data-field="quantity">Количество</th>
-                                                              <th data-searchable="false" data-sortable="false" data-field="created_at" data-formatter="dateDisplayFormatter">{{ trans('general.date') }}</th>
-                                                              <th data-searchable="false" data-sortable="false" data-field="admin">Выдал</th>
-                                                            </tr>
-                                                            </thead>
+{{--                                                            <thead>--}}
+{{--                                                            <tr>--}}
+{{--                                                              <th data-searchable="false" data-sortable="false" data-field="name">Наименование</th>--}}
+{{--                                                              <th data-searchable="false" data-sortable="false" data-field="quantity">Количество</th>--}}
+{{--                                                              <th data-searchable="false" data-sortable="false" data-field="created_at" data-formatter="dateDisplayFormatter">{{ trans('general.date') }}</th>--}}
+{{--                                                              <th data-searchable="false" data-sortable="false" data-field="admin">Выдал</th>--}}
+{{--                                                            </tr>--}}
+{{--                                                            </thead>--}}
                                     </table>
                                 </div>
 

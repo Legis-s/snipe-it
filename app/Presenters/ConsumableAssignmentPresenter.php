@@ -62,6 +62,14 @@ class ConsumableAssignmentPresenter extends Presenter
                 "visible" => true,
                 "formatter" => "usersLinkObjFormatter"
             ], [
+                "field" => "contract",
+                "searchable" => false,
+                "sortable" => true,
+                "switchable" => true,
+                "title" => "Договор",
+                "visible" => true,
+                "formatter" => "contractsLinkObjFormatter"
+            ], [
                 "field" => "comment",
                 "searchable" => true,
                 "sortable" => true,
@@ -142,13 +150,21 @@ class ConsumableAssignmentPresenter extends Presenter
                 "title" => "Cтоимость",
                 "visible" => true,
             ], [
-                "field" => "user",
+                "field" => "responsibleUser",
                 "searchable" => false,
                 "sortable" => true,
                 "switchable" => true,
                 "title" => "Ответственный",
                 "visible" => true,
                 "formatter" => "usersLinkObjFormatter"
+            ], [
+                "field" => "contract",
+                "searchable" => false,
+                "sortable" => true,
+                "switchable" => true,
+                "title" => "Договор",
+                "visible" => true,
+                "formatter" => "contractsLinkObjFormatter"
             ], [
                 "field" => "comment",
                 "searchable" => true,
