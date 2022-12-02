@@ -1898,12 +1898,7 @@ class Asset extends Depreciable
             } else {
                 $checkedOutBy = Auth::user();
             }
-            if($target instanceof User) {
-                event(new CheckoutableForInstall($this, $target, $checkedOutBy, $note, $changed));
-            }
-            if($target instanceof Contract) {
-                event(new CheckoutableSell($this, $target, $checkedOutBy, $note, $changed));
-            }
+            event(new CheckoutableSell($this, $target, $checkedOutBy, $note, $changed));
             $this->increment('checkout_counter', 1);
 
             return true;

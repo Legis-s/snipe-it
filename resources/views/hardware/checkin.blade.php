@@ -351,7 +351,7 @@
                   $time_divider = 1/3;
               @endif
 
-              
+
               //final count
               $newVal = $buyVal * $quality_divider * $time_divider;
               $newVal = $newVal.toFixed(2);

@@ -402,6 +402,7 @@ return [
     'sell'				=> 'Продать',
     'issued_for_sale'				=> 'Выдать на продажу',
     'issued_for_rent'				=> 'Выдать в аренду',
+    'rented'				=> 'В аренду',
     'issued_for_install'				=> 'Выдать для установки',
     'sell_tooltip' => 'Продать актив',
     'rent_tooltip' => 'Сдать в аренду актив',

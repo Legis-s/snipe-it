@@ -316,7 +316,7 @@ trait Loggable
         }
         $log->log_meta = json_encode($changed);
 
-        $log->logaction('issued_for_rent');
+        $log->logaction('rented');
 
         return $log;
     }
