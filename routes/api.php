@@ -1193,6 +1193,20 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
          * CUSTOM API ROUTES START
          */
 
+
+        /**
+         * tabel_create API routes
+         */
+
+
+        Route::post('tabel_create',
+                [
+                    Api\AssetsController::class,
+                    'tabel_create'
+                ]
+        )->name('api.assets.tabel_create');
+        // end tabel_create API routes
+
         /**
          * Consumable API routes
          */
@@ -1238,6 +1252,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
                     'closesell'
                 ]
             )->name('api.assets.closesell');
+
         });
 
         /**
@@ -1536,7 +1551,8 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
         ); // Massoperations resource
 
 
-        /**
+
+    /**
          * CUSTOM API ROUTES END
          */
 

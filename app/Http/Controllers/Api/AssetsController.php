@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Events\CheckoutableCheckedIn;
+use App\Models\Category;
 use App\Models\Statuslabel;
 use Illuminate\Support\Facades\Gate;
 use App\Helpers\Helper;
@@ -1225,6 +1226,82 @@ class AssetsController extends Controller
             $asset->save();
             return (new AssetsTransformer)->transformAsset($asset);
         }
+    }
+
+    /**
+     * Returns JSON with information about an asset for detail view.
+     *
+     * @param int $assetId
+     * @return JsonResponse
+     * @since [v4.0]
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     */
+    public function tabel_create(Request $request)
+    {
+        $this->authorize('create');
+        $asssets_count = 1;
+
+        if ($request->filled('name')){
+            $model_name = 'Табель: '.$request->get('name');
+        }else{
+            return response()->json(Helper::formatStandardApiResponse('error', null,null, 200));
+        }
+
+        if ($request->filled('count')) {
+            $asssets_count = $request->get('count');
+        }
+        $purchase_cost = null;
+        if ($request->filled('price')) {
+            $purchase_cost = $request->get('price');
+        }
+
+        $status = Statuslabel::where('name', 'Доступные')->first();
+
+
+        $user = Auth::user();
+
+        $model = AssetModel::where("name",$model_name)->first();
+
+
+        if (!$model){
+            $category = Category::where("name","Tабель")->first();
+            if (!$category){
+                $category = new Category();
+                $category->category_type = "asset";
+                $category->name = "Tабель";
+                $category->save();
+            }
+
+            $model = new AssetModel();
+            $model->name = $model_name;
+            $model->category_id = $category->id;
+            $model->save();
+        }
+
+
+
+        while ($asssets_count != 0) {
+            $asset = new Asset();
+
+            $asset->model_id = $model->id;
+            $asset->asset_tag               = Asset::autoincrement_asset();
+            $asset->user_id                 = $user;
+            $asset->archived                = '0';
+            $asset->physical                = '1';
+            $asset->depreciate              = '0';
+            $asset->status_id               = $status->id;
+            $asset->quality                 = 5;
+            if ($purchase_cost){
+                $asset->purchase_cost = $purchase_cost;
+            }
+            $asset->save();
+
+            $asssets_count--;
+        }
+
+        return response()->json(Helper::formatStandardApiResponse('success', null, trans('admin/hardware/message.create.success')));
+
+
     }
 
 
