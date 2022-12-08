@@ -25,7 +25,7 @@ class InventoryItemPresenter extends Presenter
                 "visible" => false
             ],[
                 "field" => "checked",
-                "searchable" => true,
+                "searchable" => false,
                 "sortable" => true,
                 "switchable" => true,
                 "title" => "Проверено",
@@ -33,7 +33,7 @@ class InventoryItemPresenter extends Presenter
                 "formatter" => 'trueFalseFormatter',
             ],[
                 "field" => "successfully",
-                "searchable" => true,
+                "searchable" => false,
                 "sortable" => true,
                 "switchable" => true,
                 "title" => "Успешно",
@@ -41,7 +41,7 @@ class InventoryItemPresenter extends Presenter
                 "formatter" => 'trueFalseFormatter',
             ],[
                 "field" => "status",
-                "searchable" => true,
+                "searchable" => false,
                 "sortable" => true,
                 "switchable" => true,
                 "title" => "Статус",
@@ -51,14 +51,14 @@ class InventoryItemPresenter extends Presenter
                 "field" => "photo",
                 "searchable" => false,
                 "sortable" => false,
-                "visible" => false,
+                "visible" => true,
                 "title" => "Фото",
                 "formatter" => "photoDisplayFormatter"
             ],[
                 "field" => "checked_at",
                 "searchable" => false,
                 "sortable" => true,
-                "visible" => false,
+                "visible" => true,
                 "title" => "Время проверки",
                 "formatter" => "dateDisplayFormatter"
             ],[

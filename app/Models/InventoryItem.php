@@ -18,6 +18,7 @@ final class InventoryItem extends SnipeModel
     protected $presenter = 'App\Presenters\InventoryItemPresenter';
     use Presentable;
     use SoftDeletes;
+    use Searchable;
     protected $dates = ['deleted_at'];
     protected $rules = array(
         'model'        => 'required',
@@ -55,6 +56,35 @@ final class InventoryItem extends SnipeModel
         'notes',
         'successfully',
     ];
+
+    /**
+     * The attributes that should be included when searching the model.
+     *
+     * @var array
+     */
+    protected $searchableAttributes = [
+        'name',
+        'model',
+        'category',
+        'manufacturer',
+        'serial_number',
+        'tag',
+        'checked',
+        'checked_at',
+    ];
+
+    /**
+     * The relations and their attributes that should be included when searching the model.
+     *
+     * @var array
+     */
+    protected $searchableRelations = [
+//        'model'              => ['name', 'model_number'],
+//        'model.category'     => ['name'],
+//        'model.manufacturer' => ['name'],
+    ];
+
+
     public function photo_url()
     {
         return '/uploads/inventory_items/'.$this->photo;

@@ -66,8 +66,16 @@ class InventoryItemController extends Controller
             $inventory_items = $inventory_items->TextSearch($request->input('search'));
         }
 
-        $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
+        $allowed_columns =
+            [
+                'id','notes','name','model','category','manufacturer','serial_number','tag','checked','checked_at','status_id','created_at', 'updated_at'
+            ];
 
+
+        $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
+        $sort = in_array($request->input('sort'), $allowed_columns) ? $request->input('sort') : 'created_at';
+
+        $inventory_items->orderBy($sort, $order);
         // Set the offset to the API call's offset, unless the offset is higher than the actual count of items in which
         // case we override with the actual count, so we should return 0 items.
         $offset = (($inventory_items) && ($request->get('offset') > $inventory_items->count())) ? $inventory_items->count() : $request->get('offset', 0);
