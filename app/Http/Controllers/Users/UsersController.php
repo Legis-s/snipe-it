@@ -125,6 +125,11 @@ class UsersController extends Controller
         // Strip out the superuser permission if the user isn't a superadmin
         $permissions_array = $request->input('permission');
 
+
+        if ($request->filled('new_bitrix_token')) {
+            $user->bitrix_token = Crypt::encryptString($request->input('new_bitrix_token'));
+        }
+
         if (! Auth::user()->isSuperUser()) {
             unset($permissions_array['superuser']);
         }
@@ -275,6 +280,10 @@ class UsersController extends Controller
         $user->start_date = $request->input('start_date', null);
         $user->end_date = $request->input('end_date', null);
 
+        if ($request->filled('new_bitrix_token')) {
+            $user->bitrix_token = Crypt::encryptString($request->input('new_bitrix_token'));
+        }
+        
         // Update the location of any assets checked out to this user
         Asset::where('assigned_type', User::class)
             ->where('assigned_to', $user->id)
