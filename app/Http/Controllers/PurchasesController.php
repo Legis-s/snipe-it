@@ -18,7 +18,7 @@ use DateTime;
 use Facebook\WebDriver\AbstractWebDriverCheckboxOrRadio;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
-use Crypt;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 
 class PurchasesController extends Controller

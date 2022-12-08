@@ -29,7 +29,7 @@ use App\Http\Transformers\LicensesTransformer;
 use Auth;
 use App\Models\AssetModel;
 use Illuminate\Database\Eloquent\Builder;
-use Crypt;
+use Illuminate\Support\Facades\Crypt;
 
 class PurchasesController extends Controller
 {
