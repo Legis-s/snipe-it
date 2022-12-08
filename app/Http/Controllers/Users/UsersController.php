@@ -17,6 +17,7 @@ use App\Notifications\WelcomeNotification;
 use Auth;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Password;
 use Input;
 use Redirect;
@@ -283,7 +284,7 @@ class UsersController extends Controller
         if ($request->filled('new_bitrix_token')) {
             $user->bitrix_token = Crypt::encryptString($request->input('new_bitrix_token'));
         }
-        
+
         // Update the location of any assets checked out to this user
         Asset::where('assigned_type', User::class)
             ->where('assigned_to', $user->id)

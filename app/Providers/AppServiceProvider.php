@@ -77,10 +77,10 @@ class AppServiceProvider extends ServiceProvider
             $this->app->register(\Rollbar\Laravel\RollbarServiceProvider::class);
         }
 
-        // Only load dusk's service provider if the app is in local or develop mode
-        if ($this->app->environment(['local', 'develop'])) {
-            $this->app->register(\Laravel\Dusk\DuskServiceProvider::class);
-        }
+//        // Only load dusk's service provider if the app is in local or develop mode
+//        if ($this->app->environment(['local', 'develop'])) {
+//            $this->app->register(\Laravel\Dusk\DuskServiceProvider::class);
+//        }
 
         $this->app->singleton('ArieTimmerman\Laravel\SCIMServer\SCIMConfig', SnipeSCIMConfig::class); // this overrides the default SCIM configuration with our own
 
