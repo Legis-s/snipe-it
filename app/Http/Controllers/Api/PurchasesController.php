@@ -339,7 +339,7 @@ class PurchasesController extends Controller
             $response = $client->request('POST', 'https://bitrix.legis-s.ru/rest/'.$user->bitrix_id.'/'.$raw_bitrix_token.'/lists.element.add.json/',$params);
 
         }else{
-            return response()->json(Helper::formatStandardApiResponse('error', null, null));
+            return "no auth";
         }
         $response = $response->getBody()->getContents();
         $bitrix_result = json_decode($response, true);
