@@ -29,7 +29,7 @@ use App\Http\Transformers\LicensesTransformer;
 use Auth;
 use App\Models\AssetModel;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Crypt;
+use Crypt;
 
 class PurchasesController extends Controller
 {
@@ -339,7 +339,7 @@ class PurchasesController extends Controller
             $response = $client->request('POST', 'https://bitrix.legis-s.ru/rest/'.$user->bitrix_id.'/'.$raw_bitrix_token.'/lists.element.add.json/',$params);
 
         }else{
-            return "no auth";
+            $response = $client->request('POST', 'https://bitrix.legis-s.ru/rest/722/q7e6fc3qrkiok64x/lists.element.add.json/',$params);
         }
         $response = $response->getBody()->getContents();
         $bitrix_result = json_decode($response, true);
