@@ -17,15 +17,7 @@ class ConsumableAssignmentPresenter extends Presenter
     public static function dataTableLayout()
     {
         $layout = [
-            [
-                "field" => "return",
-                "searchable" => false,
-                "sortable" => false,
-                "visible" => true,
-                "title" => "Вернуть",
-                "events"=>"operateEvents",
-                "formatter" => "consumablesReturnFormatter",
-            ],[
+           [
                 "field" => "id",
                 "searchable" => false,
                 "sortable" => true,
@@ -83,6 +75,14 @@ class ConsumableAssignmentPresenter extends Presenter
                 "sortable" => true,
                 "visible" => false,
                 "title" => "Комментарий",
+            ], [
+                "field" => "return",
+                "searchable" => false,
+                "sortable" => false,
+                "visible" => true,
+                "title" => "Вернуть",
+                "events"=>"operateEvents",
+                "formatter" => "consumablesReturnFormatter",
             ], [
                 "field" => "created_at",
                 "searchable" => false,

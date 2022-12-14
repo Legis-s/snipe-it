@@ -76,7 +76,7 @@ class AssetCheckinController extends Controller
         $asset->assigned_to = null;
         $asset->contract_id = null;
         $asset->name = $request->get('name');
-        
+
         if ($request->filled('status_id')) {
             $asset->status_id = e($request->get('status_id'));
         }else{
