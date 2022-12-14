@@ -782,7 +782,11 @@
                     return '<button type="button" class="btn btn-primary btn-sm review" data-tooltip="true" title="Есть закр. док.">Проверить</button>';
                 }
                 if ((row.available_actions.checkout == true) && (row.user_can_close_sell == true)) {
-                    return '<span class="btn btn-sm bg-maroon closesell" data-tooltip="true" title="Есть закр. док.">Есть закр. док.</span>';
+                    // return '<span class="btn btn-sm bg-maroon closesell" data-tooltip="true" title="Есть закр. док.">Есть закр. док.</span>';
+                    return '<div class="btn-group" style="min-width:200px">' +
+                        '<span class="btn btn-sm bg-maroon closesell" data-tooltip="true" title="Есть закр. док.">Есть закр. док.</span>'+
+                        '<a href="{{ url('/') }}/' + destination + '/' + row.id + '/checkin" class="btn btn-sm bg-purple" data-toggle="tooltip" title="Check this item in so it is available for re-imaging, re-issue, etc.">{{ trans('general.checkin') }}</a>'+
+                        '</div>';
                 }
                 // The user is allowed to check items out, AND the item is deployable
                 if ((row.available_actions.checkout == true) && (row.user_can_checkout == true) && ((!row.asset_id) && (!row.assigned_to))) {

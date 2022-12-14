@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AssetCheckinRequest;
 use App\Models\Asset;
 use App\Models\CheckoutAcceptance;
+use App\Models\Statuslabel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
@@ -75,10 +76,19 @@ class AssetCheckinController extends Controller
         $asset->assigned_to = null;
         $asset->contract_id = null;
         $asset->name = $request->get('name');
-
+        
         if ($request->filled('status_id')) {
             $asset->status_id = e($request->get('status_id'));
+        }else{
+
+            $status_for_sell = Statuslabel::where('name', 'Выдано')->first();
+            $status_ok = Statuslabel::where('name', 'Доступные')->first();
+
+            if ($asset->status_id == $status_for_sell->id){
+                $asset->status_id = $status_ok->id;
+            }
         }
+
 
         // This is just meant to correct legacy issues where some user data would have 0
         // as a location ID, which isn't valid. Later versions of Snipe-IT have stricter validation
