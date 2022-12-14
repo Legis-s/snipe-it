@@ -11,7 +11,7 @@ class ConsumableAssignment extends Model
 
     protected $presenter = 'App\Presenters\ConsumableAssignmentPresenter';
 
-    use  Presentable;
+    use Presentable;
     use Searchable;
     protected $dates = [
         'created_at',
@@ -56,8 +56,19 @@ class ConsumableAssignment extends Model
      *
      * @var array
      */
-    protected $searchableAttributes = ['type', 'cost','quantity'];
+    protected $searchableAttributes = ['type', 'cost','quantity','comment'];
 
+
+    /**
+     * The relations and their attributes that should be included when searching the model.
+     *
+     * @var array
+     */
+    protected $searchableRelations = [
+//        'assigned_to'        => ['name'],
+//        'contract_id'        => ['name'],
+//        'user_id'            => ['name'],
+    ];
 
     public function getDisplayNameAttribute()
     {

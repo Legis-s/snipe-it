@@ -56,7 +56,7 @@ class ConsumableAssignmentController extends Controller
 
 
         if ($request->filled('search')) {
-            $consumableAssignments = $consumableAssignments->AssignedSearch($request->input('search'));
+            $consumableAssignments = $consumableAssignments->TextSearch($request->input('search'));
         }
 
         if ($request->filled('no_contract') ) {

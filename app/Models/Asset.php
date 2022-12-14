@@ -1044,6 +1044,20 @@ class Asset extends Depreciable
 
         }
 
+
+        /**
+         * Assigned contracts
+         */
+        $query = $query->leftJoin('contracts as assigned_contracts', function ($leftJoin) {
+            $leftJoin->on('assigned_contracts.id', '=', 'assets.assigned_to')
+                ->where('assets.assigned_type', '=', Contract::class);
+        });
+
+        foreach ($terms as $term) {
+            $query = $query->orWhere('assigned_contracts.name', 'LIKE', '%'.$term.'%');
+
+        }
+
         return $query;
     }
 
