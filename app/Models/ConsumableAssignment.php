@@ -176,7 +176,9 @@ class ConsumableAssignment extends Model
         })->leftJoin('assets as cl_assets', function ($leftJoin) {
             $leftJoin->on('cl_assets.id', '=', 'consumables_locations.assigned_to')
                 ->where('consumables_locations.assigned_type', '=', Asset::class);
-        })->where(function ($query) use ($search) {
+        })->leftJoin('contracts as list_contracts', function ($leftJoin) {
+            $leftJoin->on('list_contracts.id', '=', 'consumables_locations.contract_id');
+        }) ->where(function ($query) use ($search) {
             foreach ($search as $search) {
                 $query->orWhere(function ($query) use ($search) {
                     $query->where('cl_users.first_name', 'LIKE', '%' . $search . '%')
@@ -186,7 +188,8 @@ class ConsumableAssignment extends Model
                         ->orWhere('cl_contracts.name', 'LIKE', '%' . $search . '%')
                         ->orWhere('cl_assets.name', 'LIKE', '%' . $search . '%')
                         ->orWhere('cl_locations.name', 'LIKE', '%' . $search . '%')
-                        ->orWhere('cl_contracts.name', 'LIKE', '%' . $search . '%');
+                        ->orWhere('cl_contracts.name', 'LIKE', '%' . $search . '%')
+                        ->orWhere('list_contracts.name', 'LIKE', '%' . $search . '%');
                 });
 
                 $query->orWhere('consumables_locations.quantity', 'LIKE', '%' . $search . '%')
