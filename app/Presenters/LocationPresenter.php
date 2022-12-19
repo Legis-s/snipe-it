@@ -38,6 +38,13 @@ class LocationPresenter extends Presenter
                 "visible" => true,
                 "formatter" => "trueFalseFormatter"
             ],[
+                "field" => "active",
+                "searchable" => true,
+                "sortable" => true,
+                "title" => "Активность",
+                "visible" => true,
+                "formatter" => "trueFalseFormatter"
+            ],[
                 'field' => 'name',
                 'searchable' => true,
                 'sortable' => true,

@@ -50,6 +50,7 @@ class LocationsController extends Controller
             'locations.notes',
             'locations.sklad',
             'locations.pult_id',
+            'locations.active',
         ])->withCount('assignedAssets as assigned_assets_count')
             ->withCount('assets as assets_count')
             ->withCount('rtd_assets as rtd_assets_count')

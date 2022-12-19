@@ -62,6 +62,7 @@ class LocationsTransformer
                 'children' => $children_arr,
                 'notes' => ($location->notes) ? e($location->notes) : null,
                 'sklad' => ($location->sklad) ? e($location->sklad) : null,
+                'active' => ($location->active) ? e($location->active) : null,
             ];
 
             $permissions_array['available_actions'] = [
