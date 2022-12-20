@@ -172,7 +172,7 @@ class SyncBitrix extends Command
                             'address2' => $value["ADDRESS_2"],
                             'coordinates' => $value["UF_MAP"],
                             'object_code' => intval($value["UF_TYPE"]),
-                            'active' => true,
+                            'active' => false,
                             'pult_id' => $value["UF_PULT_ID"],
                         ]
                     );
