@@ -1443,6 +1443,12 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
                 ]
             )->name('api.contracts.selectlist');
 
+            Route::post('{id}/closesell',
+                [
+                    Api\ContractsController::class,
+                    'closesell'
+                ]
+            )->name('api.contracts.closesell');
 
         });
         Route::resource('contracts',
