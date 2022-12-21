@@ -129,16 +129,17 @@ class SyncBitrix extends Command
 
             }
 
-            if ($value["DELETED"] == 1) {
-                $active = false;
-                $name = "[Удалено]" . $name;
-            }
             if (strlen($value["UF_CLOSEDATE"]) > 0) {
                 $dateTime = DateTime::createFromFormat('d.m.Y', $value["UF_CLOSEDATE"]);
                 $now = new DateTime();
                 if ($dateTime <= $now) {
                     $active = false;
                     $name = "[Закрыто]" . $name;
+                }
+            }else{
+                if ($value["DELETED"] == 1) {
+                    $active = false;
+                    $name = "[Удалено]" . $name;
                 }
             }
 
