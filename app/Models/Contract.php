@@ -151,14 +151,21 @@ class Contract  extends SnipeModel
      */
     public function assets()
     {
-        return $this->hasMany(\App\Models\Asset::class, 'contract_id')
-            ->whereHas('assetstatus', function ($query) {
-                $query->where('status_labels.deployable', '=', 1)
-                    ->orWhere('status_labels.pending', '=', 1)
-                    ->orWhere('status_labels.archived', '=', 0);
-            });
+        return $this->hasMany(\App\Models\Asset::class, 'contract_id');
     }
-    
+
+    /**
+     * Find assets with this location as their location_id
+     *
+     * @author A. Gianotto <snipe@snipe.net>
+     * @since [v3.0]
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
+    public function assets_no_docs()
+    {
+        return $this->hasMany(\App\Models\Asset::class, 'contract_id')->whereNotNull("assigned_to");
+    }
+
 
 
 

@@ -42,7 +42,8 @@ class ContractsController extends Controller
             'contracts.bitrix_id',
             'contracts.created_at',
             'contracts.updated_at',
-        ])->withCount('assets as assets_count');
+        ])->withCount('assets as assets_count')
+            ->withCount('assets_no_docs as assets_no_docs_count');
 
 
         if ($request->filled('search')) {

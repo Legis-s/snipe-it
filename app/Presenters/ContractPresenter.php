@@ -5,7 +5,6 @@ namespace App\Presenters;
 use App\Helpers\Helper;
 
 
-
 /**
  * Class LocationPresenter
  * @package App\Presenters
@@ -28,7 +27,7 @@ class ContractPresenter extends Presenter
                 "switchable" => true,
                 "title" => trans('general.id'),
                 "visible" => false
-            ],[
+            ], [
                 "field" => "bitrix_id",
                 "searchable" => false,
                 "sortable" => true,
@@ -48,6 +47,13 @@ class ContractPresenter extends Presenter
                 "searchable" => true,
                 "sortable" => true,
                 "title" => "Активов",
+                "visible" => true,
+//                "formatter" => "contractsLinkFormatter"
+            ], [
+                "field" => "assets_no_docs_count",
+                "searchable" => true,
+                "sortable" => true,
+                "title" => "Активов без з/д",
                 "visible" => true,
 //                "formatter" => "contractsLinkFormatter"
             ], [
@@ -112,10 +118,10 @@ class ContractPresenter extends Presenter
     }
 
 
-    public function fullName() {
-        return "[".$this->number."] ".$this->name;
+    public function fullName()
+    {
+        return "[" . $this->number . "] " . $this->name;
     }
-
 
 
 }
