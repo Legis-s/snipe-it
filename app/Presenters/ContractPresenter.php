@@ -44,6 +44,13 @@ class ContractPresenter extends Presenter
                 "visible" => true,
                 "formatter" => "contractsLinkFormatter"
             ], [
+                "field" => "assets_count",
+                "searchable" => true,
+                "sortable" => true,
+                "title" => "Активов",
+                "visible" => true,
+//                "formatter" => "contractsLinkFormatter"
+            ], [
                 "field" => "number",
                 "searchable" => true,
                 "sortable" => true,

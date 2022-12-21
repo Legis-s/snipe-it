@@ -29,6 +29,7 @@ class ContractsTransformer
                 'number' => e($contract->number),
                 'status' => e($contract->getStatusText()),
                 'type' => e($contract->getTypeText()),
+                'assets_count'    => (int) $contract->assets_count,
                 'created_at' => Helper::getFormattedDateObject($contract->created_at, 'datetime'),
                 'updated_at' => Helper::getFormattedDateObject($contract->updated_at, 'datetime'),
                 'bitrix_id' => ($contract->bitrix_id) ? (int)$contract->bitrix_id : null,
