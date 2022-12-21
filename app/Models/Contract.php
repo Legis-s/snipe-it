@@ -166,7 +166,4 @@ class Contract  extends SnipeModel
         return $this->hasMany(\App\Models\Asset::class, 'contract_id')->whereNotNull("assigned_to");
     }
 
-
-
-
 }

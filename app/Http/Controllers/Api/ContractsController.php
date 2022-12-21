@@ -42,9 +42,10 @@ class ContractsController extends Controller
             'contracts.bitrix_id',
             'contracts.created_at',
             'contracts.updated_at',
-        ])->withCount('assets as assets_count')
+        ])->withSum('assets', 'purchase_cost')
+            ->withCount('assets as assets_count')
             ->withCount('assets_no_docs as assets_no_docs_count');
-
+        \Debugbar::info($contracts);
 
         if ($request->filled('search')) {
             $contracts = $contracts->TextSearch($request->input('search'));

@@ -57,6 +57,13 @@ class ContractPresenter extends Presenter
                 "visible" => true,
 //                "formatter" => "contractsLinkFormatter"
             ], [
+                "field" => "assets_sum_purchase_cost",
+                "searchable" => false,
+                "sortable" => true,
+                "title" => "Стоимость активов",
+                'class' => 'text-right',
+                "visible" => true,
+            ], [
                 "field" => "number",
                 "searchable" => true,
                 "sortable" => true,
