@@ -40,6 +40,7 @@ class ContractsController extends Controller
             'contracts.date_start',
             'contracts.date_end',
             'contracts.bitrix_id',
+            'contracts.summ',
             'contracts.created_at',
             'contracts.updated_at',
         ])->withSum('assets', 'purchase_cost')

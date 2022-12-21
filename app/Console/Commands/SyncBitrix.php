@@ -342,6 +342,7 @@ class SyncBitrix extends Command
                         'type' => $value["TYPE_ID"],
                         'date_start' => $value["DATE_START"],
                         'date_end' => $value["DATE_END"],
+                        'summ' => $value["UF_CRM_1560273765"],
                         'assigned_by_id' => $value["ASSIGNED_BY_ID"],
                     ]
                 );

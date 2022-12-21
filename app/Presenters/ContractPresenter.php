@@ -65,6 +65,14 @@ class ContractPresenter extends Presenter
                 "formatter" => "contractsPriceFormatter",
                 "visible" => true,
             ], [
+                "field" => "summ",
+                "searchable" => false,
+                "sortable" => true,
+                "title" => "Стоимость договора",
+                'class' => 'text-right',
+                "formatter" => "contractsPriceFormatter",
+                "visible" => true,
+            ], [
                 "field" => "number",
                 "searchable" => true,
                 "sortable" => true,

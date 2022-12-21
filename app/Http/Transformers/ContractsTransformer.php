@@ -32,6 +32,7 @@ class ContractsTransformer
                 'assets_count'    => (int) $contract->assets_count,
                 'assets_no_docs_count'    => (int) $contract->assets_no_docs_count,
                 'assets_sum_purchase_cost'    => (int) $contract->assets_sum_purchase_cost,
+                'summ'    => (int) $contract->summ,
                 'created_at' => Helper::getFormattedDateObject($contract->created_at, 'datetime'),
                 'updated_at' => Helper::getFormattedDateObject($contract->updated_at, 'datetime'),
                 'bitrix_id' => ($contract->bitrix_id) ? (int)$contract->bitrix_id : null,

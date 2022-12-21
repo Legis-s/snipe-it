@@ -49,7 +49,8 @@ class Contract  extends SnipeModel
         'date_end', // DATE_END
         'bitrix_id', //ID
         'type', //ID
-        'assigned_by_id'
+        'assigned_by_id',
+        'summ'
     ];
 
 
