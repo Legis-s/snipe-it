@@ -62,6 +62,7 @@ class ContractPresenter extends Presenter
                 "sortable" => true,
                 "title" => "Стоимость активов",
                 'class' => 'text-right',
+                "formatter" => "contractsPriceFormatter",
                 "visible" => true,
             ], [
                 "field" => "number",

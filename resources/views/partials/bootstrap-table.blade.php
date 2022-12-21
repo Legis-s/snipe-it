@@ -772,7 +772,9 @@
         /**
         * START CUSTOM
          */
-
+        function contractsPriceFormatter(value,row) {
+            return value.toLocaleString('ru');
+        }
 
         function hardwareCustomInOutFormatter(value,row) {
             console.log(row);
