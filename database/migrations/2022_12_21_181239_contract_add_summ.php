@@ -14,7 +14,7 @@ class ContractAddSumm extends Migration
     public function up()
     {
         Schema::table('contracts', function (Blueprint $table) {
-            $table->float('summ', 8, 2)->nullable();
+            $table->float('summ', 14, 2)->nullable();
         });
     }
 
