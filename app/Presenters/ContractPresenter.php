@@ -57,6 +57,20 @@ class ContractPresenter extends Presenter
                 "visible" => true,
 //                "formatter" => "contractsLinkFormatter"
             ], [
+                "field" => "consumable_count",
+                "searchable" => true,
+                "sortable" => true,
+                "title" => "Расходников",
+                "visible" => true,
+//                "formatter" => "contractsLinkFormatter"
+            ], [
+                "field" => "consumable_no_docs_count",
+                "searchable" => true,
+                "sortable" => true,
+                "title" => "Расходников без з/д",
+                "visible" => true,
+//                "formatter" => "contractsLinkFormatter"
+            ], [
                 "field" => "assets_sum_purchase_cost",
                 "searchable" => false,
                 "sortable" => true,

@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Transformers\ContractsTransformer;
+use App\Models\Actionlog;
 use App\Models\Asset;
+use App\Models\Consumable;
+use App\Models\ConsumableAssignment;
 use App\Models\Contract;
 use App\Models\Statuslabel;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Helpers\Helper;
@@ -47,8 +51,9 @@ class ContractsController extends Controller
             'contracts.updated_at',
         ])->withSum('assets', 'purchase_cost')
             ->withCount('assets as assets_count')
-            ->withCount('assets_no_docs as assets_no_docs_count');
-        \Debugbar::info($contracts);
+            ->withCount('assets_no_docs as assets_no_docs_count')
+            ->withCount('consumable as consumable_count')
+            ->withCount('consumable_no_docs as consumable_no_docs_count');
 
         if ($request->filled('search')) {
             $contracts = $contracts->TextSearch($request->input('search'));
@@ -193,28 +198,34 @@ class ContractsController extends Controller
 
         $contract = Contract::findOrFail($contract_id);
         $status = Statuslabel::where('name', 'Выдано')->first();
-        $assets = Asset::where("contract_id",$contract->id)->where("status_id",$status->id)->whereNotNull("assigned_to")->get();;
+        $assets = Asset::where("contract_id",$contract->id)->where("status_id",$status->id)->whereNotNull("assigned_to")->get();
         $target = $contract;
         $checkout_at = request('checkout_at', date('Y-m-d H:i:s'));
         foreach ($assets as &$asset) {
             $asset->closeSell($target, Auth::user(), $checkout_at, null, null);
         }
-//        \Debugbar::info($assets);
-//        $target = Contract::find( $asset->contract_id);
-//        $note = request('note', null);
-//        $asset_name = request('name', null);
-//        $checkout_at = request('checkout_at', date('Y-m-d H:i:s'));
-//
-//        if (! isset($target)) {
-//            return response()->json(Helper::formatStandardApiResponse('error', $error_payload, 'Checkout target for asset '.e($asset->asset_tag).' is invalid - '.$error_payload['target_type'].' does not exist.'));
-//        }
-//
-//        if ($asset->closeSell($target, Auth::user(), $checkout_at, $note, $asset_name)) {
-//            return response()->json(Helper::formatStandardApiResponse('success', ['asset'=> e($asset->asset_tag)], trans('admin/hardware/message.checkout.success')));
-//        }
+        $user = Auth::user();
+        $consumableAssignments = ConsumableAssignment::where("contract_id",$contract->id)->where("assigned_type", User::class)->get();
+        foreach ($consumableAssignments as &$consumableAssignment) {
+            $user_pre = User::findOrFail($consumableAssignment->assigned_to);
+            $consumableAssignment->assigned_type = Contract::class;
+            $consumableAssignment->assigned_to = $contract->id;
+            $user_name = "(".$user->id.") ".$user->last_name." ".$user->first_name;
+            $user_name_pre = "(".$user_pre->id.") ".$user_pre->last_name." ".$user_pre->first_name;
+            $consumableAssignment->comment = $consumableAssignment->comment." Закрывающие документы получены ".date("Y-m-d H:i:s").", ".$user_name." Расходник списан с пользователя: ".$user_name_pre;
+            if ($consumableAssignment->save()) {
+                $log = new Actionlog();
+                $log->user_id = \Illuminate\Support\Facades\Auth::id();
+                $log->action_type = 'sell';
+                $log->target_type = Contract::class;
+                $log->target_id = $contract->id;
+                $log->item_id = $consumableAssignment->consumable_id;
+                $log->item_type = Consumable::class;
+                $log->save();
+            }
+
+        }
         return response()->json(Helper::formatStandardApiResponse('success', null, trans('admin/hardware/message.checkout.success')));
-//
-//        return response()->json(Helper::formatStandardApiResponse('error', ['asset'=> e($asset->asset_tag)], trans('admin/hardware/message.checkout.error')));
     }
 
 

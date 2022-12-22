@@ -167,4 +167,27 @@ class Contract  extends SnipeModel
         return $this->hasMany(\App\Models\Asset::class, 'contract_id')->whereNotNull("assigned_to");
     }
 
+    /**
+     * Find assets with this location as their location_id
+     *
+     * @author A. Gianotto <snipe@snipe.net>
+     * @since [v3.0]
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
+    public function consumable()
+    {
+        return $this->hasMany(\App\Models\ConsumableAssignment::class, 'contract_id');
+    }
+    /**
+     * Find assets with this location as their location_id
+     *
+     * @author A. Gianotto <snipe@snipe.net>
+     * @since [v3.0]
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
+    public function consumable_no_docs()
+    {
+        return $this->hasMany(\App\Models\ConsumableAssignment::class, 'contract_id')->where("assigned_type", User::class);
+    }
+
 }
