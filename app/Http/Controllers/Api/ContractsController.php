@@ -61,6 +61,12 @@ class ContractsController extends Controller
         if ($request->filled('sum_error') && $request->input('sum_error') == 1 ) {
             $contracts = $contracts->havingRaw('assets_sum > contracts.summ');
         }
+        if ($request->filled('only_assets') && $request->input('only_assets') == 1 ) {
+            $contracts = $contracts->having('assets_no_docs_count','>',0);
+        }
+        if ($request->filled('only_consumables') && $request->input('only_consumables') == 1 ) {
+            $contracts = $contracts->having('consumable_no_docs_count','>',0);
+        }
 
 
         // Set the offset to the API call's offset, unless the offset is higher than the actual count of items in which

@@ -15,8 +15,18 @@
         <div class="table-responsive">
           <div id="toolbar">
             <div class="form-check">
+              <input class="form-check-input" type="checkbox" value="" id="only_assets_checkbox">
+              <label class="form-check-label" for="only_assets_checkbox">
+                Активы без з/д
+              </label>
+              &nbsp;
+              <input class="form-check-input" type="checkbox" value="" id="only_consumables_checkbox">
+              <label class="form-check-label" for="only_consumables_checkbox">
+                Расходники без з/д
+              </label>
+              &nbsp;
               <input class="form-check-input" type="checkbox" value="" id="sum_checkbox">
-              <label class="form-check-label" for="defaultCheck1">
+              <label class="form-check-label" for="sum_checkbox">
                 Превышение суммы
               </label>
             </div>
@@ -34,6 +44,7 @@
                   data-show-export="true"
                   data-show-refresh="true"
                   data-sort-order="asc"
+                  data-query-params="contractQueryParams"
                   id="contractTable"
                   class="table table-striped snipe-table"
                   data-url="{{ route('api.contracts.index') }}"
@@ -51,26 +62,40 @@
 @stop
 
 @section('moar_scripts')
-@include ('partials.bootstrap-table', ['exportFile' => 'contracts-export', 'search' => true])
 <script nonce="{{ csrf_token() }}">
   $(function () {
-
-    $('#sum_checkbox').on('change', function(){ // on change of state
-      if(this.checked){
-        $( "#contractTable" ).bootstrapTable('refresh', {
-          query: {
-            sum_error: 1
-          }
-        });
-      }else{
-        $( "#contractTable" ).bootstrapTable('refresh', {
-          query: {
-            sum_error: 0
-          }
-        });
-      }
+    $( "#contractTable" ).bootstrapTable('refreshOptions', {
+      queryParams:function (params) {
+        if ($('#sum_checkbox').is(":checked")) {
+          params.sum_error = 1
+        }else{
+          params.sum_error = 0
+        }
+        if ($('#only_consumables_checkbox').is(":checked")) {
+          params.only_consumables = 1
+        }else{
+          params.only_consumables = 0
+        }
+        if ($('#only_assets_checkbox').is(":checked")) {
+          params.only_assets = 1
+        }else{
+          params.only_assets = 0
+        }
+        return params
+      },
     })
+
+    $('#only_assets_checkbox').on('change', function(){ // on change of state
+      $( "#contractTable" ).bootstrapTable('refresh');
+    });
+    $('#only_consumables_checkbox').on('change', function(){ // on change of state
+      $( "#contractTable" ).bootstrapTable('refresh');
+    });
+    $('#sum_checkbox').on('change', function(){ // on change of state
+      $( "#contractTable" ).bootstrapTable('refresh');
+    });
 
   });
 </script>
+@include ('partials.bootstrap-table', ['exportFile' => 'contracts-export', 'search' => true])
 @stop
