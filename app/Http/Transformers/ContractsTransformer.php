@@ -31,7 +31,7 @@ class ContractsTransformer
                 'type' => e($contract->getTypeText()),
                 'assets_count'    => (int) $contract->assets_count,
                 'assets_no_docs_count'    => (int) $contract->assets_no_docs_count,
-                'assets_sum_purchase_cost'    => (int) $contract->assets_sum_purchase_cost,
+                'assets_sum_purchase_cost'    => (int) $contract->assets_sum,
                 'consumable_count'    => (int) $contract->consumable_count,
                 'consumable_no_docs_count'    => (int) $contract->consumable_no_docs_count,
                 'summ'    => (int) $contract->summ,

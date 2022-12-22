@@ -49,7 +49,7 @@ class ContractsController extends Controller
             'contracts.summ',
             'contracts.created_at',
             'contracts.updated_at',
-        ])->withSum('assets', 'purchase_cost')
+        ])->withSum('assets as assets_sum', 'purchase_cost')
             ->withCount('assets as assets_count')
             ->withCount('assets_no_docs as assets_no_docs_count')
             ->withCount('consumable as consumable_count')
@@ -58,6 +58,10 @@ class ContractsController extends Controller
         if ($request->filled('search')) {
             $contracts = $contracts->TextSearch($request->input('search'));
         }
+        if ($request->filled('sum_error') && $request->input('sum_error') == 1 ) {
+            $contracts = $contracts->havingRaw('assets_sum > contracts.summ');
+        }
+
 
         // Set the offset to the API call's offset, unless the offset is higher than the actual count of items in which
         // case we override with the actual count, so we should return 0 items.
