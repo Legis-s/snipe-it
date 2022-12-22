@@ -82,7 +82,7 @@
                 </ul>
             </div>
             @can('checkout', \App\Models\Asset::class)
-                @if ( count($contract->assets_no_docs) >0 or count($contract->consumable_no_docs_count)>0)
+                @if (($contract->assets_no_docs && count($contract->assets_no_docs) >0) or ($contract->consumable_no_docs_count && count($contract->consumable_no_docs_count>0)))
                 <div class="col-md-12" id="closeing_docs_div">
                     <div id="closeing_docs" style="margin-bottom:10px; width:100%" class="btn btn-primary pull-right">
                         Есть закрывающие документы
