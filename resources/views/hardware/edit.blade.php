@@ -65,7 +65,7 @@
 
     @include ('partials.forms.edit.notes')
     @include ('partials.forms.edit.location-select', ['translated_name' => trans('admin/hardware/form.default_location'), 'fieldname' => 'rtd_location_id'])
-    @include ('partials.forms.edit.requestable', ['requestable_text' => trans('admin/hardware/general.requestable')])
+    @include ('partials.forms.edit.requestable', ['requestable_text' => trans('admin/hardware/general.requestable')])user
     <?php
     $currency_type=null;
     if ($item->id && $item->location) {
@@ -232,7 +232,7 @@
 
                     if (data == true) {
                         $("#assignto_selector").show();
-                        $("#assigned_user").show();
+                        $("#assigned_location").show();
 
                         $("#selected_status_status").removeClass('text-danger');
                         $("#selected_status_status").removeClass('text-warning');

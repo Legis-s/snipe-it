@@ -26,7 +26,7 @@
             @if ((isset($contract_select)) && ($contract_select!='false'))
                 <label class="btn btn-default">
                     <input name="checkout_to_type" value="contract" aria-label="checkout_to_type" type="radio"><i
-                            class="fas fa-file" aria-hidden="true"></i> Договор
+                            class="fas fa-file" aria-hidden="true"></i> {{ trans('general.contract') }}
                 </label>
             @endif
 
