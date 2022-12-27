@@ -773,11 +773,11 @@
         * START CUSTOM
          */
         function contractsPriceFormatter(value,row) {
-            var full_price = row.assets_sum_purchase_cost+ row.consumables_cost;
-            return full_price.toLocaleString('ru');
+            return value.toLocaleString('ru');
         }
         function contractsFullPriceFormatter(value,row) {
-            return value.toLocaleString('ru');
+            var full_price = row.assets_sum_purchase_cost+ row.consumables_cost;
+            return full_price.toLocaleString('ru');
         }
 
 
