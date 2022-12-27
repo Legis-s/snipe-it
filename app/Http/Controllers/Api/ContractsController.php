@@ -19,6 +19,7 @@ use App\Http\Transformers\SelectlistTransformer;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Auth;
+use Illuminate\Support\Facades\DB;
 
 class ContractsController extends Controller
 {
@@ -53,13 +54,18 @@ class ContractsController extends Controller
             ->withCount('assets as assets_count')
             ->withCount('assets_no_docs as assets_no_docs_count')
             ->withCount('consumable as consumable_count')
-            ->withCount('consumable_no_docs as consumable_no_docs_count');
+            ->withCount('consumable_no_docs as consumable_no_docs_count')
+            ->addSelect(['consumables_cost' => ConsumableAssignment::query()
+                ->whereColumn('contract_id', 'contracts.id')
+                ->selectRaw('sum(quantity * cost) as consumables_cost')
+            ]);
 
+//        $contracts = Contract::addSelect([]);
         if ($request->filled('search')) {
             $contracts = $contracts->TextSearch($request->input('search'));
         }
         if ($request->filled('sum_error') && $request->input('sum_error') == 1 ) {
-            $contracts = $contracts->havingRaw('assets_sum > contracts.summ');
+            $contracts = $contracts->havingRaw('assets_sum + consumables_cost > contracts.summ');
         }
         if ($request->filled('only_assets') && $request->input('only_assets') == 1 ) {
             $contracts = $contracts->having('assets_no_docs_count','>',0);

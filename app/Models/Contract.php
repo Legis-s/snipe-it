@@ -178,6 +178,19 @@ class Contract  extends SnipeModel
     {
         return $this->hasMany(\App\Models\ConsumableAssignment::class, 'contract_id');
     }
+
+    /**
+     * Find assets with this location as their location_id
+     *
+     * @author A. Gianotto <snipe@snipe.net>
+     * @since [v3.0]
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
+    public function consumables_locations()
+    {
+        return $this->hasMany(\App\Models\ConsumableAssignment::class, 'contract_id');
+    }
+
     /**
      * Find assets with this location as their location_id
      *
