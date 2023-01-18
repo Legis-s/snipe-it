@@ -358,7 +358,7 @@ class AssetsController extends Controller
         $asset->notes = $request->input('notes');
         $asset->physical = '1';
         $asset->quality = $request->input('quality');
-        $asset->depreciable_cost = $request->input('depreciable_cost');
+        $asset->depreciable_cost = Helper::ParseCurrency($request->input('depreciable_cost', null));
         $asset = $request->handleImages($asset);
 
         // Update custom fields in the database.
