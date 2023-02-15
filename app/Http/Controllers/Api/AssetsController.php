@@ -1221,6 +1221,7 @@ class AssetsController extends Controller
             $this->authorize('review');
             $status = Statuslabel::where('name', 'Доступные')->first();
             $asset->status_id = $status->id;
+            $asset->last_audit_date = date('Y-m-d h:i:s');
             $user = Auth::user();
             $asset->user_verified_id = $user->id;
             $asset->save();
