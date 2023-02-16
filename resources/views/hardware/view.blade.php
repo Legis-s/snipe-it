@@ -988,6 +988,7 @@
                                                         <img src="{{ $inventory_item->photo_url()}}" class="assetimg img-responsive"">
                                                     </a>
                                                 </div>
+                                                @break
                                             @endif
                                         @endforeach
                                 @endif
