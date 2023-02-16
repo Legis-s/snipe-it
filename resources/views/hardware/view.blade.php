@@ -981,15 +981,16 @@
 
                                 @if ($asset->inventory_items->count() > 0)
 
-{{--                                        @foreach ($asset->inventory_items as $inventory_item)--}}
-{{--                                            @if ($inventory_item->photo_url())--}}
+                                        @foreach ($asset->inventory_items as $inventory_item)
+                                            @if ($inventory_item->photo)
+                                                test
 {{--                                                <div class="text-center col-md-12" style="padding-bottom: 15px;">--}}
 {{--                                                    <a href="{{ ($inventory_item->photo_url()) ? $asset->photo_url() : null }}" data-toggle="lightbox">--}}
 {{--                                                        <img src="{{ ($inventory_item->photo_url()) ? $inventory_item->photo_url() : null }}" class="assetimg img-responsive" alt="{{ $inventory_item->name }}">--}}
 {{--                                                    </a>--}}
 {{--                                                </div>--}}
-{{--                                            @endif--}}
-{{--                                        @endforeach--}}
+                                            @endif
+                                        @endforeach
                                 @endif
 
                                 @if ($asset->deleted_at!='')
