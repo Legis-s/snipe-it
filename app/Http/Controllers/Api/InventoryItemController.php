@@ -61,6 +61,10 @@ class InventoryItemController extends Controller
             $inventory_items->where('inventory_items.inventory_id', '=', $request->input('inventory_id'));
         }
 
+        if ($request->filled('asset_id')) {
+            $inventory_items->where('inventory_items.asset_id', '=', $request->input('asset_id'));
+        }
+
 
         if ($request->filled('search')) {
             $inventory_items = $inventory_items->TextSearch($request->input('search'));

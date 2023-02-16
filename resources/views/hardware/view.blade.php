@@ -132,6 +132,17 @@
                     </li>
 
                     <li>
+                        <a href="#inventory" data-toggle="tab">
+                          <span class="hidden-lg hidden-md">
+                            <i class="far fa-save fa-2x" aria-hidden="true"></i>
+                          </span>
+                            <span class="hidden-xs hidden-sm"> Инвентаризации
+                                {!! ($asset->inventory_items->count() > 0 ) ? '<badge class="badge badge-secondary">'.number_format($asset->inventory_items->count()).'</badge>' : '' !!}
+                          </span>
+                        </a>
+                    </li>
+
+                    <li>
                         <a href="#software" data-toggle="tab">
                           <span class="hidden-lg hidden-md">
                             <i class="far fa-save fa-2x" aria-hidden="true"></i>
@@ -968,6 +979,19 @@
                                     </div>
                                 @endif
 
+                                @if ($asset->inventory_items->count() > 0)
+
+                                        @foreach ($asset->inventory_items as $inventory_item)
+                                            @if ($inventory_item->photo)
+                                                <div class="text-center col-md-12" style="padding-bottom: 15px;">
+                                                    <a href="{{ ($inventory_item->photo_url()) ? $asset->photo_url() : null }}" data-toggle="lightbox">
+                                                        <img src="{{ ($inventory_item->photo_url()) ? $inventory_item->photo_url() : null }}" class="assetimg img-responsive" alt="{{ $inventory_item->name }}">
+                                                    </a>
+                                                </div>
+                                            @endif
+                                        @endforeach
+                                @endif
+
                                 @if ($asset->deleted_at!='')
                                     <div class="text-center col-md-12" style="padding-bottom: 15px;">
                                         <form method="POST" action="{{ route('restore/hardware', ['assetId' => $asset->id]) }}">
@@ -1026,6 +1050,38 @@
                             </div> <!-- div.col-md-4 -->
                         </div><!-- /row -->
                     </div><!-- /.tab-pane asset details -->
+
+
+                    <div class="tab-pane fade" id="inventory">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <!-- Licenses assets table -->
+                                @if ($asset->inventory_items->count() > 0)
+                                        <table
+                                                data-columns="{{ \App\Presenters\InventoryItemPresenter::dataTableLayout() }}"
+                                                data-cookie-id-table="inventoryAssetTable"
+                                                data-pagination="true"
+                                                data-id-table="inventoryAssetTable"
+                                                data-search="true"
+                                                data-side-pagination="server"
+                                                data-show-columns="true"
+                                                data-show-export="true"
+                                                data-show-refresh="true"
+                                                data-sort-order="asc"
+                                                id="inventoryAssetTable"
+                                                class="table table-striped snipe-table"
+                                                data-url="{{route('api.inventory_items.index', ['asset_id' => $asset->id])}}">
+                                        </table>
+                                @else
+
+                                    <div class="alert alert-info alert-block">
+                                        <i class="fas fa-info-circle"></i>
+                                        {{ trans('general.no_results') }}
+                                    </div>
+                                @endif
+                            </div><!-- /col -->
+                        </div> <!-- row -->
+                    </div> <!-- /.tab-pane inventory -->
 
                     <div class="tab-pane fade" id="software">
                         <div class="row">
