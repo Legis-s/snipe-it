@@ -391,6 +391,11 @@ class Asset extends Depreciable
             }
         }
 
+        if ($target instanceof Asset) {
+            $this->location_id = null;
+            $this->rtd_location_id = null;
+        }
+
         $changed = [];
 
         foreach ($this->getRawOriginal() as $key => $value) {

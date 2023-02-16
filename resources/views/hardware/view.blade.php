@@ -284,6 +284,10 @@
                                                   @if ($asset->contract_id && $asset->assigned_type != 'App\Models\Contract')
                                                     (по договору <a href='/contracts/{{$asset->contract_id}}'>{{\App\Models\Contract::find($asset->contract_id)->name}}</a>                                                    )
                                                   @endif
+
+                                                @if($asset->assigned_type == 'App\Models\Asset' && $asset->assignedTo && $asset->assignedTo->location)
+                                                    (местоположение <a href='/locations/{{$asset->assignedTo->location->id}}'> {{ $asset->assignedTo->location->name }} </a>)
+                                                @endif
                                             </div>
                                         </div>
                                     @endif
