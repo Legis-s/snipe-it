@@ -981,7 +981,7 @@
 
                                 @if ($asset->inventory_items->count() > 0)
 
-                                        @foreach ($asset->inventory_items as $inventory_item)
+                                        @foreach ($asset->inventory_items->reverse() as $inventory_item)
                                             @if ($inventory_item->photo)
                                                 <div class="text-center col-md-12" style="padding-bottom: 15px;">
                                                     <a href="{{$inventory_item->photo_url() }}" data-toggle="lightbox">
