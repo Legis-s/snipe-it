@@ -1268,7 +1268,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
                     'update' => 'api.inventories.update',
                     'store' => 'api.inventories.store',
                 ],
-                'except' => ['create', 'edit'],
+                'except' => ['edit'],
                 'parameters' => ['inventory' => 'inventory_id'],
             ]
         ); // end Inventories API routes
