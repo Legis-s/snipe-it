@@ -447,6 +447,14 @@
                     </div>
                 @endif
 
+                @if ($location->coordinates!='')
+                    <div id="map" style=" width: 100%; height: 400px"></div>
+{{--                    <div class="col-md-12">--}}
+{{--                        <div id="map" style=" width: 100%; height: 400px"></div>--}}
+{{--                        <img src="https://maps.googleapis.com/maps/api/staticmap?markers={{ urlencode($location->address.','.$location->city.' '.$location->state.' '.$location->country.' '.$location->zip) }}&size=700x500&maptype=roadmap&key={{ config('services.google.maps_api_key') }}" class="img-thumbnail" style="width:100%" alt="Map">--}}
+{{--                    </div>--}}
+                @endif
+
             </div>
 
 
@@ -463,5 +471,26 @@
         'exportFile' => 'locations-export',
         'search' => true
      ])
+    @if ($location->coordinates!='')
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=9aff6103-40f7-49e4-ad79-aa2a69d421d6&lang=ru_RU"
+            type="text/javascript">
+    </script>
+    <script type="text/javascript">
+        ymaps.ready(init);
+        function init() {
+            // Создание карты.
+            var myMap = new ymaps.Map("map", {
+                center: [{{$location->coordinates}}],
+                zoom: 15,
+                controls: ['zoomControl']
+            });
 
+            myMap.geoObjects.add(new ymaps.Placemark([{{$location->coordinates}}], {
+                // balloonContent: 'цвет <strong>воды пляжа бонди</strong>'
+            }, {
+                preset: 'islands#blueCircleDotIconWithCaption',
+            }));
+        }
+    </script>
+    @endif
 @stop
