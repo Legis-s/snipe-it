@@ -218,7 +218,9 @@ class InventoriesController extends Controller
                 if ($asset->model && $asset->model->manufacturer){
                     $inventory_item->manufacturer = $asset->model->manufacturer->name;
                 }
-                $inventory_item->category = $asset->model->category->name;
+                if ($asset->model && $asset->model->category){
+                    $inventory_item->category = $asset->model->category->name;
+                }
                 $inventory_item->tag = $asset->asset_tag;
                 $inventory_item->serial_number= $asset->serial;
                 $inventory_item->inventory_id = $inventory->id;
