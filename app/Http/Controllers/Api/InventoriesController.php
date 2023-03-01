@@ -212,8 +212,12 @@ class InventoriesController extends Controller
                 $inventory_item->asset_id = $asset->id;
                 $inventory_item->name = $asset->name;
                 $inventory_item->notes = $asset->notes;
-                $inventory_item->model = $asset->model->name;
-                $inventory_item->manufacturer = $asset->model->manufacturer->name;
+                if ($asset->model && $asset->model->name){
+                    $inventory_item->model = $asset->model->name;
+                }
+                if ($asset->model && $asset->model->manufacturer){
+                    $inventory_item->manufacturer = $asset->model->manufacturer->name;
+                }
                 $inventory_item->category = $asset->model->category->name;
                 $inventory_item->tag = $asset->asset_tag;
                 $inventory_item->serial_number= $asset->serial;
