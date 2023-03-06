@@ -113,17 +113,31 @@ class LocationsTransformer
             if ($max>0 && $count !=  $max){
                 $res = "FF0000";
             }
-
-            if ($location->active){
-                $options = [
-                    "iconColor" => '#'.$res,
-                ];
+            if ($location->object_code == "455"){
+                if ($location->active){
+                    $options = [
+                        "iconColor" => '#'.$res,
+                    ];
+                }else{
+                    $options = [
+                        "iconColor" => '#'.$res,
+                        "preset"=> 'islands#circleIcon',
+                    ];
+                }
             }else{
-                $options = [
-                    "iconColor" => '#'.$res,
-                    "preset"=> 'islands#circleIcon',
-                ];
+                if ($location->active){
+                    $options = [
+                        "iconColor" => '#'.$res,
+                        "preset"=> 'islands#dotIcon',
+                    ];
+                }else{
+                    $options = [
+                        "iconColor" => '#'.$res,
+                        "preset"=> 'islands#icon',
+                    ];
+                }
             }
+
             $array = [
                 "id" => (int)$location->id,
                 "type" => "Feature",

@@ -153,6 +153,7 @@
                             $ok_count++;
                         }
                     }
+
                 });
                 $("#all_count").html( data.features.length);
                 $("#ok_count").html( $ok_count);

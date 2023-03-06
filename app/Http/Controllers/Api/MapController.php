@@ -35,6 +35,7 @@ class MapController extends Controller
             'locations.object_code',
             'locations.active',
         ]) ->where('object_code', '=', 455)
+            ->orWhere('object_code', '=', 739)
             ->where('active',"=", true)
             ->withCount(['assets as assets_count',
                 'assets as checked_assets_count' => function (Builder $query) {
