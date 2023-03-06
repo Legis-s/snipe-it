@@ -88,14 +88,17 @@ class CleanInventory extends Command
             ->where('inventories.created_at', '<', $dayBefore)
             ->get();
 
+        $to_delete  = 0;
         foreach ($inventories as &$inv) {
             $checked = $inv->checked;
             if ($checked == 0){
-                $inv->inventory_items()->forceDelete();
-                $inv->forceDelete();
+                $to_delete++;
+//                $inv->inventory_items()->forceDelete();
+//                $inv->forceDelete();
             }
         }
         print("Получено " . count($inventories) . "  инвентаризаций\n");
+        print("К удалению  " . $to_delete . "  инвентаризаций\n");
 
     }
 }
