@@ -99,7 +99,16 @@ class InventoryPresenter extends Presenter
                 "visible" => false,
                 "title" => trans('general.created_at'),
                 "formatter" => "dateDisplayFormatter"
-            ]
+            ],
+            [
+                'field' => 'actions',
+                'searchable' => false,
+                'sortable' => false,
+                'switchable' => false,
+                'title' => trans('table.actions'),
+                'visible' => true,
+                'formatter' => 'inventoriesActionsFormatter',
+            ],
         ];
 
         return json_encode($layout);

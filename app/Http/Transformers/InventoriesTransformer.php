@@ -3,6 +3,7 @@ namespace App\Http\Transformers;
 
 use App\Http\Transformers\InventoryItemTransformer;
 use App\Models\Inventory;
+use App\Models\Location;
 use Illuminate\Database\Eloquent\Collection;
 use phpDocumentor\Reflection\Types\Integer;
 use Gate;
@@ -51,6 +52,12 @@ class InventoriesTransformer
             'location' => ($inventory->location) ? (new LocationsTransformer)->transformLocation($inventory->location) : null,
             'inventory_items' => $inventory_items_arr,
         ];
+
+        $permissions_array['available_actions'] = [
+            'delete' => (Gate::allows('superadmin')) ? true : false,
+        ];
+
+        $array += $permissions_array;
 
         return $array;
     }
