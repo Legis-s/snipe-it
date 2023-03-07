@@ -42,6 +42,15 @@ class DevicePresenter extends Presenter
                 'formatter' => 'hardwareLinkObjFormatter',
             ],
             [
+                'field' => 'location',
+                'searchable' => false,
+                'sortable' => true,
+                'switchable' => true,
+                'title' =>  trans('admin/hardware/table.location'),
+                'visible' => true,
+                'formatter' => 'deployedLocationFormatter',
+            ],
+            [
                 'field' => 'deviceId',
                 'searchable' => false,
                 'sortable' => true,

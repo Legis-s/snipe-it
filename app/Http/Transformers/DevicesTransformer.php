@@ -24,6 +24,15 @@ class DevicesTransformer
     public function transformDevice(Device $device = null)
     {
         if ($device) {
+            $location = null;
+            if ($device->asset){
+                if ($device->asset->location){
+                    $location = [
+                        'id' => (int) $device->asset->location->id,
+                        'name'=> e($device->asset->location->name),
+                    ];
+                }
+            }
 
             $array = [
                 'id' => (int) $device->id,
@@ -38,6 +47,7 @@ class DevicesTransformer
                     'id' => (int) $device->asset->id,
                     'name'=> e($device->asset->present()->fullName),
                 ] : null,
+                'location' => $location,
                 'lastUpdate' => Helper::getFormattedDateObject($device->lastUpdate, 'datetime'),
                 'created_at' => Helper::getFormattedDateObject($device->created_at, 'datetime'),
                 'updated_at' => Helper::getFormattedDateObject($device->updated_at, 'datetime'),
