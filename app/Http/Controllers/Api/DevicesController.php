@@ -49,6 +49,7 @@ class DevicesController extends Controller
                 'devices.model',
                 'devices.lastUpdate',
                 'devices.asset_id',
+                'devices.asset_sim_id',
                 'devices.created_at',
                 'devices.updated_at',
             ]);

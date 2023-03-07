@@ -47,6 +47,10 @@ class DevicesTransformer
                     'id' => (int) $device->asset->id,
                     'name'=> e($device->asset->present()->fullName),
                 ] : null,
+                'asset_sim'=> ($device->asset_sim) ? [
+                    'id' => (int) $device->asset_sim->id,
+                    'name'=> e($device->asset_sim->present()->fullName),
+                ] : null,
                 'location' => $location,
                 'lastUpdate' => Helper::getFormattedDateObject($device->lastUpdate, 'datetime'),
                 'created_at' => Helper::getFormattedDateObject($device->created_at, 'datetime'),

@@ -2062,4 +2062,5 @@ class Asset extends Depreciable
     {
         return $this->hasOne(Device::class);
     }
+
 }

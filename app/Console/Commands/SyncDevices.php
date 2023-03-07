@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Category;
 use App\Models\Contract;
 use App\Models\CustomField;
 use App\Models\Device;
@@ -57,6 +58,7 @@ class SyncDevices extends Command
         $output['warn'] = [];
         $output['error'] = [];
 
+        $category_sim = Category::where('name', 'Сим-Карты')->first();
 
         /** @var \GuzzleHttp\Client $client */
         $client = new \GuzzleHttp\Client();
@@ -67,7 +69,7 @@ class SyncDevices extends Command
         $response = $response->getBody()->getContents();
         $token_json = json_decode($response, true);
         $token = $token_json["id_token"];
-        print($token_json["id_token"]);
+//        print($token_json["id_token"]);
         $headers = [
             'Content-Type' => 'application/json',
             'Authorization' => 'Bearer '.$token,
@@ -124,10 +126,17 @@ class SyncDevices extends Command
                 $statusCode =  $phone["statusCode"];
             }
             $asset_id = null;
+            $sim_id = null;
             $asset = Asset::where('asset_tag', "it_".$phone["number"])->first();
             if ($asset){
-                print ($asset->id."\n");
                 $asset_id =$asset->id;
+                $assignedAssets = $asset->assignedAssets;
+                foreach ($assignedAssets as &$aa) {
+                    print ($aa->id."\n");
+                    if ($aa->model->category->id ==$category_sim->id){
+                        $sim_id = $aa->id;
+                    }
+                }
             }
             $device = Device::updateOrCreate(
                 ['mdm_id' => $phone["id"]],
@@ -142,6 +151,7 @@ class SyncDevices extends Command
                     'imei' => $imei,
                     'lastUpdate' => $date,
                     'asset_id' => $asset_id,
+                    'asset_sim_id' => $sim_id,
                 ]
             );
         }

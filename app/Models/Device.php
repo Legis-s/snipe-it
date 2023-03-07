@@ -40,6 +40,7 @@ class Device extends SnipeModel
         'lastUpdate',
         'launcherVersion',
         'asset_id',
+        'asset_sim_id',
     ];
 
     use Searchable;
@@ -57,6 +58,14 @@ class Device extends SnipeModel
      * Get the user that owns the phone.
      */
     public function asset(): BelongsTo
+    {
+        return $this->belongsTo(Asset::class);
+    }
+
+    /**
+     * Get the user that owns the phone.
+     */
+    public function asset_sim(): BelongsTo
     {
         return $this->belongsTo(Asset::class);
     }

@@ -42,6 +42,15 @@ class DevicePresenter extends Presenter
                 'formatter' => 'hardwareLinkObjFormatter',
             ],
             [
+                'field' => 'asset_sim',
+                'searchable' => false,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => "Сим карта",
+                'visible' => true,
+                'formatter' => 'hardwareLinkObjFormatter',
+            ],
+            [
                 'field' => 'location',
                 'searchable' => false,
                 'sortable' => true,
