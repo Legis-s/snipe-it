@@ -3,32 +3,32 @@
 use App\Http\Controllers\Account;
 use App\Http\Controllers\ActionlogController;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Assets\BulkAssetsController;
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\CompaniesController;
 use App\Http\Controllers\ContractsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentsController;
 use App\Http\Controllers\DepreciationsController;
+use App\Http\Controllers\DevicesController;
 use App\Http\Controllers\GroupsController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\ImportsController;
+use App\Http\Controllers\InventoriesController;
 use App\Http\Controllers\InventoryStatuslabelsController;
 use App\Http\Controllers\LocationsController;
 use App\Http\Controllers\ManufacturersController;
+use App\Http\Controllers\MapController;
 use App\Http\Controllers\MassOperationsController;
 use App\Http\Controllers\ModalController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PurchasesController;
 use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\RequestsController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StatuslabelsController;
 use App\Http\Controllers\SuppliersController;
 use App\Http\Controllers\ViewAssetsController;
-use App\Http\Controllers\InventoriesController;
-use App\Http\Controllers\PurchasesController;
-use App\Http\Controllers\MapController;
-use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
 
 Route::impersonate();
@@ -302,6 +302,14 @@ Route::group(['middleware' => 'auth'], function () {
         'map',
         [MapController::class, 'index']
     )->name('map');
+
+
+    /**
+     * Devices
+     */
+    Route::resource('devices', DevicesController::class, [
+        'parameters' => ['device' => 'device_id']
+    ]);
 
     /**
      * MassOperations

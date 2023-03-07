@@ -559,6 +559,14 @@
                                 </ul>
                             </li>
                         @endcan
+                            @can('view', \App\Models\Location::class)
+                                <li{!! (Request::is('devices*') ? ' class="active"' : '') !!}>
+                                    <a href="{{ route('devices.index') }}">
+                                        <i class="fas fa-mobile fa-fw"></i>
+                                        <span>Телефоны</span>
+                                    </a>
+                                </li>
+                            @endcan
                         @can('view', \App\Models\License::class)
                             <li{!! (Request::is('licenses*') ? ' class="active"' : '') !!}>
                                 <a href="{{ route('licenses.index') }}">

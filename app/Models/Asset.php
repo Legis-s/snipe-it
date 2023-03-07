@@ -21,6 +21,7 @@ use Carbon\Carbon;
 use DB;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 use Watson\Validating\ValidatingTrait;
@@ -2054,4 +2055,11 @@ class Asset extends Depreciable
         return false;
     }
 
+    /**
+     * Get the phone associated with the user.
+     */
+    public function device(): HasOne
+    {
+        return $this->hasOne(Device::class);
+    }
 }

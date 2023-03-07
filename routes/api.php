@@ -1324,6 +1324,23 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
             ]
         ); // end Inventories API routes
 
+
+        /**
+         * Devices API routes
+         */
+
+        Route::resource('devices',
+            Api\DevicesController::class,
+            ['names' =>
+                [
+                    'index' => 'api.devices.index',
+                    'show' => 'api.devices.show',
+                ],
+                'except' => ['create', 'edit'],
+                'parameters' => ['device' => 'device_id'],
+            ]
+        ); // end Inventories API routes
+
         /**
          * Map API routes
          */

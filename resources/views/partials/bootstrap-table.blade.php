@@ -458,7 +458,8 @@
             'purchases',
             'inventorystatuslabels',
             'contracts',
-            'bulk'
+            'bulk',
+            'devices'
         ];
 
         for (var i in formatters) {
