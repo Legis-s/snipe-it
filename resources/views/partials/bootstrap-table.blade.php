@@ -1164,6 +1164,18 @@
                 return '';
             }
         }
+        function mdmStatusCodeFormatter(value, row) {
+            switch (value) {
+                case "red":
+                    return '<i class="fas fa-circle text-danger"></i>'
+                case "yellow":
+                    return '<i class="fas fa-circle text-warning"></i>'
+                case "green":
+                    return '<i class="fas fa-circle text-success"></i>'
+                default:
+                    return value
+            }
+        }
 
         /**
          * END CUSTOM

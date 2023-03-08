@@ -88,7 +88,7 @@ class SyncDevices extends Command
         $items= $devices["items"];
         $count = 0;
         foreach ($items as &$phone) {
-//            print (json_encode($phone));
+//            print (json_encode($phone)."\n");
             $count++;
             $date = new DateTime();
             $date->setTimestamp($phone["lastUpdate"]/ 1000);
@@ -96,6 +96,8 @@ class SyncDevices extends Command
             $info_imei = null;
             $batteryLevel = null;
             $model = null;
+            $launcherVersion = null;
+            $biometrikaVersion = null;
 
             if (isset($phone["info"])){
                 $info = $phone["info"];
@@ -111,6 +113,18 @@ class SyncDevices extends Command
                 if (isset($info["model"])){
                     $model = $info["model"];
                 }
+                if (isset($info["applications"])){
+                    $applications =  $info["applications"];
+                    foreach ($applications as &$app) {
+                        if ($app["pkg"]=="ru.legis_s.biometrika"){
+                            $biometrikaVersion= $app["version"];
+                        }
+                        if ($app["pkg"]=="com.hmdm.launcher"){
+                            $launcherVersion= $app["version"];
+                            print (json_encode($launcherVersion)."\n");
+                        }
+                    }
+                }
             }
             $imei= null;
             if (isset($phone["imei"])){
@@ -125,6 +139,20 @@ class SyncDevices extends Command
             if (isset($phone["statusCode"])){
                 $statusCode =  $phone["statusCode"];
             }
+
+            $androidVersion = null;
+            if (isset($phone["androidVersion"])){
+                $androidVersion =  $phone["androidVersion"];
+            }
+
+            $serial = null;
+            if (isset($phone["serial"])){
+                $serial =  $phone["serial"];
+            }
+
+
+
+
             $asset_id = null;
             $sim_id = null;
             $asset = Asset::where('asset_tag', "it_".$phone["number"])->first();
@@ -149,6 +177,10 @@ class SyncDevices extends Command
                     'batteryLevel' => $batteryLevel,
                     'model' => $model,
                     'imei' => $imei,
+                    'androidVersion' => $androidVersion,
+                    'biometrikaVersion' => $biometrikaVersion,
+                    'launcherVersion' => $launcherVersion,
+                    'serial' => $serial,
                     'lastUpdate' => $date,
                     'asset_id' => $asset_id,
                     'asset_sim_id' => $sim_id,

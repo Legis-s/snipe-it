@@ -39,6 +39,9 @@ class Device extends SnipeModel
         'imei',
         'lastUpdate',
         'launcherVersion',
+        'androidVersion',
+        'biometrikaVersion',
+        'serial',
         'asset_id',
         'asset_sim_id',
     ];
