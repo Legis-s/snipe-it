@@ -42,7 +42,17 @@ class DevicesController extends Controller
         $device = Device::find($id);
 
         if (isset($device->id)) {
-            return view('devices/view', compact('device'));
+            $asset = null;
+            if ($device->asset){
+                $asset=$device->asset;
+            }
+            $asset_sim = null;
+            if ($device->asset_sim){
+                $asset_sim=$device->asset_sim;
+            }
+
+
+            return view('devices/view', compact('device','asset','asset_sim'));
         }
 
         return redirect()->route('devices.index')->with('error', trans('admin/locations/message.does_not_exist'));

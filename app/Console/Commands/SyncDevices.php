@@ -149,6 +149,17 @@ class SyncDevices extends Command
                 $serial =  $phone["serial"];
             }
 
+            $enrollTime= null;
+            if (isset($phone["enrollTime"])){
+                $dateEnrol = new DateTime();
+                $dateEnrol->setTimestamp($phone["enrollTime"]/ 1000);
+                $enrollTime =  $dateEnrol;
+            }
+            $publicIp= null;
+            if (isset($phone["publicIp"])){
+                $publicIp =  $phone["publicIp"];
+            }
+
 
 
 
@@ -223,6 +234,8 @@ class SyncDevices extends Command
                     'asset_id' => $asset_id,
                     'asset_sim_id' => $sim_id,
                     'distance' => $distance,
+                    'publicIp' => $publicIp,
+                    'enrollTime' => $enrollTime,
                 ]
             );
         }

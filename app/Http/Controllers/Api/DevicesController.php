@@ -57,6 +57,8 @@ class DevicesController extends Controller
                 'devices.coordinates',
                 'devices.locationUpdate',
                 'devices.distance',
+                'devices.enrollTime',
+                'devices.publicIp',
                 'devices.created_at',
                 'devices.updated_at',
             ]);
@@ -67,7 +69,7 @@ class DevicesController extends Controller
 
         $allowed_columns =
             [
-                'id',"number",'imei','statusCode','description','batteryLevel','model','androidVersion','biometrikaVersion','launcherVersion','lastUpdate','asset_id','asset_sim_id','coordinates','locationUpdate','distance','created_at', 'updated_at'
+                'id',"number",'publicIp','enrollTime','imei','statusCode','description','batteryLevel','model','androidVersion','biometrikaVersion','launcherVersion','lastUpdate','asset_id','asset_sim_id','coordinates','locationUpdate','distance','created_at', 'updated_at'
             ];
 
 

@@ -133,6 +133,23 @@ class DevicePresenter extends Presenter
                 'visible' => true,
             ],
             [
+                'field' => 'publicIp',
+                'searchable' => false,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => "IP",
+                'visible' => true,
+            ],
+            [
+                'field' => 'enrollTime',
+                'searchable' => false,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => "Дата Привязки",
+                'visible' => true,
+                'formatter' => 'dateDisplayFormatter',
+            ],
+            [
                 'field' => 'distance',
                 'searchable' => true,
                 'sortable' => true,

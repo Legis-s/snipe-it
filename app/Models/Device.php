@@ -46,6 +46,8 @@ class Device extends SnipeModel
         'asset_sim_id',
         'coordinates',
         'locationUpdate',
+        'enrollTime',
+        'publicIp',
         'distance',
     ];
 
