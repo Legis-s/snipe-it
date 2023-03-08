@@ -1177,6 +1177,27 @@
             }
         }
 
+        function mdmDistanceFormatter(value, row) {
+            if (value){
+                if (value>1000){
+                    var valuekm = value/1000;
+                    return "<span class='text-danger'>"+valuekm.toFixed(1) + " км</span>";
+                }else{
+                    return value+ " м";
+                }
+            }else{
+                return "";
+            }
+        }
+
+        function timeAgoFormatter(value, row) {
+            if (value){
+                format(value, 'ru');
+            }else{
+                return "";
+            }
+        }
+
         /**
          * END CUSTOM
          */

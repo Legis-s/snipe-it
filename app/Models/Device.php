@@ -44,6 +44,9 @@ class Device extends SnipeModel
         'serial',
         'asset_id',
         'asset_sim_id',
+        'coordinates',
+        'locationUpdate',
+        'distance',
     ];
 
     use Searchable;

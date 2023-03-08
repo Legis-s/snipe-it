@@ -121,7 +121,6 @@ class SyncDevices extends Command
                         }
                         if ($app["pkg"]=="com.hmdm.launcher"){
                             $launcherVersion= $app["version"];
-                            print (json_encode($launcherVersion)."\n");
                         }
                     }
                 }
@@ -160,12 +159,49 @@ class SyncDevices extends Command
                 $asset_id =$asset->id;
                 $assignedAssets = $asset->assignedAssets;
                 foreach ($assignedAssets as &$aa) {
-                    print ($aa->id."\n");
                     if ($aa->model->category->id ==$category_sim->id){
                         $sim_id = $aa->id;
                     }
                 }
             }
+            $coordinates=null;
+            $locationUpdate=null;
+
+            try {
+                $response = $client->request('GET', 'https://mdm.legis-s.ru/rest/plugins/devicelocations/devicelocations/private/device/'.$phone["id"].'/location', [
+                    'headers' => $headers,
+                ]);
+                $response = $response->getBody()->getContents();
+                $json = json_decode($response, true);
+                if (isset($json["data"])){
+                    $data =  $json["data"];
+                    if (isset($data["lat"]) && isset($data["lon"])){
+                        $lat = $data["lat"];
+                        $lon = $data["lon"];
+                        $coordinates = $lat.",".$lon;
+                    }
+                    if (isset($data["ts"])){
+                        $dateLoc = new DateTime();
+                        $dateLoc->setTimestamp($data["ts"]/ 1000);
+                        $locationUpdate = $dateLoc;
+                    }
+                }
+
+            } catch (Exception $e) {
+                print 'Caught exception: '.json_encode($e->getMessage()). "\n";
+            }
+            $distance = null;
+            if($asset && $coordinates){
+                if ($asset->location){
+                   if  ($asset->location->coordinates){
+                       $obj_location = $asset->location->coordinates;
+                       $obj_location = explode(",", $obj_location);
+                       $dev_coordinates= explode(",", $coordinates);
+                       $distance = $this->getDistanceBetweenPointsNew($obj_location[0],$obj_location[1],$dev_coordinates[0],$dev_coordinates[1]);
+                   }
+                }
+            }
+
             $device = Device::updateOrCreate(
                 ['mdm_id' => $phone["id"]],
                 [
@@ -182,11 +218,23 @@ class SyncDevices extends Command
                     'launcherVersion' => $launcherVersion,
                     'serial' => $serial,
                     'lastUpdate' => $date,
+                    'coordinates' => $coordinates,
+                    'locationUpdate' => $locationUpdate,
                     'asset_id' => $asset_id,
                     'asset_sim_id' => $sim_id,
+                    'distance' => $distance,
                 ]
             );
         }
         print("Синхрониизтрованно " . $count . " устройств \n");
+    }
+
+    public function getDistanceBetweenPointsNew($latitude1, $longitude1, $latitude2, $longitude2) {
+        $theta = $longitude1 - $longitude2;
+        $distance = (sin(deg2rad($latitude1)) * sin(deg2rad($latitude2))) + (cos(deg2rad($latitude1)) * cos(deg2rad($latitude2)) * cos(deg2rad($theta)));
+        $distance = acos($distance);
+        $distance = rad2deg($distance);
+        $distance = $distance * 60 * 1.1515 *  1.609344 * 1000;
+        return intval($distance);
     }
 }
