@@ -148,6 +148,7 @@ class DevicePresenter extends Presenter
                 'switchable' => true,
                 'title' =>"Координаты",
                 'visible' => false,
+                'formatter' => 'yandexMapLinkFormatter',
             ],
             [
                 'field' => 'locationUpdate',

@@ -1190,6 +1190,15 @@
             }
         }
 
+        function yandexMapLinkFormatter(value, row) {
+            if (value){
+                var cord_array =  value.split(",");
+                return "<a href='https://yandex.ru/maps/?pt="+cord_array[1].trim()+","+cord_array[0].trim()+"&z=18&l=map' target='_blank'>"+value+"</a>";
+            }else{
+                return "";
+            }
+        }
+
         function timeAgoFormatter(value, row) {
             if (value){
                 format(value, 'ru');
