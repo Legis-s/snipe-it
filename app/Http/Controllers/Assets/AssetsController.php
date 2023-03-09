@@ -146,7 +146,7 @@ class AssetsController extends Controller
             $asset->assigned_to             = request('assigned_to', null);
             $asset->supplier_id             = request('supplier_id', null);
             $asset->requestable             = request('requestable', 0);
-            $asset->rtd_location_id         = request('rtd_location_id', null);
+//            $asset->rtd_location_id         = request('rtd_location_id', null);
             $asset->depreciable_cost        = Helper::ParseFloat($request->get('depreciable_cost'));
             $asset->quality                 = intval(request('quality', 5));
             $asset->nds                     = intval(request('nds', 20));
@@ -155,9 +155,9 @@ class AssetsController extends Controller
                 $asset->next_audit_date = Carbon::now()->addMonths($settings->audit_interval)->toDateString();
             }
 
-            if ($asset->assigned_to == '') {
-                $asset->location_id = $request->input('rtd_location_id', null);
-            }
+//            if ($asset->assigned_to == '') {
+//                $asset->location_id = $request->input('rtd_location_id', null);
+//            }
 
             // Create the image (if one was chosen.)
             if ($request->has('image')) {

@@ -48,7 +48,7 @@ trait CheckInOutRequest
                     ->update(['location_id' => $asset->location_id]);
                 break;
             case 'asset':
-                $asset->location_id = $target->rtd_location_id;
+//                $asset->location_id = $target->rtd_location_id;
                 // Override with the asset's location_id if it has one
                 if ($target->location_id != '') {
                     $asset->location_id = $target->location_id;
