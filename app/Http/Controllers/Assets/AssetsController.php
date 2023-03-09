@@ -333,7 +333,7 @@ class AssetsController extends Controller
         }
 
         if ($asset->assigned_to == '') {
-            $asset->location_id = $request->input('rtd_location_id', null);
+//            $asset->location_id = $request->input('rtd_location_id', null);
         }
 
 
