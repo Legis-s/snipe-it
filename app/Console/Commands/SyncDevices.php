@@ -9,8 +9,10 @@ use App\Models\Device;
 use App\Models\Supplier;
 use App\Models\LegalPerson;
 use App\Models\InvoiceType;
+use DateInterval;
 use DateTime;
 use DateTimeInterface;
+use DateTimeZone;
 use Exception;
 
 //use False\True;
@@ -92,6 +94,8 @@ class SyncDevices extends Command
             $count++;
             $date = new DateTime();
             $date->setTimestamp($phone["lastUpdate"]/ 1000);
+            $date->setTimezone(new DateTimeZone('Europe/Moscow'));
+            $date->sub(new DateInterval('PT3H'));
             $deviceId = null;
             $info_imei = null;
             $batteryLevel = null;
@@ -153,6 +157,8 @@ class SyncDevices extends Command
             if (isset($phone["enrollTime"])){
                 $dateEnrol = new DateTime();
                 $dateEnrol->setTimestamp($phone["enrollTime"]/ 1000);
+                $dateEnrol->setTimezone(new DateTimeZone('Europe/Moscow'));
+                $dateEnrol->sub(new DateInterval('PT3H'));
                 $enrollTime =  $dateEnrol;
             }
             $publicIp= null;
@@ -194,6 +200,8 @@ class SyncDevices extends Command
                     if (isset($data["ts"])){
                         $dateLoc = new DateTime();
                         $dateLoc->setTimestamp($data["ts"]/ 1000);
+                        $dateLoc->setTimezone(new DateTimeZone('Europe/Moscow'));
+                        $dateLoc->sub(new DateInterval('PT3H'));
                         $locationUpdate = $dateLoc;
                     }
                 }
