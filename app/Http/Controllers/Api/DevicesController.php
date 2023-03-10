@@ -59,6 +59,7 @@ class DevicesController extends Controller
                 'devices.distance',
                 'devices.enrollTime',
                 'devices.publicIp',
+                'devices.anyDesk',
                 'devices.created_at',
                 'devices.updated_at',
             ]);

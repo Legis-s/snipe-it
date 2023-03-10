@@ -90,7 +90,10 @@ class SyncDevices extends Command
         $items= $devices["items"];
         $count = 0;
         foreach ($items as &$phone) {
-//            print (json_encode($phone)."\n");
+            if ( $phone["number"] == "863258030469639"){
+                print (json_encode($phone)."\n");
+            }
+
             $count++;
             $date = new DateTime();
             $date->setTimestamp($phone["lastUpdate"]/ 1000);
@@ -166,6 +169,10 @@ class SyncDevices extends Command
                 $publicIp =  $phone["publicIp"];
             }
 
+            $publicIp= null;
+            if (isset($phone["custom1"])){
+                $anyDesk =  $phone["custom1"];
+            }
 
 
 
@@ -244,6 +251,7 @@ class SyncDevices extends Command
                     'distance' => $distance,
                     'publicIp' => $publicIp,
                     'enrollTime' => $enrollTime,
+                    'anyDesk' => $anyDesk,
                 ]
             );
         }

@@ -1207,6 +1207,15 @@
             }
         }
 
+        function anyDeskLinkFormatter(value, row) {
+            if (value){
+                return "<a href='anydesk:"+value.split(' ').join('')+"' >"+value+"</a>";
+            }else{
+                return "";
+            }
+        }
+
+
         /**
          * END CUSTOM
          */

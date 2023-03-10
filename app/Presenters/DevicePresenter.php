@@ -101,6 +101,15 @@ class DevicePresenter extends Presenter
                 'visible' => true,
             ],
             [
+                'field' => 'anyDesk',
+                'searchable' => false,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => "AnyDesk",
+                'visible' => true,
+                'formatter' => 'anyDeskLinkFormatter',
+            ],
+            [
                 'field' => 'serial',
                 'searchable' => false,
                 'sortable' => true,

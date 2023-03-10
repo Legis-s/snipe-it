@@ -59,6 +59,7 @@ class DevicesTransformer
                 'distance' =>  ($device->distance) ? (int) $device->distance : null,
                 'publicIp' =>  ($device->publicIp) ? e($device->publicIp) : null,
                 'coordinates' =>  ($device->coordinates) ? e($device->coordinates) : null,
+                'anyDesk' =>  ($device->anyDesk) ? e($device->anyDesk) : null,
                 'enrollTime' => Helper::getFormattedDateObject($device->enrollTime, 'datetime'),
                 'locationUpdate' => Helper::getFormattedDateObject($device->locationUpdate, 'datetime'),
                 'lastUpdate' => Helper::getFormattedDateObject($device->lastUpdate, 'datetime'),

@@ -49,6 +49,7 @@ class Device extends SnipeModel
         'enrollTime',
         'publicIp',
         'distance',
+        'anyDesk',
     ];
 
     use Searchable;
