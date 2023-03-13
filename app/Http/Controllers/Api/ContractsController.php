@@ -169,6 +169,7 @@ class ContractsController extends Controller
             'contracts.id',
             'contracts.name',
             'contracts.number',
+            'contracts.status',
         ]);
 
         $page = 1;
@@ -185,6 +186,10 @@ class ContractsController extends Controller
 
         foreach ($contracts as $contract) {
             $name_str = '';
+
+            if ($contract->status!='') {
+                $name_str .= "<".e($contract->getStatusText()).'> ';
+            }
             if ($contract->number!='') {
                 $name_str .= "[".e($contract->number).'] ';
             }
