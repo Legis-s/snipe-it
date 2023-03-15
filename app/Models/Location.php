@@ -115,6 +115,20 @@ class Location extends SnipeModel
     }
 
     /**
+     * Determine whether or not this location can be deleted
+     *
+     * @author A. Gianotto <snipe@snipe.net>
+     * @since [v3.0]
+     * @return bool
+     */
+    public function isDeletableNoGate()
+    {
+        return  ($this->assignedAssets()->count() === 0)
+            && ($this->assets()->count() === 0)
+            && ($this->users()->count() === 0);
+    }
+
+    /**
      * Establishes the user -> location relationship
      *
      * @author A. Gianotto <snipe@snipe.net>

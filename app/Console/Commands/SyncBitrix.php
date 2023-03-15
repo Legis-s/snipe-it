@@ -61,7 +61,7 @@ class SyncBitrix extends Command
 
 
         /**
-         * Начинаем с нуля или с какого то предыдущего шага
+         * Синхронизация польззователей
          */
         $leadID = 0;
         $finish = false;
@@ -81,6 +81,7 @@ class SyncBitrix extends Command
 
 
         foreach ($bitrix_users_final as &$value) {
+
             $user = User::firstOrCreate(
                 ['bitrix_id' => $value["ID"]],
                 [
@@ -89,7 +90,7 @@ class SyncBitrix extends Command
                     'first_name' => $value["NAME"],
                     'email' => $value["EMAIL"],
                     'password' => bcrypt($value["EMAIL"]),
-                    'activated' => true,
+                    'activated' => $value["ACTIVE"],
                 ]
             );
         }
@@ -104,10 +105,9 @@ class SyncBitrix extends Command
             $count++;
             $location = Location::where('bitrix_id', $value["ID"])->withTrashed()->first();
             $active = true;
-            $name = $value["NAME"];
-            $bitrix_user = $value["ASSIGNED_BY_ID"];
-            /** @var User $sklad_user */
-            $sklad_user = User::where('bitrix_id', $bitrix_user)->first();
+//            $bitrix_user = $value["ASSIGNED_BY_ID"];
+//            /** @var User $sklad_user */
+//            $sklad_user = User::where('bitrix_id', $bitrix_user)->first();
             switch ($value["UF_TYPE"]) {
                 case 455:
                     $name = $value["NAME"];
@@ -134,19 +134,23 @@ class SyncBitrix extends Command
                 $now = new DateTime();
                 if ($dateTime <= $now) {
                     $active = false;
-                    $name = "[Закрыто]" . $name;
-                }
-            }else{
-                if ($value["DELETED"] == 1) {
-                    $active = false;
-                    $name = "[Удалено]" . $name;
+                    $name = "[Закрыто]" . $value["NAME"];
                 }
             }
 
+            if ($value["DELETED"] == 1) {
+                $active = false;
+                $name = "[Удалено]" . $value["NAME"];
+            }
+
+
             $obj_types_to_sync = [455, 457, 739, 741];
 
-            if (in_array($value["UF_TYPE"], $obj_types_to_sync)) {
-                if ($location) {
+
+            if ($active == false && $location && $location->isDeletableNoGate()){
+                $location->delete();
+            }else{
+                if ($location){
                     $location->update([
                         'name' => $name,
                         'city' => $value["ADDRESS_CITY"],
@@ -158,20 +162,23 @@ class SyncBitrix extends Command
                         'active' => $active
                     ]);
                     $location->save();
-                } else {
-                    $location = Location::updateOrCreate(
-                        ['bitrix_id' => $value["ID"]],
-                        [
-                            'name' => $name,
-                            'city' => $value["ADDRESS_CITY"],
-                            'address' => $value["ADDRESS"],
-                            'address2' => $value["ADDRESS_2"],
-                            'coordinates' => $value["UF_MAP"],
-                            'object_code' => intval($value["UF_TYPE"]),
-                            'pult_id' => $value["UF_PULT_ID"],
-                            'active' => $active
-                        ]
-                    );
+                }
+                if (in_array($value["UF_TYPE"], $obj_types_to_sync)) {
+                    if (!$location) {
+                        $location = Location::updateOrCreate(
+                            ['bitrix_id' => $value["ID"]],
+                            [
+                                'name' => $name,
+                                'city' => $value["ADDRESS_CITY"],
+                                'address' => $value["ADDRESS"],
+                                'address2' => $value["ADDRESS_2"],
+                                'coordinates' => $value["UF_MAP"],
+                                'object_code' => intval($value["UF_TYPE"]),
+                                'pult_id' => $value["UF_PULT_ID"],
+                                'active' => $active
+                            ]
+                        );
+                    }
                 }
             }
         }
@@ -264,101 +271,101 @@ class SyncBitrix extends Command
 //                    }
 //                }
 //            }
-            print("Синхрониизтрованно " . $count . " объектов Битрикс\n");
+        print("Синхрониизтрованно " . $count . " объектов Битрикс\n");
 
-            $next = 0;
-            $finish = false;
-            $bitrix_suppliers = [];
-            while ($finish == false) {
-                $response = $client->request('GET', 'https://bitrix.legis-s.ru/rest/1/rzrrat22t46msv7v/crm.company.list?FILTER[COMPANY_TYPE]=1&start=' . "$next");
-                $response = $response->getBody()->getContents();
-                $suppliers_response = json_decode($response, true);
-                $suppliers_data = $suppliers_response["result"];
-                $bitrix_suppliers = array_merge($bitrix_suppliers, $suppliers_data);
-                if (array_key_exists("next", $suppliers_response)) {
-                    $next = $suppliers_response["next"];
-                } else {
-                    $finish = true;
-                }
-            }
-
-            $count = 0;
-            foreach ($bitrix_suppliers as &$value) {
-                $count++;
-                $supplier = Supplier::updateOrCreate(
-
-                    ['bitrix_id' => $value["ID"]],
-                    [
-                        'name' => $value["TITLE"],
-                        'city' => $value["ADDRESS_CITY"],
-                        'notes' => $value["COMMENTS"],
-                        'address' => $value["ADDRESS"],
-                        'address2' => $value["ADDRESS_2"],
-                    ]
-                );
-
-            }
-            print("Синхрониизтрованно " . $count . " поставщиков \n");
-
-
-            $response = $client->request('GET', 'https://bitrix.legis-s.ru/rest/1/rzrrat22t46msv7v/lists.element.get?IBLOCK_TYPE_ID=lists&IBLOCK_ID=77');
+        $next = 0;
+        $finish = false;
+        $bitrix_suppliers = [];
+        while ($finish == false) {
+            $response = $client->request('GET', 'https://bitrix.legis-s.ru/rest/1/rzrrat22t46msv7v/crm.company.list?FILTER[COMPANY_TYPE]=1&start=' . "$next");
             $response = $response->getBody()->getContents();
-            $bitrix_legal_persons = json_decode($response, true);
-            $bitrix_legal_persons = $bitrix_legal_persons["result"];
-            $count = 0;
-            foreach ($bitrix_legal_persons as &$value) {
-                $count++;
-                $legal_person = LegalPerson::updateOrCreate(
-
-                    ['bitrix_id' => $value["ID"]],
-                    [
-                        'name' => $value["NAME"],
-                    ]
-                );
-
+            $suppliers_response = json_decode($response, true);
+            $suppliers_data = $suppliers_response["result"];
+            $bitrix_suppliers = array_merge($bitrix_suppliers, $suppliers_data);
+            if (array_key_exists("next", $suppliers_response)) {
+                $next = $suppliers_response["next"];
+            } else {
+                $finish = true;
             }
-            print("Синхрониизтрованно " . $count . " юр. лиц \n");
+        }
+
+        $count = 0;
+        foreach ($bitrix_suppliers as &$value) {
+            $count++;
+            $supplier = Supplier::updateOrCreate(
+
+                ['bitrix_id' => $value["ID"]],
+                [
+                    'name' => $value["TITLE"],
+                    'city' => $value["ADDRESS_CITY"],
+                    'notes' => $value["COMMENTS"],
+                    'address' => $value["ADDRESS"],
+                    'address2' => $value["ADDRESS_2"],
+                ]
+            );
+
+        }
+        print("Синхрониизтрованно " . $count . " поставщиков \n");
 
 
-            $response = $client->request('GET', 'https://bitrix.legis-s.ru/rest/1/rzrrat22t46msv7v/legis_crm.contracts.list?select[0]=UF_*&select[1]=*');
-            $response = $response->getBody()->getContents();
-            $bitrix_contracts = json_decode($response, true);
-            $bitrix_contracts = $bitrix_contracts["result"];
-            $count = 0;
-            foreach ($bitrix_contracts as &$value) {
-                $count++;
+        $response = $client->request('GET', 'https://bitrix.legis-s.ru/rest/1/rzrrat22t46msv7v/lists.element.get?IBLOCK_TYPE_ID=lists&IBLOCK_ID=77');
+        $response = $response->getBody()->getContents();
+        $bitrix_legal_persons = json_decode($response, true);
+        $bitrix_legal_persons = $bitrix_legal_persons["result"];
+        $count = 0;
+        foreach ($bitrix_legal_persons as &$value) {
+            $count++;
+            $legal_person = LegalPerson::updateOrCreate(
+
+                ['bitrix_id' => $value["ID"]],
+                [
+                    'name' => $value["NAME"],
+                ]
+            );
+
+        }
+        print("Синхрониизтрованно " . $count . " юр. лиц \n");
+
+
+        $response = $client->request('GET', 'https://bitrix.legis-s.ru/rest/1/rzrrat22t46msv7v/legis_crm.contracts.list?select[0]=UF_*&select[1]=*');
+        $response = $response->getBody()->getContents();
+        $bitrix_contracts = json_decode($response, true);
+        $bitrix_contracts = $bitrix_contracts["result"];
+        $count = 0;
+        foreach ($bitrix_contracts as &$value) {
+            $count++;
 //            if ( $value["ID"] == "5354"){
 //                print_r($value);
 //            }
-                if ($value["STATUS_ID"] == "") {
-                    $value["STATUS_ID"] = "Пустой статус";
-                }
-                $contract = Contract::updateOrCreate(
-                    ['bitrix_id' => $value["ID"]],
-                    [
-                        'name' => $value["NAME"],
-                        'number' => $value["UF_NUMBER"],
-                        'status' => $value["STATUS_ID"],
-                        'type' => $value["TYPE_ID"],
-                        'date_start' => $value["DATE_START"],
-                        'date_end' => $value["DATE_END"],
-                        'summ' => $value["UF_CRM_1560273765"],
-                        'assigned_by_id' => $value["ASSIGNED_BY_ID"],
-                    ]
-                );
-                if (is_array($value["UF_OBJECT"]) && count($value["UF_OBJECT"]) > 0 && strlen($value["UF_NUMBER"]) > 0) {
-                    foreach ($value["UF_OBJECT"] as &$ufobj) {
-                        $location = Location::where('bitrix_id', '=', $ufobj)->first();
-                        if ($location) {
-                            $cn = $location->contract_number;
-                            $pos = strripos($cn, $value["UF_NUMBER"]);
+            if ($value["STATUS_ID"] == "") {
+                $value["STATUS_ID"] = "Пустой статус";
+            }
+            $contract = Contract::updateOrCreate(
+                ['bitrix_id' => $value["ID"]],
+                [
+                    'name' => $value["NAME"],
+                    'number' => $value["UF_NUMBER"],
+                    'status' => $value["STATUS_ID"],
+                    'type' => $value["TYPE_ID"],
+                    'date_start' => $value["DATE_START"],
+                    'date_end' => $value["DATE_END"],
+                    'summ' => $value["UF_CRM_1560273765"],
+                    'assigned_by_id' => $value["ASSIGNED_BY_ID"],
+                ]
+            );
+            if (is_array($value["UF_OBJECT"]) && count($value["UF_OBJECT"]) > 0 && strlen($value["UF_NUMBER"]) > 0) {
+                foreach ($value["UF_OBJECT"] as &$ufobj) {
+                    $location = Location::where('bitrix_id', '=', $ufobj)->first();
+                    if ($location) {
+                        $cn = $location->contract_number;
+                        $pos = strripos($cn, $value["UF_NUMBER"]);
 
-                            if ($pos === false) {
-                                $location->contract_number = $location->contract_number . " , " . $value["UF_NUMBER"];
-                            }
+                        if ($pos === false) {
+                            $location->contract_number = $location->contract_number . " , " . $value["UF_NUMBER"];
+                        }
 //                        print($location->contract_number);
 
-                            $location->save();
+                        $location->save();
 
 //                        if (strlen($cn)>0){
 //                            try {
@@ -394,8 +401,8 @@ class SyncBitrix extends Command
 //                            $location->contract_number = $json;
 //                            $location->save();
 //                        }
-                        }
                     }
+                }
 //                $location = Location::where('bitrix_id', '=',  $value["UF_OBJECT"][0])->firstOrFail();
 //                if ($location){
 //                    $cn = $location->contract_number;
@@ -418,45 +425,45 @@ class SyncBitrix extends Command
 //
 //                );
 //                $location->save();
-                }
             }
-            print("Синхрониизтрованно " . $count . " договоров \n");
+        }
+        print("Синхрониизтрованно " . $count . " договоров \n");
 
 
-            $response = $client->request('GET', 'https://bitrix.legis-s.ru/rest/1/rzrrat22t46msv7v/lists.element.get?IBLOCK_TYPE_ID=lists&IBLOCK_ID=166');
-            $response = $response->getBody()->getContents();
-            $bitrix_invoice_types = json_decode($response, true);
-            $bitrix_invoice_types = $bitrix_invoice_types["result"];
-            $count = 0;
-            foreach ($bitrix_invoice_types as &$value) {
-                $count++;
-                $invoice_type = InvoiceType::updateOrCreate(
+        $response = $client->request('GET', 'https://bitrix.legis-s.ru/rest/1/rzrrat22t46msv7v/lists.element.get?IBLOCK_TYPE_ID=lists&IBLOCK_ID=166');
+        $response = $response->getBody()->getContents();
+        $bitrix_invoice_types = json_decode($response, true);
+        $bitrix_invoice_types = $bitrix_invoice_types["result"];
+        $count = 0;
+        foreach ($bitrix_invoice_types as &$value) {
+            $count++;
+            $invoice_type = InvoiceType::updateOrCreate(
 
-                    ['bitrix_id' => $value["ID"]],
-                    [
-                        'name' => $value["NAME"],
-                    ]
-                );
+                ['bitrix_id' => $value["ID"]],
+                [
+                    'name' => $value["NAME"],
+                ]
+            );
 
 
+        }
+        print("Синхрониизтрованно " . $count . " типов закупок \n");
+
+
+        if (($this->option('output') == 'all') || ($this->option('output') == 'info')) {
+            foreach ($output['info'] as $key => $output_text) {
+                $this->info($output_text);
             }
-            print("Синхрониизтрованно " . $count . " типов закупок \n");
-
-
-            if (($this->option('output') == 'all') || ($this->option('output') == 'info')) {
-                foreach ($output['info'] as $key => $output_text) {
-                    $this->info($output_text);
-                }
+        }
+        if (($this->option('output') == 'all') || ($this->option('output') == 'warn')) {
+            foreach ($output['warn'] as $key => $output_text) {
+                $this->warn($output_text);
             }
-            if (($this->option('output') == 'all') || ($this->option('output') == 'warn')) {
-                foreach ($output['warn'] as $key => $output_text) {
-                    $this->warn($output_text);
-                }
-            }
-            if (($this->option('output') == 'all') || ($this->option('output') == 'error')) {
-                foreach ($output['error'] as $key => $output_text) {
-                    $this->error($output_text);
-                }
+        }
+        if (($this->option('output') == 'all') || ($this->option('output') == 'error')) {
+            foreach ($output['error'] as $key => $output_text) {
+                $this->error($output_text);
             }
         }
     }
+}
