@@ -27,7 +27,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('auth:clear-resets')->everyFifteenMinutes();
 
 
-        $schedule->command('snipeit:sync-bitrix')->everyFifteenMinutes();
+        $schedule->command('snipeit:sync-bitrix')->everyFifteenMinutes()->appendOutputTo(storage_path('logs/sync-bitrix.log'));;
     }
 
     /**
