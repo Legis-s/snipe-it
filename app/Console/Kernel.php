@@ -25,6 +25,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('backup:clean')->daily();
         $schedule->command('snipeit:upcoming-audits')->daily();
         $schedule->command('auth:clear-resets')->everyFifteenMinutes();
+
+
+        $schedule->command('snipeit:sync-bitrix')->everyFifteenMinutes();
     }
 
     /**
