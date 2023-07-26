@@ -66,7 +66,7 @@ class SyncDevices extends Command
         $client = new \GuzzleHttp\Client();
 
         $response = $client->request('POST', 'https://mdm.legis-s.ru/rest/public/jwt/login', [
-            \GuzzleHttp\RequestOptions::JSON => ['login' => 'api_user', 'password' => '4C08BD7F715FE2120A80144357C409FC']
+            \GuzzleHttp\RequestOptions::JSON => ['login' => 'apiuser', 'password' => 'c6P5ywxuz)<g[lfX']
         ]);
         $response = $response->getBody()->getContents();
         $token_json = json_decode($response, true);
