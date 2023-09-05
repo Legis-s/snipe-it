@@ -57,7 +57,7 @@ class CleanInventory extends Command
         $output['warn'] = [];
         $output['error'] = [];
 
-        $dayBefore = (new DateTime('now'))->modify('-1 day')->format('Y-m-d');
+        $dayBefore = (new DateTime('now'))->format('Y-m-d');
 
 
         $inventories = Inventory::with('inventory_items','location')
