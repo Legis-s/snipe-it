@@ -361,9 +361,10 @@ class ConsumablesController extends Controller
             }
             $purchase->consumables_json = json_encode($consumables);
 
-            if ($consumable->purchase_cost < $purchase_cost) {
-                $consumable->purchase_cost = $purchase_cost;
-            }
+//            if ($consumable->purchase_cost < $purchase_cost) {
+//                $consumable->purchase_cost = $purchase_cost;
+//            }
+            $consumable->purchase_cost = $purchase_cost;
             $consumable->qty = $consumable->qty + $quantity;
             $consumable->locations()->attach($consumable->id, [
                 'consumable_id' => $consumable->id,
