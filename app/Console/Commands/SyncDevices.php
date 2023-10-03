@@ -90,9 +90,9 @@ class SyncDevices extends Command
         $items= $devices["items"];
         $count = 0;
         foreach ($items as &$phone) {
-            if ( $phone["number"] == "863258030469639"){
-                print (json_encode($phone)."\n");
-            }
+//            if ( $phone["number"] == "863258030469639"){
+//                print (json_encode($phone)."\n");
+//            }
 
             $count++;
             $date = new DateTime();
@@ -187,6 +187,14 @@ class SyncDevices extends Command
                         $sim_id = $aa->id;
                     }
                 }
+
+                $location = $asset->assignedTo();
+                $responseupd = $client->request('POST', 'private/devices/'.$phone["id"].'/description', [
+                    'headers' => $headers,
+                    'body' => $location
+                ]);
+                $responseupd = $response->getBody()->getContents();
+                print($responseupd);
             }
             $coordinates=null;
             $locationUpdate=null;
