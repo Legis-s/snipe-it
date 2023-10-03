@@ -194,8 +194,8 @@ class SyncDevices extends Command
                         'headers' => $headers,
                         'body' => $locationAs
                     ]);
-                    $responseupd = $response->getBody()->getContents();
-                    print($responseupd);
+//                    $responseupd = $responseupd->getBody()->getContents();
+//                    print($responseupd);
                 }
             }
             $coordinates=null;
