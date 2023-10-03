@@ -188,7 +188,7 @@ class SyncDevices extends Command
                     }
                 }
 
-                $locationAs = $asset->assignedTo();
+                $locationAs =$asset->location;
                 print($locationAs);
                 $responseupd = $client->request('POST', 'private/devices/'.$phone["id"].'/description', [
                     'headers' => $headers,
