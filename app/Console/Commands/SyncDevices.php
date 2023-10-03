@@ -190,7 +190,7 @@ class SyncDevices extends Command
                 if ($asset->location){
                     $locationAs =$asset->location->name;
                     print($locationAs);
-                    $responseupd = $client->request('POST', 'private/devices/'.$phone["id"].'/description', [
+                    $responseupd = $client->request('POST', 'https://mdm.legis-s.ru/rest/private/devices/'.$phone["id"].'/description', [
                         'headers' => $headers,
                         'body' => $locationAs
                     ]);
