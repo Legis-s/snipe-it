@@ -187,15 +187,16 @@ class SyncDevices extends Command
                         $sim_id = $aa->id;
                     }
                 }
-
-                $locationAs =$asset->location;
-                print($locationAs);
-                $responseupd = $client->request('POST', 'private/devices/'.$phone["id"].'/description', [
-                    'headers' => $headers,
-                    'body' => $locationAs
-                ]);
-                $responseupd = $response->getBody()->getContents();
-                print($responseupd);
+                if ($asset->location){
+                    $locationAs =$asset->location->name;
+                    print($locationAs);
+                    $responseupd = $client->request('POST', 'private/devices/'.$phone["id"].'/description', [
+                        'headers' => $headers,
+                        'body' => $locationAs
+                    ]);
+                    $responseupd = $response->getBody()->getContents();
+                    print($responseupd);
+                }
             }
             $coordinates=null;
             $locationUpdate=null;
