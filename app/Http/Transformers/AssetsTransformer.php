@@ -152,7 +152,7 @@ class AssetsTransformer
             'update'        => ($asset->deleted_at=='' && Gate::allows('update', Asset::class)) ? true : false,
             'delete'        => ($asset->deleted_at=='' && $asset->assigned_to =='' && Gate::allows('delete', Asset::class)) ? true : false,
             'print_label'   => true,
-            'inventory'     => ($asset->deleted_at=='' && Gate::allows('update', Asset::class)) ? true : false,
+            'inventory'     => ($asset->deleted_at=='' && Gate::allows('view', Asset::class)) ? true : false,
             'review'        =>  ($asset->deleted_at=='' && Gate::allows('review', Asset::class)) ? true : false,
         ];
 
