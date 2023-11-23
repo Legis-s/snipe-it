@@ -110,7 +110,7 @@ class SyncBitrix extends Command
             $sklad_user = User::where('bitrix_id', $bitrix_user)->first();
 
             $sklad_user_id = null;
-            if (!$sklad_user) {
+            if ($sklad_user) {
                 $sklad_user_id = $sklad_user->id;
             }
 
