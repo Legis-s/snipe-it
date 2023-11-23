@@ -108,6 +108,12 @@ class SyncBitrix extends Command
             $bitrix_user = $value["ASSIGNED_BY_ID"];
             /** @var User $sklad_user */
             $sklad_user = User::where('bitrix_id', $bitrix_user)->first();
+
+            $sklad_user_id = null;
+            if (!$sklad_user) {
+                $sklad_user_id = $sklad_user->id;
+            }
+
             switch ($value["UF_TYPE"]) {
                 case 455:
                     $name = $value["NAME"];
@@ -159,7 +165,7 @@ class SyncBitrix extends Command
                         'coordinates' => $value["UF_MAP"],
                         'object_code' => intval($value["UF_TYPE"]),
                         'pult_id' => $value["UF_PULT_ID"],
-                        'manager_id' =>  $sklad_user->id,
+                        'manager_id' =>  $sklad_user_id,
                         'active' => $active
                     ]);
                     $location->save();
@@ -176,7 +182,7 @@ class SyncBitrix extends Command
                                 'coordinates' => $value["UF_MAP"],
                                 'object_code' => intval($value["UF_TYPE"]),
                                 'pult_id' => $value["UF_PULT_ID"],
-                                'manager_id' => $sklad_user->id,
+                                'manager_id' => $sklad_user_id,
                                 'active' => $active
                             ]
                         );
