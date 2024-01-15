@@ -21,18 +21,17 @@ class Setting extends Model
     use Notifiable, ValidatingTrait;
 
     /**
-     * The app settings cache key name.
-     *
-     * @var string
+     * The cache property so that multiple invocations of this will only load the Settings record from disk only once
+     * @var self
      */
-    const APP_SETTINGS_KEY = 'snipeit_app_settings';
+    public static ?self $_cache = null;
 
     /**
      * The setup check cache key name.
      *
      * @var string
      */
-    const SETUP_CHECK_KEY = 'snipeit_setup_check';
+    public const SETUP_CHECK_KEY = 'snipeit_setup_check';
 
     /**
      * Whether the model should inject it's identifier to the unique
@@ -77,6 +76,7 @@ class Setting extends Model
           'audit_interval'                      => 'numeric|nullable',
           'custom_forgot_pass_url'              => 'url|nullable',
           'privacy_policy_link'                 => 'nullable|url',
+          'google_client_id'                    => 'nullable|ends_with:apps.googleusercontent.com'
     ];
 
     protected $fillable = [
@@ -84,6 +84,16 @@ class Setting extends Model
         'email_domain',
         'email_format',
         'username_format',
+        'webhook_endpoint',
+        'webhook_channel',
+        'webhook_botname',
+        'google_login',
+        'google_client_id',
+        'google_client_secret',
+    ];
+
+    protected $casts = [
+        'label2_asset_logo' => 'boolean',
     ];
 
     /**
@@ -98,14 +108,15 @@ class Setting extends Model
      */
     public static function getSettings(): ?self
     {
-        return Cache::rememberForever(self::APP_SETTINGS_KEY, function () {
+        if (!self::$_cache) {
             // Need for setup as no tables exist
             try {
-                return self::first();
+                self::$_cache = self::first();
             } catch (\Throwable $th) {
                 return null;
             }
-        });
+        }
+        return self::$_cache;
     }
 
     /**
@@ -262,7 +273,7 @@ class Setting extends Model
     {
         // At this point the endpoint is the same for everything.
         //  In the future this may want to be adapted for individual notifications.
-        return self::getSettings()->slack_endpoint;
+        return self::getSettings()->webhook_endpoint;
     }
 
     /**
@@ -338,7 +349,15 @@ class Setting extends Model
             'ad_domain',
             'ad_append_domain',
             'ldap_client_tls_key',
-            'ldap_client_tls_cert'
+            'ldap_client_tls_cert',
+            'ldap_default_group',
+            'ldap_dept',
+            'ldap_emp_num',
+            'ldap_phone_field',
+            'ldap_jobtitle',
+            'ldap_manager',
+            'ldap_country',
+            'ldap_location',
             ])->first()->getAttributes();
 
         return collect($ldapSettings);

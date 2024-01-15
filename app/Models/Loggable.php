@@ -23,7 +23,7 @@ trait Loggable
      * @since [v3.4]
      * @return \App\Models\Actionlog
      */
-    public function logCheckout($note, $target, $action_date = null,$changed = null)
+    public function logCheckout($note, $target, $action_date = null, $originalValues = [])
     {
         $log = new Actionlog;
         $log = $this->determineLogItemType($log);
@@ -61,58 +61,25 @@ trait Loggable
         if (! $log->action_date) {
             $log->action_date = date('Y-m-d H:i:s');
         }
-        $log->log_meta = json_encode($changed);
+
+        $changed = [];
+        $originalValues = array_intersect_key($originalValues, array_flip(['action_date','name','status_id','location_id','expected_checkin']));
+
+        foreach ($originalValues as $key => $value) {
+            if ($key == 'action_date' && $value != $action_date) {
+                $changed[$key]['old'] = $value;
+                $changed[$key]['new'] = is_string($action_date) ? $action_date : $action_date->format('Y-m-d H:i:s');
+            } elseif ($value != $this->getAttributes()[$key]) {
+                $changed[$key]['old'] = $value;
+                $changed[$key]['new'] = $this->getAttributes()[$key];
+            }
+        }
+
+        if (!empty($changed)){
+            $log->log_meta = json_encode($changed);
+        }
+
         $log->logaction('checkout');
-
-        return $log;
-    }
-
-
-    /**
-     * @author  Daniel Meltzer <dmeltzer.devel@gmail.com>
-     * @since [v3.4]
-     * @return \App\Models\Actionlog
-     */
-    public function logForInstall($note, $target, $action_date = null,$changed = null)
-    {
-        $log = new Actionlog;
-        $log = $this->determineLogItemType($log);
-        if (Auth::user()) {
-            $log->user_id = Auth::user()->id;
-        }
-
-        if (! isset($target)) {
-            throw new \Exception('All checkout logs require a target.');
-
-            return;
-        }
-
-        if (! isset($target->id)) {
-            throw new \Exception('That target seems invalid (no target ID available).');
-
-            return;
-        }
-
-        $log->target_type = get_class($target);
-        $log->target_id = $target->id;
-
-        // Figure out what the target is
-        if ($log->target_type == Location::class) {
-            $log->location_id = $target->id;
-        } elseif ($log->target_type == Asset::class) {
-            $log->location_id = $target->location_id;
-        } else {
-            $log->location_id = $target->location_id;
-        }
-
-        $log->note = $note;
-        $log->action_date = $action_date;
-
-        if (! $log->action_date) {
-            $log->action_date = date('Y-m-d H:i:s');
-        }
-        $log->log_meta = json_encode($changed);
-        $log->logaction('issued_for_install');
 
         return $log;
     }
@@ -139,12 +106,16 @@ trait Loggable
      * @since [v3.4]
      * @return \App\Models\Actionlog
      */
-    public function logCheckin($target, $note, $action_date = null, $changed = null)
+    public function logCheckin($target, $note, $action_date = null, $originalValues = [])
     {
         $settings = Setting::getSettings();
         $log = new Actionlog;
-        $log->target_type = get_class($target);
-        $log->target_id = $target->id;
+
+        if($target != null){
+            $log->target_type = get_class($target);
+            $log->target_id = $target->id;
+
+        }
 
         if (static::class == LicenseSeat::class) {
             $log->item_type = License::class;
@@ -160,13 +131,9 @@ trait Loggable
             }
         }
 
-
         $log->location_id = null;
         $log->note = $note;
         $log->action_date = $action_date;
-        if (! $log->action_date) {
-            $log->action_date = date('Y-m-d H:i:s');
-        }
 
         if (! $log->action_date) {
             $log->action_date = date('Y-m-d H:i:s');
@@ -175,7 +142,24 @@ trait Loggable
         if (Auth::user()) {
             $log->user_id = Auth::user()->id;
         }
-        $log->log_meta = json_encode($changed);
+
+        $changed = [];
+        $originalValues = array_intersect_key($originalValues, array_flip(['action_date','name','status_id','location_id','rtd_location_id','expected_checkin']));
+
+        foreach ($originalValues as $key => $value) {
+            if ($key == 'action_date' && $value != $action_date) {
+                $changed[$key]['old'] = $value;
+                $changed[$key]['new'] = is_string($action_date) ? $action_date : $action_date->format('Y-m-d H:i:s');
+            } elseif ($value != $this->getAttributes()[$key]) {
+                $changed[$key]['old'] = $value;
+                $changed[$key]['new'] = $this->getAttributes()[$key];
+            }
+        }
+
+        if (!empty($changed)){
+            $log->log_meta = json_encode($changed);
+        }
+
         $log->logaction('checkin from');
 
 //        $params = [

@@ -11,7 +11,6 @@ use App\Models\Location;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 
 class LocationsController extends Controller
 {
@@ -38,6 +37,8 @@ class LocationsController extends Controller
             'locations.city',
             'locations.state',
             'locations.zip',
+            'locations.phone',
+            'locations.fax',
             'locations.country',
             'locations.parent_id',
             'locations.manager_id',
@@ -84,15 +85,14 @@ class LocationsController extends Controller
             $locations->where('locations.country', '=', $request->input('country'));
         }
 
-        $offset = (($locations) && (request('offset') > $locations->count())) ? $locations->count() : request('offset', 0);
-
-        // Check to make sure the limit is not higher than the max allowed
-        ((config('app.max_results') >= $request->input('limit')) && ($request->filled('limit'))) ? $limit = $request->input('limit') : $limit = config('app.max_results');
-
-
+        // Make sure the offset and limit are actually integers and do not exceed system limits
+        $offset = ($request->input('offset') > $locations->count()) ? $locations->count() : app('api_offset_value');
+        $limit = app('api_limit_value');
 
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
         $sort = in_array($request->input('sort'), $allowed_columns) ? $request->input('sort') : 'created_at';
+
+
 
         switch ($request->input('sort')) {
             case 'parent':
@@ -261,10 +261,13 @@ class LocationsController extends Controller
      */
     public function selectlist(Request $request)
     {
+        // If a user is in the process of editing their profile, as determined by the referrer,
+        // then we check that they have permission to edit their own location.
+        // Otherwise, we do our normal check that they can view select lists.
+        $request->headers->get('referer') === route('profile')
+            ? $this->authorize('self.edit_location')
+            : $this->authorize('view.selectlists');
 
-        $this->authorize('view.selectlists');
-        $user = Auth::user();
-        $favorite_location = $user->favoriteLocation;
         $locations = Location::select([
             'locations.id',
             'locations.name',
@@ -315,8 +318,6 @@ class LocationsController extends Controller
                 $location->name =  $location->name ."  " .$location->contract_number;
             }
         }
-
-
 
         if ($request->filled('search')) {
             $locations_formatted = $locations;

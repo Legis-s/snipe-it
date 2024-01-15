@@ -4,7 +4,7 @@ namespace App\Http\Transformers;
 
 use App\Models\License;
 use App\Models\LicenseSeat;
-use Gate;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Database\Eloquent\Collection;
 
 class LicenseSeatsTransformer
@@ -45,6 +45,7 @@ class LicenseSeatsTransformer
                 'name'=> e($seat->location()->name),
             ] : null,
             'reassignable' => (bool) $seat->license->reassignable,
+            'notes' => e($seat->notes),
             'user_can_checkout' => (($seat->assigned_to == '') && ($seat->asset_id == '')),
         ];
 

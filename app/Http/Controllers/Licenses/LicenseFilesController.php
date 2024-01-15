@@ -91,29 +91,30 @@ class LicenseFilesController extends Controller
      */
     public function destroy($licenseId = null, $fileId = null)
     {
-        $license = License::find($licenseId);
+        if ($license = License::find($licenseId)) {
 
-        // the asset is valid
-        if (isset($license->id)) {
             $this->authorize('update', $license);
-            $log = Actionlog::find($fileId);
 
-            // Remove the file if one exists
-            if (Storage::exists('licenses/'.$log->filename)) {
-                try {
-                    Storage::delete('licenses/'.$log->filename);
-                } catch (\Exception $e) {
-                    \Log::debug($e);
+            if ($log = Actionlog::find($fileId)) {
+
+                // Remove the file if one exists
+                if (Storage::exists('licenses/'.$log->filename)) {
+                    try {
+                        Storage::delete('licenses/'.$log->filename);
+                    } catch (\Exception $e) {
+                        \Log::debug($e);
+                    }
                 }
+                
+                $log->delete();
+
+                return redirect()->back()
+                    ->with('success', trans('admin/hardware/message.deletefile.success'));
             }
 
-            $log->delete();
-
-            return redirect()->back()
-                ->with('success', trans('admin/hardware/message.deletefile.success'));
+            return redirect()->route('licenses.index')->with('error', trans('general.log_does_not_exist'));
         }
 
-        // Redirect to the licence management page
         return redirect()->route('licenses.index')->with('error', trans('admin/licenses/message.does_not_exist'));
     }
 
@@ -129,7 +130,6 @@ class LicenseFilesController extends Controller
      */
     public function show($licenseId = null, $fileId = null, $download = true)
     {
-        \Log::info('Private filesystem is: '.config('filesystems.default'));
         $license = License::find($licenseId);
 
         // the license is valid
@@ -137,7 +137,7 @@ class LicenseFilesController extends Controller
             $this->authorize('view', $license);
             $this->authorize('licenses.files', $license);
 
-            if (! $log = Actionlog::find($fileId)) {
+            if (! $log = Actionlog::whereNotNull('filename')->where('item_id', $license->id)->find($fileId)) {
                 return response('No matching record for that asset/file', 500)
                     ->header('Content-Type', 'text/plain');
             }
@@ -152,20 +152,18 @@ class LicenseFilesController extends Controller
                     ->header('Content-Type', 'text/plain');
             } else {
 
+                if (request('inline') == 'true') {
+
+                    $headers = [
+                        'Content-Disposition' => 'inline',
+                    ];
+
+                    return Storage::download($file, $log->filename, $headers);
+                }
+
                 // We have to override the URL stuff here, since local defaults in Laravel's Flysystem
                 // won't work, as they're not accessible via the web
                 if (config('filesystems.default') == 'local') { // TODO - is there any way to fix this at the StorageHelper layer?
-                    return StorageHelper::downloader($file);
-                } else {
-                    if ($download != 'true') {
-                        \Log::debug('display the file');
-                        if ($contents = file_get_contents(Storage::url($file))) { // TODO - this will fail on private S3 files or large public ones
-                            return Response::make(Storage::url($file)->header('Content-Type', mime_content_type($file)));
-                        }
-
-                        return JsonResponse::create(['error' => 'Failed validation: '], 500);
-                    }
-
                     return StorageHelper::downloader($file);
 
                 }

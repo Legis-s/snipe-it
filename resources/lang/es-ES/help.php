@@ -15,7 +15,7 @@ return [
 
     'more_info_title' => 'Más información',
 
-    'audit_help' => 'Marcando esta casilla podrá editar el registro de activos reflejando su nueva ubicación. Dejándola sin marcar simplemente anotaremos la ubicación en el registro de auditoria.<br><br>Tenga en cuenta que si este activo ha si requerido, no se podrá cambiara la ubicación de la persona, Activo o ubicación en la que esta requerido.',
+    'audit_help' => 'Al marcar esta casilla se editará el registro de activos para reflejar esta nueva ubicación. Dejarla desmarcada simplemente se notará la ubicación en el registro de auditoría.<br><br>Tenga en cuenta que si este activo está desprotegido, no cambiará la ubicación de la persona, el activo o la ubicación en la que está verificado.',
 
     'assets' => 'Los activos son elementos con número de serie o etiqueta de activos.  Tienden a ser artículos de alto valor donde es importante identificar un elemento específico.',
 
@@ -30,5 +30,6 @@ return [
     'consumables'   => 'Los consumibles son cualquier cosa comprada que se usará con el tiempo. Por ejemplo, tinta de impresora o papel copiador.',
 
     'depreciations' => 'Puede configurar las depreciaciones de activos para depreciar activos basados en una depreciación lineal.',
-
+    
+    'empty_file'    => 'El importador detecta que este archivo está vacío.'
 ];

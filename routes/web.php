@@ -16,6 +16,7 @@ use App\Http\Controllers\HealthController;
 use App\Http\Controllers\ImportsController;
 use App\Http\Controllers\InventoriesController;
 use App\Http\Controllers\InventoryStatuslabelsController;
+use App\Http\Controllers\LabelsController;
 use App\Http\Controllers\LocationsController;
 use App\Http\Controllers\ManufacturersController;
 use App\Http\Controllers\MapController;
@@ -49,21 +50,37 @@ Route::group(['middleware' => 'auth'], function () {
     ]);
 
     /*
-    * Locations
+    * Labels
     */
+    Route::get(
+        'labels/{labelName}',
+        [LabelsController::class, 'show']
+    )->where('labelName', '.*')->name('labels.show');
+
+    /*
+     * Locations
+     */
+
+    Route::group(['prefix' => 'locations', 'middleware' => ['auth']], function () {
+
+        Route::get('{locationId}/clone',
+            [LocationsController::class, 'getClone']
+        )->name('clone/location');
+
+        Route::get(
+            '{locationId}/printassigned',
+            [LocationsController::class, 'print_assigned']
+        )->name('locations.print_assigned');
+
+        Route::get(
+            '{locationId}/printallassigned',
+            [LocationsController::class, 'print_all_assigned']
+        )->name('locations.print_all_assigned');
+    });
+
     Route::resource('locations', LocationsController::class, [
         'parameters' => ['location' => 'location_id'],
     ]);
-
-    Route::get(
-        'locations/{locationId}/printassigned',
-        [LocationsController::class, 'print_assigned']
-    )->name('locations.print_assigned');
-
-    Route::get(
-        'locations/{locationId}/printallassigned',
-        [LocationsController::class, 'print_all_assigned']
-    )->name('locations.print_all_assigned');
 
 
     /*
@@ -105,7 +122,6 @@ Route::group(['middleware' => 'auth'], function () {
     Route::resource('departments', DepartmentsController::class, [
         'parameters' => ['department' => 'department_id'],
     ]);
-
 });
 
 /*
@@ -188,6 +204,9 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
 
     Route::get('oauth', [SettingsController::class, 'api'])->name('settings.oauth.index');
 
+    Route::get('google', [SettingsController::class, 'getGoogleLoginSettings'])->name('settings.google.index');
+    Route::post('google', [SettingsController::class, 'postGoogleLoginSettings'])->name('settings.google.save');
+
     Route::get('purge', [SettingsController::class, 'getPurge'])->name('settings.purge.index');
     Route::post('purge', [SettingsController::class, 'postPurge'])->name('settings.purge.save');
 
@@ -201,17 +220,22 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
         Route::delete('delete/{filename}',
             [SettingsController::class, 'deleteFile'])->name('settings.backups.destroy');
 
-        Route::post('/',
+        Route::post('/', 
             [SettingsController::class, 'postBackups']
         )->name('settings.backups.create');
 
-        Route::post('/restore/{filename}',
+        Route::post('/restore/{filename}', 
             [SettingsController::class, 'postRestore']
         )->name('settings.backups.restore');
 
-        Route::post('/upload',
+        Route::post('/upload', 
             [SettingsController::class, 'postUploadBackup']
         )->name('settings.backups.upload');
+
+        // Handle redirect from after POST request from backup restore
+        Route::get('/restore/{filename?}', function () {
+            return redirect(route('settings.backups.index'));
+        });
 
         Route::get('/', [SettingsController::class, 'getBackups'])->name('settings.backups.index');
     });
@@ -232,11 +256,10 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
 |
 |
 */
-Route::group(['prefix' => 'import', 'middleware' => ['auth']], function () {
-    Route::get('/',
-       [ImportsController::class, 'index']
-    )->name('imports.index');
-});
+
+Route::get('/import',
+    \App\Http\Livewire\Importer::class
+)->middleware('auth')->name('imports.index');
 
 
 /*
@@ -399,7 +422,7 @@ Route::group(['prefix' => 'account', 'middleware' => ['auth']], function () {
     )->name('account/request-asset');
 
     Route::post(
-        'request/{itemType}/{itemId}',
+        'request/{itemType}/{itemId}/{cancel_by_admin?}/{requestingUser?}',
         [ViewAssetsController::class, 'getRequestItem']
     )->name('account/request-item');
 
@@ -412,7 +435,8 @@ Route::group(['prefix' => 'account', 'middleware' => ['auth']], function () {
     Route::get('accept/{id}', [Account\AcceptanceController::class, 'create'])
         ->name('account.accept.item');
 
-    Route::post('accept/{id}', [Account\AcceptanceController::class, 'store']);
+    Route::post('accept/{id}', [Account\AcceptanceController::class, 'store'])
+        ->name('account.store-acceptance');
 
     Route::get(
         'print',
@@ -433,7 +457,7 @@ Route::group(['prefix' => 'account', 'middleware' => ['auth']], function () {
 });
 
 Route::group(['middleware' => ['auth']], function () {
-    Route::get('reports/audit',
+    Route::get('reports/audit', 
         [ReportsController::class, 'audit']
     )->name('reports.audit');
 
@@ -481,8 +505,8 @@ Route::group(['middleware' => ['auth']], function () {
         'reports/unaccepted_assets/{deleted?}',
         [ReportsController::class, 'getAssetAcceptanceReport']
     )->name('reports/unaccepted_assets');
-    Route::get(
-        'reports/unaccepted_assets/{acceptanceId}/sent_reminder',
+    Route::post(
+        'reports/unaccepted_assets/sent_reminder',
         [ReportsController::class, 'sentAssetAcceptanceReminder']
     )->name('reports/unaccepted_assets_sent_reminder');
     Route::delete(
@@ -499,11 +523,7 @@ Route::get(
     'auth/signin',
     [LoginController::class, 'legacyAuthRedirect']
 );
-Route
-    ::get(
-    'auth/signin',
-    [LoginController::class, 'legacyAuthRedirect']
-);
+
 
 /*
 |--------------------------------------------------------------------------
@@ -577,8 +597,6 @@ Route::group(['middleware' => 'web'], function () {
         [LoginController::class, 'postTwoFactorAuth']
     );
 
-
-
     Route::post(
         'password/email',
         [ForgotPasswordController::class, 'sendResetLinkEmail']
@@ -607,7 +625,9 @@ Route::group(['middleware' => 'web'], function () {
     )->name('password.email')->middleware('throttle:forgotten_password');
 
 
-
+     // Socialite Google login
+    Route::get('google', 'App\Http\Controllers\GoogleAuthController@redirectToGoogle')->name('google.redirect');
+    Route::get('google/callback', 'App\Http\Controllers\GoogleAuthController@handleGoogleCallback')->name('google.callback');
 
 
     Route::get(
@@ -633,7 +653,7 @@ Route::group(['middleware' => 'web'], function () {
 //Auth::routes();
 
 Route::get(
-    '/health',
+    '/health', 
     [HealthController::class, 'get']
 )->name('health');
 

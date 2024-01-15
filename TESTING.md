@@ -1,65 +1,52 @@
-# Using the Test Suite
+# Running the Test Suite
 
-This document is targeted at developers looking to make modifications to
-this application's code base and want to run the existing test suite.
+This document is targeted at developers looking to make modifications to this application's code base and want to run the existing test suite.
 
+Before starting, follow the [instructions](README.md#installation) for installing the application locally and ensure you can load it in a browser properly.
 
-## Setup
+## Unit and Feature Tests
 
-Follow the instructions for installing the application locally,
-making sure to have also run the [database migrations](link to db migrations).
+Before attempting to run the test suite copy the example environment file for tests and update the values to match your environment:
 
+`cp .env.testing.example .env.testing`
 
-## Unit Tests 
+The following should work for running tests in memory with sqlite:
+```
+# --------------------------------------------
+# REQUIRED: BASIC APP SETTINGS
+# --------------------------------------------
+APP_ENV=testing
+APP_DEBUG=true
+APP_KEY=base64:glJpcM7BYwWiBggp3SQ/+NlRkqsBQMaGEOjemXqJzOU=
+APP_URL=http://localhost:8000
+APP_TIMEZONE='UTC'
+APP_LOCALE=en
 
-The application will use values in the `.env.testing` file located
-in the root directory to override the
-default settings and/or other values that exist in your `.env` files.
-
-Make sure to modify the section in `.env.testing` that has the
-database settings. In the example below, it is connecting to the
-[MariaDB](link-to-maria-db) server that is used if you install the
-application using [Docker](https://docker.com).
-
-```dotenv
 # --------------------------------------------
 # REQUIRED: DATABASE SETTINGS
 # --------------------------------------------
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_DATABASE=snipeit
-DB_USERNAME=root
-DB_PASSWORD=changeme1234
+DB_CONNECTION=sqlite_testing
+#DB_HOST=127.0.0.1
+#DB_PORT=3306
+#DB_DATABASE=null
+#DB_USERNAME=null
+#DB_PASSWORD=null
 ```
 
-To run the entire unit test suite, use the following command from your terminal:
+To use MySQL you should update the `DB_` variables to match your local test database:
+```
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE={}
+DB_USERNAME={}
+DB_PASSWORD={}
+```
 
-`php artisan test --env=testing`
+Now you are ready to run the entire test suite from your terminal:
 
-To run individual test files, you can pass the path to the test that
-you want to run.
+`php artisan test`
 
-`php artisan test --env=testing tests/Unit/AccessoryTest.php`
+To run individual test files, you can pass the path to the test that you want to run:
 
-## Browser Tests 
-
-The browser tests use [Dusk](https://laravel.com/docs/8.x/dusk) to run them.
-When troubleshooting any problems, make sure that your `.env` file is configured
-correctly to run the existing application.
-
-### Test Setup
-
-Your application needs to be configued and up and running in order for the browser
-tests to actually run. When running the tests locally, you can start the application
-using the following command:
-
-`php artisan serve`
-
-
-To run the test suite use the following command from another terminal tab or window:
-
-`php artisan dusk`
-
-To run individual test files, you can pass the path to the test that you want to run.
-
-`php artisan dusk tests/Browser/LoginTest.php`
+`php artisan test tests/Unit/AccessoryTest.php`

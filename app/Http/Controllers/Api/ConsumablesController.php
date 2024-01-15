@@ -21,10 +21,10 @@ class ConsumablesController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @author [A. Gianotto] [<snipe@snipe.net>]
      * @since [v4.0]
      *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
     {
@@ -32,7 +32,7 @@ class ConsumablesController extends Controller
 
         // This array is what determines which fields should be allowed to be sorted on ON the table itself, no relations
         // Relations will be handled in query scopes a little further down.
-        $allowed_columns =
+        $allowed_columns = 
             [
                 'id',
                 'name',
@@ -42,18 +42,17 @@ class ConsumablesController extends Controller
                 'purchase_cost',
                 'company',
                 'category',
-                'model_number',
-                'item_no',
+                'model_number', 
+                'item_no', 
                 'qty',
                 'image',
                 'notes',
-            ];
+                ];
 
 
         $consumables = Company::scopeCompanyables(
             Consumable::select('consumables.*')
-//                ->with('company', 'location', 'category', 'users', 'manufacturer')
-                ->with('company', 'location', 'category', 'manufacturer', 'purchase')
+                ->with('company', 'location', 'category', 'users', 'manufacturer','purchase')
         );
 
         if ($request->filled('search')) {
@@ -73,19 +72,23 @@ class ConsumablesController extends Controller
         }
 
         if ($request->filled('model_number')) {
-            $consumables->where('model_number', '=', $request->input('model_number'));
+            $consumables->where('model_number','=',$request->input('model_number'));
         }
 
         if ($request->filled('manufacturer_id')) {
             $consumables->where('manufacturer_id', '=', $request->input('manufacturer_id'));
         }
 
+        if ($request->filled('supplier_id')) {
+            $consumables->where('supplier_id', '=', $request->input('supplier_id'));
+        }
+
         if ($request->filled('location_id')) {
-            $consumables->where('location_id', '=', $request->input('location_id'));
+            $consumables->where('location_id','=',$request->input('location_id'));
         }
 
         if ($request->filled('notes')) {
-            $consumables->where('notes', '=', $request->input('notes'));
+            $consumables->where('notes','=',$request->input('notes'));
         }
 
         if ($request->filled('purchase_id')) {
@@ -93,17 +96,14 @@ class ConsumablesController extends Controller
         }
 
 
-        // Set the offset to the API call's offset, unless the offset is higher than the actual count of items in which
-        // case we override with the actual count, so we should return 0 items.
-        $offset = (($consumables) && ($request->get('offset') > $consumables->count())) ? $consumables->count() : $request->get('offset', 0);
-
-        // Check to make sure the limit is not higher than the max allowed
-        ((config('app.max_results') >= $request->input('limit')) && ($request->filled('limit'))) ? $limit = $request->input('limit') : $limit = config('app.max_results');
+        // Make sure the offset and limit are actually integers and do not exceed system limits
+        $offset = ($request->input('offset') > $consumables->count()) ? $consumables->count() : app('api_offset_value');
+        $limit = app('api_limit_value');
 
         $allowed_columns = ['id', 'name', 'order_number', 'min_amt', 'purchase_date', 'purchase_cost', 'company', 'category', 'model_number', 'item_no', 'manufacturer', 'location', 'qty', 'image'];
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
 
-        $sort_override = $request->input('sort');
+        $sort_override =  $request->input('sort');
         $column_sort = in_array($sort_override, $allowed_columns) ? $sort_override : 'created_at';
 
 
@@ -120,6 +120,9 @@ class ConsumablesController extends Controller
             case 'company':
                 $consumables = $consumables->OrderCompany($order);
                 break;
+            case 'supplier':
+                $components = $consumables->OrderSupplier($order);
+                break;
             default:
                 $consumables = $consumables->orderBy($column_sort, $order);
                 break;
@@ -134,10 +137,10 @@ class ConsumablesController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param \App\Http\Requests\ImageUploadRequest $request
-     * @return \Illuminate\Http\Response
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @since [v4.0]
+     * @param  \App\Http\Requests\ImageUploadRequest $request
+     * @return \Illuminate\Http\Response
      */
     public function store(ImageUploadRequest $request)
     {
@@ -164,14 +167,14 @@ class ConsumablesController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param int $id
-     * @return \Illuminate\Http\Response
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @param  int $id
+     * @return \Illuminate\Http\Response
      */
     public function show($id)
     {
         $this->authorize('view', Consumable::class);
-        $consumable = Consumable::findOrFail($id);
+        $consumable = Consumable::with('users')->findOrFail($id);
 
         return (new ConsumablesTransformer)->transformConsumable($consumable);
     }
@@ -179,11 +182,11 @@ class ConsumablesController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param \App\Http\Requests\ImageUploadRequest $request
-     * @param int $id
-     * @return \Illuminate\Http\Response
-     * @since [v4.0]
      * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v4.0]
+     * @param  \App\Http\Requests\ImageUploadRequest $request
+     * @param  int $id
+     * @return \Illuminate\Http\Response
      */
     public function update(ImageUploadRequest $request, $id)
     {
@@ -191,7 +194,7 @@ class ConsumablesController extends Controller
         $consumable = Consumable::findOrFail($id);
         $consumable->fill($request->all());
         $consumable = $request->handleImages($consumable);
-
+        
         if ($consumable->save()) {
             return response()->json(Helper::formatStandardApiResponse('success', $consumable, trans('admin/consumables/message.update.success')));
         }
@@ -202,10 +205,10 @@ class ConsumablesController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param int $id
-     * @return \Illuminate\Http\Response
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @since [v4.0]
+     * @param  int $id
+     * @return \Illuminate\Http\Response
      */
     public function destroy($id)
     {
@@ -218,26 +221,26 @@ class ConsumablesController extends Controller
     }
 
     /**
-     * Returns a JSON response containing details on the users associated with this consumable.
-     *
-     * @param int $consumableId
-     * @return array
-     * @since [v1.0]
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @see \App\Http\Controllers\Consumables\ConsumablesController::getView() method that returns the form.
+    * Returns a JSON response containing details on the users associated with this consumable.
+    *
+    * @author [A. Gianotto] [<snipe@snipe.net>]
+    * @see \App\Http\Controllers\Consumables\ConsumablesController::getView() method that returns the form.
+    * @since [v1.0]
+    * @param int $consumableId
+    * @return array
      */
     public function getDataView($consumableId)
     {
-        $consumable = Consumable::with(['consumableAssignments' => function ($query) {
-            $query->orderBy($query->getModel()->getTable() . '.created_at', 'DESC');
+        $consumable = Consumable::with(['consumableAssignments'=> function ($query) {
+            $query->orderBy($query->getModel()->getTable().'.created_at', 'DESC');
         },
-            'consumableAssignments.admin' => function ($query) {
-            },
-            'consumableAssignments.user' => function ($query) {
-            },
+        'consumableAssignments.admin'=> function ($query) {
+        },
+        'consumableAssignments.user'=> function ($query) {
+        },
         ])->find($consumableId);
 
-        if (!Company::isCurrentUserHasAccess($consumable)) {
+        if (! Company::isCurrentUserHasAccess($consumable)) {
             return ['total' => 0, 'rows' => []];
         }
         $this->authorize('view', Consumable::class);
@@ -262,41 +265,52 @@ class ConsumablesController extends Controller
     /**
      * Checkout a consumable
      *
-     * @param int $id
-     * @return JsonResponse
-     * @since [v4.9.5]
      * @author [A. Gutierrez] [<andres@baller.tv>]
+     * @param int $id
+     * @since [v4.9.5]
+     * @return JsonResponse
      */
     public function checkout(Request $request, $id)
     {
         // Check if the consumable exists
-        if (is_null($consumable = Consumable::find($id))) {
+        if (!$consumable = Consumable::with('users')->find($id)) {
             return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/consumables/message.does_not_exist')));
         }
 
         $this->authorize('checkout', $consumable);
 
-        if ($consumable->qty > 0) {
+        // Make sure there is at least one available to checkout
+        if ($consumable->numRemaining() <= 0) {
+            return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/consumables/message.checkout.unavailable')));
+        }
 
-            // Check if the user exists
-            $assigned_to = $request->input('assigned_to');
-            if (is_null($user = User::find($assigned_to))) {
-                // Return error message
-                return response()->json(Helper::formatStandardApiResponse('error', null, 'No user found'));
-            }
+        // Make sure there is a valid category
+        if (!$consumable->category){
+            return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.invalid_item_category_single', ['type' => trans('general.consumable')])));
+        }
 
-            // Update the consumable data
-            $consumable->assigned_to = e($assigned_to);
 
-            $consumable->users()->attach($consumable->id, [
-                'consumable_id' => $consumable->id,
-                'user_id' => $user->id,
-                'assigned_to' => $assigned_to,
-                'note' => $request->input('note'),
-            ]);
+        // Check if the user exists - @TODO:  this should probably be handled via validation, not here??
+        if (!$user = User::find($request->input('assigned_to'))) {
+            // Return error message
+            return response()->json(Helper::formatStandardApiResponse('error', null, 'No user found'));
+            \Log::debug('No valid user');
+        }
+
+        // Update the consumable data
+        $consumable->assigned_to = $request->input('assigned_to');
+
+        $consumable->users()->attach($consumable->id,
+                [
+                    'consumable_id' => $consumable->id,
+                    'user_id' => $user->id,
+                    'assigned_to' => $request->input('assigned_to'),
+                    'note' => $request->input('note'),
+                ]
+            );
 
             // Log checkout event
-            $logaction = $consumable->logCheckout(e($request->input('note')), $user);
+            $logaction = $consumable->logCheckout($request->input('note'), $user);
             $data['log_id'] = $logaction->id;
             $data['eula'] = $consumable->getEula();
             $data['first_name'] = $user->first_name;
@@ -306,9 +320,7 @@ class ConsumablesController extends Controller
             $data['require_acceptance'] = $consumable->requireAcceptance();
 
             return response()->json(Helper::formatStandardApiResponse('success', null, trans('admin/consumables/message.checkout.success')));
-        }
 
-        return response()->json(Helper::formatStandardApiResponse('error', null, 'No consumables remaining'));
     }
 
 
@@ -393,17 +405,12 @@ class ConsumablesController extends Controller
 
 
     /**
-     * Gets a paginated collection for the select2 menus
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v4.0.16]
-     * @see \App\Http\Transformers\SelectlistTransformer
-     *
-     */
+    * Gets a paginated collection for the select2 menus
+    *
+    * @see \App\Http\Transformers\SelectlistTransformer
+    */
     public function selectlist(Request $request)
     {
-
-        $this->authorize('index', Consumable::class);
 
         $consumables = Consumable::select([
             'consumables.id',

@@ -7,6 +7,7 @@ use App\Models\Setting;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 /**
  * Class UserPresenter
@@ -91,6 +92,15 @@ class UserPresenter extends Presenter
                 'title' => trans('admin/users/table.title'),
                 'visible' => true,
                 'formatter' => 'usersLinkFormatter',
+            ],
+            [
+                'field' => 'vip',
+                'searchable' => false,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('admin/users/general.vip_label'),
+                'visible' => false,
+                'formatter' => 'trueFalseFormatter',
             ],
             [
                 'field' => 'remote',
@@ -284,9 +294,9 @@ class UserPresenter extends Presenter
                 'formatter' => 'trueFalseFormatter',
             ],
             [
-                'field' => 'two_factor_activated',
+                'field' => 'two_factor_optin',
                 'searchable' => false,
-                'sortable' => false,
+                'sortable' => true,
                 'switchable' => true,
                 'title' => trans('admin/users/general.two_factor_active'),
                 'visible' => false,
@@ -299,6 +309,15 @@ class UserPresenter extends Presenter
                 'switchable' => true,
                 'title' => trans('general.login_enabled'),
                 'visible' => true,
+                'formatter' => 'trueFalseFormatter',
+            ],
+            [
+                'field' => 'autoassign_licenses',
+                'searchable' => false,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('general.autoassign_licenses'),
+                'visible' => false,
                 'formatter' => 'trueFalseFormatter',
             ],
             [
@@ -362,8 +381,7 @@ class UserPresenter extends Presenter
     public function emailLink()
     {
         if ($this->email) {
-            return '<a href="mailto:'.$this->email.'">'.$this->email.'</a>'
-                .'<a href="mailto:'.$this->email.'" class="hidden-xs hidden-sm"><i class="far fa-envelope"></i></a>';
+            return '<a href="mailto:'.$this->email.'">'.$this->email.'</a><a href="mailto:'.$this->email.'" class="hidden-xs hidden-sm"><i class="far fa-envelope"></i></a>';
         }
 
         return '';
@@ -398,23 +416,31 @@ class UserPresenter extends Presenter
     public function gravatar()
     {
         if ($this->avatar) {
+
+            // Check if it's a google avatar or some external avatar
+            if (Str::startsWith($this->avatar, ['http://', 'https://'])) {
+                return $this->avatar;
+            }
+
+            // Otherwise assume it's an uploaded image
             return Storage::disk('public')->url('avatars/'.e($this->avatar));
         }
 
         if (Setting::getSettings()->load_remote == '1') {
             if ($this->model->gravatar != '') {
+
                 $gravatar = md5(strtolower(trim($this->model->gravatar)));
-
                 return '//gravatar.com/avatar/'.$gravatar;
-            } elseif ($this->email != '') {
-                $gravatar = md5(strtolower(trim($this->email)));
 
+            } elseif ($this->email != '') {
+
+                $gravatar = md5(strtolower(trim($this->email)));
                 return '//gravatar.com/avatar/'.$gravatar;
             }
         }
 
         // Set a fun, gender-neutral default icon
-        return url('/').'/img/default-sm.png';
+        return config('app.url').'/img/default-sm.png';
     }
 
     /**
@@ -423,7 +449,7 @@ class UserPresenter extends Presenter
      */
     public function nameUrl()
     {
-        return (string) link_to_route('users.show', $this->fullName(), $this->id);
+        return (string) link_to_route('users.show', $this->getFullNameAttribute(), $this->id);
     }
 
     /**

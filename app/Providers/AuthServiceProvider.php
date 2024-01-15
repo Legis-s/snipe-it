@@ -117,6 +117,24 @@ class AuthServiceProvider extends ServiceProvider
             }
         });
 
+        Gate::define('accessories.files', function ($user) {
+            if ($user->hasAccess('accessories.files')) {
+                return true;
+            }
+        });
+
+        Gate::define('components.files', function ($user) {
+            if ($user->hasAccess('components.files')) {
+                return true;
+            }
+        });
+
+        Gate::define('consumables.files', function ($user) {
+            if ($user->hasAccess('consumables.files')) {
+                return true;
+            }
+        });
+
         // Can the user import CSVs?
         Gate::define('import', function ($user) {
             if ($user->hasAccess('import')) {
@@ -140,6 +158,11 @@ class AuthServiceProvider extends ServiceProvider
             }
         });
 
+        Gate::define('assets.view.encrypted_custom_fields', function ($user) {
+            if($user->hasAccess('assets.view.encrypted_custom_fields')){
+                return true;
+            }
+        });
 
         // -----------------------------------------
         // Reports
@@ -171,6 +194,10 @@ class AuthServiceProvider extends ServiceProvider
             return $user->hasAccess('self.checkout_assets');
         });
 
+        Gate::define('self.view_purchase_cost', function ($user) {
+            return $user->hasAccess('self.view_purchase_cost');
+        });
+
         // This is largely used to determine whether to display the gear icon sidenav
         // in the left-side navigation
         Gate::define('backend.interact', function ($user) {
@@ -192,24 +219,24 @@ class AuthServiceProvider extends ServiceProvider
 
         // This  determines whether or not an API user should be able to get the selectlists.
         // This can seem a little confusing, since view properties may not have been granted
-        // to the logged in API user, but creating assets, licenses, etc won't work
+        // to the logged in API user, but creating assets, licenses, etc won't work 
         // if the user can't view and interact with the select lists.
         Gate::define('view.selectlists', function ($user) {
-            return $user->can('update', Asset::class)
-                || $user->can('create', Asset::class)
+            return $user->can('update', Asset::class) 
+                || $user->can('create', Asset::class)    
                 || $user->can('checkout', Asset::class)
                 || $user->can('checkin', Asset::class)
-                || $user->can('audit', Asset::class)
-                || $user->can('update', License::class)
-                || $user->can('create', License::class)
+                || $user->can('audit', Asset::class)       
+                || $user->can('update', License::class)   
+                || $user->can('create', License::class)   
                 || $user->can('update', Component::class)
-                || $user->can('create', Component::class)
-                || $user->can('update', Consumable::class)
-                || $user->can('create', Consumable::class)
+                || $user->can('create', Component::class)   
+                || $user->can('update', Consumable::class)   
+                || $user->can('create', Consumable::class)   
                 || $user->can('update', Accessory::class)
-                || $user->can('create', Accessory::class)
+                || $user->can('create', Accessory::class)   
                 || $user->can('update', User::class)
-                || $user->can('create', User::class);
+                || $user->can('create', User::class);  
         });
     }
 }

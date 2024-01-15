@@ -11,14 +11,17 @@ use App\Http\Transformers\ConsumablesTransformer;
 use App\Http\Transformers\LicensesTransformer;
 use App\Http\Transformers\SelectlistTransformer;
 use App\Http\Transformers\UsersTransformer;
+use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\Company;
 use App\Models\License;
 use App\Models\User;
+use App\Notifications\CurrentInventory;
 use Auth;
 use Illuminate\Http\Request;
 use App\Http\Requests\ImageUploadRequest;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class UsersController extends Controller
 {
@@ -32,7 +35,7 @@ class UsersController extends Controller
      */
     public function index(Request $request)
     {
-//        $this->authorize('view', User::class);
+        $this->authorize('view', User::class);
 
         $users = User::select([
             'users.activated',
@@ -70,17 +73,12 @@ class UsersController extends Controller
             'users.ldap_import',
             'users.start_date',
             'users.end_date',
+            'users.vip',
+            'users.autoassign_licenses',
 
         ])->with('manager', 'groups', 'userloc', 'company', 'department', 'assets', 'licenses', 'accessories', 'consumables', 'createdBy',)
             ->withCount('assets as assets_count', 'licenses as licenses_count', 'accessories as accessories_count', 'consumables as consumables_count');
-        $users = Company::scopeCompanyables($users);
 
-
-        if (($request->filled('deleted')) && ($request->input('deleted') == 'true')) {
-            $users = $users->onlyTrashed();
-        } elseif (($request->filled('all')) && ($request->input('all') == 'true')) {
-            $users = $users->withTrashed();
-        }
 
         if ($request->filled('activated')) {
             $users = $users->where('users.activated', '=', $request->input('activated'));
@@ -150,6 +148,18 @@ class UsersController extends Controller
             $users = $users->where('remote', '=', $request->input('remote'));
         }
 
+        if ($request->filled('vip')) {
+            $users = $users->where('vip', '=', $request->input('vip'));
+        }
+
+        if ($request->filled('two_factor_enrolled')) {
+            $users = $users->where('two_factor_enrolled', '=', $request->input('two_factor_enrolled'));
+        }
+
+        if ($request->filled('two_factor_optin')) {
+            $users = $users->where('two_factor_optin', '=', $request->input('two_factor_optin'));
+        }
+
         if ($request->filled('start_date')) {
             $users = $users->where('users.start_date', '=', $request->input('start_date'));
         }
@@ -157,7 +167,6 @@ class UsersController extends Controller
         if ($request->filled('end_date')) {
             $users = $users->where('users.end_date', '=', $request->input('end_date'));
         }
-
 
         if ($request->filled('assets_count')) {
            $users->has('assets', '=', $request->input('assets_count'));
@@ -175,20 +184,15 @@ class UsersController extends Controller
             $users->has('accessories', '=', $request->input('accessories_count'));
         }
 
+        if ($request->filled('autoassign_licenses')) {
+            $users->where('autoassign_licenses', '=', $request->input('autoassign_licenses'));
+        }
+
         if ($request->filled('search')) {
             $users = $users->TextSearch($request->input('search'));
         }
 
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
-        $offset = (($users) && (request('offset') > $users->count())) ? 0 : request('offset', 0);
-
-        // Set the offset to the API call's offset, unless the offset is higher than the actual count of items in which
-        // case we override with the actual count, so we should return 0 items.
-        $offset = (($users) && ($request->get('offset') > $users->count())) ? $users->count() : $request->get('offset', 0);
-
-        // Check to make sure the limit is not higher than the max allowed
-        ((config('app.max_results') >= $request->input('limit')) && ($request->filled('limit'))) ? $limit = $request->input('limit') : $limit = config('app.max_results');
-
 
         switch ($request->input('sort')) {
             case 'manager':
@@ -206,20 +210,76 @@ class UsersController extends Controller
             case 'company':
                 $users = $users->OrderCompany($order);
                 break;
+            case 'first_name':
+                $users->orderBy('first_name', $order);
+                $users->orderBy('last_name', $order);
+                break;
+            case 'last_name':
+                $users->orderBy('last_name', $order);
+                $users->orderBy('first_name', $order);
+                break;
             default:
                 $allowed_columns =
                     [
-                        'last_name', 'first_name', 'email', 'jobtitle', 'username', 'employee_num',
-                        'assets', 'accessories', 'consumables', 'licenses', 'groups', 'activated', 'created_at',
-                        'two_factor_enrolled', 'two_factor_optin', 'last_login', 'assets_count', 'licenses_count',
-                        'consumables_count', 'accessories_count', 'phone', 'address', 'city', 'state',
-                        'country', 'zip', 'id', 'ldap_import', 'remote', 'start_date', 'end_date',
+                        'last_name',
+                        'first_name',
+                        'email',
+                        'jobtitle',
+                        'username',
+                        'employee_num',
+                        'assets',
+                        'accessories',
+                        'consumables',
+                        'licenses',
+                        'groups',
+                        'activated',
+                        'created_at',
+                        'two_factor_enrolled',
+                        'two_factor_optin',
+                        'last_login',
+                        'assets_count',
+                        'licenses_count',
+                        'consumables_count',
+                        'accessories_count',
+                        'phone',
+                        'address',
+                        'city',
+                        'state',
+                        'country',
+                        'zip',
+                        'id',
+                        'ldap_import',
+                        'two_factor_optin',
+                        'two_factor_enrolled',
+                        'remote',
+                        'vip',
+                        'start_date',
+                        'end_date',
+                        'autoassign_licenses',
                     ];
 
                 $sort = in_array($request->get('sort'), $allowed_columns) ? $request->get('sort') : 'first_name';
                 $users = $users->orderBy($sort, $order);
                 break;
         }
+
+        if (($request->filled('deleted')) && ($request->input('deleted') == 'true')) {
+            $users = $users->onlyTrashed();
+        } elseif (($request->filled('all')) && ($request->input('all') == 'true')) {
+            $users = $users->withTrashed();
+        }
+
+        $users = Company::scopeCompanyables($users);
+
+
+        // Make sure the offset and limit are actually integers and do not exceed system limits
+        $offset = ($request->input('offset') > $users->count()) ? $users->count() : app('api_offset_value');
+        $limit = app('api_limit_value');
+
+        \Log::debug('Requested offset: '. $request->input('offset'));
+        \Log::debug('App offset: '. app('api_offset_value'));
+        \Log::debug('Actual offset: '. $offset);
+        \Log::debug('Limit: '. $limit);
 
         $total = $users->count();
         $users = $users->skip($offset)->take($limit)->get();
@@ -252,9 +312,11 @@ class UsersController extends Controller
         $users = Company::scopeCompanyables($users);
 
         if ($request->filled('search')) {
-            $users = $users->SimpleNameSearch($request->get('search'))
-                ->orWhere('username', 'LIKE', '%'.$request->get('search').'%')
-                ->orWhere('employee_num', 'LIKE', '%'.$request->get('search').'%');
+            $users = $users->where(function ($query) use ($request) {
+                $query->SimpleNameSearch($request->get('search'))
+                    ->orWhere('username', 'LIKE', '%'.$request->get('search').'%')
+                    ->orWhere('employee_num', 'LIKE', '%'.$request->get('search').'%');
+            });
         }
 
         $users = $users->orderBy('last_name', 'asc')->orderBy('first_name', 'asc');
@@ -298,6 +360,7 @@ class UsersController extends Controller
 
         $user = new User;
         $user->fill($request->all());
+        $user->created_by = Auth::user()->id;
 
         if ($request->has('permissions')) {
             $permissions_array = $request->input('permissions');
@@ -309,11 +372,15 @@ class UsersController extends Controller
             $user->permissions = $permissions_array;
         }
 
-        $tmp_pass = substr(str_shuffle('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, 20);
-        $user->password = bcrypt($request->get('password', $tmp_pass));
+        //
+        if ($request->filled('password')) {
+            $user->password = bcrypt($request->get('password'));
+        } else {
+            $user->password = $user->noPassword();
+        }
 
         app('App\Http\Requests\ImageUploadRequest')->handleImages($user, 600, 'image', 'avatars', 'avatar');
-
+        
         if ($user->save()) {
             if ($request->filled('groups')) {
                 $user->groups()->sync($request->input('groups'));
@@ -360,12 +427,12 @@ class UsersController extends Controller
 
         /**
          * This is a janky hack to prevent people from changing admin demo user data on the public demo.
-         *
+         * 
          * The $ids 1 and 2 are special since they are seeded as superadmins in the demo seeder.
-         *
+         * 
          *  Thanks, jerks. You are why we can't have nice things. - snipe
-         *
-         */
+         * 
+         */ 
 
 
         if ((($id == 1) || ($id == 2)) && (config('app.lock_passwords'))) {
@@ -374,7 +441,7 @@ class UsersController extends Controller
 
 
         $user->fill($request->all());
-
+        
         if ($user->id == $request->input('manager_id')) {
             return response()->json(Helper::formatStandardApiResponse('error', null, 'You cannot be your own manager'));
         }
@@ -402,9 +469,9 @@ class UsersController extends Controller
         Asset::where('assigned_type', User::class)
             ->where('assigned_to', $user->id)->update(['location_id' => $request->input('location_id', null)]);
 
-
+        
         app('App\Http\Requests\ImageUploadRequest')->handleImages($user, 600, 'image', 'avatars', 'avatar');
-
+          
         if ($user->save()) {
 
             // Sync group memberships:
@@ -415,6 +482,13 @@ class UsersController extends Controller
 
             // Check if the request has groups passed and has a value
             if ($request->filled('groups')) {
+                $validator = Validator::make($request->all(), [
+                    'groups.*' => 'integer|exists:permission_groups,id',
+                ]);
+
+                if ($validator->fails()){
+                    return response()->json(Helper::formatStandardApiResponse('error', null, $user->getErrors()));
+                }
                 $user->groups()->sync($request->input('groups'));
             // The groups field has been passed but it is null, so we should blank it out
             } elseif ($request->has('groups')) {
@@ -492,6 +566,27 @@ class UsersController extends Controller
         return (new AssetsTransformer)->transformAssets($assets, $assets->count(), $request);
     }
 
+    /**
+     * Notify a specific user via email with all of their assigned assets.
+     *
+     * @author [Lukas Fehling] [<lukas.fehling@adabay.rocks>]
+     * @since [v6.0.13]
+     * @param Request $request
+     * @param $id
+     * @return string JSON
+     */
+    public function emailAssetList(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        if (empty($user->email)) {
+            return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/users/message.inventorynotification.error')));
+        }
+
+        $user->notify((new CurrentInventory($user)));
+
+        return response()->json(Helper::formatStandardApiResponse('success', null, trans('admin/users/message.inventorynotification.success')));
+    }
 
     /**
      * Return JSON containing a list of consumables assigned to a user.
@@ -540,7 +635,7 @@ class UsersController extends Controller
     {
         $this->authorize('view', User::class);
         $this->authorize('view', License::class);
-
+        
         if ($user = User::where('id', $id)->withTrashed()->first()) {
             $licenses = $user->licenses()->get();
             return (new LicensesTransformer())->transformLicenses($licenses, $licenses->count());
@@ -602,17 +697,31 @@ class UsersController extends Controller
      */
     public function restore($userId = null)
     {
-        // Get asset information
-        $user = User::withTrashed()->find($userId);
-        $this->authorize('delete', $user);
-        if (isset($user->id)) {
-            // Restore the user
-            User::withTrashed()->where('id', $userId)->restore();
 
-            return response()->json(Helper::formatStandardApiResponse('success', null, trans('admin/users/message.success.restored')));
+        if ($user = User::withTrashed()->find($userId)) {
+            $this->authorize('delete', $user);
+
+            if ($user->deleted_at == '') {
+                return response()->json(Helper::formatStandardApiResponse('error', trans('general.not_deleted', ['item_type' => trans('general.user')])), 200);
+            }
+
+            if ($user->restore()) {
+
+                $logaction = new Actionlog();
+                $logaction->item_type = User::class;
+                $logaction->item_id = $user->id;
+                $logaction->created_at = date('Y-m-d H:i:s');
+                $logaction->user_id = Auth::user()->id;
+                $logaction->logaction('restore');
+
+                return response()->json(Helper::formatStandardApiResponse('success', null, trans('admin/users/message.success.restored')), 200);
+            }
+
+            // Check validation to make sure we're not restoring a user with the same username as an existing user
+            return response()->json(Helper::formatStandardApiResponse('error', null, $user->getErrors()));
         }
 
-        $id = $userId;
-        return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/users/message.user_not_found', compact('id'))), 200);
+        return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/users/message.user_not_found')), 200);
+
     }
 }

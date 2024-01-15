@@ -5,8 +5,10 @@ namespace App\Http\Transformers;
 use App\Helpers\Helper;
 use App\Models\Asset;
 use App\Models\Setting;
-use Gate;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Database\Eloquent\Collection;
+use Carbon\Carbon;
+use Auth;
 
 class AssetsTransformer
 {
@@ -34,8 +36,11 @@ class AssetsTransformer
                 'id' => (int) $asset->model->id,
                 'name'=> e($asset->model->name),
             ] : null,
+            'byod' => ($asset->byod ? true : false),
+
             'model_number' => (($asset->model) && ($asset->model->model_number)) ? e($asset->model->model_number) : null,
-            'eol' => ($asset->purchase_date != '') ? Helper::getFormattedDateObject($asset->present()->eol_date(), 'date') : null,
+            'eol' => (($asset->asset_eol_date != '') && ($asset->purchase_date != '')) ? Carbon::parse($asset->asset_eol_date)->diffInMonths($asset->purchase_date).' months' : null,
+            'asset_eol_date' => ($asset->asset_eol_date != '') ? Helper::getFormattedDateObject($asset->asset_eol_date, 'date') : null,
             'status_label' => ($asset->assetstatus) ? [
                 'id' => (int) $asset->assetstatus->id,
                 'name'=> e($asset->assetstatus->name),
@@ -54,7 +59,7 @@ class AssetsTransformer
                 'id' => (int) $asset->supplier->id,
                 'name'=> e($asset->supplier->name),
             ] : null,
-            'notes' => ($asset->notes) ? e($asset->notes) : null,
+            'notes' => ($asset->notes) ? Helper::parseEscapedMarkedownInline($asset->notes) : null,
             'order_number' => ($asset->order_number) ? e($asset->order_number) : null,
             'company' => ($asset->company) ? [
                 'id' => (int) $asset->company->id,
@@ -84,6 +89,7 @@ class AssetsTransformer
             'next_audit_date' => Helper::getFormattedDateObject($asset->next_audit_date, 'date'),
             'deleted_at' => Helper::getFormattedDateObject($asset->deleted_at, 'datetime'),
             'purchase_date' => Helper::getFormattedDateObject($asset->purchase_date, 'date'),
+            'age' => $asset->purchase_date ? $asset->purchase_date->diffForHumans() : '',
             'last_checkout' => Helper::getFormattedDateObject($asset->last_checkout, 'datetime'),
             'expected_checkin' => Helper::getFormattedDateObject($asset->expected_checkin, 'date'),
             'purchase_cost' => Helper::formatCurrencyOutput($asset->purchase_cost),
@@ -97,6 +103,7 @@ class AssetsTransformer
             'purchase_id' => (int) $asset->purchase_id,
             'quality' => (int) $asset->quality,
             'nds' => (int) $asset->nds,
+            'book_value' => Helper::formatCurrencyOutput($asset->getLinearDepreciatedValue()),
         ];
 
 
@@ -106,10 +113,10 @@ class AssetsTransformer
             foreach ($asset->model->fieldset->fields as $field) {
                 if ($field->isFieldDecryptable($asset->{$field->db_column})) {
                     $decrypted = Helper::gracefulDecrypt($field, $asset->{$field->db_column});
-                    $value = (Gate::allows('superadmin')) ? $decrypted : strtoupper(trans('admin/custom_fields/general.encrypted'));
+                    $value = (Gate::allows('assets.view.encrypted_custom_fields')) ? $decrypted : strtoupper(trans('admin/custom_fields/general.encrypted'));
 
                     if ($field->format == 'DATE'){
-                        if (Gate::allows('superadmin')){
+                        if (Gate::allows('assets.view.encrypted_custom_fields')){
                             $value = Helper::getFormattedDateObject($value, 'date', false);
                         } else {
                            $value = strtoupper(trans('admin/custom_fields/general.encrypted'));
@@ -141,7 +148,7 @@ class AssetsTransformer
                 $array['custom_fields'] = $fields_array;
             }
         } else {
-            $array['custom_fields'] = [];
+            $array['custom_fields'] = new \stdClass; // HACK to force generation of empty object instead of empty list
         }
 
         $permissions_array['available_actions'] = [
@@ -158,13 +165,13 @@ class AssetsTransformer
 
 
         if (request('components')=='true') {
-
+        
             if ($asset->components) {
                 $array['components'] = [];
-
+    
                 foreach ($asset->components as $component) {
                     $array['components'][] = [
-
+                        
                             'id' => $component->id,
                             'pivot_id' => $component->pivot->id,
                             'name' => e($component->name),
@@ -172,12 +179,13 @@ class AssetsTransformer
                             'price_cost' => $component->purchase_cost,
                             'purchase_total' => $component->purchase_cost * $component->pivot->assigned_qty,
                             'checkout_date' => Helper::getFormattedDateObject($component->pivot->created_at, 'datetime') ,
+                        
                     ];
                 }
             }
 
         }
-
+        
         $array += $permissions_array;
 
         return $array;
@@ -197,6 +205,7 @@ class AssetsTransformer
                     'name' => e($asset->assigned->getFullNameAttribute()),
                     'first_name'=> e($asset->assigned->first_name),
                     'last_name'=> ($asset->assigned->last_name) ? e($asset->assigned->last_name) : null,
+                    'email'=> ($asset->assigned->email) ? e($asset->assigned->email) : null,
                     'employee_number' =>  ($asset->assigned->employee_num) ? e($asset->assigned->employee_num) : null,
                     'type' => 'user',
                 ] : null;
@@ -235,6 +244,29 @@ class AssetsTransformer
             'status'=> ($asset->assetstatus) ? $asset->present()->statusMeta : null,
             'assigned_to_self' => ($asset->assigned_to == \Auth::user()->id),
         ];
+
+        if (($asset->model) && ($asset->model->fieldset) && ($asset->model->fieldset->fields->count() > 0)) {
+            $fields_array = [];
+
+            foreach ($asset->model->fieldset->fields as $field) {
+
+                // Only display this if it's allowed via the custom field setting
+                if (($field->field_encrypted=='0') && ($field->show_in_requestable_list=='1')) {
+
+                    $value = $asset->{$field->db_column};
+                    if (($field->format == 'DATE') && (!is_null($value)) && ($value != '')) {
+                        $value = Helper::getFormattedDateObject($value, 'date', false);
+                    }
+
+                    $fields_array[$field->db_column] = e($value);
+                }
+
+                $array['custom_fields'] = $fields_array;
+            }
+        } else {
+            $array['custom_fields'] = new \stdClass; // HACK to force generation of empty object instead of empty list
+        }
+
 
         $permissions_array['available_actions'] = [
             'cancel' => ($asset->isRequestedBy(\Auth::user())) ? true : false,

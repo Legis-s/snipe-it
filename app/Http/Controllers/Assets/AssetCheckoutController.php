@@ -27,7 +27,7 @@ class AssetCheckoutController extends Controller
     public function create($assetId)
     {
         // Check if the asset exists
-        if (is_null($asset = Asset::find(e($assetId)))) {
+        if (is_null($asset = Asset::with('company')->find(e($assetId)))) {
             return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));
         }
 
@@ -62,7 +62,7 @@ class AssetCheckoutController extends Controller
             $this->authorize('checkout', $asset);
             $admin = Auth::user();
 
-            $target = $this->determineCheckoutTarget();
+            $target = $this->determineCheckoutTarget($asset);
 
             $asset = $this->updateAssetLocation($asset, $target);
 
@@ -97,12 +97,21 @@ class AssetCheckoutController extends Controller
                 }
             }
 
-            if ($asset->checkOut($target, $admin, $checkout_at, $expected_checkin, e($request->get('note')), $request->get('name'), $location = null, $quality, $depreciable_cost, null)) {
+            $settings = \App\Models\Setting::getSettings();
+
+            // We have to check whether $target->company_id is null here since locations don't have a company yet
+            if (($settings->full_multiple_companies_support) && ((!is_null($target->company_id)) &&  (!is_null($asset->company_id)))) {
+                if ($target->company_id != $asset->company_id){
+                    return redirect()->to("hardware/$assetId/checkout")->with('error', trans('general.error_user_company'));
+                }
+            }
+
+            if ($asset->checkOut($target, $admin, $checkout_at, $expected_checkin, $request->get('note'), $request->get('name'))) {
                 return redirect()->route('hardware.index')->with('success', trans('admin/hardware/message.checkout.success'));
             }
 
+            // Redirect to the asset management page with error
             return redirect()->to("hardware/$assetId/checkout")->with('error', trans('admin/hardware/message.checkout.error').$asset->getErrors());
-
         } catch (ModelNotFoundException $e) {
             return redirect()->back()->with('error', trans('admin/hardware/message.checkout.error'))->withErrors($asset->getErrors());
         } catch (CheckoutNotAllowed $e) {

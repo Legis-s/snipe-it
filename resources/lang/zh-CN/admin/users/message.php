@@ -6,8 +6,9 @@ return array(
     'declined'                  => '你已拒绝此项资产。',
     'bulk_manager_warn'	        => '您的用户已成功更新，但是您的经理条目未保存，因为您选择的经理也在要编辑的用户列表中，用户可能不是自己的经理。请再次选择您的用户，不包括经理。',
     'user_exists'               => '用户已经存在!',
-    'user_not_found'            => '用户[:id] 不存在',
+    'user_not_found'            => '用户不存在。',
     'user_login_required'       => '登陆字段是必须的',
+    'user_has_no_assets_assigned' => '目前没有分配给用户的资产。',
     'user_password_required'    => '密码为必填项',
     'insufficient_permissions'  => '权限不足',
     'user_deleted_warning'      => '用户已经被删除，你需要恢复这个用户编辑他或者重新指定新资产。',
@@ -15,6 +16,7 @@ return array(
     'password_resets_sent'      => '被选中的已激活并拥有有效电子邮件地址的用户已经收到了一个密码重置链接。',
     'password_reset_sent'       => '密码重置链接已发送至 :email!',
     'user_has_no_email'         => '此用户的个人资料中没有电子邮件地址。',
+    'log_record_not_found'        => '找不到该用户匹配的日志记录。',
 
 
     'success' => array(
@@ -59,4 +61,8 @@ return array(
         'invalidfiles' => '一个或多个文件过大或文件类型不被允许。允许上传的文件类型有PNG，GIF，JPG，DOC，DOCX，PDF和TXT。',
     ),
 
+    'inventorynotification' => array(
+        'error'   => '此用户没有设置电子邮件。',
+        'success' => '已通知用户其当前库存。'
+    )
 );

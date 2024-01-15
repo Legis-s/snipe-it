@@ -4,7 +4,7 @@ namespace App\Http\Transformers;
 
 use App\Helpers\Helper;
 use App\Models\User;
-use Gate;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Database\Eloquent\Collection;
 
 class UsersTransformer
@@ -24,7 +24,7 @@ class UsersTransformer
         $array = [
                 'id' => (int) $user->id,
                 'avatar' => e($user->present()->gravatar),
-                'name' => e($user->first_name).' '.e($user->last_name),
+                'name' => e($user->getFullNameAttribute()),
                 'first_name' => e($user->first_name),
                 'last_name' => e($user->last_name),
                 'username' => e($user->username),
@@ -36,6 +36,7 @@ class UsersTransformer
                     'name'=> e($user->manager->first_name).' '.e($user->manager->last_name),
                 ] : null,
                 'jobtitle' => ($user->jobtitle) ? e($user->jobtitle) : null,
+                'vip' => ($user->vip == '1') ? true : false,
                 'phone' => ($user->phone) ? e($user->phone) : null,
                 'website' => ($user->website) ? e($user->website) : null,
                 'address' => ($user->address) ? e($user->address) : null,
@@ -56,12 +57,13 @@ class UsersTransformer
                     'id' => (int) $user->favoriteLocation->id,
                     'name'=> e($user->favoriteLocation->name)
                 ]  : null,
-                'notes'=> e($user->notes),
+                'notes'=> Helper::parseEscapedMarkedownInline($user->notes),
                 'permissions' => $user->decodePermissions(),
                 'activated' => ($user->activated == '1') ? true : false,
+                'autoassign_licenses' => ($user->autoassign_licenses == '1') ? true : false,
                 'ldap_import' => ($user->ldap_import == '1') ? true : false,
-                'two_factor_activated' => ($user->two_factor_active()) ? true : false,
                 'two_factor_enrolled' => ($user->two_factor_active_and_enrolled()) ? true : false,
+                'two_factor_optin' => ($user->two_factor_active()) ? true : false,
                 'assets_count' => (int) $user->assets_count,
                 'licenses_count' => (int) $user->licenses_count,
                 'accessories_count' => (int) $user->accessories_count,
@@ -82,7 +84,7 @@ class UsersTransformer
 
         $permissions_array['available_actions'] = [
             'update' => (Gate::allows('update', User::class) && ($user->deleted_at == '')),
-            'delete' => (Gate::allows('delete', User::class) && ($user->assets_count == 0) && ($user->licenses_count == 0) && ($user->accessories_count == 0)),
+            'delete' => $user->isDeletable(),
             'clone' => (Gate::allows('create', User::class) && ($user->deleted_at == '')),
             'restore' => (Gate::allows('create', User::class) && ($user->deleted_at != '')),
             'impersonate' => (Gate::allows('superadmin')) ? true : false,

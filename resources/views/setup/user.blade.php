@@ -1,15 +1,14 @@
 @extends('layouts/setup')
-{{-- TODO: Translate --}}
-{{-- Page title --}}
+
 @section('title')
-Create a User ::
+{{ trans('admin/users/general.create_user') }} ::
 @parent
 @stop
 
 {{-- Page content --}}
 @section('content')
 
-<p> This is the account information you'll use to access the site for the first time.  </p>
+<p>{{ trans('admin/users/general.create_user_page_explanation') }}</p>
 
 <form action="{{ route('setup.user.save') }}" method="POST">
   {{ csrf_field() }}
@@ -31,7 +30,7 @@ Create a User ::
     <!-- Language -->
     <div class="form-group col-lg-6{{  (Helper::checkIfRequired(\App\Models\User::class, 'default_language')) ? ' required' : '' }} {{$errors->has('default_language') ? 'error' : ''}}">
       {{ Form::label('locale', trans('admin/settings/general.default_language')) }}
-      {!! Form::locales('locale', Request::old('locale', "en"), 'select2') !!}
+      {!! Form::locales('locale', Request::old('locale', "en-US"), 'select2') !!}
 
       {!! $errors->first('locale', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
     </div>
@@ -49,23 +48,19 @@ Create a User ::
   <div class="row">
 
     <div class="form-group col-lg-6">
-      <label>{{trans('admin/settings/general.auto_increment_assets')}}</label>
-      <div class="checkbox">
-        <label>
-          <input type="checkbox" value="1" name="auto_increment_assets">{{trans('admin/settings/general.auto_increment_assets')}}
-        </label>
-      </div>
+
+      <label class="form-control form-control">
+        <input type="checkbox" value="1" name="auto_increment_assets">{{trans('admin/settings/general.auto_increment_assets')}}
+      </label>
+
     </div>
 
     <!-- Multi Company Support -->
     <div class="form-group col-lg-6">
-            {{ Form::label('full_multiple_companies_support', trans('admin/settings/general.full_multiple_companies_support_text')) }}
-          <div class="checkbox">
-            <label>
-              <input type="checkbox" value="1" name="full_multiple_companies_support">  {{ trans('admin/settings/general.full_multiple_companies_support_text') }}
-            </label>
-          </div>
-        </div>
+      <label class="form-control form-control">
+        <input type="checkbox" value="1" name="full_multiple_companies_support">  {{ trans('admin/settings/general.full_multiple_companies_support_text') }}
+      </label>
+    </div>
 
 
   </div>
@@ -157,18 +152,15 @@ Create a User ::
 
     <!-- Email credentials -->
     <div class="form-group col-lg-12">
-      <label>Email credentials</label>
-      <div class="checkbox">
-        <label>
-          <input type="checkbox" value="1" name="email_creds">Email my credentials to the email address above
-        </label>
-      </div>
+      <label class="form-control form-control">
+        <input type="checkbox" value="1" name="email_creds">{{ trans('admin/users/general.email_credentials_text') }}
+      </label>
     </div>
   </div> <!--/.COL-LG-12-->
 @stop
 
 @section('button')
-  <button class="btn btn-primary">Next: Save User</button>
+  <button class="btn btn-primary">{{ trans('admin/users/general.next_save_user') }}</button>
 </form>
 @parent
 @stop

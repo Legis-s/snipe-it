@@ -43,12 +43,14 @@ return [
     'file'                 => ':attribute måste vara en fil.',
     'filled'               => ':attribute fältet måste ha ett värde.',
     'image'                => ':attribute måste vara en bild.',
+    'import_field_empty'    => 'Värdet för :fieldname kan inte vara noll.',
     'in'                   => 'Det valda :attribute är ogiltigt.',
     'in_array'             => ':attribute fältet existerar inte i :other.',
     'integer'              => ':attribute måste vara ett heltal.',
     'ip'                   => ':attribute måste vara en giltig IP-adress.',
     'ipv4'                 => ':attribute måste vara en giltig IPv4-adress.',
     'ipv6'                 => ':attribute måste vara en giltig IPv6-adress.',
+    'is_unique_department' => ':attribute måste vara unikt för detta företag',
     'json'                 => ':attribute måste vara en giltig JSON-sträng.',
     'max'                  => [
         'numeric' => ':attribute får inte vara större än :max.',
@@ -65,6 +67,8 @@ return [
         'array'   => ':attribute måste innehålla minst :min saker.',
     ],
     'starts_with'          => ':attribute måste börja med något av följande: :values.',
+    'ends_with'            => ':attribute måste sluta med en eller flera av följande värden: :values.',
+
     'not_in'               => 'Det valda :attribute är ogiltigt.',
     'numeric'              => ':attribute måste vara ett nummer.',
     'present'              => ':attribute fältet måste finnas.',
@@ -86,31 +90,22 @@ return [
     ],
     'string'               => ':attribute måste vara en sträng.',
     'timezone'             => ':attribute måste vara en giltig zon.',
+    'two_column_unique_undeleted' => ':attribute måste vara unikt i :table1 och :table2. ',
     'unique'               => ':attribute är upptaget.',
     'uploaded'             => 'Uppladdningen av :attribute misslyckades.',
     'url'                  => ':attribute Formatet är ogiltigt.',
     'unique_undeleted'     => ':attribute måste vara unikt.',
     'non_circular'         => ':attribute får inte skapa en cirkulär referens.',
-    'disallow_same_pwd_as_user_fields' => 'Password cannot be the same as the username.',
-    'letters'              => 'Password must contain at least one letter.',
-    'numbers'              => 'Password must contain at least one number.',
-    'case_diff'            => 'Password must use mixed case.',
-    'symbols'              => 'Password must contain symbols.',
+    'not_array'            => ':atribute harus array.',
+    'disallow_same_pwd_as_user_fields' => 'Lösenordet kan inte vara samma som användarnamnet.',
+    'letters'              => 'Lösenord måste innehålla minst en bokstav.',
+    'numbers'              => 'Lösenord måste innehålla minst en siffra.',
+    'case_diff'            => 'Lösenordet måste innehålla både versaler och gemener.',
+    'symbols'              => 'Lösenordet måste innehålla symboler.',
     'gte'                  => [
-        'numeric'          => 'Value cannot be negative'
+        'numeric'          => 'Värdet kan inte vara negativ'
     ],
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Custom Validation Language Lines
-    |--------------------------------------------------------------------------
-    |
-    | Here you may specify custom validation messages for attributes using the
-    | convention "attribute.rule" to name the lines. This makes it quick to
-    | specify a specific custom language line for a given attribute rule.
-    |
-    */
 
     /*
     |--------------------------------------------------------------------------
@@ -129,6 +124,18 @@ return [
         'hashed_pass'      => 'Ditt nuvarande lösenord är felaktigt',
         'dumbpwd'          => 'Det angivna lösenordet är för vanligt.',
         'statuslabel_type' => 'Du måste ange en giltig typ av statusetikett',
+
+        // date_format validation with slightly less stupid messages. It duplicates a lot, but it gets the job done :(
+        // We use this because the default error message for date_format is reflects php Y-m-d, which non-PHP
+        // people won't know how to format. 
+        'purchase_date.date_format'     => ':attribute måste vara ett giltigt datum i YYYY-MM-DD format',
+        'last_audit_date.date_format'   =>  ':attribute måste vara ett giltigt datum i YYYY-MM-DD hh:mm:ss format',
+        'expiration_date.date_format'   =>  ':attribute måste vara ett giltigt datum i YYYY-MM-DD format',
+        'termination_date.date_format'  =>  ':attribute måste vara ett giltigt datum i YYYY-MM-DD format',
+        'expected_checkin.date_format'  =>  ':attribute måste vara ett giltigt datum i YYYY-MM-DD format',
+        'start_date.date_format'        =>  ':attribute måste vara ett giltigt datum i YYYY-MM-DD format',
+        'end_date.date_format'          =>  ':attribute måste vara ett giltigt datum i YYYY-MM-DD format',
+
     ],
 
     /*

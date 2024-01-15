@@ -5,24 +5,27 @@ return [
     'undeployable' 		=> '<strong>Aviso: </strong> Este artigo foi assinalado como "não implementável".
                         Se este estado mudou, por favor atualize o estado do artigo.',
     'does_not_exist' 	=> 'Artigo não existente.',
-    'does_not_exist_or_not_requestable' => 'That asset does not exist or is not requestable.',
+    'does_not_exist_or_not_requestable' => 'Esse artigo não existe ou não é solicitável.',
     'assoc_users'	 	=> 'Este artigo está correntemente alocado a um utilizador e não pode ser removido. Por favor devolva o artigo e de seguida tente remover novamente. ',
 
     'create' => [
         'error'   		=> 'Não foi possível criar o Artigo. Por favor, tente novamente. :(',
         'success' 		=> 'Artigo criado com sucesso. :)',
+        'success_linked' => 'O ativo com a tag :tag foi criado com sucesso. <strong><a href=":link" style="color: white;">clique aqui para ver</a></strong>.',
     ],
 
     'update' => [
         'error'   			=> 'Artigo não foi atualizado. Por favor, tente novamente',
         'success' 			=> 'Artigo atualizado com sucesso.',
         'nothing_updated'	=>  'Nenhum atributo foi selecionado, portanto nada foi atualizado.',
-        'no_assets_selected'  =>  'No assets were selected, so nothing was updated.',
+        'no_assets_selected'  =>  'Nenhum ativo foi selecionado, por isso nada foi atualizado.',
     ],
 
     'restore' => [
         'error'   		=> 'O Artigo não foi restaurado, por favor tente novamente',
         'success' 		=> 'Artigo restaurado com sucesso.',
+        'bulk_success' 		=> 'Artigo restaurado com sucesso.',
+        'nothing_updated'   => 'Nenhum artigo foi selecionado, assim nada restaurado.', 
     ],
 
     'audit' => [
@@ -49,6 +52,9 @@ return [
         'success'               => 'O seu ficheiro foi importado',
         'file_delete_success'   => 'Ficheiro eliminado com sucesso',
         'file_delete_error'      => 'Não foi possível eliminar o ficheiro',
+        'file_missing' => 'Ficheiro selecionado está a faltar',
+        'header_row_has_malformed_characters' => 'Um ou mais atributos na linha do cabeçalho contém caracteres UTF-8 mal formados',
+        'content_row_has_malformed_characters' => 'Um ou mais atributos na primeira linha de conteúdo contém caracteres UTF-8 mal formados',
     ],
 
 

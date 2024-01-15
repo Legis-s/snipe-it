@@ -10,6 +10,8 @@ use App\Models\Manufacturer;
 use App\Models\Statuslabel;
 use App\Models\Supplier;
 use App\Models\User;
+use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\Log;
 
 class ItemImporter extends Importer
 {
@@ -60,8 +62,8 @@ class ItemImporter extends Importer
             $this->item['department_id'] = $this->createOrFetchDepartment($item_department);
         }
 
-        $item_manager_first_name = $this->findCsvMatch($row, 'manage_first_name');
-        $item_manager_last_name = $this->findCsvMatch($row, 'manage_last_name');
+        $item_manager_first_name = $this->findCsvMatch($row, 'manager_first_name');
+        $item_manager_last_name = $this->findCsvMatch($row, 'manager_last_name');
 
         if ($this->shouldUpdateField($item_manager_first_name)) {
             $this->item['manager_id'] = $this->fetchManager($item_manager_first_name, $item_manager_last_name);
@@ -74,7 +76,7 @@ class ItemImporter extends Importer
 
         $this->item['purchase_date'] = null;
         if ($this->findCsvMatch($row, 'purchase_date') != '') {
-            $this->item['purchase_date'] = date('Y-m-d 00:00:01', strtotime($this->findCsvMatch($row, 'purchase_date')));
+            $this->item['purchase_date'] = date('Y-m-d', strtotime($this->findCsvMatch($row, 'purchase_date')));
         }
 
         $this->item['last_audit_date'] = null;
@@ -87,10 +89,21 @@ class ItemImporter extends Importer
             $this->item['next_audit_date'] = date('Y-m-d', strtotime($this->findCsvMatch($row, 'next_audit_date')));
         }
 
+        $this->item['asset_eol_date'] = null;
+            if($this->findCsvMatch($row, 'asset_eol_date') != '') {
+                $csvMatch = $this->findCsvMatch($row, 'asset_eol_date');
+                try {
+                    $this->item['asset_eol_date'] = CarbonImmutable::parse($csvMatch)->format('Y-m-d');
+                } catch (\Exception $e) {
+                    Log::info($e->getMessage());
+                    $this->log('Unable to parse date: '.$csvMatch);
+                }
+        }
+
         $this->item['qty'] = $this->findCsvMatch($row, 'quantity');
         $this->item['requestable'] = $this->findCsvMatch($row, 'requestable');
         $this->item['user_id'] = $this->user_id;
-        $this->item['serial'] = $this->findCsvMatch($row, 'serial number');
+        $this->item['serial'] = $this->findCsvMatch($row, 'serial');
         // NO need to call this method if we're running the user import.
         // TODO: Merge these methods.
         $this->item['checkout_class'] = $this->findCsvMatch($row, 'checkout_class');
@@ -103,13 +116,13 @@ class ItemImporter extends Importer
     /**
      * Parse row to determine what (if anything) we should checkout to.
      * @param  array $row CSV Row being parsed
-     * @return SnipeModel      Model to be checked out to
+     * @return ?SnipeModel      Model to be checked out to
      */
     protected function determineCheckout($row)
     {
-        // We only support checkout-to-location for asset, so short circuit otherwise.
-        if (get_class($this) != AssetImporter::class) {
-            return $this->createOrFetchUser($row);
+        // Locations don't get checked out to anyone/anything
+        if (get_class($this) == LocationImporter::class) {
+            return;
         }
 
         if (strtolower($this->item['checkout_class']) === 'location' && $this->findCsvMatch($row, 'checkout_location') != null ) {
@@ -222,11 +235,11 @@ class ItemImporter extends Importer
             $item = $this->sanitizeItemForStoring($asset_model, $editingModel);
             $item['name'] = $asset_model_name;
             $item['notes'] = $this->findCsvMatch($row, 'model_notes');
-            
+
             if(!empty($asset_modelNumber)){
                 $item['model_number'] = $asset_modelNumber;
             }
-            
+
             $asset_model->update($item);
             $asset_model->save();
             $this->log('Asset Model Updated');
@@ -359,7 +372,7 @@ class ItemImporter extends Importer
         if (empty($asset_statuslabel_name)) {
             return null;
         }
-        $status = Statuslabel::where(['name' => $asset_statuslabel_name])->first();
+       $status = Statuslabel::where(['name' => trim($asset_statuslabel_name)])->first();
 
         if ($status) {
             $this->log('A matching Status '.$asset_statuslabel_name.' already exists');
@@ -368,7 +381,7 @@ class ItemImporter extends Importer
         }
         $this->log('Creating a new status');
         $status = new Statuslabel();
-        $status->name = $asset_statuslabel_name;
+        $status->name = trim($asset_statuslabel_name);
 
         $status->deployable = 1;
         $status->pending = 0;
@@ -407,7 +420,7 @@ class ItemImporter extends Importer
 
         //Otherwise create a manufacturer.
         $manufacturer = new Manufacturer();
-        $manufacturer->name = $item_manufacturer;
+        $manufacturer->name = trim($item_manufacturer);
         $manufacturer->user_id = $this->user_id;
 
         if ($manufacturer->save()) {

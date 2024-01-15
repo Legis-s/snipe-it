@@ -21,7 +21,9 @@ use App\Events\ItemDeclined;
 use App\Events\LicenseCheckedIn;
 use App\Events\LicenseCheckedOut;
 use App\Models\Actionlog;
+use App\Models\User;
 use App\Models\LicenseSeat;
+use App\Events\UserMerged;
 
 class LogListener
 {
@@ -34,7 +36,7 @@ class LogListener
      */
     public function onCheckoutableCheckedIn(CheckoutableCheckedIn $event)
     {
-        $event->checkoutable->logCheckin($event->checkedOutTo, $event->note, $event->action_date,$event->changed);
+        $event->checkoutable->logCheckin($event->checkedOutTo, $event->note, $event->action_date, $event->originalValues);
     }
 
     /**
@@ -47,8 +49,9 @@ class LogListener
      */
     public function onCheckoutableCheckedOut(CheckoutableCheckedOut $event)
     {
-        $event->checkoutable->logCheckout($event->note, $event->checkedOutTo, $event->checkoutable->last_checkout,$event->changed);
+        $event->checkoutable->logCheckout($event->note, $event->checkedOutTo, $event->checkoutable->last_checkout, $event->originalValues);
     }
+
 
     /**
      * These onBlah methods are used by the subscribe() method further down in this file.
@@ -110,7 +113,6 @@ class LogListener
             $logaction->item()->associate($event->acceptance->checkoutable->license);
         }
 
-        \Log::debug('New onCheckoutAccepted Listener fired. logaction: '.print_r($logaction, true));
         $logaction->save();
     }
 
@@ -130,6 +132,43 @@ class LogListener
         $logaction->save();
     }
 
+
+    public function onUserMerged(UserMerged $event)
+    {
+
+        $to_from_array = [
+            'to_id' => $event->merged_to->id,
+            'to_username' => $event->merged_to->username,
+            'from_id' => $event->merged_from->id,
+            'from_username' => $event->merged_from->username,
+        ];
+
+        // Add a record to the users being merged FROM
+        \Log::debug('Users merged: '.$event->merged_from->id .' ('.$event->merged_from->username.') merged into '. $event->merged_to->id. ' ('.$event->merged_to->username.')');
+        $logaction = new Actionlog();
+        $logaction->item_id = $event->merged_from->id;
+        $logaction->item_type = User::class;
+        $logaction->target_id = $event->merged_to->id;
+        $logaction->target_type = User::class;
+        $logaction->action_type = 'merged';
+        $logaction->note = trans('general.merged_log_this_user_from', $to_from_array);
+        $logaction->user_id = $event->admin->id;
+        $logaction->save();
+
+        // Add a record to the users being merged TO
+        $logaction = new Actionlog();
+        $logaction->target_id = $event->merged_from->id;
+        $logaction->target_type = User::class;
+        $logaction->item_id = $event->merged_to->id;
+        $logaction->item_type = User::class;
+        $logaction->action_type = 'merged';
+        $logaction->note = trans('general.merged_log_this_user_into', $to_from_array);
+        $logaction->user_id = $event->admin->id;
+        $logaction->save();
+
+
+    }
+
     /**
      * Register the listeners for the subscriber.
      *
@@ -144,7 +183,8 @@ class LogListener
             'CheckoutDeclined',
             'CheckoutableSell',
             'CheckoutableRent',
-            'CheckoutableForInstall'
+            'CheckoutableForInstall',
+            'UserMerged',
         ];
 
         foreach ($list as $event) {
@@ -154,4 +194,6 @@ class LogListener
             );
         }
     }
+
+
 }

@@ -6,15 +6,17 @@ return array(
     'declined'                  => 'Recusou este artigo com sucesso.',
     'bulk_manager_warn'	        => 'Seus usuários foram atualizados com sucesso, no entanto, sua entrada de gerente não foi salva porque o gerente que você selecionou também estava na lista de usuários para ser editada e os usuários podem não ser seu próprio gerente. Selecione seus usuários novamente, excluindo o gerente.',
     'user_exists'               => 'Utilizador já existe!',
-    'user_not_found'            => 'Utilizador [:id] não existe.',
+    'user_not_found'            => 'O utilizador não existe.',
     'user_login_required'       => 'O atributo login é obrigatório',
+    'user_has_no_assets_assigned' => 'Não há conteúdos atualmente atribuídos ao usuário.',
     'user_password_required'    => 'A password é obrigatória.',
     'insufficient_permissions'  => 'Permissões insuficientes.',
     'user_deleted_warning'      => 'Este utilizador foi removido. Terá que restaurar este utilizador para os editar ou alocar-lhe novos artigos.',
     'ldap_not_configured'        => 'A integração com LDAP não foi configurada para este instalação.',
     'password_resets_sent'      => 'Os usuários selecionados que são ativados e têm um endereço de e-mail válido receberam um link de redefinição de senha.',
-    'password_reset_sent'       => 'A password reset link has been sent to :email!',
-    'user_has_no_email'         => 'This user does not have an email address in their profile.',
+    'password_reset_sent'       => 'Um link para redefinição de senha foi enviado para :email!',
+    'user_has_no_email'         => 'Esse utilizador não tem um endereço de endereço eletrónico no seu perfil.',
+    'log_record_not_found'        => 'Não foi possível encontrar um registro de registro correspondente para este usuário.',
 
 
     'success' => array(
@@ -59,4 +61,8 @@ return array(
         'invalidfiles' => 'Um ou mais ficheiros são demasiado grandes ou trata-se de um tipo de ficheiro não permitido. Os tipos de ficheiro permitidos são png, gif, jpg, jpeg, doc, docx, pdf e txt.',
     ),
 
+    'inventorynotification' => array(
+        'error'   => 'Este utilizador não tem endereço eletrónico definido.',
+        'success' => 'O utilizador foi notificado sobre o seu inventário atual.'
+    )
 );

@@ -3,6 +3,7 @@
 return array(
 
     'does_not_exist' => '配件 [:id] 不存在',
+    'not_found' => 'That accessory was not found.',
     'assoc_users'	 => '使用者目前已借出 :count 組配件。請在繳回配件後重試。 ',
 
     'create' => array(
@@ -24,6 +25,7 @@ return array(
      'checkout' => array(
         'error'   		=> '配件借出失敗。請再試一次。',
         'success' 		=> '借出配件成功。',
+        'unavailable'   => '配件不足無法借出, 檢查可用數量.',
         'user_does_not_exist' => '使用者不正確。請再試一次。'
     ),
 

@@ -6,9 +6,11 @@ use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Transformers\ManufacturersTransformer;
 use App\Http\Transformers\SelectlistTransformer;
+use App\Models\Actionlog;
 use App\Models\Manufacturer;
 use Illuminate\Http\Request;
 use App\Http\Requests\ImageUploadRequest;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class ManufacturersController extends Controller
@@ -23,10 +25,10 @@ class ManufacturersController extends Controller
     public function index(Request $request)
     {
         $this->authorize('view', Manufacturer::class);
-        $allowed_columns = ['id', 'name', 'url', 'support_url', 'support_email', 'support_phone', 'created_at', 'updated_at', 'image', 'assets_count', 'consumables_count', 'components_count', 'licenses_count'];
+        $allowed_columns = ['id', 'name', 'url', 'support_url', 'support_email', 'warranty_lookup_url', 'support_phone', 'created_at', 'updated_at', 'image', 'assets_count', 'consumables_count', 'components_count', 'licenses_count'];
 
         $manufacturers = Manufacturer::select(
-            ['id', 'name', 'url', 'support_url', 'support_email', 'support_phone', 'created_at', 'updated_at', 'image', 'deleted_at']
+            ['id', 'name', 'url', 'support_url', 'warranty_lookup_url', 'support_email', 'support_phone', 'created_at', 'updated_at', 'image', 'deleted_at']
         )->withCount('assets as assets_count')->withCount('licenses as licenses_count')->withCount('consumables as consumables_count')->withCount('accessories as accessories_count');
 
         if ($request->input('deleted') == 'true') {
@@ -49,6 +51,10 @@ class ManufacturersController extends Controller
             $manufacturers->where('support_url', '=', $request->input('support_url'));
         }
 
+        if ($request->filled('warranty_lookup_url')) {
+            $manufacturers->where('warranty_lookup_url', '=', $request->input('warranty_lookup_url'));
+        }
+
         if ($request->filled('support_phone')) {
             $manufacturers->where('support_phone', '=', $request->input('support_phone'));
         }
@@ -57,12 +63,9 @@ class ManufacturersController extends Controller
             $manufacturers->where('support_email', '=', $request->input('support_email'));
         }
 
-        // Set the offset to the API call's offset, unless the offset is higher than the actual count of items in which
-        // case we override with the actual count, so we should return 0 items.
-        $offset = (($manufacturers) && ($request->get('offset') > $manufacturers->count())) ? $manufacturers->count() : $request->get('offset', 0);
-
-        // Check to make sure the limit is not higher than the max allowed
-        ((config('app.max_results') >= $request->input('limit')) && ($request->filled('limit'))) ? $limit = $request->input('limit') : $limit = config('app.max_results');
+        // Make sure the offset and limit are actually integers and do not exceed system limits
+        $offset = ($request->input('offset') > $manufacturers->count()) ? $manufacturers->count() : app('api_offset_value');
+        $limit = app('api_limit_value');
 
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
         $sort = in_array($request->input('sort'), $allowed_columns) ? $request->input('sort') : 'created_at';
@@ -156,6 +159,44 @@ class ManufacturersController extends Controller
 
         return response()->json(Helper::formatStandardApiResponse('error', null,  trans('admin/manufacturers/message.assoc_users')));
 
+    }
+
+    /**
+     * Restore a given Manufacturer (mark as un-deleted)
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v6.3.4]
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function restore($id)
+    {
+        $this->authorize('delete', Manufacturer::class);
+
+        if ($manufacturer = Manufacturer::withTrashed()->find($id)) {
+
+            if ($manufacturer->deleted_at == '') {
+                return response()->json(Helper::formatStandardApiResponse('error', trans('general.not_deleted', ['item_type' => trans('general.manufacturer')])), 200);
+            }
+
+            if ($manufacturer->restore()) {
+
+                $logaction = new Actionlog();
+                $logaction->item_type = Manufacturer::class;
+                $logaction->item_id = $manufacturer->id;
+                $logaction->created_at = date('Y-m-d H:i:s');
+                $logaction->user_id = Auth::user()->id;
+                $logaction->logaction('restore');
+
+                return response()->json(Helper::formatStandardApiResponse('success', trans('admin/manufacturers/message.restore.success')), 200);
+            }
+
+            // Check validation to make sure we're not restoring an item with the same unique attributes as a non-deleted one
+            return response()->json(Helper::formatStandardApiResponse('error', trans('general.could_not_restore', ['item_type' => trans('general.manufacturer'), 'error' => $manufacturer->getErrors()->first()])), 200);
+        }
+
+        return response()->json(Helper::formatStandardApiResponse('error', null,  trans('admin/manufacturers/message.does_not_exist')));
     }
 
     /**

@@ -80,8 +80,7 @@
           </li>
         @endcan
 
-        @can('update', Component::class)
-
+        @can('components.files', $component)
           <li class="pull-right">
             <a href="#" data-toggle="modal" data-target="#uploadFileModal">
               <i class="fas fa-paperclip" aria-hidden="true"></i> {{ trans('button.upload') }}
@@ -204,10 +203,15 @@
                       </td>
                       <td>
                         @if ($file->filename)
-                          <a href="{{ route('show.componentfile', [$component->id, $file->id, 'download' => 'true']) }}" class="btn btn-default">
+                          <a href="{{ route('show.componentfile', [$component->id, $file->id]) }}" class="btn btn-sm btn-default">
                             <i class="fas fa-download" aria-hidden="true"></i>
                             <span class="sr-only">{{ trans('general.download') }}</span>
                           </a>
+
+                          <a href="{{ route('show.componentfile', [$component->id, $file->id, 'inline' => 'true']) }}" class="btn btn-sm btn-default" target="_blank">
+                            <i class="fa fa-external-link" aria-hidden="true"></i>
+                          </a>
+
                         @endif
                       </td>
                       <td>{{ $file->created_at }}</td>

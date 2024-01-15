@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Gate;
 use Laravel\Passport\HasApiTokens;
 use Lab404\Impersonate\Models\Impersonate;
 use Watson\Validating\ValidatingTrait;
@@ -66,25 +67,22 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         'scim_externalid',
         'bitrix_id',
         'bitrix_token',
-        'favorite_location_id'
+        'favorite_location_id',
+        'scim_externalid',
+        'avatar',
+        'gravatar',
+        'vip',
+        'autoassign_licenses',
     ];
 
     protected $casts = [
-        'activated'    => 'boolean',
         'manager_id'   => 'integer',
         'location_id'  => 'integer',
         'company_id'   => 'integer',
+        'created_at'   => 'datetime',
+        'updated_at'   => 'datetime',
+        'deleted_at'   => 'datetime',
     ];
-
-
-    protected $dates = [
-        'created_at',
-        'updated_at',
-        'deleted_at',
-        'start_date',
-        'end_date',
-    ];
-
 
     /**
      * Model validation rules
@@ -101,8 +99,17 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         'website'                 => 'url|nullable|max:191',
         'manager_id'              => 'nullable|exists:users,id|cant_manage_self',
         'location_id'             => 'exists:locations,id|nullable',
-        'start_date'              => 'nullable|date',
-        'end_date'                => 'nullable|date|after_or_equal:start_date',
+        'start_date'              => 'nullable|date_format:Y-m-d',
+        'end_date'                => 'nullable|date_format:Y-m-d|after_or_equal:start_date',
+        'autoassign_licenses'     => 'boolean',
+        'address'                 => 'max:191|nullable',
+        'city'                    => 'max:191|nullable',
+        'state'                   => 'min:2|max:191|nullable',
+        'country'                 => 'min:2|max:191|nullable',
+        'zip'                     => 'max:10|nullable',
+        'vip'                     => 'boolean',
+        'remote'                  => 'boolean',
+        'activated'               => 'boolean',
     ];
 
     /**
@@ -201,6 +208,23 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         return $this->checkPermissionSection('superuser');
     }
 
+    /**
+     * Checks if the user is deletable
+     *
+     * @author A. Gianotto <snipe@snipe.net>
+     * @since [v6.3.4]
+     * @return bool
+     */
+    public function isDeletable()
+    {
+        return Gate::allows('delete', $this)
+            && ($this->assets()->count() === 0)
+            && ($this->licenses()->count() === 0)
+            && ($this->consumables()->count() === 0)
+            && ($this->accessories()->count() === 0)
+            && ($this->deleted_at == '');
+    }
+
 
     /**
      * Establishes the user -> company relationship
@@ -247,35 +271,12 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
      */
     public function getFullNameAttribute()
     {
-        return $this->first_name.' '.$this->last_name;
-    }
+        $setting = Setting::getSettings();
 
-    /**
-     * Returns the complete name attribute with username
-     *
-     * @todo refactor this so it's less repetitive and dumb
-     *
-     * @author A. Gianotto <snipe@snipe.net>
-     * @since [v2.0]
-     * @return string
-     */
-    public function getCompleteNameAttribute()
-    {
-        return $this->last_name.', '.$this->first_name.' ('.$this->username.')';
-    }
-
-    /**
-     * The url for slack notifications.
-     * Used by Notifiable trait.
-     * @return mixed
-     */
-    public function routeNotificationForSlack()
-    {
-        // At this point the endpoint is the same for everything.
-        //  In the future this may want to be adapted for individual notifications.
-        $this->endpoint = \App\Models\Setting::getSettings()->slack_endpoint;
-
-        return $this->endpoint;
+        if ($setting->name_display_format=='last_first') {
+            return ($this->last_name) ? $this->last_name.' '.$this->first_name : $this->first_name;
+        }
+        return $this->last_name ? $this->first_name.' '.$this->last_name : $this->first_name;
     }
 
 
@@ -288,7 +289,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
      */
     public function assets()
     {
-        return $this->morphMany(\App\Models\Asset::class, 'assigned', 'assigned_type', 'assigned_to')->withTrashed();
+        return $this->morphMany(\App\Models\Asset::class, 'assigned', 'assigned_type', 'assigned_to')->withTrashed()->orderBy('id');
     }
 
     /**
@@ -316,7 +317,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     public function accessories()
     {
         return $this->belongsToMany(\App\Models\Accessory::class, 'accessories_users', 'assigned_to', 'accessory_id')
-            ->withPivot('id', 'created_at', 'note')->withTrashed();
+            ->withPivot('id', 'created_at', 'note')->withTrashed()->orderBy('accessory_id');
     }
 
     /**
@@ -342,6 +343,24 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     {
         return $this->belongsToMany(\App\Models\License::class, 'license_seats', 'assigned_to', 'license_id')->withPivot('id');
     }
+
+    /**
+     * Establishes a count of all items assigned
+     *
+     * @author J. Vinsmoke
+     * @since [v6.1]
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
+    Public function allAssignedCount() {
+        $assetsCount = $this->assets()->count();
+        $licensesCount = $this->licenses()->count();
+        $accessoriesCount = $this->accessories()->count();
+        $consumablesCount = $this->consumables()->count();
+
+        $totalCount = $assetsCount + $licensesCount + $accessoriesCount + $consumablesCount;
+
+        return (int) $totalCount;
+        }
 
     /**
      * Establishes the user -> actionlogs relationship
@@ -471,6 +490,22 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         return $this->belongsToMany(Asset::class, 'checkout_requests', 'user_id', 'requestable_id')->whereNull('canceled_at');
     }
 
+    /**
+     * Set a common string when the user has been imported/synced from:
+     *
+     * - LDAP without password syncing
+     * - SCIM
+     * - CSV import where no password was provided
+     *
+     * @author A. Gianotto <snipe@snipe.net>
+     * @since [v6.2.0]
+     * @return string
+     */
+    public function noPassword()
+    {
+        return "*** NO PASSWORD ***";
+    }
+
 
     /**
      * Query builder scope to return NOT-deleted users
@@ -505,7 +540,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
 
     /**
      * Generate email from full name
-     *
+     * 
      * @author A. Gianotto <snipe@snipe.net>
      * @since [v2.0]
      *
@@ -583,24 +618,13 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         if ((Setting::getSettings()->two_factor_enabled == '1') && ($this->two_factor_optin == '1')) {
             return true;
         }
+
         // If the 2FA is required for everyone so is implicitly active
         elseif (Setting::getSettings()->two_factor_enabled == '2') {
             return true;
         }
 
         return false;
-    }
-
-    /**
-     * Get the admin user who created this user
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v6.0.5]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
-     */
-    public function createdBy()
-    {
-        return $this->belongsTo(\App\Models\User::class, 'created_by')->withTrashed();
     }
 
     /**
@@ -631,6 +655,19 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
 
     }
 
+    /**
+     * Get the admin user who created this user
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v6.0.5]
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
+    public function createdBy()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'created_by')->withTrashed();
+    }
+
+
 
     public function decodePermissions()
     {
@@ -648,13 +685,13 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
      */
     public function scopeSimpleNameSearch($query, $search)
     {
-           $query = $query->where('first_name', 'LIKE', '%'.$search.'%')
-               ->orWhere('last_name', 'LIKE', '%'.$search.'%')
-               ->orWhereRaw('CONCAT('.DB::getTablePrefix().'users.first_name," ",'.DB::getTablePrefix().'users.last_name) LIKE ?', ["%$search%"]);
-
-        return $query;
+        return $query->where('first_name', 'LIKE', '%' . $search . '%')
+            ->orWhere('last_name', 'LIKE', '%' . $search . '%')
+            ->orWhereMultipleColumns([
+                'users.first_name',
+                'users.last_name',
+            ], $search);
     }
-
 
     /**
      * Run additional, advanced searches.
@@ -664,9 +701,11 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function advancedTextSearch(Builder $query, array $terms) {
-
         foreach($terms as $term) {
-            $query = $query->orWhereRaw('CONCAT('.DB::getTablePrefix().'users.first_name," ",'.DB::getTablePrefix().'users.last_name) LIKE ?', ["%$term%"]);
+            $query->orWhereMultipleColumns([
+                'users.first_name',
+                'users.last_name',
+            ], $term);
         }
 
         return $query;
@@ -759,7 +798,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
 
 
     /**
-     * Get any locations the user manages.
+     * Get any purchases the user manages.
      **/
     public function purchases()
     {
@@ -782,5 +821,27 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     public function preferredLocale()
     {
         return $this->locale;
+    }
+    public function getUserTotalCost(){
+        $asset_cost= 0;
+        $license_cost= 0;
+        $accessory_cost= 0;
+        foreach ($this->assets as $asset){
+            $asset_cost += $asset->purchase_cost;
+            $this->asset_cost = $asset_cost;
+        }
+        foreach ($this->licenses as $license){
+            $license_cost += $license->purchase_cost;
+            $this->license_cost = $license_cost;
+        }
+        foreach ($this->accessories as $accessory){
+            $accessory_cost += $accessory->purchase_cost;
+            $this->accessory_cost = $accessory_cost;
+        }
+
+        $this->total_user_cost = ($asset_cost + $accessory_cost + $license_cost);
+
+
+        return $this;
     }
 }

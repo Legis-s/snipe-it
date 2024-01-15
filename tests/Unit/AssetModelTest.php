@@ -4,17 +4,12 @@ namespace Tests\Unit;
 use App\Models\Asset;
 use App\Models\Category;
 use App\Models\AssetModel;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Foundation\Testing\WithoutMiddleware;
-use Tests\Unit\BaseTest;
+use Tests\Support\InteractsWithSettings;
+use Tests\TestCase;
 
-class AssetModelTest extends BaseTest
+class AssetModelTest extends TestCase
 {
-    /**
-     * @var \UnitTester
-     */
-    protected $tester;
+    use InteractsWithSettings;
 
     public function testAnAssetModelZerosOutBlankEols()
     {
@@ -27,21 +22,16 @@ class AssetModelTest extends BaseTest
 
     public function testAnAssetModelContainsAssets()
     {
-        $category = Category::factory()->create(
-            ['category_type' => 'asset']
-        );
+        $category = Category::factory()->create([
+            'category_type' => 'asset'
+            ]);
         $model = AssetModel::factory()->create([
             'category_id' => $category->id,
         ]);
     
-        $asset = Asset::factory()
-            ->create(
-                [
+        $asset = Asset::factory()->create([
                     'model_id' => $model->id
-                ]
-            );
+                ]);
         $this->assertEquals(1, $model->assets()->count());
     }
-
-
 }

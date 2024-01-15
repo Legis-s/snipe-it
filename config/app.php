@@ -99,7 +99,7 @@ return [
     |
     */
 
-    'locale' =>  env('APP_LOCALE', 'en'),
+    'locale' =>  env('APP_LOCALE', 'en-US'),
 
     /*
     |--------------------------------------------------------------------------
@@ -112,7 +112,7 @@ return [
     |
     */
 
-    'fallback_locale' => 'en',
+    'fallback_locale' => 'en-US',
 
     /*
     |--------------------------------------------------------------------------
@@ -216,7 +216,8 @@ return [
     */
 
     'require_saml' => env('REQUIRE_SAML', false),
-    
+
+
     /*
     |--------------------------------------------------------------------------
     | Demo Mode Lockdown
@@ -238,7 +239,7 @@ return [
     |
     */
 
-    'min_php' => '7.2.5',
+    'min_php' => '7.4.0',
 
 
     /*
@@ -294,6 +295,7 @@ return [
         Laravel\Tinker\TinkerServiceProvider::class,
         Unicodeveloper\DumbPassword\DumbPasswordServiceProvider::class,
         Eduardokum\LaravelMailAutoEmbed\ServiceProvider::class,
+        Laravel\Socialite\SocialiteServiceProvider::class,
 
         /*
         * Application Service Providers...
@@ -368,6 +370,7 @@ return [
         'Image'     => Intervention\Image\ImageServiceProvider::class,
         'Carbon' => Carbon\Carbon::class,
         'Helper' => App\Helpers\Helper::class, // makes it much easier to use 'Helper::blah' in blades (which is where we usually use this)
+        'Socialite' => Laravel\Socialite\Facades\Socialite::class,
 
 
     ],

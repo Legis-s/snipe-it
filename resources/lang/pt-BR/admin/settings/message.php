@@ -33,11 +33,14 @@ return [
         'testing_authentication' => 'Testando Autenticação LDAP...',
         'authentication_success' => 'Usuário autenticado no LDAP com sucesso!'
     ],
-    'slack' => [
-        'sending' => 'Enviando mensagem de teste Slack...',
+    'webhook' => [
+        'sending' => 'Enviando mensagem :app de teste...',
+        'success' => 'Sua integração com :webhook_name funciona!',
         'success_pt1' => 'Sucesso! Verifique o ',
         'success_pt2' => ' canal para sua mensagem de teste, e certifique-se de clicar em SALVAR abaixo para armazenar suas configurações.',
         '500' => '500 Erro no Servidor.',
-        'error' => 'Algo deu errado.',
+        'error' => 'Algo deu errado. :app respondeu com: :error_message',
+        'error_redirect' => 'ERRO: 301/302 :endpoint retorna um redirecionamento. Por razões de segurança, não seguimos redirecionamentos. Por favor, use o ponto de extremidade atual.',
+        'error_misc' => 'Algo deu errado. :( ',
     ]
 ];

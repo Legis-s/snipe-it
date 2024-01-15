@@ -84,35 +84,36 @@ class RestoreFromBackup extends Command
 
 
         $private_dirs = [
+            'storage/private_uploads/accessories',
+            'storage/private_uploads/assetmodels',
             'storage/private_uploads/assets', // these are asset _files_, not the pictures.
             'storage/private_uploads/audits',
+            'storage/private_uploads/components',
+            'storage/private_uploads/consumables',
+            'storage/private_uploads/eula-pdfs',
             'storage/private_uploads/imports',
-            'storage/private_uploads/assetmodels',
-            'storage/private_uploads/users',
             'storage/private_uploads/licenses',
             'storage/private_uploads/signatures',
+            'storage/private_uploads/users',
         ];
         $private_files = [
             'storage/oauth-private.key',
             'storage/oauth-public.key',
         ];
         $public_dirs = [
+            'public/uploads/accessories',
+            'public/uploads/assets', // these are asset _pictures_, not asset files
+            'public/uploads/avatars',
+            //'public/uploads/barcodes', // we don't want this, let the barcodes be regenerated
+            'public/uploads/categories',
             'public/uploads/companies',
             'public/uploads/components',
-            'public/uploads/categories',
-            'public/uploads/manufacturers',
-            //'public/uploads/barcodes', // we don't want this, let the barcodes be regenerated
             'public/uploads/consumables',
             'public/uploads/departments',
-            'public/uploads/avatars',
-            'public/uploads/suppliers',
-            'public/uploads/assets', // these are asset _pictures_, not asset files
             'public/uploads/locations',
-            'public/uploads/accessories',
-            'public/uploads/models',
-            'public/uploads/categories',
-            'public/uploads/avatars',
             'public/uploads/manufacturers',
+            'public/uploads/models',
+            'public/uploads/suppliers',
         ];
 
         $public_files = [
@@ -149,7 +150,7 @@ class RestoreFromBackup extends Command
                 $boring_files[] = $raw_path;
                 continue;
             }
-            if (@pathinfo($raw_path)['extension'] == 'sql') {
+            if (@pathinfo($raw_path, PATHINFO_EXTENSION) == 'sql') {
                 \Log::debug("Found a sql file!");
                 $sqlfiles[] = $raw_path;
                 $sqlfile_indices[] = $i;
@@ -214,7 +215,7 @@ class RestoreFromBackup extends Command
         $env_vars['MYSQL_PWD'] = config('database.connections.mysql.password');
         // TODO notes: we are stealing the dump_binary_path (which *probably* also has your copy of the mysql binary in it. But it might not, so we might need to extend this)
         //             we unilaterally prepend a slash to the `mysql` command. This might mean your path could look like /blah/blah/blah//mysql - which should be fine. But maybe in some environments it isn't?
-        $mysql_binary = config('database.connections.mysql.dump.dump_binary_path').'/mysql';
+        $mysql_binary = config('database.connections.mysql.dump.dump_binary_path').\DIRECTORY_SEPARATOR.'mysql'.(\DIRECTORY_SEPARATOR == '\\' ? ".exe" : "");
         if( ! file_exists($mysql_binary) ) {
             return $this->error("mysql tool at: '$mysql_binary' does not exist, cannot restore. Please edit DB_DUMP_PATH in your .env to point to a directory that contains the mysqldump and mysql binary");
         }

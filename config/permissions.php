@@ -136,6 +136,13 @@ return [
             'note'       => '',
             'display'    => true,
         ],
+        [
+            'permission' => 'assets.view.encrypted_custom_fields',
+            'label'      => 'View and Modify Encrypted Custom Fields',
+            'note'       => '',
+            'display'    => true,
+        ],
+
     ],
 
     'Accessories' => [
@@ -672,6 +679,13 @@ return [
             'permission' => 'self.checkout_assets',
             'label'      => 'Self-Checkout',
             'note'       => 'This user may check out assets that are marked for self-checkout.',
+            'display'    => true,
+        ],
+
+        [
+            'permission' => 'self.view_purchase_cost',
+            'label'      => 'View Purchase-Cost Column',
+            'note'       => 'This user can see the purchase cost column of items assigned to them.',
             'display'    => true,
         ],
 

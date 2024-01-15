@@ -7,6 +7,7 @@ use App\Http\Requests\CustomFieldRequest;
 use App\Models\CustomField;
 use App\Models\CustomFieldset;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use Redirect;
 
 /**
@@ -45,7 +46,7 @@ class CustomFieldsController extends Controller
      * @see CustomFieldsController::storeField()
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @since [v5.1.5]
-     * @return Redirect
+     * @return \Illuminate\Http\RedirectResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function show()
@@ -63,14 +64,17 @@ class CustomFieldsController extends Controller
      * @return \Illuminate\Support\Facades\View
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function create()
+    public function create(Request $request)
     {
         $this->authorize('create', CustomField::class);
+        $fieldsets = CustomFieldset::get();
 
         return view('custom_fields.fields.edit', [
             'predefinedFormats' => Helper::predefined_formats(),
-        'customFormat' => '',
-        ])->with('field', new CustomField());
+            'customFormat' => '',
+            'fieldsets' => $fieldsets,
+            'field' => new CustomField(),
+        ]);
     }
 
     /**
@@ -79,12 +83,21 @@ class CustomFieldsController extends Controller
      * @see CustomFieldsController::createField()
      * @author [Brady Wetherington] [<uberbrady@gmail.com>]
      * @since [v1.8]
-     * @return Redirect
+     * @return \Illuminate\Http\RedirectResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function store(CustomFieldRequest $request)
     {
         $this->authorize('create', CustomField::class);
+
+        $show_in_email = $request->get("show_in_email", 0);
+        $display_in_user_view = $request->get("display_in_user_view", 0);
+
+        // Override the display settings if the field is encrypted
+        if ($request->get("field_encrypted") == '1') {
+            $show_in_email = '0';
+            $display_in_user_view = '0';
+        }
 
         $field = new CustomField([
             "name" => trim($request->get("name")),
@@ -92,23 +105,37 @@ class CustomFieldsController extends Controller
             "help_text" => $request->get("help_text"),
             "field_values" => $request->get("field_values"),
             "field_encrypted" => $request->get("field_encrypted", 0),
-            "show_in_email" => $request->get("show_in_email", 0),
+            "show_in_email" => $show_in_email,
             "is_unique" => $request->get("is_unique", 0),
+            "display_in_user_view" => $display_in_user_view,
+            "auto_add_to_fieldsets" => $request->get("auto_add_to_fieldsets", 0),
+            "show_in_listview" => $request->get("show_in_listview", 0),
+            "show_in_requestable_list" => $request->get("show_in_requestable_list", 0),
             "user_id" => Auth::id()
         ]);
 
 
         if ($request->filled('custom_format')) {
-            $field->format = e($request->get('custom_format'));
+            $field->format = $request->get('custom_format');
         } else {
-            $field->format = e($request->get('format'));
+            $field->format = $request->get('format');
         }
 
         if ($field->save()) {
+
+            // Sync fields with fieldsets
+            $fieldset_array = $request->input('associate_fieldsets');
+            if ($request->has('associate_fieldsets') && (is_array($fieldset_array))) {
+                $field->fieldset()->sync(array_keys($fieldset_array));
+            } else {
+                $field->fieldset()->sync([]);
+            }
+
+
             return redirect()->route('fields.index')->with('success', trans('admin/custom_fields/message.field.create.success'));
         }
 
-        return redirect()->back()->withInput()
+        return redirect()->back()->with('selected_fieldsets', $request->input('associate_fieldsets'))->withInput()
             ->with('error', trans('admin/custom_fields/message.field.create.error'));
     }
 
@@ -118,7 +145,7 @@ class CustomFieldsController extends Controller
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @since [v3.0]
-     * @return Redirect
+     * @return \Illuminate\Http\RedirectResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function deleteFieldFromFieldset($field_id, $fieldset_id)
@@ -137,8 +164,7 @@ class CustomFieldsController extends Controller
                 ->with('success', trans('admin/custom_fields/message.field.delete.success'));
             } else {
                 return redirect()->back()->withErrors(['message' => "Field is in use and cannot be deleted."]);
-            }  
-
+            }
         }
 
         return redirect()->back()->withErrors(['message' => "Error deleting field from fieldset"]);
@@ -151,7 +177,7 @@ class CustomFieldsController extends Controller
      *
      * @author [Brady Wetherington] [<uberbrady@gmail.com>]
      * @since [v1.8]
-     * @return Redirect
+     * @return \Illuminate\Http\RedirectResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function destroy($field_id)
@@ -180,12 +206,12 @@ class CustomFieldsController extends Controller
      * @return \Illuminate\Support\Facades\View
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
         if ($field = CustomField::find($id)) {
 
         $this->authorize('update', $field);
-
+        $fieldsets = CustomFieldset::get();
         $customFormat = '';
         if ((stripos($field->format, 'regex') === 0) && ($field->format !== CustomField::PREDEFINED_FORMATS['MAC'])) {
             $customFormat = $field->format;
@@ -194,6 +220,7 @@ class CustomFieldsController extends Controller
         return view('custom_fields.fields.edit', [
             'field'             => $field,
             'customFormat'      => $customFormat,
+            'fieldsets'         => $fieldsets,
             'predefinedFormats' => Helper::predefined_formats(),
         ]);
         } 
@@ -212,7 +239,7 @@ class CustomFieldsController extends Controller
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @param  int $id
      * @since [v4.0]
-     * @return Redirect
+     * @return \Illuminate\Http\RedirectResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function update(CustomFieldRequest $request, $id)
@@ -221,13 +248,27 @@ class CustomFieldsController extends Controller
 
         $this->authorize('update', $field);
 
+
+        $show_in_email = $request->get("show_in_email", 0);
+        $display_in_user_view = $request->get("display_in_user_view", 0);
+
+        // Override the display settings if the field is encrypted
+        if ($request->get("field_encrypted") == '1') {
+            $show_in_email = '0';
+            $display_in_user_view = '0';
+        }
+        
         $field->name          = trim(e($request->get("name")));
         $field->element       = e($request->get("element"));
         $field->field_values  = e($request->get("field_values"));
         $field->user_id       = Auth::id();
         $field->help_text     = $request->get("help_text");
-        $field->show_in_email = $request->get("show_in_email", 0);
+        $field->show_in_email = $show_in_email;
         $field->is_unique     = $request->get("is_unique", 0);
+        $field->display_in_user_view = $display_in_user_view;
+        $field->auto_add_to_fieldsets = $request->get("auto_add_to_fieldsets", 0);
+        $field->show_in_listview = $request->get("show_in_listview", 0);
+        $field->show_in_requestable_list = $request->get("show_in_requestable_list", 0);
 
         if ($request->get('format') == 'CUSTOM REGEX') {
             $field->format = e($request->get('custom_format'));
@@ -235,11 +276,21 @@ class CustomFieldsController extends Controller
             $field->format = e($request->get('format'));
         }
 
-        if($field->element == 'checkbox' || $field->element == 'radio'){
+        if ($field->element == 'checkbox' || $field->element == 'radio'){
             $field->format = 'ANY';
         }
 
         if ($field->save()) {
+
+
+            // Sync fields with fieldsets
+            $fieldset_array = $request->input('associate_fieldsets');
+            if ($request->has('associate_fieldsets') && (is_array($fieldset_array))) {
+                $field->fieldset()->sync(array_keys($fieldset_array));
+            } else {
+                $field->fieldset()->sync([]);
+            }
+
             return redirect()->route('fields.index')->with('success', trans('admin/custom_fields/message.field.update.success'));
         }
 

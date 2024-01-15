@@ -6,8 +6,9 @@ return array(
     'declined'                  => 'Du har framgångsrikt nekat den här tillgången.',
     'bulk_manager_warn'	        => 'Dina användare har uppdaterats, men chefsfältet sparades inte eftersom den chef du valt även finns i användarlistan, en användare kanske inte ange sig själv som chef. Vänligen välj dina användare igen, med undantag av chefen.',
     'user_exists'               => 'Användaren existerar redan!',
-    'user_not_found'            => 'Användare [: id] existerar inte.',
+    'user_not_found'            => 'Användaren finns inte.',
     'user_login_required'       => 'Inloggningsfältet krävs',
+    'user_has_no_assets_assigned' => 'Inga tillgångar som för närvarande tilldelats användaren.',
     'user_password_required'    => 'Lösenordet krävs.',
     'insufficient_permissions'  => 'Otillräckliga tillstånd.',
     'user_deleted_warning'      => 'Den här användaren har raderats. Du måste återställa den här användaren för att redigera dem eller tilldela dem nya tillgångar.',
@@ -15,6 +16,7 @@ return array(
     'password_resets_sent'      => 'De valda användare som är aktiverade och har en giltig e-postadress har skickats en länk för att återställa lösenordet.',
     'password_reset_sent'       => 'En återställningslänk för lösenord har skickats till :email!',
     'user_has_no_email'         => 'Den här användaren har ingen e-postadress i sin profil.',
+    'log_record_not_found'        => 'Det gick inte att hitta en matchande loggpost för den här användaren.',
 
 
     'success' => array(
@@ -59,4 +61,8 @@ return array(
         'invalidfiles' => 'En eller flera av dina filer är för stora eller är en filtyp som inte är tillåten. Tillåtna filtyper är png, gif, jpg, doc, docx, pdf och txt.',
     ),
 
+    'inventorynotification' => array(
+        'error'   => 'Den här användaren har ingen e-postadress.',
+        'success' => 'Användaren har meddelats om sitt nuvarande inventarie.'
+    )
 );

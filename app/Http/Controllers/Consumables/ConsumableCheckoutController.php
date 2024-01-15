@@ -7,6 +7,7 @@ use App\Http\Controllers\CheckInOutRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AssetCheckoutRequest;
 use App\Models\Asset;
+use App\Models\Accessory;
 use App\Models\Consumable;
 use App\Models\ConsumableAssignment;
 use App\Models\Location;
@@ -29,14 +30,34 @@ class ConsumableCheckoutController extends Controller
      * @return \Illuminate\Contracts\View\View
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function create($consumableId)
+    public function create($id)
     {
-        if (is_null($consumable = Consumable::find($consumableId))) {
-            return redirect()->route('consumables.index')->with('error', trans('admin/consumables/message.does_not_exist'));
-        }
-        $this->authorize('checkout', $consumable);
 
-        return view('consumables/checkout', compact('consumable'));
+        if ($consumable = Consumable::with('users')->find($id)) {
+
+            $this->authorize('checkout', $consumable);
+
+            // Make sure the category is valid
+            if ($consumable->category) {
+
+                // Make sure there is at least one available to checkout
+                if ($consumable->numRemaining() <= 0){
+                    return redirect()->route('consumables.index')
+                        ->with('error', trans('admin/consumables/message.checkout.unavailable'));
+                }
+
+                // Return the checkout view
+                return view('consumables/checkout', compact('consumable'));
+            }
+
+            // Invalid category
+            return redirect()->route('consumables.edit', ['consumable' => $consumable->id])
+                ->with('error', trans('general.invalid_item_category_single', ['type' => trans('general.consumable')]));
+        }
+
+        // Not found
+        return redirect()->route('consumables.index')->with('error', trans('admin/consumables/message.does_not_exist'));
+
     }
 
     /**
@@ -51,11 +72,17 @@ class ConsumableCheckoutController extends Controller
      */
     public function store(AssetCheckoutRequest $request, $consumableId)
     {
-        if (is_null($consumable = Consumable::find($consumableId))) {
+        if (is_null($consumable = Consumable::with('users')->find($consumableId))) {
             return redirect()->route('consumables.index')->with('error', trans('admin/consumables/message.not_found'));
         }
 
         $this->authorize('checkout', $consumable);
+
+        // Make sure there is at least one available to checkout
+        if ($consumable->numRemaining() <= 0) {
+            return redirect()->route('consumables.index')->with('error', trans('admin/consumables/message.checkout.unavailable'));
+        }
+
 
         $admin_user = Auth::user();
 

@@ -7,6 +7,8 @@ use App\Helpers\StorageHelper;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\SettingsSamlRequest;
 use App\Http\Requests\SetupUserRequest;
+use App\Models\CustomField;
+use App\Models\Group;
 use App\Models\Setting;
 use App\Models\Asset;
 use App\Models\User;
@@ -25,7 +27,7 @@ use Response;
 use App\Http\Requests\SlackSettingsRequest;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Artisan;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 
 /**
  * This controller handles all actions related to Settings for
@@ -64,18 +66,27 @@ class SettingsController extends Controller
             $start_settings['db_error'] = $e->getMessage();
         }
 
-        $protocol = array_key_exists('HTTPS', $_SERVER) && ('on' == $_SERVER['HTTPS']) ? 'https://' : 'http://';
+        if (array_key_exists("HTTP_X_FORWARDED_PROTO", $_SERVER)) {
+            $protocol = $_SERVER["HTTP_X_FORWARDED_PROTO"] . "://";
+        } elseif (array_key_exists('HTTPS', $_SERVER) && ('on' == $_SERVER['HTTPS'])) {
+            $protocol = "https://";
+        } else {
+            $protocol = "http://";
+        }
 
-        $host = array_key_exists('SERVER_NAME', $_SERVER) ? $_SERVER['SERVER_NAME'] : null;
-        $port = array_key_exists('SERVER_PORT', $_SERVER) ? $_SERVER['SERVER_PORT'] : null;
-        if (('http://' === $protocol && '80' != $port) || ('https://' === $protocol && '443' != $port)) {
-            $host .= ':'.$port;
+        if (array_key_exists("HTTP_X_FORWARDED_HOST", $_SERVER)) {
+            $host = $_SERVER["HTTP_X_FORWARDED_HOST"];
+        } else {
+            $host = array_key_exists('SERVER_NAME', $_SERVER) ? $_SERVER['SERVER_NAME'] : null;
+            $port = array_key_exists('SERVER_PORT', $_SERVER) ? $_SERVER['SERVER_PORT'] : null;
+            if (('http://' === $protocol && '80' != $port) || ('https://' === $protocol && '443' != $port)) {
+                $host .= ':'.$port;
+            }
         }
         $pageURL = $protocol.$host.$_SERVER['REQUEST_URI'];
 
-        $start_settings['url_valid'] = (url('/').'/setup' === $pageURL);
-
-        $start_settings['url_config'] = url('/');
+        $start_settings['url_config'] = config('app.url').'/setup';
+        $start_settings['url_valid'] = ($start_settings['url_config'] === $pageURL);
         $start_settings['real_url'] = $pageURL;
         $start_settings['php_version_min'] = true;
 
@@ -110,17 +121,17 @@ class SettingsController extends Controller
             $start_settings['prod'] = true;
         }
 
+        $start_settings['owner'] = '';
+
         if (function_exists('posix_getpwuid')) { // Probably Linux
             $owner = posix_getpwuid(fileowner($_SERVER['SCRIPT_FILENAME']));
-            $start_settings['owner'] = $owner['name'];
-        } else { // Windows
-            // TODO: Is there a way of knowing if a windows user has elevated permissions
-            // This just gets the user name, which likely isn't 'root'
-            // $start_settings['owner'] = getenv('USERNAME');
-            $start_settings['owner'] = '';
+            // This *should* be an array, but we've seen this return a bool in some chrooted environments
+            if (is_array($owner)) {
+                $start_settings['owner'] = $owner['name'];
+            }
         }
 
-        if (('root' === $start_settings['owner']) || ('0' === $start_settings['owner'])) {
+        if (($start_settings['owner'] === 'root') || ($start_settings['owner'] === '0')) {
             $start_settings['owner_is_admin'] = true;
         } else {
             $start_settings['owner_is_admin'] = false;
@@ -175,7 +186,7 @@ class SettingsController extends Controller
         $settings->alerts_enabled = 1;
         $settings->pwd_secure_min = 10;
         $settings->brand = 1;
-        $settings->locale = $request->input('locale', 'en');
+        $settings->locale = $request->input('locale', 'en-US');
         $settings->default_currency = $request->input('default_currency', 'USD');
         $settings->user_id = 1;
         $settings->email_domain = $request->input('email_domain');
@@ -574,12 +585,13 @@ class SettingsController extends Controller
         }
 
         if (! config('app.lock_passwords')) {
-            $setting->locale = $request->input('locale', 'en');
+            $setting->locale = $request->input('locale', 'en-US');
         }
         $setting->default_currency = $request->input('default_currency', '$');
         $setting->date_display_format = $request->input('date_display_format');
         $setting->time_display_format = $request->input('time_display_format');
         $setting->digit_separator = $request->input('digit_separator');
+        $setting->name_display_format = $request->input('name_display_format');
 
         if ($setting->save()) {
             return redirect()->route('settings.index')
@@ -687,33 +699,6 @@ class SettingsController extends Controller
      *
      * @return View
      */
-    public function postSlack(SlackSettingsRequest $request)
-    {
-        if (is_null($setting = Setting::getSettings())) {
-            return redirect()->to('admin')->with('error', trans('admin/settings/message.update.error'));
-        }
-
-        $setting->slack_endpoint = $request->input('slack_endpoint');
-        $setting->slack_channel = $request->input('slack_channel');
-        $setting->slack_botname = $request->input('slack_botname');
-
-        if ($setting->save()) {
-            return redirect()->route('settings.index')
-                ->with('success', trans('admin/settings/message.update.success'));
-        }
-
-        return redirect()->back()->withInput()->withErrors($setting->getErrors());
-    }
-
-    /**
-     * Return a form to allow a super admin to update settings.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     *
-     * @since [v1.0]
-     *
-     * @return View
-     */
     public function getAssetTags()
     {
         $setting = Setting::getSettings();
@@ -806,7 +791,7 @@ class SettingsController extends Controller
      */
     public function getPhpInfo()
     {
-        if (true === config('app.debug')) {
+        if (config('app.debug') === true) {
             return view('settings.phpinfo');
         }
 
@@ -825,9 +810,10 @@ class SettingsController extends Controller
      */
     public function getLabels()
     {
-        $setting = Setting::getSettings();
-
-        return view('settings.labels', compact('setting'));
+        return view('settings.labels', [
+            'setting' => Setting::getSettings(),
+            'customFields' => CustomField::all(),
+        ]);
     }
 
     /**
@@ -844,6 +830,14 @@ class SettingsController extends Controller
         if (is_null($setting = Setting::getSettings())) {
             return redirect()->to('admin')->with('error', trans('admin/settings/message.update.error'));
         }
+        $setting->label2_enable = $request->input('label2_enable');
+        $setting->label2_template = $request->input('label2_template');
+        $setting->label2_title = $request->input('label2_title');
+        $setting->label2_asset_logo = $request->input('label2_asset_logo');
+        $setting->label2_1d_type = $request->input('label2_1d_type');
+        $setting->label2_2d_type = $request->input('label2_2d_type');
+        $setting->label2_2d_target = $request->input('label2_2d_target');
+        $setting->label2_fields = $request->input('label2_fields');
         $setting->labels_per_page = $request->input('labels_per_page');
         $setting->labels_width = $request->input('labels_width');
         $setting->labels_height = $request->input('labels_height');
@@ -892,7 +886,7 @@ class SettingsController extends Controller
         }
 
         if ($setting->save()) {
-            return redirect()->route('settings.index')
+            return redirect()->route('settings.labels.index')
                 ->with('success', trans('admin/settings/message.update.success'));
         }
 
@@ -911,6 +905,8 @@ class SettingsController extends Controller
     public function getLdapSettings()
     {
         $setting = Setting::getSettings();
+        $groups = Group::pluck('name', 'id');
+
 
         /**
          * This validator is only temporary (famous last words.) - @snipe
@@ -929,7 +925,7 @@ class SettingsController extends Controller
 
 
 
-        return view('settings.ldap', compact('setting'))->withErrors($validator);
+        return view('settings.ldap', compact('setting', 'groups'))->withErrors($validator);
     }
 
     /**
@@ -956,6 +952,7 @@ class SettingsController extends Controller
                 $setting->ldap_pword = Crypt::encrypt($request->input('ldap_pword'));
             }
             $setting->ldap_basedn = $request->input('ldap_basedn');
+            $setting->ldap_default_group = $request->input('ldap_default_group');
             $setting->ldap_filter = $request->input('ldap_filter');
             $setting->ldap_username_field = $request->input('ldap_username_field');
             $setting->ldap_lname_field = $request->input('ldap_lname_field');
@@ -975,6 +972,7 @@ class SettingsController extends Controller
             $setting->ldap_phone_field = $request->input('ldap_phone');
             $setting->ldap_jobtitle = $request->input('ldap_jobtitle');
             $setting->ldap_country = $request->input('ldap_country');
+            $setting->ldap_location = $request->input('ldap_location');
             $setting->ldap_dept = $request->input('ldap_dept');
             $setting->ldap_client_tls_cert   = $request->input('ldap_client_tls_cert');
             $setting->ldap_client_tls_key    = $request->input('ldap_client_tls_key');
@@ -1052,6 +1050,48 @@ class SettingsController extends Controller
         return $pdf_branding;
     }
 
+
+    /**
+     * Show Google login settings form
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v6.1.1]
+     * @return View
+     */
+    public function getGoogleLoginSettings()
+    {
+        $setting = Setting::getSettings();
+        return view('settings.google', compact('setting'));
+    }
+
+    /**
+     * ShSaveow Google login settings form
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v6.1.1]
+     * @return View
+     */
+    public function postGoogleLoginSettings(Request $request)
+    {
+        if (!config('app.lock_passwords')) {
+            $setting = Setting::getSettings();
+
+            $setting->google_login = $request->input('google_login', 0);
+            $setting->google_client_id = $request->input('google_client_id');
+            $setting->google_client_secret = $request->input('google_client_secret');
+
+            if ($setting->save()) {
+                return redirect()->route('settings.index')
+                    ->with('success', trans('admin/settings/message.update.success'));
+            }
+
+            return redirect()->back()->withInput()->withErrors($setting->getErrors());
+        }
+
+        return redirect()->back()->with('error', trans('general.feature_disabled'));
+    }
+
+
     /**
      * Show the listing of backups.
      *
@@ -1107,7 +1147,7 @@ class SettingsController extends Controller
     public function postBackups()
     {
         if (! config('app.lock_passwords')) {
-            Artisan::call('backup:run');
+            Artisan::call('snipeit:backup', ['--filename' => 'manual-backup-'.date('Y-m-d-H-i-s')]);
             $output = Artisan::output();
 
             // Backup completed
@@ -1210,13 +1250,11 @@ class SettingsController extends Controller
             if (!$request->hasFile('file')) {
                 return redirect()->route('settings.backups.index')->with('error', 'No file uploaded');
             } else {
+
                 $max_file_size = Helper::file_upload_max_size();
-
-                $rules = [
+                $validator = Validator::make($request->all(), [
                     'file' => 'required|mimes:zip|max:'.$max_file_size,
-                ];
-
-                $validator = \Validator::make($request->all(), $rules);
+                ]);
 
                 if ($validator->passes()) {
 
@@ -1227,7 +1265,7 @@ class SettingsController extends Controller
                         return redirect()->route('settings.backups.index')->with('success', 'File uploaded');
                 }
 
-                return redirect()->route('settings.backups.index')->withErrors($request->getErrors());
+                return redirect()->route('settings.backups.index')->withErrors($validator);
 
             }
 

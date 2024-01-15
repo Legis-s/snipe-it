@@ -8,7 +8,7 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\CurrentInventory;
 use Illuminate\Support\Facades\Auth;
-use Gate;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -56,7 +56,7 @@ class ProfileController extends Controller
         $user->phone = $request->input('phone');
 
         if (! config('app.lock_passwords')) {
-            $user->locale = $request->input('locale', 'en');
+            $user->locale = $request->input('locale', 'en-US');
         }
 
         if ((Gate::allows('self.two_factor')) && ((Setting::getSettings()->two_factor_enabled == '1') && (! config('app.lock_passwords')))) {
@@ -67,37 +67,9 @@ class ProfileController extends Controller
             $user->location_id = $request->input('location_id');
         }
 
+        // Handle the avatar upload and/or delete if necessary
+        app('\App\Http\Requests\ImageUploadRequest')->handleImages($user, 600, 'avatar', 'avatars', 'avatar');
 
-        if ($request->input('avatar_delete') == 1) {
-            $user->avatar = null;
-        }
-
-
-        if ($request->hasFile('avatar')) {
-            $path = 'avatars';
-
-            if (! Storage::disk('public')->exists($path)) {
-                Storage::disk('public')->makeDirectory($path, 775);
-            }
-
-            $upload = $image = $request->file('avatar');
-            $ext = $image->getClientOriginalExtension();
-            $file_name = 'avatar-'.str_random(18).'.'.$ext;
-
-            if ($image->getClientOriginalExtension() != 'svg') {
-                $upload = Image::make($image->getRealPath())->resize(84, 84);
-            }
-
-            // This requires a string instead of an object, so we use ($string)
-            Storage::disk('public')->put($path.'/'.$file_name, (string) $upload->encode());
-
-            // Remove Current image if exists
-            if (($user->avatar) && (Storage::disk('public')->exists($path.'/'.$user->avatar))) {
-                Storage::disk('public')->delete($path.'/'.$user->avatar);
-            }
-
-            $user->avatar = $file_name;
-        }
 
         if ($user->save()) {
             return redirect()->route('profile')->with('success', 'Account successfully updated');
@@ -162,6 +134,7 @@ class ProfileController extends Controller
         ];
 
         $validator = \Validator::make($request->all(), $rules);
+
         $validator->after(function ($validator) use ($request, $user) {
             if (! Hash::check($request->input('current_password'), $user->password)) {
                 $validator->errors()->add('current_password', trans('validation.custom.hashed_pass'));
@@ -187,12 +160,14 @@ class ProfileController extends Controller
         });
 
         if (! $validator->fails()) {
-            $user->password = Hash::make($request->input('password'));
-            $user->save();
 
+            $user->password = Hash::make($request->input('password'));
+            // We have to use saveQuietly here because for some reason this method was calling the User Oserver twice :(
+            $user->saveQuietly();
+            
             // Log the user out of other devices
             Auth::logoutOtherDevices($request->input('password'));
-            return redirect()->route('account.password.index')->with('success', 'Password updated!');
+            return redirect()->route('account')->with('success', trans('passwords.password_change'));
 
         }
         return redirect()->back()->withInput()->withErrors($validator);

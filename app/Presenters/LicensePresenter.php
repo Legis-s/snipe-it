@@ -33,7 +33,7 @@ class LicensePresenter extends Presenter
                 'field' => 'name',
                 'searchable' => true,
                 'sortable' => true,
-                'title' => trans('admin/licenses/table.title'),
+                'title' => trans('general.name'),
                 'formatter' => 'licensesLinkFormatter',
             ], [
                 'field' => 'product_key',
@@ -151,6 +151,21 @@ class LicensePresenter extends Presenter
                 'visible' => false,
                 'title' => trans('general.order_number'),
             ], [
+                'field' => 'created_at',
+                'searchable' => false,
+                'sortable' => true,
+                'visible' => false,
+                'title' => trans('general.created_at'),
+                'formatter' => 'dateDisplayFormatter',
+            ], [
+                'field' => 'updated_at',
+                'searchable' => false,
+                'sortable' => true,
+                'visible' => false,
+                'title' => trans('general.updated_at'),
+                'formatter' => 'dateDisplayFormatter',
+            ],
+            [
                 'field' => 'notes',
                 'searchable' => true,
                 'sortable' => true,
@@ -238,6 +253,14 @@ class LicensePresenter extends Presenter
                 'title' => trans('general.location'),
                 'visible' => true,
                 'formatter' => 'locationsLinkObjFormatter',
+            ],
+            [
+                'field' => 'notes',
+                'searchable' => false,
+                'sortable' => false,
+                'visible' => false,
+                'title' => trans('general.notes'),
+                'formatter' => 'notesFormatter'
             ],
             [
                 'field' => 'checkincheckout',

@@ -14,17 +14,19 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
 
 
-
-    <link rel="apple-touch-icon" href="{{ ($snipeSettings) && ($snipeSettings->favicon!='') ?  Storage::disk('public')->url(e($snipeSettings->logo)) :  config('app.url').'/img/logo.png' }}">
-    <link rel="apple-touch-startup-image" href="{{ ($snipeSettings) && ($snipeSettings->favicon!='') ?  Storage::disk('public')->url(e($snipeSettings->logo)) :  config('app.url').'/img/logo.png' }}">
-    <link rel="shortcut icon" type="image/ico" href="{{ ($snipeSettings) && ($snipeSettings->favicon!='') ?  Storage::disk('public')->url(e($snipeSettings->favicon)) : config('app.url').'/favicon.ico' }} ">
+    <link rel="apple-touch-icon"
+          href="{{ ($snipeSettings) && ($snipeSettings->favicon!='') ?  Storage::disk('public')->url(e($snipeSettings->logo)) :  config('app.url').'/img/snipe-logo-bug.png' }}">
+    <link rel="apple-touch-startup-image"
+          href="{{ ($snipeSettings) && ($snipeSettings->favicon!='') ?  Storage::disk('public')->url(e($snipeSettings->logo)) :  config('app.url').'/img/snipe-logo-bug.png' }}">
+    <link rel="shortcut icon" type="image/ico"
+          href="{{ ($snipeSettings) && ($snipeSettings->favicon!='') ?  Storage::disk('public')->url(e($snipeSettings->favicon)) : config('app.url').'/favicon.ico' }} ">
 
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="baseUrl" content="{{ url('/') }}/">
+    <meta name="baseUrl" content="{{ config('app.url') }}/">
 
     <script nonce="{{ csrf_token() }}">
-        window.Laravel = { csrfToken: '{{ csrf_token() }}' };
+        window.Laravel = {csrfToken: '{{ csrf_token() }}'};
     </script>
 
     {{-- stylesheets --}}
@@ -32,19 +34,13 @@
     @if (($snipeSettings) && ($snipeSettings->allow_user_skin==1) && Auth::check() && Auth::user()->present()->skin != '')
         <link rel="stylesheet" href="{{ url(mix('css/dist/skins/skin-'.Auth::user()->present()->skin.'.min.css')) }}">
     @else
-        <link rel="stylesheet" href="{{ url(mix('css/dist/skins/skin-'.($snipeSettings->skin!='' ? $snipeSettings->skin : 'blue').'.css')) }}">
+        <link rel="stylesheet"
+              href="{{ url(mix('css/dist/skins/skin-'.($snipeSettings->skin!='' ? $snipeSettings->skin : 'blue').'.css')) }}">
     @endif
     {{-- page level css --}}
     @stack('css')
 
-    <!-- star-rating -->
-    <link rel="stylesheet" href="{{ url(asset('js/star-rating/dist/star-rating.css')) }}">
-    <!-- lightgallery  CSS -->
-    <link rel="stylesheet" href="{{ url(asset('js/lightgallery/css/lightgallery.css')) }}">
-    <!-- sweetalert2  CSS -->
-    <link rel="stylesheet" href="{{ url(asset('css/sweetalert2.min.css')) }}">
-    <!-- lightbox  CSS -->
-    <link rel="stylesheet" href="{{ url(asset('js/lightbox/css/lightbox.min.css')) }}">
+
 
     @if (($snipeSettings) && ($snipeSettings->header_color!=''))
         <style nonce="{{ csrf_token() }}">
@@ -54,6 +50,7 @@
                 background: linear-gradient(to bottom, {{ $snipeSettings->header_color }} 0%,{{ $snipeSettings->header_color }} 100%);
                 border-color: {{ $snipeSettings->header_color }};
             }
+
             .skin-{{ $snipeSettings->skin!='' ? $snipeSettings->skin : 'blue' }} .sidebar-menu > li:hover > a, .skin-{{ $snipeSettings->skin!='' ? $snipeSettings->skin : 'blue' }} .sidebar-menu > li.active > a {
                 border-left-color: {{ $snipeSettings->header_color }};
             }
@@ -95,7 +92,8 @@
         <body class="sidebar-mini skin-{{ $snipeSettings->skin!='' ? $snipeSettings->skin : 'blue' }} {{ (session('menu_state')!='open') ? 'sidebar-mini sidebar-collapse' : ''  }}">
         @endif
 
-        <a class="skip-main" href="#main">Skip to main content</a>
+
+        <a class="skip-main" href="#main">{{ trans('general.skip_to_main_content') }}</a>
         <div class="wrapper">
 
             <header class="main-header">
@@ -106,27 +104,32 @@
                 <!-- Header Navbar: style can be found in header.less -->
                 <nav class="navbar navbar-static-top" role="navigation">
                     <!-- Sidebar toggle button above the compact sidenav -->
-                    <a href="#" style="color: white" class="sidebar-toggle btn btn-white" data-toggle="push-menu" role="button">
-                        <span class="sr-only">Toggle navigation</span>
+                    <a href="#" style="color: white" class="sidebar-toggle btn btn-white" data-toggle="push-menu"
+                       role="button">
+                        <span class="sr-only">{{ trans('general.toggle_navigation') }}</span>
                     </a>
                     <div class="nav navbar-nav navbar-left">
                         <div class="left-navblock">
                             @if ($snipeSettings->brand == '3')
-                                <a class="logo navbar-brand no-hover" href="{{ url('/') }}">
+                                <a class="logo navbar-brand no-hover" href="{{ config('app.url') }}">
                                     @if ($snipeSettings->logo!='')
-                                        <img class="navbar-brand-img" src="{{ Storage::disk('public')->url($snipeSettings->logo) }}" alt="{{ $snipeSettings->site_name }} logo">
+                                        <img class="navbar-brand-img"
+                                             src="{{ Storage::disk('public')->url($snipeSettings->logo) }}"
+                                             alt="{{ $snipeSettings->site_name }} logo">
                                     @endif
                                     {{ $snipeSettings->site_name }}
                                 </a>
                             @elseif ($snipeSettings->brand == '2')
-                                <a class="logo navbar-brand no-hover" href="{{ url('/') }}">
+                                <a class="logo navbar-brand no-hover" href="{{ config('app.url') }}">
                                     @if ($snipeSettings->logo!='')
-                                        <img class="navbar-brand-img" src="{{ Storage::disk('public')->url($snipeSettings->logo) }}" alt="{{ $snipeSettings->site_name }} logo">
+                                        <img class="navbar-brand-img"
+                                             src="{{ Storage::disk('public')->url($snipeSettings->logo) }}"
+                                             alt="{{ $snipeSettings->site_name }} logo">
                                     @endif
                                     <span class="sr-only">{{ $snipeSettings->site_name }}</span>
                                 </a>
                             @else
-                                <a class="logo navbar-brand no-hover" href="{{ url('/') }}">
+                                <a class="logo navbar-brand no-hover" href="{{ config('app.url') }}">
                                     {{ $snipeSettings->site_name }}
                                 </a>
                             @endif
@@ -137,7 +140,8 @@
                     <div class="navbar-custom-menu">
                         <ul class="nav navbar-nav">
                             @can('index', \App\Models\Asset::class)
-                                <li aria-hidden="true"{!! (Request::is('hardware*') ? ' class="active"' : '') !!} tabindex="-1">
+                                <li aria-hidden="true"
+                                    {!! (Request::is('hardware*') ? ' class="active"' : '') !!} tabindex="-1">
                                     <a href="{{ url('hardware') }}" accesskey="1" tabindex="-1">
                                         <i class="fas fa-barcode fa-fw" aria-hidden="true"></i>
                                         <span class="sr-only">{{ trans('general.assets') }}</span>
@@ -145,7 +149,8 @@
                                 </li>
                             @endcan
                             @can('view', \App\Models\License::class)
-                                <li aria-hidden="true"{!! (Request::is('licenses*') ? ' class="active"' : '') !!} tabindex="-1">
+                                <li aria-hidden="true"
+                                    {!! (Request::is('licenses*') ? ' class="active"' : '') !!} tabindex="-1">
                                     <a href="{{ route('licenses.index') }}" accesskey="2" tabindex="-1">
                                         <i class="far fa-save fa-fw"></i>
                                         <span class="sr-only">{{ trans('general.licenses') }}</span>
@@ -153,7 +158,8 @@
                                 </li>
                             @endcan
                             @can('index', \App\Models\Accessory::class)
-                                <li aria-hidden="true"{!! (Request::is('accessories*') ? ' class="active"' : '') !!} tabindex="-1">
+                                <li aria-hidden="true"
+                                    {!! (Request::is('accessories*') ? ' class="active"' : '') !!} tabindex="-1">
                                     <a href="{{ route('accessories.index') }}" accesskey="3" tabindex="-1">
                                         <i class="far fa-keyboard fa-fw"></i>
                                         <span class="sr-only">{{ trans('general.accessories') }}</span>
@@ -179,11 +185,14 @@
 
                             @can('index', \App\Models\Asset::class)
                                 <li>
-                                    <form class="navbar-form navbar-left form-horizontal" role="search" action="{{ route('findbytag/hardware') }}" method="get">
+                                    <form class="navbar-form navbar-left form-horizontal" role="search"
+                                          action="{{ route('findbytag/hardware') }}" method="get">
                                         <div class="col-xs-12 col-md-12">
                                             <div class="col-xs-12 form-group">
-                                                <label class="sr-only" for="tagSearch">{{ trans('general.lookup_by_tag') }}</label>
-                                                <input type="text" class="form-control" id="tagSearch" name="assetTag" placeholder="{{ trans('general.lookup_by_tag') }}">
+                                                <label class="sr-only"
+                                                       for="tagSearch">{{ trans('general.lookup_by_tag') }}</label>
+                                                <input type="text" class="form-control" id="tagSearch" name="assetTag"
+                                                       placeholder="{{ trans('general.lookup_by_tag') }}">
                                                 <input type="hidden" name="topsearch" value="true" id="search">
                                             </div>
                                             <div class="col-xs-1">
@@ -258,12 +267,12 @@
                             @can('admin')
                                 @if ($snipeSettings->show_alerts_in_menu=='1')
                                     <!-- Tasks: style can be found in dropdown.less -->
-                                        <?php $alert_items = Helper::checkLowInventory(); ?>
+                                    <?php $alert_items = Helper::checkLowInventory(); ?>
 
                                     <li class="dropdown tasks-menu">
                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                             <i class="far fa-flag" aria-hidden="true"></i>
-                                            <span class="sr-only">Alerts</span>
+                                            <span class="sr-only">{{ trans('general.alerts') }}</span>
                                             @if (count($alert_items))
                                                 <span class="label label-danger">{{ count($alert_items) }}</span>
                                             @endif
@@ -284,7 +293,11 @@
                                                                     </small>
                                                                 </h2>
                                                                 <div class="progress xs">
-                                                                    <div class="progress-bar progress-bar-yellow" style="width: {{ $alert_items[$i]['percent'] }}%" role="progressbar" aria-valuenow="{{ $alert_items[$i]['percent'] }}" aria-valuemin="0" aria-valuemax="100">
+                                                                    <div class="progress-bar progress-bar-yellow"
+                                                                         style="width: {{ $alert_items[$i]['percent'] }}%"
+                                                                         role="progressbar"
+                                                                         aria-valuenow="{{ $alert_items[$i]['percent'] }}"
+                                                                         aria-valuemin="0" aria-valuemax="100">
                                                                         <span class="sr-only">{{ $alert_items[$i]['percent'] }}% Complete</span>
                                                                     </div>
                                                                 </div>
@@ -295,7 +308,7 @@
                                                 </ul>
                                             </li>
                                             {{-- <li class="footer">
-                                              <a href="#">View all tasks</a>
+                                              <a href="#">{{ trans('general.tasks_view_all') }}</a>
                                             </li> --}}
                                         </ul>
                                     </li>
@@ -303,17 +316,20 @@
                             @endif
 
 
+
                             <!-- User Account: style can be found in dropdown.less -->
                             @if (Auth::check())
                                 <li class="dropdown user user-menu">
                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                         @if (Auth::user()->present()->gravatar())
-                                            <img src="{{ Auth::user()->present()->gravatar() }}" class="user-image" alt="">
+                                            <img src="{{ Auth::user()->present()->gravatar() }}" class="user-image"
+                                                 alt="">
                                         @else
                                             <i class="fas fa-users" aria-hidden="true"></i>
                                         @endif
 
-                                        <span class="hidden-xs">{{ Auth::user()->first_name }} <strong class="caret"></strong></span>
+                                        <span class="hidden-xs">{{ Auth::user()->getFullNameAttribute() }} <strong
+                                                    class="caret"></strong></span>
                                     </a>
                                     <ul class="dropdown-menu">
                                         <!-- User image -->
@@ -338,7 +354,6 @@
                                             </a></li>
 
 
-
                                         <li>
                                             <a href="{{ route('profile') }}">
                                                 <i class="fas fa-user fa-fw" aria-hidden="true"></i>
@@ -353,31 +368,24 @@
                                         </li>
 
 
-
                                         @can('self.api')
                                             <li>
                                                 <a href="{{ route('user.api') }}">
-                                                    <i class="fa-solid fa-user-secret fa-fw" aria-hidden="true"></i></i> {{ trans('general.manage_api_keys') }}
+                                                    <i class="fa-solid fa-user-secret fa-fw"
+                                                       aria-hidden="true"></i></i> {{ trans('general.manage_api_keys') }}
                                                 </a>
                                             </li>
                                         @endcan
                                         <li class="divider"></li>
-                                        @impersonating($guard = null)
-                                        <li>
-                                            <a href="{{ route('impersonate.leave') }}">
-                                                <i class="fas fa-user-times fa-fw" aria-hidden="true"></i>
-                                                Leave impersonation
-                                            </a>
-                                        </li>
-                                        <li class="divider"></li>
-                                        @endImpersonating
                                         <li>
 
-                                            <a href="{{ route('logout.get') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                            <a href="{{ route('logout.get') }}"
+                                               onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                                 <i class="fa fa-sign-out fa-fw"></i> {{ trans('general.logout') }}
                                             </a>
 
-                                            <form id="logout-form" action="{{ route('logout.post') }}" method="POST" style="display: none;">
+                                            <form id="logout-form" action="{{ route('logout.post') }}" method="POST"
+                                                  style="display: none;">
                                                 {{ csrf_field() }}
                                             </form>
 
@@ -390,7 +398,7 @@
                             @can('superadmin')
                                 <li>
                                     <a href="{{ route('settings.index') }}">
-                                        <i class="fas fa-cogs fa-fw" aria-hidden="true"></i>
+                                        <i class="fa fa-cogs fa-fw" aria-hidden="true"></i>
                                         <span class="sr-only">{{ trans('general.admin') }}</span>
                                     </a>
                                 </li>
@@ -398,7 +406,8 @@
                         </ul>
                     </div>
                 </nav>
-                <a href="#" style="float:left" class="sidebar-toggle-mobile visible-xs btn" data-toggle="push-menu" role="button">
+                <a href="#" style="float:left" class="sidebar-toggle-mobile visible-xs btn" data-toggle="push-menu"
+                   role="button">
                     <span class="sr-only">{{ trans('general.toggle_navigation') }}</span>
                     <i class="fas fa-bars"></i>
                 </a>
@@ -414,19 +423,13 @@
                         @can('admin')
                             <li {!! (\Request::route()->getName()=='home' ? ' class="active"' : '') !!} class="firstnav">
                                 <a href="{{ route('home') }}">
-                                    <i class="fas fa-tachometer-alt fa-fw" aria-hidden="true"></i> <span>{{ trans('general.dashboard') }}</span>
+                                    <i class="fas fa-tachometer-alt fa-fw" aria-hidden="true"></i>
+                                    <span>{{ trans('general.dashboard') }}</span>
                                 </a>
                             </li>
                         @endcan
-                        @can('checkout', \App\Models\Asset::class)
-                                <li {!! (\Request::route()->getName()=='bulk*' ? ' class="active"' : '') !!}>
-                                    <a href="{{ route('bulk.index') }}">
-                                        <i class="fas fa-dolly fa-fw" aria-hidden="true"></i> <span>{{ trans('general.mass_operations') }}</span>
-                                    </a>
-                                </li>
-                        @endcan
                         @can('index', \App\Models\Asset::class)
-                            <li class="treeview{{ (Request::is('hardware*') ? ' active' : '') }}">
+                            <li class="treeview{{ ((Request::is('statuslabels/*') || Request::is('hardware*')) ? ' active' : '') }}">
                                 <a href="#"><i class="fas fa-barcode fa-fw" aria-hidden="true"></i>
                                     <span>{{ trans('general.assets') }}</span>
                                     <i class="fa fa-angle-left pull-right"></i>
@@ -439,11 +442,13 @@
                                         </a>
                                     </li>
 
-                                        <?php $status_navs = \App\Models\Statuslabel::where('show_in_nav', '=', 1)->withCount('assets as asset_count')->get(); ?>
+                                    <?php $status_navs = \App\Models\Statuslabel::where('show_in_nav', '=', 1)->withCount('assets as asset_count')->get(); ?>
                                     @if (count($status_navs) > 0)
                                         @foreach ($status_navs as $status_nav)
-                                            <li><a href="{{ route('statuslabels.show', ['statuslabel' => $status_nav->id]) }}">
-                                                    <i class="fas fa-circle text-grey fa-fw" aria-hidden="true"{!!  ($status_nav->color!='' ? ' style="color: '.e($status_nav->color).'"' : '') !!}></i>
+                                            <li{!! (Request::is('statuslabels/'.$status_nav->id) ? ' class="active"' : '') !!}>
+                                                <a href="{{ route('statuslabels.show', ['statuslabel' => $status_nav->id]) }}">
+                                                    <i class="fas fa-circle text-grey fa-fw"
+                                                       aria-hidden="true"{!!  ($status_nav->color!='' ? ' style="color: '.e($status_nav->color).'"' : '') !!}></i>
                                                     {{ $status_nav->name }} ({{ $status_nav->asset_count }})</a></li>
                                         @endforeach
                                     @endif
@@ -465,70 +470,78 @@
                                             ({{ (isset($total_rtd_sidebar)) ? $total_rtd_sidebar : '' }})
                                         </a>
                                     </li>
-                                    <li{!! (Request::query('status') == 'Pending' ? ' class="active"' : '') !!}><a href="{{ url('hardware?status=Pending') }}"><i class="far fa-circle text-orange fa-fw"></i>
+                                    <li{!! (Request::query('status') == 'Pending' ? ' class="active"' : '') !!}><a
+                                                href="{{ url('hardware?status=Pending') }}"><i
+                                                    class="far fa-circle text-orange fa-fw"></i>
                                             {{ trans('general.all') }}
                                             {{ trans('general.pending') }}
                                             ({{ (isset($total_pending_sidebar)) ? $total_pending_sidebar : '' }})
                                         </a>
                                     </li>
-                                    <li{!! (Request::query('status') == 'Undeployable' ? ' class="active"' : '') !!} ><a href="{{ url('hardware?status=Undeployable') }}"><i class="fas fa-times text-red fa-fw"></i>
+                                    <li{!! (Request::query('status') == 'Undeployable' ? ' class="active"' : '') !!} ><a
+                                                href="{{ url('hardware?status=Undeployable') }}"><i
+                                                    class="fas fa-times text-red fa-fw"></i>
                                             {{ trans('general.all') }}
                                             {{ trans('general.undeployable') }}
                                             ({{ (isset($total_undeployable_sidebar)) ? $total_undeployable_sidebar : '' }})
                                         </a>
                                     </li>
-                                    <li{!! (Request::query('status') == 'Archived' ? ' class="active"' : '') !!}><a href="{{ url('hardware?status=Archived') }}"><i class="fas fa-times text-red fa-fw"></i>
+                                    <li{!! (Request::query('status') == 'byod' ? ' class="active"' : '') !!}><a
+                                                href="{{ url('hardware?status=byod') }}"><i
+                                                    class="fas fa-times text-red fa-fw"></i>
+                                            {{ trans('general.all') }}
+                                            {{ trans('general.byod') }}
+                                            ({{ (isset($total_byod_sidebar)) ? $total_byod_sidebar : '' }})
+                                        </a>
+                                    </li>
+                                    <li{!! (Request::query('status') == 'Archived' ? ' class="active"' : '') !!}><a
+                                                href="{{ url('hardware?status=Archived') }}"><i
+                                                    class="fas fa-times text-red fa-fw"></i>
                                             {{ trans('general.all') }}
                                             {{ trans('admin/hardware/general.archived') }}
                                             ({{ (isset($total_archived_sidebar)) ? $total_archived_sidebar : '' }})
                                         </a>
                                     </li>
-                                    <li{!! (Request::query('status') == 'Requestable' ? ' class="active"' : '') !!}><a href="{{ url('hardware?status=Requestable') }}"><i class="fas fa-check text-blue fa-fw"></i>
+                                    <li{!! (Request::query('status') == 'Requestable' ? ' class="active"' : '') !!}><a
+                                                href="{{ url('hardware?status=Requestable') }}"><i
+                                                    class="fas fa-check text-blue fa-fw"></i>
                                             {{ trans('admin/hardware/general.requestable') }}
                                         </a>
                                     </li>
-                                    <li{!! (Request::query('status') == 'Issued_for_sale' ? ' class="active"' : '') !!}><a href="{{ url('hardware?status=Issued_for_sale') }}"><i class="fas fa-usd text-blue fa-fw"></i>
-                                            Выданные на продажу
-                                        </a>
-                                    </li>
-                                    <li{!! (Request::query('status') == 'Sold' ? ' class="active"' : '') !!}><a href="{{ url('hardware?status=Sold') }}"><i class="fas fa-usd text-red fa-fw"></i>
-                                            Проданные
-                                        </a>
-                                    </li>
 
-{{--                                    @can('audit', \App\Models\Asset::class)--}}
-{{--                                        <li{!! (Request::is('hardware/audit/due') ? ' class="active"' : '') !!}>--}}
-{{--                                            <a href="{{ route('assets.audit.due') }}">--}}
-{{--                                                <i class="fas fa-history text-yellow fa-fw"></i> {{ trans('general.audit_due') }}--}}
-{{--                                            </a>--}}
-{{--                                        </li>--}}
-{{--                                        <li{!! (Request::is('hardware/audit/overdue') ? ' class="active"' : '') !!}>--}}
-{{--                                            <a href="{{ route('assets.audit.overdue') }}">--}}
-{{--                                                <i class="fas fa-exclamation-triangle text-red fa-fw"></i> {{ trans('general.audit_overdue') }}--}}
-{{--                                            </a>--}}
-{{--                                        </li>--}}
-{{--                                    @endcan--}}
+                                    @can('audit', \App\Models\Asset::class)
+                                        <li{!! (Request::is('hardware/audit/due') ? ' class="active"' : '') !!}>
+                                            <a href="{{ route('assets.audit.due') }}">
+                                                <i class="fas fa-history text-yellow fa-fw"></i> {{ trans('general.audit_due') }}
+                                            </a>
+                                        </li>
+                                        <li{!! (Request::is('hardware/audit/overdue') ? ' class="active"' : '') !!}>
+                                            <a href="{{ route('assets.audit.overdue') }}">
+                                                <i class="fas fa-exclamation-triangle text-red fa-fw"></i> {{ trans('general.audit_overdue') }}
+                                            </a>
+                                        </li>
+                                    @endcan
 
                                     <li class="divider">&nbsp;</li>
-{{--                                    @can('checkin', \App\Models\Asset::class)--}}
-{{--                                        <li{!! (Request::is('hardware/quickscancheckin') ? ' class="active"' : '') !!}>--}}
-{{--                                            <a href="{{ route('hardware/quickscancheckin') }}">--}}
-{{--                                                {{ trans('general.quickscan_checkin') }}--}}
-{{--                                            </a>--}}
-{{--                                        </li>--}}
-{{--                                    @endcan--}}
+                                    @can('checkin', \App\Models\Asset::class)
+                                        <li{!! (Request::is('hardware/quickscancheckin') ? ' class="active"' : '') !!}>
+                                            <a href="{{ route('hardware/quickscancheckin') }}">
+                                                {{ trans('general.quickscan_checkin') }}
+                                            </a>
+                                        </li>
+                                    @endcan
 
-{{--                                    @can('checkout', \App\Models\Asset::class)--}}
-{{--                                        <li{!! (Request::is('hardware/bulkcheckout') ? ' class="active"' : '') !!}>--}}
-{{--                                            <a href="{{ route('hardware.bulkcheckout.show') }}">--}}
-{{--                                                {{ trans('general.bulk_checkout') }}--}}
-{{--                                            </a>--}}
-{{--                                        </li>--}}
-{{--                                        <li{!! (Request::is('hardware/requested') ? ' class="active"' : '') !!}>--}}
-{{--                                            <a href="{{ route('assets.requested') }}">--}}
-{{--                                                {{ trans('general.requested') }}</a>--}}
-{{--                                        </li>--}}
-{{--                                    @endcan--}}
+                                    @can('checkout', \App\Models\Asset::class)
+                                        <li{!! (Request::is('hardware/bulkcheckout') ? ' class="active"' : '') !!}>
+                                            <a href="{{ route('hardware.bulkcheckout.show') }}">
+                                                {{ trans('general.bulk_checkout') }}
+                                            </a>
+                                        </li>
+                                        <li{!! (Request::is('hardware/requested') ? ' class="active"' : '') !!}>
+                                            <a href="{{ route('assets.requested') }}">
+                                                {{ trans('general.requested') }}</a>
+                                        </li>
+                                    @endcan
 
                                     @can('create', \App\Models\Asset::class)
                                         <li{!! (Request::query('Deleted') ? ' class="active"' : '') !!}>
@@ -542,31 +555,23 @@
                                             </a>
                                         </li>
                                     @endcan
-{{--                                    @can('admin')--}}
-{{--                                        <li>--}}
-{{--                                            <a href="{{ url('hardware/history') }}">--}}
-{{--                                                {{ trans('general.import-history') }}--}}
-{{--                                            </a>--}}
-{{--                                        </li>--}}
-{{--                                    @endcan--}}
-{{--                                    @can('audit', \App\Models\Asset::class)--}}
-{{--                                        <li>--}}
-{{--                                            <a href="{{ route('assets.bulkaudit') }}">--}}
-{{--                                                {{ trans('general.bulkaudit') }}--}}
-{{--                                            </a>--}}
-{{--                                        </li>--}}
-{{--                                    @endcan--}}
+                                    @can('admin')
+                                        <li>
+                                            <a href="{{ url('hardware/history') }}">
+                                                {{ trans('general.import-history') }}
+                                            </a>
+                                        </li>
+                                    @endcan
+                                    @can('audit', \App\Models\Asset::class)
+                                        <li>
+                                            <a href="{{ route('assets.bulkaudit') }}">
+                                                {{ trans('general.bulkaudit') }}
+                                            </a>
+                                        </li>
+                                    @endcan
                                 </ul>
                             </li>
                         @endcan
-                            @can('view', \App\Models\Location::class)
-                                <li{!! (Request::is('devices*') ? ' class="active"' : '') !!}>
-                                    <a href="{{ route('devices.index') }}">
-                                        <i class="fas fa-mobile fa-fw"></i>
-                                        <span>Телефоны</span>
-                                    </a>
-                                </li>
-                            @endcan
                         @can('view', \App\Models\License::class)
                             <li{!! (Request::is('licenses*') ? ' class="active"' : '') !!}>
                                 <a href="{{ route('licenses.index') }}">
@@ -607,22 +612,7 @@
                                 </a>
                             </li>
                         @endcan
-                            @can('view', \App\Models\Purchase::class)
-                                <li{!! (Request::is('purchases*') ? ' class="active"' : '') !!}>
-                                    <a href="{{ route('purchases.index') }}">
-                                        <i class="fas fa-shopping-basket fa-fw"></i>
-                                        <span>{{ trans('general.purchases') }}</span>
-                                    </a>
-                                </li>
-                            @endcan
-                            @can('view', \App\Models\Purchase::class)
-                                <li{!! (Request::is('inventories*') ? ' class="active"' : '') !!}>
-                                    <a href="{{ route('inventories.index') }}">
-                                        <i class="fas fa-clipboard-check fa-fw"></i>
-                                        <span>{{ trans('general.inventory') }}</span>
-                                    </a>
-                                </li>
-                            @endcan
+
                         @can('view', \App\Models\User::class)
                             <li{!! (Request::is('users*') ? ' class="active"' : '') !!}>
                                 <a href="{{ route('users.index') }}" accesskey="6">
@@ -634,7 +624,7 @@
                         @can('import')
                             <li{!! (Request::is('import/*') ? ' class="active"' : '') !!}>
                                 <a href="{{ route('imports.index') }}">
-                                    <i class="fas fa-cloud-download-alt fa-fw" aria-hidden="true"></i>
+                                    <i class="fas fa-cloud-upload-alt fa-fw" aria-hidden="true"></i>
                                     <span>{{ trans('general.import') }}</span>
                                 </a>
                             </li>
@@ -728,30 +718,13 @@
                                             </a>
                                         </li>
                                     @endcan
-
-                                        <li class="divider">&nbsp;</li>
-
-                                        @can('view', \App\Models\Statuslabel::class)
-                                            <li {!! (Request::is('inventorystatuslabels*') ? ' class="active"' : '') !!}>
-                                                <a href="{{ route('inventorystatuslabels.index') }}">
-                                                    {{ trans('general.inventory_status_labels') }}
-                                                </a>
-                                            </li>
-                                        @endcan
-                                        @can('view', \App\Models\Asset::class)
-                                            <li {!! (Request::is('contracts*') ? ' class="active"' : '') !!}>
-                                                <a href="{{ route('contracts.index') }}">
-                                                    {{ trans('general.contracts') }}
-                                                </a>
-                                            </li>
-                                        @endcan
                                 </ul>
                             </li>
                         @endcan
 
                         @can('reports.view')
                             <li class="treeview{{ (Request::is('reports*') ? ' active' : '') }}">
-                                <a href="#"  class="dropdown-toggle">
+                                <a href="#" class="dropdown-toggle">
                                     <i class="fas fa-chart-bar fa-fw"></i>
                                     <span>{{ trans('general.reports') }}</span>
                                     <i class="fa fa-angle-left pull-right"></i>
@@ -764,7 +737,8 @@
                                         </a>
                                     </li>
 
-                                    <li><a href="{{ route('reports.audit') }}" {{ (Request::is('reports.audit') ? ' class="active"' : '') }}>
+                                    <li>
+                                        <a href="{{ route('reports.audit') }}" {{ (Request::is('reports.audit') ? ' class="active"' : '') }}>
                                             {{ trans('general.audit_report') }}</a>
                                     </li>
                                     <li>
@@ -801,16 +775,6 @@
                             </li>
                         @endcan
 
-                            @can('view', \App\Models\Asset::class)
-                                <li{!! (Request::is('map*') ? ' class="active"' : '') !!}>
-                                    <a href="{{ route('map') }}">
-                                        <i class="fas fa-map fa-fw"></i>
-                                        <span>{{ trans('general.map') }}</span>
-                                    </a>
-                                </li>
-                            @endcan
-
-
                         @can('viewRequestable', \App\Models\Asset::class)
                             <li{!! (Request::is('account/requestable-assets') ? ' class="active"' : '') !!}>
                                 <a href="{{ route('requestable-assets') }}">
@@ -829,11 +793,14 @@
             <!-- Content Wrapper. Contains page content -->
 
             <div class="content-wrapper" role="main" id="setting-list">
+                <barepay></barepay>
 
                 @if ($debug_in_production)
                     <div class="row" style="margin-bottom: 0px; background-color: red; color: white; font-size: 15px;">
-                        <div class="col-md-12" style="margin-bottom: 0px; background-color: #b50408 ; color: white; padding: 10px 20px 10px 30px; font-size: 16px;">
-                            <i class="fas fa-exclamation-triangle fa-3x pull-left"></i> <strong>{{ strtoupper(trans('general.debug_warning')) }}:</strong>
+                        <div class="col-md-12"
+                             style="margin-bottom: 0px; background-color: #b50408 ; color: white; padding: 10px 20px 10px 30px; font-size: 16px;">
+                            <i class="fas fa-exclamation-triangle fa-3x pull-left"></i>
+                            <strong>{{ strtoupper(trans('general.debug_warning')) }}:</strong>
                             {!! trans('general.debug_warning_text') !!}
                         </div>
                     </div>
@@ -853,7 +820,6 @@
                     <div class="pull-right">
                         @yield('header_right')
                     </div>
-
 
 
                 </section>
@@ -883,47 +849,53 @@
                 </section>
 
             </div><!-- /.content-wrapper -->
+            <footer class="main-footer hidden-print" style="display:grid;flex-direction:column;">
 
-            <footer class="main-footer hidden-print">
-
-                <div class="pull-right hidden-xs">
+                <div class="1hidden-xs pull-left">
+                    <div class="pull-left" >
+                        <a target="_blank" href="https://snipeitapp.com" rel="noopener">Snipe-IT</a> is open source software,
+                        made with <i class="fas fa-heart" style="color: #a94442; font-size: 10px" aria-hidden="true"></i><span
+                                class="sr-only">love</span> by <a href="https://twitter.com/snipeitapp" rel="noopener">@snipeitapp</a>.
+                    </div>
+                    <div class="pull-right">
                     @if ($snipeSettings->version_footer!='off')
                         @if (($snipeSettings->version_footer=='on') || (($snipeSettings->version_footer=='admin') && (Auth::user()->isSuperUser()=='1')))
-                            &nbsp; <strong>Version</strong> {{ config('version.app_version') }} - build {{ config('version.build_version') }} ({{ config('version.branch') }})
+                            &nbsp; <strong>Version</strong> {{ config('version.app_version') }} -
+                            build {{ config('version.build_version') }} ({{ config('version.branch') }})
                         @endif
                     @endif
 
                     @if ($snipeSettings->support_footer!='off')
                         @if (($snipeSettings->support_footer=='on') || (($snipeSettings->support_footer=='admin') && (Auth::user()->isSuperUser()=='1')))
-                            <a target="_blank" class="btn btn-default btn-xs" href="https://snipe-it.readme.io/docs/overview" rel="noopener">{{ trans('general.user_manual') }}</a>
-                            <a target="_blank" class="btn btn-default btn-xs" href="https://snipeitapp.com/support/" rel="noopener">{{ trans('general.bug_report') }}</a>
+                            <a target="_blank" class="btn btn-default btn-xs"
+                               href="https://snipe-it.readme.io/docs/overview"
+                               rel="noopener">{{ trans('general.user_manual') }}</a>
+                            <a target="_blank" class="btn btn-default btn-xs" href="https://snipeitapp.com/support/"
+                               rel="noopener">{{ trans('general.bug_report') }}</a>
                         @endif
                     @endif
 
                     @if ($snipeSettings->privacy_policy_link!='')
-                        <a target="_blank" class="btn btn-default btn-xs" rel="noopener" href="{{  $snipeSettings->privacy_policy_link }}" target="_new">{{ trans('admin/settings/general.privacy_policy') }}</a>
+                        <a target="_blank" class="btn btn-default btn-xs" rel="noopener"
+                           href="{{  $snipeSettings->privacy_policy_link }}"
+                           target="_new">{{ trans('admin/settings/general.privacy_policy') }}</a>
                     @endif
-
-
-                </div>
-                @if ($snipeSettings->footer_text!='')
-                    <div class="pull-right">
-                        {!!  Helper::parseEscapedMarkedown($snipeSettings->footer_text)  !!}
                     </div>
-                @endif
-
-
-                <a target="_blank" href="https://snipeitapp.com" rel="noopener">Snipe-IT</a> is open source software, made with <i class="fas fa-heart" style="color: #a94442; font-size: 10px" aria-hidden="true"></i><span class="sr-only">love</span> by <a href="https://twitter.com/snipeitapp" rel="noopener">@snipeitapp</a>.
+                    <br>
+                    @if ($snipeSettings->footer_text!='')
+                        <div class="pull-left">
+                            {!!  Helper::parseEscapedMarkedown($snipeSettings->footer_text)  !!}
+                        </div>
+                    @endif
+                </div>
             </footer>
-
-
-
         </div><!-- ./wrapper -->
 
 
         <!-- end main container -->
 
-        <div class="modal modal-danger fade" id="dataConfirmModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal modal-danger fade" id="dataConfirmModal" tabindex="-1" role="dialog"
+             aria-labelledby="myModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -936,8 +908,10 @@
                             {{ csrf_field() }}
                             {{ method_field('DELETE') }}
 
-                            <button type="button" class="btn btn-default pull-left" data-dismiss="modal">{{ trans('general.cancel') }}</button>
-                            <button type="submit" class="btn btn-outline" id="dataConfirmOK">{{ trans('general.yes') }}</button>
+                            <button type="button" class="btn btn-default pull-left"
+                                    data-dismiss="modal">{{ trans('general.cancel') }}</button>
+                            <button type="submit" class="btn btn-outline"
+                                    id="dataConfirmOK">{{ trans('general.yes') }}</button>
                         </form>
                     </div>
                 </div>
@@ -945,7 +919,8 @@
         </div>
 
 
-        <div class="modal modal-warning fade" id="restoreConfirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
+        <div class="modal modal-warning fade" id="restoreConfirmModal" tabindex="-1" role="dialog"
+             aria-labelledby="confirmModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -958,8 +933,10 @@
                             {{ csrf_field() }}
                             {{ method_field('POST') }}
 
-                            <button type="button" class="btn btn-default pull-left" data-dismiss="modal">{{ trans('general.cancel') }}</button>
-                            <button type="submit" class="btn btn-outline" id="dataConfirmOK">{{ trans('general.yes') }}</button>
+                            <button type="button" class="btn btn-default pull-left"
+                                    data-dismiss="modal">{{ trans('general.cancel') }}</button>
+                            <button type="submit" class="btn btn-outline"
+                                    id="dataConfirmOK">{{ trans('general.yes') }}</button>
                         </form>
                     </div>
                 </div>
@@ -968,12 +945,8 @@
 
         {{-- Javascript files --}}
         <script src="{{ url(mix('js/dist/all.js')) }}" nonce="{{ csrf_token() }}"></script>
+        <script defer src="{{ url(mix('js/dist/all-defer.js')) }}" nonce="{{ csrf_token() }}"></script>
 
-        <script src="{{ url(asset('js/star-rating/dist/star-rating.js')) }}"></script>
-        <script src="{{ url(asset('js/lightgallery/js/lightgallery.min.js')) }}"></script>
-        <script src="{{ url(asset('js/sweetalert2.min.js')) }}"></script>
-        <script src="{{ url(asset('js/timeago.js')) }}"></script>
-        <script src="{{ url(asset('js/lightbox/js/lightbox.min.js')) }}" nonce="{{ csrf_token() }}"></script>
         <!-- v5-beta: This pGenerator call must remain here for v5 - until fixed - so that the JS password generator works for the user create modal. -->
         <script src="{{ url('js/pGenerator.jquery.js') }}"></script>
 
@@ -986,42 +959,36 @@
 
         <script nonce="{{ csrf_token() }}">
 
+            var clipboard = new ClipboardJS('.js-copy-link');
+
+            clipboard.on('success', function(e) {
+                $('.js-copy-link').tooltip('hide').attr('data-original-title', '{{ trans('general.copied') }}').tooltip('show');
+            });
 
             // ignore: 'input[type=hidden]' is required here to validate the select2 lists
             $.validate({
-                form : '#create-form',
-                modules : 'date, toggleDisabled',
-                disabledFormFilter : '#create-form',
-                showErrorDialogs : true,
+                form: '#create-form',
+                modules: 'date, toggleDisabled',
+                disabledFormFilter: '#create-form',
+                showErrorDialogs: true,
                 ignore: 'input[type=hidden]'
             });
 
 
-
-
-
             $(function () {
 
-                $('[data-toggle="tooltip"]').tooltip();
+                // Invoke Bootstrap 3's tooltip
+                $('[data-tooltip="true"]').tooltip({
+                    container: 'body',
+                    animation: true,
+                });
+                
                 $('[data-toggle="popover"]').popover();
                 $('.select2 span').addClass('needsclick');
                 $('.select2 span').removeAttr('title');
 
-                // Initiate the ekko lightbox
-                $(document).on('click', '[data-toggle="lightbox"]', function (event) {
-                    event.preventDefault();
-                    $(this).ekkoLightbox();
-                });
-
-
-                $('input.float').on('input', function () {
-                    this.value = this.value.replace(',', '.')
-                    this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
-                    // $(this).val() // get the current value of the input field.
-                });
-
                 // This javascript handles saving the state of the menu (expanded or not)
-                $('body').bind('expanded.pushMenu', function() {
+                $('body').bind('expanded.pushMenu', function () {
                     $.ajax({
                         type: 'GET',
                         url: "{{ route('account.menuprefs', ['state'=>'open']) }}",
@@ -1030,7 +997,7 @@
 
                 });
 
-                $('body').bind('collapsed.pushMenu', function() {
+                $('body').bind('collapsed.pushMenu', function () {
                     $.ajax({
                         type: 'GET',
                         url: "{{ route('account.menuprefs', ['state'=>'close']) }}",
@@ -1041,11 +1008,18 @@
             });
 
             // Initiate the ekko lightbox
-            $(document).on('click', '[data-toggle="lightbox"]', function(event) {
+            $(document).on('click', '[data-toggle="lightbox"]', function (event) {
                 event.preventDefault();
                 $(this).ekkoLightbox();
             });
-
+            //This prevents multi-click checkouts for accessories, components, consumables
+            $(document).ready(function () {
+                $('#checkout_form').submit(function (event) {
+                    event.preventDefault();
+                    $('#submit_button').prop('disabled', true);
+                    this.submit();
+                });
+            });
 
 
         </script>
@@ -1056,8 +1030,9 @@
             </script>
         @endif
 
-
+        @include('partials.bpay')
 
         @livewireScripts
+
         </body>
 </html>

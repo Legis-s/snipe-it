@@ -18,26 +18,36 @@ class AccessoryCheckoutController extends Controller
      * Return the form to checkout an Accessory to a user.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @param  int $accessoryId
+     * @param  int $id
      * @return View
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function create($accessoryId)
+    public function create($id)
     {
-        // Check if the accessory exists
-        if (is_null($accessory = Accessory::find($accessoryId))) {
-            // Redirect to the accessory management page with error
-            return redirect()->route('accessories.index')->with('error', trans('admin/accessories/message.not_found'));
-        }
 
-        if ($accessory->category) {
+        if ($accessory = Accessory::withCount('users as users_count')->find($id)) {
+
             $this->authorize('checkout', $accessory);
 
-            // Get the dropdown of users and then pass it to the checkout view
-            return view('accessories/checkout', compact('accessory'));
+            if ($accessory->category) {
+                // Make sure there is at least one available to checkout
+                if ($accessory->numRemaining() <= 0){
+                    return redirect()->route('accessories.index')->with('error', trans('admin/accessories/message.checkout.unavailable'));
+                }
+
+                // Return the checkout view
+                return view('accessories/checkout', compact('accessory'));
+            }
+
+            // Invalid category
+            return redirect()->route('accessories.edit', ['accessory' => $accessory->id])
+                ->with('error', trans('general.invalid_item_category_single', ['type' => trans('general.accessory')]));
+
         }
 
-        return redirect()->back()->with('error', 'The category type for this accessory is not valid. Edit the accessory and select a valid accessory category.');
+        // Not found
+        return redirect()->route('accessories.index')->with('error', trans('admin/accessories/message.not_found'));
+
     }
 
     /**
@@ -55,16 +65,22 @@ class AccessoryCheckoutController extends Controller
     public function store(Request $request, $accessoryId)
     {
         // Check if the accessory exists
-        if (is_null($accessory = Accessory::find($accessoryId))) {
+        if (is_null($accessory = Accessory::withCount('users as users_count')->find($accessoryId))) {
             // Redirect to the accessory management page with error
             return redirect()->route('accessories.index')->with('error', trans('admin/accessories/message.user_not_found'));
         }
 
         $this->authorize('checkout', $accessory);
 
-        if (! $user = User::find($request->input('assigned_to'))) {
+        if (!$user = User::find($request->input('assigned_to'))) {
             return redirect()->route('accessories.checkout.show', $accessory->id)->with('error', trans('admin/accessories/message.checkout.user_does_not_exist'));
         }
+
+        // Make sure there is at least one available to checkout
+        if ($accessory->numRemaining() <= 0){
+            return redirect()->route('accessories.index')->with('error', trans('admin/accessories/message.checkout.unavailable'));
+        }
+
 
         // Update the accessory data
         $accessory->assigned_to = e($request->input('assigned_to'));

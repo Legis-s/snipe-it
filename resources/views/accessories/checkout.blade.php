@@ -17,7 +17,7 @@
 
 <div class="row">
   <div class="col-md-9">
-    <form class="form-horizontal" method="post" action="" autocomplete="off">
+    <form class="form-horizontal" id="checkout_form" method="post" action="" autocomplete="off">
     <!-- CSRF Token -->
     <input type="hidden" name="_token" value="{{ csrf_token() }}" />
 
@@ -54,7 +54,7 @@
           @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.select_user'), 'fieldname' => 'assigned_to'])
 
 
-             @if ($accessory->requireAcceptance() || $accessory->getEula() || ($snipeSettings->slack_endpoint!=''))
+             @if ($accessory->requireAcceptance() || $accessory->getEula() || ($snipeSettings->webhook_endpoint!=''))
                  <div class="form-group notification-callout">
                      <div class="col-md-8 col-md-offset-3">
                          <div class="callout callout-info">
@@ -71,9 +71,9 @@
                                  <br>
                              @endif
 
-                             @if ($snipeSettings->slack_endpoint!='')
+                             @if ($snipeSettings->webhook_endpoint!='')
                                  <i class="fab fa-slack"></i>
-                                 A slack message will be sent
+                                 {{ trans('general.webhook_msg_note') }}
                              @endif
                          </div>
                      </div>
@@ -90,7 +90,7 @@
        </div>
        <div class="box-footer">
           <a class="btn btn-link" href="{{ URL::previous() }}">{{ trans('button.cancel') }}</a>
-          <button type="submit" class="btn btn-primary pull-right"><i class="fas fa-check icon-white" aria-hidden="true"></i> {{ trans('general.checkout') }}</button>
+          <button type="submit" id="submit_button" class="btn btn-primary pull-right"><i class="fas fa-check icon-white" aria-hidden="true"></i> {{ trans('general.checkout') }}</button>
        </div>
     </div> <!-- .box.box-default -->
   </form>

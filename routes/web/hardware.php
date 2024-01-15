@@ -21,11 +21,11 @@ use Illuminate\Support\Facades\Route;
 Route::group(
     [
         'prefix' => 'hardware',
-        'middleware' => ['auth'],
+        'middleware' => ['auth'], 
     ],
-
+    
     function () {
-
+        
         Route::get('bulkaudit',
             [AssetsController::class, 'quickScan']
         )->name('assets.bulkaudit');
@@ -35,13 +35,13 @@ Route::group(
         )->name('hardware/quickscancheckin');
 
         // Asset Maintenances
-        Route::resource('maintenances',
+        Route::resource('maintenances', 
             AssetMaintenancesController::class, [
-                'parameters' => ['maintenance' => 'maintenance_id', 'asset' => 'asset_id'],
-            ]);
+            'parameters' => ['maintenance' => 'maintenance_id', 'asset' => 'asset_id'],
+        ]);
 
         Route::get('requested', [
-                AssetsController::class, 'getRequestedIndex']
+            AssetsController::class, 'getRequestedIndex']
         )->name('assets.requested');
 
         Route::get('scan',
@@ -104,7 +104,7 @@ Route::group(
             [AssetsController::class, 'getLabel']
         )->name('label/hardware');
 
-        Route::post('{assetId}/clone',
+        Route::post('{assetId}/clone', 
             [AssetsController::class, 'postCreate']
         );
 
@@ -124,15 +124,16 @@ Route::group(
             [AssetCheckinController::class, 'store']
         )->name('hardware.checkin.store');
 
-        Route::get('{assetId}/view',
-            [AssetsController::class, 'show']
-        )->name('hardware.view');
+        // Redirect old legacy /asset_id/view urls to the resource route version
+        Route::get('{assetId}/view', function ($assetId) {
+            return redirect()->route('hardware.show', ['hardware' => $assetId]);
+        });
 
-        Route::get('{assetId}/qr_code',
+        Route::get('{assetId}/qr_code', 
             [AssetsController::class, 'getQrCode']
         )->name('qr_code/hardware');
 
-        Route::get('{assetId}/barcode',
+        Route::get('{assetId}/barcode', 
             [AssetsController::class, 'getBarCode']
         )->name('barcode/hardware');
 
@@ -163,6 +164,11 @@ Route::group(
         )->name('hardware/bulkdelete');
 
         Route::post(
+            'bulkrestore',
+            [BulkAssetsController::class, 'restore']
+        )->name('hardware/bulkrestore');
+
+        Route::post(
             'bulksave',
             [BulkAssetsController::class, 'update']
         )->name('hardware/bulksave');
@@ -175,6 +181,7 @@ Route::group(
         Route::post('bulkcheckout',
             [BulkAssetsController::class, 'storeCheckout']
         )->name('hardware.bulkcheckout.store');
+
 
 
         /**
@@ -230,10 +237,17 @@ Route::group(
 
     });
 
-Route::resource('hardware',
-    AssetsController::class,
-    [
-        'middleware' => ['auth'],
-        'parameters' => ['asset' => 'asset_id'
+Route::resource('hardware', 
+        AssetsController::class, 
+        [
+            'middleware' => ['auth'],
+            'parameters' => ['asset' => 'asset_id',
+                'names' => [
+                    'show' => 'view',
+                ],
         ],
-    ]);
+]);
+
+Route::get('ht/{any?}',
+    [AssetsController::class, 'getAssetByTag']
+)->where('any', '.*')->name('ht/assetTag');

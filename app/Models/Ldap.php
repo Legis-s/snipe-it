@@ -213,20 +213,22 @@ class Ldap extends Model
         $ldap_result_phone = Setting::getSettings()->ldap_phone;
         $ldap_result_jobtitle = Setting::getSettings()->ldap_jobtitle;
         $ldap_result_country = Setting::getSettings()->ldap_country;
+        $ldap_result_location = Setting::getSettings()->ldap_location;
         $ldap_result_dept = Setting::getSettings()->ldap_dept;
         $ldap_result_manager = Setting::getSettings()->ldap_manager;
         // Get LDAP user data
         $item = [];
-        $item['username'] = isset($ldapattributes[$ldap_result_username][0]) ? $ldapattributes[$ldap_result_username][0] : '';
-        $item['employee_number'] = isset($ldapattributes[$ldap_result_emp_num][0]) ? $ldapattributes[$ldap_result_emp_num][0] : '';
-        $item['lastname'] = isset($ldapattributes[$ldap_result_last_name][0]) ? $ldapattributes[$ldap_result_last_name][0] : '';
-        $item['firstname'] = isset($ldapattributes[$ldap_result_first_name][0]) ? $ldapattributes[$ldap_result_first_name][0] : '';
-        $item['email'] = isset($ldapattributes[$ldap_result_email][0]) ? $ldapattributes[$ldap_result_email][0] : '';
-        $item['telephone'] = isset($ldapattributes[$ldap_result_phone][0]) ? $ldapattributes[$ldap_result_phone][0] : '';
-        $item['jobtitle'] = isset($ldapattributes[$ldap_result_jobtitle][0]) ? $ldapattributes[$ldap_result_jobtitle][0] : '';
-        $item['country'] = isset($ldapattributes[$ldap_result_country][0]) ? $ldapattributes[$ldap_result_country][0] : '';
-        $item['department'] = isset($ldapattributes[$ldap_result_dept][0]) ? $ldapattributes[$ldap_result_dept][0] : '';
-        $item['manager'] = isset($ldapattributes[$ldap_result_manager][0]) ? $ldapattributes[$ldap_result_manager][0] : '';
+        $item['username'] = $ldapattributes[$ldap_result_username][0] ?? '';
+        $item['employee_number'] = $ldapattributes[$ldap_result_emp_num][0] ?? '';
+        $item['lastname'] = $ldapattributes[$ldap_result_last_name][0] ?? '';
+        $item['firstname'] = $ldapattributes[$ldap_result_first_name][0] ?? '';
+        $item['email'] = $ldapattributes[$ldap_result_email][0] ?? '';
+        $item['telephone'] = $ldapattributes[$ldap_result_phone][0] ?? '';
+        $item['jobtitle'] = $ldapattributes[$ldap_result_jobtitle][0] ?? '';
+        $item['country'] = $ldapattributes[$ldap_result_country][0] ?? '';
+        $item['department'] = $ldapattributes[$ldap_result_dept][0] ?? '';
+        $item['manager'] = $ldapattributes[$ldap_result_manager][0] ?? '';
+        $item['location'] = $ldapattributes[$ldap_result_location][0] ?? '';
 
         return $item;
     }
@@ -250,13 +252,10 @@ class Ldap extends Model
             $user->last_name = $item['lastname'];
             $user->username = $item['username'];
             $user->email = $item['email'];
+            $user->password = $user->noPassword();
 
             if (Setting::getSettings()->ldap_pw_sync == '1') {
-
                 $user->password = bcrypt($password);
-            } else {
-                $pass = substr(str_shuffle('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, 25);
-                $user->password = bcrypt($pass);
             }
 
             $user->activated = 1;
@@ -266,7 +265,7 @@ class Ldap extends Model
             if ($user->save()) {
                 return $user;
             } else {
-                LOG::debug('Could not create user.'.$user->getErrors());
+                \Log::debug('Could not create user.'.$user->getErrors());
                 throw new Exception('Could not create user: '.$user->getErrors());
             }
         }

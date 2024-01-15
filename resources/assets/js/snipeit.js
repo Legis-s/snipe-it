@@ -180,14 +180,6 @@ $(document).ready(function () {
         }
      });
 
-     /*
-     * iCheck checkbox plugin
-     */
-
-     $('input[type="checkbox"].minimal, input[type="radio"].minimal').iCheck({
-         checkboxClass: 'icheckbox_minimal-blue',
-         radioClass: 'iradio_minimal-blue'
-     });
 
 
      /*
@@ -457,6 +449,9 @@ $(document).ready(function () {
                 $('#assigned_contract').hide();
                 $('.notification-callout').fadeOut();
 
+                $('[name="assigned_location"]').val('').trigger('change.select2');
+                $('[name="assigned_user"]').val('').trigger('change.select2');
+
             } else if (assignto_type == 'location') {
                 $('#current_assets_box').fadeOut();
                 $('#assigned_asset').hide();
@@ -471,6 +466,9 @@ $(document).ready(function () {
                 $('#assigned_location').hide();
                 $('#assigned_contract').show();
                 $('.notification-callout').fadeOut();
+
+                $('[name="assigned_asset"]').val('').trigger('change.select2');
+                $('[name="assigned_user"]').val('').trigger('change.select2');
             } else  {
 
                 $('#assigned_asset').hide();
@@ -482,6 +480,8 @@ $(document).ready(function () {
                 }
                 $('.notification-callout').fadeIn();
 
+                $('[name="assigned_asset"]').val('').trigger('change.select2');
+                $('[name="assigned_location"]').val('').trigger('change.select2');
             }
         });
     });
@@ -544,10 +544,16 @@ $(document).ready(function () {
         var id = '#' + $this.attr('id');
         var status = id + '-status';
         var $status = $(status);
+        var delete_id = $(id + '-deleteCheckbox');
+        var preview_container = $(id + '-previewContainer');
+
+
+
         $status.removeClass('text-success').removeClass('text-danger');
         $(status + ' .goodfile').remove();
         $(status + ' .badfile').remove();
         $(status + ' .previewSize').hide();
+        preview_container.hide();
         $(id + '-info').html('');
 
         var max_size = $this.data('maxsize');
@@ -558,17 +564,15 @@ $(document).ready(function () {
             $(id + '-info').append('<span class="label label-default">' + htmlEntities(this.files[i].name) + ' (' + formatBytes(this.files[i].size) + ')</span> ');
         }
 
-        console.log('Max size is: ' + max_size);
-        console.log('Real size is: ' + total_size);
-
         if (total_size > max_size) {
             $status.addClass('text-danger').removeClass('help-block').prepend('<i class="badfile fas fa-times"></i> ').append('<span class="previewSize"> Upload is ' + formatBytes(total_size) + '.</span>');
         } else {
-
             $status.addClass('text-success').removeClass('help-block').prepend('<i class="goodfile fas fa-check"></i> ');
             var $preview =  $(id + '-imagePreview');
             readURL(this, $preview);
             $preview.fadeIn();
+            preview_container.fadeIn();
+            delete_id.hide();
         }
 
 
@@ -605,3 +609,32 @@ function htmlEntities(str) {
     };
 
 })(jQuery);
+
+/**
+ * Universal Livewire Select2 integration
+ *
+ * How to use:
+ *
+ * 1. Set the class of your select2 elements to 'livewire-select2').
+ * 2. Name your element to match a property in your Livewire component
+ * 3. Add an attribute called 'data-livewire-component' that points to $_instance->id (via `{{ }}` if you're in a blade,
+ *    or just $_instance->id if not).
+ */
+$(function () {
+    $('.livewire-select2').select2()
+
+    $(document).on('select2:select', '.livewire-select2', function (event) {
+        var target = $(event.target)
+        if(!event.target.name || !target.data('livewire-component')) {
+            console.error("You need to set both name (which should match a Livewire property) and data-livewire-component on your Livewire-ed select2 elements!")
+            console.error("For data-livewire-component, you probably want to use $_instance->id or {{ $_instance->id }}, as appropriate")
+            return false
+        }
+        window.livewire.find(target.data('livewire-component')).set(event.target.name, this.options[this.selectedIndex].value)
+    })
+
+    window.livewire.hook('message.processed', function (el,component) {
+        $('.livewire-select2').select2();
+    });
+
+})

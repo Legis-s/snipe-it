@@ -3,6 +3,7 @@
 return array(
 
     'does_not_exist' => '配件[:id] 不存在。',
+    'not_found' => '找不到该配件。',
     'assoc_users'	 => '配件目前状态：可用数量不足，请检查改配件再重试。',
 
     'create' => array(
@@ -24,6 +25,7 @@ return array(
      'checkout' => array(
         'error'   		=> '配件不能被预订，请重试。',
         'success' 		=> '配件成功预订。',
+        'unavailable'   => '配件不可被借出。检查可用数量',
         'user_does_not_exist' => '无效用户，请重试。'
     ),
 

@@ -2,48 +2,47 @@
 
 namespace App\Listeners;
 
+use App\Events\CheckoutableCheckedOut;
 use App\Models\Accessory;
 use App\Models\Asset;
 use App\Models\CheckoutAcceptance;
+use App\Models\Component;
 use App\Models\Consumable;
 use App\Models\LicenseSeat;
 use App\Models\Recipients\AdminRecipient;
 use App\Models\Setting;
-use App\Models\User;
 use App\Notifications\CheckinAccessoryNotification;
 use App\Notifications\CheckinAssetNotification;
-use App\Notifications\CheckinLicenseNotification;
 use App\Notifications\CheckinLicenseSeatNotification;
 use App\Notifications\CheckoutAccessoryNotification;
 use App\Notifications\CheckoutAssetNotification;
 use App\Notifications\CheckoutConsumableNotification;
-use App\Notifications\CheckoutLicenseNotification;
 use App\Notifications\CheckoutLicenseSeatNotification;
+use GuzzleHttp\Exception\ClientException;
 use Illuminate\Support\Facades\Notification;
 use Exception;
 use Log;
 
 class CheckoutableListener
 {
+    private array $skipNotificationsFor = [
+        Component::class,
+    ];
+
     /**
-     * Notify the user about the checked out checkoutable and add a record to the
-     * checkout_requests table.
+     * Notify the user and post to webhook about the checked out checkoutable
+     * and add a record to the checkout_requests table.
      */
     public function onCheckedOut($event)
     {
-
-
-        /**
-         * When the item wasn't checked out to a user, we can't send notifications
-         */
-        if (! $event->checkedOutTo instanceof User) {
+        if ($this->shouldNotSendAnyNotifications($event->checkoutable)){
             return;
         }
 
         /**
          * Make a checkout acceptance and attach it in the notification
          */
-        $acceptance = $this->getCheckoutAcceptance($event);       
+        $acceptance = $this->getCheckoutAcceptance($event);
 
         try {
             if (! $event->checkedOutTo->locale) {
@@ -57,35 +56,41 @@ class CheckoutableListener
                     $this->getCheckoutNotification($event, $acceptance)
                 );
             }
+
+            if ($this->shouldSendWebhookNotification()) {
+                Notification::route('slack', Setting::getSettings()->webhook_endpoint)
+                    ->notify($this->getCheckoutNotification($event));
+            }
+        } catch (ClientException $e) {
+            Log::debug("Exception caught during checkout notification: " . $e->getMessage());
         } catch (Exception $e) {
-            Log::error("Exception caught during checkout notification: ".$e->getMessage());
+            Log::error("Exception caught during checkout notification: " . $e->getMessage());
         }
     }
 
     /**
-     * Notify the user about the checked in checkoutable
+     * Notify the user and post to webhook about the checked in checkoutable
      */    
     public function onCheckedIn($event)
     {
         \Log::debug('onCheckedIn in the Checkoutable listener fired');
 
-        /**
-         * When the item wasn't checked out to a user, we can't send notifications
-         */
-        if (! $event->checkedOutTo instanceof User) {
+        if ($this->shouldNotSendAnyNotifications($event->checkoutable)) {
             return;
         }
 
         /**
          * Send the appropriate notification
          */
-        $acceptances = CheckoutAcceptance::where('checkoutable_id', $event->checkoutable->id)
-                                        ->where('assigned_to_id', $event->checkedOutTo->id)
-                                        ->get();
+        if ($event->checkedOutTo && $event->checkoutable){
+            $acceptances = CheckoutAcceptance::where('checkoutable_id', $event->checkoutable->id)
+                                            ->where('assigned_to_id', $event->checkedOutTo->id)
+                                            ->get();
 
-        foreach($acceptances as $acceptance){
-            if($acceptance->isPending()){
-                $acceptance->delete();
+            foreach($acceptances as $acceptance){
+                if($acceptance->isPending()){
+                    $acceptance->delete();
+                }
             }
         }
 
@@ -102,8 +107,15 @@ class CheckoutableListener
                     $this->getCheckinNotification($event)
                 );
             }
+
+            if ($this->shouldSendWebhookNotification()) {
+                Notification::route('slack', Setting::getSettings()->webhook_endpoint)
+                    ->notify($this->getCheckinNotification($event));
+            }
+        } catch (ClientException $e) {
+            Log::debug("Exception caught during checkout notification: " . $e->getMessage());
         } catch (Exception $e) {
-            Log::error("Exception caught during checkin notification: ".$e->getMessage());
+            Log::error("Exception caught during checkin notification: " . $e->getMessage());
         }
     }      
 
@@ -137,9 +149,11 @@ class CheckoutableListener
         $notifiables = collect();
 
         /**
-         * Notify the user who checked out the item
+         * Notify who checked out the item as long as the model can route notifications
          */
-        $notifiables->push($event->checkedOutTo);
+        if (method_exists($event->checkedOutTo, 'routeNotificationFor')) {
+            $notifiables->push($event->checkedOutTo);
+        }
 
         /**
          * Notify Admin users if the settings is activated
@@ -182,11 +196,11 @@ class CheckoutableListener
     /**
      * Get the appropriate notification for the event
      * 
-     * @param  CheckoutableCheckedIn $event 
-     * @param  CheckoutAcceptance $acceptance 
+     * @param  CheckoutableCheckedOut $event
+     * @param  CheckoutAcceptance|null $acceptance
      * @return Notification
      */
-    private function getCheckoutNotification($event, $acceptance)
+    private function getCheckoutNotification($event, $acceptance = null)
     {
         $notificationClass = null;
 
@@ -224,5 +238,15 @@ class CheckoutableListener
             \App\Events\CheckoutableCheckedOut::class,
             'App\Listeners\CheckoutableListener@onCheckedOut'
         ); 
+    }
+
+    private function shouldNotSendAnyNotifications($checkoutable): bool
+    {
+        return in_array(get_class($checkoutable), $this->skipNotificationsFor);
+    }
+
+    private function shouldSendWebhookNotification(): bool
+    {
+        return Setting::getSettings() && Setting::getSettings()->webhook_endpoint;
     }
 }

@@ -8,6 +8,7 @@ use App\Models\AssetModel;
 use App\Models\Company;
 use App\Models\Setting;
 use App\Models\User;
+use App\Models\CustomField;
 use App\Notifications\RequestAssetCancelation;
 use App\Notifications\RequestAssetNotification;
 use Illuminate\Http\Request;
@@ -29,23 +30,41 @@ class ViewAssetsController extends Controller
     public function getIndex()
     {
         $user = User::with(
+            'assets',
             'assets.model',
+            'assets.model.fieldset.fields',
 //            'consumables',
             'accessories',
             'licenses',
-            'userloc',
-            'userlog'
-        )->withTrashed()->find(Auth::user()->id);
+        )->find(Auth::user()->id);
 
-        $userlog = $user->userlog->load('item', 'user', 'target');
+        $field_array = array();
+
+        // Loop through all the custom fields that are applied to any model the user has assigned
+        foreach ($user->assets as $asset) {
+
+            // Make sure the model has a custom fieldset before trying to loop through the associated fields
+            if ($asset->model->fieldset) {
+
+                foreach ($asset->model->fieldset->fields as $field) {
+                    // check and make sure they're allowed to see the value of the custom field
+                    if ($field->display_in_user_view == '1') {
+                        $field_array[$field->db_column] = $field->name;
+                    }
+
+                }
+            }
+
+        }
+
+        // Since some models may re-use the same fieldsets/fields, let's make the array unique so we don't repeat columns
+        array_unique($field_array);
 
         if (isset($user->id)) {
-            return view('account/view-assets', compact('user', 'userlog'))
+            return view('account/view-assets', compact('user', 'field_array' ))
                 ->with('settings', Setting::getSettings());
-        } else {
-            // Redirect to the user management page
-            return redirect()->route('users.index')->with('error', trans('admin/users/message.user_not_found', compact('id')));
         }
+
         // Redirect to the user management page
         return redirect()->route('users.index')
             ->with('error', trans('admin/users/message.user_not_found', $user->id));
@@ -63,7 +82,7 @@ class ViewAssetsController extends Controller
         return view('account/requestable-assets', compact('assets', 'models'));
     }
 
-    public function getRequestItem(Request $request, $itemType, $itemId = null)
+    public function getRequestItem(Request $request, $itemType, $itemId = null, $cancel_by_admin = false, $requestingUser = null)
     {
         $item = null;
         $fullItemType = 'App\\Models\\'.studly_case($itemType);
@@ -100,16 +119,16 @@ class ViewAssetsController extends Controller
 
         $settings = Setting::getSettings();
 
-        if ($item_request = $item->isRequestedBy($user)) {
-            $item->cancelRequest();
-            $data['item_quantity'] = $item_request->qty;
+        if (($item_request = $item->isRequestedBy($user)) || $cancel_by_admin) {
+            $item->cancelRequest($requestingUser);
+            $data['item_quantity'] = ($item_request) ? $item_request->qty : 1;
             $logaction->logaction('request_canceled');
 
             if (($settings->alert_email != '') && ($settings->alerts_enabled == '1') && (! config('app.lock_passwords'))) {
                 $settings->notify(new RequestAssetCancelation($data));
             }
 
-            return redirect()->route('requestable-assets')->with('success')->with('success', trans('admin/hardware/message.requests.canceled'));
+            return redirect()->back()->with('success')->with('success', trans('admin/hardware/message.requests.canceled'));
         } else {
             $item->request();
             if (($settings->alert_email != '') && ($settings->alerts_enabled == '1') && (! config('app.lock_passwords'))) {
