@@ -11,7 +11,7 @@
 
 {{-- Page content --}}
 @section('inputFields')
-    
+
     @include ('partials.forms.edit.company-select', ['translated_name' => trans('general.company'), 'fieldname' => 'company_id'])
 
 
@@ -103,7 +103,7 @@
         </a>
 
         </div>
-        
+
         <div id="optional_details" class="col-md-12" style="display:none">
         <br>
             @include ('partials.forms.edit.name', ['translated_name' => trans('admin/hardware/form.name')])
@@ -148,13 +148,13 @@
                 @endphp
 
             @include ('partials.forms.edit.purchase_cost', ['currency_type' => $currency_type])
-            @include ('partials.forms.edit.depreciable_cost', ['currency_type' => $currency_type])
-            @include ('partials.forms.edit.quality')
-            @include ('partials.forms.edit.nds')
+            @include ('partials.forms.custom.depreciable_cost', ['currency_type' => $currency_type])
+            @include ('partials.forms.custom.quality')
+            @include ('partials.forms.custom.nds')
 
         </div>
     </div>
-   
+
 @stop
 
 @section('moar_scripts')
@@ -274,22 +274,22 @@
                         console.log(data.tid);
                         if (data.hasOwnProperty('tid')){
                             $('#asset_tag').val(data.tid);
-                            // $.notify({
-                            //     // options
-                            //     message: 'Успешно считана метка'
-                            // },{
-                            //     // settings
-                            //     type: 'success'
-                            // });
+                            $.notify({
+                                // options
+                                message: 'Успешно считана метка'
+                            },{
+                                // settings
+                                type: 'success'
+                            });
                         }
                     }else{
-                        // $.notify({
-                        //     // options
-                        //     message: 'Считыватель не подключен'
-                        // },{
-                        //     // settings
-                        //     type: 'danger'
-                        // });
+                        $.notify({
+                            // options
+                            message: 'Считыватель не подключен'
+                        },{
+                            // settings
+                            type: 'danger'
+                        });
                         console.log(data);
                     }
                 },

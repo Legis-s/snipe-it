@@ -28,9 +28,9 @@
   @elseif (Request::get('status')=='byod')
     {{ trans('general.byod') }}
   @elseif (Request::get('status')=='Sold')
-    Проданные
+    {{ trans('general.sold') }}
   @elseif (Request::get('status')=='Issued_for_sale')
-    Выданные на продажу
+    {{ trans('general.for_sale') }}
   @endif
 @else
 {{ trans('general.all') }}

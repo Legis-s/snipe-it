@@ -39,4 +39,6 @@ return [
     'viewusers' 			=> 'Просмотр пользователей',
     'favorite_location'     => 'Основной склад',
     'bitrix_token'          => 'Ключ Bitrix',
+    'bitrix_token_new'          => 'Новый ключ Bitrix',
+    'bitrix_id'          => 'Bitrix ID',
 ];

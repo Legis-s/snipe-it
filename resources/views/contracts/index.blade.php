@@ -14,22 +14,15 @@
       <div class="box-body">
         <div class="table-responsive">
           <div id="toolbar">
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" value="" id="only_assets_checkbox">
-              <label class="form-check-label" for="only_assets_checkbox">
-                Активы без з/д
-              </label>
-              &nbsp;
-              <input class="form-check-input" type="checkbox" value="" id="only_consumables_checkbox">
-              <label class="form-check-label" for="only_consumables_checkbox">
-                Расходники без з/д
-              </label>
-              &nbsp;
-              <input class="form-check-input" type="checkbox" value="" id="sum_checkbox">
-              <label class="form-check-label" for="sum_checkbox">
-                Превышение суммы
-              </label>
-            </div>
+            <label class="form-control">
+              <input type="checkbox" value="" id="only_assets_checkbox">Активы без з/д
+            </label>
+            <label class="form-control">
+              <input type="checkbox" value="" id="only_consumables_checkbox">Расходники без з/д
+            </label>
+            <label class="form-control">
+              <input type="checkbox" value="" id="sum_checkbox">Превышение суммы
+            </label>
           </div>
           <table
                   data-columns="{{ \App\Presenters\ContractPresenter::dataTableLayout() }}"

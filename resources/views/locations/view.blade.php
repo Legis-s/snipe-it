@@ -115,19 +115,19 @@
                     </span>
                   </a>
               </li>
-                    <li>
-                        <a href="#inventories" data-toggle="tab">
+              <li>
+                  <a href="#inventories" data-toggle="tab">
                     <span class="hidden-lg hidden-md">
                         <i class="fas fa-hdd fa-2x" aria-hidden="true"></i>
                     </span>
-                            <span class="hidden-xs hidden-sm">
-                          Инвентаризации
+                      <span class="hidden-xs hidden-sm">
+                          {{ trans('general.inventories') }}
                           {!! (($location->inventories) && ($location->inventories->count() > 0 )) ? '<badge class="badge badge-secondary">'.number_format($location->inventories->count()).'</badge>' : '' !!}
-
                     </span>
-                        </a>
-                    </li>
+                  </a>
+              </li>
           </ul>
+
 
           <div class="tab-content">
               <div class="tab-pane active" id="users">
@@ -385,40 +385,33 @@
                         </div>
                     </div> <!-- /.row -->
                 </div> <!-- /.tab-pane history -->
-
-          </div><!--/.col-md-9-->
-      </div><!--/.col-md-9-->
-  </div><!--/.col-md-9-->
-                    <div class="tab-pane" id="inventories">
-                        <h2 class="box-title">Инвентаризации</h2>
-
-                        <div class="table table-responsive">
-                            <table
-                                    data-columns="{{ \App\Presenters\InventoryPresenter::dataTableLayout() }}"
-                                    data-cookie-id-table="inventoriesTable"
-                                    data-pagination="true"
-                                    data-id-table="inventoriesTable"
-                                    data-search="true"
-                                    data-side-pagination="server"
-                                    data-show-columns="true"
-                                    data-show-export="true"
-                                    data-show-refresh="true"
-                                    data-sort-order="asc"
-                                    id="inventoriesTable"
-                                    class="table table-striped snipe-table"
-                                    data-url="{{route('api.inventories.index', ['location_id' => $location->id])}}"
-                                    data-export-options='{
+              <div class="tab-pane" id="inventories">
+                  <h2 class="box-title">Инвентаризации</h2>
+                  <div class="table table-responsive">
+                      <table
+                              data-columns="{{ \App\Presenters\InventoryPresenter::dataTableLayout() }}"
+                              data-cookie-id-table="inventoriesTable"
+                              data-pagination="true"
+                              data-id-table="inventoriesTable"
+                              data-search="true"
+                              data-side-pagination="server"
+                              data-show-columns="true"
+                              data-show-export="true"
+                              data-show-refresh="true"
+                              data-sort-order="asc"
+                              id="inventoriesTable"
+                              class="table table-striped snipe-table"
+                              data-url="{{route('api.inventories.index', ['location_id' => $location->id])}}"
+                              data-export-options='{
                               "fileName": "export-locations-{{ str_slug($location->name) }}-components-{{ date('Y-m-d') }}",
                               "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
                               }'>
-
-                            </table>
-
-                        </div><!-- /.table-responsive -->
-                    </div><!-- /.tab-pane -->
-
-                </div><!--/.col-md-9-->
-            </div><!--/.col-md-9-->
+                      </table>
+                  </div><!-- /.table-responsive -->
+              </div><!-- /.tab-pane -->
+          </div><!--/.col-md-9-->
+      </div><!--/.col-md-9-->
+  </div><!--/.col-md-9-->
 
   <div class="col-md-3">
 
@@ -428,10 +421,15 @@
       <div class="col-md-12" style="padding-top: 5px;">
           <a href="{{ route('locations.print_assigned', ['locationId' => $location->id]) }}" style="width: 100%;" class="btn btn-sm btn-default pull-left">{{ trans('admin/locations/table.print_assigned') }} </a>
       </div>
-      <div class="col-md-12" style="padding-top: 5px; padding-bottom: 20px;">
+      <div class="col-md-12" style="padding-top: 5px;">
           <a href="{{ route('locations.print_all_assigned', ['locationId' => $location->id]) }}" style="width: 100%;" class="btn btn-sm btn-default pull-left">{{ trans('admin/locations/table.print_all_assigned') }} </a>
       </div>
 
+      @if (($location->bitrix_id))
+      <div class="col-md-12" style="padding-top: 15px; padding-bottom: 20px;">
+          <a href="https://bitrix.legis-s.ru/crm/object/details/{{ $location->bitrix_id}}/" style="width: 100%;" class="btn btn-sm btn-info pull-left">{{ trans('general.bitrix_open') }} </a>
+      </div>
+      @endif
 
     @if ($location->image!='')
       <div class="col-md-12 text-center" style="padding-bottom: 20px;">
@@ -458,24 +456,11 @@
               @if ($location->ldap_ou)
                   <li>{{ trans('admin/locations/table.ldap_ou') }}: {{ $location->ldap_ou }}</li>
               @endif
-              @if (($location->bitrix_id))
-                  <li><a href="https://bitrix.legis-s.ru/crm/object/details/{{ $location->bitrix_id}}/"   target="_blank" >Открыть в Bitrix</a></li>
-              @endif
         </ul>
 
-        @if (($location->state!='') && ($location->country!='') && (config('services.google.maps_api_key')))
-          <div class="col-md-12 text-center">
-            <img src="https://maps.googleapis.com/maps/api/staticmap?markers={{ urlencode($location->address.','.$location->city.' '.$location->state.' '.$location->country.' '.$location->zip) }}&size=700x500&maptype=roadmap&key={{ config('services.google.maps_api_key') }}" class="img-thumbnail" style="width:100%" alt="Map">
-          </div>
-        @endif
-
-                @if ($location->coordinates!='')
-                    <div id="map" style=" width: 100%; height: 400px"></div>
-{{--                    <div class="col-md-12">--}}
-{{--                        <div id="map" style=" width: 100%; height: 400px"></div>--}}
-{{--                        <img src="https://maps.googleapis.com/maps/api/staticmap?markers={{ urlencode($location->address.','.$location->city.' '.$location->state.' '.$location->country.' '.$location->zip) }}&size=700x500&maptype=roadmap&key={{ config('services.google.maps_api_key') }}" class="img-thumbnail" style="width:100%" alt="Map">--}}
-{{--                    </div>--}}
-                @endif
+          @if ($location->coordinates!='')
+              <div id="map" style=" width: 100%; height: 400px"></div>
+          @endif
 
 
 
@@ -493,25 +478,24 @@
         'search' => true
      ])
     @if ($location->coordinates!='')
-    <script src="https://api-maps.yandex.ru/2.1/?apikey=9aff6103-40f7-49e4-ad79-aa2a69d421d6&lang=ru_RU"
-            type="text/javascript">
-    </script>
-    <script type="text/javascript">
-        ymaps.ready(init);
-        function init() {
-            // Создание карты.
-            var myMap = new ymaps.Map("map", {
-                center: [{{$location->coordinates}}],
-                zoom: 15,
-                controls: ['zoomControl']
-            });
-
-            myMap.geoObjects.add(new ymaps.Placemark([{{$location->coordinates}}], {
-                // balloonContent: 'цвет <strong>воды пляжа бонди</strong>'
-            }, {
-                preset: 'islands#blueCircleDotIconWithCaption',
-            }));
-        }
-    </script>
+        <script src="https://api-maps.yandex.ru/2.1/?apikey=9aff6103-40f7-49e4-ad79-aa2a69d421d6&lang=ru_RU"
+                type="text/javascript">
+        </script>
+        <script type="text/javascript">
+            ymaps.ready(init);
+            function init() {
+                // Создание карты.
+                var myMap = new ymaps.Map("map", {
+                    center: [{{$location->coordinates}}],
+                    zoom: 15,
+                    controls: ['zoomControl']
+                });
+                myMap.geoObjects.add(new ymaps.Placemark([{{$location->coordinates}}], {
+                    // balloonContent: 'цвет <strong>воды пляжа бонди</strong>'
+                }, {
+                    preset: 'islands#blueCircleDotIconWithCaption',
+                }));
+            }
+        </script>
     @endif
 @stop

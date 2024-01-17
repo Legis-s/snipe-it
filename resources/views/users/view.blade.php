@@ -267,7 +267,7 @@
 
                   </div>
 
-               
+
 
                    <!-- company -->
                     @if (!is_null($user->company))
@@ -661,6 +661,35 @@
                            </div>
                    </div><!--/.row-->
                    @endif
+
+                   @if ($user->bitrix_id)
+                   <div class="row">
+                       <!-- bitrix_id -->
+
+                       <div class="col-md-3 col-sm-2">
+                           {{ trans('admin/users/table.bitrix_id') }}
+                       </div>
+                       <div class="col-md-9 col-sm-2">
+                           {{ $user->bitrix_id }}
+                       </div>
+
+                   </div>
+                   @endif
+
+                   @if ($user->bitrix_token)
+                       <!-- bitrix_token -->
+                       <div class="row">
+
+                           <div class="col-md-3">
+                               {{ trans('admin/users/table.bitrix_token') }}
+                           </div>
+                           <div class="col-md-9">
+                               {{ $user->bitrix_token }}
+                           </div>
+
+                       </div>
+                   @endif
+
                   </div> <!--/end striped container-->
                 </div> <!-- end col-md-9 -->
           </div> <!--/.row-->

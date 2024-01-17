@@ -1,7 +1,7 @@
 <?php
 
-return array(
-'title' => 'Массовые операции',
+return [
+    'title' => 'Массовые операции',
     'sell' => 'Продать',
     'checkout'=> 'Выдать',
     'return' => 'Вернуть',
@@ -12,4 +12,4 @@ return array(
     'consumables_count' => 'Количество расходников',
     'creator' => 'Ответственный',
     'purpose' => 'Цель'
-);
+];

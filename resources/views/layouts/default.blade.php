@@ -40,7 +40,14 @@
     {{-- page level css --}}
     @stack('css')
 
-
+    <!-- star-rating -->
+    <link rel="stylesheet" href="{{ url(asset('js/star-rating/dist/star-rating.css')) }}">
+    <!-- lightgallery  CSS -->
+    <link rel="stylesheet" href="{{ url(asset('js/lightgallery/css/lightgallery.css')) }}">
+    <!-- sweetalert2  CSS -->
+    <link rel="stylesheet" href="{{ url(asset('css/sweetalert2.min.css')) }}">
+    <!-- lightbox  CSS -->
+    <link rel="stylesheet" href="{{ url(asset('js/lightbox/css/lightbox.min.css')) }}">
 
     @if (($snipeSettings) && ($snipeSettings->header_color!=''))
         <style nonce="{{ csrf_token() }}">
@@ -377,6 +384,15 @@
                                             </li>
                                         @endcan
                                         <li class="divider"></li>
+                                        @impersonating($guard = null)
+                                        <li>
+                                            <a href="{{ route('impersonate.leave') }}">
+                                                <i class="fas fa-user-times fa-fw" aria-hidden="true"></i>
+                                                Leave impersonation
+                                            </a>
+                                        </li>
+                                        <li class="divider"></li>
+                                        @endImpersonating
                                         <li>
 
                                             <a href="{{ route('logout.get') }}"
@@ -427,6 +443,13 @@
                                     <span>{{ trans('general.dashboard') }}</span>
                                 </a>
                             </li>
+                        @endcan
+                        @can('checkout', \App\Models\Asset::class)
+                                <li {!! (\Request::route()->getName()=='bulk*' ? ' class="active"' : '') !!}>
+                                    <a href="{{ route('bulk.index') }}">
+                                        <i class="fas fa-dolly fa-fw" aria-hidden="true"></i> <span>{{ trans('general.mass_operations') }}</span>
+                                    </a>
+                                </li>
                         @endcan
                         @can('index', \App\Models\Asset::class)
                             <li class="treeview{{ ((Request::is('statuslabels/*') || Request::is('hardware*')) ? ' active' : '') }}">
@@ -508,19 +531,27 @@
                                             {{ trans('admin/hardware/general.requestable') }}
                                         </a>
                                     </li>
+                                    <li{!! (Request::query('status') == 'Issued_for_sale' ? ' class="active"' : '') !!}><a href="{{ url('hardware?status=Issued_for_sale') }}"><i class="fas fa-usd text-blue fa-fw"></i>
+                                            {{ trans('admin/hardware/general.issued_for_sale') }}
+                                        </a>
+                                    </li>
+                                    <li{!! (Request::query('status') == 'Sold' ? ' class="active"' : '') !!}><a href="{{ url('hardware?status=Sold') }}"><i class="fas fa-usd text-red fa-fw"></i>
+                                            {{ trans('admin/hardware/general.sold') }}
+                                        </a>
+                                    </li>
 
-                                    @can('audit', \App\Models\Asset::class)
-                                        <li{!! (Request::is('hardware/audit/due') ? ' class="active"' : '') !!}>
-                                            <a href="{{ route('assets.audit.due') }}">
-                                                <i class="fas fa-history text-yellow fa-fw"></i> {{ trans('general.audit_due') }}
-                                            </a>
-                                        </li>
-                                        <li{!! (Request::is('hardware/audit/overdue') ? ' class="active"' : '') !!}>
-                                            <a href="{{ route('assets.audit.overdue') }}">
-                                                <i class="fas fa-exclamation-triangle text-red fa-fw"></i> {{ trans('general.audit_overdue') }}
-                                            </a>
-                                        </li>
-                                    @endcan
+{{--                                    @can('audit', \App\Models\Asset::class)--}}
+{{--                                        <li{!! (Request::is('hardware/audit/due') ? ' class="active"' : '') !!}>--}}
+{{--                                            <a href="{{ route('assets.audit.due') }}">--}}
+{{--                                                <i class="fas fa-history text-yellow fa-fw"></i> {{ trans('general.audit_due') }}--}}
+{{--                                            </a>--}}
+{{--                                        </li>--}}
+{{--                                        <li{!! (Request::is('hardware/audit/overdue') ? ' class="active"' : '') !!}>--}}
+{{--                                            <a href="{{ route('assets.audit.overdue') }}">--}}
+{{--                                                <i class="fas fa-exclamation-triangle text-red fa-fw"></i> {{ trans('general.audit_overdue') }}--}}
+{{--                                            </a>--}}
+{{--                                        </li>--}}
+{{--                                    @endcan--}}
 
                                     <li class="divider">&nbsp;</li>
                                     @can('checkin', \App\Models\Asset::class)
@@ -572,6 +603,14 @@
                                 </ul>
                             </li>
                         @endcan
+                            @can('view', \App\Models\Location::class)
+                                <li{!! (Request::is('devices*') ? ' class="active"' : '') !!}>
+                                    <a href="{{ route('devices.index') }}">
+                                        <i class="fas fa-mobile fa-fw"></i>
+                                        <span> {{ trans('general.devices') }}</span>
+                                    </a>
+                                </li>
+                            @endcan
                         @can('view', \App\Models\License::class)
                             <li{!! (Request::is('licenses*') ? ' class="active"' : '') !!}>
                                 <a href="{{ route('licenses.index') }}">
@@ -612,7 +651,22 @@
                                 </a>
                             </li>
                         @endcan
-
+                            @can('view', \App\Models\Purchase::class)
+                                <li{!! (Request::is('purchases*') ? ' class="active"' : '') !!}>
+                                    <a href="{{ route('purchases.index') }}">
+                                        <i class="fas fa-shopping-basket fa-fw"></i>
+                                        <span>{{ trans('general.purchases') }}</span>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('view', \App\Models\Purchase::class)
+                                <li{!! (Request::is('inventories*') ? ' class="active"' : '') !!}>
+                                    <a href="{{ route('inventories.index') }}">
+                                        <i class="fas fa-clipboard-check fa-fw"></i>
+                                        <span>{{ trans('general.inventory') }}</span>
+                                    </a>
+                                </li>
+                            @endcan
                         @can('view', \App\Models\User::class)
                             <li{!! (Request::is('users*') ? ' class="active"' : '') !!}>
                                 <a href="{{ route('users.index') }}" accesskey="6">
@@ -718,6 +772,23 @@
                                             </a>
                                         </li>
                                     @endcan
+
+                                        <li class="divider">&nbsp;</li>
+
+                                        @can('view', \App\Models\Statuslabel::class)
+                                            <li {!! (Request::is('inventorystatuslabels*') ? ' class="active"' : '') !!}>
+                                                <a href="{{ route('inventorystatuslabels.index') }}">
+                                                    {{ trans('general.inventory_status_labels') }}
+                                                </a>
+                                            </li>
+                                        @endcan
+                                        @can('view', \App\Models\Asset::class)
+                                            <li {!! (Request::is('contracts*') ? ' class="active"' : '') !!}>
+                                                <a href="{{ route('contracts.index') }}">
+                                                    {{ trans('general.contracts') }}
+                                                </a>
+                                            </li>
+                                        @endcan
                                 </ul>
                             </li>
                         @endcan
@@ -774,6 +845,16 @@
                                 </ul>
                             </li>
                         @endcan
+
+                        @can('view', \App\Models\Asset::class)
+                           <li{!! (Request::is('map*') ? ' class="active"' : '') !!}>
+                               <a href="{{ route('map') }}">
+                                   <i class="fas fa-map fa-fw"></i>
+                                   <span>{{ trans('general.map') }}</span>
+                               </a>
+                           </li>
+                        @endcan
+
 
                         @can('viewRequestable', \App\Models\Asset::class)
                             <li{!! (Request::is('account/requestable-assets') ? ' class="active"' : '') !!}>
@@ -947,6 +1028,11 @@
         <script src="{{ url(mix('js/dist/all.js')) }}" nonce="{{ csrf_token() }}"></script>
         <script defer src="{{ url(mix('js/dist/all-defer.js')) }}" nonce="{{ csrf_token() }}"></script>
 
+        <script src="{{ url(asset('js/star-rating/dist/star-rating.js')) }}"></script>
+        <script src="{{ url(asset('js/lightgallery/js/lightgallery.min.js')) }}"></script>
+        <script src="{{ url(asset('js/sweetalert2.min.js')) }}"></script>
+        <script src="{{ url(asset('js/timeago.js')) }}"></script>
+        <script src="{{ url(asset('js/lightbox/js/lightbox.min.js')) }}" nonce="{{ csrf_token() }}"></script>
         <!-- v5-beta: This pGenerator call must remain here for v5 - until fixed - so that the JS password generator works for the user create modal. -->
         <script src="{{ url('js/pGenerator.jquery.js') }}"></script>
 

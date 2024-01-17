@@ -52,7 +52,7 @@
                           <span class="hidden-lg hidden-md">
                             <i class="far fa-save fa-2x" aria-hidden="true"></i>
                           </span>
-                            <span class="hidden-xs hidden-sm"> Инвентаризации
+                            <span class="hidden-xs hidden-sm"> {{ trans('general.inventories') }}
                                 {!! ($asset->inventory_items->count() > 0 ) ? '<badge class="badge badge-secondary">'.number_format($asset->inventory_items->count()).'</badge>' : '' !!}
                           </span>
                         </a>
@@ -91,16 +91,14 @@
                           </span>
                         </a>
                     </li>
-                  <li>
+                    <li>
                         <a href="#consumables" data-toggle="tab">
                             <span class="hidden-lg hidden-md">
-                                <i class="fas fa-barcode" aria-hidden="true"></i>
-                                </span>
-                          <span class="hidden-xs hidden-sm">
-                            {{ trans('general.consumables') }}
+                                <i class="fas fa-barcode fa-2x" aria-hidden="true"></i>
                             </span>
+                            <span class="hidden-xs hidden-sm">{{ trans('general.consumables') }}</span>
                         </a>
-                  </li>
+                    </li>
                     <li>
                         <a href="#history" data-toggle="tab">
                           <span class="hidden-lg hidden-md">
@@ -477,7 +475,7 @@
                                             <div class="row">
                                                 <div class="col-md-2">
                                                     <strong>
-                                                        Закупка
+                                                        {{ trans('general.purchase') }}
                                                     </strong>
                                                 </div>
                                                 <div class="col-md-6">
@@ -825,24 +823,24 @@
                                         </div>
                                     @endif
 
-{{--                                    @if ($asset->defaultLoc)--}}
-{{--                                        <div class="row">--}}
-{{--                                            <div class="col-md-2">--}}
-{{--                                                <strong>--}}
-{{--                                                    {{ trans('admin/hardware/form.default_location') }}--}}
-{{--                                                </strong>--}}
-{{--                                            </div>--}}
-{{--                                            <div class="col-md-6">--}}
-{{--                                                @can('superuser')--}}
-{{--                                                    <a href="{{ route('locations.show', ['location' => $asset->defaultLoc->id]) }}">--}}
-{{--                                                        {{ $asset->defaultLoc->name }}--}}
-{{--                                                    </a>--}}
-{{--                                                @else--}}
-{{--                                                    {{ $asset->defaultLoc->name }}--}}
-{{--                                                @endcan--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-{{--                                    @endif--}}
+                                    @if ($asset->defaultLoc)
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <strong>
+                                                    {{ trans('admin/hardware/form.default_location') }}
+                                                </strong>
+                                            </div>
+                                            <div class="col-md-6">
+                                                @can('superuser')
+                                                    <a href="{{ route('locations.show', ['location' => $asset->defaultLoc->id]) }}">
+                                                        {{ $asset->defaultLoc->name }}
+                                                    </a>
+                                                @else
+                                                    {{ $asset->defaultLoc->name }}
+                                                @endcan
+                                            </div>
+                                        </div>
+                                    @endif
 
                                     @if ($asset->created_at!='')
                                         <div class="row">
@@ -960,7 +958,7 @@
                                             @if ($inventory_item->photo)
                                                 <div class="text-center col-md-12" style="padding-bottom: 15px;">
                                                     <a href="{{$inventory_item->photo_url() }}" data-toggle="lightbox">
-                                                        <img src="{{ $inventory_item->photo_url()}}" class="assetimg img-responsive"">
+                                                        <img src="{{ $inventory_item->photo_url()}}" class="assetimg img-responsive">
                                                     </a>
                                                 </div>
                                                 @break
@@ -969,7 +967,11 @@
                                 @endif
 
                                     <!-- Start side button column -->
-
+                                    <div class="col-md-12" style="padding-bottom: 10px;">
+                                        <a id="print_tag" style="width: 100%;" class="btn btn-sm btn-info hidden-print">
+                                            {{ trans('general.print_tag') }}
+                                        </a>
+                                    </div>
                                     @if (($asset->assetstatus) && ($asset->assetstatus->deployable=='1'))
                                         @if (($asset->assigned_to != '') && ($asset->deleted_at==''))
                                             @can('checkin', \App\Models\Asset::class)
@@ -986,13 +988,23 @@
                                                         {{ trans('admin/hardware/general.checkout') }}
                                                     </a>
                                                 </div>
+                                                <div class="col-md-12" style="padding-top: 5px;">
+                                                    <a href="{{ route('hardware.sell.create', $asset->id)  }}" style="width: 100%;" class="btn btn-sm btn-primary hidden-print">
+                                                        {{ trans('general.sell') }}
+                                                    </a>
+                                                </div>
+                                                    <div class="col-md-12" style="padding-top: 5px;">
+                                                    <a href="{{ route('hardware.rent.create', $asset->id)  }}" style="width: 100%;" class="btn btn-sm btn-primary hidden-print">
+                                                        {{ trans('general.rent') }}
+                                                    </a>
+                                                    </div>
                                             @endcan
                                         @endif
                                     @endif
 
 
                                     @can('update', $asset)
-                                        <div class="col-md-12" style="padding-top: 5px;">
+                                        <div class="col-md-12" style="padding-top: 15px;">
                                             <a href="{{ route('hardware.edit', $asset->id) }}" style="width: 100%;" class="btn btn-sm btn-primary hidden-print">
                                                 {{ trans('admin/hardware/general.edit') }}
                                             </a>
@@ -1301,38 +1313,32 @@
                     <div class="tab-pane fade" id="consumables">
                         <div class="row">
                             <div class="col-md-12">
-
-                                <div id="toolbar">
-                                </div>
-                                <!-- checked out assets table -->
-                                <div class="table-responsive">
-                                    <table
-                                            data-columns="{{ \App\Presenters\ConsumableAssignmentPresenter::dataTableLayoutIn() }}"
-                                            data-cookie-id-table="consumablesCheckedoutTable"
-                                            data-pagination="true"
-                                            data-id-table="consumablesCheckedoutTable"
-                                            data-search="false"
-                                            data-side-pagination="server"
-                                            data-show-columns="true"
-                                            data-show-export="true"
-                                            data-show-footer="true"
-                                            data-show-refresh="true"
-                                            data-sort-order="asc"
-                                            data-sort-name="name"
-                                            id="consumablesCheckedoutTable"
-                                            class="table table-striped snipe-table"
-                                            data-url="{{route('api.consumableassignments.index',['asset_id'=> $asset->id])}}">
-{{--                                                            <thead>--}}
-{{--                                                            <tr>--}}
-{{--                                                              <th data-searchable="false" data-sortable="false" data-field="name">Наименование</th>--}}
-{{--                                                              <th data-searchable="false" data-sortable="false" data-field="quantity">Количество</th>--}}
-{{--                                                              <th data-searchable="false" data-sortable="false" data-field="created_at" data-formatter="dateDisplayFormatter">{{ trans('general.date') }}</th>--}}
-{{--                                                              <th data-searchable="false" data-sortable="false" data-field="admin">Выдал</th>--}}
-{{--                                                            </tr>--}}
-{{--                                                            </thead>--}}
-                                    </table>
-                                </div>
-
+                                @if ($asset->assignedAssets->count() > 0)
+                                    <div class="table-responsive">
+                                        <table
+                                                data-columns="{{ \App\Presenters\ConsumableAssignmentPresenter::dataTableLayoutIn() }}"
+                                                data-cookie-id-table="consumablesCheckedoutTable"
+                                                data-pagination="true"
+                                                data-id-table="consumablesCheckedoutTable"
+                                                data-search="false"
+                                                data-side-pagination="server"
+                                                data-show-columns="true"
+                                                data-show-export="true"
+                                                data-show-footer="true"
+                                                data-show-refresh="true"
+                                                data-sort-order="asc"
+                                                data-sort-name="name"
+                                                id="consumablesCheckedoutTable"
+                                                class="table table-striped snipe-table"
+                                                data-url="{{route('api.consumableassignments.index',['asset_id'=> $asset->id])}}">
+                                        </table>
+                                    </div>
+                                @else
+                                    <div class="alert alert-info alert-block">
+                                        <i class="fas fa-info-circle"></i>
+                                        {{ trans('general.no_results') }}
+                                    </div>
+                                @endif
 
                             </div><!-- /col -->
                         </div> <!-- row -->
@@ -1694,16 +1700,6 @@
                   });
             });
         });
-//                 $('#assetHistory').on('post-body.bs.table', function (e, data) {
-// // console.log("assetHistory");
-// // $('.aniimated-thumbnials').lightGallery({
-// //   // thumbnail:true,
-// // });
-//                   lightbox.option({
-//                     'resizeDuration': 200,
-//                     'wrapAround': true
-//                   })
-//                 });
     </script>
 
 @stop

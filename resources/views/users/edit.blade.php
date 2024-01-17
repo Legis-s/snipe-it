@@ -560,21 +560,21 @@
                           </div>
 
                           <!-- bitrix_token -->
-
                           <div class="form-group{!! $errors->has('bitrix_token') ? ' has-error' : '' !!}">
-                              <label for="bitrix_token" class="col-md-3 control-label">Bitrix token</label>
+                              <label for="bitrix_token" class="col-md-3 control-label">{{ trans('admin/users/table.bitrix_token') }}</label>
                               <div class="col-md-8">
                                   <textarea readonly disabled class="form-control" id="bitrix_token" name="bitrix_token">{{ Request::old('bitrix_token', $user->bitrix_token) }}</textarea>
                                   {!! $errors->first('bitrix_token', '<span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span>') !!}
                               </div>
                           </div>
                           <div class="form-group{!! $errors->has('new_bitrix_token') ? ' has-error' : '' !!}">
-                              <label for="new_bitrix_token" class="col-md-3 control-label">New bitrix token</label>
+                              <label for="new_bitrix_token" class="col-md-3 control-label">{{ trans('admin/users/table.bitrix_token_new') }}</label>
                               <div class="col-md-8">
                                   <textarea  class="form-control" id="new_bitrix_token" name="new_bitrix_token"></textarea>
                                   {!! $errors->first('new_bitrix_token', '<span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span>') !!}
                               </div>
                           </div>
+                          @include('partials.forms.custom.location_bitrix_id')
 
                       </div>
                   </div>

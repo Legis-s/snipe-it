@@ -2,14 +2,14 @@
 
 {{-- Page title --}}
 @section('title')
-Статусы инвентаризаций
+{{ trans('admin/inventorystatuslabels/table.title') }}
 @parent
 @stop
 
 @section('header_right')
     @can('create', \App\Models\Statuslabel::class)
         <a href="{{ route('inventorystatuslabels.create') }}" class="btn btn-primary pull-right">
-{{ trans('general.create') }}</a>
+        {{ trans('general.create') }}</a>
     @endcan
 @stop
 {{-- Page content --}}
@@ -22,9 +22,9 @@
         <div class="table-responsive">
 
             <table
-                    data-cookie-id-table="statuslabelsTable"
+                    data-cookie-id-table="inventoryStatusLabelsTable"
                     data-pagination="true"
-                    data-id-table="statuslabelsTable"
+                    data-id-table="inventoryStatusLabelsTable"
                     data-search="true"
                     data-show-footer="false"
                     data-side-pagination="server"
@@ -33,7 +33,7 @@
                     data-show-refresh="true"
                     data-sort-order="asc"
                     data-sort-name="name"
-                    id="statuslabelsTable"
+                    id="inventoryStatusLabelsTable"
                     class="table table-striped snipe-table"
                     data-url="{{ route('api.inventorystatuslabels.index') }}"
                     data-export-options='{
@@ -43,11 +43,10 @@
             <thead>
               <tr>
                 <th data-sortable="true" data-field="id" data-visible="false">{{ trans('general.id') }}</th>
-                <th data-sortable="true" data-field="name">{{ trans('admin/statuslabels/table.name') }}</th>
-
-                <th data-sortable="false" data-field="type" data-formatter="statusLabelSuccessFormatter">{{ trans('admin/statuslabels/table.status_type') }}</th>
-                <th data-sortable="true" data-field="color" data-formatter="colorSqFormatter">{{ trans('admin/statuslabels/table.color') }}</th>
-              <th data-formatter="inventorystatuslabelsActionsFormatter" data-searchable="false" data-sortable="false" data-field="actions">{{ trans('table.actions') }}</th>
+                <th data-sortable="true" data-field="name">{{ trans('admin/inventorystatuslabels/table.name') }}</th>
+                <th data-sortable="false" data-field="type" data-formatter="statusLabelSuccessFormatter">{{ trans('admin/inventorystatuslabels/table.status_type') }}</th>
+                <th data-sortable="true" data-field="color" data-formatter="colorSqFormatter">{{ trans('admin/inventorystatuslabels/table.color') }}</th>
+                <th data-formatter="inventorystatuslabelsActionsFormatter" data-searchable="false" data-sortable="false" data-field="actions">{{ trans('table.actions') }}</th>
               </tr>
             </thead>
           </table>
@@ -70,10 +69,17 @@
 
       function statusLabelSuccessFormatter (row, value) {
           if (value.success=="1"){
-              return "Успешно"
+              text_color = 'green';
+              icon_style = 'fa-circle';
+              trans  = 'Успешно';
           }else{
-              return "Не успешно"
+              text_color = 'red';
+              icon_style = 'fa-circle';
+              trans  ='Не успешно';
           }
+          var typename_lower = trans;
+          var typename = typename_lower.charAt(0).toUpperCase() + typename_lower.slice(1);
+          return '<i class="fa ' + icon_style + ' text-' + text_color + '"></i> ' + typename;
       }
   </script>
 @stop

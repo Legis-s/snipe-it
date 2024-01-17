@@ -10,7 +10,7 @@
 {{-- Page content --}}
 @section('inputFields')
 @include ('partials.forms.edit.name', ['translated_name' => trans('admin/locations/table.name')])
-@include ('partials.forms.edit.bitrix_id')
+
 <!-- parent -->
 @include ('partials.forms.edit.location-select', ['translated_name' => trans('admin/locations/table.parent'), 'fieldname' => 'parent_id'])
 
@@ -33,16 +33,6 @@
 
 @include ('partials.forms.edit.address')
 
-
-<div class="form-group">
-    <label class="col-md-3 control-label">Склад</label>
-    <div class="col-md-9 checkbox">
-        <label>
-            {{ Form::checkbox('sklad', '1', old('sklad', $item->sklad), ['class'=>'minimal', 'aria-label'=>'sklad']) }} Да
-        </label>
-    </div>
-</div>
-
 <!-- LDAP Search OU -->
 @if ($snipeSettings->ldap_enabled == 1)
     <div class="form-group {{ $errors->has('ldap_ou') ? ' has-error' : '' }}">
@@ -57,5 +47,9 @@
 @endif
 
 @include ('partials.forms.edit.image-upload', ['image_path' => app('locations_upload_path')])
+
+@include ('partials.forms.custom.location_bitrix_id')
+@include ('partials.forms.custom.location_sklad')
+
 @stop
 
