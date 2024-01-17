@@ -679,14 +679,12 @@
                    @if ($user->bitrix_token)
                        <!-- bitrix_token -->
                        <div class="row">
-
                            <div class="col-md-3">
                                {{ trans('admin/users/table.bitrix_token') }}
                            </div>
-                           <div class="col-md-9">
+                           <div class="col-md-9 " style="word-break: break-all;line-height:1.3;">
                                {{ $user->bitrix_token }}
                            </div>
-
                        </div>
                    @endif
 
