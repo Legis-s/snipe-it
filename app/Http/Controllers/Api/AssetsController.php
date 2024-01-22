@@ -154,11 +154,6 @@ class AssetsController extends Controller
         } elseif ($request->filled('search')) {
             $assets->TextSearch($request->input('search'));
         }
-        if ($request->filled('contract_id')) {
-            $assets->where('assets.contract_id', '=', $request->input('contract_id'));
-            $settings->show_archived_in_list = "1";
-
-        }
 
         // This is used by the audit reporting routes
         if (Gate::allows('audit', Asset::class)) {
@@ -328,12 +323,11 @@ class AssetsController extends Controller
             $assets->where('assets.order_number', '=', strval($request->get('order_number')));
         }
 
+        //Custom filters
         if ($request->filled('contract_id')) {
             $assets->where('assets.contract_id', '=', $request->input('contract_id'));
             $settings->show_archived_in_list = "1";
-
         }
-
 
         if ($request->filled('bitrix_object_id')) {
             $bitrix_object_id = $request->input('bitrix_object_id');
@@ -344,11 +338,9 @@ class AssetsController extends Controller
         if ($request->filled('bulk')) {
             $data = json_decode($request->input('data'), true);
             if (is_array($data)){
-                \Debugbar::info("is_array");
-                \Debugbar::info($data);
+//                \Debugbar::info($data);
                 $assets->whereIn('assets.id', $data);
             }else{
-                \Debugbar::info("not array");
                 $assets->whereIn('assets.id', []);
             }
         }
@@ -932,7 +924,8 @@ class AssetsController extends Controller
 //        }
 
 
-        if ($asset->checkOut($target, Auth::user(), $checkout_at, $expected_checkin, $note, $asset_name, $asset->location_id, $quality, $depreciable_cost)) {
+
+        if ($asset->checkOut($target, Auth::user(), $checkout_at, $expected_checkin, $note, $asset_name, $asset->location_id)) {
             return response()->json(Helper::formatStandardApiResponse('success', ['asset'=> e($asset->asset_tag)], trans('admin/hardware/message.checkout.success')));
         }
 
@@ -994,20 +987,13 @@ class AssetsController extends Controller
 
         $checkin_at = $request->filled('checkin_at') ? $request->input('checkin_at').' '. date('H:i:s') : date('Y-m-d H:i:s');
         $originalValues = $asset->getRawOriginal();
-        $changed = [];
 
         if (($request->filled('checkin_at')) && ($request->get('checkin_at') != date('Y-m-d'))) {
             $originalValues['action_date'] = $checkin_at;
         }
-        foreach ($asset->getRawOriginal() as $key => $value) {
-            if ($asset->getRawOriginal()[$key] != $asset->getAttributes()[$key]) {
-                $changed[$key]['old'] = $asset->getRawOriginal()[$key];
-                $changed[$key]['new'] = $asset->getAttributes()[$key];
-            }
-        }
 
         if ($asset->save()) {
-            event(new CheckoutableCheckedIn($asset, $target, Auth::user(), $request->input('note'), $checkin_at,$changed, $originalValues));
+            event(new CheckoutableCheckedIn($asset, $target, Auth::user(), $request->input('note'), $checkin_at, $originalValues));
 
             return response()->json(Helper::formatStandardApiResponse('success', [
                 'asset_tag'=> e($asset->asset_tag),

@@ -131,11 +131,10 @@ class Asset extends Depreciable
         'notes'            => 'nullable|string|max:65535',
         'assigned_to'      => 'nullable|integer',
         'requestable'      => 'nullable|boolean',
-        'depreciable_cost'=> 'numeric|nullable',
+        'depreciable_cost'=> 'nullable|numeric|gte:0',
         'quality'         => 'integer|between:1,5|nullable',
         'purchase_id'     => 'integer|nullable',
         'nds'             => 'integer|max:100',
-        'purchase_cost'   => 'numeric|nullable|gte:0',
     ];
 
 
@@ -164,12 +163,6 @@ class Asset extends Depreciable
         'warranty_months',
         'requestable',
         'last_checkout',
-        'purchase_id',
-        'expected_checkin',
-        'contract_id',
-        'depreciable_cost',
-        'quality',
-        'nds',
         'user_verified_id',
         'byod',
         'asset_eol_date',
@@ -177,6 +170,12 @@ class Asset extends Depreciable
         'last_audit_date',
         'next_audit_date',
         'asset_eol_date',
+        'expected_checkin',
+        'purchase_id',
+        'contract_id',
+        'depreciable_cost',
+        'quality',
+        'nds',
     ];
 
     use Searchable;
@@ -199,9 +198,9 @@ class Asset extends Depreciable
       'expected_checkin', 
       'next_audit_date', 
       'last_audit_date',
-        'depreciable_cost',
-        'quality',
       'asset_eol_date',
+      'depreciable_cost',
+      'quality',
     ];
 
     /**
@@ -333,19 +332,16 @@ class Asset extends Depreciable
         $status = Statuslabel::where('name', 'Выдано')->first();
         if ($this->status_id == $status->id){
             return true;
-        }else{
-            return false;
         }
+        return false;
     }
     public function availableForReview()
     {
         $status = Statuslabel::where('name', 'Ожидает проверки')->first();
         if ($this->status_id == $status->id){
             return true;
-        }else{
-            return false;
         }
-
+        return false;
     }
 
     public function mass_operations()

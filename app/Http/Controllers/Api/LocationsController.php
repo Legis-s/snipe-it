@@ -11,6 +11,7 @@ use App\Models\Location;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 
 class LocationsController extends Controller
 {
@@ -42,12 +43,12 @@ class LocationsController extends Controller
             'locations.country',
             'locations.parent_id',
             'locations.manager_id',
-            'locations.bitrix_id',
             'locations.created_at',
             'locations.updated_at',
             'locations.image',
             'locations.ldap_ou',
             'locations.currency',
+            'locations.bitrix_id',
             'locations.notes',
             'locations.sklad',
             'locations.pult_id',
@@ -163,9 +164,11 @@ class LocationsController extends Controller
                 'locations.updated_at',
                 'locations.image',
                 'locations.currency',
+                'locations.bitrix_id',
                 'locations.notes',
                 'locations.sklad',
                 'locations.pult_id',
+                'locations.active',
             ])
             ->withCount('assignedAssets as assigned_assets_count')
             ->withCount('assets as assets_count')
@@ -267,7 +270,8 @@ class LocationsController extends Controller
         $request->headers->get('referer') === route('profile')
             ? $this->authorize('self.edit_location')
             : $this->authorize('view.selectlists');
-
+        $user = Auth::user();
+        $favorite_location = $user->favoriteLocation;
         $locations = Location::select([
             'locations.id',
             'locations.name',
@@ -284,7 +288,7 @@ class LocationsController extends Controller
 
         if ($request->filled('search')) {
             $locations = $locations->where('locations.name', 'LIKE', '%'.$request->input('search').'%')
-            ->orWhere('locations.contract_number', 'LIKE', '%'.$request->input('search').'%');
+                ->orWhere('locations.contract_number', 'LIKE', '%'.$request->input('search').'%');
         }
 
         $locations = $locations->orderBy('sklad', 'desc');

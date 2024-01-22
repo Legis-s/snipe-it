@@ -74,9 +74,9 @@ class AssetCheckinController extends Controller
         $asset->assignedTo()->disassociate($asset);
         $asset->assigned_type = null;
         $asset->accepted = null;
-        $asset->assigned_to = null;
-        $asset->contract_id = null;
         $asset->name = $request->get('name');
+        $asset->contract_id = null;
+        $asset->depreciable_cost = $request->get('depreciable_cost');
 
         if ($request->filled('status_id')) {
             $asset->status_id = e($request->get('status_id'));
@@ -89,7 +89,6 @@ class AssetCheckinController extends Controller
                 $asset->status_id = $status_ok->id;
             }
         }
-
 
         // This is just meant to correct legacy issues where some user data would have 0
         // as a location ID, which isn't valid. Later versions of Snipe-IT have stricter validation
@@ -110,7 +109,7 @@ class AssetCheckinController extends Controller
             \Log::debug('New Location ID: '.$asset->location_id);
         }
 
-//        $asset->location_id = $asset->rtd_location_id;
+        $asset->location_id = $asset->rtd_location_id;
 
         if ($request->filled('location_id')) {
             \Log::debug('NEW Location ID: '.$request->get('location_id'));
@@ -146,19 +145,9 @@ class AssetCheckinController extends Controller
             $acceptance->delete();
         });
 
-
-        $changed = [];
-
-        foreach ($asset->getRawOriginal() as $key => $value) {
-            if ($asset->getRawOriginal()[$key] != $asset->getAttributes()[$key]) {
-                $changed[$key]['old'] = $asset->getRawOriginal()[$key];
-                $changed[$key]['new'] = $asset->getAttributes()[$key];
-            }
-        }
-
         // Was the asset updated?
         if ($asset->save()) {
-            event(new CheckoutableCheckedIn($asset, $target, Auth::user(), $request->input('note'), $checkin_at, $originalValues,$changed));
+            event(new CheckoutableCheckedIn($asset, $target, Auth::user(), $request->input('note'), $checkin_at, $originalValues));
 
             if ((isset($user)) && ($backto == 'user')) {
                 return redirect()->route('users.show', $user->id)->with('success', trans('admin/hardware/message.checkin.success'));
