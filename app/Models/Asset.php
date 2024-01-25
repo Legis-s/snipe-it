@@ -385,13 +385,13 @@ class Asset extends Depreciable
 
         $this->assignedTo()->associate($target);
 
-        if ($quality != null) {
-            $this->quality = $quality;
-        }
-
-        if ($depreciable_cost != null) {
-            $this->depreciable_cost = $depreciable_cost;
-        }
+//        if ($quality != null) {
+//            $this->quality = $quality;
+//        }
+//
+//        if ($depreciable_cost != null) {
+//            $this->depreciable_cost = $depreciable_cost;
+//        }
 
         if ($location != null) {
             $this->location_id = $location;
@@ -411,20 +411,10 @@ class Asset extends Depreciable
             $originalValues['action_date'] = date('Y-m-d H:i:s');
         }
 
-        if ($target instanceof Asset) {
-            $this->location_id = null;
-            $this->rtd_location_id = null;
-        }
-
-        $changed = [];
-
-        foreach ($this->getRawOriginal() as $key => $value) {
-            if ($this->getRawOriginal()[$key] != $this->getAttributes()[$key]) {
-                $changed[$key]['old'] = $this->getRawOriginal()[$key];
-                $changed[$key]['new'] = $this->getAttributes()[$key];
-            }
-        }
-
+//        if ($target instanceof Asset) {
+//            $this->location_id = null;
+//            $this->rtd_location_id = null;
+//        }
         if ($this->save()) {
             if (is_int($admin)) {
                 $checkedOutBy = User::findOrFail($admin);
@@ -433,7 +423,7 @@ class Asset extends Depreciable
             } else {
                 $checkedOutBy = Auth::user();
             }
-            event(new CheckoutableCheckedOut($this, $target, $checkedOutBy, $note,$changed, $originalValues));
+            event(new CheckoutableCheckedOut($this, $target, $checkedOutBy, $note, $originalValues));
 
             $this->increment('checkout_counter', 1);
 
@@ -1922,10 +1912,7 @@ class Asset extends Depreciable
 
 
     /**
-     * Checks the asset out to the target
-     *
-     * @todo The admin parameter is never used. Can probably be removed.
-     *
+     * Sell the asset out to the target
      * @author [S. Markin] [<markin@legis-s.ru>]
      * @param User $user
      * @param Carbon $checkout_at
@@ -1935,7 +1922,7 @@ class Asset extends Depreciable
      * @since [v3.0]
      * @return bool
      */
-    public function sell($target,$admin = null, $checkout_at = null, $contract_id = null, $note = null, $name = null)
+    public function sell($target, $admin = null, $checkout_at = null, $note = null, $name = null)
     {
         if (! $target) {
             return false;
@@ -1949,32 +1936,20 @@ class Asset extends Depreciable
         $this->rtd_location_id = null;
 
 
-
         if ($name != null) {
             $this->name = $name;
         }
+        $status = Statuslabel::where('name', 'Продано')->first();
+        $this->status_id = $status->id;
+        $this->contract_id = $target->id;
+        $this->assigned_to = null;
+        $this->assigned_type = null;
 
-        if($target instanceof User) {
-            $this->assignedTo()->associate($target);
-            $status = Statuslabel::where('name', 'Выдано')->first();
-            $this->status_id = $status->id;
-            $this->contract_id = $contract_id;
-        }
-        if($target instanceof Contract) {
-            $status = Statuslabel::where('name', 'Продано')->first();
-            $this->status_id = $status->id;
-            $this->contract_id = $target->id;
-            $this->assigned_to = null;
-            $this->assigned_type = null;
-        }
+        $originalValues = $this->getRawOriginal();
 
-        $changed = [];
-
-        foreach ($this->getRawOriginal() as $key => $value) {
-            if ($this->getRawOriginal()[$key] != $this->getAttributes()[$key]) {
-                $changed[$key]['old'] = $this->getRawOriginal()[$key];
-                $changed[$key]['new'] = $this->getAttributes()[$key];
-            }
+        // attempt to detect change in value if different from today's date
+        if ($checkout_at && strpos($checkout_at, date('Y-m-d')) === false) {
+            $originalValues['action_date'] = date('Y-m-d H:i:s');
         }
 
         if ($this->save()) {
@@ -1985,7 +1960,7 @@ class Asset extends Depreciable
             } else {
                 $checkedOutBy = Auth::user();
             }
-            event(new CheckoutableSell($this, $target, $checkedOutBy, $note, $changed));
+            event(new CheckoutableSell($this, $target, $checkedOutBy, $note, $originalValues));
             $this->increment('checkout_counter', 1);
 
             return true;
@@ -1995,12 +1970,8 @@ class Asset extends Depreciable
     }
 
     /**
-     * Checks the asset out to the target
-     *
-     * @todo The admin parameter is never used. Can probably be removed.
-     *
+     * Rent the asset out to the target
      * @author [S. Markin] [<markin@legis-s.ru>]
-     * @param User $user
      * @param Carbon $checkout_at
      * @param string $note
      * @param null $name
@@ -2008,7 +1979,7 @@ class Asset extends Depreciable
      * @since [v3.0]
      * @return bool
      */
-    public function closeSell($target,$admin = null, $checkout_at = null, $note = null, $name = null)
+    public function rent($target, $admin = null, $checkout_at = null, $note = null, $name = null)
     {
         if (! $target) {
             return false;
@@ -2025,82 +1996,19 @@ class Asset extends Depreciable
             $this->name = $name;
         }
 
-        if($target instanceof Contract) {
-            $status = Statuslabel::where('name', 'Продано')->first();
-            $this->status_id = $status->id;
-            $this->contract_id = $target->id;
-            $this->assigned_to = null;
-            $this->assigned_type = null;
-        }
-
-        $changed = [];
-
-        foreach ($this->getRawOriginal() as $key => $value) {
-            if ($this->getRawOriginal()[$key] != $this->getAttributes()[$key]) {
-                $changed[$key]['old'] = $this->getRawOriginal()[$key];
-                $changed[$key]['new'] = $this->getAttributes()[$key];
-            }
-        }
-
-        if ($this->save()) {
-            if (is_int($admin)) {
-                $checkedOutBy = User::findOrFail($admin);
-            } elseif (get_class($admin) === \App\Models\User::class) {
-                $checkedOutBy = $admin;
-            } else {
-                $checkedOutBy = Auth::user();
-            }
-            event(new CheckoutableSell($this, $target, $checkedOutBy, $note, $changed));
-            $this->increment('checkout_counter', 1);
-
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Checks the asset out to the target
-     *
-     * @todo The admin parameter is never used. Can probably be removed.
-     *
-     * @author [S. Markin] [<markin@legis-s.ru>]
-     * @param User $user
-     * @param Carbon $checkout_at
-     * @param string $note
-     * @param null $name
-     * @return bool
-     * @since [v3.0]
-     * @return bool
-     */
-    public function rent($target,$admin = null, $checkout_at = null, $user = null, $note = null, $name = null)
-    {
-        if (! $target) {
-            return false;
-        }
-        if ($this->is($target)) {
-            throw new CheckoutNotAllowed('You cannot check an asset out to itself.');
-        }
-        $this->last_checkout = $checkout_at;
-        $this->location_id =null;
-        $this->rtd_location_id = null;
-        $this->contract_id =$target->id;
         $status = Statuslabel::where('name', 'В аренде')->first();
         $this->status_id = $status->id;
+        $this->contract_id = $target->id;
+        $this->assigned_to = null;
+        $this->assigned_type = null;
 
-        if ($name != null) {
-            $this->name = $name;
-        }
-        $this->assignedTo()->associate($target);
+//        $this->assignedTo()->associate($target);
 
+        $originalValues = $this->getRawOriginal();
 
-        $changed = [];
-
-        foreach ($this->getRawOriginal() as $key => $value) {
-            if ($this->getRawOriginal()[$key] != $this->getAttributes()[$key]) {
-                $changed[$key]['old'] = $this->getRawOriginal()[$key];
-                $changed[$key]['new'] = $this->getAttributes()[$key];
-            }
+        // attempt to detect change in value if different from today's date
+        if ($checkout_at && strpos($checkout_at, date('Y-m-d')) === false) {
+            $originalValues['action_date'] = date('Y-m-d H:i:s');
         }
 
         if ($this->save()) {
@@ -2111,9 +2019,7 @@ class Asset extends Depreciable
             } else {
                 $checkedOutBy = Auth::user();
             }
-            event(new CheckoutableForInstall($this, $user, $checkedOutBy, $note, $changed));
-            event(new CheckoutableRent($this, $target, $checkedOutBy, $note, $changed));
-
+            event(new CheckoutableRent($this, $target, $checkedOutBy, $note, $originalValues));
             $this->increment('checkout_counter', 1);
 
             return true;

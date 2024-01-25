@@ -13,7 +13,7 @@
         <div class="col-md-9">
             <form class="form-horizontal" method="post" action="" autocomplete="off">
                 <!-- CSRF Token -->
-                <input type="hidden" name="_token" value="{{ csrf_token() }}" />
+                <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
 
                 <div class="box box-default">
 
@@ -27,45 +27,45 @@
 
                     <div class="box-body">
                         @if ($consumable->name)
-                                <!-- consumable name -->
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label">{{ trans('admin/consumables/general.consumable_name') }}</label>
-                                    <div class="col-md-6">
-                                        <p class="form-control-static">{{ $consumable->name }}</p>
-                                    </div>
+                            <!-- consumable name -->
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{ trans('admin/consumables/general.consumable_name') }}</label>
+                                <div class="col-md-6">
+                                    <p class="form-control-static">{{ $consumable->name }}</p>
                                 </div>
-                            @endif
+                            </div>
+                        @endif
 
                         @include ('partials.forms.sell-selector', ['user_select' => 'true','contract_select'=> 'true'])
 
                         @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.user'), 'fieldname' => 'assigned_user','required'=>'true'])
                         @include ('partials.forms.edit.contract-select', ['translated_name' => "Договор", 'fieldname' => 'assigned_contract', 'style' => 'display:none;','required'=>'true'])
 
-                        @include ('partials.forms.edit.contract-id-select', ['translated_name' => "Договор", 'fieldname' => 'contract_id','required'=>'true'])
+                        @include ('partials.forms.custom.contract-id-select', ['translated_name' => "Договор", 'fieldname' => 'contract_id','required'=>'true'])
 
                         <!-- Purchase Cost -->
                         <div class="form-group {{ $errors->has('purchase_cost') ? ' has-error' : '' }}">
                             <label for="purchase_cost" class="col-md-3 control-label">Закупочная стоимость</label>
-                                <div class="col-md-9">
-                                    <div class="input-group col-md-4" style="padding-left: 0px;">
-                                        <input class="form-control float" type="text"
-                                               name="purchase_cost" aria-label="Purchase_cost"
-                                               id="purchase_cost"
-                                               disabled
-                                               value="{{ old('purchase_cost', \App\Helpers\Helper::formatCurrencyOutput($consumable->purchase_cost)) }}"/>
-                                        <span class="input-group-addon">
+                            <div class="col-md-9">
+                                <div class="input-group col-md-4" style="padding-left: 0px;">
+                                    <input class="form-control float" type="text"
+                                           name="purchase_cost" aria-label="Purchase_cost"
+                                           id="purchase_cost"
+                                           disabled
+                                           value="{{ old('purchase_cost', \App\Helpers\Helper::formatCurrencyOutput($consumable->purchase_cost)) }}"/>
+                                    <span class="input-group-addon">
                     @if (isset($currency_type))
-                                                {{ $currency_type }}
-                                            @else
-                                                {{ $snipeSettings->default_currency }}
-                                            @endif
+                                            {{ $currency_type }}
+                                        @else
+                                            {{ $snipeSettings->default_currency }}
+                                        @endif
                 </span>
-                                    </div>
-
-                                    <div class="col-md-9" style="padding-left: 0px;">
-                                        {!! $errors->first('depreciable_cost', '<span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span>') !!}
-                                    </div>
                                 </div>
+
+                                <div class="col-md-9" style="padding-left: 0px;">
+                                    {!! $errors->first('depreciable_cost', '<span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                </div>
+                            </div>
                         </div>
                         @include ('partials.forms.edit.quantity_max')
                         @if ($consumable->requireAcceptance() || $consumable->getEula() || ($snipeSettings->slack_endpoint!=''))
@@ -92,22 +92,26 @@
                                     </div>
                                 </div>
                             </div>
-                    @endif
+                        @endif
 
                         <!-- Note -->
                         <div class="form-group {{ $errors->has('note') ? 'error' : '' }}">
-                        <label for="note" class="col-md-3 control-label">{{ trans('admin/hardware/form.notes') }}</label>
-                        <div class="col-md-7">
-                            <textarea class="col-md-6 form-control" name="note">{{ old('note') }}</textarea>
-                            {!! $errors->first('note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                            <label for="note"
+                                   class="col-md-3 control-label">{{ trans('admin/hardware/form.notes') }}</label>
+                            <div class="col-md-7">
+                                <textarea class="col-md-6 form-control" name="note">{{ old('note') }}</textarea>
+                                {!! $errors->first('note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                            </div>
                         </div>
-                    </div>
 
                     </div> <!-- .box-body -->
 
                     <div class="box-footer">
-                        <a class="btn btn-link" href="{{ route('consumables.show', ['consumable'=> $consumable->id]) }}">{{ trans('button.cancel') }}</a>
-                        <button type="submit" class="btn btn-primary pull-right"><i class="fas fa-check icon-white" aria-hidden="true"></i> {{ trans('general.sell') }}</button>
+                        <a class="btn btn-link"
+                           href="{{ route('consumables.show', ['consumable'=> $consumable->id]) }}">{{ trans('button.cancel') }}</a>
+                        <button type="submit" class="btn btn-primary pull-right"><i class="fas fa-check icon-white"
+                                                                                    aria-hidden="true"></i> {{ trans('general.sell') }}
+                        </button>
                     </div>
                 </div>
             </form>
@@ -118,7 +122,7 @@
 @section('moar_scripts')
     <script nonce="{{ csrf_token() }}">
         $(function () {
-            $('input[name=checkout_to_type_s]').on("change",function () {
+            $('input[name=checkout_to_type_s]').on("change", function () {
                 var assignto_type = $('input[name=checkout_to_type_s]:checked').val();
                 var userid = $('#assigned_user option:selected').val();
 
@@ -145,7 +149,7 @@
                     $('#assigned_contract').show();
                     $('#contract_id').hide();
                     $('.notification-callout').fadeOut();
-                } else  {
+                } else {
 
                     $('#assigned_asset').hide();
                     $('#assigned_user').show();

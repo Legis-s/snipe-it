@@ -55,41 +55,28 @@ class LogListener
 
     /**
      * These onBlah methods are used by the subscribe() method further down in this file.
-     * This one creates an action_logs entry for the checkout
+     * This one creates an action_logs entry for the sell
      *
-     * @param CheckoutableCheckedOut $event
-     * @return void
-     *
-     */
-    public function onCheckoutableForInstall(CheckoutableForInstall $event)
-    {
-        $event->checkoutable->logForInstall($event->note, $event->checkedOutTo, $event->checkoutable->last_checkout,$event->changed);
-    }
-
-    /**
-     * These onBlah methods are used by the subscribe() method further down in this file.
-     * This one creates an action_logs entry for the checkout
-     *
-     * @param CheckoutableCheckedOut $event
+     * @param CheckoutableSell $event
      * @return void
      *
      */
     public function onCheckoutableSell(CheckoutableSell $event)
     {
-        $event->checkoutable->logSell($event->note, $event->checkedOutTo, $event->checkoutable->last_checkout,$event->changed);
+        $event->checkoutable->logSell($event->note, $event->checkedOutTo, $event->checkoutable->last_checkout, $event->originalValues);
     }
 
     /**
      * These onBlah methods are used by the subscribe() method further down in this file.
-     * This one creates an action_logs entry for the checkout
+     * This one creates an action_logs entry for the rent
      *
-     * @param CheckoutableCheckedOut $event
+     * @param CheckoutableRent $event
      * @return void
      *
      */
     public function onCheckoutableRent(CheckoutableRent $event)
     {
-        $event->checkoutable->logRent($event->note, $event->checkedOutTo, $event->checkoutable->last_checkout,$event->changed);
+        $event->checkoutable->logRent($event->note, $event->checkedOutTo, $event->checkoutable->last_checkout, $event->originalValues);
     }
 
 

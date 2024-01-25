@@ -1,5 +1,6 @@
 @extends('layouts/default')
 
+{{-- Выдать в вренду актив --}}
 {{-- Page title --}}
 @section('title')
     {{ trans('general.rent') }}
@@ -10,7 +11,6 @@
 @section('content')
 
     <style>
-
         .input-group {
             padding-left: 0px !important;
         }
@@ -22,10 +22,20 @@
             <div class="box box-default">
                 <form class="form-horizontal" method="post" action="" autocomplete="off">
                     <div class="box-header with-border">
-                        <h2 class="box-title"> {{ trans('admin/hardware/form.tag') }}: <b style="font-size: 120%"> {{ $asset->asset_tag }}</b></h2>
+                        <h2 class="box-title"> {{ trans('admin/hardware/form.tag') }} {{ $asset->asset_tag }}</h2>
                     </div>
                     <div class="box-body">
-                    {{csrf_field()}}
+                        {{csrf_field()}}
+                        @if ($asset->company && $asset->company->name)
+                            <div class="form-group">
+                                {{ Form::label('model', trans('general.company'), array('class' => 'col-md-3 control-label')) }}
+                                <div class="col-md-8">
+                                    <p class="form-control-static">
+                                        {{ $asset->company->name }}
+                                    </p>
+                                </div>
+                            </div>
+                        @endif
                         <!-- AssetModel name -->
                         <div class="form-group">
                             {{ Form::label('model', trans('admin/hardware/form.model'), array('class' => 'col-md-3 control-label')) }}
@@ -33,11 +43,10 @@
                                 <p class="form-control-static">
                                     @if (($asset->model) && ($asset->model->name))
                                         {{ $asset->model->name }}
-
                                     @else
                                         <span class="text-danger text-bold">
-                  <i class="fas fa-exclamation-triangle"></i>This asset's model is invalid!
-                  The asset <a href="{{ route('hardware.edit', $asset->id) }}">should be edited</a> to correct this before attempting to check it in or out.</span>
+                  <i class="fas fa-exclamation-triangle"></i>{{ trans('admin/hardware/general.model_invalid')}}
+                  <a href="{{ route('hardware.edit', $asset->id) }}"></a> {{ trans('admin/hardware/general.model_invalid_fix')}}</span>
                                     @endif
                                 </p>
                             </div>
@@ -47,12 +56,13 @@
                         <div class="form-group {{ $errors->has('name') ? 'error' : '' }}">
                             {{ Form::label('name', trans('admin/hardware/form.name'), array('class' => 'col-md-3 control-label')) }}
                             <div class="col-md-8">
-                                <input class="form-control" type="text" name="name" id="name" value="{{ old('name', $asset->name) }}" tabindex="1">
+                                <input class="form-control" type="text" name="name" id="name"
+                                       value="{{ old('name', $asset->name) }}" tabindex="1">
                                 {!! $errors->first('name', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                             </div>
                         </div>
-                        @include ('partials.forms.edit.contract-select', ['translated_name' => trans('general.contract'),  'fieldname' => 'assigned_contract','unselect' => 'true', 'required'=>'true'])
-                        @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.user'), 'fieldname' => 'assigned_user','unselect' => 'true', 'required'=>'true','hide_new' => 'true'])
+
+                        @include ('partials.forms.custom.contract-select', ['translated_name' => trans('general.contract'),  'fieldname' => 'assigned_contract','unselect' => 'true', 'required'=>'true'])
 
                         <!-- Checkout/Checkin Date -->
                         <div class="form-group {{ $errors->has('checkout_at') ? 'error' : '' }}">
@@ -74,12 +84,11 @@
                                 {!! $errors->first('note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                             </div>
                         </div>
+
                     </div> <!--/.box-body-->
                     <div class="box-footer">
-                        <div class="box-footer">
-                            <a class="btn btn-link" href="{{ URL::previous() }}"> {{ trans('button.cancel') }}</a>
-                            <button type="submit" class="btn btn-primary pull-right"><i class="fas fa-check icon-white" aria-hidden="true"></i> {{ trans('general.rent') }}</button>
-                        </div>
+                        <a class="btn btn-link" href="{{ URL::previous() }}"> {{ trans('button.cancel') }}</a>
+                        <button type="submit" class="btn btn-primary pull-right"><i class="fas fa-check icon-white" aria-hidden="true"></i> {{ trans('general.rent') }}</button>
                     </div>
                 </form>
             </div>
@@ -101,8 +110,6 @@
 
 @stop
 
-
 @section('moar_scripts')
-    <script nonce="{{ csrf_token() }}">
-    </script>
+    @include('partials/assets-assigned')
 @stop

@@ -195,13 +195,12 @@ class ContractsController extends Controller
             }
             $name_str .= e($contract->name);
 
-
-            $contract->use_text = $name_str;
+//            preg_replace('/&quot;/', '"', $name_str);
+            $contract->use_text = preg_replace('/&quot;/', '"', $name_str);;
         }
 
         $paginated_results =  new LengthAwarePaginator($contracts->forPage($page, 500), $contracts->count(), 500, $page, []);
 
-//        return [];
         return (new SelectlistTransformer)->transformSelectlist($paginated_results);
 
     }

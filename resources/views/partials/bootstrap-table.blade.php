@@ -5,6 +5,7 @@
 @push('js')
 
 <script src="{{ url(mix('js/dist/bootstrap-table.js')) }}"></script>
+<script src="{{ url('js/locale/bootstrap-table-ru-RU.js') }}"></script>
 
 <script nonce="{{ csrf_token() }}">
     $(function () {
@@ -287,6 +288,25 @@
             if(element_name != '') {
                 dest = dest + '/' + row.owner_id + '/' + element_name;
             }
+
+            /**
+             *  START CUSTOM
+             */
+            if ((row.available_actions) && (row.available_actions.print_label === true)) {
+                actions += '<span class="actions btn btn-sm btn-primary print_label" data-tooltip="true" title="Напечатать этикетку"><i class="fas fa-barcode" style="color: white" aria-hidden="true"></i><span class="sr-only">Напечатать этикетку</span></span>&nbsp;';
+            }
+
+
+            if ((row.available_actions) && (row.available_actions.inventory === true)) {
+                actions += '<span class="actions btn btn-sm btn-primary inventory" data-tooltip="true" title="Инвентаризировать"><i class="fas fa-key" style="color: white" aria-hidden="true"></i><span class="sr-only">Инвентаризировать</span></span>&nbsp;';
+            }
+
+            if ((row.available_actions) && (row.available_actions.impersonate === true)) {
+                actions += '<a href="{{ config('app.url') }}/impersonate/take/' + row.id + '/" class="actions btn btn-sm btn-danger" data-tooltip="true" title="Зайти под пользовтелем"><i class="fas fa-unlock" aria-hidden="true"></i><span class="sr-only">Зайти под пользовтелем</span></a>&nbsp;';
+            }
+            /**
+             *  END CUSTOM
+             */
 
             if ((row.available_actions) && (row.available_actions.clone === true)) {
                 actions += '<a href="{{ config('app.url') }}/' + dest + '/' + row.id + '/clone" class="actions btn btn-sm btn-info" data-tooltip="true" title="{{ trans('general.clone_item') }}"><i class="far fa-clone" aria-hidden="true"></i><span class="sr-only">Clone</span></a>&nbsp;';
@@ -864,44 +884,37 @@
             return full_price.toLocaleString('ru');
         }
 
-
         function hardwareCustomInOutFormatter(value,row) {
-            console.log(row);
-            var destination = "hardware";
+                var destination = "hardware";
                 if ((row.available_actions.review == true) && (row.user_can_review == true)) {
-
-                    return '<button type="button" class="btn btn-primary btn-sm review" data-tooltip="true" title="Есть закр. док.">Проверить</button>';
+                    return '<button type="button" class="btn btn-primary btn-sm review" data-tooltip="true" title="Проверка">Проверить</button>';
                 }
                 if ((row.available_actions.checkout == true) && (row.user_can_close_sell == true)) {
                     // return '<span class="btn btn-sm bg-maroon closesell" data-tooltip="true" title="Есть закр. док.">Есть закр. док.</span>';
                     return '<div class="btn-group" style="min-width:200px">' +
                         '<span class="btn btn-sm bg-maroon closesell" data-tooltip="true" title="Есть закр. док.">Есть закр. док.</span>'+
-                        '<a href="{{ url('/') }}/' + destination + '/' + row.id + '/checkin" class="btn btn-sm bg-purple" data-toggle="tooltip" title="Check this item in so it is available for re-imaging, re-issue, etc.">{{ trans('general.checkin') }}</a>'+
+                        '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/checkin" class="btn btn-sm bg-purple" data-toggle="tooltip" title="Check this item in so it is available for re-imaging, re-issue, etc.">{{ trans('general.checkin') }}</a>'+
                         '</div>';
                 }
                 // The user is allowed to check items out, AND the item is deployable
                 if ((row.available_actions.checkout == true) && (row.user_can_checkout == true) && ((!row.asset_id) && (!row.assigned_to))) {
                     return '<div class="btn-group" style="min-width:270px">' +
-                        '<a href="{{ url('/') }}/' + destination + '/' + row.id + '/checkout" class="btn btn-sm bg-maroon" data-toggle="tooltip" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>'+
-                        '<a href="{{ url('/') }}/' + destination + '/' + row.id + '/sell" class="btn btn-sm bg-red" data-toggle="tooltip" title="{{ trans('general.sell_tooltip') }}">{{ trans('general.sell') }}</a>'+
-                        '<a href="{{ url('/') }}/' + destination + '/' + row.id + '/rent" class="btn btn-sm bg-yellow" data-toggle="tooltip" title="{{ trans('general.rent_tooltip') }}">{{ trans('general.rent') }}</a>'+
+                        '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/checkout" class="btn btn-sm bg-maroon" data-tooltip="true" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>'+
+                        '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/sell" class="btn btn-sm bg-red" data-tooltip="true" title="{{ trans('general.sell_tooltip') }}">{{ trans('general.sell') }}</a>'+
+                        '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/rent" class="btn btn-sm bg-yellow" data-tooltip="true" title="{{ trans('general.rent_tooltip') }}">{{ trans('general.rent') }}</a>'+
                         '</div>';
-
                     // The user is allowed to check items out, but the item is not deployable
                 } else if (((row.user_can_checkout == false)) && (row.available_actions.checkout == true) && (!row.assigned_to)) {
-                    return '<div  data-toggle="tooltip" title="This item has a status label that is undeployable and cannot be checked out at this time."><a class="btn btn-sm bg-maroon disabled">{{ trans('general.checkout') }}</a></div>';
-
+                    return '<span  data-tooltip="true" title="{{ trans('admin/hardware/general.undeployable_tooltip') }}"><a class="btn btn-sm bg-maroon disabled">{{ trans('general.checkout') }}</a></span>';
                     // The user is allowed to check items in
                 } else if (row.available_actions.checkin == true)  {
                     if (row.assigned_to) {
-                        return '<a href="{{ url('/') }}/' + destination + '/' + row.id + '/checkin" class="btn btn-sm bg-purple" data-toggle="tooltip" title="Check this item in so it is available for re-imaging, re-issue, etc.">{{ trans('general.checkin') }}</a>';
+                        return '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="Check this item in so it is available for re-imaging, re-issue, etc.">{{ trans('general.checkin') }}</a>';
                     } else if (row.assigned_pivot_id) {
-                        return '<a href="{{ url('/') }}/' + destination + '/' + row.assigned_pivot_id + '/checkin" class="btn btn-sm bg-purple" data-toggle="tooltip" title="Check this item in so it is available for re-imaging, re-issue, etc.">{{ trans('general.checkin') }}</a>';
+                        return '<a href="{{ config('app.url') }}/' + destination + '/' + row.assigned_pivot_id + '/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="Check this item in so it is available for re-imaging, re-issue, etc.">{{ trans('general.checkin') }}</a>';
                     }
-
                 }
         }
-
 
         function consumablesCustomInOutFormatter(value,row) {
             var destination = "consumables";
@@ -927,51 +940,8 @@
             }
         }
 
-        {{--function sellFormatter(value, row) {--}}
-        {{--    if ((row.available_actions.sell == true) && (row.user_can_sell == true) && ((!row.asset_id) && (!row.assigned_to))) {--}}
-        {{--        return '<a href="{{ url('/') }}/hardware/' + row.id + '/sell/" class="btn btn-sm bg-maroon" data-tooltip="true" title="Check this item out">Продать</a>';--}}
-        {{--    } else if (row.available_actions.sell == true && row.user_can_close_sell == true) {--}}
-        {{--        return '<span class="btn btn-sm bg-maroon closesell" data-tooltip="true" title="Есть закр. док.">Есть закр. док.</span>';--}}
-        {{--    } else {--}}
-        {{--        return ""--}}
-        {{--    }--}}
-        {{--}--}}
-
-        // function reviewFormatter(value, row) {
-        //     if ((row.available_actions.review == true) && (row.user_can_review == true)) {
-        //         return '<button type="button" class="btn btn-primary btn-sm review">Проверено</button>';
-        //     } else {
-        //         return "";
-        //     }
-        // }
-
-        // function actionTypeFormatter(value, row) {
-        //     if (value == "выдать") {
-        //         if (row.biometric_uid && row.biometric_result) {
-        //             var fio = "";
-        //             try {
-        //                 console.log(row.biometric_result)
-        //                 var result = JSON.parse(row.biometric_result);
-        //                 if (result.fio) {
-        //                     fio = result.fio;
-        //                 }
-        //             } catch (e) {
-        //                 console.log(e);
-        //             }
-        //             return "<span data-toggle='tooltip' data-placement='top' title='Подтверждено: " + fio + "'><i class='fa fa-hand-o-up' aria-hidden='true'></i> " + value + "</span>";
-        //         } else {
-        //             return "<i class='fa fa-hand-o-up' aria-hidden='true'></i> " + value + "";
-        //         }
-        //     } else {
-        //         return value;
-        //     }
-        // }
-
-
-
         // This just prints out the item type in the activity report
         function quantityItemFormatter(value, row) {
-            console.log(row);
             if ((row) && (row.type)) {
                 switch (row.type) {
                     case "purchase":

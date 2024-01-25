@@ -200,11 +200,10 @@ trait Loggable
 
 
     /**
-     * @author  Daniel Meltzer <dmeltzer.devel@gmail.com>
      * @since [v3.4]
      * @return \App\Models\Actionlog
      */
-    public function logSell($note, $target, $action_date = null,$changed = null)
+    public function logSell($note, $target, $action_date = null, $originalValues = [])
     {
         $log = new Actionlog;
         $log = $this->determineLogItemType($log);
@@ -242,25 +241,35 @@ trait Loggable
         if (! $log->action_date) {
             $log->action_date = date('Y-m-d H:i:s');
         }
-        $log->log_meta = json_encode($changed);
-        if($log->target_type == User::class){
-            $log->logaction('issued_for_sale');
-        }
-        if($log->target_type == Contract::class){
-            $log->logaction('sell');
+
+        $changed = [];
+        $originalValues = array_intersect_key($originalValues, array_flip(['action_date','name','status_id','location_id','expected_checkin']));
+
+        foreach ($originalValues as $key => $value) {
+            if ($key == 'action_date' && $value != $action_date) {
+                $changed[$key]['old'] = $value;
+                $changed[$key]['new'] = is_string($action_date) ? $action_date : $action_date->format('Y-m-d H:i:s');
+            } elseif ($value != $this->getAttributes()[$key]) {
+                $changed[$key]['old'] = $value;
+                $changed[$key]['new'] = $this->getAttributes()[$key];
+            }
         }
 
+        if (!empty($changed)){
+            $log->log_meta = json_encode($changed);
+        }
+
+        $log->logaction('sell');
 
         return $log;
     }
 
 
     /**
-     * @author  Daniel Meltzer <dmeltzer.devel@gmail.com>
      * @since [v3.4]
      * @return \App\Models\Actionlog
      */
-    public function logRent($note, $target, $action_date = null,$changed = null)
+    public function logRent($note, $target, $action_date = null, $originalValues = [])
     {
         $log = new Actionlog;
         $log = $this->determineLogItemType($log);
@@ -298,7 +307,23 @@ trait Loggable
         if (! $log->action_date) {
             $log->action_date = date('Y-m-d H:i:s');
         }
-        $log->log_meta = json_encode($changed);
+
+        $changed = [];
+        $originalValues = array_intersect_key($originalValues, array_flip(['action_date','name','status_id','location_id','expected_checkin']));
+
+        foreach ($originalValues as $key => $value) {
+            if ($key == 'action_date' && $value != $action_date) {
+                $changed[$key]['old'] = $value;
+                $changed[$key]['new'] = is_string($action_date) ? $action_date : $action_date->format('Y-m-d H:i:s');
+            } elseif ($value != $this->getAttributes()[$key]) {
+                $changed[$key]['old'] = $value;
+                $changed[$key]['new'] = $this->getAttributes()[$key];
+            }
+        }
+
+        if (!empty($changed)){
+            $log->log_meta = json_encode($changed);
+        }
 
         $log->logaction('rented');
 

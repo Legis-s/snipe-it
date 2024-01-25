@@ -86,13 +86,6 @@ class AssetPresenter extends Presenter
                 'visible' => true,
                 'formatter' => 'categoriesLinkObjFormatter',
             ], [
-                'field' => 'manufacturer',
-                'searchable' => true,
-                'sortable' => true,
-                'title' => trans('general.manufacturer'),
-                'visible' => false,
-                'formatter' => 'manufacturersLinkObjFormatter',
-            ], [
                 'field' => 'status_label',
                 'searchable' => true,
                 'sortable' => true,
@@ -120,16 +113,21 @@ class AssetPresenter extends Presenter
                 'title' => trans('admin/hardware/table.location'),
                 'visible' => true,
                 'formatter' => 'deployedLocationFormatter',
-            ],
-//            [
-//                'field' => 'rtd_location',
-//                'searchable' => true,
-//                'sortable' => true,
-//                'title' => trans('admin/hardware/form.default_location'),
-//                'visible' => false,
-//                'formatter' => 'deployedLocationFormatter',
-//            ],
-            [
+            ], [
+                'field' => 'rtd_location',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('admin/hardware/form.default_location'),
+                'visible' => false,
+                'formatter' => 'deployedLocationFormatter',
+            ], [
+                'field' => 'manufacturer',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('general.manufacturer'),
+                'visible' => false,
+                'formatter' => 'manufacturersLinkObjFormatter',
+            ],[
                 "field" => "contract",
                 "searchable" => true,
                 "sortable" => true,
@@ -164,6 +162,13 @@ class AssetPresenter extends Presenter
                 'footerFormatter' => 'sumFormatter',
                 'class' => 'text-right',
             ], [
+                "field" => "nds",
+                "searchable" => false,
+                "sortable" => true,
+                "switchable" => true,
+                "title" => "НДС",
+                "visible" => false
+            ], [
                 "field" => "book_value",
                 "searchable" => false,
                 "sortable" => false,
@@ -177,12 +182,6 @@ class AssetPresenter extends Presenter
                 "title" => "Остаточная стоимость",
                 "footerFormatter" => 'sumFormatter',
             ], [
-//                "field" => "depreciable_cost",
-//                "searchable" => true,
-                "sortable" => true,
-                "title" => "Срок эксплуатации",
-                "formatter" => 'lifetimeFormatter',
-            ], [
                 "field" => "quality",
                 "searchable" => true,
                 "sortable" => true,
@@ -195,13 +194,6 @@ class AssetPresenter extends Presenter
                 'visible' => false,
                 'title' => trans('general.order_number'),
                 'formatter' => 'orderNumberObjFilterFormatter',
-            ], [
-                "field" => "purchase_id",
-                "searchable" => false,
-                "sortable" => true,
-                "switchable" => true,
-                "title" => "ID закупки",
-                "visible" => false
             ], [
                 'field' => 'eol',
                 'searchable' => false,
@@ -307,13 +299,6 @@ class AssetPresenter extends Presenter
                 'title' => trans('general.byod'),
                 'formatter' => 'trueFalseFormatter',
 
-            ], [
-                "field" => "nds",
-                "searchable" => false,
-                "sortable" => true,
-                "switchable" => true,
-                "title" => "НДС",
-                "visible" => false
             ],
         ];
 
@@ -352,7 +337,8 @@ class AssetPresenter extends Presenter
             'switchable' => true,
             'title' => trans('general.checkin').'/'.trans('general.checkout'),
             'visible' => true,
-            'formatter' => 'hardwareInOutFormatter',
+            'formatter' => 'hardwareCustomInOutFormatter',
+            "events" => "operateEvents"
         ];
 
         $layout[] = [
@@ -362,6 +348,7 @@ class AssetPresenter extends Presenter
             'switchable' => false,
             'title' => trans('table.actions'),
             'formatter' => 'hardwareActionsFormatter',
+            "events" => "operateEvents"
         ];
 
         return json_encode($layout);
