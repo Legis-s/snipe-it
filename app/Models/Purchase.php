@@ -163,6 +163,7 @@ class Purchase extends SnipeModel
             $need_to_inventrory = true;
             foreach ($assets as &$asset) {
                 $asset->setStatusAfterPaid();
+                $asset->unsetEventDispatcher();
                 $asset->save();
             }
         }

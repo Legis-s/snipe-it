@@ -3,31 +3,73 @@
     'createText' =>"Создать закупку" ,
     'updateText' => "Обновить закупку",
     'topSubmit' => false,
-//    'helpPosition' => 'right',
-//    'helpText' => trans('admin/locations/table.about_locations'),
    'formAction' =>  route('purchases.store'),
 ])
 
 
 {{-- Page content --}}
 @section('inputFields')
-    @include ('partials.forms.edit.invoice_number', ['translated_name' => "Название"])
 
-    @include ('partials.forms.edit.final_price', ['translated_name' => "Стоимость"])
+    <!-- invoice_number -->
+    <div class="form-group {{ $errors->has('invoice_number') ? ' has-error' : '' }}">
+        <label for="name" class="col-md-3 control-label">Название</label>
+        <div class="col-md-7 col-sm-12{{  (Helper::checkIfRequired($item, 'invoice_number')) ? ' required' : '' }}">
+            <input class="form-control" type="text" name="invoice_number" aria-label="invoice_number" id="invoice_number" value="{{ old('invoice_number', $item->invoice_number) }}"{!!  (Helper::checkIfRequired($item, 'invoice_number')) ? ' data-validation="required" required' : '' !!} />
+            {!! $errors->first('invoice_number', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+        </div>
+    </div>
 
-    @include ('partials.forms.edit.delivery_cost', ['translated_name' => "Стоимость доставки"])
+    <!-- final_price -->
+    <div class="form-group {{ $errors->has('final_price') ? ' has-error' : '' }}">
+        <label for="final_price" class="col-md-3 control-label">Стоимость</label>
+        <div class="col-md-7 col-sm-12{{  (Helper::checkIfRequired($item, 'final_price')) ? ' required' : '' }}">
+            <input class="form-control float" type="text"  name="final_price" aria-label="final_price" id="final_price" value="{{ old('final_price', $item->final_price) }}"{!!  (Helper::checkIfRequired($item, 'final_price')) ? ' data-validation="required" required' : '' !!} />
+            {!! $errors->first('final_price', '<span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span>') !!}
+        </div>
+    </div>
 
-    @include ('partials.forms.edit.currency-select', ['translated_name' => "Валюта", 'fieldname' => 'currency_id'])
+    <!-- delivery_cost -->
+    <div class="form-group {{ $errors->has('delivery_cost') ? ' has-error' : '' }}">
+        <label for="delivery_cost" class="col-md-3 control-label">Стоимость доставки</label>
+        <div class="col-md-7 col-sm-12{{  (Helper::checkIfRequired($item, 'delivery_cost')) ? ' required' : '' }}">
+            <input class="form-control float" type="text"  name="delivery_cost" aria-label="delivery_cost" id="delivery_cost" value="{{ old('delivery_cost', $item->delivery_cost) }}"{!!  (Helper::checkIfRequired($item, 'delivery_cost')) ? ' data-validation="required" required' : '' !!} />
+            {!! $errors->first('delivery_cost', '<span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span>') !!}
+        </div>
+    </div>
 
-    @include ('partials.forms.edit.comment', ['translated_name' => "Комментарий"])
+    <!-- currency-select -->
+    <div class="form-group{{ $errors->has('currency_id') ? ' has-error' : '' }}">
+        {{ Form::label("currency_id", "Валюта", array('class' => 'col-md-3 control-label')) }}
+        <div class="col-md-2{{  ((isset($required)) && ($required=='true')) ? ' required' : '' }}">
+            <select class="js-data-no-ajax" data-placeholder="Выберите валюту" name="currency_id" style="width: 100%" id="currency_select" aria-label="currency_id">
+                <option value="341" selected="selected">руб</option>
+                <option value="342">usd</option>
+                <option value="343">eur</option>
+            </select>
+        </div>
+        {!! $errors->first('currency_id', '<div class="col-md-8 col-md-offset-3"><span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span></div>') !!}
+    </div>
+
+    <!-- comment -->
+    <div class="form-group {{ $errors->has('comment') ? ' has-error' : '' }}">
+        <label for="comment" class="col-md-3 control-label">Комментарий</label>
+        <div class="col-md-7 col-sm-12 required">
+            <textarea class="col-md-6 form-control" id="comment" aria-label="comment" name="comment">{{ old('comment', $item->comment) }}</textarea>
+            {!! $errors->first('comment', '<span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span>') !!}
+        </div>
+    </div>
+
 
     @include ('partials.forms.edit.supplier-select', ['translated_name' => trans('general.supplier'), 'fieldname' => 'supplier_id','required'=>true])
 
-    @include ('partials.forms.edit.invoice-type-select', ['translated_name' => "Тип счета", 'fieldname' => 'invoice_type_id','required'=>true])
+    @include ('partials.forms.purchases.invoice-type-select', ['translated_name' => "Тип счета", 'fieldname' => 'invoice_type_id','required'=>true])
 
-    @include ('partials.forms.edit.legal_person-select', ['translated_name' => "Юр. лицо", 'fieldname' => 'legal_person_id','required'=>true])
+    @include ('partials.forms.purchases.legal_person-select', ['translated_name' => "Юр. лицо", 'fieldname' => 'legal_person_id','required'=>true])
 
     @include ('partials.forms.purchases.invoice_file')
+
+{{--    @include ('partials.forms.edit.image-upload', ['image_path' => app('locations_upload_path')])--}}
+
 
     <input type="hidden" id="assets" name="assets" value="{{ old('assets_json', $item->assets_json) }}">
     <input type="hidden" id="consumables" name="consumables" value="{{ old('consumables_json', $item->consumables_json) }}">

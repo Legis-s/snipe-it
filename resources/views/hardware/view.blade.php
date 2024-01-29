@@ -1686,19 +1686,19 @@
                   });
 
                 });
-            $('#closesell').click(function () {
-                $.ajax({
-                    url: '/api/v1/hardware/{{ $asset->id }}/closesell',
-                    method: "POST",
-                    headers: {
-                      "X-Requested-With": 'XMLHttpRequest',
-                      "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function () {
-                      location.reload();
-                    }
-                  });
-            });
+            {{--$('#closesell').click(function () {--}}
+            {{--    $.ajax({--}}
+            {{--        url: '/api/v1/hardware/{{ $asset->id }}/closesell',--}}
+            {{--        method: "POST",--}}
+            {{--        headers: {--}}
+            {{--          "X-Requested-With": 'XMLHttpRequest',--}}
+            {{--          "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')--}}
+            {{--        },--}}
+            {{--        success: function () {--}}
+            {{--          location.reload();--}}
+            {{--        }--}}
+            {{--      });--}}
+            {{--});--}}
         });
     </script>
 

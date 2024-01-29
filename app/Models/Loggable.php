@@ -365,6 +365,46 @@ trait Loggable
     }
 
     /**
+     * @author  A. Gianotto <snipe@snipe.net>
+     * @since [v4.0]
+     * @return \App\Models\Actionlog
+     */
+    public function logTag($note = null, $originalValues = [])
+    {
+        $log = new Actionlog;
+        $log->item_type = static::class;
+        $log->item_id = $this->id;
+        $log->location_id = null;
+        $log->note = $note;
+        $log->user_id = Auth::user()->id;
+
+        $action_date = date('Y-m-d H:i:s');
+        $log->action_date = $action_date;
+
+        $changed = [];
+        $originalValues = array_intersect_key($originalValues, array_flip(['action_date','name','status_id','location_id','expected_checkin','asset_tag']));
+
+        foreach ($originalValues as $key => $value) {
+            if ($key == 'action_date' && $value != $action_date) {
+                $changed[$key]['old'] = $value;
+                $changed[$key]['new'] = is_string($action_date) ? $action_date : $action_date->format('Y-m-d H:i:s');
+            } elseif ($value != $this->getAttributes()[$key]) {
+                $changed[$key]['old'] = $value;
+                $changed[$key]['new'] = $this->getAttributes()[$key];
+            }
+        }
+
+        if (!empty($changed)){
+            $log->log_meta = json_encode($changed);
+        }
+
+        $log->logaction('tag');
+        $log->save();
+        return $log;
+    }
+
+
+    /**
      * @author  Daniel Meltzer <dmeltzer.devel@gmail.com>
      * @since [v3.5]
      * @return \App\Models\Actionlog

@@ -1,13 +1,35 @@
 version: '3'
 
 services:
+  https-portal:
+    image: steveltn/https-portal:1
+    ports:
+      - '8050:80'
+      - '44380:443'
+    restart: always
+    environment:
+      DOMAINS: 'example.com -> http://snipeit:8000'
+#      STAGE: 'production' # Don't use production until staging works
+      STAGE: 'local'
+      ERROR_LOG: stdout
+      ACCESS_LOG: stderr
+      # FORCE_RENEW: 'true'
+    networks:
+      - snipeit-backend
+    depends_on:
+      - mariadb
+      - redis
+      - snipeit
+    volumes:
+      - https-portal-data:/var/lib/https-portal
+
   snipeit:
     build:
       context: .
       dockerfile: Dockerfile.alpine
     container_name: snipeit
     ports:
-    - "8080:80"
+    - "8000:8000"
     volumes:
     - ./storage/logs:/var/www/html/storage/logs
     depends_on:
@@ -34,9 +56,18 @@ services:
     networks:
     - snipeit-backend
 
+#  mailhog:
+#    image: mailhog/mailhog:v1.0.1
+#    ports:
+#    # - 1025:1025
+#    - "8025:8025"
+#    networks:
+#    - snipeit-backend
+
 
 volumes:
   db: {}
+  https-portal-data:
 
 networks:
   snipeit-backend: {}

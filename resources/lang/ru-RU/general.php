@@ -25,7 +25,7 @@ return [
     'assets_available'		=> 'Доступные активы',
     'accept_assets'         => 'Принять активы: название',
     'accept_assets_menu'    => 'Принять активы',
-    'audit'				    => 'аудит',
+    'audit'				    => 'Аудит',
     'audit_report'			=> 'Журнал аудита',
     'assets'				=> 'Активы',
     'assets_audited'        => 'активы проверены',
@@ -528,4 +528,7 @@ return [
     'sklad'				=> 'Склад',
     'print_tag'				=> 'Напечатать этикетку',
     'depreciable_cost'				=> 'Остаточная стоимость',
+    'document_filetypes_help'  => 'Допустимые типы файлов - pdf. Максимальный размер файла :size.',
+    'invoicetypes' => 'Типы счетов',
+    'tag' => "Наклейка"
 ];

@@ -64,7 +64,7 @@ class ActionlogPresenter extends Presenter
         }
 
         // Everything else
-        if ($this->action_type=='create new') {
+        if ($this->action_type=='create') {
             return 'fa-solid fa-plus';
         }
 
@@ -89,7 +89,7 @@ class ActionlogPresenter extends Presenter
         }
 
         if ($this->action_type=='sell') {
-            return 'fa-solid fa-file-invoice-dollar';
+            return 'fa-solid fa-ruble-sign';
         }
 
         if ($this->action_type=='rented') {
@@ -99,6 +99,15 @@ class ActionlogPresenter extends Presenter
         if ($this->action_type=='checkin from') {
             return 'fa-solid fa-rotate-right';
         }
+
+        if ($this->action_type=='audit') {
+            return 'fa-solid fa-check';
+        }
+
+        if ($this->action_type=='tag') {
+            return 'fa-solid fa-tag';
+        }
+
 
         return 'fa-solid fa-rotate-right';
 

@@ -513,7 +513,8 @@
             'inventorystatuslabels',
             'contracts',
             'bulk',
-            'devices'
+            'devices',
+            'invoicetypes'
         ];
 
     for (var i in formatters) {
@@ -889,13 +890,13 @@
                 if ((row.available_actions.review == true) && (row.user_can_review == true)) {
                     return '<button type="button" class="btn btn-primary btn-sm review" data-tooltip="true" title="Проверка">Проверить</button>';
                 }
-                if ((row.available_actions.checkout == true) && (row.user_can_close_sell == true)) {
-                    // return '<span class="btn btn-sm bg-maroon closesell" data-tooltip="true" title="Есть закр. док.">Есть закр. док.</span>';
-                    return '<div class="btn-group" style="min-width:200px">' +
-                        '<span class="btn btn-sm bg-maroon closesell" data-tooltip="true" title="Есть закр. док.">Есть закр. док.</span>'+
-                        '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/checkin" class="btn btn-sm bg-purple" data-toggle="tooltip" title="Check this item in so it is available for re-imaging, re-issue, etc.">{{ trans('general.checkin') }}</a>'+
-                        '</div>';
-                }
+                {{--if ((row.available_actions.checkout == true) && (row.user_can_close_sell == true)) {--}}
+                {{--    // return '<span class="btn btn-sm bg-maroon closesell" data-tooltip="true" title="Есть закр. док.">Есть закр. док.</span>';--}}
+                {{--    return '<div class="btn-group" style="min-width:200px">' +--}}
+                {{--        '<span class="btn btn-sm bg-maroon closesell" data-tooltip="true" title="Есть закр. док.">Есть закр. док.</span>'+--}}
+                {{--        '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/checkin" class="btn btn-sm bg-purple" data-toggle="tooltip" title="Check this item in so it is available for re-imaging, re-issue, etc.">{{ trans('general.checkin') }}</a>'+--}}
+                {{--        '</div>';--}}
+                {{--}--}}
                 // The user is allowed to check items out, AND the item is deployable
                 if ((row.available_actions.checkout == true) && (row.user_can_checkout == true) && ((!row.asset_id) && (!row.assigned_to))) {
                     return '<div class="btn-group" style="min-width:270px">' +
@@ -1296,10 +1297,9 @@
                                     "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
                                 },
                                 success: function (data) {
-
+                                    $(".table").bootstrapTable('refresh');
                                 }
                             });
-
                         } else {
                             console.log(data) ;
                         }
@@ -1309,20 +1309,20 @@
                     }
                 });
             },
-            'click .closesell': function (e, value, row, index) {
-                $.ajax({
-                    url: '/api/v1/hardware/' + row.id + '/closesell',
-                    {{--url: '{{ route('api.purchases.resend', ['id'=> row.id]) }}',--}}
-                    method: "POST",
-                    headers: {
-                        "X-Requested-With": 'XMLHttpRequest',
-                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function () {
-                        $(".table").bootstrapTable('refresh');
-                    }
-                });
-            },
+            {{--'click .closesell': function (e, value, row, index) {--}}
+            {{--    $.ajax({--}}
+            {{--        url: '/api/v1/hardware/' + row.id + '/closesell',--}}
+            {{--        --}}{{--url: '{{ route('api.purchases.resend', ['id'=> row.id]) }}',--}}
+            {{--        method: "POST",--}}
+            {{--        headers: {--}}
+            {{--            "X-Requested-With": 'XMLHttpRequest',--}}
+            {{--            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')--}}
+            {{--        },--}}
+            {{--        success: function () {--}}
+            {{--            $(".table").bootstrapTable('refresh');--}}
+            {{--        }--}}
+            {{--    });--}}
+            {{--},--}}
             'click .inventory': function (e, value, row, index) {
 
                 Swal.fire({
@@ -1346,8 +1346,8 @@
                         };
                         console.log("asset_tag: " + result.value);
                         $.ajax({
-                            type: 'PATCH',
-                            url: "/api/v1/hardware/" + row.id + "",
+                            type: 'POST',
+                            url: '/api/v1/hardware/' + row.id + '/inventory',
                             headers: {
                                 "X-Requested-With": 'XMLHttpRequest',
                                 "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
