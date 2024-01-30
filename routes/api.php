@@ -1456,7 +1456,17 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
             )->name('api.invoice_types.selectlist');
 
 
-        });// end InvoiceTypes API routes
+        });
+        Route::resource('invoicetypes',
+            Api\InvoiceTypesController::class,
+            ['names' =>
+                [
+                    'index' => 'api.invoicetypes.index',
+                ],
+                'except' => ['create', 'edit'],
+                'parameters' => ['invoicetype' => 'invoicetype_id'],
+            ]
+        );// end InvoiceTypes API routes
 
         /**
          * LegalPersons API routes

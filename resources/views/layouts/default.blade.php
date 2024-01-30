@@ -789,6 +789,13 @@
                                                 </a>
                                             </li>
                                         @endcan
+                                        @can('view', \App\Models\Asset::class)
+                                            <li {!! (Request::is('invoicetypes*') ? ' class="active"' : '') !!}>
+                                                <a href="{{ route('invoicetypes.index') }}">
+                                                    {{ trans('general.invoicetypes') }}
+                                                </a>
+                                            </li>
+                                        @endcan
                                 </ul>
                             </li>
                         @endcan

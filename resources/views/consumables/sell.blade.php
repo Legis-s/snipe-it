@@ -67,7 +67,7 @@
                                 </div>
                             </div>
                         </div>
-                        @include ('partials.forms.edit.quantity_max')
+                        @include ('partials.forms.custom.quantity_max')
                         @if ($consumable->requireAcceptance() || $consumable->getEula() || ($snipeSettings->slack_endpoint!=''))
                             <div class="form-group notification-callout">
                                 <div class="col-md-8 col-md-offset-3">

@@ -4,30 +4,16 @@
 namespace App\Http\Controllers\Api;
 
 
-use App\Http\Transformers\InventoriesTransformer;
-use App\Http\Transformers\InventoryItemTransformer;
-use App\Http\Transformers\LocationsTransformer;
 use App\Models\Asset;
 use App\Models\Consumable;
-use App\Models\Location;
 use App\Models\Statuslabel;
 use DateTime;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Transformers\PurchasesTransformer;
-use App\Models\Company;
-use App\Models\User;
-use App\Models\Inventory;
-use App\Models\InventoryItem;
 use App\Helpers\Helper;
-use App\Http\Requests\SaveUserRequest;
 use App\Models\Purchase;
-use App\Http\Transformers\AssetsTransformer;
-use App\Http\Transformers\SelectlistTransformer;
-use App\Http\Transformers\AccessoriesTransformer;
-use App\Http\Transformers\LicensesTransformer;
 use Auth;
-use App\Models\AssetModel;
 use Illuminate\Database\Eloquent\Builder;
 use Crypt;
 
@@ -301,6 +287,7 @@ class PurchasesController extends Controller
             $assets = Asset::where('purchase_id', $purchase->id)->get();
             foreach ($assets as &$value) {
                 $value->status_id = $status->id;
+                $value->unsetEventDispatcher();
                 $value->save();
             }
 
@@ -332,16 +319,15 @@ class PurchasesController extends Controller
         $params = json_decode($file_data, true);
         /** @var \GuzzleHttp\Client $client */
         $client = new \GuzzleHttp\Client();
-//        $response = $client->request('POST', 'https://bitrixdev.legis-s.ru/rest/1/lp06vc4xgkxjbo3t/lists.element.add.json/',$params);
         $user =  Auth::user();
-//        if ($user->bitrix_token && $user->bitrix_id){
-//            $raw_bitrix_token  = Crypt::decryptString($user->bitrix_token);
-//            $response = $client->request('POST', 'https://bitrix.legis-s.ru/rest/'.$user->bitrix_id.'/'.$raw_bitrix_token.'/lists.element.add.json/',$params);
-//
-//        }else{
-//            $response = $client->request('POST', 'https://bitrix.legis-s.ru/rest/722/q7e6fc3qrkiok64x/lists.element.add.json/',$params);
-//        }
-        $response = $client->request('POST', 'https://bitrix.legis-s.ru/rest/722/q7e6fc3qrkiok64x/lists.element.add.json/',$params);
+        if ($user->bitrix_token && $user->bitrix_id){
+            $raw_bitrix_token  = Crypt::decryptString($user->bitrix_token);
+            $response = $client->request('POST', 'https://bitrix.legis-s.ru/rest/'.$user->bitrix_id.'/'.$raw_bitrix_token.'/lists.element.add.json/',$params);
+
+        }else{
+            $response = $client->request('POST', 'https://bitrix.legis-s.ru/rest/722/q7e6fc3qrkiok64x/lists.element.add.json/',$params);
+        }
+//        $response = $client->request('POST', 'https://bitrix.legis-s.ru/rest/722/q7e6fc3qrkiok64x/lists.element.add.json/',$params);
 
         $response = $response->getBody()->getContents();
         $bitrix_result = json_decode($response, true);

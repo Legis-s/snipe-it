@@ -30,6 +30,7 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StatuslabelsController;
 use App\Http\Controllers\SuppliersController;
 use App\Http\Controllers\ViewAssetsController;
+use App\Http\Controllers\InvoiceTypesController;
 use Illuminate\Support\Facades\Route;
 
 Route::impersonate();
@@ -283,6 +284,13 @@ Route::resource('requests', RequestsController::class, [
 */
 
 Route::group(['middleware' => 'auth'], function () {
+
+    /**
+     * InvoiceTypes
+     */
+    Route::resource('invoicetypes', InvoiceTypesController::class, [
+        'parameters' => ['invoicetype' => 'invoicetype_id']
+    ]);
 
     /**
     * Contracts
