@@ -3,9 +3,8 @@
 {{-- Page title --}}
 @section('title')
 
- Инвентаризация -
- {{ $inventory->name }}
- 
+ Инвентаризация: {{ $inventory->name }}
+
 @parent
 @stop
 
@@ -14,14 +13,11 @@
 
 <div class="row">
     <div class="col-md-9">
-        <div class="box box-default">
-            <div class="box-header with-border">
-                <div class="box-heading">
-                    <h2 class="box-title">Активы</h2>
-                </div>
-            </div>
+        <div class="box">
             <div class="box-body">
-            <div class="table table-responsive">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="table table-responsive">
                 <table
                         data-columns="{{ \App\Presenters\InventoryItemPresenter::dataTableLayout() }}"
                         data-cookie-id-table="inventoryItemsTable"
@@ -38,6 +34,8 @@
                         data-url="{{route('api.inventory_items.index', ['inventory_id' => $inventory->id])}}">
                 </table>
             </div><!-- /.table-responsive -->
+                    </div>
+                </div>
           </div><!-- /.box-body -->
         </div> <!--/.box-->
     </div><!--/.col-md-9-->

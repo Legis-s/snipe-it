@@ -3,7 +3,8 @@
 {{-- Page title --}}
 @section('title')
 
-    Закупка - {{ $purchase->invoice_number }}
+    {{ trans('general.purchase') }}:
+    {{ $purchase->invoice_number }}
 
     @parent
 @stop
@@ -13,14 +14,17 @@
 
 <div class="row">
     <div class="col-md-9">
-        <div class="box box-default">
+        @if (count($purchase->assets) > 0)
+        <div class="box">
             <div class="box-header with-border">
                 <div class="box-heading">
-                    <h2 class="box-title">Активы </h2>
+                    <h2 class="box-title">Активы</h2>
                 </div>
             </div>
             <div class="box-body">
-                <div class="table table-responsive">
+                <div class="row">
+                    <div class="col-md-12">
+{{--                <div class="table table-responsive">--}}
 
                     <table
                         data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayout() }}"
@@ -35,18 +39,26 @@
                         class="table table-striped snipe-table"
                         data-url="{{route('api.assets.index', ['purchase_id' => $purchase->id]) }}">
                     </table>
-                </div><!-- /.table-responsive -->
+{{--                </div><!-- /.table-responsive -->--}}
+
+                    </div>
+                </div>
           </div><!-- /.box-body -->
         </div> <!--/.box-->
+        @endif
+
+        @if ( strlen($purchase->consumables_json) > 2)
         @if ($purchase->status!='paid')
-            <div class="box box-default">
+            <div class="box">
                 <div class="box-header with-border">
                     <div class="box-heading">
                         <h2 class="box-title">Расходники не принятые</h2>
                     </div>
                 </div>
                 <div class="box-body">
-                    <div class="table table-responsive">
+                    <div class="row">
+                        <div class="col-md-12">
+{{--                    <div class="table table-responsive">--}}
                         <table id="table_consumables" class="table table-striped snipe-table">
                             @if($old)
                                 <thead>
@@ -74,17 +86,21 @@
                                 </thead>
                             @endif
                         </table>
-                    </div><!-- /.table-responsive -->
+{{--                    </div><!-- /.table-responsive -->--}}
+                        </div>
+                    </div>
                 </div><!-- /.box-body -->
             </div> <!--/.box-->
-            <div class="box box-default">
+            <div class="box">
                 <div class="box-header with-border">
                     <div class="box-heading">
                         <h2 class="box-title">Расходники принятые </h2>
                     </div>
                 </div>
                 <div class="box-body">
-                    <div class="table table-responsive">
+                    <div class="row">
+                        <div class="col-md-12">
+{{--                    <div class="table table-responsive">--}}
                         <table
                                 data-columns="{{ \App\Presenters\ConsumableAssignmentPresenter::dataTableLayoutIn() }}"
                                 data-cookie-id-table="сonsumableAssignmentTable"
@@ -101,15 +117,18 @@
                                 data-url="{{route('api.consumableassignments.index',['purchase_id'=> $purchase->id])}}">
 
                         </table>
-                    </div><!-- /.table-responsive -->
+{{--                    </div><!-- /.table-responsive -->--}}
+                        </div>
+                    </div>
                 </div><!-- /.box-body -->
             </div> <!--/.box-->
 
 
-        @endif
+              @endif
+            @endif
     </div><!--/.col-md-9-->
     <div class="col-md-3">
-        <div class="box box-default">
+        <div class="box">
             <div class="box-header with-border">
                 <div class="box-heading">
                     <h2 class="box-title">Информация</h2>
@@ -301,7 +320,6 @@
         </div> <!--/.box-->
     </div>
 </div>
-
 
 @stop
 
