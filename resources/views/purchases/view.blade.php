@@ -128,196 +128,200 @@
             @endif
     </div><!--/.col-md-9-->
     <div class="col-md-3">
-        <div class="box">
-            <div class="box-header with-border">
-                <div class="box-heading">
-                    <h2 class="box-title">Информация</h2>
-                </div>
-            </div>
-            <div class="box-body">
-                @if ($purchase->status)
-                    <div class="row">
-                        <div class="col-md-6">
-                            <strong>
-                                Статус
-                            </strong>
-                        </div>
-                        <div class="col-md-6 status_label">
-                            @switch($purchase->status)
-                                @case("inventory")
-                                <span class="label label-warning">В процессе инвентаризации</span>
-                                @break
-
-                                @case("in_payment")
-                                <span class="label label-primary">В оплате</span>
-                                @break
-
-                                @case("review")
-                                <span class="label label-warning">В процессе проверки</span>
-                                @break
-
-                                @case("finished")
-                                <span class="label label-success">Завершено</span>
-                                @break
-
-                                @case("rejected")
-                                <span class="label label-danger">Отклонено</span>
-                                @break
-
-                                @case("paid")
-                                <span class="label label-success">Оплачено</span>
-                                @break
-
-                                @case("inprogress")
-                                <span class="label label-primary">На согласовании</span>
-                                @break
-
-                            @endswitch
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <div class="box-heading">
+                            <h2 class="box-title">Информация</h2>
                         </div>
                     </div>
-                @endif
-                @if ($purchase->invoice_number)
-                    <div class="row">
-                        <div class="col-md-6">
-                            <strong>
-                                Название
-                            </strong>
-                        </div>
-                        <div class="col-md-6">
-                            {{ $purchase->invoice_number }}
-                        </div>
-                    </div>
-                @endif
-                @if ($purchase->invoice_file)
-                        <div class="row">
-                            <div class="col-md-6">
-                                <strong>
-                                    Файл счета
-                                </strong>
-                            </div>
-                            <div class="col-md-6">
-                                <a href="/uploads/purchases/{{ $purchase->invoice_file }}">Скачать</a>
-                            </div>
-                        </div>
-                    @endif
-                    @if ($purchase->bitrix_id)
-                        <div class="row">
-                            <div class="col-md-6">
-                                <strong>
-                                    Bitrix id
-                                </strong>
-                            </div>
-                            <div class="col-md-6">
-                                <a href='https://bitrix.legis-s.ru/services/lists/52/element/0/{{ $purchase->bitrix_id }}/?list_section_id='>{{ $purchase->bitrix_id }}</a>
-                            </div>
-                        </div>
-                    @endif
-                    @if ($purchase->final_price)
-                        <div class="row">
-                            <div class="col-md-6">
-                                <strong>
-                                    Цена
-                                </strong>
-                            </div>
-                            <div class="col-md-6">
-                                {{ $purchase->final_price }}
-                            </div>
-                        </div>
-                    @endif
-                    @if ($purchase->delivery_cost)
-                        <div class="row">
-                            <div class="col-md-6">
-                                <strong>
-                                    Стоимость доставки
-                                </strong>
-                            </div>
-                            <div class="col-md-6">
-                                {{ $purchase->delivery_cost }}
-                            </div>
-                        </div>
-                    @endif
-                @if ($purchase->supplier)
-                    <div class="row">
-                        <div class="col-md-6">
-                            <strong>
-                                {{ trans('general.supplier') }}
-                            </strong>
-                        </div>
-                        <div class="col-md-6">
-                            @can ('superuser')
-                                <a href="{{ route('suppliers.show', $purchase->supplier_id) }}">
-                                    {{ $purchase->supplier->name }}
-                                </a>
-                            @else
-                                {{ $purchase->supplier->name }}
-                            @endcan
-                        </div>
-                    </div>
-                @endif
-                    @if ($purchase->paid)
-                        <div class="row">
-                            <div class="col-md-6">
-                                <strong>
-                                    Оплачено
-                                </strong>
-                            </div>
-                            <div class="col-md-6">
-                                {{ $purchase->paid }}
-                            </div>
-                        </div>
-                    @endif
-                    @if ($purchase->comment)
-                        <div class="row">
-                            <div class="col-md-6">
-                                <strong>
-                                    Комментарий
-                                </strong>
-                            </div>
-                            <div class="col-md-12">
-                                {{ $purchase->comment }}
-                            </div>
-                        </div>
-                    @endif
-                    @if ($purchase->bitrix_task_id)
-                        <div class="row">
-                            <div class="col-md-6">
-                                <strong>
-                                    Задача
-                                </strong>
-                            </div>
-                            <div class="col-md-6">
-                                <a href="https://bitrix.legis-s.ru/company/personal/user/290/tasks/task/view/{{ $purchase->bitrix_task_id }}/">{{ $purchase->bitrix_task_id }}</a>
-                            </div>
-                        </div>
-                    @endif
-                    @if($old)
-                        @can('review', \App\Models\Asset::class)
-                            @if ($purchase->consumables_json != "[]" &&  count($purchase->consumables)==0)
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <button type="button" class="btn btn-primary" id="check_consumables">Принять расходники</button>
-                                    </div>
+                    <div class="box-body">
+                        @if ($purchase->status)
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <strong>
+                                        Статус
+                                    </strong>
                                 </div>
-                            @endif
+                                <div class="col-md-8 status_label">
+                                    @switch($purchase->status)
+                                        @case("inventory")
+                                            <span class="label label-warning">В процессе инвентаризации</span>
+                                            @break
+
+                                        @case("in_payment")
+                                            <span class="label label-primary">В оплате</span>
+                                            @break
+
+                                        @case("review")
+                                            <span class="label label-warning">В процессе проверки</span>
+                                            @break
+
+                                        @case("finished")
+                                            <span class="label label-success">Завершено</span>
+                                            @break
+
+                                        @case("rejected")
+                                            <span class="label label-danger">Отклонено</span>
+                                            @break
+
+                                        @case("paid")
+                                            <span class="label label-success">Оплачено</span>
+                                            @break
+
+                                        @case("inprogress")
+                                            <span class="label label-primary">На согласовании</span>
+                                            @break
+
+                                    @endswitch
+                                </div>
+                            </div>
+                        @endif
+                        @if ($purchase->invoice_number)
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <strong>
+                                        Название
+                                    </strong>
+                                </div>
+                                <div class="col-md-8">
+                                    {{ $purchase->invoice_number }}
+                                </div>
+                            </div>
+                        @endif
+                        @if ($purchase->invoice_file)
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <strong>
+                                        Файл счета
+                                    </strong>
+                                </div>
+                                <div class="col-md-8">
+                                    <a href="/uploads/purchases/{{ $purchase->invoice_file }}">Скачать</a>
+                                </div>
+                            </div>
+                        @endif
+                        @if ($purchase->bitrix_id)
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <strong>
+                                        Bitrix id
+                                    </strong>
+                                </div>
+                                <div class="col-md-8">
+                                    <a href='https://bitrix.legis-s.ru/services/lists/52/element/0/{{ $purchase->bitrix_id }}/?list_section_id='>{{ $purchase->bitrix_id }}</a>
+                                </div>
+                            </div>
+                        @endif
+                        @if ($purchase->final_price)
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <strong>
+                                        Цена
+                                    </strong>
+                                </div>
+                                <div class="col-md-8">
+                                    {{ $purchase->final_price }}
+                                </div>
+                            </div>
+                        @endif
+                        @if ($purchase->delivery_cost)
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <strong>
+                                        Стоимость доставки
+                                    </strong>
+                                </div>
+                                <div class="col-md-8">
+                                    {{ $purchase->delivery_cost }}
+                                </div>
+                            </div>
+                        @endif
+                        @if ($purchase->supplier)
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <strong>
+                                        {{ trans('general.supplier') }}
+                                    </strong>
+                                </div>
+                                <div class="col-md-8">
+                                    @can ('superuser')
+                                        <a href="{{ route('suppliers.show', $purchase->supplier_id) }}">
+                                            {{ $purchase->supplier->name }}
+                                        </a>
+                                    @else
+                                        {{ $purchase->supplier->name }}
+                                    @endcan
+                                </div>
+                            </div>
+                        @endif
+                        @if ($purchase->paid)
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <strong>
+                                        Оплачено
+                                    </strong>
+                                </div>
+                                <div class="col-md-8">
+                                    {{ $purchase->paid }}
+                                </div>
+                            </div>
+                        @endif
+                        @if ($purchase->comment)
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <strong>
+                                        Комментарий
+                                    </strong>
+                                </div>
+                                <div class="col-md-8">
+                                    {{ $purchase->comment }}
+                                </div>
+                            </div>
+                        @endif
+                        @if ($purchase->bitrix_task_id)
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <strong>
+                                        Задача
+                                    </strong>
+                                </div>
+                                <div class="col-md-8">
+                                    <a href="https://bitrix.legis-s.ru/company/personal/user/290/tasks/task/view/{{ $purchase->bitrix_task_id }}/">{{ $purchase->bitrix_task_id }}</a>
+                                </div>
+                            </div>
+                        @endif
+                        @if($old)
+                            @can('review', \App\Models\Asset::class)
+                                @if ($purchase->consumables_json != "[]" &&  count($purchase->consumables)==0)
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <button type="button" class="btn btn-primary" id="check_consumables">Принять расходники</button>
+                                        </div>
+                                    </div>
+                                @endif
+                            @endcan
+                        @endif
+                        @can('checkout', \App\Models\Asset::class)
+
+                            <div class="col-md-12">
+                                <br><br>
+                                @if ($purchase->status == "finished")
+                                    <a href="{{ route('bulk.checkout.show', ['purchase_bulk_id' => $purchase->id]) }}" style="margin-bottom:10px; width:100%" class="btn btn-primary btn-sm">
+                                        {{ trans('admin/massoperations/general.checkout') }}
+                                    </a>
+                                    <a href="{{ route('bulk.sell.show', ['purchase_bulk_id' => $purchase->id]) }}" style="margin-bottom:10px; width:100%" class="btn btn-primary btn-sm">
+                                        {{ trans('admin/massoperations/general.sell') }}
+                                    </a>
+                                @endif
+                            </div>
+
                         @endcan
-                    @endif
-                    @can('checkout', \App\Models\Asset::class)
-
-                        <div class="col-md-12">
-                            <br><br>
-                            @if ($purchase->status == "finished")
-                                <a href="{{ route('bulk.checkout.show', ['purchase_bulk_id' => $purchase->id]) }}" style="margin-bottom:10px; width:100%" class="btn btn-primary btn-sm">
-                                    {{ trans('admin/massoperations/general.checkout') }}
-                                </a>
-                                <a href="{{ route('bulk.sell.show', ['purchase_bulk_id' => $purchase->id]) }}" style="margin-bottom:10px; width:100%" class="btn btn-primary btn-sm">
-                                    {{ trans('admin/massoperations/general.sell') }}
-                                </a>
-                            @endif
-                        </div>
-
-                    @endcan
-            </div><!-- /.box-body -->
-        </div> <!--/.box-->
+                    </div><!-- /.box-body -->
+                </div> <!--/.box-->
+            </div>
+        </div>
     </div>
 </div>
 

@@ -75,8 +75,7 @@ class CategoriesController extends Controller
         $category->require_acceptance = $request->input('require_acceptance', '0');
         $category->checkin_email = $request->input('checkin_email', '0');
         $category->user_id = Auth::id();
-        $category->lifetime             = $request->input('lifetime', '0');
-        $category->require_biometric_confirmation   = $request->input('require_biometric_confirmation', '0');
+
         $category = $request->handleImages($category);
         if ($category->save()) {
             return redirect()->route('categories.index')->with('success', trans('admin/categories/message.create.success'));
@@ -134,8 +133,6 @@ class CategoriesController extends Controller
         $category->use_default_eula = $request->input('use_default_eula', '0');
         $category->require_acceptance = $request->input('require_acceptance', '0');
         $category->checkin_email = $request->input('checkin_email', '0');
-        $category->lifetime             = $request->input('lifetime', '0');
-        $category->require_biometric_confirmation   = $request->input('require_biometric_confirmation', '0');
 
         $category = $request->handleImages($category);
 

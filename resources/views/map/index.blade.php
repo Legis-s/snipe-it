@@ -11,17 +11,15 @@
     <div class="row">
         <div class="col-md-12">
             <div class="box box-default">
-                <div class="box-body" style="font-size: 120%">
-                    Всего: <span id="all_count" style="font-weight: bold"></span>
-                    Готово: <span id="ok_count" style="font-weight: bold"></span>
-                    Без имущества: <span id="null_count" style="font-weight: bold"></span>
+                <div class="box-header with-border">
+                    <div class="box-heading">
+                        <h2 class="box-title">
+                            Всего: <span id="all_count" style="font-weight: bold"></span>
+                            Готово: <span id="ok_count" style="font-weight: bold"></span>
+                            Без имущества: <span id="null_count" style="font-weight: bold"></span>
+                        </h2>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12">
-            <div class="box box-default">
                 <div class="box-body">
                     <div id="map" style=" width: 100%; height: 900px"></div>
                 </div>
