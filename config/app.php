@@ -46,7 +46,7 @@ return [
     |
     */
 
-    'max_results' => env('MAX_RESULTS', 2000),
+    'max_results' => env('MAX_RESULTS', 500),
 
     /*
     |--------------------------------------------------------------------------
@@ -314,7 +314,6 @@ return [
         App\Providers\SamlServiceProvider::class,
 
         Lab404\Impersonate\ImpersonateServiceProvider::class,
-        Barryvdh\Debugbar\ServiceProvider::class
     ],
 
     /*

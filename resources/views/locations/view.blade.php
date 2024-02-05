@@ -292,7 +292,7 @@
 
                       <div class="table table-responsive">
                           <table
-                                  data-columns="{{ \App\Presenters\ConsumablePresenter::dataTableLayout() }}"
+                                  data-columns="{{ \App\Presenters\ConsumableAssignmentPresenter::dataTableLayoutIn() }}"
                                   data-cookie-id-table="consumablesListingTable"
                                   data-pagination="true"
                                   data-id-table="consumablesListingTable"
@@ -304,7 +304,7 @@
                                   data-sort-order="asc"
                                   id="consumablesListingTable"
                                   class="table table-striped snipe-table"
-                                  data-url="{{route('api.consumables.index', ['location_id' => $location->id]) }}"
+                                  data-url="{{route('api.consumableassignments.index', ['location_id' => $location->id]) }}"
                                   data-export-options='{
                               "fileName": "export-locations-{{ str_slug($location->name) }}-consumables-{{ date('Y-m-d') }}",
                               "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]

@@ -25,31 +25,45 @@ class ConsumableSellController extends Controller
     use CheckInOutRequest;
 
     /**
-     * Return a view to checkout a consumable to a user.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @see ConsumableCheckoutController::store() method that stores the data.
-     * @since [v1.0]
-     * @param int $consumableId
+     * Return a view to sell a consumable.
+     * @see ConsumableSellController::store() method that stores the data.
+     * @param int $id
      * @return \Illuminate\Contracts\View\View
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function create($consumableId)
+    public function create($id)
     {
-        if (is_null($consumable = Consumable::find($consumableId))) {
-            return redirect()->route('consumables.index')->with('error', trans('admin/consumables/message.does_not_exist'));
-        }
-        $this->authorize('checkout', $consumable);
 
-        return view('consumables/sell', compact('consumable'));
+        if ($consumable = Consumable::find($id)) {
+
+            $this->authorize('checkout', $consumable);
+
+            // Make sure the category is valid
+            if ($consumable->category) {
+
+                // Make sure there is at least one available to sell
+                if ($consumable->numRemaining() <= 0){
+                    return redirect()->route('consumables.index')
+                        ->with('error', trans('admin/consumables/message.checkout.unavailable'));
+                }
+
+                // Return the checkout view
+                return view('consumables/sell', compact('consumable'));
+            }
+
+            // Invalid category
+            return redirect()->route('consumables.edit', ['consumable' => $consumable->id])
+                ->with('error', trans('general.invalid_item_category_single', ['type' => trans('general.consumable')]));
+        }
+
+        // Not found
+        return redirect()->route('consumables.index')->with('error', trans('admin/consumables/message.does_not_exist'));
+
     }
 
     /**
      * Saves the checkout information
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @see ConsumableCheckoutController::create() method that returns the form.
-     * @since [v1.0]
+     * @see ConsumableSellController::create() method that returns the form.
      * @param int $consumableId
      * @return \Illuminate\Http\RedirectResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
@@ -62,17 +76,15 @@ class ConsumableSellController extends Controller
 
         $this->authorize('checkout', $consumable);
 
-        $target = $this->determineSellTarget();
-
+        // Make sure there is at least one available to sell
+        if ($consumable->numRemaining() <= 0) {
+            return redirect()->route('consumables.index')->with('error', trans('admin/consumables/message.checkout.unavailable'));
+        }
         $admin_user = Auth::user();
+
+        $target = Contract::findOrFail(request('assigned_contract'));
         $quantity = e($request->input('quantity'));
         $note = $request->input('note');
-
-        if (get_class($target) == Contract::class){
-            $contract_id = Contract::findOrFail(request('assigned_contract'))->id;
-        }else{
-            $contract_id =  request('contract_id');
-        }
 
         $consumable->locations()->attach($consumable->id, [
             'consumable_id' => $consumable->id,
@@ -83,11 +95,12 @@ class ConsumableSellController extends Controller
             'type' => ConsumableAssignment::SOLD,
             'assigned_to' => $target->id,
             'assigned_type' => get_class($target),
-            'contract_id' => $contract_id,
+            'contract_id' => $target->id,
+//            'note' => $request->input('note'),
         ]);
 
 
-        event(new CheckoutableSell($consumable, $target,$admin_user,$note,null));
+        event(new CheckoutableSell($consumable, $target, Auth::user(),$note));
 
         // Redirect to the new consumable page
         return redirect()->route('consumables.index')->with('success', trans('admin/consumables/message.checkout.success'));

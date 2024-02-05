@@ -5,14 +5,9 @@ namespace App\Http\Controllers\Consumables;
 use App\Events\CheckoutableCheckedOut;
 use App\Http\Controllers\CheckInOutRequest;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\AssetCheckoutRequest;
-use App\Models\Asset;
-use App\Models\Accessory;
+use App\Http\Requests\ConsumableCheckoutRequest;
 use App\Models\Consumable;
 use App\Models\ConsumableAssignment;
-use App\Models\Location;
-use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
 
@@ -26,14 +21,14 @@ class ConsumableCheckoutController extends Controller
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @see ConsumableCheckoutController::store() method that stores the data.
      * @since [v1.0]
-     * @param int $consumableId
+     * @param int $id
      * @return \Illuminate\Contracts\View\View
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function create($id)
     {
 
-        if ($consumable = Consumable::with('users')->find($id)) {
+        if ($consumable = Consumable::find($id)) {
 
             $this->authorize('checkout', $consumable);
 
@@ -70,9 +65,9 @@ class ConsumableCheckoutController extends Controller
      * @return \Illuminate\Http\RedirectResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function store(AssetCheckoutRequest $request, $consumableId)
+    public function store(ConsumableCheckoutRequest $request, $consumableId)
     {
-        if (is_null($consumable = Consumable::with('users')->find($consumableId))) {
+        if (is_null($consumable = Consumable::find($consumableId))) {
             return redirect()->route('consumables.index')->with('error', trans('admin/consumables/message.not_found'));
         }
 
@@ -82,7 +77,6 @@ class ConsumableCheckoutController extends Controller
         if ($consumable->numRemaining() <= 0) {
             return redirect()->route('consumables.index')->with('error', trans('admin/consumables/message.checkout.unavailable'));
         }
-
 
         $admin_user = Auth::user();
 
@@ -101,10 +95,11 @@ class ConsumableCheckoutController extends Controller
             'type' => ConsumableAssignment::ISSUED,
             'assigned_to' => $target->id,
             'assigned_type' => get_class($target),
+//            'note' => $request->input('note'),
         ]);
 
 
-        event(new CheckoutableCheckedOut($consumable, $target, Auth::user(),$note,null));
+        event(new CheckoutableCheckedOut($consumable, $target, Auth::user(),$note));
 
         // Redirect to the new consumable page
         return redirect()->route('consumables.index')->with('success', trans('admin/consumables/message.checkout.success'));
