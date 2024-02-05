@@ -2,8 +2,8 @@
 
 {{-- Page title --}}
 @section('title')
-    {{ trans('general.consumables') }}
-    @parent
+{{ trans('general.consumables') }}
+@parent
 @stop
 
 @section('header_right')
@@ -29,7 +29,7 @@
                     </div>
                     <table
                             data-columns="{{ \App\Presenters\ConsumablePresenter::dataTableLayout() }}"
-                            data-cookie-id-table="consumablesTableMain"
+                            data-cookie-id-table="consumablesTable"
                             data-pagination="true"
                             data-id-table="consumablesTable"
                             data-search="true"

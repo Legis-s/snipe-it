@@ -76,13 +76,7 @@ class CategoryPresenter extends Presenter
                 "title" => trans('admin/categories/general.use_default_eula_column'),
                 'visible' => true,
                 "formatter" => 'trueFalseFormatter',
-            ],[
-                "field" => "lifetime",
-                "searchable" => true,
-                "sortable" => true,
-                "title" => 'Срок эксплуатации',
-                "visible" => true
-            ],[
+            ], [
                 'field' => 'created_at',
                 'searchable' => true,
                 'sortable' => true,

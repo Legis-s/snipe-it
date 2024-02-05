@@ -847,12 +847,13 @@
         <div class="tab-pane" id="consumables">
           <div class="table-responsive">
             <table
+                    data-columns="{{ \App\Presenters\ConsumableAssignmentPresenter::dataTableLayoutIn() }}"
                     data-cookie-id-table="userConsumableTable"
                     data-id-table="userConsumableTable"
                     id="userConsumableTable"
                     data-search="true"
                     data-pagination="true"
-                    data-side-pagination="client"
+                    data-side-pagination="server"
                     data-show-columns="true"
                     data-show-fullscreen="true"
                     data-show-export="true"
@@ -861,30 +862,31 @@
                     data-sort-order="asc"
                     data-sort-name="name"
                     class="table table-striped snipe-table table-hover"
+                    data-url="{{route('api.consumableassignments.index', ['user_id' => $user->id]) }}"
                     data-export-options='{
                     "fileName": "export-consumable-{{ str_slug($user->username) }}-{{ date('Y-m-d') }}",
                     "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","delete","download","icon"]
                     }'>
-              <thead>
-                <tr>
-                  <th class="col-md-3">{{ trans('general.name') }}</th>
-                  <th class="col-md-2" data-footer-formatter="sumFormatter" data-fieldname="purchase_cost">{{ trans('general.purchase_cost') }}</th>
-                  <th class="col-md-2">{{ trans('general.date') }}</th>
-                    <th class="col-md-5">{{ trans('general.notes') }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                @foreach ($user->consumables as $consumable)
-                <tr>
-                  <td>{!! $consumable->present()->nameUrl() !!}</td>
-                  <td>
-                    {!! Helper::formatCurrencyOutput($consumable->purchase_cost) !!}
-                  </td>
-                  <td>{{ Helper::getFormattedDateObject($consumable->pivot->created_at, 'datetime',  false) }}</td>
-                  <td>{{ $consumable->pivot->note }}</td>
-                </tr>
-                @endforeach
-              </tbody>
+{{--              <thead>--}}
+{{--                <tr>--}}
+{{--                  <th class="col-md-3">{{ trans('general.name') }}</th>--}}
+{{--                  <th class="col-md-2" data-footer-formatter="sumFormatter" data-fieldname="purchase_cost">{{ trans('general.purchase_cost') }}</th>--}}
+{{--                  <th class="col-md-2">{{ trans('general.date') }}</th>--}}
+{{--                    <th class="col-md-5">{{ trans('general.notes') }}</th>--}}
+{{--                </tr>--}}
+{{--              </thead>--}}
+{{--              <tbody>--}}
+{{--                @foreach ($user->consumables as $consumable)--}}
+{{--                <tr>--}}
+{{--                  <td>{!! $consumable->present()->nameUrl() !!}</td>--}}
+{{--                  <td>--}}
+{{--                    {!! Helper::formatCurrencyOutput($consumable->purchase_cost) !!}--}}
+{{--                  </td>--}}
+{{--                  <td>{{ Helper::getFormattedDateObject($consumable->pivot->created_at, 'datetime',  false) }}</td>--}}
+{{--                  <td>{{ $consumable->pivot->note }}</td>--}}
+{{--                </tr>--}}
+{{--                @endforeach--}}
+{{--              </tbody>--}}
           </table>
           </div>
         </div><!-- /consumables-tab -->

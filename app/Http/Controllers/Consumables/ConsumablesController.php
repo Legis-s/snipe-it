@@ -210,12 +210,18 @@ class ConsumablesController extends Controller
     }
 
 
-
+    /**
+     * Return a view to display component information.
+     *
+     * @see ConsumablesController::getDatatable() method that generates the JSON response
+     * @since [v1.0]
+     * @return \Illuminate\Contracts\View\View
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
     public function noclosingdocuments()
     {
         $this->authorize('index', Consumable::class);
         return view('consumables/noclosingdocuments');
     }
-
 
 }

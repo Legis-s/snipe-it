@@ -28,7 +28,7 @@
 
 {{-- Page content --}}
 @section('content')
-    <link rel="stylesheet" type="text/css" href="{{ asset('css/sweetalert2.min.css') }}">
+
 
 <div class="row">
     <div class="col-md-9">
@@ -286,12 +286,6 @@
                             {{ $model->model_number }}
                         </li>
                     @endif
-                        @if ($model->lifetime)
-                            <li>
-                                Срок службы:
-                                {{ $model->lifetime }}
-                            </li>
-                        @endif
 
                     @if ($model->depreciation)
                         <li>

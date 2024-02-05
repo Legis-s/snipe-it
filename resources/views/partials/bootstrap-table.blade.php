@@ -1210,9 +1210,9 @@
 
         function consumablesReturnFormatter(value, row) {
             if (row.can_return == true && row.quantity != 0) {
-                if (row.can_close_documents == true) {
-                    return '<button class="btn btn-sm bg-maroon return" data-tooltip="true" title="Вернуть">Вернуть</button><br><button class="btn btn-sm bg-maroon close_documents" data-tooltip="true" title="Вернуть">Получены закр. док.</button>';
-                }
+                // if (row.can_close_documents == true) {
+                //     return '<button class="btn btn-sm bg-maroon return" data-tooltip="true" title="Вернуть">Вернуть</button><br><button class="btn btn-sm bg-maroon close_documents" data-tooltip="true" title="Вернуть">Получены закр. док.</button>';
+                // }
                 return '<button class="btn btn-sm bg-maroon return" data-tooltip="true" title="Вернуть">Вернуть</button>';
             } else {
                 return '';

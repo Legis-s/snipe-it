@@ -69,9 +69,7 @@ class Category extends SnipeModel
         'eula_text',
         'name',
         'require_acceptance',
-        'require_biometric_confirmation',
         'use_default_eula',
-        'lifetime',
         'user_id',
     ];
 

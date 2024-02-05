@@ -9,8 +9,9 @@ class ConsumableAssignment extends Model
 {
     use CompanyableTrait;
 
-    protected $presenter = 'App\Presenters\ConsumableAssignmentPresenter';
+    protected $table = 'consumables_locations';
 
+    protected $presenter = \App\Presenters\ConsumableAssignmentPresenter::class;
     use Presentable;
     use Searchable;
     protected $dates = [
@@ -18,9 +19,6 @@ class ConsumableAssignment extends Model
         'updated_at',
         'deleted_at',
     ];
-
-    protected $table = 'consumables_locations';
-
 
     const LOCATION = 'location';
     const ASSET = 'asset';

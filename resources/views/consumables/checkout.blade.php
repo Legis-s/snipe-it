@@ -2,8 +2,8 @@
 
 {{-- Page title --}}
 @section('title')
-     {{ trans('admin/consumables/general.checkout') }}
-@parent
+  Выдать расходники
+  @parent
 @stop
 
 {{-- Page content --}}
@@ -37,11 +37,23 @@
           </div>
           @endif
 
-          <!-- User -->
-            @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.select_user'), 'fieldname' => 'assigned_to', 'required'=> 'true'])
+{{--          <!-- User -->--}}
+{{--            @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.select_user'), 'fieldname' => 'assigned_to', 'required'=> 'true'])--}}
+
+{{--            --}}
+            @include ('partials.forms.checkout-selector', ['user_select' => 'true','asset_select' => 'true', 'location_select' => 'true'])
+
+            @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'assigned_location', 'required'=>'true'])
+
+            @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.user'), 'fieldname' => 'assigned_user', 'style' => 'display:none;','required'=>'true'])
+
+            @include ('partials.forms.edit.asset-select', ['translated_name' => trans('general.asset'), 'fieldname' => 'assigned_asset', 'unselect' => 'true', 'style' => 'display:none;', 'required'=>'true'])
+
+            @include ('partials.forms.custom.quantity_max')
 
 
-            @if ($consumable->requireAcceptance() || $consumable->getEula() || ($snipeSettings->webhook_endpoint!=''))
+
+            @if ($consumable->requireAcceptance() || $consumable->getEula() || ($snipeSettings->slack_endpoint!=''))
               <div class="form-group notification-callout">
                 <div class="col-md-8 col-md-offset-3">
                   <div class="callout callout-info">

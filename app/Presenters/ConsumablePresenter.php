@@ -15,12 +15,16 @@ class ConsumablePresenter extends Presenter
     {
         $layout = [
             [
-                'field' => 'id',
-                'searchable' => false,
-                'sortable' => true,
-                'switchable' => true,
-                'title' => trans('general.id'),
-                'visible' => false,
+                "field" => "checkbox",
+                "checkbox" => true,
+            ],
+            [
+                "field" => "id",
+                "searchable" => false,
+                "sortable" => true,
+                "switchable" => true,
+                "title" => trans('general.id'),
+                "visible" => false
             ],
             [
                 'field' => 'company',
@@ -103,6 +107,13 @@ class ConsumablePresenter extends Presenter
                 'visible' => false,
                 'formatter' => 'manufacturersLinkObjFormatter',
             ], [
+                "field" => "purchase",
+                "searchable" => false,
+                "sortable" => true,
+                "switchable" => true,
+                "title" => "Закупка",
+                "formatter" => "purchasesLinkObjFormatter"
+            ], [
                 'field' => 'order_number',
                 'searchable' => true,
                 'sortable' => true,
@@ -136,7 +147,7 @@ class ConsumablePresenter extends Presenter
                 'sortable' => false,
                 'visible' => true,
                 'title' => trans('general.change'),
-                'formatter' => 'consumablesInOutFormatter',
+                'formatter' => 'consumablesCustomInOutFormatter',
             ], [
                 'field' => 'actions',
                 'searchable' => false,

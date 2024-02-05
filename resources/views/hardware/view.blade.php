@@ -1313,13 +1313,13 @@
                     <div class="tab-pane fade" id="consumables">
                         <div class="row">
                             <div class="col-md-12">
-                                @if ($asset->assignedAssets->count() > 0)
+{{--                                @if ($asset->assignedAssets->count() > 0)--}}
                                     <div class="table-responsive">
                                         <table
                                                 data-columns="{{ \App\Presenters\ConsumableAssignmentPresenter::dataTableLayoutIn() }}"
-                                                data-cookie-id-table="consumablesCheckedoutTable"
+                                                data-cookie-id-table="consumablesAssetCheckedoutTable"
                                                 data-pagination="true"
-                                                data-id-table="consumablesCheckedoutTable"
+                                                data-id-table="consumablesAssetCheckedoutTable"
                                                 data-search="false"
                                                 data-side-pagination="server"
                                                 data-show-columns="true"
@@ -1328,17 +1328,17 @@
                                                 data-show-refresh="true"
                                                 data-sort-order="asc"
                                                 data-sort-name="name"
-                                                id="consumablesCheckedoutTable"
+                                                id="consumablesAssetCheckedoutTable"
                                                 class="table table-striped snipe-table"
                                                 data-url="{{route('api.consumableassignments.index',['asset_id'=> $asset->id])}}">
                                         </table>
                                     </div>
-                                @else
-                                    <div class="alert alert-info alert-block">
-                                        <i class="fas fa-info-circle"></i>
-                                        {{ trans('general.no_results') }}
-                                    </div>
-                                @endif
+{{--                                @else--}}
+{{--                                    <div class="alert alert-info alert-block">--}}
+{{--                                        <i class="fas fa-info-circle"></i>--}}
+{{--                                        {{ trans('general.no_results') }}--}}
+{{--                                    </div>--}}
+{{--                                @endif--}}
 
                             </div><!-- /col -->
                         </div> <!-- row -->

@@ -86,7 +86,6 @@ class AssetModelsController extends Controller
         $model->notes = $request->input('notes');
         $model->user_id = Auth::id();
         $model->requestable = Request::has('requestable');
-        $model->lifetime            = $request->input('lifetime');
 
         if ($request->input('fieldset_id') != '') {
             $model->fieldset_id = $request->input('fieldset_id');
@@ -163,7 +162,6 @@ class AssetModelsController extends Controller
         $model->category_id = $request->input('category_id');
         $model->notes = $request->input('notes');
         $model->requestable = $request->input('requestable', '0');
-        $model->lifetime               = $request->input('lifetime');
 
         $this->removeCustomFieldsDefaultValues($model);
 

@@ -2,9 +2,8 @@
 
 {{-- Page title --}}
 @section('title')
- {{ $consumable->name }}
- {{ trans('general.consumable') }}
-@parent
+    {{ trans('general.consumable') }}: {{ $consumable->name }}
+    @parent
 @stop
 
 @section('header_right')
@@ -61,10 +60,11 @@
               <div class="table-responsive">
 
                 <table
+                        data-columns="{{ \App\Presenters\ConsumableAssignmentPresenter::dataTableLayout() }}"
                         data-cookie-id-table="consumablesCheckedoutTable"
                         data-pagination="true"
                         data-id-table="consumablesCheckedoutTable"
-                        data-search="false"
+                        data-search="true"
                         data-side-pagination="server"
                         data-show-columns="true"
                         data-show-export="true"
@@ -74,22 +74,11 @@
                         data-sort-name="name"
                         id="consumablesCheckedoutTable"
                         class="table table-striped snipe-table"
-                        data-url="{{route('api.consumables.show.users', $consumable->id)}}"
+                        data-url="{{route('api.consumableassignments.index',['consumable_id' => $consumable->id])}}"
                         data-export-options='{
                 "fileName": "export-consumables-{{ str_slug($consumable->name) }}-checkedout-{{ date('Y-m-d') }}",
                 "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
                 }'>
-                  <thead>
-                  <tr>
-                    <th data-searchable="false" data-sortable="false" data-field="avatar" data-formatter="imageFormatter">{{ trans('general.image') }}</th>
-                    <th data-searchable="false" data-sortable="false" data-field="name" formatter="usersLinkFormatter">{{ trans('general.user') }}</th>
-                    <th data-searchable="false" data-sortable="false" data-field="created_at" data-formatter="dateDisplayFormatter">
-                      {{ trans('general.date') }}
-                    </th>
-                    <th data-searchable="false" data-sortable="false" data-field="note">{{ trans('general.notes') }}</th>
-                    <th data-searchable="false" data-sortable="false" data-field="admin">{{ trans('general.admin') }}</th>
-                  </tr>
-                  </thead>
                 </table>
           </div>
         </div> <!-- close tab-pane div -->
@@ -201,12 +190,6 @@
                 <div class="box-body">
                     <div class="row">
                         <div class="col-md-12">
-                            @if ($consumable->manufacturer)
-                                <div class="col-md-12">
-                                    <strong>{{ trans('general.manufacturer') }}:</strong>
-                                    <a href="{{ route('manufacturers.show', $consumable->manufacturer->id) }}">{{ $consumable->manufacturer->name }}</a>
-                                </div>
-                            @endif
                             @if ($consumable->category)
                                 <div class="col-md-12">
                                     <strong>Категория: </strong>
@@ -215,18 +198,6 @@
                                     </a>
                                 </div>
                             @endif
-                            @if ($consumable->name)
-                                <div class="col-md-12">
-                                    <strong>Название: </strong>
-                                    {{$consumable->name}}
-                                </div>
-                            @endif
-                                @if ($consumable->model_number)
-                                    <div class="col-md-12">
-                                        <strong>{{ trans('general.model_no') }}:</strong>
-                                        {{ $consumable->model_number }}
-                                    </div>
-                                @endif
                             <div class="col-md-12" style="font-size: 200%">
                                 <strong>Всего: </strong>
                                 {{$consumable->qty}}
@@ -251,13 +222,13 @@
                   </div>
                 @endif
 
-                            @if ($consumable->purchase_cost)
-                                <div class="col-md-12">
-                                    <strong>{{ trans('general.purchase_cost') }}:</strong>
-                                    {{ $snipeSettings->default_currency }}
-                                    {{ Helper::formatCurrencyOutput($consumable->purchase_cost) }}
-                                </div>
-                            @endif
+                @if ($consumable->purchase_cost)
+                  <div class="col-md-12">
+                    <strong>{{ trans('general.purchase_cost') }}:</strong>
+                    {{ $snipeSettings->default_currency }}
+                    {{ Helper::formatCurrencyOutput($consumable->purchase_cost) }}
+                  </div>
+                @endif
 
                 @if ($consumable->item_no)
                   <div class="col-md-12">
@@ -280,16 +251,17 @@
                   </div>
                 @endif
 
-                @if ($consumable->order_number)
-                  <div class="col-md-12">
-                    <strong>{{ trans('general.order_number') }}:</strong>
-                    {{ $consumable->order_number }}
-                  </div>
-                @endif
+{{--                @if ($consumable->order_number)--}}
+{{--                  <div class="col-md-12">--}}
+{{--                    <strong>{{ trans('general.order_number') }}:</strong>--}}
+{{--                    {{ $consumable->order_number }}--}}
+{{--                  </div>--}}
+{{--                @endif--}}
 
     @can('checkout', \App\Models\Consumable::class)
 
                                 <div class="col-md-12">
+                                    <br><br>
                                     @if ($consumable->numRemaining() > 0)
                                         <a href="{{ route('consumables.checkout.show', $consumable->id) }}" style="margin-bottom:10px; width:100%" class="btn btn-primary btn-sm">
                                             {{ trans('general.checkout') }}
@@ -299,7 +271,7 @@
                                         </a>
                                     @else
                                         <button style="margin-bottom:10px; width:100%" class="btn btn-primary btn-sm disabled">
-                                        {{ trans('general.checkout') }}
+                                            {{ trans('general.checkout') }}
                                         </button>
                                         <button style="margin-bottom:10px; width:100%" class="btn btn-primary btn-sm disabled">
                                             {{ trans('general.sell') }}
@@ -307,7 +279,7 @@
                                     @endif
                                 </div>
 
-                            @endcan
+    @endcan
 
     @if ($consumable->notes)
 

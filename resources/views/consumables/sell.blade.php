@@ -36,12 +36,7 @@
                             </div>
                         @endif
 
-                        @include ('partials.forms.sell-selector', ['user_select' => 'true','contract_select'=> 'true'])
-
-                        @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.user'), 'fieldname' => 'assigned_user','required'=>'true'])
-                        @include ('partials.forms.edit.contract-select', ['translated_name' => "Договор", 'fieldname' => 'assigned_contract', 'style' => 'display:none;','required'=>'true'])
-
-                        @include ('partials.forms.custom.contract-id-select', ['translated_name' => "Договор", 'fieldname' => 'contract_id','required'=>'true'])
+                        @include ('partials.forms.custom.contract-select', ['translated_name' => "Договор", 'fieldname' => 'assigned_contract','required'=>'true'])
 
                         <!-- Purchase Cost -->
                         <div class="form-group {{ $errors->has('purchase_cost') ? ' has-error' : '' }}">
@@ -68,51 +63,47 @@
                             </div>
                         </div>
                         @include ('partials.forms.custom.quantity_max')
-                        @if ($consumable->requireAcceptance() || $consumable->getEula() || ($snipeSettings->slack_endpoint!=''))
-                            <div class="form-group notification-callout">
-                                <div class="col-md-8 col-md-offset-3">
-                                    <div class="callout callout-info">
 
-                                        @if ($consumable->category->require_acceptance=='1')
-                                            <i class="fa fa-envelope"></i>
-                                            {{ trans('admin/categories/general.required_acceptance') }}
-                                            <br>
-                                        @endif
+                            @if ($consumable->requireAcceptance() || $consumable->getEula() || ($snipeSettings->slack_endpoint!=''))
+                                <div class="form-group notification-callout">
+                                    <div class="col-md-8 col-md-offset-3">
+                                        <div class="callout callout-info">
 
-                                        @if ($consumable->getEula())
-                                            <i class="fa fa-envelope"></i>
-                                            {{ trans('admin/categories/general.required_eula') }}
-                                            <br>
-                                        @endif
+                                            @if ($consumable->category->require_acceptance=='1')
+                                                <i class="far fa-envelope"></i>
+                                                {{ trans('admin/categories/general.required_acceptance') }}
+                                                <br>
+                                            @endif
 
-                                        @if ($snipeSettings->slack_endpoint!='')
-                                            <i class="fa fa-slack"></i>
-                                            A slack message will be sent
-                                        @endif
+                                            @if ($consumable->getEula())
+                                                <i class="far fa-envelope"></i>
+                                                {{ trans('admin/categories/general.required_eula') }}
+                                                <br>
+                                            @endif
+
+                                            @if ($snipeSettings->webhook_endpoint!='')
+                                                <i class="fab fa-slack"></i>
+                                                {{ trans('general.webhook_msg_note') }}
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        @endif
+                            @endif
 
-                        <!-- Note -->
-                        <div class="form-group {{ $errors->has('note') ? 'error' : '' }}">
-                            <label for="note"
-                                   class="col-md-3 control-label">{{ trans('admin/hardware/form.notes') }}</label>
-                            <div class="col-md-7">
-                                <textarea class="col-md-6 form-control" name="note">{{ old('note') }}</textarea>
-                                {!! $errors->first('note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                            <!-- Note -->
+                            <div class="form-group {{ $errors->has('note') ? 'error' : '' }}">
+                                <label for="note" class="col-md-3 control-label">{{ trans('admin/hardware/form.notes') }}</label>
+                                <div class="col-md-7">
+                                    <textarea class="col-md-6 form-control" name="note">{{ old('note') }}</textarea>
+                                    {!! $errors->first('note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                </div>
                             </div>
-                        </div>
 
                     </div> <!-- .box-body -->
-
-                    <div class="box-footer">
-                        <a class="btn btn-link"
-                           href="{{ route('consumables.show', ['consumable'=> $consumable->id]) }}">{{ trans('button.cancel') }}</a>
-                        <button type="submit" class="btn btn-primary pull-right"><i class="fas fa-check icon-white"
-                                                                                    aria-hidden="true"></i> {{ trans('general.sell') }}
-                        </button>
-                    </div>
+                        <div class="box-footer">
+                            <a class="btn btn-link" href="{{ route('consumables.show', ['consumable'=> $consumable->id]) }}">{{ trans('button.cancel') }}</a>
+                            <button type="submit" id="submit_button" class="btn btn-primary pull-right"><i class="fas fa-check icon-white" aria-hidden="true"></i> {{ trans('general.sell') }}</button>
+                        </div>
                 </div>
             </form>
         </div>
@@ -121,48 +112,4 @@
 
 @section('moar_scripts')
     <script nonce="{{ csrf_token() }}">
-        $(function () {
-            $('input[name=checkout_to_type_s]').on("change", function () {
-                var assignto_type = $('input[name=checkout_to_type_s]:checked').val();
-                var userid = $('#assigned_user option:selected').val();
-
-                if (assignto_type == 'asset') {
-                    $('#current_assets_box').fadeOut();
-                    $('#assigned_asset').show();
-                    $('#assigned_user').hide();
-                    $('#assigned_location').hide();
-                    $('#assigned_contract').hide();
-                    $('.notification-callout').fadeOut();
-
-                } else if (assignto_type == 'location') {
-                    $('#current_assets_box').fadeOut();
-                    $('#assigned_asset').hide();
-                    $('#assigned_user').hide();
-                    $('#assigned_location').show();
-                    $('#assigned_contract').hide();
-                    $('.notification-callout').fadeOut();
-                } else if (assignto_type == 'contract') {
-                    $('#current_assets_box').fadeOut();
-                    $('#assigned_asset').hide();
-                    $('#assigned_user').hide();
-                    $('#assigned_location').hide();
-                    $('#assigned_contract').show();
-                    $('#contract_id').hide();
-                    $('.notification-callout').fadeOut();
-                } else {
-
-                    $('#assigned_asset').hide();
-                    $('#assigned_user').show();
-                    $('#assigned_location').hide();
-                    $('#assigned_contract').hide();
-                    $('#contract_id').show();
-                    if (userid) {
-                        $('#current_assets_box').fadeIn();
-                    }
-                    $('.notification-callout').fadeIn();
-
-                }
-            });
-        });
-    </script>
 @stop

@@ -67,7 +67,7 @@ class ConsumableAssignmentPresenter extends Presenter
                 "sortable" => true,
                 "switchable" => true,
                 "title" => "Договор",
-                "visible" => true,
+                "visible" => false,
                 "formatter" => "contractsLinkObjFormatter"
             ], [
                 "field" => "comment",
@@ -163,7 +163,7 @@ class ConsumableAssignmentPresenter extends Presenter
                 "sortable" => true,
                 "switchable" => true,
                 "title" => "Договор",
-                "visible" => true,
+                "visible" => false,
                 "formatter" => "contractsLinkObjFormatter"
             ], [
                 "field" => "comment",
