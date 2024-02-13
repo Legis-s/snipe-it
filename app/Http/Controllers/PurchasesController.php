@@ -3,11 +3,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\Helper;
 use App\Http\Requests\FileUploadRequest;
 use App\Models\Asset;
 use App\Models\AssetModel;
-use App\Models\Company;
 use App\Models\Purchase;
 use App\Models\Location;
 use App\Models\Statuslabel;
@@ -16,13 +14,9 @@ use App\Models\User;
 use Carbon\Carbon;
 use DateTime;
 use Facebook\WebDriver\AbstractWebDriverCheckboxOrRadio;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use function Livewire\str;
 
 class PurchasesController extends Controller
 {
@@ -56,7 +50,7 @@ class PurchasesController extends Controller
     /**
      * Returns a view that invokes the ajax tables which actually contains
      * the content for the locations detail page.
-     * @param int $inventoryId
+     * @param int $purchaseId
      * @since [v1.0]
      * @return \Illuminate\Contracts\View\View
      */
@@ -81,10 +75,7 @@ class PurchasesController extends Controller
 
     /**
      * Returns a form view used to create a new location.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
      * @see PurchasesController::postCreate() method that validates and stores the data
-     * @since [v1.0]
      * @return \Illuminate\Contracts\View\View
      */
     public function create()
@@ -97,12 +88,44 @@ class PurchasesController extends Controller
     /**
      * Validates and stores a new location.
      * @see PurchasesController::getCreate() method that makes the form
-     * @since [v1.0]
      * @return \Illuminate\Http\RedirectResponse
      */
     public function store(FileUploadRequest $request)
     {
         $this->authorize('create', Purchase::class);
+
+        $data_list = "";
+        $consumables = json_decode($request->input('consumables'), true);
+
+        if (count($consumables)>0) {
+            $data_list .= "Компоненты:"."\n";
+            foreach ($consumables as &$consumable) {
+                $consumable_name= $consumable["consumable"];
+                $consumable_id = $consumable["consumable_id"];
+                $purchase_cost = $consumable["purchase_cost"];
+                $quantity = $consumable["quantity"];
+                $data_list .= "[".$consumable_id."] ".$consumable_name." - Количество: ".$quantity." Цена: ".$purchase_cost."\n";
+            }
+        }
+        $consumables_sorted = [];
+        if (count($consumables)>0) {
+            foreach ($consumables as &$consumable) {
+                $consumable_id = $consumable["consumable_id"];
+                $need_add = true;
+                foreach ($consumables_sorted as &$cons_sorted) {
+                    if ($consumable_id == $cons_sorted["consumable_id"]){
+                        $need_add = false;
+                        $cons_sorted["quantity"] = $consumable["quantity"]+ $cons_sorted["quantity"];
+                    }
+                }
+                if ($need_add){
+                    array_push($consumables_sorted, $consumable);
+                }
+            }
+        }
+        $consumables = json_encode($consumables_sorted, JSON_UNESCAPED_UNICODE);
+
+
         $purchase = new Purchase();
         $purchase->invoice_number      = $request->input('invoice_number');
         $purchase->final_price         = $request->input('final_price');
@@ -110,7 +133,7 @@ class PurchasesController extends Controller
         $purchase->legal_person_id     = $request->input('legal_person_id');
         $purchase->invoice_type_id     = $request->input('invoice_type_id');
         $purchase->comment             = $request->input('comment');
-        $purchase->consumables_json    = $request->input('consumables');
+        $purchase->consumables_json    = $consumables;
         $purchase->assets_json         = $request->input('assets');
         $purchase->delivery_cost       = $request->input('delivery_cost');
         $purchase->user_id             = Auth::id();
@@ -129,14 +152,13 @@ class PurchasesController extends Controller
                 break;
         }
         $assets = json_decode($request->input('assets'), true);
-        $consumables = json_decode($request->input('consumables'), true);
+//        $consumables = json_decode($request->input('consumables'), true);
         $purchase = $request->handleFile($purchase, public_path().'/uploads/purchases');
 
 
         $status = Statuslabel::where('name', 'В закупке')->first();
         $settings = \App\Models\Setting::getSettings();
         if ($purchase->save()) {
-            $data_list = "";
             if (count($assets)>0) {
                 $asset_tag = Asset::autoincrement_asset();
                 $data_list .= "Активы:"."\n";
@@ -194,16 +216,6 @@ class PurchasesController extends Controller
                     }
                 }
                 $data_list .="\n";
-            }
-            if (count($consumables)>0) {
-                $data_list .= "Компоненты:"."\n";
-                foreach ($consumables as &$consumable) {
-                    $consumable_name= $consumable["consumable"];
-                    $consumable_id = $consumable["consumable_id"];
-                    $purchase_cost = $consumable["purchase_cost"];
-                    $quantity = $consumable["quantity"];
-                    $data_list .= "[".$consumable_id."] ".$consumable_name." - Количество: ".$quantity." Цена: ".$purchase_cost."\n";
-                }
             }
 
 
@@ -279,7 +291,7 @@ class PurchasesController extends Controller
     /**
      * Makes a form view to edit location information.
      *
-     * @see LocationsController::postCreate() method that validates and stores
+     * @see PurchasesController::postCreate() method that validates and stores
      * @param int $purchaseId
      * @since [v1.0]
      * @return \Illuminate\Contracts\View\View
@@ -361,7 +373,7 @@ class PurchasesController extends Controller
      */
     public function deleteAllRejected()
     {
-//        $this->authorize('delete', Purchase::class);
+        $this->authorize('delete', Purchase::class);
 
         $purchases = Purchase::with('assets')->where("status",Purchase::REJECTED)->get();
         foreach ($purchases as &$purchase) {
