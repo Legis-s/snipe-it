@@ -11,6 +11,10 @@
         <a href="{{ route('purchases.create') }}" class="btn btn-primary pull-right">
             {{ trans('general.create') }}</a>
     @endcan
+    @can('delete', \App\Models\Purchase::class)
+        <a href="{{ route('purchases.delete_all_rejected') }}" class="btn btn-danger pull-right">
+            Удалить отклоненные</a>
+    @endcan
 @stop
 
 {{-- Page content --}}

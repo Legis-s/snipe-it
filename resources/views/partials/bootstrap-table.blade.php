@@ -323,6 +323,9 @@
                 if (row.name=='') {
                     var name_for_box = row.asset_tag
                 }
+                if( name_for_box == undefined && row.invoice_number){
+                    name_for_box = row.invoice_number
+                }
 
                 actions += '<a href="{{ config('app.url') }}/' + dest + '/' + row.id + '" '
                     + ' class="actions btn btn-danger btn-sm delete-asset" data-tooltip="true"  '

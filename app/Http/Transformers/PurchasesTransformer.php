@@ -1,14 +1,9 @@
 <?php
 namespace App\Http\Transformers;
 
-use App\Http\Transformers\InventoryItemTransformer;
-use App\Http\Transformers\LocationsTransformer;
-use App\Http\Transformers\SuppliersTransformer;
 use App\Models\Purchase;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
-use phpDocumentor\Reflection\Types\Integer;
-use Gate;
+use Illuminate\Support\Facades\Gate;
 use App\Helpers\Helper;
 
 class PurchasesTransformer
@@ -62,6 +57,7 @@ class PurchasesTransformer
 
         $permissions_array['available_actions'] = [
             'clone' => (Gate::allows('create', Purchase::class) && ($purchase->deleted_at == '')),
+            'delete' => (Gate::allows('superadmin') && ($purchase->status ==  $purchase::REJECTED)),
         ];
         if ($full) {
             $array += ['consumables_json' => ($purchase->consumables_json) ? $consumables : null];

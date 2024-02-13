@@ -317,6 +317,12 @@ Route::group(['middleware' => 'auth'], function () {
      * Purchases
      */
 
+    Route::get(
+        'purchases/delete_all_rejected',
+        [PurchasesController::class, 'deleteAllRejected']
+    )->name('purchases.delete_all_rejected');
+
+
     Route::resource('purchases', PurchasesController::class, [
         'parameters' => ['purchase' => 'purchase_id']
     ]);
@@ -324,7 +330,6 @@ Route::group(['middleware' => 'auth'], function () {
         'purchases/{assetId}/clone',
         [PurchasesController::class, 'getClone']
     )->name('clone/purchases');
-
 
     /**
      * Map

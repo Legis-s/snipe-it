@@ -22,6 +22,7 @@ class Purchase extends SnipeModel
     const FINISHED = 'finished';
     const REVIEW = 'review';
     const INVENTORY = 'inventory';
+    const REJECTED = 'rejected';
 
     protected $dates = ['deleted_at'];
     protected $table = 'purchases';
@@ -98,14 +99,19 @@ class Purchase extends SnipeModel
     ];
 
 
+//    public function assets()
+//    {
+//        return $this->hasMany('\App\Models\Asset', 'purchase_id')
+//            ->whereHas('assetstatus', function ($query) {
+//                $query->where('status_labels.deployable', '=', 1)
+//                    ->orWhere('status_labels.pending', '=', 1)
+//                    ->orWhere('status_labels.archived', '=', 0);
+//            });
+//    }
+
     public function assets()
     {
-        return $this->hasMany('\App\Models\Asset', 'purchase_id')
-            ->whereHas('assetstatus', function ($query) {
-                $query->where('status_labels.deployable', '=', 1)
-                    ->orWhere('status_labels.pending', '=', 1)
-                    ->orWhere('status_labels.archived', '=', 0);
-            });
+        return $this->hasMany('\App\Models\Asset', 'purchase_id');
     }
 
     public function consumables()
