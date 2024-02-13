@@ -342,4 +342,6 @@ class PurchasesController extends Controller
         return response()->json(Helper::formatStandardApiResponse('error', null, $purchase->getErrors()));
     }
 
+
+
 }

@@ -16,10 +16,13 @@ use App\Models\User;
 use Carbon\Carbon;
 use DateTime;
 use Facebook\WebDriver\AbstractWebDriverCheckboxOrRadio;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use function Livewire\str;
 
 class PurchasesController extends Controller
 {
@@ -53,8 +56,6 @@ class PurchasesController extends Controller
     /**
      * Returns a view that invokes the ajax tables which actually contains
      * the content for the locations detail page.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
      * @param int $inventoryId
      * @since [v1.0]
      * @return \Illuminate\Contracts\View\View
@@ -95,9 +96,6 @@ class PurchasesController extends Controller
 
     /**
      * Validates and stores a new location.
-     *
-     * @todo Check if a Form Request would work better here.
-     * @author [A. Gianotto] [<snipe@snipe.net>]
      * @see PurchasesController::getCreate() method that makes the form
      * @since [v1.0]
      * @return \Illuminate\Http\RedirectResponse
@@ -281,7 +279,6 @@ class PurchasesController extends Controller
     /**
      * Makes a form view to edit location information.
      *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
      * @see LocationsController::postCreate() method that validates and stores
      * @param int $purchaseId
      * @since [v1.0]
@@ -301,9 +298,7 @@ class PurchasesController extends Controller
 
 
     /**
-     * Returns a view that presents a form to clone an asset.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * Returns a view that presents a form to clone purchase.
      * @param int $purchaseId
      * @since [v1.0]
      * @return \Illuminate\Contracts\View\View
@@ -324,5 +319,62 @@ class PurchasesController extends Controller
         return view('purchases/edit')
             ->with('item', $purchase);
     }
+
+
+
+    /**
+     * Validates and deletes selected purchase.
+     *
+     * @param int $purchaseId
+     * @since [v1.0]
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function destroy($purchaseId)
+    {
+        $this->authorize('delete', Purchase::class);
+
+        if (is_null($purchase = Purchase::find($purchaseId))) {
+            return redirect()->to(route('purchases.index'))->with('error', trans('admin/locations/message.not_found'));
+        }
+        if ($purchase->status == Purchase::REJECTED){
+            $assets = Asset::where('purchase_id', $purchase->id)->get();
+            foreach ($assets as &$value) {
+                $value->unsetEventDispatcher();
+                $value->forceDelete();
+            }
+            $purchase->delete();
+        }else{
+            return redirect()->to(route('purchases.index'))->with('error', "Нельзя удалить");
+        }
+
+
+        return redirect()->to(route('purchases.index'))->with('success', trans('admin/locations/message.delete.success'));
+    }
+
+
+    /**
+     * Returns a view that presents a form to clone purchase.
+     * @param int $purchaseId
+     * @since [v1.0]
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function deleteAllRejected()
+    {
+//        $this->authorize('delete', Purchase::class);
+
+        $purchases = Purchase::with('assets')->where("status",Purchase::REJECTED)->get();
+        foreach ($purchases as &$purchase) {
+            $pas = $purchase->assets;
+            foreach($pas as &$pa){
+                $pa->unsetEventDispatcher();
+                $pa->forceDelete();
+            }
+            $purchase->delete();
+        }
+        $total = $purchases->count();
+        return redirect()->to(route('purchases.index'))->with('success',"Dell ".$total);
+    }
+
 
 }

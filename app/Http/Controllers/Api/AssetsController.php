@@ -6,6 +6,7 @@ use App\Events\CheckoutableCheckedIn;
 use App\Models\Category;
 use App\Models\Statuslabel;
 use App\Http\Requests\StoreAssetRequest;
+use DateTime;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Gate;
@@ -167,6 +168,15 @@ class AssetsController extends Controller
             }
         }
 
+        if ($request->filled('purchase_id')) {
+            $assets->where('assets.purchase_id', '=', $request->input('purchase_id'));
+            $settings->show_archived_in_list = "1";
+        }
+        if ($request->filled('contract_id')) {
+            $assets->where('assets.contract_id', '=', $request->input('contract_id'));
+            $settings->show_archived_in_list = "1";
+        }
+
 
         // This is used by the sidenav, mostly
 
@@ -325,15 +335,6 @@ class AssetsController extends Controller
 
         //Custom filters
 
-        if ($request->filled('purchase_id')) {
-            $assets->where('assets.purchase_id', '=', $request->input('purchase_id'));
-            $settings->show_archived_in_list = "1";
-        }
-
-        if ($request->filled('contract_id')) {
-            $assets->where('assets.contract_id', '=', $request->input('contract_id'));
-            $settings->show_archived_in_list = "1";
-        }
 
         if ($request->filled('bitrix_object_id')) {
             $bitrix_object_id = $request->input('bitrix_object_id');
@@ -1265,6 +1266,7 @@ class AssetsController extends Controller
             // We don't want to log this as a normal update, so let's bypass that
             $asset->unsetEventDispatcher();
             $note = "Проверка после покупки";
+            $asset->purchase_date =date('Y-m-d H:i:s');
             $asset->next_audit_date = $dt;
             $asset->last_audit_date = date('Y-m-d H:i:s');
             $user = Auth::user();
