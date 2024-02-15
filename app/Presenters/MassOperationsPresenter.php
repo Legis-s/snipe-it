@@ -63,6 +63,14 @@ class MassOperationsPresenter extends Presenter
                 "searchable" => false,
                 "sortable" => true,
                 "title" => trans('admin/massoperations/general.consumables_count'),
+            ],[
+                'field' => 'user',
+                'searchable' => false,
+                'sortable' => true,
+                'switchable' => true,
+                'title' =>  "Созданно",
+                'visible' => false,
+                'formatter' => 'usersLinkObjFormatter',
             ],
             [
                 "field" => "notes",

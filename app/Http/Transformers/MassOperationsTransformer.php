@@ -30,6 +30,7 @@ class MassOperationsTransformer
             'assets_count' => e($mo->assets_count),
             'consumables_count' => e($mo->consumables_count),
             'assigned_to' => $this->transformAssignedTo($mo),
+            'user' => ($mo->user) ? (new UsersTransformer)->transformUser($mo->user) : null,
             'notes' => ($mo->notes) ? e($mo->notes) : null,
             'created_at' => Helper::getFormattedDateObject($mo->created_at, 'datetime'),
             'updated_at' => Helper::getFormattedDateObject($mo->updated_at, 'datetime'),
