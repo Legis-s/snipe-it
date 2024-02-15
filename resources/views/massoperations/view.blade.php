@@ -54,50 +54,62 @@
                     </div>
                 </div>
                 <div class="box-body">
+                    @if ($massoperation->user)
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>
+                                    Пользователь
+                                </strong>
+                            </div>
+                            <div class="col-md-6">
+                                {{ $massoperation->user->getFullNameAttribute() }}
+                            </div>
+                        </div>
+                    @endif
                     @if ($massoperation->assets)
                             <div class="row">
-                                <div class="col-md-8">
+                                <div class="col-md-6">
                                     <strong>
                                         Кол-во активов
                                     </strong>
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-md-6">
                                     {{ count($massoperation->assets) }}
                                 </div>
                             </div>
                         @endif
                         @if ($massoperation->consumables)
                             <div class="row">
-                                <div class="col-md-8">
+                                <div class="col-md-6">
                                     <strong>
                                         Кол-во расходников
                                     </strong>
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-md-6">
                                     {{ count($massoperation->consumables) }}
                                 </div>
                             </div>
                         @endif
                         @if ($massoperation->bitrix_task_id)
                             <div class="row">
-                                <div class="col-md-8">
+                                <div class="col-md-6">
                                     <strong>
                                         Bitrix задача
                                     </strong>
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-md-6">
                                     <a href="https://bitrix.legis-s.ru/company/personal/user/290/tasks/task/view/{{ $massoperation->bitrix_task_id }}/">ссылка</a>
                                 </div>
                             </div>
                         @endif
                     @if ($massoperation->operation_type)
                         <div class="row">
-                            <div class="col-md-8">
+                            <div class="col-md-6">
                                 <strong>
                                     Операция
                                 </strong>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-6">
                                 @if ($massoperation->operation_type == 'checkout')
                                 выдача
                                 @elseif($massoperation->operation_type == 'checkin')
@@ -110,24 +122,24 @@
                     @endif
                     @if ($massoperation->created_at)
                         <div class="row">
-                            <div class="col-md-8">
+                            <div class="col-md-6">
                                 <strong>
                                     Дата
                                 </strong>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-6">
                                 {{ date('Y.m.d', strtotime((string) $massoperation->created_at))}}
                             </div>
                         </div>
                     @endif
                     @if ($massoperation->contract_id)
                         <div class="row">
-                            <div class="col-md-8">
+                            <div class="col-md-6">
                                 <strong>
                                     Договор
                                 </strong>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-6">
                                 {{ $massoperation->contract_id}}
                             </div>
                         </div>
@@ -139,7 +151,7 @@
                                     Комментарий
                                 </strong>
                             </div>
-                            <div class="col-md-12">
+                            <div class="col-md-6">
                                 {{ $massoperation->note }}
                             </div>
                         </div>
@@ -149,6 +161,7 @@
                 </div><!-- /.box-body -->
             </div> <!--/.box-->
         </div>
+        @if ($massoperation->consumables->count() >0)
         <div class="col-md-9">
             <div class="box box-default">
                 <div class="box-header with-border">
@@ -182,6 +195,7 @@
                 </div><!-- /.box-body -->
             </div> <!--/.box-->
         </div><!--/.col-md-9-->
+        @endif
     </div>
 
 @stop
