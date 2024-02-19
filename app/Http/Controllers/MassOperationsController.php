@@ -88,6 +88,7 @@ class MassOperationsController extends Controller
             $admin = Auth::user();
 
             $target = $this->determineCheckoutTarget();
+
             if (! is_array($request->get('selected_assets')) and ! is_array($request->get('selected_consumables'))) {
                 return redirect()->route('bulk.checkout.show')->withInput()->with('error', trans('admin/hardware/message.checkout.no_assets_selected'));
             }
@@ -96,6 +97,13 @@ class MassOperationsController extends Controller
                 $asset_ids = array_filter($request->get('selected_assets'));
             }
 
+            if (request('checkout_to_type') == 'asset') {
+                foreach ($asset_ids as $asset_id) {
+                    if ($target->id == $asset_id) {
+                        return redirect()->back()->with('error', 'You cannot check an asset out to itself.');
+                    }
+                }
+            }
 
             $consumbales_post  = is_array($request->get('selected_consumables')) ? array_filter($request->get('selected_consumables')) : [];
             $consumbales_data = [];
@@ -115,6 +123,7 @@ class MassOperationsController extends Controller
                     }
                 }
             }
+
             $checkout_at = date('Y-m-d H:i:s');
             if (($request->filled('checkout_at')) && ($request->get('checkout_at') != date('Y-m-d'))) {
                 $checkout_at = e($request->get('checkout_at'));
@@ -128,12 +137,11 @@ class MassOperationsController extends Controller
 
             $errors = [];
             DB::transaction(function () use ($target, $admin, $checkout_at, $expected_checkin, $errors, $asset_ids,$consumbales_ids,$consumbales_data, $request) {
-                $consumbales_assigned_ids = [];
-
                 foreach ($asset_ids as $asset_id) {
                     $asset = Asset::findOrFail($asset_id);
                     $this->authorize('checkout', $asset);
-                    $error = $asset->checkOut($target, $admin, $checkout_at, $expected_checkin, e($request->get('note')), null);
+
+                    $error = $asset->checkOut($target, $admin, $checkout_at, $expected_checkin, e($request->get('note')), $asset->name);
 
                     if ($target->location_id != '') {
                         $asset->location_id = $target->location_id;
@@ -145,6 +153,8 @@ class MassOperationsController extends Controller
                         array_merge_recursive($errors, $asset->getErrors()->toArray());
                     }
                 }
+
+                $consumbales_assigned_ids = [];
 
                 foreach ($consumbales_data as $consumbale_item) {
                     $consumable = Consumable::findOrFail($consumbale_item[0]);
@@ -162,17 +172,7 @@ class MassOperationsController extends Controller
                     $ca->save();
                     $consumbales_assigned_ids[]=$ca->id;
 
-//                    $consumable->locations()->attach($consumable->id, [
-//                        'consumable_id' => $consumable->id,
-//                        'user_id' => $admin->id,
-//                        'quantity' => $consumbale_item[1],
-//                        'comment' => e($request->get('note')),
-//                        'cost' => $consumable->purchase_cost,
-//                        'type' => ConsumableAssignment::ISSUED,
-//                        'assigned_to' => $target->id,
-//                        'assigned_type' => get_class($target),
-//                    ]);
-                    event(new CheckoutableCheckedOut($consumable, $target, $admin,e($request->get('note')),null));
+                    event(new CheckoutableCheckedOut($consumable, $target, $admin,e($request->get('note'))));
                 }
 
                 $bitrix_task_id = intval($request->get('bitrix_task_id'));
@@ -241,8 +241,7 @@ class MassOperationsController extends Controller
         try {
             $admin = Auth::user();
 
-            $target = $this->determineSellTarget();
-
+            $target = Contract::findOrFail(request('assigned_contract'));
 
             if (! is_array($request->get('selected_assets')) and ! is_array($request->get('selected_consumables'))) {
                 return redirect()->route('bulk.sell.show')->withInput()->with('error', trans('admin/hardware/message.checkout.no_assets_selected'));
@@ -265,19 +264,20 @@ class MassOperationsController extends Controller
 
             $checkout_at = date('Y-m-d H:i:s');
             if (($request->filled('checkout_at')) && ($request->get('checkout_at') != date('Y-m-d'))) {
-                $checkout_at = e($request->get('checkout_at'));
+                $checkout_at = $request->get('checkout_at');
             }
 
-            $contract_id = e($request->get('contract_id'));
+            $expected_checkin = '';
 
             $errors = [];
-            DB::transaction(function () use ($target, $admin, $checkout_at, $contract_id, $errors, $asset_ids,$consumbales_ids,$consumbales_data, $request) {
+
+            DB::transaction(function () use ($target, $admin, $checkout_at, $expected_checkin, $errors, $asset_ids,$consumbales_ids,$consumbales_data, $request) {
                 $consumbales_assigned_ids = [];
 
                 foreach ($asset_ids as $asset_id) {
                     $asset = Asset::findOrFail($asset_id);
                     $this->authorize('checkout', $asset);
-                    $error = $asset->sell($target, $admin, $checkout_at, $contract_id, e($request->get('note')), null);
+                    $error = $asset->sell($target, $admin, $checkout_at, e($request->get('note')), $request->get('name'));
 
                     if ($error) {
                         array_merge_recursive($errors, $asset->getErrors()->toArray());
@@ -306,20 +306,7 @@ class MassOperationsController extends Controller
 
                     $consumbales_assigned_ids[]=$ca->id;
 
-//                    $consumable->locations()->attach($ca->id);
-//                  $consumable->locations()->attach($consumable->id, [
-//                        'consumable_id' => $consumable->id,
-//                        'user_id' => $admin->id,
-//                        'quantity' => $consumbale_item[1],
-//                        'comment' => e($request->get('note')),
-//                        'cost' => $consumable->purchase_cost,
-//                        'type' => ConsumableAssignment::SOLD,
-//                        'assigned_to' => $target->id,
-//                        'assigned_type' => get_class($target),
-//                        'contract_id' => $contract_id,
-//                    ]);
-
-                    event(new CheckoutableSell($consumable, $target, $admin,e($request->get('note')),null));
+                    event(new CheckoutableSell($consumable, $target, $admin,e($request->get('note'))));
                 }
 
                 $bitrix_task_id = intval($request->get('bitrix_task_id'));
@@ -337,8 +324,6 @@ class MassOperationsController extends Controller
                 $mo->consumables()->attach($consumbales_ids);
                 $mo->consumables_assigments()->attach($consumbales_assigned_ids);
             });
-
-
 
             if (! $errors) {
                 // Redirect to the new asset page

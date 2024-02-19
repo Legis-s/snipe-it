@@ -18,33 +18,24 @@
 
     <div class="row">
         <!-- left column -->
-        <div class="col-md-9">
+        <div class="col-md-6">
             <div class="box box-default">
                 <div class="box-header with-border">
-                    {{--                    <h2 class="box-title"> {{ trans('admin/hardware/form.tag') }} </h2>--}}
+                    <h2 class="box-title"> {{ trans('admin/hardware/form.tag') }} </h2>
                 </div>
                 <div class="box-body">
                     <form class="form-horizontal" method="post" action="" autocomplete="off">
                         {{ csrf_field() }}
 
-                        <!-- Sell selector -->
-                        @include ('partials.forms.sell-selector', ['user_select' => 'true','contract_select' => 'true'])
-                        @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.user'), 'fieldname' => 'assigned_user','unselect' => 'true', 'required'=>'true','hide_new' => 'true'])
-                        @include ('partials.forms.edit.contract-select', ['translated_name' => trans('general.contract'),  'fieldname' => 'assigned_contract','unselect' => 'true', 'style' => 'display:none;', 'required'=>'true','help_text'=>'Укажите только договор когда уже есть закрывающие документы'])
-
-                        @include ('partials.forms.edit.contract-id-select', ['translated_name' => trans('general.contract'), 'fieldname' => 'contract_id', 'required'=>'true'])
+                        @include ('partials.forms.custom.contract-select', ['translated_name' => trans('general.contract'),  'fieldname' => 'assigned_contract','unselect' => 'true', 'required'=>'true'])
 
                         <!-- Checkout/Checkin Date -->
                         <div class="form-group {{ $errors->has('checkout_at') ? 'error' : '' }}">
                             {{ Form::label('checkout_at', trans('admin/hardware/form.checkout_date'), array('class' => 'col-md-3 control-label')) }}
                             <div class="col-md-8">
-                                <div class="input-group date col-md-5" data-provide="datepicker"
-                                     data-date-format="yyyy-mm-dd" data-date-end-date="0d" data-date-clear-btn="true">
-                                    <input type="text" class="form-control"
-                                           placeholder="{{ trans('general.select_date') }}" name="checkout_at"
-                                           id="checkout_at" value="{{ old('checkout_at') }}">
-                                    <span class="input-group-addon"><i class="fas fa-calendar"
-                                                                       aria-hidden="true"></i></span>
+                                <div class="input-group date col-md-8" data-provide="datepicker" data-date-format="yyyy-mm-dd" data-date-end-date="0d" data-date-clear-btn="true">
+                                    <input type="text" class="form-control" placeholder="{{ trans('general.select_date') }}" name="checkout_at" id="checkout_at" value="{{ old('checkout_at') }}">
+                                    <span class="input-group-addon"><i class="fas fa-calendar" aria-hidden="true"></i></span>
                                 </div>
                                 {!! $errors->first('checkout_at', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                             </div>
@@ -53,36 +44,22 @@
                         <!-- Note -->
                         <div class="form-group {{ $errors->has('note') ? 'error' : '' }}">
                             {{ Form::label('note', trans('admin/hardware/form.notes'), array('class' => 'col-md-3 control-label')) }}
-                            <div class="col-md-7">
-                                <textarea class="col-md-6 form-control" id="note"
-                                          name="note">{{ old('note') }}</textarea>
+                            <div class="col-md-8">
+                                <textarea class="col-md-6 form-control" id="note" name="note">{{ old('note') }}</textarea>
                                 {!! $errors->first('note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                             </div>
                         </div>
-                    @include ('partials.forms.custom.bitrix_id')
+                        @include ('partials.forms.custom.bitrix_id')
 
-                        @include ('partials.forms.custom.asset-select-bulk-form', [
-                            'translated_name' => trans('general.asset'),
-                            'fieldname' => 'asset_select',
-                            'unselect' => 'true',
-                            'asset_status_type' => 'RTD',
-                            'select_id' => 'asset_select',
+
+                        @include ('partials.forms.edit.asset-select', [
+                          'translated_name' => trans('general.assets'),
+                          'fieldname' => 'selected_assets[]',
+                          'multiple' => true,
+                          'asset_status_type' => 'RTD',
+                          'select_id' => 'assigned_assets_select',
                         ])
-{{--                    @include ('partials.forms.edit.asset-select', [--}}
-{{--                      'translated_name' => trans('general.assets'),--}}
-{{--                      'fieldname' => 'selected_assets[]',--}}
-{{--                      'multiple' => true,--}}
-{{--                      'asset_status_type' => 'RTD',--}}
-{{--                      'select_id' => 'assigned_assets_select',--}}
-{{--                      'required' => false,--}}
-{{--                    ])--}}
-                        <select id="assigned_assets_select" name="selected_assets[]" multiple hidden>
-                            @foreach ($ids as $a_id)
-                                <option value = '{{ $a_id }}' selected="selected">{{ $a_id }}</option>
-                            @endforeach
-                        </select>
                         <select id="assigned_consumables_select" name="selected_consumables[]" multiple hidden></select>
-
 
                 </div> <!--./box-body-->
                 <div class="box-footer">
@@ -93,9 +70,9 @@
                 </div>
             </div>
             </form>
-        </div> <!--/.col-md-7-->
-        <div class="col-md-9">
-            <div class="box box-default">
+        </div>
+        <div class="col-md-6">
+            <div class="box box-primary">
                 <div class="box-header with-border">
                     <h2 class="box-title">Активы</h2>
                 </div>
@@ -103,23 +80,22 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="table table-responsive">
-                                {{--                                <p class="activ text-center text-bold text-danger hidden">Добавьте хотя бы один--}}
-                                {{--                                    расходник</p>--}}
                                 <table
                                         data-advanced-search="true"
                                         data-click-to-select="true"
                                         data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayoutBulk() }}"
                                         data-cookie-id-table="assetsBulkTable"
-                                        data-pagination="true"
+                                        data-pagination="false"
                                         data-id-table="assetsBulkTable"
                                         data-search="false"
-                                        {{--                                        {% if ids is defined %}--}}
-                                        {{--                                        data-query-params="queryParams"--}}
-                                        {{--                                        {% endif %}--}}
+                                        @isset($ids)
+                                            data-query-params="queryParams"
+                                        @endif
+                                        data-height="385"
                                         data-side-pagination="server"
                                         data-show-columns="true"
-                                        data-show-footer="true"
-                                        data-show-refresh="true"
+                                        data-show-footer="false"
+                                        data-show-refresh="false"
                                         data-sort-order="asc"
                                         data-sort-name="name"
                                         data-toolbar="#toolbar"
@@ -134,7 +110,9 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-9">
+    </div>
+    <div class="row">
+        <div class="col-md-6">
             <div class="box box-default">
                 <div class="box-header with-border">
                     <h2 class="box-title">Расходники</h2>
@@ -196,118 +174,108 @@
 @stop
 
 @section('moar_scripts')
+{{--    @include('partials/assets-assigned')--}}
+    @include('partials.bootstrap-table')
+
     <script nonce="{{ csrf_token() }}">
+
+        // Initialize with options
+        onScan.attachTo(document, {
+            suffixKeyCodes: [13], // enter-key expected at the end of a scan
+            reactToPaste: true, // Compatibility to built-in scanners in paste-mode (as opposed to keyboard-mode)
+            onScan: function(sCode, iQty) { // Alternative to document.addEventListener('scan')
+                console.log('Scanned: ' + sCode);
+                $.ajax({
+                    type: 'GET',
+                    url:  "/api/v1/hardware/bytag/"+sCode,
+                    headers: {
+                        "X-Requested-With": 'XMLHttpRequest',
+                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        console.log(data);
+                        if (data != null && "id" in data) {
+                            if( data["user_can_checkout"] == true){
+                                var add = true
+                                var selected_ass = $('#assigned_assets_select').select2('data');
+                                selected_ass.forEach((element) => {
+                                    if (element.id == data.id){
+                                        add = false
+                                    }
+                                });
+                                if (add){
+                                    var model_name = "";
+                                    if ("model" in data){
+                                        model_name = data["model"]["name"]
+                                    }
+                                    var option = new Option("("+data["asset_tag"]+") "+model_name, data.id, true, true);
+                                    $('#assigned_assets_select').append(option).trigger('change');
+                                    // manually trigger the `select2:select` event
+                                    $('#assigned_assets_select').trigger({
+                                        type: 'select2:select',
+                                        params: {
+                                            data: data
+                                        }
+                                    });
+                                }
+
+                            }else{
+                                Swal.fire({
+                                    icon: "error",
+                                    title: "Актив "+ sCode + " недоступен к выдаче",
+                                    timer: 1200
+                                });
+                            }
+                            // window.location.href = "/hardware/"+data["id"];
+                        }else{
+                            Swal.fire({
+                                icon: "error",
+                                title: "Нет актива с меткой "+ sCode,
+                                timer: 1200
+                            });
+                            console.log("No tag ");
+                        }
+                    },
+                });
+            },
+        });
+
         var selected = [];
+        var assets_select = $('#assigned_assets_select');
+        var assets_table = $("#assetsBulkTable");
+        function queryParams(params) {
+            params.data = JSON.stringify(selected);
+            return params
+        }
         window.operateEventsBulk = {
             'click .bulk-clear':function (e, value, row, index) {
-                var selected_id =String(row.id);
-                console.log(selected_id);
-                console.log(selected);
+                var selected_id = String(row.id);
+
                 if (selected.includes(selected_id)) {
                     selected = selected.filter(item => item !== selected_id)
-                    // selected.remove(selected_id);
-                    updData();
                 }
+                assets_select.val(selected).trigger('change');
             }
         };
-        // function queryParams(params) {
-        //     params.data = JSON.stringify(selected);
-        //     return params
-        // }
-        function updData() {
-            console.log("upd");
-            console.log(selected);
-            $("#assetsBulkTable").bootstrapTable("refresh", {
-                "query": {
-                    "data": JSON.stringify(selected),
-                },
-                "silent": true,
-            });
-            $('#assigned_assets_select').empty();
-            $.each(selected, function (i, item) {
 
-                $('#assigned_assets_select').append($('<option>', {
-                    value: item,
-                    text: item,
-                    selected: true
-                }));
-            });
-
-        }
-
-    </script>
-    @include('partials/assets-assigned')
-    @include('partials.bootstrap-table')
-    <script nonce="{{ csrf_token() }}">
         $(function () {
 
 
-            var select = $('#asset_select');
-            var add_asset = $('#add_asset');
-
-            // Array.from(document.getElementById("assigned_assets_select")).forEach(function(item) {
-            //     selected.push(item.innerHTML);
-            // });
-
-            // updData();
-            add_asset.prop('disabled', true);
-            add_asset.click(function () {
-                var selected_id = select.val();
-                if (!selected.includes(selected_id)) {
-                    selected.push(selected_id);
-                }
-                updData();
-                select.val(null).trigger('change');
-                add_asset.prop('disabled', true);
-            });
-            select.on('select2:select', function (e) {
-                add_asset.prop('disabled', false);
-            });
-            select.on('select2:unselect', function (e) {
-                add_asset.prop('disabled', true);
+            assets_select.on('change', function (e) {
+                var selected_ass = assets_select.select2('data');
+                selected = []
+                selected_ass.forEach((element) => {
+                    selected.push(element.id)
+                });
+                assets_table.bootstrapTable("refresh", {
+                    "query": {
+                        "data": JSON.stringify(selected),
+                    },
+                    "silent": true,
+                });
             });
 
-
-            $('input[name=checkout_to_type_s]').on("change",function () {
-                var assignto_type = $('input[name=checkout_to_type_s]:checked').val();
-                var userid = $('#assigned_user option:selected').val();
-                if (assignto_type == 'asset') {
-                    $('#current_assets_box').fadeOut();
-                    $('#assigned_asset').show();
-                    $('#assigned_user').hide();
-                    $('#assigned_location').hide();
-                    $('#assigned_contract').hide();
-                    $('.notification-callout').fadeOut();
-
-                } else if (assignto_type == 'location') {
-                    $('#current_assets_box').fadeOut();
-                    $('#assigned_asset').hide();
-                    $('#assigned_user').hide();
-                    $('#assigned_location').show();
-                    $('#assigned_contract').hide();
-                    $('.notification-callout').fadeOut();
-                } else if (assignto_type == 'contract') {
-                    $('#current_assets_box').fadeOut();
-                    $('#assigned_asset').hide();
-                    $('#assigned_user').hide();
-                    $('#assigned_location').hide();
-                    $('#assigned_contract').show();
-                    $('#contract_id').hide();
-                    $('.notification-callout').fadeOut();
-                } else  {
-
-                    $('#assigned_asset').hide();
-                    $('#assigned_user').show();
-                    $('#assigned_location').hide();
-                    $('#assigned_contract').hide();
-                    $('#contract_id').show();
-                    if (userid) {
-                        $('#current_assets_box').fadeIn();
-                    }
-                    $('.notification-callout').fadeIn();
-
-                }
-            });
 
             var baseUrl = $('meta[name="baseUrl"]').attr('content');
             var table_consumables = $('#table_consumables');

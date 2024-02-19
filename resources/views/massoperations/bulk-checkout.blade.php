@@ -63,23 +63,6 @@
                           'select_id' => 'assigned_assets_select',
                         ])
 
-{{--                        @include ('partials.forms.custom.asset-select-bulk-form', [--}}
-{{--                            'translated_name' => trans('general.asset'),--}}
-{{--                            'fieldname' => 'asset_select',--}}
-{{--                            'unselect' => 'true',--}}
-{{--                            'asset_status_type' => 'RTD',--}}
-{{--                            'select_id' => 'asset_select',--}}
-{{--                        ])--}}
-
-
-{{--                        @include ('partials.forms.edit.asset-select', [--}}
-{{--                          'translated_name' => trans('general.assets'),--}}
-{{--                          'fieldname' => 'selected_assets[]',--}}
-{{--                          'multiple' => true,--}}
-{{--                          'asset_status_type' => 'RTD',--}}
-{{--                          'select_id' => 'assigned_assets_select',--}}
-{{--                          'required' => false,--}}
-{{--                        ])--}}
 {{--                        <select id="assigned_assets_select" name="selected_assets[]" multiple hidden>--}}
 {{--                            @foreach ($ids as $a_id)--}}
 {{--                                <option value = '{{ $a_id }}' selected="selected">{{ $a_id }}</option>--}}
@@ -106,24 +89,22 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="table table-responsive">
-                                {{--                                <p class="activ text-center text-bold text-danger hidden">Добавьте хотя бы один--}}
-                                {{--                                    расходник</p>--}}
                                 <table
                                         data-advanced-search="true"
                                         data-click-to-select="true"
                                         data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayoutBulk() }}"
                                         data-cookie-id-table="assetsBulkTable"
-                                        data-pagination="true"
+                                        data-pagination="false"
                                         data-id-table="assetsBulkTable"
                                         data-search="false"
-{{--                                        {% if ids is defined %}--}}
-{{--                                        data-query-params="queryParams"--}}
-{{--                                        {% endif %}--}}
+                                        @isset($ids)
+                                            data-query-params="queryParams"
+                                        @endif
                                         data-height="385"
                                         data-side-pagination="server"
                                         data-show-columns="true"
                                         data-show-footer="false"
-                                        data-show-refresh="true"
+                                        data-show-refresh="false"
                                         data-sort-order="asc"
                                         data-sort-name="name"
                                         data-toolbar="#toolbar"
@@ -153,8 +134,6 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="table table-responsive">
-                                {{--                                <p class="activ text-center text-bold text-danger hidden">Добавьте хотя бы один--}}
-                                {{--                                    расходник</p>--}}
                                 <table id="table_consumables" class="table table-striped snipe-table">
                                     <thead>
                                     <th>#</th>
@@ -202,7 +181,7 @@
 @stop
 
 @section('moar_scripts')
-    @include('partials/assets-assigned')
+{{--    @include('partials/assets-assigned')--}}
     @include('partials.bootstrap-table')
 
     <script nonce="{{ csrf_token() }}">
@@ -269,78 +248,44 @@
         });
 
         var selected = [];
+        var assets_select = $('#assigned_assets_select');
+        var assets_table = $("#assetsBulkTable");
+
+        function queryParams(params) {
+            params.data = JSON.stringify(selected);
+            return params
+        }
         window.operateEventsBulk = {
             'click .bulk-clear':function (e, value, row, index) {
-                var selected_id =String(row.id);
-                console.log(selected_id);
-                console.log(selected);
+                var selected_id = String(row.id);
+
                 if (selected.includes(selected_id)) {
                     selected = selected.filter(item => item !== selected_id)
-                    // selected.remove(selected_id);
-                    updData();
                 }
+                assets_select.val(selected).trigger('change');
             }
         };
-        // function queryParams(params) {
-        //     params.data = JSON.stringify(selected);
-        //     return params
-        // }
-        function updData() {
-            console.log("upd");
-            console.log(selected);
-            $("#assetsBulkTable").bootstrapTable("refresh", {
-                "query": {
-                    "data": JSON.stringify(selected),
-                },
-                "silent": true,
-            });
-            $('#assigned_assets_select').empty();
-            $.each(selected, function (i, item) {
 
-                $('#assigned_assets_select').append($('<option>', {
-                    value: item,
-                    text: item,
-                    selected: true
-                }));
-            });
-
-        }
 
         $(function () {
-            // const elem = document.querySelector("#myDiv");
-            // if(elem) {
-            //     const rect = elem.getBoundingClientRect();
-            //     console.log(`height: ${rect.height}`);
-            //     resetView("")
-            // }
 
-            var select = $('#asset_select');
-            var add_asset = $('#add_asset');
-
-            // Array.from(document.getElementById("assigned_assets_select")).forEach(function(item) {
-            //     selected.push(item.innerHTML);
-            // });
-
-            // updData();
-            add_asset.prop('disabled', true);
-            add_asset.click(function () {
-                var selected_id = select.val();
-                if (!selected.includes(selected_id)) {
-                    selected.push(selected_id);
-                }
-                updData();
-                select.val(null).trigger('change');
-                add_asset.prop('disabled', true);
-            });
-            select.on('select2:select', function (e) {
-                add_asset.prop('disabled', false);
-            });
-            select.on('select2:unselect', function (e) {
-                add_asset.prop('disabled', true);
+            assets_select.on('change', function (e) {
+                var selected_ass = assets_select.select2('data');
+                selected = []
+                selected_ass.forEach((element) => {
+                    selected.push(element.id)
+                });
+                assets_table.bootstrapTable("refresh", {
+                    "query": {
+                        "data": JSON.stringify(selected),
+                    },
+                    "silent": true,
+                });
             });
 
 
 
+            //Сonsumables
             var baseUrl = $('meta[name="baseUrl"]').attr('content');
             var table_consumables = $('#table_consumables');
             table_consumables.bootstrapTable('destroy').bootstrapTable({
@@ -471,75 +416,75 @@
                 }
             });
 
-            // function formatDatalistSafe(datalist) {
-            //     // console.warn("What in the hell is going on with Select2?!?!!?!?");
-            //     // console.warn($.select2);
-            //     if (datalist.loading) {
-            //         return $('<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Loading...');
-            //     }
-            //
-            //     var root_div = $("<div class='clearfix'>") ;
-            //     var left_pull = $("<div class='pull-left' style='padding-right: 10px;'>");
-            //     if (datalist.image) {
-            //         var inner_div = $("<div style='width: 30px;'>");
-            //         /******************************************************************
-            //          *
-            //          * We are specifically chosing empty alt-text below, because this
-            //          * image conveys no additional information, relative to the text
-            //          * that will *always* be there in any select2 list that is in use
-            //          * in Snipe-IT. If that changes, we would probably want to change
-            //          * some signatures of some functions, but right now, we don't want
-            //          * screen readers to say "HP SuperJet 5000, .... picture of HP
-            //          * SuperJet 5000..." and so on, for every single row in a list of
-            //          * assets or models or whatever.
-            //          *
-            //          *******************************************************************/
-            //         var img = $("<img src='' style='max-height: 20px; max-width: 30px;' alt=''>");
-            //         // console.warn("Img is: ");
-            //         // console.dir(img);
-            //         // console.warn("Strigularly, that's: ");
-            //         // console.log(img);
-            //         img.attr("src", datalist.image );
-            //         inner_div.append(img)
-            //     } else {
-            //         var inner_div=$("<div style='height: 20px; width: 30px;'></div>");
-            //     }
-            //     left_pull.append(inner_div);
-            //     root_div.append(left_pull);
-            //     var name_div = $("<div>");
-            //     name_div.text(datalist.text);
-            //     root_div.append(name_div)
-            //     var safe_html = root_div.get(0).outerHTML;
-            //     var old_html = formatDatalist(datalist);
-            //     if(safe_html != old_html) {
-            //         //console.log("HTML MISMATCH: ");
-            //         //console.log("FormatDatalistSafe: ");
-            //         // console.dir(root_div.get(0));
-            //         //console.log(safe_html);
-            //         //console.log("FormatDataList: ");
-            //         //console.log(old_html);
-            //     }
-            //     return root_div;
-            //
-            // }
-            // function formatDatalist (datalist) {
-            //     var loading_markup = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Loading...';
-            //     if (datalist.loading) {
-            //         return loading_markup;
-            //     }
-            //
-            //     var markup = '<div class="clearfix">' ;
-            //     markup += '<div class="pull-left" style="padding-right: 10px;">';
-            //     if (datalist.image) {
-            //         markup += "<div style='width: 30px;'><img src='" + datalist.image + "' style='max-height: 20px; max-width: 30px;' alt='" +  datalist.text + "'></div>";
-            //     } else {
-            //         markup += '<div style="height: 20px; width: 30px;"></div>';
-            //     }
-            //
-            //     markup += "</div><div>" + datalist.text + "</div>";
-            //     markup += "</div>";
-            //     return markup;
-            // }
+            function formatDatalistSafe(datalist) {
+                // console.warn("What in the hell is going on with Select2?!?!!?!?");
+                // console.warn($.select2);
+                if (datalist.loading) {
+                    return $('<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Loading...');
+                }
+
+                var root_div = $("<div class='clearfix'>") ;
+                var left_pull = $("<div class='pull-left' style='padding-right: 10px;'>");
+                if (datalist.image) {
+                    var inner_div = $("<div style='width: 30px;'>");
+                    /******************************************************************
+                     *
+                     * We are specifically chosing empty alt-text below, because this
+                     * image conveys no additional information, relative to the text
+                     * that will *always* be there in any select2 list that is in use
+                     * in Snipe-IT. If that changes, we would probably want to change
+                     * some signatures of some functions, but right now, we don't want
+                     * screen readers to say "HP SuperJet 5000, .... picture of HP
+                     * SuperJet 5000..." and so on, for every single row in a list of
+                     * assets or models or whatever.
+                     *
+                     *******************************************************************/
+                    var img = $("<img src='' style='max-height: 20px; max-width: 30px;' alt=''>");
+                    // console.warn("Img is: ");
+                    // console.dir(img);
+                    // console.warn("Strigularly, that's: ");
+                    // console.log(img);
+                    img.attr("src", datalist.image );
+                    inner_div.append(img)
+                } else {
+                    var inner_div=$("<div style='height: 20px; width: 30px;'></div>");
+                }
+                left_pull.append(inner_div);
+                root_div.append(left_pull);
+                var name_div = $("<div>");
+                name_div.text(datalist.text);
+                root_div.append(name_div)
+                var safe_html = root_div.get(0).outerHTML;
+                var old_html = formatDatalist(datalist);
+                if(safe_html != old_html) {
+                    //console.log("HTML MISMATCH: ");
+                    //console.log("FormatDatalistSafe: ");
+                    // console.dir(root_div.get(0));
+                    //console.log(safe_html);
+                    //console.log("FormatDataList: ");
+                    //console.log(old_html);
+                }
+                return root_div;
+
+            }
+            function formatDatalist (datalist) {
+                var loading_markup = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Loading...';
+                if (datalist.loading) {
+                    return loading_markup;
+                }
+
+                var markup = '<div class="clearfix">' ;
+                markup += '<div class="pull-left" style="padding-right: 10px;">';
+                if (datalist.image) {
+                    markup += "<div style='width: 30px;'><img src='" + datalist.image + "' style='max-height: 20px; max-width: 30px;' alt='" +  datalist.text + "'></div>";
+                } else {
+                    markup += '<div style="height: 20px; width: 30px;"></div>';
+                }
+
+                markup += "</div><div>" + datalist.text + "</div>";
+                markup += "</div>";
+                return markup;
+            }
 
 
         });
