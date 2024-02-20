@@ -6,11 +6,22 @@
     @parent
 @stop
 
+@section('header_right')
+    @can('checkout', \App\Models\Asset::class)
+        <a href="{{ route('bulk.checkout.show') }}" class="btn  bg-maroon pull-right" style="margin-left: 10px">
+            <i class="fa-solid fa-rotate-left  "></i> {{ trans('admin/massoperations/general.checkout') }}</a>
+        <a href="{{ route('bulk.sell.show') }}" class="btn bg-red pull-right" style="margin-left: 10px">
+            <i class="fa-solid fa-ruble-sign  "></i>  {{ trans('admin/massoperations/general.sell') }}</a>
+        <a href="{{ route('bulk.checkin.show') }}" class="btn bg-purple pull-right" style="margin-left: 10px">
+            <i class="fa-solid fa-rotate-right  "></i> {{ trans('admin/massoperations/general.return') }}</a>
+    @endcan
+@stop
+
 {{-- Page content --}}
 @section('content')
 
     <div class="row">
-        <div class="col-md-10">
+        <div class="col-md-12">
             <div class="box">
                 <div class="box-body">
                     <div class="table-responsive">
@@ -39,37 +50,6 @@
                 <div class="box-footer clearfix">
                 </div>
             </div><!-- /.box -->
-        </div>
-        <div class="col-md-2">
-            <div class="box box-default">
-                <div class="box-body">
-                    <div class="row">
-                        <div class="col-md-12">
-                            @can('checkout', \App\Models\Asset::class)
-
-                                <div class="col-md-12">
-                                    <a href="{{ route('bulk.checkout.show') }}"
-                                       style="margin-bottom:10px; width:100%" class="btn btn-primary pull-right">
-                                        {{ trans('admin/massoperations/general.checkout') }} <i
-                                                class="fa-solid fa-arrow-right"></i>
-                                    </a>
-                                    <a href="{{ route('bulk.sell.show') }}"
-                                       style="margin-bottom:10px; width:100%" class="btn btn-primary pull-right">
-                                        {{ trans('admin/massoperations/general.sell') }} <i
-                                                class="fa-solid fa-arrow-right"></i>
-                                    </a>
-                                    <a href="{{ route('bulk.checkin.show') }}"
-                                       style="margin-bottom:10px; width:100%" class="btn btn-primary pull-right">
-                                        {{ trans('admin/massoperations/general.return') }} <i
-                                                class="fa-solid fa-arrow-left"></i>
-                                    </a>
-                                </div>
-
-                            @endcan
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 @stop

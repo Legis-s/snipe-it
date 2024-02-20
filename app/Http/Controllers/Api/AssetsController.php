@@ -554,6 +554,10 @@ class AssetsController extends Controller
             $assets = $assets->RTD();
         }
 
+        if ($request->filled('assetStatusType') && $request->input('assetStatusType') === 'RETURN') {
+            $assets = $assets->whereNotNull('assets.assigned_to');
+        }
+
         if ($request->filled('search')) {
             $assets = $assets->AssignedSearch($request->input('search'));
         }

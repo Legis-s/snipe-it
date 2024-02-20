@@ -116,4 +116,10 @@ class MassOperation extends SnipeModel
         return $this->belongsToMany(ConsumableAssignment::class,'cons_assignment_mass_operation');
     }
 
+    public function user()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'user_id');
+    }
+
+
 }

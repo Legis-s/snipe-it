@@ -1379,7 +1379,6 @@
                 });
             },
             'click .review': function (e, value, row, index) {
-                console.log(row);
                 $.ajax({
                     url: '/api/v1/hardware/' + row.id + '/review',
                     method: "POST",
@@ -1472,7 +1471,6 @@
                 });
             },
             'click .close_documents': function (e, value, row, index) {
-                console.log(row);
                 if (row.contract) {
                     $.ajax({
                         type: 'POST',
@@ -1565,7 +1563,6 @@
                     }).then((result) => {
                         if (result.isConfirmed) {
                             var contract_id = result.value[0];
-                            console.log(contract_id);
                             var sendData = {
                                 contract_id: contract_id,
                             };

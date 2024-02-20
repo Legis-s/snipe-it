@@ -1039,6 +1039,7 @@
         <script src="{{ url(asset('js/lightgallery/js/lightgallery.min.js')) }}"></script>
         <script src="{{ url(asset('js/sweetalert2.min.js')) }}"></script>
         <script src="{{ url(asset('js/timeago.js')) }}"></script>
+        <script src="{{ url(asset('js/onscan.js')) }}"></script>
         <script src="{{ url(asset('js/lightbox/js/lightbox.min.js')) }}" nonce="{{ csrf_token() }}"></script>
         <!-- v5-beta: This pGenerator call must remain here for v5 - until fixed - so that the JS password generator works for the user create modal. -->
         <script src="{{ url('js/pGenerator.jquery.js') }}"></script>
@@ -1051,6 +1052,8 @@
 
 
         <script nonce="{{ csrf_token() }}">
+
+
 
             var clipboard = new ClipboardJS('.js-copy-link');
 

@@ -112,5 +112,39 @@
 
 @section('moar_scripts')
 @include('partials.bootstrap-table')
+<script nonce="{{ csrf_token() }}">
 
+// Initialize with options
+onScan.attachTo(document, {
+    suffixKeyCodes: [13], // enter-key expected at the end of a scan
+    reactToPaste: true, // Compatibility to built-in scanners in paste-mode (as opposed to keyboard-mode)
+    onScan: function(sCode, iQty) { // Alternative to document.addEventListener('scan')
+        console.log('Scanned: ' + sCode);
+        $.ajax({
+          type: 'GET',
+          url:  "api/v1/hardware/bytag/"+sCode,
+          headers: {
+            "X-Requested-With": 'XMLHttpRequest',
+            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+          },
+          dataType: 'json',
+          success: function (data) {
+            console.log(data);
+            if (data != null && "id" in data) {
+              console.log(data["id"]);
+              window.location.href = "/hardware/"+data["id"];
+            }else{
+              Swal.fire({
+                icon: "error",
+                title: "Нет актива с меткой "+ sCode,
+                timer: 1200
+              });
+              console.log("No tag ");
+            }
+          },
+        });
+    },
+});
+
+</script>
 @stop
