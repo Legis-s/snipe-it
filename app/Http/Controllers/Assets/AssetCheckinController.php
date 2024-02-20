@@ -114,6 +114,7 @@ class AssetCheckinController extends Controller
         if ($request->filled('location_id')) {
             \Log::debug('NEW Location ID: '.$request->get('location_id'));
             $asset->location_id = $request->get('location_id');
+            $asset->rtd_location_id = $request->get('location_id');
 
             if ($request->get('update_default_location') == 0){
                 $asset->rtd_location_id = $request->get('location_id');

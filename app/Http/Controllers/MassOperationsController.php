@@ -425,6 +425,7 @@ class MassOperationsController extends Controller
 
                     if ($request->filled('location_id')) {
                         $asset->location_id = $location_id;
+                        $asset->rtd_location_id = $location_id;
                     }
                     if(!empty($asset->licenseseats->all())){
                         foreach ($asset->licenseseats as $seat){
