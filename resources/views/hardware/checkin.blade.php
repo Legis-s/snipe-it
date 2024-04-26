@@ -332,7 +332,9 @@
 
                     // console.log(`HelcalculeteCoastlo $usetime ${$usetime}  $lifetime${$lifetime}`)
                     $newVal = (($buyVal - ($buyVal/$lifetime) * $usetime) * $quality_divider).toFixed(2);
-
+                    if ($newVal<0){
+                        $newVal = 0;
+                    }
                     $("#new_depreciable_cost").val($newVal);
                 }
             }
