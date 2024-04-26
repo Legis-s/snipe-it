@@ -75,13 +75,21 @@ class AssetCheckoutController extends Controller
             if ($request->filled('expected_checkin')) {
                 $expected_checkin = $request->get('expected_checkin');
             }
-            $depreciable_cost = null;
-            if ($request->filled('new_depreciable_cost')) {
-                $depreciable_cost = $request->get('new_depreciable_cost');
+
+            if ($request->filled('purchase_cost')) {
+                $asset->purchase_cost = $request->get('purchase_cost');
             }
-            $quality = null;
+
+            if ($request->filled('new_depreciable_cost')) {
+                $asset->depreciable_cost =$request->get('new_depreciable_cost');
+            }
+
             if ($request->filled('quality')) {
                 $quality =intval( $request->get('quality'));
+                if ($quality == 5) {
+                    $quality = 4;
+                }
+                $asset->quality = $quality;
             }
 
             if ($request->filled('status_id')) {

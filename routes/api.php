@@ -312,6 +312,15 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
         /**
          * Depreciations API routes
         */
+
+        Route::group(['prefix' => 'depreciations'], function () {
+            Route::get('selectlist',
+                [
+                    Api\DepreciationsController::class,
+                    'selectlist'
+                ]
+            )->name('depreciations.selectlist');
+        });
         Route::resource('depreciations', 
         Api\DepreciationsController::class,
         ['names' => [

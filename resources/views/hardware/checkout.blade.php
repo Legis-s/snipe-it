@@ -156,74 +156,17 @@
                             <div class="col-md-9">
                                 <div class="input-group col-md-4" style="padding-left: 0px;">
                                     <select class="star-rating" name="quality" id="quality">
-                                        @if ($quality = Request::old('quality', (isset($asset)) ? $asset->quality : ''))
-                                            @if ($quality == 1)
-                                                <option value="">Оцените состояние</option>
-                                                <option value="5">Новое запакованное</option>
-                                                <option value="4">В отличном состоянии, но использовалось</option>
-                                                <option value="3">Рабочее, но с небольшими следами повреждений,
-                                                    небольшим загрязнением
-                                                </option>
-                                                <option value="2">Частично рабочее или сильно загрязненное</option>
-                                                <option selected value="1">Полностью не рабочее</option>
-                                            @elseif ($quality ==2 )
-                                                <option value="">Оцените состояние</option>
-                                                <option value="5">Новое запакованное</option>
-                                                <option value="4">В отличном состоянии, но использовалось</option>
-                                                <option value="3">Рабочее, но с небольшими следами повреждений,
-                                                    небольшим загрязнением
-                                                </option>
-                                                <option selected value="2">Частично рабочее или сильно загрязненное
-                                                </option>
-                                                <option value="1">Полностью не рабочее</option>
-                                            @elseif ($quality ==3 )
-                                                <option value="">Оцените состояние</option>
-                                                <option value="5">Новое запакованное</option>
-                                                <option value="4">В отличном состоянии, но использовалось</option>
-                                                <option selected value="3">Рабочее, но с небольшими следами повреждений,
-                                                    небольшим загрязнением
-                                                </option>
-                                                <option value="2">Частично рабочее или сильно загрязненное</option>
-                                                <option value="1">Полностью не рабочее</option>
-                                            @elseif ($quality ==4 )
-                                                <option value="">Оцените состояние</option>
-                                                <option value="5">Новое запакованное</option>
-                                                <option selected value="4">В отличном состоянии, но использовалось
-                                                </option>
-                                                <option value="3">Рабочее, но с небольшими следами повреждений,
-                                                    небольшим загрязнением
-                                                </option>
-                                                <option value="2">Частично рабочее или сильно загрязненное</option>
-                                                <option value="1">Полностью не рабочее</option>
-                                            @elseif ($quality ==5 )
-                                                <option value="">Оцените состояние</option>
-                                                <option selected value="5">Новое запакованное</option>
-                                                <option value="4">В отличном состоянии, но использовалось</option>
-                                                <option value="3">Рабочее, но с небольшими следами повреждений,
-                                                    небольшим загрязнением
-                                                </option>
-                                                <option value="2">Частично рабочее или сильно загрязненное</option>
-                                                <option value="1">Полностью не рабочее</option>
-                                            @else
-                                                <option selected value="">Оцените состояние</option>
-                                                <option value="5">Новое запакованное</option>
-                                                <option value="4">В отличном состоянии, но использовалось</option>
-                                                <option value="3">Рабочее, но с небольшими следами повреждений,
-                                                    небольшим загрязнением
-                                                </option>
-                                                <option value="2">Частично рабочее или сильно загрязненное</option>
-                                                <option value="1">Полностью не рабочее</option>
-                                            @endif
-                                        @else
-                                            <option selected value="">Оцените состояние</option>
-                                            <option value="5">Новое запакованное</option>
-                                            <option value="4">В отличном состоянии, но использовалось</option>
-                                            <option value="3">Рабочее, но с небольшими следами повреждений, небольшим
-                                                загрязнением
+                                        @php
+                                            $quality = Request::old('quality', (isset($asset)) ? $asset->quality :null);
+                                        @endphp
+                                            <option @if (!isset($quality)) selected @endif value="">Оцените состояние</option>
+                                            <option @if ($quality == 5) selected @endif value="5">Новое запакованное</option>
+                                            <option @if ($quality == 4) selected @endif value="4">В отличном состоянии, но использовалось</option>
+                                            <option @if ($quality == 3) selected @endif value="3">Рабочее, но с небольшими следами повреждений,
+                                                небольшим загрязнением
                                             </option>
-                                            <option value="2">Частично рабочее или сильно загрязненное</option>
-                                            <option value="1">Полностью не рабочее</option>
-                                        @endif
+                                            <option @if ($quality == 2) selected @endif value="2">Частично рабочее или сильно загрязненное</option>
+                                            <option @if ($quality == 1) selected @endif value="1">Полностью не рабочее</option>
                                     </select>
                                </div>
                                 <div class="col-md-9" style="padding-left: 0px;">
@@ -236,26 +179,23 @@
                             <label for="life" class="col-md-3 control-label">Срок эксплуатации (прошло/рассчетный)</label>
                             <div class="col-md-9">
                                @php
-                               if ($asset->purchase_date){
-                                    $now = new DateTime();
-                                    $d2 = new DateTime($asset->purchase_date);
-                                    $interval = $d2->diff($now);
-                                    $result =  $interval->m + 12*$interval->y;
-
-                                }else{
-                                    $result = "???";
-                                }
-                                if($asset->model->lifetime){
-                                     $lifetime = $asset->model->lifetime;
-                                }else if($asset->model->category->lifetime){
-                                    $lifetime = $asset->model->category->lifetime;
-                                }else{
-                                    $lifetime = 36;
-                                }
+                                   if ($asset->purchase_date){
+                                        $now = new DateTime();
+                                        $d2 = new DateTime($asset->purchase_date);
+                                        $interval = $d2->diff($now);
+                                        $result =  $interval->m + 12*$interval->y;
+                                    }else{
+                                        $result = "Нет даты закупки";
+                                    }
+                                    if($asset->model->depreciation->months){
+                                         $months= $asset->model->depreciation->months;
+                                    }else{
+                                        $months = 36;
+                                    }
                                @endphp
                                 <div class="input-group col-md-4" style="padding-left: 0px;">
                                     <input class="form-control float" type="text" disabled
-                                           value="{{$result}}/{{ $lifetime }}"/>
+                                           value="{{$result}}/{{ $months }}"/>
                                     <span class="input-group-addon">Месяцев</span>
                                 </div>
                             </div>
@@ -268,7 +208,9 @@
                                     <input class="form-control float" type="text"
                                            name="purchase_cost" aria-label="Purchase_cost"
                                            id="purchase_cost"
+                                           @if (isset($asset->purchase_cost))
                                            disabled
+                                           @endif
                                            value="{{ Request::old('purchase_cost', \App\Helpers\Helper::formatCurrencyOutput($asset->purchase_cost)) }}"/>
                                     <span class="input-group-addon">
                                         @if (isset($currency_type))
@@ -276,7 +218,7 @@
                                         @else
                                             {{ $snipeSettings->default_currency }}
                                         @endif
-                                </span>
+                                    </span>
                                 </div>
 
                                 <div class="col-md-9" style="padding-left: 0px;">
@@ -284,6 +226,7 @@
                                 </div>
                             </div>
                         </div>
+                        @if (isset($asset->depreciable_cost))
                         <!-- depreciable Cost -->
                         <div class="form-group {{ $errors->has('depreciable_cost') ? ' has-error' : '' }}">
                             <label for="purchase_cost" class="col-md-3 control-label">Старая остаточная
@@ -296,12 +239,12 @@
                                            disabled
                                            value="{{ Request::old('depreciable_cost', \App\Helpers\Helper::formatCurrencyOutput($asset->depreciable_cost)) }}"/>
                                     <span class="input-group-addon">
-                @if (isset($currency_type))
+                                        @if (isset($currency_type))
                                             {{ $currency_type }}
                                         @else
                                             {{ $snipeSettings->default_currency }}
                                         @endif
-            </span>
+                                    </span>
                                 </div>
 
                                 <div class="col-md-9" style="padding-left: 0px;">
@@ -309,6 +252,7 @@
                                 </div>
                             </div>
                         </div>
+                        @endif
                         <!-- new depreciable Cost -->
                         <div class="form-group {{ $errors->has('new_depreciable_cost') ? ' has-error' : '' }}">
                             <label for="purchase_cost" class="col-md-3 control-label">Новая остаточная
@@ -369,125 +313,73 @@
             });
             calculeteCoast();
 
+            function calculeteCoast() {
 
-            var biometric = $("#biometric")
-            biometric.click(function () {
-                $.ajax('http://localhost:8001/find ', {
-                    success: function (data, textStatus, xhr) {
-                        if (xhr.status === 200) {
-                            if (data.requestUID){
-                                var uid = data.requestUID
-                                startCheck(uid);
-                            }
-                        } else {
-                            console.log(data);
-                        }
-                    },
-                    error: function () {
-                        console.log("error");
+                $buyVal = parseFloat($("#purchase_cost").val().replace(",",""));
+                $quality = parseInt($("#quality").val());
+
+                if ($buyVal > 0 && $quality > 0) {
+                    //quality count
+                    $quality_divider = 1;
+                    switch ($quality) {
+                        case 4:
+                            $quality_divider = 0.8
+                            break;
+                        case 3:
+                            $quality_divider = 0.50
+                            break;
+                        case 2:
+                            $quality_divider = 0.3
+                            break;
+                        case 1:
+                            $quality_divider = 0
+                            break;
                     }
-                });
-            });
-
-            function startCheck(uid){
-                console.log("startCheck:"+ uid);
-                $.ajax({
-                    type: 'GET',
-                    url: '/api/v1/biometric/check/'+uid,
-                    headers: {
-                        "X-Requested-With": 'XMLHttpRequest',
-                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                    },
-                    dataType: 'json',
-                    success: function (data) {
-                        if (data.status){
-                            if (data.status == "processing"){
-                                setTimeout(500);
-                                startCheck(uid);
-                            }else if(data.status == "finished"){
-                                if (data.answer){
-                                    var result = data.answer;
-                                    processBiometricResult(uid,result);
-                                }
-                            }
-                        }
-                    },
-                    error: function (data) {
-                        console.log(data);
-                        // window.location.reload(true);
-                    }
-                });
-            }
-
-        });
-        function processBiometricResult(uid,result){
-            $("#biometric_uid").val(uid);
-            $("#biometric_result").val(JSON.stringify(result));
-            $("#formId").submit()
-        }
 
 
-        function calculeteCoast() {
-            $buyVal = $("#purchase_cost").val();
-            $quality = $("#quality").val();
-            if ($buyVal > 0 && $quality > 0) {
-                //quality count
-                $quality_divider = 1;
-                switch (parseInt($quality)) {
-                    case 4:
-                        $quality_divider = 0.75
-                        break;
-                    case 3:
-                        $quality_divider = 0.50
-                        break;
-                    case 2:
-                        $quality_divider = 0.25
-                        break;
-                    case 1:
-                        $quality_divider = 0
-                        break;
-                }
-                //lifetime count
-                @if (isset($asset->model->lifetime))
-                    $lifetime = {{$asset->model->lifetime}};
-                @elseif (isset($asset->model->category->lifetime))
-                    $lifetime = {{$asset->model->category->lifetime}};
-                @else
-                    $lifetime = 36;
-                @endif
+                    @if (isset($asset->model->depreciation))
+                        $lifetime = {{$asset->model->depreciation->months}};
+                    @else
+                        $lifetime = 36;
+                    @endif
 
-                @if (isset($asset->purchase_date))
-                    $buydate = "{{$asset->purchase_date}}";
+                            @if (isset($asset->purchase_date))
+                        $buydate = "{{$asset->purchase_date}}";
                     $buydate = new Date($buydate.substr(0, 10));
                     $usetime = monthDiff($buydate);
-                    if ($usetime<=12){
+                    if ($usetime <= 12) {
                         $time_divider = 0;
-                    }else{
+                    } else {
                         $time_divider = ($lifetime - $usetime) / $lifetime;
                         if ($time_divider < 0) {
                             $time_divider = 0;
                         }
                     }
-                @else
-                    $time_divider = 1/3;
-                @endif
+                    @else
+                        $time_divider = 1 / 3;
+                    @endif
 
-                //final count
-                $newVal = $buyVal * $quality_divider * $time_divider;
-                $newVal = $newVal.toFixed(2);
-                $("#new_depreciable_cost").val($newVal);
+                    // console.log(`HelcalculeteCoastlo $usetime ${$usetime}  $lifetime${$lifetime}`)
+                    $newVal = (($buyVal - ($buyVal/$lifetime) * $usetime) * $quality_divider).toFixed(2);
+
+                    $("#new_depreciable_cost").val($newVal);
+                }
             }
-        }
 
-        $("#quality").change(function () {
-            calculeteCoast();
+            $("#quality").change(function () {
+                calculeteCoast();
+            });
+
+            $("#purchase_cost").change(function () {
+                calculeteCoast();
+            });
+
+            function monthDiff(dateFrom) {
+                var dateTo = new Date();
+                return dateTo.getMonth() - dateFrom.getMonth() +
+                    (12 * (dateTo.getFullYear() - dateFrom.getFullYear()))
+            }
         });
-
-        function monthDiff(dateFrom) {
-            var dateTo = new Date();
-            return dateTo.getMonth() - dateFrom.getMonth() +
-                (12 * (dateTo.getFullYear() - dateFrom.getFullYear()))
-        }
 
     </script>
 @stop
