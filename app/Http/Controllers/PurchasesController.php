@@ -3,6 +3,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\Helper;
 use App\Http\Requests\FileUploadRequest;
 use App\Models\Asset;
 use App\Models\AssetModel;
@@ -82,7 +83,7 @@ class PurchasesController extends Controller
     {
         $this->authorize('create', Asset::class);
         return view('purchases/edit')
-            ->with('item', new Purchase);
+            ->with('item', new Purchase)->with('depreciation_list', Helper::depreciationList());
     }
 
     /**

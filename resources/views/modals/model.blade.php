@@ -36,6 +36,14 @@
                 </div>
 
                 <div class="dynamic-form-row">
+                    <div class="col-md-4 col-xs-12"><label for="modal-depreciation_id">{{ trans('general.depreciation') }}:</label></div>
+                    <div class="col-md-8 col-xs-12 required">
+{{--                        {{ Form::select('depreciation_id', $depreciation_list , null, array('class'=>'select2', 'style'=>'width:350px', 'aria-label'=>'depreciation_id')) }}--}}
+                        <select class="js-data-ajax" data-endpoint="depreciations" name="depreciation_id" style="width: 100%" id="modal-depreciation_id"></select>
+                    </div>
+                </div>
+
+                <div class="dynamic-form-row">
                     <div class="col-md-4 col-xs-12"><label for="modal-fieldset_id">{{ trans('admin/models/general.fieldset') }}:</label></div>
                     <div class="col-md-8 col-xs-12">{{ Form::select('fieldset_id', Helper::customFieldsetList(),Request::old('fieldset_id'), array('class'=>'select2', 'id'=>'modal-fieldset_id', 'style'=>'width:350px')) }}</div>
                 </div>
