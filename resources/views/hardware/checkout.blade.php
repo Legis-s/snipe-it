@@ -187,7 +187,7 @@
                                     }else{
                                         $result = "Нет даты закупки";
                                     }
-                                    if($asset->model->depreciation->months){
+                                    if($asset->model && $asset->model->depreciation &&  $asset->model->depreciation->months){
                                          $months= $asset->model->depreciation->months;
                                     }else{
                                         $months = 36;
@@ -337,7 +337,7 @@
                     }
 
 
-                    @if (isset($asset->model->depreciation))
+                    @if (isset($asset->model) && isset($asset->model->depreciation) && isset($asset->model->depreciation->months))
                         $lifetime = {{$asset->model->depreciation->months}};
                     @else
                         $lifetime = 36;
