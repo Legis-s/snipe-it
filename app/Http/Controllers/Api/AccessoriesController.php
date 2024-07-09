@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\CheckoutableCheckedOut;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Transformers\AccessoriesTransformer;
@@ -9,11 +10,12 @@ use App\Http\Transformers\SelectlistTransformer;
 use App\Models\Accessory;
 use App\Models\Company;
 use App\Models\User;
-use Auth;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-use DB;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Http\Requests\ImageUploadRequest;
+
 
 class AccessoriesController extends Controller
 {
@@ -273,12 +275,12 @@ class AccessoriesController extends Controller
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @param  int  $accessoryId
-     * @return Redirect
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function checkout(Request $request, $accessoryId)
     {
         // Check if the accessory exists
-        if (is_null($accessory = Accessory::find($accessoryId))) {
+        if (is_null($accessory = Accessory::withCount('users as users_count')->find($accessoryId))) {
             return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/accessories/message.does_not_exist')));
         }
 
@@ -302,7 +304,7 @@ class AccessoriesController extends Controller
                 'note' => $request->get('note'),
             ]);
 
-            $accessory->logCheckout($request->input('note'), $user);
+            event(new CheckoutableCheckedOut($accessory, $user, auth()->user(), $request->input('note')));
 
             return response()->json(Helper::formatStandardApiResponse('success', null, trans('admin/accessories/message.checkout.success')));
         }
@@ -319,7 +321,7 @@ class AccessoriesController extends Controller
      * @param Request $request
      * @param int $accessoryUserId
      * @param string $backto
-     * @return Redirect
+     * @return \Illuminate\Http\RedirectResponse
      * @internal param int $accessoryId
      */
     public function checkin(Request $request, $accessoryUserId = null)

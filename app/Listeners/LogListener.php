@@ -24,6 +24,7 @@ use App\Models\Actionlog;
 use App\Models\User;
 use App\Models\LicenseSeat;
 use App\Events\UserMerged;
+use Illuminate\Support\Facades\Log;
 
 class LogListener
 {
@@ -87,12 +88,13 @@ class LogListener
     public function onCheckoutAccepted(CheckoutAccepted $event)
     {
 
-        \Log::debug('event passed to the onCheckoutAccepted listener:');
+        Log::debug('event passed to the onCheckoutAccepted listener:');
         $logaction = new Actionlog();
         $logaction->item()->associate($event->acceptance->checkoutable);
         $logaction->target()->associate($event->acceptance->assignedTo);
         $logaction->accept_signature = $event->acceptance->signature_filename;
         $logaction->filename = $event->acceptance->stored_eula_file;
+        $logaction->note = $event->acceptance->note;
         $logaction->action_type = 'accepted';
 
         // TODO: log the actual license seat that was checked out
@@ -109,6 +111,7 @@ class LogListener
         $logaction->item()->associate($event->acceptance->checkoutable);
         $logaction->target()->associate($event->acceptance->assignedTo);
         $logaction->accept_signature = $event->acceptance->signature_filename;
+        $logaction->note = $event->acceptance->note;
         $logaction->action_type = 'declined';
 
         // TODO: log the actual license seat that was checked out
@@ -131,7 +134,7 @@ class LogListener
         ];
 
         // Add a record to the users being merged FROM
-        \Log::debug('Users merged: '.$event->merged_from->id .' ('.$event->merged_from->username.') merged into '. $event->merged_to->id. ' ('.$event->merged_to->username.')');
+        Log::debug('Users merged: '.$event->merged_from->id .' ('.$event->merged_from->username.') merged into '. $event->merged_to->id. ' ('.$event->merged_to->username.')');
         $logaction = new Actionlog();
         $logaction->item_id = $event->merged_from->id;
         $logaction->item_type = User::class;
@@ -139,7 +142,7 @@ class LogListener
         $logaction->target_type = User::class;
         $logaction->action_type = 'merged';
         $logaction->note = trans('general.merged_log_this_user_from', $to_from_array);
-        $logaction->user_id = $event->admin->id;
+        $logaction->user_id = $event->admin->id ?? null;
         $logaction->save();
 
         // Add a record to the users being merged TO
@@ -150,7 +153,7 @@ class LogListener
         $logaction->item_type = User::class;
         $logaction->action_type = 'merged';
         $logaction->note = trans('general.merged_log_this_user_into', $to_from_array);
-        $logaction->user_id = $event->admin->id;
+        $logaction->user_id = $event->admin->id ?? null;
         $logaction->save();
 
 

@@ -10,7 +10,6 @@
 <script nonce="{{ csrf_token() }}">
     $(function () {
 
-        var locale = '{{ config('app.locale') }}';
         var blockedFields = "searchable,sortable,switchable,title,visible,formatter,class".split(",");
 
         var keyBlocked = function(key) {
@@ -47,16 +46,18 @@
             stickyHeader: true,
             stickyHeaderOffsetLeft: parseInt($('body').css('padding-left'), 10),
             stickyHeaderOffsetRight: parseInt($('body').css('padding-right'), 10),
-            locale: locale,
             undefinedText: '',
             iconsPrefix: 'fa',
             cookieStorage: '{{ config('session.bs_table_storage') }}',
             cookie: true,
             cookieExpire: '2y',
+            showColumnsToggleAll: true,
+            minimumCountColumns: 2,
             mobileResponsive: true,
             maintainSelected: true,
             trimOnSearch: false,
             showSearchClearButton: true,
+            addrbar: {{ (config('session.bs_table_addrbar') == 'true') ? 'true' : 'false'}}, // deeplink search phrases, sorting, etc
             paginationFirstText: "{{ trans('general.first') }}",
             paginationLastText: "{{ trans('general.last') }}",
             paginationPreText: "{{ trans('general.previous') }}",
@@ -74,7 +75,7 @@
                 return newParams;
             },
             formatLoadingMessage: function () {
-                return '<h2><i class="fas fa-spinner fa-spin" aria-hidden="true"></i> {{ trans('general.loading') }} </h4>';
+                return '<h2><i class="fas fa-spinner fa-spin" aria-hidden="true"></i> {{ trans('general.loading') }} </h2>';
             },
             icons: {
                 advancedSearchIcon: 'fas fa-search-plus',
@@ -86,11 +87,14 @@
                 export: 'fa-download',
                 clearSearch: 'fa-times'
             },
-                exportOptions: export_options,
-
+            locale: '{{ app()->getLocale() }}',
+            exportOptions: export_options,
             exportTypes: ['xlsx', 'excel', 'csv', 'pdf','json', 'xml', 'txt', 'sql', 'doc' ],
             onLoadSuccess: function () {
                 $('[data-tooltip="true"]').tooltip(); // Needed to attach tooltips after ajax call
+            },
+            formatNoMatches: function () {
+                return '{{ trans('table.no_matching_records') }}';
             }
 
             });
@@ -140,12 +144,12 @@
     });
 
 
-    // Handle whether or not the edit button should be disabled
+    // Handle whether the edit button should be disabled
     $('.snipe-table').on('uncheck.bs.table', function () {
-
         var buttonName =  $(this).data('bulk-button-id');
 
         if ($(this).bootstrapTable('getSelections').length == 0) {
+
             $(buttonName).attr('disabled', 'disabled');
         }
     });
@@ -165,23 +169,24 @@
     // Initialize sort-order for bulk actions (label-generation) for snipe-tables
     $('.snipe-table').each(function (i, table) {
         table_cookie_segment = $(table).data('cookie-id-table');
-        name = '';
-        direction = '';
+        sort = '';
+        order = '';
         cookies = document.cookie.split(";");
         for(i in cookies) {
             cookiedef = cookies[i].split("=", 2);
             cookiedef[0] = cookiedef[0].trim();
             if (cookiedef[0] == table_cookie_segment + ".bs.table.sortOrder") {
-                direction = cookiedef[1];
+                order = cookiedef[1];
             }
             if (cookiedef[0] == table_cookie_segment + ".bs.table.sortName") {
-                name = cookiedef[1];
+                sort = cookiedef[1];
             }
         }
-        if (name && direction) {
+        if (sort && order) {
             domnode = $($(this).data('bulk-form-id')).get(0);
             if ( domnode && domnode.elements && domnode.elements.sort ) {
-                domnode.elements.sort.value = name + " " + direction;
+                domnode.elements.sort.value = sort;
+                domnode.elements.order.value = order;
             }
         }
     });
@@ -191,7 +196,8 @@
        domnode = $($(this).data('bulk-form-id')).get(0);
        // make safe in case there isn't a bulk-form-id, or it's not found, or has no 'sort' element
        if ( domnode && domnode.elements && domnode.elements.sort ) {
-           domnode.elements.sort.value = name + " " + order;
+           domnode.elements.sort.value = name;
+           domnode.elements.order.value = order;
        }
     });
 
@@ -289,25 +295,6 @@
                 dest = dest + '/' + row.owner_id + '/' + element_name;
             }
 
-            /**
-             *  START CUSTOM
-             */
-            if ((row.available_actions) && (row.available_actions.print_label === true)) {
-                actions += '<span class="actions btn btn-sm btn-primary print_label" data-tooltip="true" title="Напечатать этикетку"><i class="fas fa-barcode" style="color: white" aria-hidden="true"></i><span class="sr-only">Напечатать этикетку</span></span>&nbsp;';
-            }
-
-
-            if ((row.available_actions) && (row.available_actions.inventory === true)) {
-                actions += '<span class="actions btn btn-sm btn-primary inventory" data-tooltip="true" title="Инвентаризировать"><i class="fas fa-key" style="color: white" aria-hidden="true"></i><span class="sr-only">Инвентаризировать</span></span>&nbsp;';
-            }
-
-            if ((row.available_actions) && (row.available_actions.impersonate === true)) {
-                actions += '<a href="{{ config('app.url') }}/impersonate/take/' + row.id + '/" class="actions btn btn-sm btn-danger" data-tooltip="true" title="Зайти под пользовтелем"><i class="fas fa-unlock" aria-hidden="true"></i><span class="sr-only">Зайти под пользовтелем</span></a>&nbsp;';
-            }
-            /**
-             *  END CUSTOM
-             */
-
             if ((row.available_actions) && (row.available_actions.clone === true)) {
                 actions += '<a href="{{ config('app.url') }}/' + dest + '/' + row.id + '/clone" class="actions btn btn-sm btn-info" data-tooltip="true" title="{{ trans('general.clone_item') }}"><i class="far fa-clone" aria-hidden="true"></i><span class="sr-only">Clone</span></a>&nbsp;';
             }
@@ -323,10 +310,7 @@
                 if (row.name=='') {
                     var name_for_box = row.asset_tag
                 }
-                if( name_for_box == undefined && row.invoice_number){
-                    name_for_box = row.invoice_number
-                }
-
+                
                 actions += '<a href="{{ config('app.url') }}/' + dest + '/' + row.id + '" '
                     + ' class="actions btn btn-danger btn-sm delete-asset" data-tooltip="true"  '
                     + ' data-toggle="modal" '
@@ -424,7 +408,23 @@
     // Convert line breaks to <br>
     function notesFormatter(value) {
         if (value) {
-            return value.replace(/(?:\r\n|\r|\n)/g, '<br />');;
+            return value.replace(/(?:\r\n|\r|\n)/g, '<br />');
+        }
+    }
+
+    // Check if checkbox should be selectable
+    // Selectability is determined by the API field "selectable" which is set at the Presenter/API Transformer
+    // However since different bulk actions have different requirements, we have to walk through the available_actions object
+    // to determine whether to disable it
+    function checkboxEnabledFormatter (value, row) {
+
+        // add some stuff to get the value of the select2 option here?
+
+        if ((row.available_actions) && (row.available_actions.bulk_selectable) && (row.available_actions.bulk_selectable.delete !== true)) {
+            return {
+                disabled:true,
+                //checked: false, <-- not sure this will work the way we want?
+            }
         }
     }
 
@@ -434,7 +434,7 @@
 
     function licenseSeatInOutFormatter(value, row) {
         // The user is allowed to check the license seat out and it's available
-        if ((row.available_actions.checkout == true) && (row.user_can_checkout == true) && ((!row.asset_id) && (!row.assigned_to))) {
+        if ((row.available_actions.checkout === true) && (row.user_can_checkout === true) && ((!row.asset_id) && (!row.assigned_to))) {
             return '<a href="{{ config('app.url') }}/licenses/' + row.license_id + '/checkout/'+row.id+'" class="btn btn-sm bg-maroon" data-tooltip="true" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>';
         } else {
             return '<a href="{{ config('app.url') }}/licenses/' + row.id + '/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="Check in this license seat.">{{ trans('general.checkin') }}</a>';
@@ -464,9 +464,9 @@
             // The user is allowed to check items in
             } else if (row.available_actions.checkin == true)  {
                 if (row.assigned_to) {
-                    return '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="Check this item in so it is available for re-imaging, re-issue, etc.">{{ trans('general.checkin') }}</a>';
+                    return '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkin') }}</a>';
                 } else if (row.assigned_pivot_id) {
-                    return '<a href="{{ config('app.url') }}/' + destination + '/' + row.assigned_pivot_id + '/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="Check this item in so it is available for re-imaging, re-issue, etc.">{{ trans('general.checkin') }}</a>';
+                    return '<a href="{{ config('app.url') }}/' + destination + '/' + row.assigned_pivot_id + '/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkin') }}</a>';
                 }
 
             }
@@ -484,7 +484,7 @@
         } else if (value.available_actions.cancel == true)  {
             return '<form action="{{ config('app.url') }}/account/request-asset/'+ value.id + '" method="POST">@csrf<button class="btn btn-danger btn-sm" data-tooltip="true" title="Cancel this item request">{{ trans('button.cancel') }}</button></form>';
         } else if (value.available_actions.request == true)  {
-            return '<form action="{{ config('app.url') }}/account/request-asset/'+ value.id + '" method="POST">@csrf<button class="btn btn-primary btn-sm" data-tooltip="true" title="Request this item">{{ trans('button.request') }}</button></form>';
+            return '<form action="{{ config('app.url') }}/account/request-asset/'+ value.id + '" method="POST">@csrf<button class="btn btn-primary btn-sm" data-tooltip="true" title="{{ trans('general.request_item') }}">{{ trans('button.request') }}</button></form>';
         }
 
     }
@@ -563,9 +563,9 @@
                     if (row.custom_fields[field_column_plain].field_format=='URL') {
                         return '<a href="' + row.custom_fields[field_column_plain].value + '" target="_blank" rel="noopener">' + row.custom_fields[field_column_plain].value + '</a>';
                     } else if (row.custom_fields[field_column_plain].field_format=='BOOLEAN') {
-                        return (row.custom_fields[field_column_plain].value == 1) ? "<span class='fas fa-check-circle' style='color:green' />" : "<span class='fas fa-times-circle' style='color:red' />";
+                        return (row.custom_fields[field_column_plain].value == 1) ? "<span class='fas fa-check-circle' style='color:green'>" : "<span class='fas fa-times-circle' style='color:red' />";
                     } else if (row.custom_fields[field_column_plain].field_format=='EMAIL') {
-                        return '<a href="mailto:' + row.custom_fields[field_column_plain].value + '">' + row.custom_fields[field_column_plain].value + '</a>';
+                        return '<a href="mailto:' + row.custom_fields[field_column_plain].value + '" style="white-space: nowrap" data-tooltip="true" title="{{ trans('general.send_email') }}"><i class="fa-regular fa-envelope" aria-hidden="true"></i> ' + row.custom_fields[field_column_plain].value + '</a>';
                     }
                 }
                 return row.custom_fields[field_column_plain].value;
@@ -585,7 +585,7 @@
 
         if (value) {
             if ((value.indexOf("{") === -1) || (value.indexOf("}") ===-1)) {
-                return '<nobr><a href="' + value + '" target="_blank" title="External link to ' + value + '" data-tooltip="true" ><i class="fa fa-external-link"></i> ' + value + '</a></nobr>';
+                return '<nobr><a href="' + value + '" target="_blank" title="{{ trans('general.external_link_tooltip') }} ' + value + '" data-tooltip="true"><i class="fa fa-external-link"></i> ' + value + '</a></nobr>';
             }
             return value;
         }
@@ -660,6 +660,9 @@
 
     function assetTagLinkFormatter(value, row) {
         if ((row.asset) && (row.asset.id)) {
+            if (row.asset.deleted_at!='') {
+                return '<span style="white-space: nowrap;"><i class="fas fa-times text-danger"></i><span class="sr-only">{{ trans('admin/hardware/general.deleted') }}</span> <del><a href="{{ config('app.url') }}/hardware/' + row.asset.id + '" data-tooltip="true" title="{{ trans('admin/hardware/general.deleted') }}">' + row.asset.asset_tag + '</a></del></span>';
+            }
             return '<a href="{{ config('app.url') }}/hardware/' + row.asset.id + '">' + row.asset.asset_tag + '</a>';
         }
         return '';
@@ -677,7 +680,17 @@
         if ((row.asset) && (row.asset.name)) {
             return '<a href="{{ config('app.url') }}/hardware/' + row.asset.id + '">' + row.asset.name + '</a>';
         }
+    }
 
+    function assetSerialLinkFormatter(value, row) {
+
+        if ((row.asset) && (row.asset.serial)) {
+            if (row.asset.deleted_at!='') {
+                return '<span style="white-space: nowrap;"><i class="fas fa-times text-danger"></i><span class="sr-only">deleted</span> <del><a href="{{ config('app.url') }}/hardware/' + row.asset.id + '" data-tooltip="true" title="{{ trans('admin/hardware/general.deleted') }}">' + row.asset.serial + '</a></del></span>';
+            }
+            return '<a href="{{ config('app.url') }}/hardware/' + row.asset.id + '">' + row.asset.serial + '</a>';
+        }
+        return '';
     }
 
     function trueFalseFormatter(value) {
@@ -702,7 +715,7 @@
 
     function emailFormatter(value) {
         if (value) {
-            return '<a href="mailto:' + value + '">' + value + '</a>';
+            return '<a href="mailto:' + value + '" style="white-space: nowrap" data-tooltip="true" title="{{ trans('general.send_email') }}"><i class="fa-regular fa-envelope" aria-hidden="true"></i> ' + value + '</a>';
         }
     }
 
@@ -789,6 +802,38 @@
         if ((value) && (value.filename) && (value.url)) {
             return '<a href="' + value.url + '">' + value.filename + '</a>';
         }
+    }
+
+    function linkToUserSectionBasedOnCount (count, id, section) {
+        if (count) {
+            return '<a href="{{ config('app.url') }}/users/' + id + '#' + section +'">' + count + '</a>';
+        }
+
+        return count;
+    }
+
+    function linkNumberToUserAssetsFormatter(value, row) {
+        return linkToUserSectionBasedOnCount(value, row.id, 'asset');
+    }
+
+    function linkNumberToUserLicensesFormatter(value, row) {
+        return linkToUserSectionBasedOnCount(value, row.id, 'licenses');
+    }
+
+    function linkNumberToUserConsumablesFormatter(value, row) {
+        return linkToUserSectionBasedOnCount(value, row.id, 'consumables');
+    }
+
+    function linkNumberToUserAccessoriesFormatter(value, row) {
+        return linkToUserSectionBasedOnCount(value, row.id, 'accessories');
+    }
+
+    function linkNumberToUserManagedUsersFormatter(value, row) {
+        return linkToUserSectionBasedOnCount(value, row.id, 'managed-users');
+    }
+
+    function linkNumberToUserManagedLocationsFormatter(value, row) {
+        return linkToUserSectionBasedOnCount(value, row.id, 'managed-locations');
     }
 
     function labelPerPageFormatter(value, row, index, field) {
@@ -1558,33 +1603,7 @@
                                     templateSelection: formatDataSelection
                                 });
 
-                            });
-                        }
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            var contract_id = result.value[0];
-                            var sendData = {
-                                contract_id: contract_id,
-                            };
 
-                            $.ajax({
-                                type: 'POST',
-                                url: "/api/v1/consumableassignments/" + row.id + "/close_documents",
-                                headers: {
-                                    "X-Requested-With": 'XMLHttpRequest',
-                                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                                },
-                                data: sendData,
-                                dataType: 'json',
-                                success: function (data) {
-                                    $(".table").bootstrapTable('refresh');
-                                },
-                            });
-                        }
-                    });
-                }
-            }
-        }
 
     $(function() {
 

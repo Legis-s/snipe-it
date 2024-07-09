@@ -4,7 +4,7 @@ namespace App\Observers;
 
 use App\Models\Actionlog;
 use App\Models\Consumable;
-use Auth;
+use Illuminate\Support\Facades\Auth;
 
 class ConsumableObserver
 {
@@ -38,6 +38,9 @@ class ConsumableObserver
         $logAction->item_id = $consumable->id;
         $logAction->created_at = date('Y-m-d H:i:s');
         $logAction->user_id = Auth::id();
+        if($consumable->imported) {
+            $logAction->setActionSource('importer');
+        }
         $logAction->logaction('create');
     }
 

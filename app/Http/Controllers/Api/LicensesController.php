@@ -4,14 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
-use App\Http\Transformers\LicenseSeatsTransformer;
 use App\Http\Transformers\LicensesTransformer;
 use App\Http\Transformers\SelectlistTransformer;
-use App\Models\Company;
 use App\Models\License;
-use App\Models\LicenseSeat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\JsonResponse;
 
 class LicensesController extends Controller
 {
@@ -21,9 +19,8 @@ class LicensesController extends Controller
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @since [v4.0]
      *
-     * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request) : JsonResponse | array
     {
         $this->authorize('view', License::class);
 
@@ -136,6 +133,7 @@ class LicensesController extends Controller
                         'seats',
                         'termination_date',
                         'depreciation_id',
+                        'min_amt',
                     ];
                 $sort = in_array($request->input('sort'), $allowed_columns) ? e($request->input('sort')) : 'created_at';
                 $licenses = $licenses->orderBy($sort, $order);
@@ -155,11 +153,9 @@ class LicensesController extends Controller
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @since [v4.0]
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request) : JsonResponse
     {
-        //
         $this->authorize('create', License::class);
         $license = new License;
         $license->fill($request->all());
@@ -176,9 +172,8 @@ class LicensesController extends Controller
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($id) : JsonResponse | array
     {
         $this->authorize('view', License::class);
         $license = License::withCount('freeSeats')->findOrFail($id);
@@ -194,9 +189,8 @@ class LicensesController extends Controller
      * @since [v4.0]
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id) : JsonResponse | array
     {
         //
         $this->authorize('update', License::class);
@@ -217,9 +211,8 @@ class LicensesController extends Controller
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @since [v4.0]
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id) : JsonResponse
     {
         //
         $license = License::findOrFail($id);
@@ -247,7 +240,7 @@ class LicensesController extends Controller
      *
      * @see \App\Http\Transformers\SelectlistTransformer
      */
-    public function selectlist(Request $request)
+    public function selectlist(Request $request) : array
     {
         $licenses = License::select([
             'licenses.id',

@@ -38,73 +38,78 @@ class ActionlogPresenter extends Presenter
 
     public function icon()
     {
+
         // User related icons
         if ($this->itemType() == 'user') {
 
-            if ($this->action_type=='create new') {
+            if ($this->actionType()=='create new') {
                 return 'fa-solid fa-user-plus';
             }
+            if ($this->actionType()=='2fa reset') {
+                return 'fa-solid fa-mobile-screen';
+            }
 
-            if ($this->action_type=='merged') {
+            if ($this->actionType()=='merged') {
                 return 'fa-solid fa-people-arrows';
             }
 
-            if ($this->action_type=='delete') {
+            if ($this->actionType()=='delete') {
                 return 'fa-solid fa-user-minus';
             }
 
-            if ($this->action_type=='delete') {
+            if ($this->actionType()=='delete') {
                 return 'fa-solid fa-user-minus';
             }
 
-            if ($this->action_type=='update') {
+            if ($this->actionType()=='update') {
                 return 'fa-solid fa-user-pen';
             }
+
              return 'fa-solid fa-user';
         }
 
         // Everything else
-        if ($this->action_type=='create') {
+        if ($this->actionType()=='create new') {
             return 'fa-solid fa-plus';
         }
 
-        if ($this->action_type=='delete') {
+        if ($this->actionType()=='delete') {
             return 'fa-solid fa-user-xmark';
         }
 
-        if ($this->action_type=='update') {
+        if ($this->actionType()=='update') {
             return 'fa-solid fa-pen';
         }
 
-        if ($this->action_type=='restore') {
+        if ($this->actionType()=='restore') {
             return 'fa-solid fa-trash-arrow-up';
         }
 
-        if ($this->action_type=='upload') {
+        if ($this->actionType()=='upload') {
             return 'fas fa-paperclip';
         }
 
-        if ($this->action_type=='checkout') {
+        if ($this->actionType()=='checkout') {
             return 'fa-solid fa-rotate-left';
         }
 
-        if ($this->action_type=='sell') {
+        if ($this->actionType()=='sell') {
             return 'fa-solid fa-ruble-sign';
         }
 
-        if ($this->action_type=='rented') {
+        if ($this->actionType()=='rented') {
             return 'fa-solid fa-right-left';
         }
 
-        if ($this->action_type=='checkin from') {
+        if ($this->actionType()=='checkin from') {
             return 'fa-solid fa-rotate-right';
         }
 
-        if ($this->action_type=='audit') {
+        if ($this->actionType()=='audit') {
             return 'fa-solid fa-check';
         }
 
-        if ($this->action_type=='tag') {
+        if ($this->actionType()=='tag') {
             return 'fa-solid fa-tag';
         }
 

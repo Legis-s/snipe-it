@@ -1,4 +1,11 @@
 
+
+// var jQuery = require('jquery');
+// window.jQuery = jQuery
+// window.$ = jQuery
+
+require('./bootstrap');
+
 /**
  * Module containing core application logic.
  * @param  {jQuery} $        Insulated jQuery object
@@ -186,17 +193,12 @@ $(document).ready(function () {
      * Select2
      */
 
-     var iOS = /iPhone|iPad|iPod/.test(navigator.userAgent)  && !window.MSStream;
-     if(!iOS)
-     {
-        // Vue collision: Avoid overriding a vue select2 instance
-        // by checking to see if the item has already been select2'd.
         $('select.select2:not(".select2-hidden-accessible")').each(function (i,obj) {
             {
                 $(obj).select2();
             }
         });
-     }
+
 
     // $('.datepicker').datepicker();
     // var datepicker = $.fn.datepicker.noConflict(); // return $.fn.datepicker to previously assigned value
@@ -259,41 +261,41 @@ $(document).ready(function () {
     });
 
 	function getSelect2Value(element) {
-
+		
 		// if the passed object is not a jquery object, assuming 'element' is a selector
 		if (!(element instanceof jQuery)) element = $(element);
 
 		var select = element.data("select2");
 
-		// There's two different locations where the select2-generated input element can be.
+		// There's two different locations where the select2-generated input element can be. 
 		searchElement = select.dropdown.$search || select.$container.find(".select2-search__field");
 
 		var value = searchElement.val();
 		return value;
 	}
-
+	
 	$(".select2-hidden-accessible").on('select2:selecting', function (e) {
 		var data = e.params.args.data;
 		var isMouseUp = false;
 		var element = $(this);
 		var value = getSelect2Value(element);
-
+		
 		if(e.params.args.originalEvent) isMouseUp = e.params.args.originalEvent.type == "mouseup";
-
+		
 		// if selected item does not match typed text, do not allow it to pass - force close for ajax.
 		if(!isMouseUp) {
 			if(value.toLowerCase() && data.text.toLowerCase().indexOf(value) < 0) {
 				e.preventDefault();
 
 				element.select2('close');
-
+				
 			// if it does match, we set a flag in the event (which gets passed to subsequent events), telling it not to worry about the ajax
 			} else if(value.toLowerCase() && data.text.toLowerCase().indexOf(value) > -1) {
 				e.params.args.noForceAjax = true;
 			}
 		}
 	});
-
+	
 	$(".select2-hidden-accessible").on('select2:closing', function (e) {
 		var element = $(this);
 		var value = getSelect2Value(element);
@@ -301,7 +303,7 @@ $(document).ready(function () {
 		var isMouseUp = false;
 		if(e.params.args.originalSelect2Event) noForceAjax = e.params.args.originalSelect2Event.noForceAjax;
 		if(e.params.args.originalEvent) isMouseUp = e.params.args.originalEvent.type == "mouseup";
-
+		
 		if(value && !noForceAjax && !isMouseUp) {
 			var endpoint = element.data("endpoint");
 			var assetStatusType = element.data("asset-status-type");
@@ -313,22 +315,22 @@ $(document).ready(function () {
 					"X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
 				},
 			}).done(function(response) {
-				var currentlySelected = element.select2('data').map(function (x){
+				var currentlySelected = element.select2('data').map(function (x){ 
                     return +x.id;
                 }).filter(function (x) {
                     return x !== 0;
                 });
-
+				
 				// makes sure we're not selecting the same thing twice for multiples
 				var filteredResponse = response.results.filter(function(item) {
 					return currentlySelected.indexOf(+item.id) < 0;
 				});
 
 				var first = (currentlySelected.length > 0) ? filteredResponse[0] : response.results[0];
-
+				
 				if(first && first.id) {
 					first.selected = true;
-
+					
 					if($("option[value='" + first.id + "']", element).length < 1) {
 						var option = new Option(first.text, first.id, true, true);
 						element.append(option);
@@ -380,16 +382,16 @@ $(document).ready(function () {
         if (datalist.image) {
             var inner_div = $("<div style='width: 30px;'>");
             /******************************************************************
-             *
-             * We are specifically chosing empty alt-text below, because this
+             * 
+             * We are specifically chosing empty alt-text below, because this 
              * image conveys no additional information, relative to the text
              * that will *always* be there in any select2 list that is in use
              * in Snipe-IT. If that changes, we would probably want to change
              * some signatures of some functions, but right now, we don't want
-             * screen readers to say "HP SuperJet 5000, .... picture of HP
+             * screen readers to say "HP SuperJet 5000, .... picture of HP 
              * SuperJet 5000..." and so on, for every single row in a list of
              * assets or models or whatever.
-             *
+             * 
              *******************************************************************/
             var img = $("<img src='' style='max-height: 20px; max-width: 30px;' alt=''>");
             // console.warn("Img is: ");
@@ -441,12 +443,12 @@ $(document).ready(function () {
         $('input[name=checkout_to_type]').on("change",function () {
             var assignto_type = $('input[name=checkout_to_type]:checked').val();
             var userid = $('#assigned_user option:selected').val();
+
             if (assignto_type == 'asset') {
                 $('#current_assets_box').fadeOut();
                 $('#assigned_asset').show();
                 $('#assigned_user').hide();
                 $('#assigned_location').hide();
-                $('#assigned_contract').hide();
                 $('.notification-callout').fadeOut();
 
                 $('[name="assigned_location"]').val('').trigger('change.select2');
@@ -457,14 +459,6 @@ $(document).ready(function () {
                 $('#assigned_asset').hide();
                 $('#assigned_user').hide();
                 $('#assigned_location').show();
-                $('#assigned_contract').hide();
-                $('.notification-callout').fadeOut();
-            } else if (assignto_type == 'contract') {
-                $('#current_assets_box').fadeOut();
-                $('#assigned_asset').hide();
-                $('#assigned_user').hide();
-                $('#assigned_location').hide();
-                $('#assigned_contract').show();
                 $('.notification-callout').fadeOut();
 
                 $('[name="assigned_asset"]').val('').trigger('change.select2');
@@ -474,7 +468,6 @@ $(document).ready(function () {
                 $('#assigned_asset').hide();
                 $('#assigned_user').show();
                 $('#assigned_location').hide();
-                $('#assigned_contract').hide();
                 if (userid) {
                     $('#current_assets_box').fadeIn();
                 }
@@ -590,7 +583,7 @@ function htmlEntities(str) {
  * Toggle disabled
  */
 (function($){
-
+		
     $.fn.toggleDisabled = function(callback){
         return this.each(function(){
             var disabled, $this = $(this);
@@ -607,7 +600,7 @@ function htmlEntities(str) {
             }
         });
     };
-
+    
 })(jQuery);
 
 /**
@@ -617,24 +610,27 @@ function htmlEntities(str) {
  *
  * 1. Set the class of your select2 elements to 'livewire-select2').
  * 2. Name your element to match a property in your Livewire component
- * 3. Add an attribute called 'data-livewire-component' that points to $_instance->id (via `{{ }}` if you're in a blade,
- *    or just $_instance->id if not).
+ * 3. Add an attribute called 'data-livewire-component' that points to $this->getId() (via `{{ }}` if you're in a blade,
+ *    or just $this->getId() if not).
  */
-$(function () {
+document.addEventListener('livewire:init', () => {
     $('.livewire-select2').select2()
 
     $(document).on('select2:select', '.livewire-select2', function (event) {
         var target = $(event.target)
         if(!event.target.name || !target.data('livewire-component')) {
             console.error("You need to set both name (which should match a Livewire property) and data-livewire-component on your Livewire-ed select2 elements!")
-            console.error("For data-livewire-component, you probably want to use $_instance->id or {{ $_instance->id }}, as appropriate")
+            console.error("For data-livewire-component, you probably want to use $this->getId() or {{ $this->getId() }}, as appropriate")
             return false
         }
-        window.livewire.find(target.data('livewire-component')).set(event.target.name, this.options[this.selectedIndex].value)
-    })
-
-    window.livewire.hook('message.processed', function (el,component) {
-        $('.livewire-select2').select2();
+        Livewire.find(target.data('livewire-component')).set(event.target.name, this.options[this.selectedIndex].value)
     });
 
-})
+    Livewire.hook('request', ({succeed}) => {
+        succeed(() => {
+            queueMicrotask(() => {
+                $('.livewire-select2').select2();
+            });
+        });
+    });
+});

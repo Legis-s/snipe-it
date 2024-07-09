@@ -2,7 +2,7 @@
 
 return array(
 
-    'support_url_help' => 'Variables <code>{LOCALE}</code>, <code>{SERIAL}</code>, <code>{MODEL_NUMBER}</code>, y <code>{MODEL_NAME}</code> puede ser usado en tu URL para tener esos valores auto-rellenados al ver los activos - por ejemplo https://support. pple.com/{LOCALE}/{SERIAL}.',
+    'support_url_help' => 'Variables <code>{LOCALE}</code>, <code>{SERIAL}</code>, <code>{MODEL_NUMBER}</code>, y <code>{MODEL_NAME}</code> se puede utilizar en tu URL para que esos valores se llenen automáticamente al ver los activos - por ejemplo https://checkcoverage. pple.com/{LOCALE}/{SERIAL}.',
     'does_not_exist' => 'Fabricante inexistente.',
     'assoc_users'	 => 'Este Fabricante está asociado al menos a un modelo y no puede ser eliminado',
 
@@ -22,7 +22,7 @@ return array(
     ),
 
     'delete' => array(
-        'confirm'   => 'Estás seguro que quieres eliminar Fabricante?',
+        'confirm'   => '¿Está seguro de que desea eliminar este fabricante?',
         'error'   => 'Hubo un problema eliminando el fabricante. Por favor, inténtalo de nuevo.',
         'success' => 'Fabricante Eliminado.'
     )

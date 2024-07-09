@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
-use Carbon;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
@@ -18,6 +18,9 @@ use Illuminate\Support\Facades\Auth;
 class Actionlog extends SnipeModel
 {
     use HasFactory;
+
+    // This is to manually set the source (via setActionSource()) for determineActionSource()
+    protected ?string $source = null;
 
     protected $presenter = \App\Presenters\ActionlogPresenter::class;
     use SoftDeletes;
@@ -78,14 +81,14 @@ class Actionlog extends SnipeModel
         parent::boot();
         static::creating(function (self $actionlog) {
             // If the admin is a superadmin, let's see if the target instead has a company.
-            if (Auth::user() && Auth::user()->isSuperUser()) {
+            if (auth()->user() && auth()->user()->isSuperUser()) {
                 if ($actionlog->target) {
                     $actionlog->company_id = $actionlog->target->company_id;
                 } elseif ($actionlog->item) {
                     $actionlog->company_id = $actionlog->item->company_id;
                 }
-            } elseif (Auth::user() && Auth::user()->company) {
-                $actionlog->company_id = Auth::user()->company_id;
+            } elseif (auth()->user() && auth()->user()->company) {
+                $actionlog->company_id = auth()->user()->company_id;
             }
         });
     }
@@ -341,7 +344,12 @@ class Actionlog extends SnipeModel
      * @since v6.3.0
      * @return string
      */
-    public function determineActionSource() {
+    public function determineActionSource(): string
+    {
+        // This is a manually set source
+        if($this->source) {
+            return $this->source;
+        }
 
         // This is an API call
         if (((request()->header('content-type') && (request()->header('accept'))=='application/json'))
@@ -357,5 +365,11 @@ class Actionlog extends SnipeModel
         // We're not sure, probably cli
         return 'cli/unknown';
 
+    }
+
+    // Manually sets $this->source for determineActionSource()
+    public function setActionSource($source = null): void
+    {
+        $this->source = $source;
     }
 }
