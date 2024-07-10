@@ -37,6 +37,7 @@
     "guzzlehttp/guzzle": "^7.0.1",
     "intervention/image": "^2.5",
     "javiereguiluz/easyslugger": "^1.0",
+    "lab404/laravel-impersonate": "^1.7",
     "laravel-notification-channels/google-chat": "^3.0",
     "laravel-notification-channels/microsoft-teams": "^1.1",
     "laravel/framework": "^10.0",

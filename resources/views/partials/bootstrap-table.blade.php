@@ -1603,7 +1603,33 @@
                                     templateSelection: formatDataSelection
                                 });
 
+                            });
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            var contract_id = result.value[0];
+                            var sendData = {
+                                contract_id: contract_id,
+                            };
 
+                            $.ajax({
+                                type: 'POST',
+                                url: "/api/v1/consumableassignments/" + row.id + "/close_documents",
+                                headers: {
+                                    "X-Requested-With": 'XMLHttpRequest',
+                                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                                },
+                                data: sendData,
+                                dataType: 'json',
+                                success: function (data) {
+                                    $(".table").bootstrapTable('refresh');
+                                },
+                            });
+                        }
+                    });
+                }
+            }
+        }
 
     $(function() {
 
@@ -1633,8 +1659,6 @@
             $('[data-tooltip="true"]').tooltip({
                 container: 'body'
             });
-
-
         });
     });
 
