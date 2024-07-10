@@ -22,16 +22,18 @@
 </div>
 @endcan
 
+
 <!-- Seats -->
 <div class="form-group {{ $errors->has('seats') ? ' has-error' : '' }}">
     <label for="seats" class="col-md-3 control-label">{{ trans('admin/licenses/form.seats') }}</label>
     <div class="col-md-7 col-sm-12 required">
         <div class="col-md-2" style="padding-left:0px">
-            <input class="form-control" type="text" name="seats" id="seats" value="{{ Request::old('seats', $item->seats) }}" />
+            <input class="form-control" type="text" name="seats" id="seats" value="{{ old('seats', $item->seats) }}" />
         </div>
     </div>
     {!! $errors->first('seats', '<div class="col-md-8 col-md-offset-3"><span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span></div>') !!}
 </div>
+@include ('partials.forms.edit.minimum_quantity')
 
 @include ('partials.forms.edit.company-select', ['translated_name' => trans('general.company'), 'fieldname' => 'company_id'])
 @include ('partials.forms.edit.manufacturer-select', ['translated_name' => trans('general.manufacturer'), 'fieldname' => 'manufacturer_id',])

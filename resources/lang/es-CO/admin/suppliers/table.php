@@ -7,9 +7,9 @@ return array(
     'assets'                => 'Activos',
     'city'                  => 'Ciudad',
     'contact'               => 'Nombre de contacto',
-    'country'               => 'Pais',
+    'country'               => 'País',
     'create'                => 'Crear Proveedor',
-    'email'                 => 'Email',
+    'email'                 => 'Correo electrónico',
     'fax'                   => 'Fax',
     'id'                    => 'ID',
     'licenses'              => 'Licencias',
@@ -19,9 +19,8 @@ return array(
     'state'                 => 'Departamento',
     'suppliers'             => 'Proveedores',
     'update'                => 'Actualizar proveedor',
-    'url'                   => 'URL',
     'view'                  => 'Ver Proveedor',
-    'view_assets_for'       => 'Ver recursos para',
-    'zip'                   => 'Código Postal',
+    'view_assets_for'       => 'Ver activos para',
+    'zip'                   => 'Código postal',
 
 );

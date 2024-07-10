@@ -21,8 +21,8 @@ return array(
     ),
 
     'delete' => array(
-        'confirm'   => '¿Estás seguro de que deseas eliminar este modelo de equipo?',
-        'error'   => 'Hubo un problema eliminando el modelo. Por favor, inténtalo de nuevo.',
+        'confirm'   => '¿Está seguro de que desea eliminar este modelo de activo?',
+        'error'   => 'Hubo un problema eliminando el modelo. Por favor, inténtelo de nuevo.',
         'success' => 'El modelo fue eliminado exitosamente.'
     ),
 
@@ -34,7 +34,7 @@ return array(
     'bulkedit' => array(
         'error'   		=> 'Ningún campo ha cambiado, no hay nada que actualizar.',
         'success' 		=> 'Modelo actualizado correctamente. |:model_count modelos actualizados correctamente.',
-        'warn'          => 'Está a punto de actualizar las propiedades del siguiente modelo: |Está a punto de editar las propiedades de los siguientes :model_count modelos:',
+        'warn'          => 'Está a punto de actualizar las propiedades del siguiente modelo:|Está a punto de editar las propiedades de los siguientes :model_count modelos:',
 
     ),
 

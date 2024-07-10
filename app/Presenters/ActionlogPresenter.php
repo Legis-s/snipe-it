@@ -2,6 +2,8 @@
 
 namespace App\Presenters;
 
+use DebugBar\DebugBar;
+
 /**
  * Class CompanyPresenter
  */
@@ -44,6 +46,9 @@ class ActionlogPresenter extends Presenter
             if ($this->action_type=='create new') {
                 return 'fa-solid fa-user-plus';
             }
+            if ($this->action_type=='2fa reset') {
+                return 'fa-solid fa-mobile-screen';
+            }
 
             if ($this->action_type=='merged') {
                 return 'fa-solid fa-people-arrows';
@@ -60,11 +65,12 @@ class ActionlogPresenter extends Presenter
             if ($this->action_type=='update') {
                 return 'fa-solid fa-user-pen';
             }
+
              return 'fa-solid fa-user';
         }
 
         // Everything else
-        if ($this->action_type=='create') {
+        if ($this->action_type=='create new') {
             return 'fa-solid fa-plus';
         }
 

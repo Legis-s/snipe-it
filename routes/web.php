@@ -3,7 +3,6 @@
 use App\Http\Controllers\Account;
 use App\Http\Controllers\ActionlogController;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\CompaniesController;
 use App\Http\Controllers\ContractsController;
@@ -31,7 +30,12 @@ use App\Http\Controllers\StatuslabelsController;
 use App\Http\Controllers\SuppliersController;
 use App\Http\Controllers\ViewAssetsController;
 use App\Http\Controllers\InvoiceTypesController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Livewire\Importer;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
 Route::impersonate();
 
@@ -49,7 +53,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::resource('categories', CategoriesController::class, [
         'parameters' => ['category' => 'category_id'],
     ]);
-
+  
     /*
     * Labels
     */
@@ -64,6 +68,17 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::group(['prefix' => 'locations', 'middleware' => ['auth']], function () {
 
+        Route::post(
+            'bulkdelete',
+            [LocationsController::class, 'postBulkDelete']
+        )->name('locations.bulkdelete.show');
+
+        Route::post(
+            'bulkedit',
+            [LocationsController::class, 'postBulkDeleteStore']
+        )->name('locations.bulkdelete.store');
+
+
         Route::get('{locationId}/clone',
             [LocationsController::class, 'getClone']
         )->name('clone/location');
@@ -77,6 +92,7 @@ Route::group(['middleware' => 'auth'], function () {
             '{locationId}/printallassigned',
             [LocationsController::class, 'print_all_assigned']
         )->name('locations.print_all_assigned');
+
     });
 
     Route::resource('locations', LocationsController::class, [
@@ -259,22 +275,9 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
 */
 
 Route::get('/import',
-    \App\Http\Livewire\Importer::class
+    Importer::class
 )->middleware('auth')->name('imports.index');
 
-
-/*
-|--------------------------------------------------------------------------
-| Requests Routes
-|--------------------------------------------------------------------------
-|
-|
-|
-*/
-
-Route::resource('requests', RequestsController::class, [
-    'parameters' => ['request' => 'request_id']
-]);
 
 
 /**

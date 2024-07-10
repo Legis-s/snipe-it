@@ -4,6 +4,7 @@ return [
 
     'asset_tag'   	=> 'Etiqueta de equipo',
     'asset_model'       => 'Modelo',
+    'assigned_to'   => 'Asignado a',
     'book_value'  	=> 'Valor actual',
     'change' 		=> 'Entrada/Salida',
     'checkout_date' => 'Fecha de devolución',
@@ -14,7 +15,7 @@ return [
     'dl_csv' 		=> 'Descargar CSV',
     'eol' 			=> 'Vida útil',
     'id'      		=> 'ID',
-    'last_checkin_date' => 'Last Checkin Date',
+    'last_checkin_date' => 'Última fecha de devolución',
     'location' 		=> 'Ubicación',
     'purchase_cost'	=> 'Precio',
     'purchase_date'	=> 'Comprado',

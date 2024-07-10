@@ -11,6 +11,7 @@ use App\Models\Location;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
 class LocationsController extends Controller
@@ -22,13 +23,31 @@ class LocationsController extends Controller
      * @since [v4.0]
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request) : JsonResponse | array
     {
         $this->authorize('view', Location::class);
         $allowed_columns = [
-            'id', 'name', 'address', 'address2', 'city', 'state', 'country', 'zip', 'created_at',
-            'updated_at', 'manager_id', 'image',
-            'assigned_assets_count', 'users_count', 'assets_count','assigned_assets_count', 'assets_count', 'rtd_assets_count', 'currency', 'ldap_ou', ];
+            'id',
+            'name',
+            'address',
+            'address2',
+            'city',
+            'state',
+            'country',
+            'zip',
+            'created_at',
+            'updated_at',
+            'manager_id',
+            'image',
+            'assigned_assets_count',
+            'users_count',
+            'assets_count',
+            'assigned_assets_count',
+            'assets_count',
+            'rtd_assets_count',
+            'currency',
+            'ldap_ou',
+            ];
 
         $locations = Location::with('parent', 'manager', 'children')->select([
             'locations.id',
@@ -56,6 +75,7 @@ class LocationsController extends Controller
         ])->withCount('assignedAssets as assigned_assets_count')
             ->withCount('assets as assets_count')
             ->withCount('rtd_assets as rtd_assets_count')
+            ->withCount('children as children_count')
             ->withCount('users as users_count');
 
         if ($request->filled('search')) {
@@ -84,6 +104,10 @@ class LocationsController extends Controller
 
         if ($request->filled('country')) {
             $locations->where('locations.country', '=', $request->input('country'));
+        }
+
+        if ($request->filled('manager_id')) {
+            $locations->where('locations.manager_id', '=', $request->input('manager_id'));
         }
 
         // Make sure the offset and limit are actually integers and do not exceed system limits
@@ -121,9 +145,8 @@ class LocationsController extends Controller
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @since [v4.0]
      * @param  \App\Http\Requests\ImageUploadRequest  $request
-     * @return \Illuminate\Http\Response
      */
-    public function store(ImageUploadRequest $request)
+    public function store(ImageUploadRequest $request) : JsonResponse
     {
         $this->authorize('create', Location::class);
         $location = new Location;
@@ -143,9 +166,8 @@ class LocationsController extends Controller
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @since [v4.0]
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($id) : JsonResponse | array
     {
         $this->authorize('view', Location::class);
         $location = Location::with('parent', 'manager', 'children')
@@ -164,11 +186,6 @@ class LocationsController extends Controller
                 'locations.updated_at',
                 'locations.image',
                 'locations.currency',
-                'locations.bitrix_id',
-                'locations.notes',
-                'locations.sklad',
-                'locations.pult_id',
-                'locations.active',
             ])
             ->withCount('assignedAssets as assigned_assets_count')
             ->withCount('assets as assets_count')
@@ -187,9 +204,8 @@ class LocationsController extends Controller
      * @since [v4.0]
      * @param  \App\Http\Requests\ImageUploadRequest  $request
      * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
      */
-    public function update(ImageUploadRequest $request, $id)
+    public function update(ImageUploadRequest $request, $id) : JsonResponse
     {
         $this->authorize('update', Location::class);
         $location = Location::findOrFail($id);
@@ -218,15 +234,20 @@ class LocationsController extends Controller
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @since [v4.0]
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id) : JsonResponse
     {
         $this->authorize('delete', Location::class);
-        $location = Location::findOrFail($id);
+        $location = Location::withCount('assignedAssets as assigned_assets_count')
+            ->withCount('assets as assets_count')
+            ->withCount('rtd_assets as rtd_assets_count')
+            ->withCount('children as children_count')
+            ->withCount('users as users_count')
+            ->findOrFail($id);
+
         if (! $location->isDeletable()) {
             return response()
-                    ->json(Helper::formatStandardApiResponse('error', null, trans('admin/companies/message.assoc_users')));
+                    ->json(Helper::formatStandardApiResponse('error', null, trans('admin/locations/message.assoc_users')));
         }
         $this->authorize('delete', $location);
         $location->delete();
@@ -262,7 +283,7 @@ class LocationsController extends Controller
      * @since [v4.0.16]
      * @see \App\Http\Transformers\SelectlistTransformer
      */
-    public function selectlist(Request $request)
+    public function selectlist(Request $request) : array
     {
         // If a user is in the process of editing their profile, as determined by the referrer,
         // then we check that they have permission to edit their own location.
@@ -332,7 +353,6 @@ class LocationsController extends Controller
 
         $paginated_results = new LengthAwarePaginator($locations_formatted->forPage($page, 500), $locations_formatted->count(), 500, $page, []);
 
-        //return [];
         return (new SelectlistTransformer)->transformSelectlist($paginated_results);
     }
 }
