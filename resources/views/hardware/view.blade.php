@@ -1161,7 +1161,6 @@
                     <div class="tab-pane fade" id="inventory">
                         <div class="row">
                             <div class="col-md-12">
-                                <!-- Licenses assets table -->
                                 @if ($asset->inventory_items->count() > 0)
                                         <table
                                                 data-columns="{{ \App\Presenters\InventoryItemPresenter::dataTableLayout() }}"
