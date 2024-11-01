@@ -7,6 +7,7 @@ use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\CompaniesController;
 use App\Http\Controllers\ContractsController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DealsController;
 use App\Http\Controllers\DepartmentsController;
 use App\Http\Controllers\DepreciationsController;
 use App\Http\Controllers\DevicesController;
@@ -300,6 +301,13 @@ Route::group(['middleware' => 'auth'], function () {
     */
     Route::resource('contracts', ContractsController::class, [
         'parameters' => ['contract' => 'contract_id']
+    ]);
+
+    /**
+     * Deals
+     */
+    Route::resource('deals', DealsController::class, [
+        'parameters' => ['deal' => 'deal_id']
     ]);
 
     /**

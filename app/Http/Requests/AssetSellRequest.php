@@ -22,7 +22,7 @@ class AssetSellRequest extends Request
     public function rules()
     {
         $rules = [
-            'assigned_contract'        => 'required_without_all:assigned_user',
+            'assigned_deal'        => 'required_without_all:assigned_user',
         ];
 
         return $rules;

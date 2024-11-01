@@ -12,7 +12,7 @@ use Watson\Validating\ValidatingTrait;
 
 class Contract  extends SnipeModel
 {
-    protected $presenter = 'App\Presenters\ContractPresenter';
+    protected $presenter = \App\Presenters\ContractPresenter::class;
     use Presentable;
 
 

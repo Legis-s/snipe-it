@@ -60,7 +60,7 @@ class LocationsTransformer
                 'manager' => ($location->manager) ? (new UsersTransformer)->transformUser($location->manager) : null,
 
                 'bitrix_id' => ($location->bitrix_id) ? (int)$location->bitrix_id : null,
-                'pult_id' => ($location->pult_id) ? (int)$location->pult_id : null,
+                'bitrix_id_old' => ($location->bitrix_id_old) ? (int)$location->bitrix_id_old : null,
                 'children' => $children_arr,
                 'notes' => ($location->notes) ? e($location->notes) : null,
                 'sklad' => ($location->sklad) ? e($location->sklad) : null,
@@ -157,7 +157,7 @@ class LocationsTransformer
                 ],
                 "properties" => [
                     "balloonContentHeader" => e($location->name),
-                    "balloonContentBody" => "<a target='_blank'  href='/locations/".$location->id."'>Открыть список</a><br><a target='_blank'  href='https://bitrix.legis-s.ru/crm/object/details/".$location->bitrix_id."/'>Открыть Bitrix [".$location->bitrix_id."]</a><br>Адрес: " . e($location->address) ."<br>Активов: " . e($location->assets_count) . "<br>" . "Инвентаризированно: " .  $location->checked_assets_count. "<br>",
+                    "balloonContentBody" => "<a target='_blank'  href='/locations/".$location->id."'>Открыть список</a><br><a target='_blank'  href='https://bitrix.legis-s.ru/crm/type/1032/details/".$location->bitrix_id."/'>Открыть Bitrix [".$location->bitrix_id."]</a><br>Адрес: " . e($location->address) ."<br>Активов: " . e($location->assets_count) . "<br>" . "Инвентаризированно: " .  $location->checked_assets_count. "<br>",
                     "balloonContentFooter" => "",
                     "hintContent" => e($location->name)
                 ],

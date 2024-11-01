@@ -78,6 +78,7 @@ class LocationsController extends Controller
         $location->phone = request('phone');
         $location->fax = request('fax');
         $location->bitrix_id = $request->input('bitrix_id');
+        $location->bitrix_id_old = $request->input('bitrix_id_old');
         $location->notes            = $request->input('notes');
         if ($request->input('sklad')){
             $location->sklad            = $request->input('sklad');
@@ -145,6 +146,7 @@ class LocationsController extends Controller
         $location->ldap_ou = $request->input('ldap_ou');
         $location->manager_id = $request->input('manager_id');
         $location->bitrix_id        = $request->input('bitrix_id');
+        $location->bitrix_id_old        = $request->input('bitrix_id_old');
         $location->notes            = $request->input('notes');
         $location->sklad            = $request->input('sklad');
         $location = $request->handleImages($location);

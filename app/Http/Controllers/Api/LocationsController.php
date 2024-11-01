@@ -68,9 +68,9 @@ class LocationsController extends Controller
             'locations.ldap_ou',
             'locations.currency',
             'locations.bitrix_id',
+            'locations.bitrix_id_old',
             'locations.notes',
             'locations.sklad',
-            'locations.pult_id',
             'locations.active',
         ])->withCount('assignedAssets as assigned_assets_count')
             ->withCount('assets as assets_count')
@@ -186,6 +186,8 @@ class LocationsController extends Controller
                 'locations.updated_at',
                 'locations.image',
                 'locations.currency',
+                'locations.bitrix_id',
+                'locations.bitrix_id_old',
             ])
             ->withCount('assignedAssets as assigned_assets_count')
             ->withCount('assets as assets_count')

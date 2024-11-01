@@ -198,6 +198,11 @@ class AssetsController extends Controller
             $assets->where('assets.contract_id', '=', $request->input('contract_id'));
             $settings->show_archived_in_list = "1";
         }
+        if ($request->filled('deal_id')) {
+            $assets->where('assets.assigned_to', '=', $request->input('deal_id'))
+                ->where('assets.assigned_type', '=', "App\Models\Deal");
+            $settings->show_archived_in_list = "1";
+        }
 
 
         // This is used by the sidenav, mostly

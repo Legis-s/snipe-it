@@ -11,7 +11,7 @@ use Watson\Validating\ValidatingTrait;
 
 class LegalPerson extends SnipeModel
 {
-    protected $presenter = 'App\Presenters\LocationPresenter';
+    protected $presenter = \App\Presenters\LegalPersonPresenter::class;
     use Presentable;
     use SoftDeletes;
     protected $dates = ['deleted_at'];

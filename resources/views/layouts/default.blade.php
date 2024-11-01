@@ -808,6 +808,13 @@ dir="{{ in_array(app()->getLocale(),['ar-SA','fa-IR', 'he-IL']) ? 'rtl' : 'ltr' 
                                             </li>
                                         @endcan
                                         @can('view', \App\Models\Asset::class)
+                                            <li {!! (Request::is('deals*') ? ' class="active"' : '') !!}>
+                                                <a href="{{ route('deals.index') }}">
+                                                    {{ trans('general.deals') }}
+                                                </a>
+                                            </li>
+                                        @endcan
+                                        @can('view', \App\Models\Asset::class)
                                             <li {!! (Request::is('invoicetypes*') ? ' class="active"' : '') !!}>
                                                 <a href="{{ route('invoicetypes.index') }}">
                                                     {{ trans('general.invoicetypes') }}

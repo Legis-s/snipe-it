@@ -10,6 +10,7 @@ use App\Http\Transformers\ComponentsTransformer;
 use App\Http\Transformers\ConsumableAssignmentTransformer;
 use App\Http\Transformers\LocationsTransformer;
 use App\Models\Actionlog;
+use App\Models\Asset;
 use App\Models\Company;
 use App\Models\Contract;
 use App\Models\User;
@@ -85,6 +86,12 @@ class ConsumableAssignmentController extends Controller
             $consumableAssignments->where('assigned_to', $request->input('contract_id'));
             $consumableAssignments->where('assigned_type',"App\Models\Contract");
             $consumableAssignments->orWhere('contract_id', $request->input('contract_id'));
+        }
+
+        if ($request->filled('deal_id')) {
+            $consumableAssignments->where('assigned_to', $request->input('deal_id'));
+            $consumableAssignments->where('assigned_type',"App\Models\Deal");
+//            $consumableAssignments->orWhere('contract_id', $request->input('contract_id'));
         }
 
         if ($request->filled('purchase_id')) {

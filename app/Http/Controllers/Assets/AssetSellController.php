@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AssetSellRequest;
 use App\Models\Asset;
 use App\Models\Contract;
+use App\Models\Deal;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
 
@@ -63,7 +64,7 @@ class AssetSellController extends Controller
             $this->authorize('checkout', $asset);
             $admin = Auth::user();
 
-            $target = Contract::findOrFail(request('assigned_contract'));
+            $target = Deal::findOrFail(request('assigned_deal'));
             $asset->location_id = null;
             $asset->rtd_location_id = null;
 

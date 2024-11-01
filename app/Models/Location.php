@@ -73,11 +73,11 @@ class Location extends SnipeModel
         'manager_id',
         'image',
         'bitrix_id',
+        'bitrix_id_old',
         'notes',
         'coordinates',
         'active',
         'sklad',
-        'pult_id',
         'contract_number',
         'object_code',
     ];
@@ -90,7 +90,7 @@ class Location extends SnipeModel
      *
      * @var array
      */
-    protected $searchableAttributes = ['name', 'address', 'city', 'state', 'zip', 'created_at', 'ldap_ou', 'phone', 'fax','pult_id','object_code'];
+    protected $searchableAttributes = ['name', 'address', 'city', 'state', 'zip', 'created_at', 'ldap_ou', 'phone', 'fax','bitrix_id_old','object_code'];
 
     /**
      * The relations and their attributes that should be included when searching the model.
@@ -120,6 +120,15 @@ class Location extends SnipeModel
                 && ($this->assigned_assets_count === 0)
                 && ($this->children_count === 0)
                 && ($this->users_count === 0);
+    }
+
+    public function isDeletableNoGate()
+    {
+
+        return ($this->assets_count === 0)
+            && ($this->assigned_assets_count === 0)
+            && ($this->children_count === 0)
+            && ($this->users_count === 0);
     }
 
     /**

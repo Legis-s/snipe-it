@@ -15,7 +15,7 @@ final class Inventory extends SnipeModel
 {
     protected $table = 'inventories';
 
-    protected $presenter = 'App\Presenters\InventoryPresenter';
+    protected $presenter = \App\Presenters\InventoryPresenter::class;
     use Presentable;
     use SoftDeletes;
     protected $dates = ['deleted_at'];

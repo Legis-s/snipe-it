@@ -1572,6 +1572,36 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
             ]
         );// end Contracts API routes
 
+
+
+        /**
+         * Deals API routes
+         */
+        Route::group(['prefix' => 'deals'], function () {
+
+            Route::get('selectlist',
+                [
+                    Api\DealsController::class,
+                    'selectlist'
+                ]
+            )->name('api.deals.selectlist');
+
+        });
+        Route::resource('deals',
+            Api\DealsController::class,
+            ['names' =>
+                [
+                    'index' => 'api.deals.index',
+                    'show' => 'api.deals.show',
+                    'store' => 'api.deals.store',
+                    'update' => 'api.deals.update',
+                    'destroy' => 'api.deals.destroy'
+                ],
+                'except' => ['create', 'edit'],
+                'parameters' => ['deal' => 'deal_id'],
+            ]
+        );// end Contracts API routes
+
         /**
          * BitrixSync API routes
          */

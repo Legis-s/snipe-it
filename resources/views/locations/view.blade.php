@@ -426,9 +426,15 @@
       </div>
 
       @if (($location->bitrix_id))
-      <div class="col-md-12" style="padding-top: 15px; padding-bottom: 20px;">
-          <a href="https://bitrix.legis-s.ru/crm/object/details/{{ $location->bitrix_id}}/" style="width: 100%;" class="btn btn-sm btn-info pull-left">{{ trans('general.bitrix_open') }} </a>
-      </div>
+          <div class="col-md-12" style="padding-top: 15px; padding-bottom: 20px;">
+              <a href="https://bitrix.legis-s.ru/crm/type/1032/details/{{ $location->bitrix_id}}/" style="width: 100%;" class="btn btn-sm btn-info pull-left">{{ trans('general.bitrix_open') }} OLD </a>
+          </div>
+      @endif
+
+      @if (($location->bitrix_id_old))
+          <div class="col-md-12" style="padding-top: 15px; padding-bottom: 20px;">
+              <a href="https://bitrix.legis-s.ru/crm/object/details/{{ $location->bitrix_id_old}}/" style="width: 100%;" class="btn btn-sm btn-info pull-left">{{ trans('general.bitrix_open') }} </a>
+          </div>
       @endif
 
     @if ($location->image!='')

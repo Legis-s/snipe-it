@@ -46,6 +46,8 @@ class Asset extends Depreciable
     public const USER = 'user';
     public const CONTRACT = 'contract';
 
+    public const DEAL = 'deal';
+
     use Acceptable;
 
     /**
@@ -2071,9 +2073,10 @@ class Asset extends Depreciable
         }
         $status = Statuslabel::where('name', 'Продано')->first();
         $this->status_id = $status->id;
-        $this->contract_id = $target->id;
-        $this->assigned_to = null;
-        $this->assigned_type = null;
+//        $this->contract_id = $target->id;
+//        $this->assigned_to = $target;
+//        $this->assigned_type = null;
+        $this->assignedTo()->associate($target);
 
         $originalValues = $this->getRawOriginal();
 

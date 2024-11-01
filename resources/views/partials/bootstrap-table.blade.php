@@ -515,6 +515,7 @@
             'purchases',
             'inventorystatuslabels',
             'contracts',
+            'deals',
             'bulk',
             'devices',
             'invoicetypes'
@@ -1144,6 +1145,12 @@
             }
         }
 
+        function bitrixNewIdLocationFormatter(value, row) {
+            if (value) {
+                return '<a href="https://bitrix.legis-s.ru/crm/type/1032/details/' + value + '/"   target="_blank" >' + value + '</a>';
+            }
+        }
+
 
         function fileFormatter(value) {
             if (value) {
@@ -1240,6 +1247,11 @@
         function bitrixIdContractFormatter(value, row) {
             if (value) { //https://bitrix.legis-s.ru/crm/contract/details/4537/
                 return "<a href='https://bitrix.legis-s.ru/crm/contract/details/" + value + "/' target='_blank'>" + value + "</a>";
+            }
+        }
+        function bitrixIdDealFormatter(value, row) {
+            if (value) { //https://bitrix.legis-s.ru/crm/contract/details/4537/
+                return "<a href='https://bitrix.legis-s.ru/crm/deal/details/" + value + "/' target='_blank'>" + value + "</a>";
             }
         }
 

@@ -14,7 +14,7 @@ use Watson\Validating\ValidatingTrait;
 
 class Purchase extends SnipeModel
 {
-    protected $presenter = 'App\Presenters\PurchasePresenter';
+    protected $presenter = \App\Presenters\PurchasePresenter::class;
     use Presentable;
     use SoftDeletes;
 

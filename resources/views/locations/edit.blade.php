@@ -49,6 +49,7 @@
 @include ('partials.forms.edit.image-upload', ['image_path' => app('locations_upload_path')])
 
 @include ('partials.forms.custom.location_bitrix_id')
+@include ('partials.forms.custom.location_bitrix_id_old')
 @include ('partials.forms.custom.location_sklad')
 
 @stop
