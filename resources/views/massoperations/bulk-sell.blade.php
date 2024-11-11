@@ -27,7 +27,9 @@
                     <form class="form-horizontal" method="post" action="" autocomplete="off">
                         {{ csrf_field() }}
 
-                        @include ('partials.forms.custom.contract-select', ['translated_name' => trans('general.contract'),  'fieldname' => 'assigned_contract','unselect' => 'true', 'required'=>'true'])
+{{--                        @include ('partials.forms.custom.contract-select', ['translated_name' => trans('general.contract'),  'fieldname' => 'assigned_contract','unselect' => 'true', 'required'=>'true'])--}}
+
+                        @include ('partials.forms.custom.deal-select', ['translated_name' => trans('general.deal'),  'fieldname' => 'assigned_deal','unselect' => 'true', 'required'=>'true'])
 
                         <!-- Checkout/Checkin Date -->
                         <div class="form-group {{ $errors->has('checkout_at') ? 'error' : '' }}">

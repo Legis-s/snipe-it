@@ -34,8 +34,9 @@ class MapController extends Controller
             'locations.bitrix_id',
             'locations.object_code',
             'locations.active',
-        ]) ->where('object_code', '=', 455)
-            ->orWhere('object_code', '=', 739)
+        ]) ->where('object_code', '=', 843)
+            ->orWhere('object_code', '=', 847)
+            ->orWhere('object_code', '=', 848)
             ->where('active',"=", true)
             ->withCount(['assets as assets_count',
                 'assets as checked_assets_count' => function (Builder $query) {

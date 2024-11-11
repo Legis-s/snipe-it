@@ -61,12 +61,12 @@ class SyncBitrix extends Command
 
         /** @var \GuzzleHttp\Client $client */
         $client = new \GuzzleHttp\Client();
-//        $this->synh_users($client,$bitrix_url);
-//        $this->synh_objects($client,$bitrix_url);
-//        $this->synh_suppliers($client,$bitrix_url);
-//        $this->synh_legals($client,$bitrix_url);
+        $this->synh_users($client,$bitrix_url);
+        $this->synh_objects($client,$bitrix_url);
+        $this->synh_suppliers($client,$bitrix_url);
+        $this->synh_legals($client,$bitrix_url);
         $this->synh_deals($client, $bitrix_url);
-//        $this->synh_types($client,$bitrix_url);
+        $this->synh_types($client,$bitrix_url);
 
         if (($this->option('output') == 'all') || ($this->option('output') == 'info')) {
             foreach ($output['info'] as $key => $output_text) {
@@ -89,9 +89,6 @@ class SyncBitrix extends Command
     private function synh_users($client, $bitrix_url)
     {
 
-        /**
-         * Синхронизация польззователей
-         */
         $leadID = 0;
         $finish = false;
         $bitrix_users_final = [];
@@ -118,8 +115,7 @@ class SyncBitrix extends Command
 
 
         foreach ($bitrix_users_final as &$value) {
-
-            $user = User::firstOrCreate(
+            User::firstOrCreate(
                 ['bitrix_id' => $value["ID"]],
                 [
                     'username' => $value["EMAIL"],
@@ -132,7 +128,6 @@ class SyncBitrix extends Command
             );
         }
         print("Синхрониизтрованно " . count($bitrix_users_final) . " пользователей Битрикс\n");
-
     }
 
     private function synh_objects($client, $bitrix_url)

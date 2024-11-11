@@ -12,6 +12,7 @@ use App\Models\Asset;
 use App\Models\Consumable;
 use App\Models\ConsumableAssignment;
 use App\Models\Contract;
+use App\Models\Deal;
 use App\Models\MassOperation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -241,7 +242,7 @@ class MassOperationsController extends Controller
         try {
             $admin = Auth::user();
 
-            $target = Contract::findOrFail(request('assigned_contract'));
+            $target = Deal::findOrFail(request('assigned_deal'));
 
             if (! is_array($request->get('selected_assets')) and ! is_array($request->get('selected_consumables'))) {
                 return redirect()->route('bulk.sell.show')->withInput()->with('error', trans('admin/hardware/message.checkout.no_assets_selected'));
@@ -288,8 +289,8 @@ class MassOperationsController extends Controller
                     $consumable = Consumable::findOrFail($consumbale_item[0]);
                     $this->authorize('checkout', $consumable);
 
-                    if (get_class($target) == Contract::class){
-                        $contract_id = Contract::findOrFail(request('assigned_contract'))->id;
+                    if (get_class($target) == Deal::class){
+                        $contract_id = $target->id;
                     }
 
                     $ca = new ConsumableAssignment();

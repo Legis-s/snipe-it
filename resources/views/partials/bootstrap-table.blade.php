@@ -380,6 +380,9 @@
                 } else if (value.type == 'sale') {
                     item_destination = 'sales'
                     item_icon = 'fas fa-usd';
+                } else if (value.type == 'deal') {
+                    item_destination = 'deals'
+                    item_icon = 'fas fa-usd';
                 }
 
             // display the username if it's checked out to a user, but don't do it if the username's there already
