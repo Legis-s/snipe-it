@@ -4,10 +4,12 @@ namespace App\Models;
 use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
 use Illuminate\Database\Eloquent\Model;
+use Watson\Validating\ValidatingTrait;
 
 class ConsumableAssignment extends Model
 {
     use CompanyableTrait;
+    use ValidatingTrait;
 
     protected $table = 'consumables_locations';
 
@@ -101,6 +103,10 @@ class ConsumableAssignment extends Model
     }
 
 
+    public $rules = [
+        'assigned_to'        => 'required|exists:users,id',
+    ];
+
     public function consumable()
     {
         return $this->belongsTo(\App\Models\Consumable::class);
@@ -112,9 +118,9 @@ class ConsumableAssignment extends Model
         return $this->belongsTo(\App\Models\User::class, 'assigned_to');
     }
 
-    public function responsibleUser()
+    public function adminuser()
     {
-        return $this->belongsTo(\App\Models\User::class, 'user_id');
+        return $this->belongsTo(\App\Models\User::class, 'created_by');
     }
 
     public function location()

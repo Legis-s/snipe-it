@@ -3,10 +3,15 @@
 namespace App\Http\Controllers\Consumables;
 
 use App\Events\CheckoutableCheckedOut;
+use App\Helpers\Helper;
 use App\Http\Controllers\CheckInOutRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ConsumableCheckoutRequest;
 use App\Models\Consumable;
+use App\Models\User;
+use Illuminate\Http\Request;
+use \Illuminate\Contracts\View\View;
+use \Illuminate\Http\RedirectResponse;
 use App\Models\ConsumableAssignment;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
@@ -22,10 +27,8 @@ class ConsumableCheckoutController extends Controller
      * @see ConsumableCheckoutController::store() method that stores the data.
      * @since [v1.0]
      * @param int $id
-     * @return \Illuminate\Contracts\View\View
-     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function create($id)
+    public function create($id) : View | RedirectResponse
     {
 
         if ($consumable = Consumable::find($id)) {
@@ -38,7 +41,7 @@ class ConsumableCheckoutController extends Controller
                 // Make sure there is at least one available to checkout
                 if ($consumable->numRemaining() <= 0){
                     return redirect()->route('consumables.index')
-                        ->with('error', trans('admin/consumables/message.checkout.unavailable'));
+                        ->with('error', trans('admin/consumables/message.checkout.unavailable', ['requested' => 1, 'remaining' => $consumable->numRemaining()]));
                 }
 
                 // Return the checkout view

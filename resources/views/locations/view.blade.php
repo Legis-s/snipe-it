@@ -9,6 +9,10 @@
 @parent
 @stop
 
+@section('header_right')
+<a href="{{ route('locations.index') }}" class="btn btn-primary" style="margin-right: 10px;">
+    {{ trans('general.back') }}</a>
+@endsection
 {{-- Page content --}}
 @section('content')
 
@@ -21,7 +25,7 @@
               <li class="active">
                   <a href="#users" data-toggle="tab">
                         <span class="hidden-lg hidden-md">
-                            <i class="fas fa-users fa-2x"></i>
+                            <x-icon type="users" class="fa-2x" />
                         </span>
                       <span class="hidden-xs hidden-sm">
                           {{ trans('general.users') }}
@@ -34,7 +38,7 @@
               <li>
                   <a href="#assets" data-toggle="tab">
                     <span class="hidden-lg hidden-md">
-                        <i class="fas fa-barcode fa-2x" aria-hidden="true"></i>
+                        <x-icon type="assets" class="fa-2x" />
                     </span>
                     <span class="hidden-xs hidden-sm">
                           {{ trans('admin/locations/message.current_location') }}
@@ -47,7 +51,8 @@
               <li>
                   <a href="#rtd_assets" data-toggle="tab">
                     <span class="hidden-lg hidden-md">
-                        <i class="fas fa-barcode fa-2x" aria-hidden="true"></i>
+
+                        <x-icon type="assets" class="fa-2x" />
                     </span>
                       <span class="hidden-xs hidden-sm">
                           {{ trans('admin/hardware/form.default_location') }}
@@ -59,7 +64,7 @@
               <li>
                   <a href="#assets_assigned" data-toggle="tab">
                     <span class="hidden-lg hidden-md">
-                        <i class="fas fa-barcode fa-2x" aria-hidden="true"></i>
+                        <x-icon type="assets" class="fa-2x" />
                     </span>
                       <span class="hidden-xs hidden-sm">
                           {{ trans('admin/locations/message.assigned_assets') }}
@@ -72,7 +77,7 @@
               <li>
                   <a href="#accessories" data-toggle="tab">
                     <span class="hidden-lg hidden-md">
-                        <i class="fas fa-keyboard fa-2x" aria-hidden="true"></i>
+                        <x-icon type="accessories" class="fa-2x "/>
                     </span>
                       <span class="hidden-xs hidden-sm">
                           {{ trans('general.accessories') }}
@@ -84,7 +89,7 @@
               <li>
                   <a href="#consumables" data-toggle="tab">
                     <span class="hidden-lg hidden-md">
-                        <i class="fas fa-tint fa-2x" aria-hidden="true"></i>
+                        <x-icon type="consumables" class="fa-2x "/>
                     </span>
                       <span class="hidden-xs hidden-sm">
                           {{ trans('general.consumables') }}
@@ -96,7 +101,7 @@
               <li>
                   <a href="#components" data-toggle="tab">
                     <span class="hidden-lg hidden-md">
-                        <i class="fas fa-hdd fa-2x" aria-hidden="true"></i>
+                        <x-icon type="components" class="fa-2x "/>
                     </span>
                       <span class="hidden-xs hidden-sm">
                           {{ trans('general.components') }}
@@ -104,11 +109,11 @@
                     </span>
                   </a>
               </li>
-
+              
               <li>
                   <a href="#history" data-toggle="tab">
                     <span class="hidden-lg hidden-md">
-                        <i class="fas fa-hdd fa-2x" aria-hidden="true"></i>
+                        <x-icon type="history" class="fa-2x "/>
                     </span>
                       <span class="hidden-xs hidden-sm">
                           {{ trans('general.history') }}
@@ -415,16 +420,6 @@
 
   <div class="col-md-3">
 
-      <div class="col-md-12">
-          <a href="{{ route('locations.edit', ['location' => $location->id]) }}" style="width: 100%;" class="btn btn-sm btn-primary pull-left">{{ trans('admin/locations/table.update') }} </a>
-      </div>
-      <div class="col-md-12" style="padding-top: 5px;">
-          <a href="{{ route('locations.print_assigned', ['locationId' => $location->id]) }}" style="width: 100%;" class="btn btn-sm btn-default pull-left">{{ trans('admin/locations/table.print_assigned') }} </a>
-      </div>
-      <div class="col-md-12" style="padding-top: 5px;">
-          <a href="{{ route('locations.print_all_assigned', ['locationId' => $location->id]) }}" style="width: 100%;" class="btn btn-sm btn-default pull-left">{{ trans('admin/locations/table.print_all_assigned') }} </a>
-      </div>
-
       @if (($location->bitrix_id))
           <div class="col-md-12" style="padding-top: 15px; padding-bottom: 20px;">
               <a href="https://bitrix.legis-s.ru/crm/type/1032/details/{{ $location->bitrix_id}}/" style="width: 100%;" class="btn btn-sm btn-info pull-left">{{ trans('general.bitrix_open') }} OLD </a>
@@ -437,52 +432,135 @@
           </div>
       @endif
 
-    @if ($location->image!='')
-      <div class="col-md-12 text-center" style="padding-bottom: 20px;">
-        <img src="{{ Storage::disk('public')->url('locations/'.e($location->image)) }}" class="img-responsive img-thumbnail" style="width:100%" alt="{{ $location->name }}">
-      </div>
-    @endif
+      @if ($location->image!='')
+          <div class="col-md-12 text-center" style="padding-bottom: 20px;">
+              <img src="{{ Storage::disk('public')->url('locations/'.e($location->image)) }}" class="img-responsive img-thumbnail" style="width:100%" alt="{{ $location->name }}">
+          </div>
+      @endif
+
+      @if (($location->state!='') && ($location->country!='') && (config('services.google.maps_api_key')))
+          <div class="col-md-12 text-center" style="padding-bottom: 10px;">
+              <img src="https://maps.googleapis.com/maps/api/staticmap?markers={{ urlencode($location->address.','.$location->city.' '.$location->state.' '.$location->country.' '.$location->zip) }}&size=700x500&maptype=roadmap&key={{ config('services.google.maps_api_key') }}" class="img-thumbnail" style="width:100%" alt="Map">
+          </div>
+      @endif
+
       <div class="col-md-12">
-        <ul class="list-unstyled" style="line-height: 25px; padding-bottom: 20px;">
-          @if ($location->address!='')
-            <li>{{ $location->address }}</li>
-           @endif
-            @if ($location->address2!='')
-              <li>{{ $location->address2 }}</li>
-            @endif
-            @if (($location->city!='') || ($location->state!='') || ($location->zip!=''))
-              <li>{{ $location->city }} {{ $location->state }} {{ $location->zip }}</li>
-            @endif
-            @if ($location->manager)
-              <li>{{ trans('admin/users/table.manager') }}: {!! $location->manager->present()->nameUrl() !!}</li>
-            @endif
-            @if ($location->parent)
-              <li>{{ trans('admin/locations/table.parent') }}: {!! $location->parent->present()->nameUrl() !!}</li>
-            @endif
+          <ul class="list-unstyled" style="line-height: 20px; padding-bottom: 20px;">
+              @if ($location->address!='')
+                  <li>{{ $location->address }}</li>
+              @endif
+              @if ($location->address2!='')
+                  <li>{{ $location->address2 }}</li>
+              @endif
+              @if (($location->city!='') || ($location->state!='') || ($location->zip!=''))
+                  <li>{{ $location->city }} {{ $location->state }} {{ $location->zip }}</li>
+              @endif
+              @if ($location->manager)
+                  <li>{{ trans('admin/users/table.manager') }}: {!! $location->manager->present()->nameUrl() !!}</li>
+              @endif
+              @if ($location->parent)
+                  <li>{{ trans('admin/locations/table.parent') }}: {!! $location->parent->present()->nameUrl() !!}</li>
+              @endif
               @if ($location->ldap_ou)
                   <li>{{ trans('admin/locations/table.ldap_ou') }}: {{ $location->ldap_ou }}</li>
               @endif
-        </ul>
+
+              @if ((($location->address!='') && ($location->city!='')) || ($location->state!='') || ($location->country!=''))
+                      <li>
+                        <a href="https://maps.google.com/?q={{ urlencode($location->address.','. $location->city.','.$location->state.','.$location->country.','.$location->zip) }}" target="_blank">
+                            {!! trans('admin/locations/message.open_map', ['map_provider_icon' => '<i class="fa-brands fa-google" aria-hidden="true"></i>']) !!}
+                            <x-icon type="external-link"/>
+                        </a>
+                      </li>
+                      <li>
+                        <a href="https://maps.apple.com/?q={{ urlencode($location->address.','. $location->city.','.$location->state.','.$location->country.','.$location->zip) }}" target="_blank">
+                            {!! trans('admin/locations/message.open_map', ['map_provider_icon' => '<i class="fa-brands fa-apple" aria-hidden="true" style="font-size: 18px"></i>']) !!}
+                            <x-icon type="external-link"/></a>
+                  </li>
+              @endif
+
+          </ul>
+      </div>
+
+      @can('update', $location)
+      <div class="col-md-12">
+          <a href="{{ route('locations.edit', ['location' => $location->id]) }}" style="width: 100%;" class="btn btn-sm btn-warning btn-social">
+              <x-icon type="edit" />
+              {{ trans('admin/locations/table.update') }}
+          </a>
+      </div>
+      @endcan
+
+      <div class="col-md-12" style="padding-top: 5px;">
+          <a href="{{ route('locations.print_assigned', ['locationId' => $location->id]) }}" style="width: 100%;" class="btn btn-sm btn-primary btn-social hidden-print">
+              <x-icon type="print" />
+              {{ trans('admin/locations/table.print_assigned') }}
+          </a>
+      </div>
+      <div class="col-md-12" style="padding-top: 5px;">
+          <a href="{{ route('locations.print_all_assigned', ['locationId' => $location->id]) }}" style="width: 100%;" class="btn btn-sm btn-primary btn-social hidden-print">
+              <x-icon type="print" />
+              {{ trans('admin/locations/table.print_all_assigned') }}
+          </a>
+      </div>
+
+          @can('delete', $location)
+              <div class="col-md-12 hidden-print" style="padding-top: 10px;">
+
+            @if ($location->deleted_at=='')
+
+                @if ($location->isDeletable())
+                      <button class="btn btn-sm btn-block btn-danger btn-social delete-location" data-toggle="modal" data-title="{{ trans('general.delete') }}" data-content="{{ trans('general.sure_to_delete_var', ['item' => $location->name]) }}" data-target="#dataConfirmModal">
+                          <x-icon type="delete" />
+                          {{ trans('general.delete') }}
+                      </button>
+                @else
+                      <a href="#" class="btn btn-block btn-sm btn-danger btn-social hidden-print disabled" data-tooltip="true"  data-placement="top" data-title="{{ trans('general.cannot_be_deleted') }}">
+                          <x-icon type="delete" />
+                          {{ trans('general.delete') }}
+                      </a>
+                @endif
+
+            @else
+                  <form method="POST" action="{{ route('locations.restore', ['location' => $location->id]) }}">
+                      @csrf
+                      <button class="btn btn-sm btn-block btn-warning btn-social delete-asset">
+                          <x-icon type="restore" />
+                          {{ trans('general.restore') }}
+                      </button>
+                  </form>
+            @endif
+              </div>
+    @endcan
 
           @if ($location->coordinates!='')
               <div id="map" style=" width: 100%; height: 400px"></div>
           @endif
 
 
-
-		
-  </div>
-
-  </div>
 </div>
+</div>
+
 
 @stop
 
 @section('moar_scripts')
-    @include ('partials.bootstrap-table', [
-        'exportFile' => 'locations-export',
-        'search' => true
-     ])
+
+    <script>
+        $('#dataConfirmModal').on('show.bs.modal', function (event) {
+            var content = $(event.relatedTarget).data('content');
+            var title = $(event.relatedTarget).data('title');
+            $(this).find(".modal-body").text(content);
+            $(this).find(".modal-header").text(title);
+        });
+    </script>
+
+@include ('partials.bootstrap-table', [
+'exportFile' => 'locations-export',
+'search' => true
+])
+
+
     @if ($location->coordinates!='')
         <script src="https://api-maps.yandex.ru/2.1/?apikey=9aff6103-40f7-49e4-ad79-aa2a69d421d6&lang=ru_RU"
                 type="text/javascript">
@@ -504,4 +582,5 @@
             }
         </script>
     @endif
+
 @stop

@@ -7,6 +7,11 @@ use App\Helpers\StorageHelper;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\SettingsSamlRequest;
 use App\Http\Requests\SetupUserRequest;
+use App\Http\Requests\StoreLdapSettings;
+use App\Http\Requests\StoreLocalizationSettings;
+use App\Http\Requests\StoreNotificationSettings;
+use App\Http\Requests\StoreLabelSettings;
+use App\Http\Requests\StoreSecuritySettings;
 use App\Models\CustomField;
 use App\Models\Group;
 use App\Models\Setting;
@@ -14,7 +19,6 @@ use App\Models\Asset;
 use App\Models\User;
 use App\Notifications\FirstAdminNotification;
 use App\Notifications\MailTest;
-use Illuminate\Http\Client\HttpClientException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Storage;
@@ -129,11 +133,11 @@ class SettingsController extends Controller
     protected function dotEnvFileIsExposed() : bool
     {
         try {
-            return Http::timeout(10)
+            return Http::withoutVerifying()->timeout(10)
                 ->accept('*/*')
                 ->get(URL::to('.env'))
                 ->successful();
-        } catch (HttpClientException $e) {
+        } catch (\Exception $e) {
             Log::debug($e->getMessage());
             return true;
         }
@@ -182,7 +186,7 @@ class SettingsController extends Controller
         $settings->brand = 1;
         $settings->locale = $request->input('locale', 'en-US');
         $settings->default_currency = $request->input('default_currency', 'USD');
-        $settings->user_id = 1;
+        $settings->created_by = 1;
         $settings->email_domain = $request->input('email_domain');
         $settings->email_format = $request->input('email_format');
         $settings->next_auto_tag_base = 1;
@@ -274,20 +278,6 @@ class SettingsController extends Controller
         return view('settings/index', compact('settings'));
     }
 
-    /**
-     * Return the admin settings page.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     *
-     * @since [v1.0]
-     */
-    public function getEdit() : View
-
-    {
-        $setting = Setting::getSettings();
-
-        return view('settings/general', compact('setting'));
-    }
 
     /**
      * Return a form to allow a super admin to update settings.
@@ -325,6 +315,7 @@ class SettingsController extends Controller
 
         $setting->full_multiple_companies_support = $request->input('full_multiple_companies_support', '0');
         $setting->unique_serial = $request->input('unique_serial', '0');
+        $setting->shortcuts_enabled = $request->input('shortcuts_enabled', '0');
         $setting->show_images_in_email = $request->input('show_images_in_email', '0');
         $setting->show_archived_in_list = $request->input('show_archived_in_list', '0');
         $setting->dashboard_message = $request->input('dashboard_message');
@@ -414,10 +405,7 @@ class SettingsController extends Controller
             $setting = $request->handleImages($setting, 600, 'logo', '', 'logo');
 
             if ($request->input('clear_logo') == '1') {
-
-                if (($setting->logo) && (Storage::exists($setting->logo))) {
-                    Storage::disk('public')->delete($setting->logo);
-                }
+                $setting = $request->deleteExistingImage($setting, '', 'logo');
                 $setting->logo = null;
                 $setting->brand = 1;
             }
@@ -425,42 +413,37 @@ class SettingsController extends Controller
             // Email logo upload
             $setting = $request->handleImages($setting, 600, 'email_logo', '', 'email_logo');
             if ($request->input('clear_email_logo') == '1') {
-
-                if (($setting->email_logo) && (Storage::exists($setting->email_logo))) {
-                    Storage::disk('public')->delete($setting->email_logo);
-                }
+                $setting = $request->deleteExistingImage($setting, '', 'email_logo');
                 $setting->email_logo = null;
-                // If they are uploading an image, validate it and upload it
             }
 
              // Label logo upload
             $setting = $request->handleImages($setting, 600, 'label_logo', '', 'label_logo');
-            if ($request->input('clear_label_logo') == '1') {
 
-                if (($setting->label_logo) && (Storage::exists($setting->label_logo))) {
-                    Storage::disk('public')->delete($setting->label_logo);
-                }
+            if ($request->input('clear_label_logo') == '1') {
+                $setting = $request->deleteExistingImage($setting, '', 'label_logo');
                 $setting->label_logo = null;
             }
 
             // Favicon upload
             $setting = $request->handleImages($setting, 100, 'favicon', '', 'favicon');
             if ('1' == $request->input('clear_favicon')) {
-
-                if (($setting->favicon) && (Storage::exists($setting->favicon))) {
-                    Storage::disk('public')->delete($setting->favicon);
-                }
+                $setting = $request->deleteExistingImage($setting, '', 'favicon');
                 $setting->favicon = null;
             }
 
             // Default avatar upload
             $setting = $request->handleImages($setting, 500, 'default_avatar', 'avatars', 'default_avatar');
-            if ($request->input('clear_default_avatar') == '1') {
-
-                if (($setting->default_avatar) && (Storage::exists('avatars/'.$setting->default_avatar))) {
-                    Storage::disk('public')->delete('avatars/'.$setting->default_avatar);
+            if ($request->input('clear_default_avatar') == '1')  {
+                // Don't delete the file, just update the field if this is the default
+                if ($setting->default_avatar!='default.png') {
+                    $setting = $request->deleteExistingImage($setting, 'avatars', 'default_avatar');
                 }
                 $setting->default_avatar = null;
+            }
+
+            if ($request->input('restore_default_avatar') == '1')  {
+                $setting->default_avatar = 'default.png';
             }
         }
 
@@ -494,7 +477,7 @@ class SettingsController extends Controller
      *
      * @since [v1.0]
      */
-    public function postSecurity(Request $request) : RedirectResponse
+    public function postSecurity(StoreSecuritySettings $request) : RedirectResponse
     {
         $this->validate($request, [
             'pwd_secure_complexity' => 'array',
@@ -564,7 +547,7 @@ class SettingsController extends Controller
      *
      * @since [v1.0]
      */
-    public function postLocalization(Request $request) : RedirectResponse
+    public function postLocalization(StoreLocalizationSettings $request) : RedirectResponse
     {
         if (is_null($setting = Setting::getSettings())) {
             return redirect()->to('admin')->with('error', trans('admin/settings/message.update.error'));
@@ -607,7 +590,7 @@ class SettingsController extends Controller
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @since [v1.0]
      */
-    public function postAlerts(Request $request) : RedirectResponse
+    public function postAlerts(StoreNotificationSettings $request) : RedirectResponse
     {
         if (is_null($setting = Setting::getSettings())) {
             return redirect()->to('admin')->with('error', trans('admin/settings/message.update.error'));
@@ -645,6 +628,7 @@ class SettingsController extends Controller
         $setting->alert_threshold = $request->input('alert_threshold');
         $setting->audit_interval = $request->input('audit_interval');
         $setting->audit_warning_days = $request->input('audit_warning_days');
+        $setting->due_checkin_days = $request->input('due_checkin_days');
         $setting->show_alerts_in_menu = $request->input('show_alerts_in_menu', '0');
 
         if ($setting->save()) {
@@ -787,7 +771,7 @@ class SettingsController extends Controller
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @since [v4.0]
      */
-    public function postLabels(Request $request) : RedirectResponse
+    public function postLabels(StoreLabelSettings $request) : RedirectResponse
     {
         if (is_null($setting = Setting::getSettings())) {
             return redirect()->to('admin')->with('error', trans('admin/settings/message.update.error'));
@@ -866,26 +850,7 @@ class SettingsController extends Controller
     {
         $setting = Setting::getSettings();
         $groups = Group::pluck('name', 'id');
-
-
-        /**
-         * This validator is only temporary (famous last words.) - @snipe
-         */
-        $messages = [
-            'ldap_username_field.not_in' => '<code>sAMAccountName</code> (mixed case) will likely not work. You should use <code>samaccountname</code> (lowercase) instead. ',
-            'ldap_auth_filter_query.not_in' => '<code>uid=samaccountname</code> is probably not a valid auth filter. You probably want <code>uid=</code> ',
-            'ldap_filter.regex' => 'This value should probably not be wrapped in parentheses.',
-        ];
-
-        $validator = Validator::make($setting->toArray(), [
-            'ldap_username_field' => 'not_in:sAMAccountName',
-            'ldap_auth_filter_query' => 'not_in:uid=samaccountname|required_if:ldap_enabled,1',
-            'ldap_filter' => 'nullable|regex:"^[^(]"|required_if:ldap_enabled,1',
-        ],  $messages);
-
-
-
-        return view('settings.ldap', compact('setting', 'groups'))->withErrors($validator);
+        return view('settings.ldap', compact('setting', 'groups'));
     }
 
     /**
@@ -894,7 +859,7 @@ class SettingsController extends Controller
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @since [v4.0]
      */
-    public function postLdapSettings(Request $request) : RedirectResponse
+    public function postLdapSettings(StoreLdapSettings $request) : RedirectResponse
     {
         if (is_null($setting = Setting::getSettings())) {
             return redirect()->to('admin')->with('error', trans('admin/settings/message.update.error'));
@@ -1211,7 +1176,7 @@ class SettingsController extends Controller
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @since [v6.0]
      */
-    public function postRestore($filename = null) : RedirectResponse
+    public function postRestore(Request $request, $filename = null): RedirectResponse
     {
 
         if (! config('app.lock_passwords')) {
@@ -1231,13 +1196,29 @@ class SettingsController extends Controller
 
                 Log::debug('Attempting to restore from: '. storage_path($path).'/'.$filename);
 
-                // run the restore command
-                Artisan::call('snipeit:restore',
-                [
+                $restore_params = [
                     '--force' => true,
                     '--no-progress' => true,
-                    'filename' => storage_path($path).'/'.$filename
-                ]);
+                    'filename' => storage_path($path) . '/' . $filename
+                ];
+
+                if ($request->input('clean')) {
+                    Log::debug("Attempting 'clean' - first, guessing prefix...");
+                    Artisan::call('snipeit:restore', [
+                        '--sanitize-guess-prefix' => true,
+                        'filename' => storage_path($path) . '/' . $filename
+                    ]);
+                    $guess_prefix_output = Artisan::output();
+                    Log::debug("Sanitize output is: $guess_prefix_output");
+                    list($prefix, $_output) = explode("\n", $guess_prefix_output);
+                    Log::debug("prefix is: '$prefix'");
+                    $restore_params['--sanitize-with-prefix'] = $prefix;
+                }
+
+                // run the restore command
+                Artisan::call('snipeit:restore',
+                    $restore_params
+                );
 
                 // If it's greater than 300, it probably worked
                 $output = Artisan::output();
@@ -1264,7 +1245,7 @@ class SettingsController extends Controller
                 DB::table('users')->update(['remember_token' => null]);
                 Auth::logout();
 
-                return redirect()->route('login')->with('success', 'Your system has been restored. Please login again.');
+                return redirect()->route('login')->with('success', trans('admin/settings/message.restore.success'));
             } else {
                 return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.backup.file_not_found'));
             }

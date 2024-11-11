@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Intervention\Image\ImageManagerStatic as Image;
 use Illuminate\Support\Facades\Session;
 
@@ -62,8 +63,9 @@ class Helper
         'mn' => 'mn-MN', // Mongolian
         'ms' => 'ms-MY', // Malay
         'nl' => 'nl-NL', // Dutch
-        'no' => 'no-NO', // Norwegian
+        'no' => 'nb-NO', // Norwegian Bokmål
         'pl' => 'pl-PL', // Polish
+        'pt' => 'pt-PT', // Portuguese
         'ro' => 'ro-RO', // Romanian
         'ru' => 'ru-RU', // Russian
         'sk' => 'sk-SK', // Slovak
@@ -707,6 +709,28 @@ class Helper
 
         return $randomString;
     }
+    /**
+     * A method to be used to handle deprecations notifications, currently handling MS Teams. more can be added when needed.
+     *
+     *
+     * @author [Godfrey Martinez]
+     * @since [v7.0.14]
+     * @return array
+     */
+    public static function deprecationCheck()  : array {
+        // The check and message that the user is still using the deprecated version
+        $deprecations = [
+            'ms_teams_deprecated' => array(
+            'check' => !Str::contains(Setting::getSettings()->webhook_endpoint, 'workflows'),
+            'message' => 'The Microsoft Teams webhook URL being used will be deprecated Jan 31st, 2025. <a class="btn btn-primary" href="' . route('settings.slack.index') . '">Change webhook endpoint</a>'),
+        ];
+
+        // if item of concern is being used and its being used with the deprecated values return the notification array.
+        if(Setting::getSettings()->webhook_selected === 'microsoft' && $deprecations['ms_teams_deprecated']['check']) {
+            return $deprecations;
+        }
+            return [];
+    }
 
     /**
      * This nasty little method gets the low inventory info for the
@@ -720,7 +744,7 @@ class Helper
     {
         $alert_threshold = \App\Models\Setting::getSettings()->alert_threshold;
         $consumables = Consumable::withCount('consumableAssignments as consumable_assignments_count')->whereNotNull('min_amt')->get();
-        $accessories = Accessory::withCount('users as users_count')->whereNotNull('min_amt')->get();
+        $accessories = Accessory::withCount('checkouts as checkouts_count')->whereNotNull('min_amt')->get();
         $components = Component::whereNotNull('min_amt')->get();
         $asset_models = AssetModel::where('min_amt', '>', 0)->get();
         $licenses = License::where('min_amt', '>', 0)->get();
@@ -748,7 +772,7 @@ class Helper
         }
 
         foreach ($accessories as $accessory) {
-            $avail = $accessory->qty - $accessory->users_count;
+            $avail = $accessory->qty - $accessory->checkouts_count;
             if ($avail < ($accessory->min_amt) + $alert_threshold) {
                 if ($accessory->qty > 0) {
                     $percent = number_format((($avail / $accessory->qty) * 100), 0);
@@ -913,13 +937,22 @@ class Helper
         $rules = $class::rules();
         foreach ($rules as $rule_name => $rule) {
             if ($rule_name == $field) {
-                if (strpos($rule, 'required') === false) {
-                    return false;
+                if (is_array($rule)) {
+                    if (in_array('required', $rule)) {
+                       return true;
+                    } else {
+                        return false;
+                    }
                 } else {
-                    return true;
-                }
+                    if (strpos($rule, 'required') === false) {
+                            return false;
+                        } else {
+                            return true;
+                        }
+                    }
             }
         }
+        return false;
     }
 
     /**
@@ -1113,6 +1146,7 @@ class Helper
             'png'   => 'far fa-image',
             'webp'   => 'far fa-image',
             'avif'   => 'far fa-image',
+            'svg' => 'fas fa-vector-square',
             // word
             'doc'   => 'far fa-file-word',
             'docx'   => 'far fa-file-word',
@@ -1125,7 +1159,7 @@ class Helper
             //Text
             'txt'   => 'far fa-file-alt',
             'rtf'   => 'far fa-file-alt',
-            'xml'   => 'far fa-file-alt',
+            'xml'   => 'fas fa-code',
             // Misc
             'pdf'   => 'far fa-file-pdf',
             'lic'   => 'far fa-save',
@@ -1138,41 +1172,7 @@ class Helper
         return 'far fa-file';
     }
 
-    public static function show_file_inline($filename)
-    {
-        $extension = substr(strrchr($filename, '.'), 1);
 
-        if ($extension) {
-            switch ($extension) {
-                case 'jpg':
-                case 'jpeg':
-                case 'gif':
-                case 'png':
-                case 'webp':
-                case 'avif':
-                    return true;
-                    break;
-                default:
-                    return false;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Generate a random encrypted password.
-     *
-     * @author Wes Hulette <jwhulette@gmail.com>
-     *
-     * @since 5.0.0
-     *
-     * @return string
-     */
-    public static function generateEncyrptedPassword(): string
-    {
-        return bcrypt(self::generateUnencryptedPassword());
-    }
 
     /**
      * Get a random unencrypted password.
@@ -1460,7 +1460,6 @@ class Helper
 
         foreach (self::$language_map as $legacy => $new) {
             if ($language_code == $legacy) {
-                Log::debug('Current language is '.$legacy.', using '.$new.' instead');
                 return $new;
             }
         }
@@ -1471,6 +1470,7 @@ class Helper
 
     public static function mapBackToLegacyLocale($new_locale = null)
     {
+
         if (strlen($new_locale) <= 4) {
             return $new_locale; //"new locale" apparently wasn't quite so new
         }
@@ -1478,42 +1478,73 @@ class Helper
         // This does a *reverse* search against our new language map array - given the value, find the *key* for it
         $legacy_locale = array_search($new_locale, self::$language_map);
 
-        if($legacy_locale !== false) {
+        if ($legacy_locale !== false) {
             return $legacy_locale;
         }
         return $new_locale; // better that you have some weird locale that doesn't fit into our mappings anywhere than 'void'
     }
 
+    public static function determineLanguageDirection() {
+        return in_array(app()->getLocale(),
+            [
+                'ar-SA',
+                'fa-IR',
+                'he-IL'
+            ]) ? 'rtl' : 'ltr';
+    }
 
-    static public function getRedirectOption($request, $id, $table, $asset_id = null)
+
+    static public function getRedirectOption($request, $id, $table, $item_id = null)
     {
 
         $redirect_option = Session::get('redirect_option');
         $checkout_to_type = Session::get('checkout_to_type');
 
-        //return to index
-        if ($redirect_option == '0') {
+        // return to index
+        if ($redirect_option == 'index') {
             switch ($table) {
                 case "Assets":
-                    return redirect()->route('hardware.index')->with('success', trans('admin/hardware/message.checkout.success'));
+                    return route('hardware.index');
+                case "Users":
+                    return route('users.index');
+                case "Licenses":
+                    return route('licenses.index');
+                case "Accessories":
+                    return route('accessories.index');
+                case "Components":
+                    return route('components.index');
+                case "Consumables":
+                    return route('consumables.index');
             }
         }
-        //return to thing being assigned
-        if ($redirect_option == '1') {
+
+        // return to thing being assigned
+        if ($redirect_option == 'item') {
             switch ($table) {
                 case "Assets":
-                    return redirect()->route('hardware.show', $id ? $id : $asset_id)->with('success', trans('admin/hardware/message.checkout.success'));
+                    return route('hardware.show', $id ?? $item_id);
+                case "Users":
+                    return route('users.show', $id ?? $item_id);
+                case "Licenses":
+                    return route('licenses.show', $id ?? $item_id);
+                case "Accessories":
+                    return route('accessories.show', $id ?? $item_id);
+                case "Components":
+                    return route('components.show', $id ?? $item_id);
+                case "Consumables":
+                    return route('consumables.show', $id ?? $item_id);
             }
         }
-        //return to thing being assigned to
-        if ($redirect_option == '2') {
+
+        // return to assignment target
+        if ($redirect_option == 'target') {
             switch ($checkout_to_type) {
                 case 'user':
-                    return redirect()->route('users.show', $request->assigned_user)->with('success', trans('admin/hardware/message.checkout.success'));
+                    return route('users.show', ['user' => $request->assigned_user]);
                 case 'location':
-                    return redirect()->route('locations.show', $request->assigned_location)->with('success', trans('admin/hardware/message.checkout.success'));
+                    return route('locations.show', ['location' => $request->assigned_location]);
                 case 'asset':
-                    return redirect()->route('hardware.show', $request->assigned_asset)->with('success', trans('admin/hardware/message.checkout.success'));
+                    return route('hardware.show', ['hardware' => $request->assigned_asset]);
             }
         }
         return redirect()->back()->with('error', trans('admin/hardware/message.checkout.error'));

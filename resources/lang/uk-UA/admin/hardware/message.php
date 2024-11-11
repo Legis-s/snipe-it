@@ -2,8 +2,7 @@
 
 return [
 
-    'undeployable' 		=> '<strong>Попередження: </strong> цей актив позначено як такий, що наразі неможливо розгорнути.
-                         Якщо цей статус змінився, оновіть статус активу.',
+    'undeployable' 		=> '<strong>Warning: </strong> This asset has been marked as currently undeployable. If this status has changed, please update the asset status.',
     'does_not_exist' 	=> 'Медіафайл не існує.',
     'does_not_exist_var'=> 'Asset with tag :asset_tag not found.',
     'no_tag' 	        => 'No asset tag provided.',
@@ -15,6 +14,8 @@ return [
         'error'   		=> 'Актив не був створений, будь ласка, спробуйте ще раз :(',
         'success' 		=> 'Актив успішно створений. :)',
         'success_linked' => 'Активу з тегом :tag було успішно створено. <strong><a href=":link" style="color: white;">Натисніть тут, щоб переглянути</a></strong>.',
+        'multi_success_linked' => 'Asset with tag :links was created successfully.|:count assets were created succesfully. :links.',
+        'partial_failure' => 'An asset was unable to be created. Reason: :failures|:count assets were unable to be created. Reasons: :failures',
     ],
 
     'update' => [
@@ -52,12 +53,14 @@ return [
     ],
 
     'import' => [
+        'import_button'         => 'Process Import',
         'error'                 => 'Деякі елементи не імпортовано належним чином.',
         'errorDetail'           => 'Наступні елементи не були імпортовані через помилки.',
         'success'               => 'Ваш файл імпортовано',
         'file_delete_success'   => 'Ваш файл успішно вилучено',
         'file_delete_error'      => 'Файл не може бути видалений',
         'file_missing' => 'Відсутній файл',
+        'file_already_deleted' => 'The file selected was already deleted',
         'header_row_has_malformed_characters' => 'Один або кілька атрибутів у рядку заголовка містять невірні символи UTF-8',
         'content_row_has_malformed_characters' => 'Один або кілька атрибутів у першому рядку вмісту містять неправильні символи UTF-8',
     ],
@@ -76,6 +79,11 @@ return [
         'user_does_not_exist' => 'Невірний користувач. Спробуйте ще раз.',
         'not_available' => 'Цей актив недоступний для оформлення!',
         'no_assets_selected' => 'Ви повинні вибрати хоча б один медіафайл зі списку',
+    ],
+
+    'multi-checkout' => [
+        'error'   => 'Asset was not checked out, please try again|Assets were not checked out, please try again',
+        'success' => 'Asset checked out successfully.|Assets checked out successfully.',
     ],
 
     'checkin' => [

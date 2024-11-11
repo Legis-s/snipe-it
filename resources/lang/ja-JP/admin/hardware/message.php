@@ -2,8 +2,7 @@
 
 return [
 
-    'undeployable' 		=> '<strong>警告:</strong>この資産は、現在 未配備としてマークされています。
-                        この状態が変更された場合は、資産のステータスを更新してください。',
+    'undeployable' 		=> '<strong>Warning: </strong> This asset has been marked as currently undeployable. If this status has changed, please update the asset status.',
     'does_not_exist' 	=> '資産が存在しません。',
     'does_not_exist_var'=> 'Asset with tag :asset_tag not found.',
     'no_tag' 	        => 'No asset tag provided.',
@@ -15,6 +14,8 @@ return [
         'error'   		=> '資産は作成されませんでした。もう一度、やり直して下さい。',
         'success' 		=> '資産は作成されました。',
         'success_linked' => ':tag を持つアセットは正常に作成されました。 <strong><a href=":link" style="color: white;"></a></strong> を表示するにはここをクリックしてください。',
+        'multi_success_linked' => 'Asset with tag :links was created successfully.|:count assets were created succesfully. :links.',
+        'partial_failure' => 'An asset was unable to be created. Reason: :failures|:count assets were unable to be created. Reasons: :failures',
     ],
 
     'update' => [
@@ -52,12 +53,14 @@ return [
     ],
 
     'import' => [
+        'import_button'         => 'Process Import',
         'error'                 => 'いくつかの項目は正しくインポートされませんでした。',
         'errorDetail'           => '以下のアイテムはエラーのためインポートできませんでした',
         'success'               => 'ファイルはインポートされました。',
         'file_delete_success'   => 'ファイルを削除しました。',
         'file_delete_error'      => 'ファイルが削除出来ませんでした。',
         'file_missing' => '選択されたファイルがありません',
+        'file_already_deleted' => '選択したファイルは既に削除されています',
         'header_row_has_malformed_characters' => 'ヘッダー行の1つ以上の属性に不正な形式のUTF-8文字が含まれています',
         'content_row_has_malformed_characters' => 'コンテンツの最初の行の1つまたは複数の属性に不正な形式のUTF-8文字が含まれています',
     ],
@@ -76,6 +79,11 @@ return [
         'user_does_not_exist' => 'その利用者は不正です。もう一度、やり直して下さい。',
         'not_available' => 'この資産はチェックアウトできません!',
         'no_assets_selected' => 'リストから少なくとも1つの資産を選択する必要があります',
+    ],
+
+    'multi-checkout' => [
+        'error'   => 'Asset was not checked out, please try again|Assets were not checked out, please try again',
+        'success' => 'Asset checked out successfully.|Assets checked out successfully.',
     ],
 
     'checkin' => [

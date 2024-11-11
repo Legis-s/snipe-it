@@ -41,6 +41,10 @@ class ConsumablesTransformer
             'purchase_date'  => Helper::getFormattedDateObject($consumable->purchase_date, 'date'),
             'qty'           => (int) $consumable->qty,
             'notes'         => ($consumable->notes) ? Helper::parseEscapedMarkedownInline($consumable->notes) : null,
+            'created_by' => ($consumable->adminuser) ? [
+                'id' => (int) $consumable->adminuser->id,
+                'name'=> e($consumable->adminuser->present()->fullName()),
+            ] : null,
             'created_at' => Helper::getFormattedDateObject($consumable->created_at, 'datetime'),
             'updated_at' => Helper::getFormattedDateObject($consumable->updated_at, 'datetime'),
             'model' => ($consumable->model) ? [
@@ -63,6 +67,7 @@ class ConsumablesTransformer
             'checkin' => Gate::allows('checkin', Consumable::class),
             'update' => Gate::allows('update', Consumable::class),
             'delete' => Gate::allows('delete', Consumable::class),
+            'clone' => (Gate::allows('create', Consumable::class) && ($consumable->deleted_at == '')),
         ];
         $array += $permissions_array;
 

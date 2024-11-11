@@ -242,7 +242,7 @@ return [
     |
     */
 
-    'min_php' => '7.4.0',
+    'min_php' => '8.1.2',
 
 
     /*
@@ -280,7 +280,6 @@ return [
         Illuminate\Redis\RedisServiceProvider::class,
         Illuminate\Auth\Passwords\PasswordResetServiceProvider::class,
         Illuminate\Session\SessionServiceProvider::class,
-//        Illuminate\Translation\TranslationServiceProvider::class, //replaced on next line
         App\Providers\SnipeTranslationServiceProvider::class, //we REPLACE the default Laravel translator with our own
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
@@ -311,8 +310,10 @@ return [
         App\Providers\ValidationServiceProvider::class,
 
         /*
-        * Custom service provider
+        * Custom Service Providers...
         */
+        App\Providers\BladeServiceProvider::class,
+        App\Providers\LivewireServiceProvider::class,
         App\Providers\MacroServiceProvider::class,
         App\Providers\SamlServiceProvider::class,
 
@@ -340,7 +341,7 @@ return [
         'Cache' => Illuminate\Support\Facades\Cache::class,
         'Config' => Illuminate\Support\Facades\Config::class,
         'Cookie' => Illuminate\Support\Facades\Cookie::class,
-        'Crypt' => Illuminate\Support\FacadesCrypt::class,
+        'Crypt' => Illuminate\Support\Facades\Crypt::class,
         'Date' => Illuminate\Support\Facades\Date::class,
         'DB' => Illuminate\Support\Facades\DB::class,
         'Eloquent' => Illuminate\Database\Eloquent\Model::class,
@@ -371,7 +372,9 @@ return [
         'Google2FA' => PragmaRX\Google2FALaravel\Facade::class,
         'Image'     => Intervention\Image\ImageServiceProvider::class,
         'Carbon' => Carbon\Carbon::class,
-        'Helper' => App\Helpers\Helper::class, // makes it much easier to use 'Helper::blah' in blades (which is where we usually use this)
+        'Helper' => App\Helpers\Helper::class,
+        'StorageHelper' => App\Helpers\StorageHelper::class,
+        'Icon' => App\Helpers\IconHelper::class,
         'Socialite' => Laravel\Socialite\Facades\Socialite::class,
 
 
@@ -427,5 +430,5 @@ return [
   */
 
     'escape_formulas' => env('CSV_ESCAPE_FORMULAS', true),
-
+    
 ];

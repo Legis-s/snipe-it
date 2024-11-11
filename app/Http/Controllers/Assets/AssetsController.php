@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Assets;
 
+use App\Events\CheckoutableCheckedIn;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ImageUploadRequest;
@@ -17,7 +18,6 @@ use App\Models\Location;
 use App\Models\Setting;
 use App\Models\Statuslabel;
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
 use App\View\Label;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -112,8 +112,10 @@ class AssetsController extends Controller
 
         $settings = Setting::getSettings();
 
-        $success = false;
+        $successes = [];
+        $failures = [];
         $serials = $request->input('serials');
+        $asset = null;
 
         for ($a = 1; $a <= count($asset_tags); $a++) {
             $asset = new Asset();
@@ -133,7 +135,7 @@ class AssetsController extends Controller
             $asset->model_id                = $request->input('model_id');
             $asset->order_number            = $request->input('order_number');
             $asset->notes                   = $request->input('notes');
-            $asset->user_id                 = Auth::id();
+            $asset->created_by              = auth()->id();
             $asset->status_id               = request('status_id');
             $asset->warranty_months         = request('warranty_months', null);
             $asset->purchase_cost           = request('purchase_cost');
@@ -168,7 +170,7 @@ class AssetsController extends Controller
             if (($model) && ($model->fieldset)) {
                 foreach ($model->fieldset->fields as $field) {
                     if ($field->field_encrypted == '1') {
-                        if (Gate::allows('admin')) {
+                        if (Gate::allows('assets.view.encrypted_custom_fields')) {
                             if (is_array($request->input($field->db_column))) {
                                 $asset->{$field->db_column} = Crypt::encrypt(implode(', ', $request->input($field->db_column)));
                             } else {
@@ -202,16 +204,35 @@ class AssetsController extends Controller
                     $asset->checkOut($target, auth()->user(), date('Y-m-d H:i:s'), $request->input('expected_checkin', null), 'Checked out on asset creation', $request->get('name'), $location);
                 }
 
-                $success = true;
-                
+                $successes[] = "<a href='" . route('hardware.show', ['hardware' => $asset->id]) . "' style='color: white;'>" . e($asset->asset_tag) . "</a>";
+
+            } else {
+                $failures[] = join(",", $asset->getErrors()->all());
             }
         }
 
-        if ($success) {
-            return redirect()->route('hardware.index')
-                ->with('success-unescaped', trans('admin/hardware/message.create.success_linked', ['link' => route('hardware.show', $asset->id), 'id', 'tag' => e($asset->asset_tag)]));
-               
-      
+        session()->put(['redirect_option' => $request->get('redirect_option'), 'checkout_to_type' => $request->get('checkout_to_type')]);
+
+
+        if ($successes) {
+            if ($failures) {
+                //some succeeded, some failed
+                return redirect()->to(Helper::getRedirectOption($request, $asset->id, 'Assets')) //FIXME - not tested
+                ->with('success-unescaped', trans_choice('admin/hardware/message.create.multi_success_linked', $successes, ['links' => join(", ", $successes)]))
+                    ->with('warning', trans_choice('admin/hardware/message.create.partial_failure', $failures, ['failures' => join("; ", $failures)]));
+            } else {
+                if (count($successes) == 1) {
+                    //the most common case, keeping it so we don't have to make every use of that translation string be trans_choice'ed
+                    //and re-translated
+                    return redirect()->to(Helper::getRedirectOption($request, $asset->id, 'Assets'))
+                        ->with('success-unescaped', trans('admin/hardware/message.create.success_linked', ['link' => route('hardware.show', ['hardware' => $asset->id]), 'id', 'tag' => e($asset->asset_tag)]));
+                } else {
+                    //multi-success
+                    return redirect()->to(Helper::getRedirectOption($request, $asset->id, 'Assets'))
+                        ->with('success-unescaped', trans_choice('admin/hardware/message.create.multi_success_linked', $successes, ['links' => join(", ", $successes)]));
+                }
+            }
+
         }
 
         return redirect()->back()->withInput()->withErrors($asset->getErrors());
@@ -292,6 +313,7 @@ class AssetsController extends Controller
      */
     public function update(ImageUploadRequest $request, $assetId = null) : RedirectResponse
     {
+
         // Check if the asset exists
         if (! $asset = Asset::find($assetId)) {
             // Redirect to the asset management page with error
@@ -327,16 +349,21 @@ class AssetsController extends Controller
         $asset->supplier_id = $request->input('supplier_id', null);
         $asset->nds = $request->input('nds', 20);
         $asset->expected_checkin = $request->input('expected_checkin', null);
-
-        // If the box isn't checked, it's not in the request at all.
-        $asset->requestable = $request->filled('requestable');
+        $asset->requestable = $request->input('requestable', 0);
         $asset->rtd_location_id = $request->input('rtd_location_id', null);
         $asset->byod = $request->input('byod', 0);
 
-        $status = Statuslabel::find($asset->status_id);
+        $status = Statuslabel::find($request->input('status_id'));
 
-        if($status->archived){
+        // This is a non-deployable status label - we should check the asset back in.
+        if (($status && $status->getStatuslabelType() != 'deployable') && ($target = $asset->assignedTo)) {
+
+            $originalValues = $asset->getRawOriginal();
             $asset->assigned_to = null;
+            $asset->assigned_type = null;
+            $asset->accepted = null;
+
+            event(new CheckoutableCheckedIn($asset, $target, auth()->user(), 'Checkin on asset update', date('Y-m-d H:i:s'), $originalValues));
         }
 
 
@@ -362,14 +389,26 @@ class AssetsController extends Controller
         }
 
         // Update the asset data
-        $asset_tag = $request->input('asset_tags');
+
         $serial = $request->input('serials');
+        $asset->serial = $request->input('serials');
+
+        if (is_array($request->input('serials'))) {
+            $asset->serial = $serial[1];
+        }
+
         $asset->name = $request->input('name');
-        $asset->serial = $serial[1];
         $asset->company_id = Company::getIdForCurrentUser($request->input('company_id'));
         $asset->model_id = $request->input('model_id');
         $asset->order_number = $request->input('order_number');
-        $asset->asset_tag = $asset_tag[1];
+
+        $asset_tags = $request->input('asset_tags');
+        $asset->asset_tag = $request->input('asset_tags');
+
+        if (is_array($request->input('asset_tags'))) {
+            $asset->asset_tag = $asset_tags[1];
+        }
+
         $asset->notes = $request->input('notes');
         $asset->quality = $request->input('quality');
         $asset->depreciable_cost = Helper::ParseCurrency($request->input('depreciable_cost', null));
@@ -383,8 +422,9 @@ class AssetsController extends Controller
         $model = AssetModel::find($request->get('model_id'));
         if (($model) && ($model->fieldset)) {
             foreach ($model->fieldset->fields as $field) {
+
                 if ($field->field_encrypted == '1') {
-                    if (Gate::allows('admin')) {
+                    if (Gate::allows('assets.view.encrypted_custom_fields')) {
                         if (is_array($request->input($field->db_column))) {
                             $asset->{$field->db_column} = Crypt::encrypt(implode(', ', $request->input($field->db_column)));
                         } else {
@@ -401,9 +441,10 @@ class AssetsController extends Controller
             }
         }
 
+        session()->put(['redirect_option' => $request->get('redirect_option'), 'checkout_to_type' => $request->get('checkout_to_type')]);
 
         if ($asset->save()) {
-            return redirect()->route('hardware.show', $assetId)
+            return redirect()->to(Helper::getRedirectOption($request, $assetId, 'Assets'))
                 ->with('success', trans('admin/hardware/message.update.success'));
         }
 
@@ -417,7 +458,7 @@ class AssetsController extends Controller
      * @param int $assetId
      * @since [v1.0]
      */
-    public function destroy($assetId) : RedirectResponse
+    public function destroy(Request $request, $assetId) : RedirectResponse
     {
         // Check if the asset exists
         if (is_null($asset = Asset::find($assetId))) {
@@ -427,9 +468,17 @@ class AssetsController extends Controller
 
         $this->authorize('delete', $asset);
 
-        DB::table('assets')
-            ->where('id', $asset->id)
-            ->update(['assigned_to' => null]);
+        if ($asset->assignedTo) {
+
+            $target = $asset->assignedTo;
+            $checkin_at = date('Y-m-d H:i:s');
+            $originalValues = $asset->getRawOriginal();
+            event(new CheckoutableCheckedIn($asset, $target, auth()->user(), 'Checkin on delete', $checkin_at, $originalValues));
+            DB::table('assets')
+                ->where('id', $asset->id)
+                ->update(['assigned_to' => null]);
+        }
+
 
         if ($asset->image) {
             try {
@@ -473,9 +522,16 @@ class AssetsController extends Controller
         $tag = $tag ? $tag : $request->get('assetTag');
         $topsearch = ($request->get('topsearch') == 'true');
 
-        if (! $asset = Asset::where('asset_tag', '=', $tag)->first()) {
-            return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));
+        // Search for an exact and unique asset tag match
+        $assets = Asset::where('asset_tag', '=', $tag);
+
+        // If not a unique result, redirect to the index view
+        if ($assets->count() != 1) {
+            return redirect()->route('hardware.index')
+                ->with('search', $tag)
+                ->with('warning', trans('admin/hardware/message.does_not_exist_var', [ 'asset_tag' => $tag ]));
         }
+        $asset = $assets->first();
         $this->authorize('view', $asset);
 
         return redirect()->route('hardware.show', $asset->id)->with('topsearch', $topsearch);
@@ -489,7 +545,7 @@ class AssetsController extends Controller
      * @param int $assetId
      * @since [v1.0]
      */
-    public function getQrCode($assetId = null) : Response | BinaryFileResponse
+    public function getQrCode($assetId = null) : Response | BinaryFileResponse | string | bool
     {
         $settings = Setting::getSettings();
 
@@ -516,6 +572,7 @@ class AssetsController extends Controller
 
             return 'That asset is invalid';
         }
+        return false;
     }
 
     /**
@@ -589,26 +646,20 @@ class AssetsController extends Controller
      * @since [v1.0]
      * @return \Illuminate\Contracts\View\View
      */
-    public function getClone($assetId = null)
+    public function getClone(Asset $asset)
     {
-        // Check if the asset exists
-        if (is_null($asset_to_clone = Asset::find($assetId))) {
-            // Redirect to the asset management page
-            return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));
-        }
-
-        $this->authorize('create', $asset_to_clone);
-
-        $asset = clone $asset_to_clone;
-        $asset->id = null;
-        $asset->asset_tag = '';
-        $asset->serial = '';
-        $asset->assigned_to = '';
+        $this->authorize('create', $asset);
+        $cloned = clone $asset;
+        $cloned->id = null;
+        $cloned->asset_tag = '';
+        $cloned->serial = '';
+        $cloned->assigned_to = '';
+        $cloned->deleted_at = '';
 
         return view('hardware/edit')
             ->with('statuslabel_list', Helper::statusLabelList())
             ->with('statuslabel_types', Helper::statusTypeList())
-            ->with('item', $asset);
+            ->with('item', $cloned);
     }
 
     /**
@@ -732,7 +783,7 @@ class AssetsController extends Controller
                         Actionlog::firstOrCreate([
                             'item_id' => $asset->id,
                             'item_type' => Asset::class,
-                            'user_id' =>  auth()->id(),
+                            'created_by' =>  auth()->id(),
                             'note' => 'Checkout imported by '.auth()->user()->present()->fullName().' from history importer',
                             'target_id' => $item[$asset_tag][$batch_counter]['user_id'],
                             'target_type' => User::class,
@@ -760,7 +811,7 @@ class AssetsController extends Controller
                             Actionlog::firstOrCreate([
                                 'item_id' => $item[$asset_tag][$batch_counter]['asset_id'],
                                 'item_type' => Asset::class,
-                                'user_id' => auth()->id(),
+                                'created_by' => auth()->id(),
                                 'note' => 'Checkin imported by '.auth()->user()->present()->fullName().' from history importer',
                                 'target_id' => null,
                                 'created_at' => $checkin_date,
@@ -837,7 +888,7 @@ class AssetsController extends Controller
     {
         $this->authorize('checkin', Asset::class);
 
-        return view('hardware/quickscan-checkin');
+        return view('hardware/quickscan-checkin')->with('statusLabel_list', Helper::statusLabelList());
     }
 
     public function audit($id)

@@ -2,7 +2,7 @@
 
 return [
 
-    'undeployable' 		=> '<strong>Warning: </strong> Acest activ a fost marcat ca fiind în prezent nedelimitat. Dacă această stare sa modificat, actualizați starea activelor.',
+    'undeployable' 		=> '<strong>Warning: </strong> This asset has been marked as currently undeployable. If this status has changed, please update the asset status.',
     'does_not_exist' 	=> 'Activul nu exista.',
     'does_not_exist_var'=> 'Asset with tag :asset_tag not found.',
     'no_tag' 	        => 'No asset tag provided.',
@@ -14,6 +14,8 @@ return [
         'error'   		=> 'Activul nu a fost creat, va rugam incercati iar. :(',
         'success' 		=> 'Activul a fost creat. :)',
         'success_linked' => 'Activul cu tag-ul :tag a fost creat cu succes. <strong><a href=":link" style="color: white;">Click aici pentru a vizualiza</a></strong>.',
+        'multi_success_linked' => 'Asset with tag :links was created successfully.|:count assets were created succesfully. :links.',
+        'partial_failure' => 'An asset was unable to be created. Reason: :failures|:count assets were unable to be created. Reasons: :failures',
     ],
 
     'update' => [
@@ -51,12 +53,14 @@ return [
     ],
 
     'import' => [
+        'import_button'         => 'Process Import',
         'error'                 => 'Unele elemente nu au importat corect.',
         'errorDetail'           => 'Următoarele elemente nu au fost importate din cauza erorilor.',
         'success'               => 'Fișierul dvs. a fost importat',
         'file_delete_success'   => 'Fișierul dvs. a fost șters cu succes',
         'file_delete_error'      => 'Fișierul nu a putut fi șters',
         'file_missing' => 'Fișierul selectat lipsește',
+        'file_already_deleted' => 'The file selected was already deleted',
         'header_row_has_malformed_characters' => 'Unul sau mai multe atribute din rândul de antet conțin caractere UTF-8 incorecte',
         'content_row_has_malformed_characters' => 'Unul sau mai multe atribute din primul rând de conținut conțin caractere UTF-8 formatate incorect',
     ],
@@ -75,6 +79,11 @@ return [
         'user_does_not_exist' => 'Utilizatorul este invalid. Va rugam incercati iar.',
         'not_available' => 'Activul respectiv nu este disponibil pentru checkout!',
         'no_assets_selected' => 'Trebuie să selectați cel puțin un articol din lista',
+    ],
+
+    'multi-checkout' => [
+        'error'   => 'Asset was not checked out, please try again|Assets were not checked out, please try again',
+        'success' => 'Asset checked out successfully.|Assets checked out successfully.',
     ],
 
     'checkin' => [

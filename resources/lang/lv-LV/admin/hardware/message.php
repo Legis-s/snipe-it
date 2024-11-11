@@ -2,7 +2,7 @@
 
 return [
 
-    'undeployable' 		=> '<strong>Ievadīšana: </strong> Šis īpašums ir atzīmēts kā pašlaik nederīgs. Ja šis statuss ir mainījies, lūdzu, atjauniniet aktīvu statusu.',
+    'undeployable' 		=> '<strong>Warning: </strong> This asset has been marked as currently undeployable. If this status has changed, please update the asset status.',
     'does_not_exist' 	=> 'Aktīvs neeksistē.',
     'does_not_exist_var'=> 'Asset with tag :asset_tag not found.',
     'no_tag' 	        => 'No asset tag provided.',
@@ -14,6 +14,8 @@ return [
         'error'   		=> 'Īpašums netika izveidots, lūdzu, mēģiniet vēlreiz. :(',
         'success' 		=> 'Īpašums veiksmīgi izveidots. :)',
         'success_linked' => 'Asset with tag :tag was created successfully. <strong><a href=":link" style="color: white;">Click here to view</a></strong>.',
+        'multi_success_linked' => 'Asset with tag :links was created successfully.|:count assets were created succesfully. :links.',
+        'partial_failure' => 'An asset was unable to be created. Reason: :failures|:count assets were unable to be created. Reasons: :failures',
     ],
 
     'update' => [
@@ -51,12 +53,14 @@ return [
     ],
 
     'import' => [
+        'import_button'         => 'Process Import',
         'error'                 => 'Daži vienumi netika pareizi importēti.',
         'errorDetail'           => 'Tālāk minētie vienumi netika importēti kļūdu dēļ.',
         'success'               => 'Jūsu fails ir importēts',
         'file_delete_success'   => 'Jūsu fails ir veiksmīgi izdzēsts',
         'file_delete_error'      => 'Failu nevarēja dzēst',
         'file_missing' => 'The file selected is missing',
+        'file_already_deleted' => 'The file selected was already deleted',
         'header_row_has_malformed_characters' => 'One or more attributes in the header row contain malformed UTF-8 characters',
         'content_row_has_malformed_characters' => 'One or more attributes in the first row of content contain malformed UTF-8 characters',
     ],
@@ -75,6 +79,11 @@ return [
         'user_does_not_exist' => 'Šis lietotājs ir nederīgs. Lūdzu mēģiniet vēlreiz.',
         'not_available' => 'Šis īpašums nav pieejams izrakstīšanai!',
         'no_assets_selected' => 'Jums jāizvēlas vismaz vienu aparatūru',
+    ],
+
+    'multi-checkout' => [
+        'error'   => 'Asset was not checked out, please try again|Assets were not checked out, please try again',
+        'success' => 'Asset checked out successfully.|Assets checked out successfully.',
     ],
 
     'checkin' => [

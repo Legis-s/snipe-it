@@ -2,8 +2,7 @@
 
 return [
 
-    'undeployable' 		=> '<strong>Uyarı:</strong> Bu demirbaş dağıtılamaz olarak işlaretlenmiş.
-                        Eğer durumu değişti ise, lütfen Demirbaş Durumu\'nu güncelleyiniz.',
+    'undeployable' 		=> '<strong>Uyarı: </strong> Bu demirbaş dağıtılamaz durumdadır. Eğer bu durum değişti ise demirbaş durumunu değiştiriniz.',
     'does_not_exist' 	=> 'Demirbaş mevcut değil.',
     'does_not_exist_var'=> 'Asset with tag :asset_tag not found.',
     'no_tag' 	        => 'No asset tag provided.',
@@ -15,6 +14,8 @@ return [
         'error'   		=> 'Demirbaş oluşturulamadı, lütfen tekrar deneyin. ',
         'success' 		=> 'Demirbaş oluşturuldu.',
         'success_linked' => 'Etiketli ürün :etiket oluşturuldu. <strong><a href=":link" style="color: white;">Görmek için tıklayın.</a></strong>.',
+        'multi_success_linked' => 'Asset with tag :links was created successfully.|:count assets were created succesfully. :links.',
+        'partial_failure' => 'An asset was unable to be created. Reason: :failures|:count assets were unable to be created. Reasons: :failures',
     ],
 
     'update' => [
@@ -52,12 +53,14 @@ return [
     ],
 
     'import' => [
+        'import_button'         => 'İçeri aktarma işlemi',
         'error'                 => 'Bazı öğeler doğru şekilde içe aktarılamadı.',
         'errorDetail'           => 'Aşağıdaki öğeler hatalar nedeniyle alınamadı.',
         'success'               => 'Dosyanızı içe aktarıldı',
         'file_delete_success'   => 'Dosyanız başarıyla silindi',
         'file_delete_error'      => 'Dosya silenemedi',
         'file_missing' => 'Seçilen dosya bulunamıyor',
+        'file_already_deleted' => 'The file selected was already deleted',
         'header_row_has_malformed_characters' => 'Başlık bilgisindeki bir veya daha fazla öznitelik, hatalı UTF-8 karakterleri içeriyor',
         'content_row_has_malformed_characters' => 'Başlıktaki ilk satırda bir veya daha fazla öznitelik, hatalı biçimlendirilmiş UTF-8 karakterleri içeriyor',
     ],
@@ -76,6 +79,11 @@ return [
         'user_does_not_exist' => 'Bu kullanıcı geçersiz. Lütfen tekrar deneyin.',
         'not_available' => 'Bu varlık için atama yapılamaz!',
         'no_assets_selected' => 'Listeden en az bir varlık seçmelisiniz',
+    ],
+
+    'multi-checkout' => [
+        'error'   => 'Asset was not checked out, please try again|Assets were not checked out, please try again',
+        'success' => 'Asset checked out successfully.|Assets checked out successfully.',
     ],
 
     'checkin' => [

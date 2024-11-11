@@ -2,15 +2,18 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Traits\MayContainCustomFields;
 use App\Models\Asset;
 use App\Models\Company;
 use App\Models\Setting;
 use Carbon\Carbon;
 use Carbon\Exceptions\InvalidFormatException;
 use Illuminate\Support\Facades\Gate;
+use App\Rules\AssetCannotBeCheckedOutToNondeployableStatus;
 
 class StoreAssetRequest extends ImageUploadRequest
 {
+    use MayContainCustomFields;
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -26,7 +29,8 @@ class StoreAssetRequest extends ImageUploadRequest
         // Guard against users passing in an array for company_id instead of an integer.
         // If the company_id is not an integer then we simply use what was
         // provided to be caught by model level validation later.
-        $idForCurrentUser = is_int($this->company_id)
+        // The use of is_numeric accounts for 1 and '1'.
+        $idForCurrentUser = is_numeric($this->company_id)
             ? Company::getIdForCurrentUser($this->company_id)
             : $this->company_id;
 
@@ -59,6 +63,7 @@ class StoreAssetRequest extends ImageUploadRequest
 
         return array_merge(
             $modelRules,
+            ['status_id' => [new AssetCannotBeCheckedOutToNondeployableStatus()]],
             parent::rules(),
         );
     }

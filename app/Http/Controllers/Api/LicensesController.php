@@ -24,10 +24,10 @@ class LicensesController extends Controller
     {
         $this->authorize('view', License::class);
 
-        $licenses = License::with('company', 'manufacturer', 'supplier','category')->withCount('freeSeats as free_seats_count');
+        $licenses = License::with('company', 'manufacturer', 'supplier','category', 'adminuser')->withCount('freeSeats as free_seats_count');
 
         if ($request->filled('company_id')) {
-            $licenses->where('company_id', '=', $request->input('company_id'));
+            $licenses->where('licenses.company_id', '=', $request->input('company_id'));
         }
 
         if ($request->filled('name')) {
@@ -70,6 +70,9 @@ class LicensesController extends Controller
             $licenses->where('depreciation_id', '=', $request->input('depreciation_id'));
         }
 
+        if ($request->filled('created_by')) {
+            $licenses->where('created_by', '=', $request->input('created_by'));
+        }
 
         if (($request->filled('maintained')) && ($request->input('maintained')=='true')) {
             $licenses->where('maintained','=',1);
@@ -112,6 +115,9 @@ class LicensesController extends Controller
                 break;
             case 'company':
                 $licenses = $licenses->leftJoin('companies', 'licenses.company_id', '=', 'companies.id')->orderBy('companies.name', $order);
+                break;
+            case 'created_by':
+                $licenses = $licenses->OrderByCreatedBy($order);
                 break;
             default:
                 $allowed_columns =
@@ -176,7 +182,7 @@ class LicensesController extends Controller
     public function show($id) : JsonResponse | array
     {
         $this->authorize('view', License::class);
-        $license = License::withCount('freeSeats')->findOrFail($id);
+        $license = License::withCount('freeSeats as free_seats_count')->findOrFail($id);
         $license = $license->load('assignedusers', 'licenseSeats.user', 'licenseSeats.asset');
 
         return (new LicensesTransformer)->transformLicense($license);
@@ -214,7 +220,6 @@ class LicensesController extends Controller
      */
     public function destroy($id) : JsonResponse
     {
-        //
         $license = License::findOrFail($id);
         $this->authorize('delete', $license);
 

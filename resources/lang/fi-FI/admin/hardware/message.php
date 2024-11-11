@@ -2,8 +2,7 @@
 
 return [
 
-    'undeployable' 		=> '<strong>Varoitus: </strong> Tämä laite  ei ole käytettävävissä.
-                        Jos laitteen tila on muuttunut, päivitä laitteen tila sen asetuksista.',
+    'undeployable' 		=> '<strong>Warning: </strong> This asset has been marked as currently undeployable. If this status has changed, please update the asset status.',
     'does_not_exist' 	=> 'Laitetta ei löydy.',
     'does_not_exist_var'=> 'Asset with tag :asset_tag not found.',
     'no_tag' 	        => 'No asset tag provided.',
@@ -15,6 +14,8 @@ return [
         'error'   		=> 'Laitetta ei luotu, yritä uudelleen. :(',
         'success' 		=> 'Laite luotiin onnistuneesti. :)',
         'success_linked' => 'Laite tunnisteella :tag luotiin onnistuneesti. <strong><a href=":link" style="color: white;">Klikkaa tästä nähdäksesi</a></strong>.',
+        'multi_success_linked' => 'Asset with tag :links was created successfully.|:count assets were created succesfully. :links.',
+        'partial_failure' => 'An asset was unable to be created. Reason: :failures|:count assets were unable to be created. Reasons: :failures',
     ],
 
     'update' => [
@@ -52,12 +53,14 @@ return [
     ],
 
     'import' => [
+        'import_button'         => 'Process Import',
         'error'                 => 'Joitakin nimikkeitä ei tuotu oikein.',
         'errorDetail'           => 'Seuraavia nimikkeitä ei tuotu virheiden vuoksi.',
         'success'               => 'Tiedostosi on tuotu',
         'file_delete_success'   => 'Tiedosto on poistettu onnistuneesti',
         'file_delete_error'      => 'Tiedostoa ei voitu poistaa',
         'file_missing' => 'Valittu tiedosto puuttuu',
+        'file_already_deleted' => 'The file selected was already deleted',
         'header_row_has_malformed_characters' => 'Yksi tai useampi otsikkorivin attribuutti sisältää epämuodostuneita UTF-8 merkkejä',
         'content_row_has_malformed_characters' => 'Yksi tai useampi ensimmäisen sisältörivin attribuutti sisältää epämuodostuneita UTF-8 merkkejä',
     ],
@@ -76,6 +79,11 @@ return [
         'user_does_not_exist' => 'Käyttäjä on virheellinen. Yritä uudelleen.',
         'not_available' => 'Laite ei ole luovutettavissa!',
         'no_assets_selected' => 'Valitse ainakin yksi laite listasta',
+    ],
+
+    'multi-checkout' => [
+        'error'   => 'Asset was not checked out, please try again|Assets were not checked out, please try again',
+        'success' => 'Asset checked out successfully.|Assets checked out successfully.',
     ],
 
     'checkin' => [

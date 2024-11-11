@@ -8,6 +8,7 @@ use App\Http\Requests\StoreAssetModelRequest;
 use App\Models\Actionlog;
 use App\Models\AssetModel;
 use App\Models\CustomField;
+use App\Models\SnipeModel;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -77,7 +78,7 @@ class AssetModelsController extends Controller
         $model->manufacturer_id = $request->input('manufacturer_id');
         $model->category_id = $request->input('category_id');
         $model->notes = $request->input('notes');
-        $model->user_id = Auth::id();
+        $model->created_by = auth()->id();
         $model->requestable = $request->has('requestable');
 
         if ($request->input('fieldset_id') != '') {
@@ -150,17 +151,17 @@ class AssetModelsController extends Controller
         $model->notes = $request->input('notes');
         $model->requestable = $request->input('requestable', '0');
 
-        $this->removeCustomFieldsDefaultValues($model);
-
         $model->fieldset_id = $request->input('fieldset_id');
 
-        if ($this->shouldAddDefaultValues($request->input())) {
-            if (!$this->assignCustomFieldsDefaultValues($model, $request->input('default_values'))){
-                return redirect()->back()->withInput()->with('error', trans('admin/custom_fields/message.fieldset_default_value.error'));
-            }
-        }
-
         if ($model->save()) {
+            $this->removeCustomFieldsDefaultValues($model);
+
+            if ($this->shouldAddDefaultValues($request->input())) {
+                if (!$this->assignCustomFieldsDefaultValues($model, $request->input('default_values'))) {
+                    return redirect()->back()->withInput()->with('error', trans('admin/custom_fields/message.fieldset_default_value.error'));
+                }
+            }
+
             if ($model->wasChanged('eol')) {
                     if ($model->eol > 0) {
                         $newEol = $model->eol; 
@@ -201,6 +202,7 @@ class AssetModelsController extends Controller
         if ($model->image) {
             try {
                 Storage::disk('public')->delete('models/'.$model->image);
+                $model->update(['image' => null]);
             } catch (\Exception $e) {
                 Log::info($e);
             }
@@ -234,10 +236,10 @@ class AssetModelsController extends Controller
 
             if ($model->restore()) {
                 $logaction = new Actionlog();
-                $logaction->item_type = User::class;
+                $logaction->item_type = AssetModel::class;
                 $logaction->item_id = $model->id;
                 $logaction->created_at = date('Y-m-d H:i:s');
-                $logaction->user_id = auth()->id();
+                $logaction->created_by = auth()->id();
                 $logaction->logaction('restore');
 
 
@@ -461,7 +463,7 @@ class AssetModelsController extends Controller
      * @param  AssetModel $model
      * @param  array      $defaultValues
      */
-    private function assignCustomFieldsDefaultValues(AssetModel $model, array $defaultValues): bool
+    private function assignCustomFieldsDefaultValues(AssetModel|SnipeModel $model, array $defaultValues): bool
     {
         $data = array();
         foreach ($defaultValues as $customFieldId => $defaultValue) {
@@ -470,17 +472,17 @@ class AssetModelsController extends Controller
             $data[$customField->db_column] = $defaultValue;
         }
 
-        $fieldsets = $model->fieldset->validation_rules();
+        $allRules = $model->fieldset->validation_rules();
         $rules = array();
 
-        foreach ($fieldsets as $fieldset => $validation){
+        foreach ($allRules as $field => $validation) {
             // If the field is marked as required, eliminate the rule so it doesn't interfere with the default values
             // (we are at model level, the rule still applies when creating a new asset using this model)
             $index = array_search('required', $validation);
             if ($index !== false){
                 $validation[$index] = 'nullable';
             }
-            $rules[$fieldset] = $validation;
+            $rules[$field] = $validation;
         }
 
         $validator = Validator::make($data, $rules);
@@ -503,7 +505,7 @@ class AssetModelsController extends Controller
      * Removes all default values
      *
      */
-    private function removeCustomFieldsDefaultValues(AssetModel $model) : void
+    private function removeCustomFieldsDefaultValues(AssetModel|SnipeModel $model): void
     {
         $model->defaultValues()->detach();
     }

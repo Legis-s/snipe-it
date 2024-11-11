@@ -63,7 +63,7 @@ class AssetObserver
             $logAction->item_type = Asset::class;
             $logAction->item_id = $asset->id;
             $logAction->created_at = date('Y-m-d H:i:s');
-            $logAction->user_id = Auth::id();
+            $logAction->created_by = auth()->id();
             $logAction->log_meta = json_encode($changed);
             $logAction->logaction('update');
         }
@@ -115,7 +115,7 @@ class AssetObserver
         $logAction->item_type = Asset::class; // can we instead say $logAction->item = $asset ?
         $logAction->item_id = $asset->id;
         $logAction->created_at = date('Y-m-d H:i:s');
-        $logAction->user_id = Auth::id();
+        $logAction->created_by = auth()->id();
         if($asset->imported) {
             $logAction->setActionSource('importer');
         }
@@ -134,7 +134,7 @@ class AssetObserver
         $logAction->item_type = Asset::class;
         $logAction->item_id = $asset->id;
         $logAction->created_at = date('Y-m-d H:i:s');
-        $logAction->user_id = Auth::id();
+        $logAction->created_by = auth()->id();
         $logAction->logaction('delete');
     }
 
@@ -150,7 +150,7 @@ class AssetObserver
         $logAction->item_type = Asset::class;
         $logAction->item_id = $asset->id;
         $logAction->created_at = date('Y-m-d H:i:s');
-        $logAction->user_id = Auth::id();
+        $logAction->created_by = auth()->id();
         $logAction->logaction('restore');
     }
 

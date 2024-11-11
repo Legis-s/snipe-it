@@ -2,14 +2,12 @@
 
 namespace App\Presenters;
 
-use DebugBar\DebugBar;
-
 /**
  * Class CompanyPresenter
  */
 class ActionlogPresenter extends Presenter
 {
-    public function admin()
+    public function adminuser()
     {
         if ($user = $this->model->user) {
             if (empty($user->deleted_at)) {
@@ -40,29 +38,30 @@ class ActionlogPresenter extends Presenter
 
     public function icon()
     {
+
         // User related icons
         if ($this->itemType() == 'user') {
 
-            if ($this->action_type=='create new') {
+            if ($this->actionType()=='create new') {
                 return 'fa-solid fa-user-plus';
             }
-            if ($this->action_type=='2fa reset') {
+            if ($this->actionType()=='2fa reset') {
                 return 'fa-solid fa-mobile-screen';
             }
 
-            if ($this->action_type=='merged') {
+            if ($this->actionType()=='merged') {
                 return 'fa-solid fa-people-arrows';
             }
 
-            if ($this->action_type=='delete') {
+            if ($this->actionType()=='delete') {
                 return 'fa-solid fa-user-minus';
             }
 
-            if ($this->action_type=='delete') {
+            if ($this->actionType()=='delete') {
                 return 'fa-solid fa-user-minus';
             }
 
-            if ($this->action_type=='update') {
+            if ($this->actionType()=='update') {
                 return 'fa-solid fa-user-pen';
             }
 
@@ -70,27 +69,27 @@ class ActionlogPresenter extends Presenter
         }
 
         // Everything else
-        if ($this->action_type=='create new') {
+        if ($this->actionType()=='create new') {
             return 'fa-solid fa-plus';
         }
 
-        if ($this->action_type=='delete') {
-            return 'fa-solid fa-user-xmark';
+        if ($this->actionType()=='delete') {
+            return 'fa-solid fa-trash';
         }
 
-        if ($this->action_type=='update') {
+        if ($this->actionType()=='update') {
             return 'fa-solid fa-pen';
         }
 
-        if ($this->action_type=='restore') {
+        if ($this->actionType()=='restore') {
             return 'fa-solid fa-trash-arrow-up';
         }
 
-        if ($this->action_type=='upload') {
+        if ($this->actionType()=='upload') {
             return 'fas fa-paperclip';
         }
 
-        if ($this->action_type=='checkout') {
+        if ($this->actionType()=='checkout') {
             return 'fa-solid fa-rotate-left';
         }
 

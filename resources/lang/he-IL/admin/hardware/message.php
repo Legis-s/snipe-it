@@ -2,7 +2,7 @@
 
 return [
 
-    'undeployable' 		=> '<strong> אזהרה: </strong> הנכס הזה סומן כבלתי ניתן לפריסה כעת. אם סטטוס זה השתנה, עדכן את סטטוס הנכס.',
+    'undeployable' 		=> '<strong>Warning: </strong> This asset has been marked as currently undeployable. If this status has changed, please update the asset status.',
     'does_not_exist' 	=> 'הנכס אינו קיים.',
     'does_not_exist_var'=> 'Asset with tag :asset_tag not found.',
     'no_tag' 	        => 'No asset tag provided.',
@@ -14,6 +14,8 @@ return [
         'error'   		=> 'הנכס לא נוצר, נסה שוב. You',
         'success' 		=> 'הנכס נוצר בהצלחה. :)',
         'success_linked' => 'Asset with tag :tag was created successfully. <strong><a href=":link" style="color: white;">Click here to view</a></strong>.',
+        'multi_success_linked' => 'Asset with tag :links was created successfully.|:count assets were created succesfully. :links.',
+        'partial_failure' => 'An asset was unable to be created. Reason: :failures|:count assets were unable to be created. Reasons: :failures',
     ],
 
     'update' => [
@@ -51,12 +53,14 @@ return [
     ],
 
     'import' => [
+        'import_button'         => 'Process Import',
         'error'                 => 'פריטים מסוימים לא ייבאו כראוי.',
         'errorDetail'           => 'הפריטים הבאים לא יובאו בגלל שגיאות.',
         'success'               => 'הקובץ שלך יובא',
         'file_delete_success'   => 'הקובץ שלך נמחק בהצלחה',
         'file_delete_error'      => 'לא ניתן היה למחוק את הקובץ',
         'file_missing' => 'The file selected is missing',
+        'file_already_deleted' => 'The file selected was already deleted',
         'header_row_has_malformed_characters' => 'One or more attributes in the header row contain malformed UTF-8 characters',
         'content_row_has_malformed_characters' => 'One or more attributes in the first row of content contain malformed UTF-8 characters',
     ],
@@ -75,6 +79,11 @@ return [
         'user_does_not_exist' => 'משתמש זה אינו חוקי. בבקשה נסה שוב.',
         'not_available' => 'הנכס הזה אינו זמין לקופה!',
         'no_assets_selected' => 'עליך לבחור לפחות בנכס אחד מהרשימה',
+    ],
+
+    'multi-checkout' => [
+        'error'   => 'Asset was not checked out, please try again|Assets were not checked out, please try again',
+        'success' => 'Asset checked out successfully.|Assets checked out successfully.',
     ],
 
     'checkin' => [

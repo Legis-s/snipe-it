@@ -2,8 +2,7 @@
 
 return [
 
-    'undeployable' 		=> '<strong>Warning: </strong> Το περιουσιακό αυτό στοιχείο έχει επισημανθεί ως επί του παρόντος undeployable.
-                        Εάν αυτή η κατάσταση έχει αλλάξει, παρακαλούμε να ενημερώσετε την κατάσταση των περιουσιακών στοιχείων.',
+    'undeployable' 		=> '<strong>Warning: </strong> This asset has been marked as currently undeployable. If this status has changed, please update the asset status.',
     'does_not_exist' 	=> 'To πάγιο δεν υπάρχει.',
     'does_not_exist_var'=> 'Asset with tag :asset_tag not found.',
     'no_tag' 	        => 'No asset tag provided.',
@@ -15,6 +14,8 @@ return [
         'error'   		=> 'Το περιουσιακού στοιχείο δεν δημιουργήθηκε, παρακαλώ προσπαθήστε ξανά. :(',
         'success' 		=> 'Το πάγιο δημιουργήθηκε επιτυχώς',
         'success_linked' => 'Asset with tag :tag was created successfully. <strong><a href=":link" style="color: white;">Click here to view</a></strong>.',
+        'multi_success_linked' => 'Asset with tag :links was created successfully.|:count assets were created succesfully. :links.',
+        'partial_failure' => 'An asset was unable to be created. Reason: :failures|:count assets were unable to be created. Reasons: :failures',
     ],
 
     'update' => [
@@ -52,12 +53,14 @@ return [
     ],
 
     'import' => [
+        'import_button'         => 'Process Import',
         'error'                 => 'Ορισμένα στοιχεία δεν έχουν εισαχθεί σωστά.',
         'errorDetail'           => 'Τα παρακάτω στοιχεία δεν εισήχθησαν εξαιτίας σφαλμάτων.',
         'success'               => 'Το αρχείο σας έχει εισαχθεί',
         'file_delete_success'   => 'Το αρχείο σας έχει διαγραφεί με επιτυχία',
         'file_delete_error'      => 'Το αρχείο δεν μπόρεσε να διαγραφεί',
         'file_missing' => 'Λείπει το επιλεγμένο αρχείο',
+        'file_already_deleted' => 'The file selected was already deleted',
         'header_row_has_malformed_characters' => 'Ένα ή περισσότερα χαρακτηριστικά στη σειρά κεφαλίδας περιέχουν κακοσχηματισμένους UTF-8 χαρακτήρες',
         'content_row_has_malformed_characters' => 'Ένα ή περισσότερα χαρακτηριστικά στην πρώτη σειρά περιεχομένου περιέχουν κακοσχηματισμένους UTF-8 χαρακτήρες',
     ],
@@ -76,6 +79,11 @@ return [
         'user_does_not_exist' => 'Αυτός ο χρήστης είναι άκυρος. ΠΑΡΑΚΑΛΩ προσπαθησε ξανα.',
         'not_available' => 'Αυτό το πάγιο δεν είναι διαθέσιμο για την ολοκλήρωση της παραγγελίας!',
         'no_assets_selected' => 'Πρέπει να επιλέξετε τουλάχιστον ένα στοιχείο προς δημοσίευση.',
+    ],
+
+    'multi-checkout' => [
+        'error'   => 'Asset was not checked out, please try again|Assets were not checked out, please try again',
+        'success' => 'Asset checked out successfully.|Assets checked out successfully.',
     ],
 
     'checkin' => [

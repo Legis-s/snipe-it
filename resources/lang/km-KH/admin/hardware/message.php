@@ -2,8 +2,7 @@
 
 return [
 
-    'undeployable' 		=> '<strong>ការព្រមាន៖ </strong> ទ្រព្យសកម្មនេះត្រូវបានសម្គាល់ថាមិនអាចប្រើប្រាស់បាននាពេលបច្ចុប្បន្ន។
-                         ប្រសិនបើស្ថានភាពនេះត្រូវបានផ្លាស់ប្តូរ សូមធ្វើបច្ចុប្បន្នភាពស្ថានភាពទ្រព្យសម្បត្តិ។',
+    'undeployable' 		=> '<strong>Warning: </strong> This asset has been marked as currently undeployable. If this status has changed, please update the asset status.',
     'does_not_exist' 	=> 'ទ្រព្យសកម្មមិនមានទេ។',
     'does_not_exist_var'=> 'Asset with tag :asset_tag not found.',
     'no_tag' 	        => 'No asset tag provided.',
@@ -15,6 +14,8 @@ return [
         'error'   		=> 'ទ្រព្យសកម្មមិនត្រូវបានបង្កើតទេ សូមព្យាយាមម្តងទៀត។ :(',
         'success' 		=> 'ទ្រព្យសកម្មត្រូវបានបង្កើតដោយជោគជ័យ។ :)',
         'success_linked' => 'ទ្រព្យសកម្មជាមួយស្លាក៖ ស្លាកត្រូវបានបង្កើតដោយជោគជ័យ។ <strong><a href=":link" style="color: white;">ចុចទីនេះដើម្បីមើល</a></strong>។',
+        'multi_success_linked' => 'Asset with tag :links was created successfully.|:count assets were created succesfully. :links.',
+        'partial_failure' => 'An asset was unable to be created. Reason: :failures|:count assets were unable to be created. Reasons: :failures',
     ],
 
     'update' => [
@@ -52,12 +53,14 @@ return [
     ],
 
     'import' => [
+        'import_button'         => 'Process Import',
         'error'                 => 'Some items did not import correctly.',
         'errorDetail'           => 'The following Items were not imported because of errors.',
         'success'               => 'ឯកសាររបស់អ្នកត្រូវបាននាំចូល',
         'file_delete_success'   => 'ឯកសាររបស់អ្នកត្រូវបានលុបដោយជោគជ័យ',
         'file_delete_error'      => 'ឯកសារមិនអាចលុបបានទេ។',
         'file_missing' => 'បាត់ឯកសារដែលបានជ្រើសរើស',
+        'file_already_deleted' => 'The file selected was already deleted',
         'header_row_has_malformed_characters' => 'គុណលក្ខណៈមួយ ឬច្រើននៅក្នុងជួរបឋមកថាមានតួអក្សរ UTF-8 ខុសទម្រង់',
         'content_row_has_malformed_characters' => 'គុណលក្ខណៈមួយ ឬច្រើននៅក្នុងជួរទីមួយនៃមាតិកាមានតួអក្សរ UTF-8 ខុសទម្រង់',
     ],
@@ -76,6 +79,11 @@ return [
         'user_does_not_exist' => 'អ្នកប្រើប្រាស់នោះមិនត្រឹមត្រូវទេ។ សូម​ព្យាយាម​ម្តង​ទៀត។',
         'not_available' => 'ទ្រព្យ​សកម្ម​នោះ​មិន​អាច​ checkout បាន​ទេ!',
         'no_assets_selected' => 'អ្នកត្រូវតែជ្រើសរើសយ៉ាងហោចណាស់ទ្រព្យសកម្មមួយពីបញ្ជី',
+    ],
+
+    'multi-checkout' => [
+        'error'   => 'Asset was not checked out, please try again|Assets were not checked out, please try again',
+        'success' => 'Asset checked out successfully.|Assets checked out successfully.',
     ],
 
     'checkin' => [

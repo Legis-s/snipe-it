@@ -2,7 +2,7 @@
 
 return [
 
-    'undeployable' 		=> '<strong>คำเตือน: </strong> สินทรัพย์นี้ถูกกำหนดสถานะให้ไม่สามารถใช้งานได้ หากสถานะนี้ถูกเปลี่ยน กรุณาอัพเดทสถานะสินทรัพย์ด้วย',
+    'undeployable' 		=> '<strong>Warning: </strong> This asset has been marked as currently undeployable. If this status has changed, please update the asset status.',
     'does_not_exist' 	=> 'ไม่มีสินทรัพย์',
     'does_not_exist_var'=> 'Asset with tag :asset_tag not found.',
     'no_tag' 	        => 'No asset tag provided.',
@@ -14,6 +14,8 @@ return [
         'error'   		=> 'ไม่ได้สร้างเนื้อหาโปรดลองอีกครั้ง :(',
         'success' 		=> 'สร้างเนื้อหาสำเร็จแล้ว :)',
         'success_linked' => 'Asset with tag :tag was created successfully. <strong><a href=":link" style="color: white;">Click here to view</a></strong>.',
+        'multi_success_linked' => 'Asset with tag :links was created successfully.|:count assets were created succesfully. :links.',
+        'partial_failure' => 'An asset was unable to be created. Reason: :failures|:count assets were unable to be created. Reasons: :failures',
     ],
 
     'update' => [
@@ -51,12 +53,14 @@ return [
     ],
 
     'import' => [
+        'import_button'         => 'Process Import',
         'error'                 => 'บางรายการไม่สามารถนำเข้าได้อย่างถูกต้อง',
         'errorDetail'           => 'รายการต่อไปนี้ไม่ได้นำเข้าเนื่องจากมีข้อผิดพลาด',
         'success'               => 'ไฟล์ของคุณถูกนำเข้าแล้ว',
         'file_delete_success'   => 'ไฟล์ของคุณถูกลบเรียบร้อยแล้ว',
         'file_delete_error'      => 'ไม่สามารถลบไฟล์ได้',
         'file_missing' => 'The file selected is missing',
+        'file_already_deleted' => 'The file selected was already deleted',
         'header_row_has_malformed_characters' => 'One or more attributes in the header row contain malformed UTF-8 characters',
         'content_row_has_malformed_characters' => 'One or more attributes in the first row of content contain malformed UTF-8 characters',
     ],
@@ -75,6 +79,11 @@ return [
         'user_does_not_exist' => 'ผู้ใช้รายนั้นไม่ถูกต้อง กรุณาลองอีกครั้ง.',
         'not_available' => 'เนื้อหาดังกล่าวไม่สามารถใช้ได้สำหรับเช็คเอาท์!',
         'no_assets_selected' => 'คุณต้องเลือกอย่างน้อยหนึ่งสินทรัพย์จากรายการ',
+    ],
+
+    'multi-checkout' => [
+        'error'   => 'Asset was not checked out, please try again|Assets were not checked out, please try again',
+        'success' => 'Asset checked out successfully.|Assets checked out successfully.',
     ],
 
     'checkin' => [

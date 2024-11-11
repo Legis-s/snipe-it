@@ -2,8 +2,7 @@
 
 return [
 
-    'undeployable' 		=> '<strong>Varování:</strong> Toto zařízení bylo označeno jako momentálně nepřiřaditelné.
-                        Pokud se na jeho stavu něco změnilo, upravte jej.',
+    'undeployable' 		=> '<strong>Warning: </strong> This asset has been marked as currently undeployable. If this status has changed, please update the asset status.',
     'does_not_exist' 	=> 'Majetek nenalezen.',
     'does_not_exist_var'=> 'Asset with tag :asset_tag not found.',
     'no_tag' 	        => 'No asset tag provided.',
@@ -15,6 +14,8 @@ return [
         'error'   		=> 'Majetek se nepodařilo vytvořit, zkuste to prosím znovu.',
         'success' 		=> 'Majetek byl v pořádku vytvořen.',
         'success_linked' => 'Asset with tag :tag was created successfully. <strong><a href=":link" style="color: white;">Click here to view</a></strong>.',
+        'multi_success_linked' => 'Asset with tag :links was created successfully.|:count assets were created succesfully. :links.',
+        'partial_failure' => 'An asset was unable to be created. Reason: :failures|:count assets were unable to be created. Reasons: :failures',
     ],
 
     'update' => [
@@ -52,12 +53,14 @@ return [
     ],
 
     'import' => [
+        'import_button'         => 'Process Import',
         'error'                 => 'Některé položky nebyly správně importovány.',
         'errorDetail'           => 'Následující položky nebyly importovány kvůli chybám.',
         'success'               => 'Váš soubor byl importován',
         'file_delete_success'   => 'Váš soubor byl úspěšně odstraněn',
         'file_delete_error'      => 'Soubor nelze odstranit',
         'file_missing' => 'Vybraný soubor chybí',
+        'file_already_deleted' => 'The file selected was already deleted',
         'header_row_has_malformed_characters' => 'Jeden nebo více sloupců obsahuje v záhlaví poškozené UTF-8 znaky',
         'content_row_has_malformed_characters' => 'Jedna nebo více hodnot v prvním řádku obsahu obsahuje poškozené UTF-8 znaky',
     ],
@@ -76,6 +79,11 @@ return [
         'user_does_not_exist' => 'Tento uživatel je neplatný. Zkuste to prosím znovu.',
         'not_available' => 'Tento majetek není k dispozici pro výdej!',
         'no_assets_selected' => 'Je třeba vybrat ze seznamu alespoň jeden majetek',
+    ],
+
+    'multi-checkout' => [
+        'error'   => 'Asset was not checked out, please try again|Assets were not checked out, please try again',
+        'success' => 'Asset checked out successfully.|Assets checked out successfully.',
     ],
 
     'checkin' => [

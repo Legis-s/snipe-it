@@ -11,12 +11,21 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 use Watson\Validating\ValidatingTrait;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use App\Presenters\ConsumablePresenter;
+use App\Models\Actionlog;
+use App\Models\ConsumableAssignment;
+use App\Models\User;
+use App\Models\Location;
+use App\Models\Manufacturer;
+use App\Models\Supplier;
+use App\Models\Category;
 
 class Consumable extends SnipeModel
 {
     use HasFactory;
 
-    protected $presenter = \App\Presenters\ConsumablePresenter::class;
+    protected $presenter = ConsumablePresenter::class;
     use CompanyableTrait;
     use Loggable, Presentable;
     use SoftDeletes;
@@ -30,19 +39,19 @@ class Consumable extends SnipeModel
         'company_id'     => 'integer',
         'supplier_id',
         'qty'            => 'integer',
-        'min_amt'        => 'integer',
-    ];
+        'min_amt'        => 'integer',    
+     ];
 
     /**
      * Category validation rules
      */
     public $rules = [
         'name'        => 'required|min:3|max:255',
-        'qty'         => 'required|integer|min:0',
+        'qty'         => 'required|integer|min:0|max:99999',
         'category_id' => 'required|integer',
         'company_id'  => 'integer|nullable',
-        'min_amt'     => 'integer|min:0|nullable',
-        'purchase_cost'   => 'numeric|nullable|gte:0',
+        'min_amt'     => 'integer|min:0|max:99999|nullable',
+        'purchase_cost'   => 'numeric|nullable|gte:0|max:9999999999999',
         'purchase_date'   => 'date_format:Y-m-d|nullable',
     ];
 
@@ -113,7 +122,7 @@ class Consumable extends SnipeModel
      */
     public function uploads()
     {
-        return $this->hasMany(\App\Models\Actionlog::class, 'item_id')
+        return $this->hasMany(Actionlog::class, 'item_id')
             ->where('item_type', '=', self::class)
             ->where('action_type', '=', 'uploaded')
             ->whereNotNull('filename')
@@ -149,9 +158,9 @@ class Consumable extends SnipeModel
      * @since [v3.0]
      * @return \Illuminate\Database\Eloquent\Relations\Relation
      */
-    public function admin()
+    public function adminuser()
     {
-        return $this->belongsTo(\App\Models\User::class, 'user_id');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     /**
@@ -163,7 +172,7 @@ class Consumable extends SnipeModel
      */
     public function consumableAssignments()
     {
-        return $this->hasMany(\App\Models\ConsumableAssignment::class);
+        return $this->hasMany(ConsumableAssignment::class);
     }
 
     /**
@@ -187,7 +196,7 @@ class Consumable extends SnipeModel
      */
     public function manufacturer()
     {
-        return $this->belongsTo(\App\Models\Manufacturer::class, 'manufacturer_id');
+        return $this->belongsTo(Manufacturer::class, 'manufacturer_id');
     }
 
     /**
@@ -199,7 +208,7 @@ class Consumable extends SnipeModel
      */
     public function location()
     {
-        return $this->belongsTo(\App\Models\Location::class, 'location_id');
+        return $this->belongsTo(Location::class, 'location_id');
     }
 
     /**
@@ -211,7 +220,7 @@ class Consumable extends SnipeModel
      */
     public function category()
     {
-        return $this->belongsTo(\App\Models\Category::class, 'category_id');
+        return $this->belongsTo(Category::class, 'category_id');
     }
 
     public function mass_operations()
@@ -228,7 +237,7 @@ class Consumable extends SnipeModel
      */
     public function assetlog()
     {
-        return $this->hasMany(\App\Models\Actionlog::class, 'item_id')->where('item_type', self::class)->orderBy('created_at', 'desc')->withTrashed();
+        return $this->hasMany(Actionlog::class, 'item_id')->where('item_type', self::class)->orderBy('created_at', 'desc')->withTrashed();
     }
 
     /**
@@ -252,11 +261,10 @@ class Consumable extends SnipeModel
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @since [v3.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
      */
-    public function users()
+    public function users() : Relation
     {
-        return $this->belongsToMany(\App\Models\User::class, 'consumables_users', 'consumable_id', 'assigned_to')->withPivot('user_id')->withTrashed()->withTimestamps();
+        return $this->belongsToMany(User::class, 'consumables_users', 'consumable_id', 'assigned_to')->withPivot('created_by')->withTrashed()->withTimestamps();
     }
 
     /**
@@ -268,7 +276,7 @@ class Consumable extends SnipeModel
      */
     public function supplier()
     {
-        return $this->belongsTo(\App\Models\Supplier::class, 'supplier_id');
+        return $this->belongsTo(Supplier::class, 'supplier_id');
     }
 
 
@@ -443,6 +451,20 @@ class Consumable extends SnipeModel
     }
 
     /**
+     * Query builder scope to order on remaining
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query  Query builder instance
+     * @param  string                              $order       Order
+     *
+     * @return \Illuminate\Database\Query\Builder          Modified query builder
+     */
+    public function scopeOrderRemaining($query, $order)
+    {
+        $order_by = 'consumables.qty - consumables_users_count ' . $order;
+        return $query->orderByRaw($order_by);
+    }
+
+    /**
      * Query builder scope to order on supplier
      *
      * @param  \Illuminate\Database\Query\Builder  $query  Query builder instance
@@ -453,6 +475,11 @@ class Consumable extends SnipeModel
     public function scopeOrderSupplier($query, $order)
     {
         return $query->leftJoin('suppliers', 'consumables.supplier_id', '=', 'suppliers.id')->orderBy('suppliers.name', $order);
+    }
+
+    public function scopeOrderByCreatedBy($query, $order)
+    {
+        return $query->leftJoin('users as users_sort', 'consumables.created_by', '=', 'users_sort.id')->select('consumables.*')->orderBy('users_sort.first_name', $order)->orderBy('users_sort.last_name', $order);
     }
 
 

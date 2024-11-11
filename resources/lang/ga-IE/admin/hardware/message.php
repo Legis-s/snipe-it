@@ -2,7 +2,7 @@
 
 return [
 
-    'undeployable' 		=> '<strong>Marradh: </strong> Tá an tsócmhainn seo marcáilte mar atá inghníomhaithe faoi láthair. Má d\'athraigh an stádas seo, déan an stádas sócmhainne a nuashonrú.',
+    'undeployable' 		=> '<strong>Warning: </strong> This asset has been marked as currently undeployable. If this status has changed, please update the asset status.',
     'does_not_exist' 	=> 'Níl sócmhainn ann.',
     'does_not_exist_var'=> 'Asset with tag :asset_tag not found.',
     'no_tag' 	        => 'No asset tag provided.',
@@ -14,6 +14,8 @@ return [
         'error'   		=> 'Níor cruthaíodh sócmhainn, déan iarracht arís. :(',
         'success' 		=> 'Cruthaíodh sócmhainn go rathúil. :)',
         'success_linked' => 'Asset with tag :tag was created successfully. <strong><a href=":link" style="color: white;">Click here to view</a></strong>.',
+        'multi_success_linked' => 'Asset with tag :links was created successfully.|:count assets were created succesfully. :links.',
+        'partial_failure' => 'An asset was unable to be created. Reason: :failures|:count assets were unable to be created. Reasons: :failures',
     ],
 
     'update' => [
@@ -51,12 +53,14 @@ return [
     ],
 
     'import' => [
+        'import_button'         => 'Process Import',
         'error'                 => 'Níor iompórtáil roinnt míreanna i gceart.',
         'errorDetail'           => 'Níor allmhairíodh na Míreanna seo a leanas mar gheall ar earráidí.',
         'success'               => 'Tá do chomhad iompórtáilte',
         'file_delete_success'   => 'Tá do chomhad scriosta go rathúil',
         'file_delete_error'      => 'Níorbh fhéidir an comhad a scriosadh',
         'file_missing' => 'The file selected is missing',
+        'file_already_deleted' => 'The file selected was already deleted',
         'header_row_has_malformed_characters' => 'One or more attributes in the header row contain malformed UTF-8 characters',
         'content_row_has_malformed_characters' => 'One or more attributes in the first row of content contain malformed UTF-8 characters',
     ],
@@ -75,6 +79,11 @@ return [
         'user_does_not_exist' => 'Tá an úsáideoir neamhbhailí. Arís, le d\'thoil.',
         'not_available' => 'Níl an tsócmhainn sin ar fáil le haghaidh seiceáil!',
         'no_assets_selected' => 'You must select at least one asset from the list',
+    ],
+
+    'multi-checkout' => [
+        'error'   => 'Asset was not checked out, please try again|Assets were not checked out, please try again',
+        'success' => 'Asset checked out successfully.|Assets checked out successfully.',
     ],
 
     'checkin' => [

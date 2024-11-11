@@ -20,7 +20,7 @@ class ReportsController extends Controller
     {
         $this->authorize('reports.view');
 
-        $actionlogs = Actionlog::with('item', 'user', 'admin', 'target', 'location');
+        $actionlogs = Actionlog::with('item', 'user', 'adminuser', 'target', 'location');
 
         if ($request->filled('search')) {
             $actionlogs = $actionlogs->TextSearch(e($request->input('search')));
@@ -44,21 +44,6 @@ class ReportsController extends Controller
             });
         }
 
-        if ($request->filled('action_type')) {
-            $actionlogs = $actionlogs->where('action_type', '=', $request->input('action_type'))->orderBy('created_at', 'desc');
-        }
-
-        if ($request->filled('user_id')) {
-            $actionlogs = $actionlogs->where('user_id', '=', $request->input('user_id'));
-        }
-
-        if ($request->filled('action_source')) {
-            $actionlogs = $actionlogs->where('action_source', '=', $request->input('action_source'))->orderBy('created_at', 'desc');
-        }
-
-        if ($request->filled('remote_ip')) {
-            $actionlogs = $actionlogs->where('remote_ip', '=', $request->input('remote_ip'))->orderBy('created_at', 'desc');
-        }
 
         if ($request->filled('uploads')) {
             $actionlogs = $actionlogs->whereNotNull('filename')->orderBy('created_at', 'desc');
@@ -68,14 +53,17 @@ class ReportsController extends Controller
             'id',
             'created_at',
             'target_id',
-            'user_id',
+            'created_by',
             'accept_signature',
             'action_type',
             'note',
 //            'photos',
             'remote_ip',
             'user_agent',
+            'target_type',
+            'item_type',
             'action_source',
+            'action_date',
         ];
 
 
@@ -84,11 +72,19 @@ class ReportsController extends Controller
         $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
 
-        $sort = in_array($request->input('sort'), $allowed_columns) ? e($request->input('sort')) : 'created_at';
         $order = ($request->input('order') == 'asc') ? 'asc' : 'desc';
 
+        switch ($request->input('sort')) {
+            case 'created_by':
+                $actionlogs->OrderByCreatedBy($order);
+                break;
+            default:
+                $sort = in_array($request->input('sort'), $allowed_columns) ? e($request->input('sort')) : 'created_at';
+                $actionlogs = $actionlogs->orderBy($sort, $order);
+                break;
+        }
 
-        $actionlogs = $actionlogs->orderBy($sort, $order)->skip($offset)->take($limit)->get();
+        $actionlogs = $actionlogs->skip($offset)->take($limit)->get();
 
         return response()->json((new ActionlogsTransformer)->transformActionlogs($actionlogs, $total), 200, ['Content-Type' => 'application/json;charset=utf8'], JSON_UNESCAPED_UNICODE);
     }

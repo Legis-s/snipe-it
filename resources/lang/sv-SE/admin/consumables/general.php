@@ -8,4 +8,5 @@ return array(
     'remaining' 			            => 'Återstående',
     'total' 			                => 'Totalt',
     'update'                            => 'Uppdatera förbrukningsvara',
+    'inventory_warning'                 => 'Lagret av denna förbrukningsvara är under minimiantal :min_count',
 );

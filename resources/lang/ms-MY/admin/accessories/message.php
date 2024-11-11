@@ -25,8 +25,12 @@ return array(
      'checkout' => array(
         'error'   		=> 'Aksesori tidak diperiksa, sila cuba lagi',
         'success' 		=> 'Aksesori diperiksa dengan jayanya.',
-        'unavailable'   => 'Accessory is not available for checkout. Check quantity available',
-        'user_does_not_exist' => 'Pengguna itu tidak sah. Sila cuba lagi.'
+        'unavailable'   => 'Tiada aksesori untuk dikeluarkan. Sila periksa kuantiti sedia ada',
+        'user_does_not_exist' => 'Pengguna itu tidak sah. Sila cuba lagi.',
+         'checkout_qty' => array(
+            'lte'  => 'There is currently only one available accessory of this type, and you are trying to check out :checkout_qty. Please adjust the checkout quantity or the total stock of this accessory and try again.|There are :number_currently_remaining total available accessories, and you are trying to check out :checkout_qty. Please adjust the checkout quantity or the total stock of this accessory and try again.',
+            ),
+           
     ),
 
     'checkin' => array(

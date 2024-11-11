@@ -143,6 +143,8 @@ class ActionlogsTransformer
                 if ($actionlog->item) {
                     if ($actionlog->itemType() == 'asset') {
                         $file_url = route('show/assetfile', ['assetId' => $actionlog->item->id, 'fileId' => $actionlog->id]);
+                    } elseif ($actionlog->itemType() == 'accessory') {
+                        $file_url = route('show.accessoryfile', ['accessoryId' => $actionlog->item->id, 'fileId' => $actionlog->id]);
                     } elseif ($actionlog->itemType() == 'license') {
                         $file_url = route('show.licensefile', ['licenseId' => $actionlog->item->id, 'fileId' => $actionlog->id]);
                     } elseif ($actionlog->itemType() == 'user') {
@@ -160,7 +162,6 @@ class ActionlogsTransformer
                 [
                     'url' => $file_url,
                     'filename' => $actionlog->filename,
-                    'inlineable' => (bool) Helper::show_file_inline($actionlog->filename),
                 ] : null,
 
             'item' => ($actionlog->item) ? [
@@ -178,11 +179,17 @@ class ActionlogsTransformer
             'next_audit_date' => ($actionlog->itemType()=='asset') ? Helper::getFormattedDateObject($actionlog->calcNextAuditDate(null, $actionlog->item), 'date'): null,
             'days_to_next_audit' => $actionlog->daysUntilNextAudit($settings->audit_interval, $actionlog->item),
             'action_type'   => $actionlog->present()->actionType(),
-            'admin' => ($actionlog->admin) ? [
-                'id' => (int) $actionlog->admin->id,
-                'name' => e($actionlog->admin->getFullNameAttribute()),
-                'first_name'=> e($actionlog->admin->first_name),
-                'last_name'=> e($actionlog->admin->last_name)
+            'admin' => ($actionlog->adminuser) ? [
+                'id' => (int) $actionlog->adminuser->id,
+                'name' => e($actionlog->adminuser->getFullNameAttribute()),
+                'first_name'=> e($actionlog->adminuser->first_name),
+                'last_name'=> e($actionlog->adminuser->last_name)
+            ] : null,
+            'created_by' => ($actionlog->adminuser) ? [
+                'id' => (int) $actionlog->adminuser->id,
+                'name' => e($actionlog->adminuser->getFullNameAttribute()),
+                'first_name'=> e($actionlog->adminuser->first_name),
+                'last_name'=> e($actionlog->adminuser->last_name)
             ] : null,
             'target' => ($actionlog->target) ? [
                 'id' => (int) $actionlog->target->id,
@@ -208,11 +215,11 @@ class ActionlogsTransformer
 
 
 
-    public function transformCheckedoutActionlog (Collection $accessories_users, $total)
+    public function transformCheckedoutActionlog (Collection $accessories_checkout, $total)
     {
 
         $array = array();
-        foreach ($accessories_users as $user) {
+        foreach ($accessories_checkout as $user) {
             $array[] = (new UsersTransformer)->transformUser($user);
         }
         return (new DatatablesTransformer)->transformDatatables($array, $total);
@@ -259,7 +266,7 @@ class ActionlogsTransformer
 
             $clean_meta['rtd_location_id']['old'] = $clean_meta['rtd_location_id']['old'] ? "[id: ".$clean_meta['rtd_location_id']['old']."] ". $oldRtdName : '';
             $clean_meta['rtd_location_id']['new'] = $clean_meta['rtd_location_id']['new'] ? "[id: ".$clean_meta['rtd_location_id']['new']."] ". $newRtdName : '';
-            $clean_meta['Default Location'] = $clean_meta['rtd_location_id'];
+            $clean_meta[trans('admin/hardware/form.default_location')] = $clean_meta['rtd_location_id'];
             unset($clean_meta['rtd_location_id']);
         }
 
@@ -275,7 +282,7 @@ class ActionlogsTransformer
 
             $clean_meta['location_id']['old'] = $clean_meta['location_id']['old'] ? "[id: ".$clean_meta['location_id']['old']."] ". $oldLocationName : '';
             $clean_meta['location_id']['new'] = $clean_meta['location_id']['new'] ? "[id: ".$clean_meta['location_id']['new']."] ". $newLocationName : '';
-            $clean_meta['Current Location'] = $clean_meta['location_id'];
+            $clean_meta[trans('admin/locations/message.current_location')] = $clean_meta['location_id'];
             unset($clean_meta['location_id']);
         }
 
@@ -290,7 +297,7 @@ class ActionlogsTransformer
             $clean_meta['model_id']['old'] = "[id: ".$clean_meta['model_id']['old']."] ".$oldModelName;
             $clean_meta['model_id']['new'] = "[id: ".$clean_meta['model_id']['new']."] ".$newModelName; /** model is required at asset creation */
 
-            $clean_meta['Model'] = $clean_meta['model_id'];
+            $clean_meta[trans('admin/hardware/form.model')] = $clean_meta['model_id'];
             unset($clean_meta['model_id']);
         }
         if(array_key_exists('company_id', $clean_meta)) {
@@ -303,7 +310,7 @@ class ActionlogsTransformer
 
             $clean_meta['company_id']['old'] = $clean_meta['company_id']['old'] ? "[id: ".$clean_meta['company_id']['old']."] ". $oldCompanyName : trans('general.unassigned');
             $clean_meta['company_id']['new'] = $clean_meta['company_id']['new'] ? "[id: ".$clean_meta['company_id']['new']."] ". $newCompanyName : trans('general.unassigned');
-            $clean_meta['Company'] = $clean_meta['company_id'];
+            $clean_meta[trans('general.company')] = $clean_meta['company_id'];
             unset($clean_meta['company_id']);
         }
         if(array_key_exists('supplier_id', $clean_meta)) {
@@ -316,7 +323,7 @@ class ActionlogsTransformer
 
             $clean_meta['supplier_id']['old'] = $clean_meta['supplier_id']['old'] ? "[id: ".$clean_meta['supplier_id']['old']."] ". $oldSupplierName : trans('general.unassigned');
             $clean_meta['supplier_id']['new'] = $clean_meta['supplier_id']['new'] ? "[id: ".$clean_meta['supplier_id']['new']."] ". $newSupplierName : trans('general.unassigned');
-            $clean_meta['Supplier'] = $clean_meta['supplier_id'];
+            $clean_meta[trans('general.supplier')] = $clean_meta['supplier_id'];
             unset($clean_meta['supplier_id']);
         }
         if(array_key_exists('status_id', $clean_meta)) {
@@ -329,11 +336,11 @@ class ActionlogsTransformer
 
             $clean_meta['status_id']['old'] = $clean_meta['status_id']['old'] ? "[id: ".$clean_meta['status_id']['old']."] ". $oldStatusName : trans('general.unassigned');
             $clean_meta['status_id']['new'] = $clean_meta['status_id']['new'] ? "[id: ".$clean_meta['status_id']['new']."] ". $newStatusName : trans('general.unassigned');
-            $clean_meta['Status'] = $clean_meta['status_id'];
+            $clean_meta[trans('general.status_label')] = $clean_meta['status_id'];
             unset($clean_meta['status_id']);
         }
         if(array_key_exists('asset_eol_date', $clean_meta)) {
-            $clean_meta['EOL date'] = $clean_meta['asset_eol_date'];
+            $clean_meta[trans('admin/hardware/form.eol_date')] = $clean_meta['asset_eol_date'];
             unset($clean_meta['asset_eol_date']);
         }
 
