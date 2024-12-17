@@ -909,13 +909,11 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
         Route::resource('settings', 
         Api\SettingsController::class,
         ['names' => [
-                'index' => 'api.settings.index',
                 'show' => 'api.settings.show',
                 'update' => 'api.settings.update',
                 'store' => 'api.settings.store',
-                'destroy' => 'api.settings.destroy',
             ],
-        'except' => ['create', 'edit'],
+        'except' => ['create', 'edit', 'index', 'destroy'],
         'parameters' => ['setting' => 'setting_id'],
         ]
         ); // end settings API
@@ -1281,6 +1279,16 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
                     'payload' => null,
                 ], 404);
         }); // end fallback routes
+
+        /**
+         * Generate label routes
+         */
+        Route::post('hardware/labels', [
+            Api\AssetsController::class,
+            'getLabels'
+        ])->name('api.assets.labels');
+        // end generate label routes
+
 
 
 

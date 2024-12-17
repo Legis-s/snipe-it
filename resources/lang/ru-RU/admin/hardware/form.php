@@ -60,5 +60,6 @@ return [
     'processing_spinner' => 'Обработка... (Это может занять некоторое время на больших файлах)',
     'optional_infos'  => 'Дополнительная информация',
     'order_details'   => 'Информация, связанная с заказом',
-    'bitrix_task_id' => 'Bitrix задача'
+    'calc_eol'    => 'If nulling the EOL date, use automatic EOL calculation based on the purchase date and EOL rate.',
+    'bitrix_task_id' => 'Bitrix задача',
 ];

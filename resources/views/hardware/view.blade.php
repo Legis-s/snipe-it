@@ -1574,7 +1574,7 @@
                                 <x-filestable
                                         filepath="private_uploads/assets/"
                                         showfile_routename="show/assetfile"
-                                        deletefile_routename="delete/modelfile"
+                                        deletefile_routename="delete/assetfile"
                                         :object="$asset" />
                             </div> <!-- /.col-md-12 -->
                         </div> <!-- /.row -->
@@ -1588,7 +1588,7 @@
                                 <x-filestable
                                         filepath="private_uploads/assetmodels/"
                                         showfile_routename="show/modelfile"
-                                        deletefile_routename="userfile.destroy"
+                                        deletefile_routename="delete/modelfile"
                                         :object="$asset->model" />
 
                             </div> <!-- /.col-md-12 -->

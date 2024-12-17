@@ -115,6 +115,11 @@ class SlackSettingsForm extends Component
         }
     }
 
+    public function updatedwebhookEndpoint()
+    {
+        $this->teams_webhook_deprecated = !Str::contains($this->webhook_endpoint, 'workflows');
+    }
+
     private function isButtonDisabled() {
             if (empty($this->webhook_endpoint)) {
                 $this->isDisabled = 'disabled';
@@ -219,7 +224,7 @@ class SlackSettingsForm extends Component
 
         try {
             $response = Http::withHeaders([
-                'content-type' => 'applications/json',
+                'content-type' => 'application/json',
             ])->post($this->webhook_endpoint,
                 $payload)->throw();
 
@@ -254,7 +259,7 @@ class SlackSettingsForm extends Component
                         "text" => trans('general.webhook_test_msg', ['app' => $this->webhook_name]),
                     ];
                 $response = Http::withHeaders([
-                    'content-type' => 'applications/json',
+                    'content-type' => 'application/json',
                 ])->post($this->webhook_endpoint,
                     $payload)->throw();
             }
@@ -264,7 +269,7 @@ class SlackSettingsForm extends Component
                  $notification->success()->sendMessage($message);
 
                  $response = Http::withHeaders([
-                     'content-type' => 'applications/json',
+                     'content-type' => 'application/json',
                  ])->post($this->webhook_endpoint);
              }
 
