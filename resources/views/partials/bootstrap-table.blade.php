@@ -1357,10 +1357,11 @@
          */
 
     $(function () {
+
         $('#bulkEdit').click(function () {
             var selectedIds = $('.snipe-table').bootstrapTable('getSelections');
-            $.each(selectedIds, function(key,value) {
-                $( "#bulkForm" ).append($('<input type="hidden" name="ids[' + value.id + ']" value="' + value.id + '">' ));
+            $.each(selectedIds, function (key, value) {
+                $("#bulkForm").append($('<input type="hidden" name="ids[' + value.id + ']" value="' + value.id + '">'));
             });
         });
 
@@ -1382,7 +1383,7 @@
                                 }
                             });
                         } else {
-                            console.log(data) ;
+                            console.log(data);
                         }
                     },
                     error: function () {
@@ -1390,20 +1391,6 @@
                     }
                 });
             },
-            {{--'click .closesell': function (e, value, row, index) {--}}
-            {{--    $.ajax({--}}
-            {{--        url: '/api/v1/hardware/' + row.id + '/closesell',--}}
-            {{--        --}}{{--url: '{{ route('api.purchases.resend', ['id'=> row.id]) }}',--}}
-            {{--        method: "POST",--}}
-            {{--        headers: {--}}
-            {{--            "X-Requested-With": 'XMLHttpRequest',--}}
-            {{--            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')--}}
-            {{--        },--}}
-            {{--        success: function () {--}}
-            {{--            $(".table").bootstrapTable('refresh');--}}
-            {{--        }--}}
-            {{--    });--}}
-            {{--},--}}
             'click .inventory': function (e, value, row, index) {
 
                 Swal.fire({
@@ -1559,7 +1546,7 @@
                         },
                         dataType: 'json',
                         success: function (data) {
-                            $(".table").bootstrapTable('refresh',{"silent":true});
+                            $(".table").bootstrapTable('refresh', {"silent": true});
                         },
                     });
                 } else {
@@ -1661,8 +1648,9 @@
                         }
                     });
                 }
-            }
-        }
+            },
+        };
+    });
 
     $(function() {
 

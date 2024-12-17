@@ -164,12 +164,13 @@ class SyncDevices extends Command
                 $dateEnrol->sub(new DateInterval('PT3H'));
                 $enrollTime =  $dateEnrol;
             }
-            $publicIp= null;
+            $publicIp = null;
             if (isset($phone["publicIp"])){
                 $publicIp =  $phone["publicIp"];
             }
 
-            $publicIp= null;
+            $publicIp = null;
+            $anyDesk = null;
             if (isset($phone["custom1"])){
                 $anyDesk =  $phone["custom1"];
             }

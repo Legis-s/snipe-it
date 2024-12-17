@@ -94,6 +94,7 @@
                           </span>
                         </a>
                     </li>
+
                     <li>
                         <a href="#consumables" data-toggle="tab">
                             <span class="hidden-lg hidden-md">
@@ -102,6 +103,7 @@
                             <span class="hidden-xs hidden-sm">{{ trans('general.consumables') }}</span>
                         </a>
                     </li>
+
                     <li>
                         <a href="#history" data-toggle="tab">
                           <span class="hidden-lg hidden-md">
@@ -194,6 +196,22 @@
                                     @endif
                                 </div>
 
+                                <div class="col-md-12 text-center">
+                                    @if ($asset->inventory_items->count() > 0)
+
+                                        @foreach ($asset->inventory_items->reverse() as $inventory_item)
+                                            @if ($inventory_item->photo)
+                                                <div class="text-center col-md-12" style="padding-bottom: 15px;">
+                                                    <a href="{{$inventory_item->photo_url() }}" data-toggle="lightbox" data-type="image">
+                                                        <img src="{{$inventory_item->photo_url() }}" class="assetimg img-responsive" alt="{{ $asset->getDisplayNameAttribute() }}">
+                                                    </a>
+                                                </div>
+                                                @break
+                                            @endif
+                                        @endforeach
+                                    @endif
+                                </div>
+
 
                                 @if ($asset->deleted_at=='')
                                     @can('update', $asset)
@@ -228,6 +246,22 @@
                                                     </a>
                                                     </span>
                                             </div>
+                                                    <div class="col-md-12 hidden-print" style="padding-top: 5px;">
+                                                        <span class="tooltip-wrapper"{!! (!$asset->model ? ' data-tooltip="true" title="'.trans('admin/hardware/general.model_invalid_fix').'"' : '') !!}>
+                                                            <a href="{{ route('hardware.sell.create', $asset->id)  }}" class="btn btn-sm bg-maroon btn-social btn-block hidden-print{{ (!$asset->model ? ' disabled' : '') }}">
+                                                                <x-icon type="checkout" />
+                                                            {{ trans('general.sell') }}
+                                                            </a>
+                                                        </span>
+                                                    </div>
+                                                    <div class="col-md-12 hidden-print" style="padding-top: 5px;">
+                                                        <span class="tooltip-wrapper"{!! (!$asset->model ? ' data-tooltip="true" title="'.trans('admin/hardware/general.model_invalid_fix').'"' : '') !!}>
+                                                            <a href="{{ route('hardware.rent.create', $asset->id)  }}" class="btn btn-sm bg-maroon btn-social btn-block hidden-print{{ (!$asset->model ? ' disabled' : '') }}">
+                                                                <x-icon type="checkout" />
+                                                                  {{ trans('general.rent') }}
+                                                            </a>
+                                                        </span>
+                                                    </div>
                                         @endcan
                                     @endif
                                 @endif
@@ -268,6 +302,12 @@
                                         <x-icon type="assets" />
                                         {{ trans_choice('button.generate_labels', 1) }}</button>
                                         {{ Form::close() }}
+                                </div>
+
+                                <div class="col-md-12 hidden-print" style="padding-top: 5px;">
+                                    <button class="btn btn-block btn-social btn-sm btn-default" id="print_tag">
+                                        <x-icon type="assets" />
+                                        Напечатать этикетку</button>
                                 </div>
 
                                 @can('delete', $asset)
@@ -755,18 +795,19 @@
                                             </div>
                                         @endforeach
                                     @endif
-
                                         @if ($asset->purchase)
                                             <div class="row">
-                                                <div class="col-md-2">
+                                                <div class="col-md-3">
                                                     <strong>
                                                         {{ trans('general.purchase') }}
                                                     </strong>
                                                 </div>
-                                                <div class="col-md-6">
-                                                    <a href="{{ route('purchases.show', $asset->purchase->id) }}">
-                                                        {{ $asset->purchase->invoice_number }}
-                                                    </a>
+                                                <div class="col-md-9">
+                                                    @if ($asset->purchase)
+                                                        <a href="{{ route('purchases.show', $asset->purchase->id) }}">
+                                                            {{ $asset->purchase->invoice_number }}
+                                                        </a>
+                                                    @endif
                                                 </div>
                                             </div>
                                         @endif
@@ -827,12 +868,12 @@
                                     @endif
 
                                         <div class="row">
-                                            <div class="col-md-2">
+                                            <div class="col-md-3">
                                                 <strong>
                                                     Состояние
                                                 </strong>
                                             </div>
-                                            <div class="col-md-6">
+                                            <div class="col-md-9">
                                                 @if ($asset->quality == 5)
                                                     <i class="fas fa-star" aria-hidden="true"></i><i class="fas fa-star"
                                                                                                     aria-hidden="true"></i>
@@ -875,12 +916,12 @@
                                         </div>
                                         @if ($asset->depreciable_cost)
                                             <div class="row">
-                                                <div class="col-md-2">
+                                                <div class="col-md-3">
                                                     <strong>
                                                         Остаточная стоимость
                                                     </strong>
                                                 </div>
-                                                <div class="col-md-6">
+                                                <div class="col-md-9">
                                                     @if (($asset->id) && ($asset->location))
                                                         {{ $asset->location->currency }}
                                                     @elseif (($asset->id) && ($asset->location))
@@ -1209,188 +1250,6 @@
                         </div><!-- end info-stack-container -->
                         </div> <!--/.row-->
                     </div><!-- /.tab-pane -->
-
-                                        </div>
-                                    </div>
-                                </div> <!-- end row-striped -->
-
-                            </div><!-- /col-md-8 -->
-
-                            <div class="col-md-4">
-
-                                @if (($asset->image) || (($asset->model) && ($asset->model->image!='')))
-                                    <div class="text-center col-md-12" style="padding-bottom: 15px;">
-                                        <a href="{{ ($asset->getImageUrl()) ? $asset->getImageUrl() : null }}" data-toggle="lightbox">
-                                            <img src="{{ ($asset->getImageUrl()) ? $asset->getImageUrl() : null }}" class="assetimg img-responsive" alt="{{ $asset->getDisplayNameAttribute() }}">
-                                        </a>
-                                    </div>
-                                @else
-                                    <!-- generic image goes here -->
-                                @endif
-
-                                @if ($asset->inventory_items->count() > 0)
-
-                                        @foreach ($asset->inventory_items->reverse() as $inventory_item)
-                                            @if ($inventory_item->photo)
-                                                <div class="text-center col-md-12" style="padding-bottom: 15px;">
-                                                    <a href="{{$inventory_item->photo_url() }}" data-toggle="lightbox">
-                                                        <img src="{{ $inventory_item->photo_url()}}" class="assetimg img-responsive">
-                                                    </a>
-                                                </div>
-                                                @break
-                                            @endif
-                                        @endforeach
-                                @endif
-
-                                    <!-- Start side button column -->
-
-                                    @if (($asset->assetstatus) && ($asset->assetstatus->deployable=='1'))
-                                        @if (($asset->assigned_to != '') && ($asset->deleted_at==''))
-                                            @can('checkin', \App\Models\Asset::class)
-                                                <div class="col-md-12">
-                                                    <span class="tooltip-wrapper"{!! (!$asset->model ? ' data-tooltip="true" title="'.trans('admin/hardware/general.model_invalid_fix').'"' : '') !!}>
-                                                        <a role="button" href="{{ route('hardware.checkin.create', $asset->id) }}" class="btn btn-sm btn-primary btn-block hidden-print{{ (!$asset->model ? ' disabled' : '') }}">
-                                                        {{ trans('admin/hardware/general.checkin') }}
-                                                    </a>
-                                                    </span>
-                                                </div>
-                                            @endcan
-                                        @elseif (($asset->assigned_to == '') && ($asset->deleted_at==''))
-                                            @can('checkout', \App\Models\Asset::class)
-                                                <div class="col-md-12" style="padding-top: 5px;">
-                                                    <span class="tooltip-wrapper"{!! (!$asset->model ? ' data-tooltip="true" title="'.trans('admin/hardware/general.model_invalid_fix').'"' : '') !!}>
-                                                        <a href="{{ route('hardware.checkout.create', $asset->id)  }}" class="btn btn-sm btn-primary btn-block hidden-print{{ (!$asset->model ? ' disabled' : '') }}">
-                                                        {{ trans('admin/hardware/general.checkout') }}
-                                                    </a>
-                                                    </span>
-                                                </div>
-                                                <div class="col-md-12" style="padding-top: 5px;">
-                                                    <a href="{{ route('hardware.sell.create', $asset->id)  }}" style="width: 100%;" class="btn btn-sm btn-primary hidden-print">
-                                                        {{ trans('general.sell') }}
-                                                    </a>
-                                                </div>
-                                                    <div class="col-md-12" style="padding-top: 5px;">
-                                                    <a href="{{ route('hardware.rent.create', $asset->id)  }}" style="width: 100%;" class="btn btn-sm btn-primary hidden-print">
-                                                        {{ trans('general.rent') }}
-                                                    </a>
-                                                    </div>
-                                            @endcan
-                                        @endif
-                                    @endif
-
-
-                                    @can('update', $asset)
-                                        @if ($asset->deleted_at=='')
-                                        <div class="col-md-12" style="padding-top: 5px;">
-                                            <a href="{{ route('hardware.edit', $asset->id) }}" class="btn btn-sm btn-primary btn-block hidden-print">
-                                                {{ trans('admin/hardware/general.edit') }}
-                                            </a>
-                                        </div>
-                                        @endif
-                                    @endcan
-
-                                    @can('create', $asset)
-                                        <div class="col-md-12" style="padding-top: 5px;">
-                                            <a href="{{ route('clone/hardware', $asset->id) }}" class="btn btn-sm btn-primary btn-block hidden-print">
-                                                {{ trans('admin/hardware/general.clone') }}
-                                            </a>
-                                        </div>
-                                    @endcan
-
-                                    @can('audit', \App\Models\Asset::class)
-                                        <div class="col-md-12" style="padding-top: 5px;">
-                                            <span class="tooltip-wrapper"{!! (!$asset->model ? ' data-tooltip="true" title="'.trans('admin/hardware/general.model_invalid_fix').'"' : '') !!}>
-                                                <a href="{{ route('asset.audit.create', $asset->id)  }}" class="btn btn-sm btn-primary btn-block hidden-print{{ (!$asset->model ? ' disabled' : '') }}">
-                                                 {{ trans('general.audit') }}
-                                            </a>
-                                            </span>
-                                        </div>
-                                    @endcan
-
-                                    @can('delete', $asset)
-                                        <div class="col-md-12" style="padding-top: 30px; padding-bottom: 30px;">
-                                            @if ($asset->deleted_at=='')
-                                                <button class="btn btn-sm btn-block btn-danger delete-asset" data-toggle="modal" data-title="{{ trans('general.delete') }}" data-content="{{ trans('general.sure_to_delete_var', ['item' => $asset->asset_tag]) }}" data-target="#dataConfirmModal">{{ trans('general.delete') }}
-                                                </button>
-                                                <span class="sr-only">{{ trans('general.delete') }}</span>
-                                            @else
-                                                <form method="POST" action="{{ route('restore/hardware', ['assetId' => $asset->id]) }}">
-                                                    @csrf
-                                                    <button class="btn btn-sm btn-warning btn-block">{{ trans('general.restore') }}</button>
-                                                </form>
-                                           @endif
-                                        </div>
-                                    @endcan
-
-                                @if (($asset->assignedTo) && ($asset->deleted_at==''))
-                                    <div style="text-align: left">
-                                        <h2>{{ trans('admin/hardware/form.checkedout_to') }}</h2>
-                                        <p>
-                                        @if($asset->checkedOutToUser()) <!-- Only users have avatars currently-->
-                                            <img src="{{ $asset->assignedTo->present()->gravatar() }}" class="user-image-inline" alt="{{ $asset->assignedTo->present()->fullName() }}">
-                                            @endif
-                                        </p>
-                                            {!! $asset->assignedTo->present()->glyph() . ' ' .$asset->assignedTo->present()->nameUrl() !!}
-                                        </p>
-
-                                        <ul class="list-unstyled" style="line-height: 25px;">
-                                            @if ((isset($asset->assignedTo->email)) && ($asset->assignedTo->email!=''))
-                                                <li>
-                                                    <i class="far fa-envelope" aria-hidden="true"></i>
-                                                    <a href="mailto:{{ $asset->assignedTo->email }}">{{ $asset->assignedTo->email }}</a>
-                                                </li>
-                                            @endif
-
-                                            @if ((isset($asset->assignedTo)) && ($asset->assignedTo->phone!=''))
-                                                <li>
-                                                    <i class="fas fa-phone" aria-hidden="true"></i>
-                                                    <a href="tel:{{ $asset->assignedTo->phone }}">{{ $asset->assignedTo->phone }}</a>
-                                                </li>
-                                            @endif
-
-                                            @if((isset($asset->assignedTo)) && ($asset->assignedTo->department))
-                                                <li>{{ trans('admin/hardware/general.user_department') }}: {{ $asset->assignedTo->department->name}}</li>
-                                            @endif
-
-                                            @if (isset($asset->location))
-                                                <li><i class="fas fa-map-marker-alt" aria-hidden="true"></i> {{ $asset->location->name }}</li>
-                                                <li>{{ $asset->location->address }}
-                                                    @if ($asset->location->address2!='')
-                                                        {{ $asset->location->address2 }}
-                                                    @endif
-                                                </li>
-
-                                                <li>{{ $asset->location->city }}
-                                                    @if (($asset->location->city!='') && ($asset->location->state!=''))
-                                                        ,
-                                                    @endif
-                                                    {{ $asset->location->state }} {{ $asset->location->zip }}
-                                                </li>
-                                            @endif
-                                                <li>
-                                                    <i class="fas fa-calendar"></i> {{ trans('admin/hardware/form.checkout_date') }}: {{ Helper::getFormattedDateObject($asset->last_checkout, 'date', false) }}
-                                                </li>
-                                            @if (isset($asset->expected_checkin))
-                                                <li>
-                                                    <i class="fas fa-calendar"></i> {{ trans('admin/hardware/form.expected_checkin') }}: {{ Helper::getFormattedDateObject($asset->expected_checkin, 'date', false) }}
-                                                </li>
-                                            @endif
-                                        </ul>
-                                    </div>
-
-                                @endif
-
-                                @if  ($snipeSettings->qr_code=='1')
-                                    <div class="col-md-12" style="padding-top: 15px;">
-                                        <img src="{{ config('app.url') }}/hardware/{{ $asset->id }}/qr_code" class="img-thumbnail pull-right" style="height: 100px; width: 100px; margin-right: 10px;" alt="QR code for {{ $asset->getDisplayNameAttribute() }}">
-                                    </div>
-                                @endif
-
-                            </div> <!-- div.col-md-4 -->
-                        </div><!-- /row -->
-                    </div><!-- /.tab-pane asset details -->
-
-
 
                     <div class="tab-pane fade" id="inventory">
                         <div class="row">
