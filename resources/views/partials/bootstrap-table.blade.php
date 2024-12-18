@@ -1356,303 +1356,299 @@
          * END CUSTOM
          */
 
-    $(function () {
-
-        $('#bulkEdit').click(function () {
-            var selectedIds = $('.snipe-table').bootstrapTable('getSelections');
-            $.each(selectedIds, function (key, value) {
-                $("#bulkForm").append($('<input type="hidden" name="ids[' + value.id + ']" value="' + value.id + '">'));
-            });
-        });
-
-        window.operateEvents = {
-            'click .print_label': function (e, value, row, index) {
-                $.ajax('http://localhost:8001/termal_print?text=' + row.asset_tag, {
-                    success: function (data, textStatus, xhr) {
-                        console.log(xhr.status);
-                        if (xhr.status === 200) {
-                            $.ajax({
-                                method: "POST",
-                                url: '/api/v1/hardware/' + row.id + '/inventory',
-                                headers: {
-                                    "X-Requested-With": 'XMLHttpRequest',
-                                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                                },
-                                success: function (data) {
-                                    $(".table").bootstrapTable('refresh');
-                                }
-                            });
-                        } else {
-                            console.log(data);
-                        }
-                    },
-                    error: function () {
-                        console.log("error");
-                    }
-                });
-            },
-            'click .inventory': function (e, value, row, index) {
-
-                Swal.fire({
-                    title: "Изменить тег актива <b>" + row.asset_tag + " </b>",
-                    // text: 'Do you want to continue',
-                    icon: 'question',
-                    input: "text",
-                    inputLabel: 'Новый тег',
-                    inputAttributes: {
-                        autocapitalize: 'on'
-                    },
-                    reverseButtons: true,
-                    showCancelButton: true,
-                    confirmButtonText: 'Подтвердить',
-                    cancelButtonText: 'Отменить',
-                }).then((result) => {
-                    if (result.isConfirmed) {
-
-                        var sendData = {
-                            asset_tag: result.value,
-                        };
-                        console.log("asset_tag: " + result.value);
+    window.operateEvents = {
+        'click .print_label': function (e, value, row, index) {
+            $.ajax('http://localhost:8001/termal_print?text=' + row.asset_tag, {
+                success: function (data, textStatus, xhr) {
+                    console.log(xhr.status);
+                    if (xhr.status === 200) {
                         $.ajax({
-                            type: 'POST',
+                            method: "POST",
                             url: '/api/v1/hardware/' + row.id + '/inventory',
                             headers: {
                                 "X-Requested-With": 'XMLHttpRequest',
                                 "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
                             },
-                            data: sendData,
-                            dataType: 'json',
                             success: function (data) {
                                 $(".table").bootstrapTable('refresh');
-                            },
+                            }
                         });
+                    } else {
+                        console.log(data);
                     }
-                });
-            },
-            'click .resend': function (e, value, row, index) {
-                $.ajax({
-                    url: '/api/v1/purchases/' + row.id + '/resend',
-                    {{--url: '{{ route('api.purchases.resend', ['id'=> row.id]) }}',--}}
-                    method: "POST",
-                    headers: {
-                        "X-Requested-With": 'XMLHttpRequest',
-                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function () {
-                        $(".table").bootstrapTable('refresh');
-                    }
-                });
-            },
-            'click .review': function (e, value, row, index) {
-                $.ajax({
-                    url: '/api/v1/hardware/' + row.id + '/review',
-                    method: "POST",
-                    headers: {
-                        "X-Requested-With": 'XMLHttpRequest',
-                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function () {
-                        $(".table").bootstrapTable('refresh');
-                        $.ajax({
-                            type: 'GET',
-                            url: "/api/v1/purchases/" + row.purchase_id,
-                            headers: {
-                                "X-Requested-With": 'XMLHttpRequest',
-                                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                            },
-                            dataType: 'json',
-                            success: function (data) {
-                                var status = data.status;
-                                var result = "";
-                                switch (status) {
-                                    case "inventory":
-                                        result = '<span class="label label-warning">В процессе инвентаризации</span>';
-                                        break;
-                                    case "in_payment":
-                                        result = '<span class="label label-primary">В оплате</span>';
-                                        break;
-                                    case "review":
-                                        result = '<span class="label label-warning">В процессе проверки</span>';
-                                        break;
-                                    case "finished":
-                                        result = '<span class="label label-success">Завершено</span>';
-                                        break;
-                                    case "rejected":
-                                        result = '<span class="label label-danger">Отклонено</span>';
-                                        break;
-                                    case "paid":
-                                        result = '<span class="label label-success">Оплачено</span>';
-                                        break;
-                                    case "inprogress":
-                                        result = '<span class="label label-primary">На согласовании</span>';
-                                        break;
-                                }
-                                $('.status_label').html(result);
+                },
+                error: function () {
+                    console.log("error");
+                }
+            });
+        },
+        'click .inventory': function (e, value, row, index) {
 
-                            },
-                        });
-                    }
-                });
-            },
-            'click .return': function (e, value, row, index) {
-                Swal.fire({
-                    title: "Вернуть - " + row.name + " " + row.assigned_to.name,
-                    // text: 'Do you want to continue',
-                    icon: 'question',
-                    input: "range",
-                    inputLabel: 'Количество',
-                    inputAttributes: {
-                        min: 1,
-                        max: row.quantity,
-                        step: 1
-                    },
-                    inputValue: 1,
-                    reverseButtons: true,
-                    showCancelButton: true,
-                    confirmButtonText: 'Подтвердить',
-                    cancelButtonText: 'Отменить',
-                }).then((result) => {
-                    if (result.isConfirmed) {
+            Swal.fire({
+                title: "Изменить тег актива <b>" + row.asset_tag + " </b>",
+                // text: 'Do you want to continue',
+                icon: 'question',
+                input: "text",
+                inputLabel: 'Новый тег',
+                inputAttributes: {
+                    autocapitalize: 'on'
+                },
+                reverseButtons: true,
+                showCancelButton: true,
+                confirmButtonText: 'Подтвердить',
+                cancelButtonText: 'Отменить',
+            }).then((result) => {
+                if (result.isConfirmed) {
 
-                        var sendData = {
-                            quantity: result.value,
-                            nds: row.nds,
-                            purchase_cost: row.purchase_cost,
-                        };
-                        $.ajax({
-                            type: 'POST',
-                            url: "/api/v1/consumableassignments/" + row.id + "/return",
-                            headers: {
-                                "X-Requested-With": 'XMLHttpRequest',
-                                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                            },
-                            data: sendData,
-                            dataType: 'json',
-                            success: function (data) {
-                                $(".table").bootstrapTable('refresh');
-                            },
-                        });
-                    }
-                });
-            },
-            'click .close_documents': function (e, value, row, index) {
-                if (row.contract) {
+                    var sendData = {
+                        asset_tag: result.value,
+                    };
+                    console.log("asset_tag: " + result.value);
                     $.ajax({
                         type: 'POST',
-                        url: "/api/v1/consumableassignments/" + row.id + "/close_documents",
+                        url: '/api/v1/hardware/' + row.id + '/inventory',
+                        headers: {
+                            "X-Requested-With": 'XMLHttpRequest',
+                            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                        },
+                        data: sendData,
+                        dataType: 'json',
+                        success: function (data) {
+                            $(".table").bootstrapTable('refresh');
+                        },
+                    });
+                }
+            });
+        },
+        'click .resend': function (e, value, row, index) {
+            $.ajax({
+                url: '/api/v1/purchases/' + row.id + '/resend',
+                {{--url: '{{ route('api.purchases.resend', ['id'=> row.id]) }}',--}}
+                method: "POST",
+                headers: {
+                    "X-Requested-With": 'XMLHttpRequest',
+                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function () {
+                    $(".table").bootstrapTable('refresh');
+                }
+            });
+        },
+        'click .review': function (e, value, row, index) {
+            $.ajax({
+                url: '/api/v1/hardware/' + row.id + '/review',
+                method: "POST",
+                headers: {
+                    "X-Requested-With": 'XMLHttpRequest',
+                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function () {
+                    $(".table").bootstrapTable('refresh');
+                    $.ajax({
+                        type: 'GET',
+                        url: "/api/v1/purchases/" + row.purchase_id,
                         headers: {
                             "X-Requested-With": 'XMLHttpRequest',
                             "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
                         },
                         dataType: 'json',
                         success: function (data) {
-                            $(".table").bootstrapTable('refresh', {"silent": true});
+                            var status = data.status;
+                            var result = "";
+                            switch (status) {
+                                case "inventory":
+                                    result = '<span class="label label-warning">В процессе инвентаризации</span>';
+                                    break;
+                                case "in_payment":
+                                    result = '<span class="label label-primary">В оплате</span>';
+                                    break;
+                                case "review":
+                                    result = '<span class="label label-warning">В процессе проверки</span>';
+                                    break;
+                                case "finished":
+                                    result = '<span class="label label-success">Завершено</span>';
+                                    break;
+                                case "rejected":
+                                    result = '<span class="label label-danger">Отклонено</span>';
+                                    break;
+                                case "paid":
+                                    result = '<span class="label label-success">Оплачено</span>';
+                                    break;
+                                case "inprogress":
+                                    result = '<span class="label label-primary">На согласовании</span>';
+                                    break;
+                            }
+                            $('.status_label').html(result);
+
                         },
-                    });
-                } else {
-                    Swal.fire({
-                        title: "Закрывающие документы - " + row.name + " " + row.assigned_to.name,
-                        // text: 'Do you want to continue',
-                        icon: 'question',
-                        html:
-                            '<select class="js-data-ajax" data-endpoint="contracts" data-placeholder="Выберите договор" name="assigned_contract" style="width: 100%" id="assigned_contract_contract_select" aria-label="assigned_contract">' +
-                            '<option value=""  role="option">Выберите договор</option>' +
-                            '</select>',
-                        reverseButtons: true,
-                        showCancelButton: true,
-                        confirmButtonText: 'Подтвердить',
-                        cancelButtonText: 'Отменить',
-                        preConfirm: () => {
-                            return [
-                                $('#assigned_contract_contract_select').val(),
-                            ]
-                        },
-                        didOpen: (toast) => {
-                            // Crazy select2 rich dropdowns with images!
-                            $('.js-data-ajax').each(function (i, item) {
-                                console.log("js-data-ajax")
-                                var link = $(item);
-                                var endpoint = link.data("endpoint");
-                                var select = link.data("select");
-                                link.select2({
-
-                                    /**
-                                     * Adds an empty placeholder, allowing every select2 instance to be cleared.
-                                     * This placeholder can be overridden with the "data-placeholder" attribute.
-                                     */
-                                    placeholder: '',
-                                    allowClear: true,
-
-                                    ajax: {
-
-                                        // the baseUrl includes a trailing slash
-                                        url: baseUrl + 'api/v1/' + endpoint + '/selectlist',
-                                        dataType: 'json',
-                                        delay: 250,
-                                        headers: {
-                                            "X-Requested-With": 'XMLHttpRequest',
-                                            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                                        },
-                                        data: function (params) {
-                                            var data = {
-                                                search: params.term,
-                                                page: params.page || 1,
-                                                assetStatusType: link.data("asset-status-type"),
-                                            };
-                                            return data;
-                                        },
-                                        processResults: function (data, params) {
-
-                                            params.page = params.page || 1;
-
-                                            var answer = {
-                                                results: data.items,
-                                                pagination: {
-                                                    more: "true" //(params.page  < data.page_count)
-                                                }
-                                            };
-
-                                            return answer;
-                                        },
-                                        cache: true
-                                    },
-                                    escapeMarkup: function (markup) {
-                                        return markup;
-                                    }, // let our custom formatter work
-                                    templateResult: formatDatalist,
-                                    templateSelection: formatDataSelection
-                                });
-
-                            });
-                        }
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            var contract_id = result.value[0];
-                            var sendData = {
-                                contract_id: contract_id,
-                            };
-
-                            $.ajax({
-                                type: 'POST',
-                                url: "/api/v1/consumableassignments/" + row.id + "/close_documents",
-                                headers: {
-                                    "X-Requested-With": 'XMLHttpRequest',
-                                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                                },
-                                data: sendData,
-                                dataType: 'json',
-                                success: function (data) {
-                                    $(".table").bootstrapTable('refresh');
-                                },
-                            });
-                        }
                     });
                 }
-            },
-        };
-    });
+            });
+        },
+        'click .return': function (e, value, row, index) {
+            Swal.fire({
+                title: "Вернуть - " + row.name + " " + row.assigned_to.name,
+                // text: 'Do you want to continue',
+                icon: 'question',
+                input: "range",
+                inputLabel: 'Количество',
+                inputAttributes: {
+                    min: 1,
+                    max: row.quantity,
+                    step: 1
+                },
+                inputValue: 1,
+                reverseButtons: true,
+                showCancelButton: true,
+                confirmButtonText: 'Подтвердить',
+                cancelButtonText: 'Отменить',
+            }).then((result) => {
+                if (result.isConfirmed) {
+
+                    var sendData = {
+                        quantity: result.value,
+                        nds: row.nds,
+                        purchase_cost: row.purchase_cost,
+                    };
+                    $.ajax({
+                        type: 'POST',
+                        url: "/api/v1/consumableassignments/" + row.id + "/return",
+                        headers: {
+                            "X-Requested-With": 'XMLHttpRequest',
+                            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                        },
+                        data: sendData,
+                        dataType: 'json',
+                        success: function (data) {
+                            $(".table").bootstrapTable('refresh');
+                        },
+                    });
+                }
+            });
+        },
+        'click .close_documents': function (e, value, row, index) {
+            if (row.contract) {
+                $.ajax({
+                    type: 'POST',
+                    url: "/api/v1/consumableassignments/" + row.id + "/close_documents",
+                    headers: {
+                        "X-Requested-With": 'XMLHttpRequest',
+                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        $(".table").bootstrapTable('refresh', {"silent": true});
+                    },
+                });
+            } else {
+                Swal.fire({
+                    title: "Закрывающие документы - " + row.name + " " + row.assigned_to.name,
+                    // text: 'Do you want to continue',
+                    icon: 'question',
+                    html:
+                        '<select class="js-data-ajax" data-endpoint="contracts" data-placeholder="Выберите договор" name="assigned_contract" style="width: 100%" id="assigned_contract_contract_select" aria-label="assigned_contract">' +
+                        '<option value=""  role="option">Выберите договор</option>' +
+                        '</select>',
+                    reverseButtons: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Подтвердить',
+                    cancelButtonText: 'Отменить',
+                    preConfirm: () => {
+                        return [
+                            $('#assigned_contract_contract_select').val(),
+                        ]
+                    },
+                    didOpen: (toast) => {
+                        // Crazy select2 rich dropdowns with images!
+                        $('.js-data-ajax').each(function (i, item) {
+                            console.log("js-data-ajax")
+                            var link = $(item);
+                            var endpoint = link.data("endpoint");
+                            var select = link.data("select");
+                            link.select2({
+
+                                /**
+                                 * Adds an empty placeholder, allowing every select2 instance to be cleared.
+                                 * This placeholder can be overridden with the "data-placeholder" attribute.
+                                 */
+                                placeholder: '',
+                                allowClear: true,
+
+                                ajax: {
+
+                                    // the baseUrl includes a trailing slash
+                                    url: baseUrl + 'api/v1/' + endpoint + '/selectlist',
+                                    dataType: 'json',
+                                    delay: 250,
+                                    headers: {
+                                        "X-Requested-With": 'XMLHttpRequest',
+                                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                                    },
+                                    data: function (params) {
+                                        var data = {
+                                            search: params.term,
+                                            page: params.page || 1,
+                                            assetStatusType: link.data("asset-status-type"),
+                                        };
+                                        return data;
+                                    },
+                                    processResults: function (data, params) {
+
+                                        params.page = params.page || 1;
+
+                                        var answer = {
+                                            results: data.items,
+                                            pagination: {
+                                                more: "true" //(params.page  < data.page_count)
+                                            }
+                                        };
+
+                                        return answer;
+                                    },
+                                    cache: true
+                                },
+                                escapeMarkup: function (markup) {
+                                    return markup;
+                                }, // let our custom formatter work
+                                templateResult: formatDatalist,
+                                templateSelection: formatDataSelection
+                            });
+
+                        });
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        var contract_id = result.value[0];
+                        var sendData = {
+                            contract_id: contract_id,
+                        };
+
+                        $.ajax({
+                            type: 'POST',
+                            url: "/api/v1/consumableassignments/" + row.id + "/close_documents",
+                            headers: {
+                                "X-Requested-With": 'XMLHttpRequest',
+                                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                            },
+                            data: sendData,
+                            dataType: 'json',
+                            success: function (data) {
+                                $(".table").bootstrapTable('refresh');
+                            },
+                        });
+                    }
+                });
+            }
+        },
+    };
 
     $(function() {
+        $('#bulkEdit').click(function () {
+            var selectedIds = $('.snipe-table').bootstrapTable('getSelections');
+            $.each(selectedIds, function (key, value) {
+                $("#bulkForm").append($('<input type="hidden" name="ids[' + value.id + ']" value="' + value.id + '">'));
+            });
+        });
 
         // This handles the search box highlighting on both ajax and client-side
         // bootstrap tables
@@ -1680,8 +1676,6 @@
             $('[data-tooltip="true"]').tooltip({
                 container: 'body'
             });
-
-
         });
     });
 
