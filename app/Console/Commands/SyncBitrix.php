@@ -61,7 +61,7 @@ class SyncBitrix extends Command
 
         /** @var \GuzzleHttp\Client $client */
         $client = new \GuzzleHttp\Client();
-        $this->synh_users($client,$bitrix_url);
+        $this->synh_users($client, $bitrix_url);
         $this->synh_objects($client,$bitrix_url);
         $this->synh_suppliers($client,$bitrix_url);
         $this->synh_legals($client,$bitrix_url);
@@ -95,9 +95,9 @@ class SyncBitrix extends Command
         while (!$finish) {
             $params = [
                 'query' => [
-                    'FILTER' => [
-                        'ACTIVE' => true,
-                    ],
+//                    'FILTER' => [
+//                        'ACTIVE' => true,
+//                    ],
                     'start' => $leadID
                 ]
             ];
@@ -115,17 +115,21 @@ class SyncBitrix extends Command
 
 
         foreach ($bitrix_users_final as &$value) {
-            User::firstOrCreate(
-                ['bitrix_id' => $value["ID"]],
-                [
-                    'username' => $value["EMAIL"],
-                    'last_name' => $value["LAST_NAME"],
-                    'first_name' => $value["NAME"],
-                    'email' => $value["EMAIL"],
-                    'password' => bcrypt($value["EMAIL"]),
-                    'activated' => $value["ACTIVE"],
-                ]
-            );
+            if ($value["ACTIVE"] == 1) {
+                User::firstOrCreate(
+                    ['bitrix_id' => $value["ID"]],
+                    [
+                        'username' => $value["EMAIL"],
+                        'last_name' => $value["LAST_NAME"],
+                        'first_name' => $value["NAME"],
+                        'email' => $value["EMAIL"],
+                        'password' => bcrypt($value["EMAIL"]),
+                        'activated' => $value["ACTIVE"],
+                    ]
+                );
+            } else {
+                User::where('bitrix_id', $value["ID"])->update(['activated' => false]);
+            }
         }
         print("Синхрониизтрованно " . count($bitrix_users_final) . " пользователей Битрикс\n");
     }
@@ -282,7 +286,7 @@ class SyncBitrix extends Command
         $count = 0;
         foreach ($bitrix_suppliers as &$value) {
             $count++;
-            $supplier = Supplier::updateOrCreate(
+            Supplier::updateOrCreate(
 
                 ['bitrix_id' => $value["ID"]],
                 [
@@ -293,7 +297,6 @@ class SyncBitrix extends Command
                     'address2' => $value["ADDRESS_2"],
                 ]
             );
-
         }
         print("Синхрониизтрованно " . $count . " поставщиков \n");
     }

@@ -421,14 +421,8 @@
   <div class="col-md-3">
 
       @if (($location->bitrix_id))
-          <div class="col-md-12" style="padding-top: 15px; padding-bottom: 20px;">
-              <a href="https://bitrix.legis-s.ru/crm/type/1032/details/{{ $location->bitrix_id}}/" style="width: 100%;" class="btn btn-sm btn-info pull-left">{{ trans('general.bitrix_open') }} OLD </a>
-          </div>
-      @endif
-
-      @if (($location->bitrix_id_old))
-          <div class="col-md-12" style="padding-top: 15px; padding-bottom: 20px;">
-              <a href="https://bitrix.legis-s.ru/crm/object/details/{{ $location->bitrix_id_old}}/" style="width: 100%;" class="btn btn-sm btn-info pull-left">{{ trans('general.bitrix_open') }} </a>
+          <div class="col-md-12" style="padding-top: 10px; padding-bottom: 10px;">
+              <a href="https://bitrix.legis-s.ru/crm/type/1032/details/{{ $location->bitrix_id}}/" style="width: 100%;" class="btn btn-sm btn-info pull-left" target="_blank">{{ trans('general.bitrix_open') }}</a>
           </div>
       @endif
 
@@ -503,7 +497,6 @@
               {{ trans('admin/locations/table.print_all_assigned') }}
           </a>
       </div>
-
           @can('delete', $location)
               <div class="col-md-12 hidden-print" style="padding-top: 10px;">
 
@@ -533,8 +526,11 @@
               </div>
     @endcan
 
+
           @if ($location->coordinates!='')
-              <div id="map" style=" width: 100%; height: 400px"></div>
+          <div class="col-md-12" style="padding-top: 20px;">
+              <div id="map" style="width: 100%; height: 300px"></div>
+          </div>
           @endif
 
 
