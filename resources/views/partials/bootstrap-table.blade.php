@@ -683,7 +683,7 @@
 
     function assetTagLinkFormatter(value, row) {
         if ((row.asset) && (row.asset.id)) {
-            if (row.asset.deleted_at!='') {
+            if (row.asset.deleted_at != null) {
                 return '<span style="white-space: nowrap;"><x-icon type="x" class="text-danger" /><span class="sr-only">{{ trans('admin/hardware/general.deleted') }}</span> <del><a href="{{ config('app.url') }}/hardware/' + row.asset.id + '" data-tooltip="true" title="{{ trans('admin/hardware/general.deleted') }}">' + row.asset.asset_tag + '</a></del></span>';
             }
             return '<a href="{{ config('app.url') }}/hardware/' + row.asset.id + '">' + row.asset.asset_tag + '</a>';
@@ -1146,10 +1146,10 @@
             }
         }
 
-        function photoDisplayFormatter(value) {
+        function photoDisplayFormatter(value,row) {
             if (value) {
                 // return  '<img height="50" src="'+value+'" class="img-responsive img-thumbnail">';
-                return '<a href="' + value + '" data-lightbox="roadtrip"><i class="fa fa-camera fa-lg" aria-hidden="true"></i></a>';
+                return '<a href="' + value + '" data-title="'+ row.tag +'" data-lightbox="inventory"><i class="fa fa-camera fa-lg" aria-hidden="true"></i></a>';
             }
         }
 

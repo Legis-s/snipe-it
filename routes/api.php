@@ -1361,6 +1361,16 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
         /**
          * Inventories API routes
          */
+        Route::group(['prefix' => 'inventories'], function () {
+
+            Route::post('clearallemply',
+                [
+                    Api\InventoriesController::class,
+                    'clearallemply'
+                ]
+            )->name('api.inventories.clearallemply');
+
+        });
 
         Route::resource('inventories',
             Api\InventoriesController::class,

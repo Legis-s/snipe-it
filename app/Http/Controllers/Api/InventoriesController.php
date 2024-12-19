@@ -2,36 +2,25 @@
 namespace App\Http\Controllers\Api;
 
 
-use App\Http\Transformers\InventoriesTransformer;
-use App\Http\Transformers\InventoryItemTransformer;
-use App\Http\Transformers\LocationsTransformer;
-use App\Models\InventoryStatuslabel;
-use App\Models\Location;
-use Illuminate\Http\Request;
+use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
-use App\Http\Transformers\UsersTransformer;
-use App\Models\Company;
-use App\Models\User;
+use App\Http\Transformers\InventoriesTransformer;
+use App\Models\Asset;
 use App\Models\Inventory;
 use App\Models\InventoryItem;
-use App\Helpers\Helper;
-use App\Http\Requests\SaveUserRequest;
-use App\Models\Asset;
-use App\Http\Transformers\AssetsTransformer;
-use App\Http\Transformers\SelectlistTransformer;
-use App\Http\Transformers\AccessoriesTransformer;
-use App\Http\Transformers\LicensesTransformer;
+use App\Models\Location;
 use Auth;
-use App\Models\AssetModel;
+use DateTime;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class InventoriesController extends Controller
 {
     /**
      * Display a listing of the resource.
-     * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse | array
     {
 //        $this->authorize('view', User::class);
 
@@ -59,8 +48,7 @@ class InventoriesController extends Controller
                 'inventory_items as successfully' => function (Builder $query) {
                     $query->where('successfully', true);
                 },
-            ])
-            ;
+            ]);
 
         if ($request->filled('location_id')) {
             $inventories->where('inventories.location_id', '=', $request->input('location_id'));
@@ -104,11 +92,9 @@ class InventoriesController extends Controller
 
     /**
      * Display the specified resource.
-     *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($id): JsonResponse
     {
 //        $this->authorize('view', Location::class);
 
@@ -144,12 +130,10 @@ class InventoriesController extends Controller
 
 
     /**
-
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request) : JsonResponse
     {
         $data = $request->all();
         if (isset($data['bitrix_id'])){
@@ -237,9 +221,8 @@ class InventoriesController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id) : JsonResponse
     {
 //        $this->authorize('update', Location::class);
         $inventory = Inventory::findOrFail($id);
@@ -266,6 +249,58 @@ class InventoriesController extends Controller
         }
 
         return response()->json(Helper::formatStandardApiResponse('error', null, $inventory->getErrors()));
+    }
+
+
+    /**
+     *
+     * @param  \Illuminate\Http\Request  $request
+     */
+    public function clearallemply(Request $request): JsonResponse
+    {
+        $dayBefore = (new DateTime('now'))->format('Y-m-d');
+
+
+        $inventories = Inventory::with('inventory_items','location')
+            ->select([
+                'inventories.id',
+                'inventories.status',
+                'inventories.name',
+                'inventories.device',
+                'inventories.responsible_id',
+                'inventories.responsible',
+                'inventories.responsible_photo',
+                'inventories.coords',
+                'inventories.log',
+                'inventories.comment',
+                'inventories.location_id',
+                'inventories.created_at',
+                'inventories.updated_at',
+            ])
+            ->withCount([
+                'inventory_items as total',
+                'inventory_items as checked' => function (Builder $query) {
+                    $query->where('checked', true);
+                },
+                'inventory_items as successfully' => function (Builder $query) {
+                    $query->where('successfully', true);
+                },
+            ])
+            ->where('inventories.created_at', '<', $dayBefore)
+            ->get();
+
+        $to_delete  = 0;
+        foreach ($inventories as &$inv) {
+            $checked = $inv->checked;
+            if ($checked == 0){
+                $to_delete++;
+                $inv->inventory_items()->forceDelete();
+                $inv->forceDelete();
+            }
+        }
+//        $text = "Получено " . count($inventories) . "  инвентаризаций\n К удалению  " . $to_delete . "  инвентаризаций\n";
+//        return response()->json(Helper::formatStandardApiResponse('success', null,$text));
+        return response()->json(Helper::formatStandardApiResponse('success', null,null));
     }
 
 }

@@ -22,7 +22,6 @@ use App\Http\Transformers\SelectlistTransformer;
 use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\Company;
-use App\Models\Contract;
 use App\Models\CustomField;
 use App\Models\License;
 use App\Models\Location;

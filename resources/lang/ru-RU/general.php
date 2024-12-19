@@ -601,5 +601,6 @@ return [
     'depreciable_cost'				=> 'Остаточная стоимость',
     'document_filetypes_help'  => 'Допустимые типы файлов - pdf. Максимальный размер файла :size.',
     'invoicetypes' => 'Типы счетов',
-    'tag' => "Наклейка"
+    'tag' => "Наклейка",
+    'clear_all_null' => "Очистить пустые"
 ];

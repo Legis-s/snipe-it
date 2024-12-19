@@ -82,4 +82,16 @@ final class Inventory extends SnipeModel
     {
         return $this->belongsTo('\App\Models\Location');
     }
+
+    public function inventory_items_count() {
+        return $this->inventory_items->count();
+    }
+
+    public function inventory_items_checked_count() {
+        return $this->inventory_items->where('checked', true)->count();
+    }
+
+    public function inventory_items_checked_success_count() {
+        return $this->inventory_items->where('successfully', true)->count();
+    }
 }

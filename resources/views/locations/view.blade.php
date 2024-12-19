@@ -5,7 +5,7 @@
 
  {{ trans('general.location') }}:
  {{ $location->name }}
- 
+
 @parent
 @stop
 
@@ -123,11 +123,11 @@
               <li>
                   <a href="#inventories" data-toggle="tab">
                     <span class="hidden-lg hidden-md">
-                        <i class="fas fa-hdd fa-2x" aria-hidden="true"></i>
+                         <x-icon type="hdd" class="fa-2x "/>
                     </span>
                       <span class="hidden-xs hidden-sm">
                           {{ trans('general.inventories') }}
-                          {!! (($location->inventories) && ($location->inventories->count() > 0 )) ? '<badge class="badge badge-secondary">'.number_format($location->inventories->count()).'</badge>' : '' !!}
+                          {!! ($location->inventories->count() > 0 ) ? '<badge class="badge badge-secondary">'.number_format($location->inventories->count()).'</badge>' : '' !!}
                     </span>
                   </a>
               </li>
@@ -391,7 +391,7 @@
                     </div> <!-- /.row -->
                 </div> <!-- /.tab-pane history -->
               <div class="tab-pane" id="inventories">
-                  <h2 class="box-title">Инвентаризации</h2>
+                  <h2 class="box-title">{{ trans('general.inventories') }}</h2>
                   <div class="table table-responsive">
                       <table
                               data-columns="{{ \App\Presenters\InventoryPresenter::dataTableLayout() }}"
@@ -403,7 +403,7 @@
                               data-show-columns="true"
                               data-show-export="true"
                               data-show-refresh="true"
-                              data-sort-order="asc"
+                              data-sort-order="desc"
                               id="inventoriesTable"
                               class="table table-striped snipe-table"
                               data-url="{{route('api.inventories.index', ['location_id' => $location->id])}}"

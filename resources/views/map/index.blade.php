@@ -30,7 +30,7 @@
 @stop
 
 @section('moar_scripts')
-    @include ('partials.bootstrap-table', ['exportFile' => 'locations-export', 'search' => true])
+{{--    @include ('partials.bootstrap-table', ['exportFile' => 'locations-export', 'search' => true])--}}
     <script src="https://api-maps.yandex.ru/2.1/?apikey=9aff6103-40f7-49e4-ad79-aa2a69d421d6&lang=ru_RU"
             type="text/javascript">
     </script>
@@ -42,10 +42,6 @@
         function init() {
             // Создание карты.
             var myMap = new ymaps.Map("map", {
-                // Координаты центра карты.
-                // Порядок по умолчанию: «широта, долгота».
-                // Чтобы не определять координаты центра карты вручную,
-                // воспользуйтесь инструментом Определение координат.
                 center: [55.76, 37.64],
                 // Уровень масштабирования. Допустимые значения:
                 // от 0 (весь мир) до 19.
