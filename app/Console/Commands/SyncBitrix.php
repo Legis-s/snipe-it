@@ -55,8 +55,7 @@ class SyncBitrix extends Command
         $output['info'] = [];
         $output['warn'] = [];
         $output['error'] = [];
-
-        $bitrix_url = "https://bitrix.legis-s.ru/rest/1/rzrrat22t46msv7v/";
+        $bitrix_url =  env('BITRIX_URL');
 
 
         /** @var \GuzzleHttp\Client $client */

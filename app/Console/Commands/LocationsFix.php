@@ -55,7 +55,7 @@ class LocationsFix extends Command
         $output['warn'] = [];
         $output['error'] = [];
 
-
+        $bitrix_url =  env('BITRIX_URL');
         /** @var \GuzzleHttp\Client $client */
         $client = new \GuzzleHttp\Client();
 
@@ -77,7 +77,7 @@ class LocationsFix extends Command
                     'start'=> $next
                 ]
             ];
-            $response = $client->request('GET', 'https://bitrix.legis-s.ru/rest/1/rzrrat22t46msv7v/crm.item.list/',$params);
+            $response = $client->request('GET', $bitrix_url.'crm.item.list/',$params);
             $response = $response->getBody()->getContents();
             $bitrix_objects_response = json_decode($response, true);
             $bitrix_objects = array_merge($bitrix_objects, $bitrix_objects_response["result"]["items"]);

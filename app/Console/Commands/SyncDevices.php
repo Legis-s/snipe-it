@@ -64,9 +64,12 @@ class SyncDevices extends Command
 
         /** @var \GuzzleHttp\Client $client */
         $client = new \GuzzleHttp\Client();
+        $mdm_url = env('MDM_URL');
+        $mdm_user = env('MDM_USER');
+        $mdm_password = env('MDM_PASSWORD');
 
-        $response = $client->request('POST', 'https://mdm.legis-s.ru/rest/public/jwt/login', [
-            \GuzzleHttp\RequestOptions::JSON => ['login' => 'apiuser', 'password' => '6B01F9D3A8B77DB50655BE48D2DFB18F']
+        $response = $client->request('POST', $mdm_url.'public/jwt/login', [
+            \GuzzleHttp\RequestOptions::JSON => ['login' => $mdm_user, 'password' => $mdm_password]
         ]);
         $response = $response->getBody()->getContents();
         $token_json = json_decode($response, true);
@@ -78,7 +81,7 @@ class SyncDevices extends Command
         ];
 
 
-        $response = $client->request('POST', 'https://mdm.legis-s.ru/rest/private/devices/search', [
+        $response = $client->request('POST', $mdm_url.'private/devices/search', [
             'headers' => $headers,
             \GuzzleHttp\RequestOptions::JSON => ['pageSize' => 1000000, 'pageNum' => 1]
         ]);
@@ -190,7 +193,7 @@ class SyncDevices extends Command
                 }
                 if ($asset->location){
                     $locationAs =$asset->location->name;
-                    $responseupd = $client->request('POST', 'https://mdm.legis-s.ru/rest/private/devices/'.$phone["id"].'/description', [
+                    $responseupd = $client->request('POST', $mdm_url.'private/devices/'.$phone["id"].'/description', [
                         'headers' => $headers,
                         'body' => $locationAs
                     ]);
@@ -202,7 +205,7 @@ class SyncDevices extends Command
             $locationUpdate=null;
 
             try {
-                $response = $client->request('GET', 'https://mdm.legis-s.ru/rest/plugins/devicelocations/devicelocations/private/device/'.$phone["id"].'/location', [
+                $response = $client->request('GET', $mdm_url.'plugins/devicelocations/devicelocations/private/device/'.$phone["id"].'/location', [
                     'headers' => $headers,
                 ]);
                 $response = $response->getBody()->getContents();
