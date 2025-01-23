@@ -2,21 +2,11 @@
     {{ Form::label('checkout_to_type', trans('admin/hardware/form.checkout_to'), array('class' => 'col-md-3 control-label')) }}
     <div class="col-md-8">
         <div class="btn-group" data-toggle="buttons">
-
             @if ((isset($user_select)) && ($user_select!='false'))
             <label class="btn btn-default active">
                 <input name="checkout_to_type" value="user" aria-label="checkout_to_type" type="radio" checked="checked"><x-icon type="user" /> {{ trans('general.user') }}
             </label>
             @endif
-
-                @if ((isset($location_select)) && ($location_select!='false'))
-                    <label class="btn btn-default">
-                        <input name="checkout_to_type" value="location" aria-label="checkout_to_type" class="active"
-                               type="radio"><i class="fas fa-map-marker"
-                                                                 aria-hidden="true"></i> {{ trans('general.location') }}
-                    </label>
-                @endif
-
             @if ((isset($asset_select)) && ($asset_select!='false'))
             <label class="btn btn-default">
                 <input name="checkout_to_type" value="asset" aria-label="checkout_to_type" type="radio"><i class="fas fa-barcode" aria-hidden="true"></i> {{ trans('general.asset') }}
