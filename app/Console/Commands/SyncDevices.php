@@ -260,7 +260,7 @@ class SyncDevices extends Command
                     'distance' => $distance,
                     'publicIp' => $publicIp,
                     'enrollTime' => $enrollTime,
-                    'anyDesk' => $anyDesk,
+//                    'anyDesk' => $anyDesk,
                 ]
             );
         }
