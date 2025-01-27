@@ -279,8 +279,8 @@
             element_name = '';
         }
 
-        return function (value,row) {
 
+        return function (value,row) {
             var actions = '<nobr>';
 
             // Add some overrides for any funny urls we have
@@ -453,7 +453,7 @@
     }
 
     function genericCheckinCheckoutFormatter(destination) {
-        return function (value,row) {
+        return function (value, row) {
 
             // The user is allowed to check items out, AND the item is deployable
             if ((row.available_actions.checkout == true) && (row.user_can_checkout == true) && ((!row.asset_id) && (!row.assigned_to))) {
@@ -683,7 +683,7 @@
 
     function assetTagLinkFormatter(value, row) {
         if ((row.asset) && (row.asset.id)) {
-            if (row.asset.deleted_at != null) {
+            if (row.asset.deleted_at) {
                 return '<span style="white-space: nowrap;"><x-icon type="x" class="text-danger" /><span class="sr-only">{{ trans('admin/hardware/general.deleted') }}</span> <del><a href="{{ config('app.url') }}/hardware/' + row.asset.id + '" data-tooltip="true" title="{{ trans('admin/hardware/general.deleted') }}">' + row.asset.asset_tag + '</a></del></span>';
             }
             return '<a href="{{ config('app.url') }}/hardware/' + row.asset.id + '">' + row.asset.asset_tag + '</a>';
@@ -708,7 +708,7 @@
     function assetSerialLinkFormatter(value, row) {
 
         if ((row.asset) && (row.asset.serial)) {
-            if (row.asset.deleted_at!='') {
+            if (row.asset.deleted_at) {
                 return '<span style="white-space: nowrap;"><x-icon type="x" class="text-danger" /><span class="sr-only">deleted</span> <del><a href="{{ config('app.url') }}/hardware/' + row.asset.id + '" data-tooltip="true" title="{{ trans('admin/hardware/general.deleted') }}">' + row.asset.serial + '</a></del></span>';
             }
             return '<a href="{{ config('app.url') }}/hardware/' + row.asset.id + '">' + row.asset.serial + '</a>';
@@ -1642,13 +1642,19 @@
         },
     };
 
-    $(function() {
+    $(function () {
         $('#bulkEdit').click(function () {
             var selectedIds = $('.snipe-table').bootstrapTable('getSelections');
-            $.each(selectedIds, function (key, value) {
-                $("#bulkForm").append($('<input type="hidden" name="ids[' + value.id + ']" value="' + value.id + '">'));
+            $.each(selectedIds, function(key,value) {
+                $( "#bulkForm" ).append($('<input type="hidden" name="ids[' + value.id + ']" value="' + value.id + '">' ));
             });
+
         });
+    });
+
+
+
+    $(function() {
 
         // This handles the search box highlighting on both ajax and client-side
         // bootstrap tables
@@ -1676,6 +1682,8 @@
             $('[data-tooltip="true"]').tooltip({
                 container: 'body'
             });
+
+
         });
     });
 
