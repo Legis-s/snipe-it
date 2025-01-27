@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Location;
+use Illuminate\Contracts\View\View;
 
 /**
  * This controller for map
@@ -16,7 +17,7 @@ class MapController extends Controller
      *
      * @author [S. Markin] [<markin@legis-s.ru>]
      */
-    public function index()
+    public function index()  : View
     {
         $this->authorize('view', Location::class);
         return view('map/index');
