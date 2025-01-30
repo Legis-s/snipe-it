@@ -75,7 +75,6 @@ class LocationsController extends Controller
             'locations.currency',
             'locations.bitrix_id',
             'locations.bitrix_id_old',
-            'locations.notes',
             'locations.sklad',
             'locations.active',
         ])
@@ -353,8 +352,7 @@ class LocationsController extends Controller
         }
 
         if ($request->filled('search')) {
-            $locations = $locations->where('locations.name', 'LIKE', '%'.$request->input('search').'%')
-                ->orWhere('locations.contract_number', 'LIKE', '%'.$request->input('search').'%');
+            $locations = $locations->where('locations.name', 'LIKE', '%'.$request->input('search').'%');
         }
 
         $locations = $locations->orderBy('name', 'ASC')->get();

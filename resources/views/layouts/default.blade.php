@@ -693,7 +693,7 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                     </a>
                                 </li>
                             @endcan
-                            @can('view', \App\Models\Purchase::class)
+                            @can('view', \App\Models\Location::class)
                                 <li{!! (Request::is('inventories*') ? ' class="active"' : '') !!}>
                                     <a href="{{ route('inventories.index') }}">
                                         <i class="fas fa-clipboard-check fa-fw"></i>
@@ -1166,7 +1166,7 @@ dir="{{ Helper::determineLanguageDirection() }}">
                     container: 'body',
                     animation: true,
                 });
-                
+
                 $('[data-toggle="popover"]').popover();
                 $('.select2 span').addClass('needsclick');
                 $('.select2 span').removeAttr('title');

@@ -1788,7 +1788,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
 
 
     /**
-         * CUSTOM API ROUTES END
-         */
+     * CUSTOM API ROUTES END
+     * */
 
 }); // end API routes

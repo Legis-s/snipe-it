@@ -378,7 +378,7 @@
                 } else if (value.type == 'model') {
                     item_destination = 'models'
                     item_icon = '';
-                }else if (value.type == 'purchase') {
+                } else if (value.type == 'purchase') {
                     item_destination = 'purchases'
                     item_icon = 'fas fa-shopping-basket';
                 } else if (value.type == 'contract') {

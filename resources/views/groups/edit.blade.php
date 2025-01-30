@@ -95,9 +95,9 @@
                         {{ Form::radio('permission['.$localPermission['permission'].']', '0',(array_key_exists($localPermission['permission'], $groupPermissions) ? $groupPermissions[$localPermission['permission'] ] == '0' : null),['value'=>"grant", 'aria-label'=> 'permission['.$localPermission['permission'].']']) }}
                     </td>
                 </tr>
-
+            </tbody>
             @else
-
+            <tbody class="permission-group">
                 <tr class="header-row permissions-row">
                     <td class="col-md-5 tooltip-base permissions-item header-name"
                         data-tooltip="true"

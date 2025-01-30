@@ -7,4 +7,3 @@ return [
     'reset'         => 'Your password has been reset!',
     'password_change'  => 'Your password has been updated!',
 ];
-

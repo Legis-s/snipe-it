@@ -553,5 +553,18 @@
         if (current != last) location.reload();
         last = current;
     });
+
+    // $("#dashCategorySummary").bootstrapTable('refresh');
+    //
+    // $("#dashCategorySummary").on('all.bs.table', function (e) {
+    //     console.log("dashCategorySummary");
+    //     console.log(e);
+    // });
+    //
+    // $("#dashLocationSummary").bootstrapTable('refresh');
+    // $("#dashLocationSummary").on('all.bs.table', function (e) {
+    //     console.log("dashCategorySummary");
+    //     console.log(e);
+    // });
 </script>
 @endpush

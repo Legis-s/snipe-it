@@ -98,7 +98,7 @@
                             @endif
 
                             <br>
-                            <a href="https://bitrix.legis-s.ru/oauth/authorize/?client_id=local.6384cb37df2c27.72657963&state=JJHgsdgfkdaslg7lbadsfg" class="btn btn-lg btn-primary btn-block" id="bitrix"><img src="{{ url('img/triangle.svg') }}" style="height: 25px;padding-bottom: 4px;"/> Продолжить с Bitrix</a>
+                            <a href="https://bitrix.legis-s.ru/oauth/authorize/?client_id=local.6384cb37df2c27.72657963&state=JJHgsdgfkdaslg7lbadsfg" class="btn btn-lg btn-primary btn-block" id="bitrix"><img src="{{ url('img/triangle.svg') }}" style="height: 20px;padding-bottom: 2px;"/> Продолжить с Bitrix</a>
 
                         </div>
                         <div class="text-right col-md-12 col-sm-12 col-xs-12" style="padding-top: 10px;">

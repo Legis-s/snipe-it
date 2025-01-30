@@ -144,23 +144,24 @@
                           </li>
                       @endif
                   @endcan
-              
+
+                  @if ($location->inventories->count() > 0)
+                      <li>
+                          <a href="#inventories" data-toggle="tab" data-tooltip="true" title="{{ trans('general.inventories') }}">
+                              <i class="fa-solid fa-clipboard-check fa-fw" style="font-size: 17px" aria-hidden="true"></i>
+                              <span class="badge">
+                                    {{ number_format($location->inventories->count()) }}
+                              </span>
+                              <span class="sr-only">{{ trans('general.inventories') }}</span>
+                          </a>
+                      </li>
+                  @endif
+
               <li>
-                  <a href="#history" data-toggle="tab" data-toggle="tab" data-tooltip="true" title="{{ trans('general.history') }}">
+                  <a href="#history" data-toggle="tab" data-tooltip="true" title="{{ trans('general.history') }}">
                       <i class="fa-solid fa-clock-rotate-left" style="font-size: 17px" aria-hidden="true"></i>
                       <span class="sr-only">
                           {{ trans('general.history') }}
-                    </span>
-                  </a>
-              </li>
-              <li>
-                  <a href="#inventories" data-toggle="tab">
-                    <span class="hidden-lg hidden-md">
-                         <x-icon type="hdd" class="fa-2x "/>
-                    </span>
-                      <span class="hidden-xs hidden-sm">
-                          {{ trans('general.inventories') }}
-                          {!! ($location->inventories->count() > 0 ) ? '<badge class="badge badge-secondary">'.number_format($location->inventories->count()).'</badge>' : '' !!}
                     </span>
                   </a>
               </li>
@@ -560,6 +561,7 @@
               {{ trans('admin/locations/table.print_all_assigned') }}
           </a>
       </div>
+
           @can('delete', $location)
               <div class="col-md-12 hidden-print" style="padding-top: 10px;">
 

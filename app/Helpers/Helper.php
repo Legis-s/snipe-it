@@ -137,7 +137,7 @@ class Helper
      * @since [v3.3]
      * @return string
      */
-    public static function defaultChartColors($index = 0)
+    public static function defaultChartColors(int $index = 0)
     {
         if ($index < 0) {
             $index = 0;
@@ -1291,7 +1291,7 @@ class Helper
         return $settings;
         }
 
-    public static function getFormattedStatus($status) {
+    public static function getFormattedStatus($status): string {
 
         if ($status=='') {
             return null;

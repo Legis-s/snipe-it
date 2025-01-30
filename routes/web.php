@@ -2,41 +2,43 @@
 
 use App\Http\Controllers\Account;
 use App\Http\Controllers\ActionlogController;
-use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\DealsController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\CompaniesController;
-use App\Http\Controllers\ContractsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentsController;
 use App\Http\Controllers\DepreciationsController;
-use App\Http\Controllers\DevicesController;
 use App\Http\Controllers\GroupsController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\ImportsController;
-use App\Http\Controllers\InventoriesController;
-use App\Http\Controllers\InventoryStatuslabelsController;
 use App\Http\Controllers\LabelsController;
 use App\Http\Controllers\LocationsController;
 use App\Http\Controllers\ManufacturersController;
-use App\Http\Controllers\MapController;
-use App\Http\Controllers\MassOperationsController;
 use App\Http\Controllers\ModalController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\PurchasesController;
 use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\ReportTemplatesController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StatuslabelsController;
 use App\Http\Controllers\SuppliersController;
 use App\Http\Controllers\ViewAssetsController;
-use App\Http\Controllers\InvoiceTypesController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Livewire\Importer;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+
+//custom
+use App\Http\Controllers\InvoiceTypesController;
+use App\Http\Controllers\PurchasesController;
+use App\Http\Controllers\MapController;
+use App\Http\Controllers\MassOperationsController;
+use App\Http\Controllers\InventoriesController;
+use App\Http\Controllers\InventoryStatuslabelsController;
+use App\Http\Controllers\DevicesController;
+use App\Http\Controllers\ContractsController;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DealsController;
 
 Route::impersonate();
 
@@ -403,13 +405,6 @@ Route::group(['middleware' => 'auth'], function () {
     ]);
 
 });
-
-
-
-Route::middleware(['auth'])->get(
-    '/',
-    [DashboardController::class, 'index']
-)->name('home');
 
 Route::group(['middleware' => 'web'], function () {
 
