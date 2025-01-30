@@ -2,8 +2,8 @@
 
 {{-- Page title --}}
 @section('title')
-    Телефоны
-    @parent
+{{ trans('general.devices') }}
+@parent
 @stop
 
 @section('header_right')
