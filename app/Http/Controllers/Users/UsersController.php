@@ -188,11 +188,11 @@ class UsersController extends Controller
      * @internal param int $id
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function edit($id)
+    public function edit(User $user)
     {
 
         $this->authorize('update', User::class);
-        $user = User::with(['assets', 'assets.model', 'consumables', 'accessories', 'licenses', 'userloc'])->withTrashed()->find($id);
+        $user = User::with(['assets', 'assets.model', 'consumables', 'accessories', 'licenses', 'userloc'])->withTrashed()->find($user->id);
 
         if ($user) {
 
@@ -207,7 +207,6 @@ class UsersController extends Controller
             return view('users/edit', compact('user', 'groups', 'userGroups', 'permissions', 'userPermissions'))->with('item', $user);
         }
 
-        return redirect()->route('users.index')->with('error', trans('admin/users/message.user_not_found', compact('id')));
     }
 
     /**
@@ -331,7 +330,7 @@ class UsersController extends Controller
      * @return \Illuminate\Http\RedirectResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function destroy(DeleteUserRequest $request, $id = null)
+    public function destroy(DeleteUserRequest $request, $id)
     {
         $this->authorize('delete', User::class);
 
@@ -340,13 +339,6 @@ class UsersController extends Controller
             $this->authorize('delete', $user);
 
             if ($user->delete()) {
-                if (Storage::disk('public')->exists('avatars/' . $user->avatar)) {
-                    try {
-                        Storage::disk('public')->delete('avatars/' . $user->avatar);
-                    } catch (\Exception $e) {
-                        Log::debug($e);
-                    }
-                }
                 return redirect()->route('users.index')->with('success', trans('admin/users/message.success.delete'));
             }
         }
@@ -405,23 +397,27 @@ class UsersController extends Controller
      * @return \Illuminate\Contracts\View\View
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function show($userId = null)
+    public function show(User $user)
     {
         // Make sure the user can view users at all
         $this->authorize('view', User::class);
 
-        $user = User::with('assets', 'assets.model', 'consumables', 'accessories', 'licenses', 'userloc')->withTrashed()->find($userId);
+        $user = User::with([
+            'consumables',
+            'accessories',
+            'licenses',
+            'userloc',
+        ])
+            ->withTrashed()
+            ->find($user->id);
 
         // Make sure they can view this particular user
         $this->authorize('view', $user);
 
-        if ($user) {
-            $userlog = $user->userlog->load('item');
-            return view('users/view', compact('user', 'userlog'))->with('settings', Setting::getSettings());
-        }
-
-        return redirect()->route('users.index')->with('error', trans('admin/users/message.user_not_found', ['id' => $userId]));
-
+        return view('users/view', [
+            'user' => $user,
+            'settings' => Setting::getSettings(),
+        ]);
     }
 
 
@@ -435,7 +431,7 @@ class UsersController extends Controller
      * @return \Illuminate\Contracts\View\View
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function getClone(Request $request, $id = null)
+    public function getClone(Request $request, User $user)
     {
         $this->authorize('create', User::class);
 
@@ -445,7 +441,7 @@ class UsersController extends Controller
         app('request')->request->set('permissions', $permissions);
 
 
-        $user_to_clone = User::with('assets', 'assets.model', 'consumables', 'accessories', 'licenses', 'userloc')->withTrashed()->find($id);
+        $user_to_clone = User::with('assets', 'assets.model', 'consumables', 'accessories', 'licenses', 'userloc')->withTrashed()->find($user->id);
         // Make sure they can view this particular user
         $this->authorize('view', $user_to_clone);
 
@@ -475,10 +471,10 @@ class UsersController extends Controller
                 ->with('user', $user)
                 ->with('groups', Group::pluck('name', 'id'))
                 ->with('userGroups', $userGroups)
-                ->with('clone_user', $user_to_clone);
+                ->with('clone_user', $user_to_clone)
+                ->with('item', $user);
         }
 
-        return redirect()->route('users.index')->with('error', trans('admin/users/message.user_not_found', compact('id')));
 
     }
 
@@ -605,18 +601,18 @@ class UsersController extends Controller
 
         $user = User::where('id', $id)
             ->with([
-                'assets.assetlog',
-                'assets.assignedAssets.assetlog',
+                'assets.log' => fn($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
+                'assets.assignedAssets.log' => fn($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
                 'assets.assignedAssets.defaultLoc',
                 'assets.assignedAssets.location',
                 'assets.assignedAssets.model.category',
                 'assets.defaultLoc',
                 'assets.location',
                 'assets.model.category',
-                'accessories.assetlog',
+                'accessories.log' => fn($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
                 'accessories.category',
                 'accessories.manufacturer',
-                'consumables.assetlog',
+                'consumables.log' => fn($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
                 'consumables.category',
                 'consumables.manufacturer',
                 'licenses.category',

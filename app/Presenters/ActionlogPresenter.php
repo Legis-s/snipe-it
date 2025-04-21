@@ -102,16 +102,16 @@ class ActionlogPresenter extends Presenter
             return 'fas fa-sticky-note';
         }
 
+        if ($this->action_type == 'audit') {
+            return 'fas fa-clipboard-check';
+        }
+
         if ($this->action_type=='sell') {
             return 'fa-solid fa-ruble-sign';
         }
 
         if ($this->action_type=='rented') {
             return 'fa-solid fa-right-left';
-        }
-
-        if ($this->action_type=='audit') {
-            return 'fa-solid fa-check';
         }
 
         if ($this->action_type=='tag') {
