@@ -43,13 +43,10 @@ dir="{{ Helper::determineLanguageDirection() }}">
     {{-- page level css --}}
     @stack('css')
 
-    <!-- star-rating -->
+    <!-- custom css -->
     <link rel="stylesheet" href="{{ url(asset('js/star-rating/dist/star-rating.css')) }}">
-    <!-- lightgallery  CSS -->
     <link rel="stylesheet" href="{{ url(asset('js/lightgallery/css/lightgallery.css')) }}">
-    <!-- sweetalert2  CSS -->
     <link rel="stylesheet" href="{{ url(asset('css/sweetalert2.min.css')) }}">
-    <!-- lightbox  CSS -->
     <link rel="stylesheet" href="{{ url(asset('js/lightbox/css/lightbox.min.css')) }}">
 
     @if (($snipeSettings) && ($snipeSettings->header_color!=''))
@@ -565,6 +562,8 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                         </a>
                                     </li>
                                     @endcan
+                                    <li class="divider">&nbsp;</li>
+
                                     <li{!! (Request::query('status') == 'Issued_for_sale' ? ' class="active"' : '') !!}><a href="{{ url('hardware?status=Issued_for_sale') }}"><i class="fas fa-usd text-blue fa-fw"></i>
                                             {{ trans('admin/hardware/general.issued_for_sale') }}
                                         </a>
@@ -902,7 +901,6 @@ dir="{{ Helper::determineLanguageDirection() }}">
                            </li>
                         @endcan
 
-
                         @can('viewRequestable', \App\Models\Asset::class)
                             <li{!! (Request::is('account/requestable-assets') ? ' class="active"' : '') !!}>
                                 <a href="{{ route('requestable-assets') }}">
@@ -1076,12 +1074,14 @@ dir="{{ Helper::determineLanguageDirection() }}">
         <script src="{{ url(mix('js/dist/all.js')) }}" nonce="{{ csrf_token() }}"></script>
         <script src="{{ url('js/select2/i18n/'.Helper::mapBackToLegacyLocale(app()->getLocale()).'.js') }}"></script>
 
+        <!-- custom js -->
         <script src="{{ url(asset('js/star-rating/dist/star-rating.js')) }}"></script>
         <script src="{{ url(asset('js/lightgallery/js/lightgallery.min.js')) }}"></script>
         <script src="{{ url(asset('js/sweetalert2.min.js')) }}"></script>
         <script src="{{ url(asset('js/timeago.js')) }}"></script>
         <script src="{{ url(asset('js/onscan.js')) }}"></script>
         <script src="{{ url(asset('js/lightbox/js/lightbox.min.js')) }}" nonce="{{ csrf_token() }}"></script>
+
         <!-- v5-beta: This pGenerator call must remain here for v5 - until fixed - so that the JS password generator works for the user create modal. -->
         <script src="{{ url('js/pGenerator.jquery.js') }}"></script>
 

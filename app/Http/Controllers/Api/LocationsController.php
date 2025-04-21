@@ -17,6 +17,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 
 class LocationsController extends Controller
 {
@@ -196,6 +197,8 @@ class LocationsController extends Controller
                 'locations.currency',
                 'locations.bitrix_id',
                 'locations.bitrix_id_old',
+                'locations.sklad',
+                'locations.active',
             ])
             ->withCount('assignedAssets as assigned_assets_count')
             ->withCount('assets as assets_count')
@@ -343,7 +346,6 @@ class LocationsController extends Controller
             'locations.parent_id',
             'locations.image',
             'locations.sklad',
-            'locations.contract_number',
         ]);
 
         $page = 1;
@@ -379,9 +381,6 @@ class LocationsController extends Controller
             $locations_with_children[$location->parent_id][] = $location;
             if ($location->sklad){
                 $location->name =   "[Склад] ".$location->name;
-            }
-            if ($location->contract_number){
-                $location->name =  $location->name ."  " .$location->contract_number;
             }
         }
 
