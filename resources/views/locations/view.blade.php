@@ -152,7 +152,9 @@
                               <span class="badge">
                                     {{ number_format($location->inventories->count()) }}
                               </span>
-                              <span class="sr-only">{{ trans('general.inventories') }}</span>
+                              <span class="sr-only">
+                                  {{ trans('general.inventories') }}
+                              </span>
                           </a>
                       </li>
                   @endif
@@ -334,9 +336,8 @@
                               data-export-options='{
                               "fileName": "export-locations-{{ str_slug($location->name) }}-accessories-{{ date('Y-m-d') }}",
                               "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                              }'>
+                               }'>
                       </table>
-                  </div><!-- /.table-responsive -->
               </div><!-- /.tab-pane -->
 
               <div class="tab-pane" id="accessories_assigned">
