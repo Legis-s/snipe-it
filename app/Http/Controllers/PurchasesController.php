@@ -13,6 +13,7 @@ use App\Models\Supplier;
 use App\Models\User;
 use Carbon\Carbon;
 use DateTime;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -135,22 +136,9 @@ class PurchasesController extends Controller
         $purchase->assets_json = $request->input('assets');
         $purchase->delivery_cost = $request->input('delivery_cost');
         $purchase->user_id = Auth::id();
-//        $currency_id = $request->input('currency_id');
         $purchase->setStatusInprogress();
 
-//        switch ($currency_id) {
-//            case 341:
-//                $purchase->currency = "руб";
-//                break;
-//            case 342:
-//                $purchase->currency = "usd";
-//                break;
-//            case 343:
-//                $purchase->currency = "eur";
-//                break;
-//        }
         $assets = json_decode($request->input('assets'), true);
-//        $consumables = json_decode($request->input('consumables'), true);
         $purchase = $request->handleFile($purchase, public_path() . '/uploads/purchases');
 
 
@@ -227,6 +215,11 @@ class PurchasesController extends Controller
             $file_data_base64 = base64_encode($file_data);
 
             $user = Auth::user();
+//            \Debugbar::info("send bitrix");
+//            \Debugbar::info($user);
+//            \Debugbar::info($user->bitrix_token);
+//            \Debugbar::info($user->bitrix_id);
+
             /** @var \GuzzleHttp\Client $client */
             $client = new \GuzzleHttp\Client();
             $params = [
@@ -256,15 +249,19 @@ class PurchasesController extends Controller
             $purchase->bitrix_send_json = $purchase->id . '.json';
             $purchase->save();
 
-            \Debugbar::info("send bitrix");
+//            \Debugbar::info("send bitrix");
             if ($user->bitrix_token && $user->bitrix_id) {
-                $raw_bitrix_token = Crypt::decryptString($user->bitrix_token);
-                $response = $client->request('POST',  env('BITRIX_URL').'rest/' . $user->bitrix_id . '/' . $raw_bitrix_token . '/lists.element.add.json/', $params);
+                try {
+                    \Debugbar::info("raw_bitrix_token");
+                    $raw_bitrix_token = Crypt::decryptString($user->bitrix_token);
+                    $response = $client->request('POST',  env('BITRIX_URL').'rest/' . $user->bitrix_id . '/' . $raw_bitrix_token . '/lists.element.add.json/', $params);
 
+                } catch (DecryptException $e) {
+                    $response = $client->request('POST',  env('BITRIX_URL').'rest/'.env('BITRIX_USER').'/'.env('BITRIX_KEY').'/lists.element.add.json/', $params);
+                }
             } else {
                 $response = $client->request('POST',  env('BITRIX_URL').'rest/'.env('BITRIX_USER').'/'.env('BITRIX_KEY').'/lists.element.add.json/', $params);
             }
-            \Debugbar::info("cant Crypt ");
             $response = $response->getBody()->getContents();
 
             $purchase->bitrix_result = $response;
