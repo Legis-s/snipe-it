@@ -63,11 +63,6 @@
 
 @include ('partials.forms.edit.image-upload', ['image_path' => app('locations_upload_path')])
 
-@include ('partials.forms.custom.location_bitrix_id')
-@include ('partials.forms.custom.location_bitrix_id_old')
-@include ('partials.forms.custom.location_sklad')
-
-
 <div class="form-group{!! $errors->has('notes') ? ' has-error' : '' !!}">
     <label for="notes" class="col-md-3 control-label">{{ trans('general.notes') }}</label>
     <div class="col-md-8">
@@ -83,5 +78,8 @@
     </div>
 </div>
 
+@include ('partials.forms.custom.location_bitrix_id')
+@include ('partials.forms.custom.location_bitrix_id_old')
+@include ('partials.forms.custom.location_sklad')
 @stop
 

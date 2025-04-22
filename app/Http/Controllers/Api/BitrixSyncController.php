@@ -3,14 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Transformers\UsersTransformer;
 use App\Models\InvoiceType;
 use App\Models\LegalPerson;
 use App\Models\Location;
 use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Rollbar\Payload\Trace;
 
 class BitrixSyncController extends Controller
 {
@@ -19,8 +17,7 @@ class BitrixSyncController extends Controller
 
         /** @var \GuzzleHttp\Client $client */
         $client = new \GuzzleHttp\Client();
-        $bitrix_url =  env('BITRIX_URL');
-
+        $bitrix_url = env('BITRIX_URL')."rest/".env('BITRIX_USER')."/".env('BIREIX_KEY')."/";
         /**
          * Начинаем с нуля или с какого то предыдущего шага
          */
@@ -70,7 +67,7 @@ class BitrixSyncController extends Controller
     {
         /** @var \GuzzleHttp\Client $client */
         $client = new \GuzzleHttp\Client();
-        $bitrix_url =  env('BITRIX_URL');
+        $bitrix_url = env('BITRIX_URL')."rest/".env('BITRIX_USER')."/".env('BITRIX_KEY')."/";
 
         $response = $client->request('GET', $bitrix_url.'legis_crm.object.list/?select%5B0%5D=UF_*&select%5B1%5D=*');
         $response = $response->getBody()->getContents();
@@ -117,7 +114,8 @@ class BitrixSyncController extends Controller
 
         /** @var \GuzzleHttp\Client $client */
         $client = new \GuzzleHttp\Client();
-        $bitrix_url =  env('BITRIX_URL');
+        $bitrix_url = env('BITRIX_URL')."rest/".env('BITRIX_USER')."/".env('BITRIX_KEY')."/";
+
         $next = 0;
         $finish = false;
         $bitrix_suppliers = [];
@@ -170,7 +168,7 @@ class BitrixSyncController extends Controller
     {
         /** @var \GuzzleHttp\Client $client */
         $client = new \GuzzleHttp\Client();
-        $bitrix_url =  env('BITRIX_URL');
+        $bitrix_url = env('BITRIX_URL')."rest/".env('BITRIX_USER')."/".env('BITRIX_KEY')."/";
         $response = $client->request('GET', $bitrix_url.'lists.element.get?IBLOCK_TYPE_ID=lists&IBLOCK_ID=77');
         $response = $response->getBody()->getContents();
         $bitrix_legal_persons = json_decode($response, true);
@@ -203,7 +201,7 @@ class BitrixSyncController extends Controller
     {
         /** @var \GuzzleHttp\Client $client */
         $client = new \GuzzleHttp\Client();
-        $bitrix_url =  env('BITRIX_URL');
+        $bitrix_url = env('BITRIX_URL')."rest/".env('BITRIX_USER')."/".env('BITRIX_KEY')."/";
         $response = $client->request('GET', $bitrix_url.'lists.element.get?IBLOCK_TYPE_ID=lists&IBLOCK_ID=166');
         $response = $response->getBody()->getContents();
         $bitrix_invoice_types = json_decode($response, true);

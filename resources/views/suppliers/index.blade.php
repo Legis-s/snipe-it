@@ -10,11 +10,11 @@
 @section('content')
 
 
-@section('header_right')
-  @can('create', \App\Models\Supplier::class)
-    <a href="{{ route('suppliers.create') }}" class="btn btn-primary pull-right"> {{ trans('general.create') }}</a>
-  @endcan
-@stop
+{{--@section('header_right')--}}
+{{--  @can('create', \App\Models\Supplier::class)--}}
+{{--    <a href="{{ route('suppliers.create') }}" class="btn btn-primary pull-right"> {{ trans('general.create') }}</a>--}}
+{{--  @endcan--}}
+{{--@stop--}}
 
 <div class="row">
   <div class="col-md-12">

@@ -1,13 +1,12 @@
 <?php
 
-
 namespace App\Http\Controllers\Api;
-
 
 use App\Models\Asset;
 use App\Models\Consumable;
 use App\Models\Statuslabel;
 use DateTime;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Transformers\PurchasesTransformer;
@@ -21,13 +20,12 @@ class PurchasesController extends Controller
 {
     /**
      * Display a listing of the resource.
-     * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse|array
     {
         $this->authorize('view', Purchase::class);
         $status = Statuslabel::where('name', 'Доступные')->first();
-        $purchases = Purchase::with('supplier', 'assets', 'invoice_type', 'legal_person','user','consumables')
+        $purchases = Purchase::with('supplier', 'assets', 'invoice_type', 'legal_person', 'user', 'consumables')
             ->select([
                 'purchases.id',
                 'purchases.invoice_number',
@@ -79,7 +77,7 @@ class PurchasesController extends Controller
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
         $sort = in_array($request->input('sort'), $allowed_columns) ? $request->input('sort') : 'created_at';
 
-        if ($request->input('not_finished_status')){
+        if ($request->input('not_finished_status')) {
             $purchases->where('status', '<>', "finished");
         }
 
@@ -100,17 +98,13 @@ class PurchasesController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v4.0]
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param int $id
      */
-    public function show($id)
+    public function show($id): JsonResponse|array
     {
         $this->authorize('view', Purchase::class);
         $status = Statuslabel::where('name', 'Доступные')->first();
-        $purchise = Purchase::with('supplier', 'assets', 'invoice_type', 'legal_person','user','consumables')
+        $purchise = Purchase::with('supplier', 'assets', 'invoice_type', 'legal_person', 'user', 'consumables')
             ->select([
                 'purchases.id',
                 'purchases.invoice_number',
@@ -137,14 +131,13 @@ class PurchasesController extends Controller
                 },
             ])
             ->findOrFail($id);
-        return (new PurchasesTransformer)->transformPurchase($purchise,true);
+        return (new PurchasesTransformer)->transformPurchase($purchise, true);
     }
 
     /**
      * Display a listing of the resource.
-     * @return \Illuminate\Http\Response
      */
-    public function paid(Request $request, $purchaseId = null)
+    public function paid(Request $request, $purchaseId = null): JsonResponse
     {
         $this->authorize('view', Purchase::class);
         $purchase = Purchase::findOrFail($purchaseId);
@@ -165,26 +158,25 @@ class PurchasesController extends Controller
 
     /**
      * Display a listing of the resource.
-     * @return \Illuminate\Http\Response
      */
-    public function consumables_check(Request $request, $purchaseId = null)
+    public function consumables_check(Request $request, $purchaseId = null): JsonResponse
     {
         $this->authorize('view', Purchase::class);
         $purchase = Purchase::findOrFail($purchaseId);
 
         $assets = Asset::where('purchase_id', $purchase->id)->get();
         $status_ok = Statuslabel::where('name', 'Доступные')->first();
-        if (count($assets) > 0){
+        if (count($assets) > 0) {
             $all_ok = true;
             foreach ($assets as &$asset) {
-                if ($asset->status_id != $status_ok->id){
+                if ($asset->status_id != $status_ok->id) {
                     $all_ok = false;
                 }
             }
-            if($all_ok){
+            if ($all_ok) {
                 $purchase->status = "finished";
             }
-        }else{
+        } else {
             $purchase->status = "finished";
         }
 
@@ -196,7 +188,7 @@ class PurchasesController extends Controller
                     $consumable_server = new Consumable();
                     $consumable_server->name = $consumable_new["name"];
                     $consumable_server->category_id = $consumable_new["category_id"];
-                    if(!empty($consumable_new["model_id"])) {
+                    if (!empty($consumable_new["model_id"])) {
                         $consumable_server->model_id = $consumable_new["model_id"];
                     }
                     $consumable_server->order_number = $purchase->id;
@@ -222,14 +214,10 @@ class PurchasesController extends Controller
     }
 
 
-
-
-
     /**
      * Display a listing of the resource.
-     * @return \Illuminate\Http\Response
      */
-    public function in_payment(Request $request, $purchaseId = null)
+    public function in_payment(Request $request, $purchaseId = null): JsonResponse
     {
         $this->authorize('view', Purchase::class);
         $purchase = Purchase::findOrFail($purchaseId);
@@ -251,9 +239,8 @@ class PurchasesController extends Controller
 
     /**
      * Display a listing of the resource.
-     * @return \Illuminate\Http\Response
      */
-    public function bitrix_task(Request $request, $purchaseId = null,$bitrix_task= null)
+    public function bitrix_task(Request $request, $purchaseId = null, $bitrix_task = null): JsonResponse|array
     {
         $this->authorize('view', Purchase::class);
         $purchase = Purchase::findOrFail($purchaseId);
@@ -274,14 +261,13 @@ class PurchasesController extends Controller
 
     /**
      * Display a listing of the resource.
-     * @return \Illuminate\Http\Response
      */
-    public function reject(Request $request, $purchaseId = null)
+    public function reject(Request $request, $purchaseId = null): JsonResponse|array
     {
         $this->authorize('view', Purchase::class);
         $purchase = Purchase::findOrFail($purchaseId);
         $purchase->status = "rejected";
-        $purchase->bitrix_result_at =new DateTime();
+        $purchase->bitrix_result_at = new DateTime();
         if ($purchase->save()) {
             $status = Statuslabel::where('name', 'Отклонено')->first();
             $assets = Asset::where('purchase_id', $purchase->id)->get();
@@ -306,28 +292,25 @@ class PurchasesController extends Controller
 
     /**
      * Display a listing of the resource.
-     * @return \Illuminate\Http\Response
      */
-    public function resend(Request $request, $purchaseId = null)
+    public function resend(Request $request, $purchaseId = null): JsonResponse|array
     {
         $this->authorize('view', Purchase::class);
         $purchase = Purchase::findOrFail($purchaseId);
 
 
-        $file_data = file_get_contents(public_path().'/uploads/purchases/'.$purchase->bitrix_send_json);
+        $file_data = file_get_contents(public_path() . '/uploads/purchases/' . $purchase->bitrix_send_json);
 
         $params = json_decode($file_data, true);
         /** @var \GuzzleHttp\Client $client */
         $client = new \GuzzleHttp\Client();
-        $user =  Auth::user();
-        if ($user->bitrix_token && $user->bitrix_id){
-            $raw_bitrix_token  = Crypt::decryptString($user->bitrix_token);
-            $response = $client->request('POST', 'https://bitrix.legis-s.ru/rest/'.$user->bitrix_id.'/'.$raw_bitrix_token.'/lists.element.add.json/',$params);
-
-        }else{
-            $response = $client->request('POST', 'https://bitrix.legis-s.ru/rest/722/q7e6fc3qrkiok64x/lists.element.add.json/',$params);
+        $user = Auth::user();
+        if ($user->bitrix_token && $user->bitrix_id) {
+            $raw_bitrix_token = Crypt::decryptString($user->bitrix_token);
+            $response = $client->request('POST', env('BITRIX_URL') . 'rest/' . $user->bitrix_id . '/' . $raw_bitrix_token . '/lists.element.add.json/', $params);
+        } else {
+            $response = $client->request('POST', env('BITRIX_URL') . 'rest/' . env('BITRIX_USER') . '/' . env('BITRIX_KEY') . '/lists.element.add.json/', $params);
         }
-//        $response = $client->request('POST', 'https://bitrix.legis-s.ru/rest/722/q7e6fc3qrkiok64x/lists.element.add.json/',$params);
 
         $response = $response->getBody()->getContents();
         $bitrix_result = json_decode($response, true);
@@ -341,7 +324,4 @@ class PurchasesController extends Controller
 
         return response()->json(Helper::formatStandardApiResponse('error', null, $purchase->getErrors()));
     }
-
-
-
 }

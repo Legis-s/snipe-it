@@ -55,7 +55,7 @@ class LocationsFix extends Command
         $output['warn'] = [];
         $output['error'] = [];
 
-        $bitrix_url =  env('BITRIX_URL');
+        $bitrix_url = env('BITRIX_URL')."rest/".env('BITRIX_USER')."/".env('BITRIX_KEY')."/";
         /** @var \GuzzleHttp\Client $client */
         $client = new \GuzzleHttp\Client();
 

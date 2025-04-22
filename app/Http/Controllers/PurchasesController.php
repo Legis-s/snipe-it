@@ -73,19 +73,19 @@ class PurchasesController extends Controller
 
 
     /**
-     * Returns a form view used to create a new location.
+     * Returns a form view used to create a new purchase.
      * @see PurchasesController::postCreate() method that validates and stores the data
      */
     public function create(): View
     {
-        $this->authorize('create', Asset::class);
+        $this->authorize('create', Purchase::class);
         return view('purchases/edit')
-            ->with('item', new Purchase)->with('depreciation_list', Helper::depreciationList());
+            ->with('item', new Purchase);
+//            ->with('depreciation_list', Helper::depreciationList());
     }
 
     /**
-     * Validates and stores a new location.
-     * @return \Illuminate\Http\RedirectResponse
+     * Validates and stores a new purchase.
      * @see PurchasesController::getCreate() method that makes the form
      */
     public function store(FileUploadRequest $request): RedirectResponse
@@ -135,20 +135,20 @@ class PurchasesController extends Controller
         $purchase->assets_json = $request->input('assets');
         $purchase->delivery_cost = $request->input('delivery_cost');
         $purchase->user_id = Auth::id();
-        $currency_id = $request->input('currency_id');
+//        $currency_id = $request->input('currency_id');
         $purchase->setStatusInprogress();
 
-        switch ($currency_id) {
-            case 341:
-                $purchase->currency = "руб";
-                break;
-            case 342:
-                $purchase->currency = "usd";
-                break;
-            case 343:
-                $purchase->currency = "eur";
-                break;
-        }
+//        switch ($currency_id) {
+//            case 341:
+//                $purchase->currency = "руб";
+//                break;
+//            case 342:
+//                $purchase->currency = "usd";
+//                break;
+//            case 343:
+//                $purchase->currency = "eur";
+//                break;
+//        }
         $assets = json_decode($request->input('assets'), true);
 //        $consumables = json_decode($request->input('consumables'), true);
         $purchase = $request->handleFile($purchase, public_path() . '/uploads/purchases');
@@ -242,17 +242,12 @@ class PurchasesController extends Controller
                     "FIELDS[PROPERTY_758]" => $purchase->invoice_type->bitrix_id, // тип платежа
                     "FIELDS[PROPERTY_141]" => $purchase->comment, //описание
                     "FIELDS[PROPERTY_142]" => $purchase->final_price, //сумма
-                    "FIELDS[PROPERTY_156]" => $currency_id, //валюта
-                    "FIELDS[PROPERTY_790]" => $purchase->legal_person->bitrix_id, //Юр. лицо
-                    "FIELDS[PROPERTY_158]" => $purchase->supplier->name, //Поставщик название
+                    "FIELDS[PROPERTY_1640]" => $purchase->legal_person->bitrix_id, //Юр. лицо
                     "FIELDS[PROPERTY_824]" => $purchase->supplier->bitrix_id, //Поставщик bitrix_id
                     "FIELDS[PROPERTY_143][0]" => $purchase->invoice_file, //файл имя
                     "FIELDS[PROPERTY_143][1]" => $file_data_base64, //файл base64
                     "FIELDS[PROPERTY_1132]" => $data_list, // что покупаем
                     "FIELDS[PROPERTY_1134]" => $purchase->id . "", //id заказа
-                    "FIELDS[PROPERTY_1120]" => "1", //покупка из системы
-
-                    //2. На боевом есть еще одно поле PROPERTY_1120=Y - надо передать любое значение, означает что создана из snipe_it
                 ]
             ];
             $params_json = json_encode($params);
@@ -261,16 +256,13 @@ class PurchasesController extends Controller
             $purchase->bitrix_send_json = $purchase->id . '.json';
             $purchase->save();
 
-//            $response = $client->request('POST', 'https://bitrixdev.legis-s.ru/rest/1/lp06vc4xgkxjbo3t/lists.element.add.json/',$params);
-
             \Debugbar::info("send bitrix");
             if ($user->bitrix_token && $user->bitrix_id) {
                 $raw_bitrix_token = Crypt::decryptString($user->bitrix_token);
-                $response = $client->request('POST', 'https://bitrix.legis-s.ru/rest/' . $user->bitrix_id . '/' . $raw_bitrix_token . '/lists.element.add.json/', $params);
+                $response = $client->request('POST',  env('BITRIX_URL').'rest/' . $user->bitrix_id . '/' . $raw_bitrix_token . '/lists.element.add.json/', $params);
 
             } else {
-                $response = $client->request('POST', 'https://bitrix.legis-s.ru/rest/722/q7e6fc3qrkiok64x/lists.element.add.json/', $params);
-
+                $response = $client->request('POST',  env('BITRIX_URL').'rest/'.env('BITRIX_USER').'/'.env('BITRIX_KEY').'/lists.element.add.json/', $params);
             }
             \Debugbar::info("cant Crypt ");
             $response = $response->getBody()->getContents();

@@ -283,7 +283,7 @@ class Purchase extends SnipeModel
                 ];
                 $raw_bitrix_token = Crypt::decryptString($user->bitrix_token);
 
-                $client->request('POST', 'https://bitrix.legis-s.ru/rest/' . $user->bitrix_id . '/' . $raw_bitrix_token . '/tasks.task.complete/', $params1);
+                $client->request('POST',  env('BITRIX_URL').'rest/' . $user->bitrix_id . '/' . $raw_bitrix_token . '/tasks.task.complete/', $params1);
                 $params2 = [
                     'query' => [
                         'TASKID' => $this->bitrix_task_id,
@@ -292,7 +292,7 @@ class Purchase extends SnipeModel
                         ]
                     ]
                 ];
-                $client->request('POST', 'https://bitrix.legis-s.ru/rest/' . $user->bitrix_id . '/' . $raw_bitrix_token . '/task.commentitem.add/', $params2);
+                $client->request('POST', env('BITRIX_URL').'rest/' . $user->bitrix_id . '/' . $raw_bitrix_token . '/task.commentitem.add/', $params2);
             }
         }
 

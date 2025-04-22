@@ -37,18 +37,18 @@
         </div>
     </div>
 
-    <!-- currency-select -->
-    <div class="form-group{{ $errors->has('currency_id') ? ' has-error' : '' }}">
-        {{ Form::label("currency_id", "Валюта", array('class' => 'col-md-3 control-label')) }}
-        <div class="col-md-2{{  ((isset($required)) && ($required=='true')) ? ' required' : '' }}">
-            <select class="js-data-no-ajax" data-placeholder="Выберите валюту" name="currency_id" style="width: 100%" id="currency_select" aria-label="currency_id">
-                <option value="341" selected="selected">руб</option>
-                <option value="342">usd</option>
-                <option value="343">eur</option>
-            </select>
-        </div>
-        {!! $errors->first('currency_id', '<div class="col-md-8 col-md-offset-3"><span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span></div>') !!}
-    </div>
+{{--    <!-- currency-select -->--}}
+{{--    <div class="form-group{{ $errors->has('currency_id') ? ' has-error' : '' }}">--}}
+{{--        {{ Form::label("currency_id", "Валюта", array('class' => 'col-md-3 control-label')) }}--}}
+{{--        <div class="col-md-2{{  ((isset($required)) && ($required=='true')) ? ' required' : '' }}">--}}
+{{--            <select class="js-data-no-ajax" data-placeholder="Выберите валюту" name="currency_id" style="width: 100%" id="currency_select" aria-label="currency_id">--}}
+{{--                <option value="341" selected="selected">руб</option>--}}
+{{--                <option value="342">usd</option>--}}
+{{--                <option value="343">eur</option>--}}
+{{--            </select>--}}
+{{--        </div>--}}
+{{--        {!! $errors->first('currency_id', '<div class="col-md-8 col-md-offset-3"><span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span></div>') !!}--}}
+{{--    </div>--}}
 
     <!-- comment -->
     <div class="form-group {{ $errors->has('comment') ? ' has-error' : '' }}">
@@ -60,16 +60,13 @@
     </div>
 
 
-    @include ('partials.forms.edit.supplier-select', ['translated_name' => trans('general.supplier'), 'fieldname' => 'supplier_id','required'=>true])
+    @include ('partials.forms.edit.supplier-select', ['translated_name' => trans('general.supplier'), 'fieldname' => 'supplier_id','required'=>true, 'hide_new'=>true ])
 
     @include ('partials.forms.purchases.invoice-type-select', ['translated_name' => "Тип счета", 'fieldname' => 'invoice_type_id','required'=>true])
 
     @include ('partials.forms.purchases.legal_person-select', ['translated_name' => "Юр. лицо", 'fieldname' => 'legal_person_id','required'=>true])
 
-    @include ('partials.forms.purchases.invoice_file')
-
-{{--    @include ('partials.forms.edit.image-upload', ['image_path' => app('locations_upload_path')])--}}
-
+    @include ('partials.forms.purchases.invoice_file', ['required'=>true,])
 
     <input type="hidden" id="assets" name="assets" value="{{ old('assets_json', $item->assets_json) }}">
     <input type="hidden" id="consumables" name="consumables" value="{{ old('consumables_json', $item->consumables_json) }}">

@@ -1359,12 +1359,12 @@
         }
 
         function bitrixIdContractFormatter(value, row) {
-            if (value) { //https://bitrix.legis-s.ru/crm/contract/details/4537/
+            if (value) {
                 return "<a href='https://bitrix.legis-s.ru/crm/contract/details/" + value + "/' target='_blank'>" + value + "</a>";
             }
         }
         function bitrixIdDealFormatter(value, row) {
-            if (value) { //https://bitrix.legis-s.ru/crm/contract/details/4537/
+            if (value) {
                 return "<a href='https://bitrix.legis-s.ru/crm/deal/details/" + value + "/' target='_blank'>" + value + "</a>";
             }
         }
