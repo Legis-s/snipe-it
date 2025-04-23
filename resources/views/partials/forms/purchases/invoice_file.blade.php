@@ -6,7 +6,7 @@
 
         <label class="btn btn-default" aria-hidden="true">
             {{ trans('button.select_file')  }}
-           <input type="file" name="invoice_file" class="js-uploadFile" id="uploadFile" data-maxsize="{{ Helper::file_upload_max_size() }}" accept="application/pdf,application/x-pdf,application/x-bzpdf,application/x-gzpdf" style="display:none; max-width: 90%" aria-label="image" aria-hidden="true">
+           <input type="file" name="invoice_file" class="js-uploadFile" id="uploadFile" data-maxsize="{{ Helper::file_upload_max_size() }}" accept="image/*, application/pdf,application/x-pdf,application/x-bzpdf,application/x-gzpdf" style="display:none; max-width: 90%" aria-label="image" aria-hidden="true">
         </label>
         <span class='label label-default' id="uploadFile-info"></span>
 

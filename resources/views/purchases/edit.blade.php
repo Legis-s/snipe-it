@@ -37,19 +37,6 @@
         </div>
     </div>
 
-{{--    <!-- currency-select -->--}}
-{{--    <div class="form-group{{ $errors->has('currency_id') ? ' has-error' : '' }}">--}}
-{{--        {{ Form::label("currency_id", "Валюта", array('class' => 'col-md-3 control-label')) }}--}}
-{{--        <div class="col-md-2{{  ((isset($required)) && ($required=='true')) ? ' required' : '' }}">--}}
-{{--            <select class="js-data-no-ajax" data-placeholder="Выберите валюту" name="currency_id" style="width: 100%" id="currency_select" aria-label="currency_id">--}}
-{{--                <option value="341" selected="selected">руб</option>--}}
-{{--                <option value="342">usd</option>--}}
-{{--                <option value="343">eur</option>--}}
-{{--            </select>--}}
-{{--        </div>--}}
-{{--        {!! $errors->first('currency_id', '<div class="col-md-8 col-md-offset-3"><span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span></div>') !!}--}}
-{{--    </div>--}}
-
     <!-- comment -->
     <div class="form-group {{ $errors->has('comment') ? ' has-error' : '' }}">
         <label for="comment" class="col-md-3 control-label">Комментарий</label>
