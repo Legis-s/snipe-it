@@ -229,7 +229,7 @@ class PurchasesController extends Controller
                 'form_params' => [
                     "IBLOCK_TYPE_ID" => "lists",
                     "IBLOCK_ID" => 52,
-                    "ELEMENT_CODE" => "warehouse_buy_" . $purchase->id,
+                    "ELEMENT_CODE" => "dev_warehouse_buy_" . $purchase->id,
                     "FIELDS[NAME]" => $purchase->invoice_number,
                     "FIELDS[CREATED_BY]" => $user->bitrix_id,
                     "FIELDS[PROPERTY_758]" => $purchase->invoice_type->bitrix_id, // тип платежа
@@ -252,7 +252,7 @@ class PurchasesController extends Controller
 //            \Debugbar::info("send bitrix");
             if ($user->bitrix_token && $user->bitrix_id) {
                 try {
-                    \Debugbar::info("raw_bitrix_token");
+//                    \Debugbar::info("raw_bitrix_token");
                     $raw_bitrix_token = Crypt::decryptString($user->bitrix_token);
                     $response = $client->request('POST',  env('BITRIX_URL').'rest/' . $user->bitrix_id . '/' . $raw_bitrix_token . '/lists.element.add.json/', $params);
 
