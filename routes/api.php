@@ -1316,7 +1316,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
 
 
 
-    /**
+        /**
          * Version API routes
          */
 
@@ -1648,6 +1648,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
             )->name('api.contracts.closesell');
 
         });
+
         Route::resource('contracts',
             Api\ContractsController::class,
             ['names' =>
@@ -1662,7 +1663,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
                 'parameters' => ['contract' => 'contract_id'],
             ]
         );// end Contracts API routes
-
 
 
         /**
@@ -1691,7 +1691,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
                 'except' => ['create', 'edit'],
                 'parameters' => ['deal' => 'deal_id'],
             ]
-        );// end Contracts API routes
+        );// end Deals API routes
 
         /**
          * BitrixSync API routes

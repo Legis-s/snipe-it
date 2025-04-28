@@ -39,7 +39,7 @@ use App\Http\Controllers\InventoryStatuslabelsController;
 use App\Http\Controllers\DevicesController;
 use App\Http\Controllers\ContractsController;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\DealsController;
+use App\Http\Controllers\DealsController;
 
 Route::impersonate();
 

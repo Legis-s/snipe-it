@@ -25,17 +25,13 @@ class DealsController extends Controller
 {
     /**
      * Display a listing of the resource.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v4.0]
-     * @return \Illuminate\Http\Response
      */
-    public function index(Request $request) : JsonResponse | array
+    public function index(Request $request): JsonResponse|array
     {
         $this->authorize('view', Location::class);
         $allowed_columns = [
-            'id','name','address','created_at', 'updated_at','manager_id',
-            'assigned_assets_count','users_count','assets_count','currency'
+            'id', 'name', 'address', 'created_at', 'updated_at', 'manager_id',
+            'assigned_assets_count', 'users_count', 'assets_count', 'currency'
         ];
 
         $deals = Deal::select([
@@ -51,31 +47,13 @@ class DealsController extends Controller
             'deals.created_at',
             'deals.updated_at',
         ]);
-//
-//            ->withSum('assets as assets_sum', 'purchase_cost')
-//            ->withCount('assets as assets_count')
-//            ->withCount('assets_no_docs as assets_no_docs_count')
-//            ->withCount('consumable as consumable_count')
-//            ->withCount('consumable_no_docs as consumable_no_docs_count')
-//            ->addSelect(['consumables_cost' => ConsumableAssignment::query()
-//                ->whereColumn('contract_id', 'contracts.id')
-//                ->selectRaw('sum(quantity * cost) as consumables_cost')
-//            ]);
 
-//        $contracts = Contract::addSelect([]);
         if ($request->filled('search')) {
             $deals = $deals->TextSearch($request->input('search'));
         }
-        if ($request->filled('sum_error') && $request->input('sum_error') == 1 ) {
+        if ($request->filled('sum_error') && $request->input('sum_error') == 1) {
             $deals = $deals->havingRaw('assets_sum + consumables_cost > contracts.summ');
         }
-//        if ($request->filled('only_assets') && $request->input('only_assets') == 1 ) {
-//            $deals = $deals->having('assets_no_docs_count','>',0);
-//        }
-//        if ($request->filled('only_consumables') && $request->input('only_consumables') == 1 ) {
-//            $deals = $deals->having('consumable_no_docs_count','>',0);
-//        }
-
 
         // Set the offset to the API call's offset, unless the offset is higher than the actual count of items in which
         // case we override with the actual count, so we should return 0 items.
@@ -109,11 +87,11 @@ class DealsController extends Controller
     /**
      * Display the specified resource.
      *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @param int $id
      * @since [v4.0]
-     * @param  int  $id
+     * @author [A. Gianotto] [<snipe@snipe.net>]
      */
-    public function show($id)  : JsonResponse | array
+    public function show($id): JsonResponse | array
     {
         $this->authorize('view', Deal::class);
         $deal = Deal::with('')
@@ -128,10 +106,9 @@ class DealsController extends Controller
                 'deals.created_at',
                 'deals.updated_at',
             ])
-        ->findOrFail($id);
+            ->findOrFail($id);
         return (new DealsTransformer())->transformDeal($deal);
     }
-
 
 
     /**
@@ -166,7 +143,7 @@ class DealsController extends Controller
     public function selectlist(Request $request)
     {
 
-       $deals = Deal::select([
+        $deals = Deal::select([
             'deals.id',
             'deals.name',
             'deals.number',
@@ -179,16 +156,16 @@ class DealsController extends Controller
         }
 
         if ($request->filled('search')) {
-            $deals = $deals->where('deals.name', 'LIKE', '%'.$request->input('search').'%')
-                ->orWhere('deals.number', 'LIKE', '%'.$request->input('search').'%');
+            $deals = $deals->where('deals.name', 'LIKE', '%' . $request->input('search') . '%')
+                ->orWhere('deals.number', 'LIKE', '%' . $request->input('search') . '%');
         }
 
         $deals = $deals->orderBy('name', 'ASC')->get();
 
         foreach ($deals as $deal) {
             $name_str = '';
-            if ($deal->number!='') {
-                $name_str .= "[".e($deal->number).'] ';
+            if ($deal->number != '') {
+                $name_str .= "[" . e($deal->number) . '] ';
             }
             $name_str .= e($deal->name);
 
@@ -196,7 +173,7 @@ class DealsController extends Controller
             $deal->use_text = preg_replace('/&quot;/', '"', $name_str);;
         }
 
-        $paginated_results =  new LengthAwarePaginator($deals->forPage($page, 500), $deals->count(), 500, $page, []);
+        $paginated_results = new LengthAwarePaginator($deals->forPage($page, 500), $deals->count(), 500, $page, []);
 
         return (new SelectlistTransformer)->transformSelectlist($paginated_results);
 
