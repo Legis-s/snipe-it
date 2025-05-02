@@ -235,7 +235,7 @@ class PurchasesController extends Controller
                     "FIELDS[PROPERTY_758]" => $purchase->invoice_type->bitrix_id, // тип платежа
                     "FIELDS[PROPERTY_141]" => $purchase->comment, //описание
                     "FIELDS[PROPERTY_142]" => $purchase->final_price, //сумма
-                    "FIELDS[PROPERTY_1640]" => $purchase->legal_person->bitrix_id, //Юр. лицо
+                    "FIELDS[PROPERTY_1641]" => $purchase->legal_person->bitrix_id, //Юр. лицо
                     "FIELDS[PROPERTY_824]" => $purchase->supplier->bitrix_id, //Поставщик bitrix_id
                     "FIELDS[PROPERTY_143][0]" => $purchase->invoice_file, //файл имя
                     "FIELDS[PROPERTY_143][1]" => $file_data_base64, //файл base64
