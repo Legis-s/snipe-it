@@ -249,18 +249,13 @@ class PurchasesController extends Controller
             $purchase->bitrix_send_json = $purchase->id . '.json';
             $purchase->save();
 
-//            \Debugbar::info("send bitrix");
             if ($user->bitrix_token && $user->bitrix_id) {
-                try {
-//                    \Debugbar::info("raw_bitrix_token");
-                    $raw_bitrix_token = Crypt::decryptString($user->bitrix_token);
-                    $response = $client->request('POST',  env('BITRIX_URL').'rest/' . $user->bitrix_id . '/' . $raw_bitrix_token . '/lists.element.add.json/', $params);
+                $raw_bitrix_token = Crypt::decryptString($user->bitrix_token);
+                $response = $client->request('POST', 'https://bitrix.legis-s.ru/rest/' . $user->bitrix_id . '/' . $raw_bitrix_token . '/lists.element.add.json/', $params);
 
-                } catch (DecryptException $e) {
-                    $response = $client->request('POST',  env('BITRIX_URL').'rest/'.env('BITRIX_USER').'/'.env('BITRIX_KEY').'/lists.element.add.json/', $params);
-                }
             } else {
-                $response = $client->request('POST',  env('BITRIX_URL').'rest/'.env('BITRIX_USER').'/'.env('BITRIX_KEY').'/lists.element.add.json/', $params);
+                $response = $client->request('POST', 'https://bitrix.legis-s.ru/rest/722/q7e6fc3qrkiok64x/lists.element.add.json/', $params);
+
             }
             $response = $response->getBody()->getContents();
 
