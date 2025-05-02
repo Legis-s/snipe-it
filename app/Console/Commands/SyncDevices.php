@@ -228,12 +228,12 @@ class SyncDevices extends Command
             $distance = null;
             if($asset && $coordinates){
                 if ($asset->location){
-                   if  ($asset->location->coordinates){
-                       $obj_location = $asset->location->coordinates;
-                       $obj_location = explode(",", $obj_location);
-                       $dev_coordinates= explode(",", $coordinates);
-                       $distance = $this->getDistanceBetweenPointsNew($obj_location[0],$obj_location[1],$dev_coordinates[0],$dev_coordinates[1]);
-                   }
+                    if  ($asset->location->coordinates){
+                        $obj_location = $asset->location->coordinates;
+                        $obj_location = explode(",", $obj_location);
+                        $dev_coordinates= explode(",", $coordinates);
+                        $distance = $this->getDistanceBetweenPointsNew($obj_location[0],$obj_location[1],$dev_coordinates[0],$dev_coordinates[1]);
+                    }
                 }
             }
 
@@ -260,7 +260,7 @@ class SyncDevices extends Command
                     'distance' => $distance,
                     'publicIp' => $publicIp,
                     'enrollTime' => $enrollTime,
-//                    'anyDesk' => $anyDesk,
+                    // 'anyDesk' => $anyDesk,
                 ]
             );
         }

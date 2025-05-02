@@ -23,6 +23,8 @@ class Purchase extends SnipeModel
     const REVIEW = 'review';
     const INVENTORY = 'inventory';
 
+    const REJECTED = 'rejected';
+
     protected $dates = ['deleted_at'];
     protected $table = 'purchases';
     protected $rules = array(
