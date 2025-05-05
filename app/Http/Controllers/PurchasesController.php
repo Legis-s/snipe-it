@@ -126,6 +126,7 @@ class PurchasesController extends Controller
 
 
         $purchase = new Purchase();
+        $purchase->currency = "руб";
         $purchase->invoice_number = $request->input('invoice_number');
         $purchase->final_price = $request->input('final_price');
         $purchase->supplier_id = $request->input('supplier_id');
