@@ -25,7 +25,7 @@ return [
     'audit_interval_help'       => 'ប្រសិនបើអ្នកត្រូវបានតម្រូវឱ្យធ្វើសវនកម្មលើទ្រព្យសកម្មរបស់អ្នកឱ្យបានទៀងទាត់ សូមបញ្ចូលចន្លោះពេលជាច្រើនខែដែលអ្នកប្រើ។ ប្រសិនបើអ្នកធ្វើបច្ចុប្បន្នភាពតម្លៃនេះ រាល់ "កាលបរិច្ឆេទសវនកម្មបន្ទាប់" សម្រាប់ទ្រព្យសកម្មដែលមានកាលបរិច្ឆេទសវនកម្មនាពេលខាងមុខនឹងត្រូវបានអាប់ដេត។',
     'audit_warning_days'        => 'Audit Warning Threshold',
     'audit_warning_days_help'   => 'តើ​យើង​គួរ​ព្រមាន​អ្នក​មុន​ប៉ុន្មាន​ថ្ងៃ​នៅ​ពេល​ទ្រព្យ​សកម្ម​ត្រូវ​កំណត់​សម្រាប់​ការ​ធ្វើ​សវនកម្ម?',
-    'auto_increment_assets'		=> 'Enerate auto-incrementing asset tags',
+    'auto_increment_assets'		=> 'បង្កើត​ស្លាក​ទ្រព្យសកម្ម​បង្កើន​ដោយ​ស្វ័យ​ប្រវត្តិ',
     'auto_increment_prefix'		=> 'បុព្វបទ (ជាជម្រើស)',
     'auto_incrementing_help'    => 'បើកដំណើរការស្លាកទ្រព្យសម្បត្តិដែលបង្កើនដោយស្វ័យប្រវត្តិជាមុនសិនដើម្បីកំណត់វា។',
     'backups'					=> 'ការបម្រុងទុក',
@@ -64,6 +64,8 @@ return [
     'enabled'                   => 'បានបើក',
     'eula_settings'				=> 'ការកំណត់ EULA',
     'eula_markdown'				=> 'EULA នេះអនុញ្ញាតឱ្យ <a href="https://help.github.com/articles/github-flavored-markdown/">Github flavored markdown</a>។',
+    'empty_row_count'           => 'Field Start Offset (Empty Rows)',
+    'empty_row_count_help'      => 'Fields will begin populating after this many empty rows are skipped at the top of the label.',
     'favicon'                   => 'Favicon',
     'favicon_format'            => 'ប្រភេទឯកសារដែលទទួលយកគឺ ico, png និង gif ។ ទម្រង់រូបភាពផ្សេងទៀតប្រហែលជាមិនដំណើរការនៅក្នុងកម្មវិធីរុករកទាំងអស់ទេ។',
     'favicon_size'          => 'Favicons គួរតែជារូបភាពការ៉េ ១៦x១៦ ភីកសែល។',
@@ -153,7 +155,9 @@ return [
     'full_multiple_companies_support_help_text' => 'ការដាក់កម្រិតអ្នកប្រើប្រាស់ (រាប់បញ្ចូលទាំងអ្នកគ្រប់គ្រង) ដែលត្រូវបានចាត់តាំងឱ្យក្រុមហ៊ុនចំពោះទ្រព្យសម្បត្តិរបស់ក្រុមហ៊ុនពួកគេ។',
     'full_multiple_companies_support_text' => 'ការគាំទ្រក្រុមហ៊ុនច្រើនយ៉ាងពេញលេញ',
     'scope_locations_fmcs_support_text'  => 'Scope Locations with Full Multiple Companies Support',
-    'scope_locations_fmcs_support_help_text'  => 'In previous versions, locations were not restricted to a particular company. If this setting is disabled, this preserves backward compatibility with older versions and locations can be used across multiple companies. If this setting is enabled, locations are restricted to their selected company.',
+    'scope_locations_fmcs_support_help_text'  => 'Restrict locations to their selected company.',
+    'scope_locations_fmcs_check_button' => 'Check Compatibility',
+    'scope_locations_fmcs_support_disabled_text'  => 'This option is disabled because you have conflicting locations set for :count or more items.',
     'show_in_model_list'   => 'Show in Model Dropdowns',
     'optional'					=> 'ជាជម្រើស',
     'per_page'                  => 'លទ្ធផលក្នុងមួយទំព័រ',
@@ -452,6 +456,24 @@ return [
         'logo_and_text' => 'Logo and Text',
     ],
 
+
+    'legends' => [
+        'scoping' => 'Scoping',
+        'formats' => 'Default Formats',
+        'profiles' => 'User Profiles',
+        'eula' => 'EULA & Acceptance Preferences',
+        'misc_display' => 'Miscellaneous Display Options',
+        'email' => 'Email Preferences',
+        'checkin' => 'Checkin Preferences',
+        'dashboard' => 'Login & Dashboard Preferences',
+        'misc' => 'Miscellaneous',
+        'logos' => 'Logos & Display',
+        'colors' => 'Colors & Skins',
+        'footer' => 'Footer Preferences',
+        'security' => 'Security Preferences',
+        'general' => 'General',
+        'intervals' => 'Intervals & Thresholds',
+    ],
 
 
     /* Keywords for settings overview help */

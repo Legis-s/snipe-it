@@ -328,9 +328,15 @@ class AssetsController extends Controller
         if ($request->input('requestable') == 'true') {
             $assets->where('assets.requestable', '=', '1');
         }
-
+        
         if ($request->filled('model_id')) {
-            $assets->InModelList([$request->input('model_id')]);
+            // If model_id is already an array, just use it as-is
+            if (is_array($request->input('model_id'))) {
+                $assets->InModelList($request->input('model_id'));
+            } else {
+                // Otherwise, turn it into an array
+                $assets->InModelList([$request->input('model_id')]);
+            }
         }
 
         if ($request->filled('category_id')) {
@@ -751,7 +757,9 @@ class AssetsController extends Controller
 
             return response()->json(Helper::formatStandardApiResponse('success', $asset, trans('admin/hardware/message.create.success')));
 
-            return response()->json(Helper::formatStandardApiResponse('success', (new AssetsTransformer)->transformAsset($asset), trans('admin/hardware/message.create.success')));
+            // below is what we want the _eventual_ return to look like - in a more standardized format.
+            // return response()->json(Helper::formatStandardApiResponse('success', (new AssetsTransformer)->transformAsset($asset), trans('admin/hardware/message.create.success')));
+
         }
 
         return response()->json(Helper::formatStandardApiResponse('error', null, $asset->getErrors()), 200);

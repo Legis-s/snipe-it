@@ -25,7 +25,7 @@ return [
     'audit_interval_help'       => 'crwdns11201:0crwdne11201:0',
     'audit_warning_days'        => 'crwdns1910:0crwdne1910:0',
     'audit_warning_days_help'   => 'crwdns1911:0crwdne1911:0',
-    'auto_increment_assets'		=> 'crwdns13154:0crwdne13154:0',
+    'auto_increment_assets'		=> 'crwdns13178:0crwdne13178:0',
     'auto_increment_prefix'		=> 'crwdns1148:0crwdne1148:0',
     'auto_incrementing_help'    => 'crwdns6323:0crwdne6323:0',
     'backups'					=> 'crwdns1331:0crwdne1331:0',
@@ -64,6 +64,8 @@ return [
     'enabled'                   => 'crwdns6337:0crwdne6337:0',
     'eula_settings'				=> 'crwdns1296:0crwdne1296:0',
     'eula_markdown'				=> 'crwdns1261:0crwdne1261:0',
+    'empty_row_count'           => 'crwdns13236:0crwdne13236:0',
+    'empty_row_count_help'      => 'crwdns13238:0crwdne13238:0',
     'favicon'                   => 'crwdns5858:0crwdne5858:0',
     'favicon_format'            => 'crwdns5860:0crwdne5860:0',
     'favicon_size'          => 'crwdns5862:0crwdne5862:0',
@@ -151,7 +153,9 @@ return [
     'full_multiple_companies_support_help_text' => 'crwdns1464:0crwdne1464:0',
     'full_multiple_companies_support_text' => 'crwdns1465:0crwdne1465:0',
     'scope_locations_fmcs_support_text'  => 'crwdns13049:0crwdne13049:0',
-    'scope_locations_fmcs_support_help_text'  => 'crwdns13142:0crwdne13142:0',
+    'scope_locations_fmcs_support_help_text'  => 'crwdns13188:0crwdne13188:0',
+    'scope_locations_fmcs_check_button' => 'crwdns13234:0crwdne13234:0',
+    'scope_locations_fmcs_support_disabled_text'  => 'crwdns13190:0crwdne13190:0',
     'show_in_model_list'   => 'crwdns1990:0crwdne1990:0',
     'optional'					=> 'crwdns1298:0crwdne1298:0',
     'per_page'                  => 'crwdns832:0crwdne832:0',
@@ -450,6 +454,24 @@ return [
         'logo_and_text' => 'crwdns12981:0crwdne12981:0',
     ],
 
+
+    'legends' => [
+        'scoping' => 'crwdns13192:0crwdne13192:0',
+        'formats' => 'crwdns13194:0crwdne13194:0',
+        'profiles' => 'crwdns13196:0crwdne13196:0',
+        'eula' => 'crwdns13224:0crwdne13224:0',
+        'misc_display' => 'crwdns13200:0crwdne13200:0',
+        'email' => 'crwdns13202:0crwdne13202:0',
+        'checkin' => 'crwdns13204:0crwdne13204:0',
+        'dashboard' => 'crwdns13206:0crwdne13206:0',
+        'misc' => 'crwdns13208:0crwdne13208:0',
+        'logos' => 'crwdns13212:0crwdne13212:0',
+        'colors' => 'crwdns13214:0crwdne13214:0',
+        'footer' => 'crwdns13216:0crwdne13216:0',
+        'security' => 'crwdns13218:0crwdne13218:0',
+        'general' => 'crwdns13220:0crwdne13220:0',
+        'intervals' => 'crwdns13222:0crwdne13222:0',
+    ],
 
 
     /* Keywords for settings overview help */

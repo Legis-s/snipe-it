@@ -390,6 +390,8 @@ return [
     'new_license'           => 'Nauja licencija',
     'new_accessory'         => 'Naujas priedas',
     'new_consumable'        => 'Nauja eksploatacinė medžiaga',
+    'new_component'         => 'New Component',
+    'new_user'              => 'New User',
     'collapse'              => 'Sutraukti',
     'assigned'              => 'Priskirta',
     'asset_count'           => 'Turto kiekis',
@@ -614,5 +616,14 @@ return [
     'deleted_users' => 'Panaikinti naudotojai',
     'cost_each' => ':amount kiekvienas',
     'remove_current_image' => 'Remove current :type image',
+
+    'seeding' => [
+        'manufacturers' => [
+            'button' => 'Create Manufacturers',
+            'prompt' => 'You do not have any manufacturers yet. Would you like to seed a list of common manufacturers? (THIS WILL OVERWRITE EXISTING MANUFACTURERS, including those that have been soft-deleted.)',
+            'success' => 'Manufacturers seeded successfully',
+            'error' => 'Could not seed manufacturers. A manufacturer record already exists and seeding would overwrite it.|Could not seed manufacturers. :count manufacturer records already exist and seeding would overwrite them.',
+        ],
+    ],
 
 ];

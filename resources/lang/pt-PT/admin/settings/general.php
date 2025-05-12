@@ -25,7 +25,7 @@ return [
     'audit_interval_help'       => 'Se for obrigado a fiscalizar fisicamente os seus ativos, insira o intervalo em meses que usa. Se você atualizar este valor, todas as "próximas datas de auditoria" para os artigos com uma data de auditoria futura serão atualizadas.',
     'audit_warning_days'        => 'Limiar de aviso de auditoria',
     'audit_warning_days_help'   => 'Quantos dias de antecedência devemos avisar quando os ativos são devidos para a auditoria?',
-    'auto_increment_assets'		=> 'Enerate auto-incrementing asset tags',
+    'auto_increment_assets'		=> 'Gerar etiquetas de artigos com incremento automático',
     'auto_increment_prefix'		=> 'Prefixo (opcional)',
     'auto_incrementing_help'    => 'Permitir o incremento automático de etiquetas de artigos antes de configurar isto',
     'backups'					=> 'Cópias de segurança',
@@ -64,6 +64,8 @@ return [
     'enabled'                   => 'Ativado',
     'eula_settings'				=> 'Definições de EULA',
     'eula_markdown'				=> 'Este EULA permite <a href="https://help.github.com/articles/github-flavored-markdown/">Github flavored markdown</a>.',
+    'empty_row_count'           => 'Field Start Offset (Empty Rows)',
+    'empty_row_count_help'      => 'Fields will begin populating after this many empty rows are skipped at the top of the label.',
     'favicon'                   => 'Ícone de Favoritos',
     'favicon_format'            => 'Os tipos de arquivos aceites são ico, png e gif. Outros formatos de imagem podem não funcionar em todos os navegadores.',
     'favicon_size'          => 'Favicons devem ser imagens quadradas, 16x16 pixels.',
@@ -151,7 +153,9 @@ return [
     'full_multiple_companies_support_help_text' => 'Restringir utilizadores (incluindo admins) associados a empresas ao ativos da empresa.',
     'full_multiple_companies_support_text' => 'Suporte multi-empresa completo',
     'scope_locations_fmcs_support_text'  => 'Scope Locations with Full Multiple Companies Support',
-    'scope_locations_fmcs_support_help_text'  => 'In previous versions, locations were not restricted to a particular company. If this setting is disabled, this preserves backward compatibility with older versions and locations can be used across multiple companies. If this setting is enabled, locations are restricted to their selected company.',
+    'scope_locations_fmcs_support_help_text'  => 'Restrict locations to their selected company.',
+    'scope_locations_fmcs_check_button' => 'Check Compatibility',
+    'scope_locations_fmcs_support_disabled_text'  => 'This option is disabled because you have conflicting locations set for :count or more items.',
     'show_in_model_list'   => 'Mostrar modelos em menu de cascata',
     'optional'					=> 'opcional',
     'per_page'                  => 'Resultados por página',
@@ -450,6 +454,24 @@ return [
         'logo_and_text' => 'Logo and Text',
     ],
 
+
+    'legends' => [
+        'scoping' => 'Scoping',
+        'formats' => 'Default Formats',
+        'profiles' => 'User Profiles',
+        'eula' => 'EULA & Acceptance Preferences',
+        'misc_display' => 'Miscellaneous Display Options',
+        'email' => 'Email Preferences',
+        'checkin' => 'Checkin Preferences',
+        'dashboard' => 'Login & Dashboard Preferences',
+        'misc' => 'Miscellaneous',
+        'logos' => 'Logos & Display',
+        'colors' => 'Colors & Skins',
+        'footer' => 'Footer Preferences',
+        'security' => 'Security Preferences',
+        'general' => 'General',
+        'intervals' => 'Intervals & Thresholds',
+    ],
 
 
     /* Keywords for settings overview help */

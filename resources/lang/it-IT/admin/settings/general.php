@@ -64,6 +64,8 @@ return [
     'enabled'                   => 'Abilitato',
     'eula_settings'				=> 'Impostazioni EULA',
     'eula_markdown'				=> 'Questa EULA consente l\'uso del <a href="https://help.github.com/articles/github-flavored-markdown/">Markdown in stile Github flavored</a>.',
+    'empty_row_count'           => 'Field Start Offset (Empty Rows)',
+    'empty_row_count_help'      => 'Fields will begin populating after this many empty rows are skipped at the top of the label.',
     'favicon'                   => 'Favicon',
     'favicon_format'            => 'I tipi di file accettati sono ico, png e gif. Altri formati potrebbero non funzionare in tutti i browser.',
     'favicon_size'          => 'Le Favicon dovrebbero essere quadrate, 16x16 pixel.',
@@ -151,7 +153,9 @@ return [
     'full_multiple_companies_support_help_text' => 'Restringere gli utenti (amministratori inclusi) assegnati ad una azienda agli asset della propria azienda.',
     'full_multiple_companies_support_text' => 'Supporto completo ad aziende multiple',
     'scope_locations_fmcs_support_text'  => 'Posizioni precise con supporto completo alle aziende multiple',
-    'scope_locations_fmcs_support_help_text'  => 'Nelle versioni precedenti, le sedi non erano limitate a una particolare società. Se questa impostazione è disattivata, verrà preservata la compatibilità con le versioni precedenti e le stesse posizioni potranno essere utilizzate in più aziende. Se invece questa impostazione è abilitata, le posizioni saranno limitate all\'azienda selezionata.',
+    'scope_locations_fmcs_support_help_text'  => 'Restrict locations to their selected company.',
+    'scope_locations_fmcs_check_button' => 'Check Compatibility',
+    'scope_locations_fmcs_support_disabled_text'  => 'This option is disabled because you have conflicting locations set for :count or more items.',
     'show_in_model_list'   => 'Mostra in menu a discesa del modello',
     'optional'					=> 'facoltativo',
     'per_page'                  => 'Risultati per Pagina',
@@ -450,6 +454,24 @@ return [
         'logo_and_text' => 'Logo e Testo',
     ],
 
+
+    'legends' => [
+        'scoping' => 'Scoping',
+        'formats' => 'Default Formats',
+        'profiles' => 'User Profiles',
+        'eula' => 'EULA & Acceptance Preferences',
+        'misc_display' => 'Miscellaneous Display Options',
+        'email' => 'Email Preferences',
+        'checkin' => 'Checkin Preferences',
+        'dashboard' => 'Login & Dashboard Preferences',
+        'misc' => 'Miscellaneous',
+        'logos' => 'Loghi E Schermo',
+        'colors' => 'Colori E Skin',
+        'footer' => 'Preferenze piè di pagina',
+        'security' => 'Security Preferences',
+        'general' => 'General',
+        'intervals' => 'Intervals & Thresholds',
+    ],
 
 
     /* Keywords for settings overview help */

@@ -25,7 +25,7 @@ return [
     'audit_interval_help'       => 'If you are required to regularly physically audit your assets, enter the interval in months that you use. If you update this value, all of the "next audit dates" for assets with an upcoming audit date will be updated.',
     'audit_warning_days'        => 'เกณฑ์การตรวจสอบคำเตือน',
     'audit_warning_days_help'   => 'เราควรเตือนล่วงหน้ากี่วันเมื่อสินทรัพย์มีกำหนดการตรวจสอบ?',
-    'auto_increment_assets'		=> 'Enerate auto-incrementing asset tags',
+    'auto_increment_assets'		=> 'Generate auto-incrementing asset tags',
     'auto_increment_prefix'		=> 'Prefix (ส่วนเสริม)',
     'auto_incrementing_help'    => 'Enable auto-incrementing asset tags first to set this',
     'backups'					=> 'สำรอง',
@@ -64,6 +64,8 @@ return [
     'enabled'                   => 'Enabled',
     'eula_settings'				=> 'ตั้งค่าข้อตกลงการใช้งาน',
     'eula_markdown'				=> 'อนุญาต EULA นี้ <a href="https://help.github.com/articles/github-flavored-markdown/">Github flavored markdown</a>.',
+    'empty_row_count'           => 'Field Start Offset (Empty Rows)',
+    'empty_row_count_help'      => 'Fields will begin populating after this many empty rows are skipped at the top of the label.',
     'favicon'                   => 'Favicon',
     'favicon_format'            => 'Accepted filetypes are ico, png, and gif. Other image formats may not work in all browsers.',
     'favicon_size'          => 'Favicons should be square images, 16x16 pixels.',
@@ -151,7 +153,9 @@ return [
     'full_multiple_companies_support_help_text' => 'จำกัด ผู้ใช้ (รวมทั้งผู้ดูแลระบบ) ที่มอบหมายให้ บริษัท ไปยังสินทรัพย์ของ บริษัท',
     'full_multiple_companies_support_text' => 'การสนับสนุนหลาย บริษัท',
     'scope_locations_fmcs_support_text'  => 'Scope Locations with Full Multiple Companies Support',
-    'scope_locations_fmcs_support_help_text'  => 'In previous versions, locations were not restricted to a particular company. If this setting is disabled, this preserves backward compatibility with older versions and locations can be used across multiple companies. If this setting is enabled, locations are restricted to their selected company.',
+    'scope_locations_fmcs_support_help_text'  => 'Restrict locations to their selected company.',
+    'scope_locations_fmcs_check_button' => 'Check Compatibility',
+    'scope_locations_fmcs_support_disabled_text'  => 'This option is disabled because you have conflicting locations set for :count or more items.',
     'show_in_model_list'   => 'แสดงใน Dropdown แบบจำลอง',
     'optional'					=> 'ออฟชั่นเสริม',
     'per_page'                  => 'ผลการค้นหาต่อหน้า',
@@ -450,6 +454,24 @@ return [
         'logo_and_text' => 'Logo and Text',
     ],
 
+
+    'legends' => [
+        'scoping' => 'Scoping',
+        'formats' => 'Default Formats',
+        'profiles' => 'User Profiles',
+        'eula' => 'EULA & Acceptance Preferences',
+        'misc_display' => 'Miscellaneous Display Options',
+        'email' => 'Email Preferences',
+        'checkin' => 'Checkin Preferences',
+        'dashboard' => 'Login & Dashboard Preferences',
+        'misc' => 'Miscellaneous',
+        'logos' => 'Logos & Display',
+        'colors' => 'Colors & Skins',
+        'footer' => 'Footer Preferences',
+        'security' => 'Security Preferences',
+        'general' => 'General',
+        'intervals' => 'Intervals & Thresholds',
+    ],
 
 
     /* Keywords for settings overview help */

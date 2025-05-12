@@ -390,6 +390,8 @@ return [
     'new_license'           => 'Ny licens',
     'new_accessory'         => 'Nytt tillbehör',
     'new_consumable'        => 'Ny förbrukningsvara',
+    'new_component'         => 'New Component',
+    'new_user'              => 'New User',
     'collapse'              => 'Dölj',
     'assigned'              => 'Tilldelad',
     'asset_count'           => 'Antal tillgångar',
@@ -614,5 +616,14 @@ return [
     'deleted_users' => 'Raderade användare',
     'cost_each' => ':amount styck',
     'remove_current_image' => 'Remove current :type image',
+
+    'seeding' => [
+        'manufacturers' => [
+            'button' => 'Create Manufacturers',
+            'prompt' => 'You do not have any manufacturers yet. Would you like to seed a list of common manufacturers? (THIS WILL OVERWRITE EXISTING MANUFACTURERS, including those that have been soft-deleted.)',
+            'success' => 'Manufacturers seeded successfully',
+            'error' => 'Could not seed manufacturers. A manufacturer record already exists and seeding would overwrite it.|Could not seed manufacturers. :count manufacturer records already exist and seeding would overwrite them.',
+        ],
+    ],
 
 ];

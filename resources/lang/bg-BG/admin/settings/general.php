@@ -25,7 +25,7 @@ return [
     'audit_interval_help'       => 'Ако искадате да правите периодична инвентаризация на вашите активи, въведете интервала в месеци за инвентаризация. Ако въведете този интервал, всички активи ще им се смени датата за следваща инвентаризация.',
     'audit_warning_days'        => 'Праг за предупреждение за одит',
     'audit_warning_days_help'   => 'Колко дни предварително трябва да ви предупреждаваме, когато активите са дължими за одит?',
-    'auto_increment_assets'		=> 'Enerate auto-incrementing asset tags',
+    'auto_increment_assets'		=> 'Автоматично генериране на инвентарни номера на активите',
     'auto_increment_prefix'		=> 'Префикс (незадължително)',
     'auto_incrementing_help'    => 'Първо включете автоматично генериране на инвентарни номера, за да включите тази опция',
     'backups'					=> 'Архивиране',
@@ -64,6 +64,8 @@ return [
     'enabled'                   => 'Активно',
     'eula_settings'				=> 'Настройки на EULA',
     'eula_markdown'				=> 'Съдържанието на EULA може да бъде форматирано с <a href="https://help.github.com/articles/github-flavored-markdown/">Github flavored markdown</a>.',
+    'empty_row_count'           => 'Field Start Offset (Empty Rows)',
+    'empty_row_count_help'      => 'Fields will begin populating after this many empty rows are skipped at the top of the label.',
     'favicon'                   => 'Favicon',
     'favicon_format'            => 'Приетите файлови формати са ico, png, и gif. Другите формати на снимки може да не работят в всъчки браузъри.',
     'favicon_size'          => 'Favicons трябва да бъдат квадратна снимка с размери, 16х16 пиксела.',
@@ -151,7 +153,9 @@ return [
     'full_multiple_companies_support_help_text' => 'Ограничаване на потребителите (включително административните) до активите на собствената им компания.',
     'full_multiple_companies_support_text' => 'Поддръжка на множество компании',
     'scope_locations_fmcs_support_text'  => 'Scope Locations with Full Multiple Companies Support',
-    'scope_locations_fmcs_support_help_text'  => 'In previous versions, locations were not restricted to a particular company. If this setting is disabled, this preserves backward compatibility with older versions and locations can be used across multiple companies. If this setting is enabled, locations are restricted to their selected company.',
+    'scope_locations_fmcs_support_help_text'  => 'Restrict locations to their selected company.',
+    'scope_locations_fmcs_check_button' => 'Check Compatibility',
+    'scope_locations_fmcs_support_disabled_text'  => 'This option is disabled because you have conflicting locations set for :count or more items.',
     'show_in_model_list'   => 'Показване в падащите менюта на моделите',
     'optional'					=> 'незадължително',
     'per_page'                  => 'Резултати на страница',
@@ -450,6 +454,24 @@ return [
         'logo_and_text' => 'Logo and Text',
     ],
 
+
+    'legends' => [
+        'scoping' => 'Scoping',
+        'formats' => 'Default Formats',
+        'profiles' => 'User Profiles',
+        'eula' => 'EULA & Acceptance Preferences',
+        'misc_display' => 'Miscellaneous Display Options',
+        'email' => 'Email Preferences',
+        'checkin' => 'Checkin Preferences',
+        'dashboard' => 'Login & Dashboard Preferences',
+        'misc' => 'Miscellaneous',
+        'logos' => 'Logos & Display',
+        'colors' => 'Colors & Skins',
+        'footer' => 'Footer Preferences',
+        'security' => 'Security Preferences',
+        'general' => 'General',
+        'intervals' => 'Intervals & Thresholds',
+    ],
 
 
     /* Keywords for settings overview help */

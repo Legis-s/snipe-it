@@ -64,6 +64,8 @@ return [
     'changepassword'  		=> 'Изменить пароль',
     'checkin'  				=> 'Вернуть',
     'checkin_from'  		=> 'Возврат из',
+    'checkin_note'  		=> 'Checkin Note',
+    'checkout_note'  		=> 'Checkout Note',
     'checkout'  			=> 'Выдать',
     'checkouts_count'       => 'Выдадвалось',
     'checkins_count'        => 'Возвращалось',
@@ -388,6 +390,8 @@ return [
     'new_license'           => 'Создать лицензию',
     'new_accessory'         => 'Создать аксессуар',
     'new_consumable'        => 'Создать новый расходник',
+    'new_component'         => 'New Component',
+    'new_user'              => 'New User',
     'collapse'              => 'Свернуть',
     'assigned'              => 'Назначено',
     'asset_count'           => 'Количество активов',
@@ -612,6 +616,15 @@ return [
     'deleted_users' => 'Удаленные пользователи',
     'cost_each' => ':amount each',
     'remove_current_image' => 'Remove current :type image',
+
+    'seeding' => [
+        'manufacturers' => [
+            'button' => 'Create Manufacturers',
+            'prompt' => 'You do not have any manufacturers yet. Would you like to seed a list of common manufacturers? (THIS WILL OVERWRITE EXISTING MANUFACTURERS, including those that have been soft-deleted.)',
+            'success' => 'Manufacturers seeded successfully',
+            'error' => 'Could not seed manufacturers. A manufacturer record already exists and seeding would overwrite it.|Could not seed manufacturers. :count manufacturer records already exist and seeding would overwrite them.',
+        ],
+    ],
 
     'mass_operations' => 'Массовые операции',
     'selling' => 'Продажа',

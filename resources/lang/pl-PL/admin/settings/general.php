@@ -25,7 +25,7 @@ return [
     'audit_interval_help'       => 'Jeśli jesteś zobowiązany do regularnego fizycznego audytu swoich aktywów, wprowadź interwał w miesiącach, który stosujesz. Jeśli zaktualizujesz tę wartość, wszystkie "daty następnego audytu" dla aktywów z nadchodzącą datą audytu zostaną zaktualizowane.',
     'audit_warning_days'        => 'Próg ostrzegania przed audytem',
     'audit_warning_days_help'   => 'Ile dni wcześniej powinniśmy ostrzec Cię, gdy majątek ma zostać poddany audytowi?',
-    'auto_increment_assets'		=> 'Enerate auto-incrementing asset tags',
+    'auto_increment_assets'		=> 'Generuj automatycznie zwiększanjące się tagi zasobów',
     'auto_increment_prefix'		=> 'Prefix (opcjonalnie)',
     'auto_incrementing_help'    => 'Włącz automatyczne zwiększanie tagów zasobów aby to ustawić',
     'backups'					=> 'Kopie zapasowe',
@@ -64,6 +64,8 @@ return [
     'enabled'                   => 'Włączone',
     'eula_settings'				=> 'Ustawienia Licencji',
     'eula_markdown'				=> 'Ta licencja zezwala na <a href="https://help.github.com/articles/github-flavored-markdown/">Github flavored markdown</a>.',
+    'empty_row_count'           => 'Field Start Offset (Empty Rows)',
+    'empty_row_count_help'      => 'Fields will begin populating after this many empty rows are skipped at the top of the label.',
     'favicon'                   => 'Ikona ulubionych',
     'favicon_format'            => 'Akceptowane typy plików to ico, png i gif. Inne formaty obrazów mogą nie działać we wszystkich przeglądarkach.',
     'favicon_size'          => 'Favikony powinny być kwadratowymi grafikami 16x16 pikseli.',
@@ -151,7 +153,9 @@ return [
     'full_multiple_companies_support_help_text' => 'Ograniczenie do użytkowników',
     'full_multiple_companies_support_text' => 'Wsparcie dla wielu firm',
     'scope_locations_fmcs_support_text'  => 'Scope Locations with Full Multiple Companies Support',
-    'scope_locations_fmcs_support_help_text'  => 'In previous versions, locations were not restricted to a particular company. If this setting is disabled, this preserves backward compatibility with older versions and locations can be used across multiple companies. If this setting is enabled, locations are restricted to their selected company.',
+    'scope_locations_fmcs_support_help_text'  => 'Restrict locations to their selected company.',
+    'scope_locations_fmcs_check_button' => 'Check Compatibility',
+    'scope_locations_fmcs_support_disabled_text'  => 'This option is disabled because you have conflicting locations set for :count or more items.',
     'show_in_model_list'   => 'Pokaż w Menu Rozwijanym Modelu',
     'optional'					=> 'opcjonalny',
     'per_page'                  => 'Wyników na stronie',
@@ -450,6 +454,24 @@ return [
         'logo_and_text' => 'Logo and Text',
     ],
 
+
+    'legends' => [
+        'scoping' => 'Scoping',
+        'formats' => 'Default Formats',
+        'profiles' => 'User Profiles',
+        'eula' => 'EULA & Acceptance Preferences',
+        'misc_display' => 'Miscellaneous Display Options',
+        'email' => 'Email Preferences',
+        'checkin' => 'Checkin Preferences',
+        'dashboard' => 'Login & Dashboard Preferences',
+        'misc' => 'Miscellaneous',
+        'logos' => 'Logos & Display',
+        'colors' => 'Colors & Skins',
+        'footer' => 'Footer Preferences',
+        'security' => 'Security Preferences',
+        'general' => 'General',
+        'intervals' => 'Intervals & Thresholds',
+    ],
 
 
     /* Keywords for settings overview help */

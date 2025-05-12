@@ -539,7 +539,7 @@ class AssetsController extends Controller
     {
         $settings = Setting::getSettings();
 
-        if (($settings->qr_code == '1') && ($settings->label2_2d_type !== 'none')) {
+        if ($settings->label2_2d_type !== 'none') {
 
             if ($asset) {
                 $size = Helper::barcodeDimensions($settings->label2_2d_type);
@@ -897,10 +897,19 @@ class AssetsController extends Controller
     }
 
 
-    public function audit(Asset $asset)
+    public function audit(Asset $asset): View | RedirectResponse
     {
-        $settings = Setting::getSettings();
         $this->authorize('audit', Asset::class);
+        $settings = Setting::getSettings();
+
+
+        // Invoke the validation to see if the audit will complete successfully
+        $asset->setRules($asset->getRules() + $asset->customFieldValidationRules());
+
+        if ($asset->isInvalid()) {
+            return redirect()->route('hardware.edit', $asset)->withErrors($asset->getErrors());
+        }
+
         $dt = Carbon::now()->addMonths($settings->audit_interval)->toDateString();
         return view('hardware/audit')->with('asset', $asset)->with('item', $asset)->with('next_audit_date', $dt)->with('locations_list');
     }
@@ -909,6 +918,10 @@ class AssetsController extends Controller
     {
 
         $this->authorize('audit', Asset::class);
+
+        session()->put('redirect_option', $request->get('redirect_option'));
+        session()->put('other_redirect', 'audit');
+
 
         $originalValues = $asset->getRawOriginal();
 
@@ -985,7 +998,7 @@ class AssetsController extends Controller
             }
 
             $asset->logAudit($request->input('note'), $request->input('location_id'), $file_name, $originalValues);
-            return redirect()->route('assets.audit.due')->with('success', trans('admin/hardware/message.audit.success'));
+            return redirect()->to(Helper::getRedirectOption($request, $asset->id, 'Assets'))->with('success', trans('admin/hardware/message.audit.success'));
         }
 
         return redirect()->back()->withInput()->withErrors($asset->getErrors());

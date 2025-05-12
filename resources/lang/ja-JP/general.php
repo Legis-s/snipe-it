@@ -390,6 +390,8 @@ return [
     'new_license'           => '新しいライセンス',
     'new_accessory'         => '新しい付属品',
     'new_consumable'        => '新しい消耗品',
+    'new_component'         => 'New Component',
+    'new_user'              => 'New User',
     'collapse'              => '折りたたむ',
     'assigned'              => '割り当て済み',
     'asset_count'           => '資産数',
@@ -614,5 +616,14 @@ return [
     'deleted_users' => 'Deleted Users',
     'cost_each' => '各:amount',
     'remove_current_image' => 'Remove current :type image',
+
+    'seeding' => [
+        'manufacturers' => [
+            'button' => 'Create Manufacturers',
+            'prompt' => 'You do not have any manufacturers yet. Would you like to seed a list of common manufacturers? (THIS WILL OVERWRITE EXISTING MANUFACTURERS, including those that have been soft-deleted.)',
+            'success' => 'Manufacturers seeded successfully',
+            'error' => 'Could not seed manufacturers. A manufacturer record already exists and seeding would overwrite it.|Could not seed manufacturers. :count manufacturer records already exist and seeding would overwrite them.',
+        ],
+    ],
 
 ];

@@ -25,7 +25,7 @@ return [
     'audit_interval_help'       => 'Hvis du er forpligtet til regelmæssigt fysisk revidere dine aktiver, skal du indtaste intervallet i måneder, som du bruger. Hvis du opdaterer denne værdi, vil alle "næste revisionsdatoer" for aktiver med en kommende revisionsdato blive opdateret.',
     'audit_warning_days'        => 'Audit Warning Threshold',
     'audit_warning_days_help'   => 'Hvor mange dage i forvejen skal vi advare dig, når aktiver skal betales for revision?',
-    'auto_increment_assets'		=> 'Enerate auto-incrementing asset tags',
+    'auto_increment_assets'		=> 'Generer auto-tilvækst af asset-tags',
     'auto_increment_prefix'		=> 'Præfiks (valgfrit)',
     'auto_incrementing_help'    => 'Aktiver auto-tilvækst af asset-tags først for at indstille dette',
     'backups'					=> 'Backups',
@@ -64,6 +64,8 @@ return [
     'enabled'                   => 'Aktiveret',
     'eula_settings'				=> 'EULA-indstillinger',
     'eula_markdown'				=> 'Denne EULA tillader <a href="https://help.github.com/articles/github-flavored-markdown/">Github smagsmærket markdown</a>.',
+    'empty_row_count'           => 'Field Start Offset (Empty Rows)',
+    'empty_row_count_help'      => 'Fields will begin populating after this many empty rows are skipped at the top of the label.',
     'favicon'                   => 'Favicon',
     'favicon_format'            => 'Accepterede filtyper er ico, png, og gif. Andre billedformater fungerer muligvis ikke i alle browsere.',
     'favicon_size'          => 'Favicons skal være firkantede billeder, 16x16 pixels.',
@@ -151,7 +153,9 @@ return [
     'full_multiple_companies_support_help_text' => 'Begrænsning af brugere (herunder admins) tildelt virksomheder til deres virksomheds aktiver.',
     'full_multiple_companies_support_text' => 'Fuld flere virksomheder support',
     'scope_locations_fmcs_support_text'  => 'Scope Locations with Full Multiple Companies Support',
-    'scope_locations_fmcs_support_help_text'  => 'In previous versions, locations were not restricted to a particular company. If this setting is disabled, this preserves backward compatibility with older versions and locations can be used across multiple companies. If this setting is enabled, locations are restricted to their selected company.',
+    'scope_locations_fmcs_support_help_text'  => 'Restrict locations to their selected company.',
+    'scope_locations_fmcs_check_button' => 'Check Compatibility',
+    'scope_locations_fmcs_support_disabled_text'  => 'This option is disabled because you have conflicting locations set for :count or more items.',
     'show_in_model_list'   => 'Vis i modeldropdown',
     'optional'					=> 'valgfri',
     'per_page'                  => 'Resultater pr. Side',
@@ -450,6 +454,24 @@ return [
         'logo_and_text' => 'Logo and Text',
     ],
 
+
+    'legends' => [
+        'scoping' => 'Scoping',
+        'formats' => 'Default Formats',
+        'profiles' => 'User Profiles',
+        'eula' => 'EULA & Acceptance Preferences',
+        'misc_display' => 'Miscellaneous Display Options',
+        'email' => 'Email Preferences',
+        'checkin' => 'Checkin Preferences',
+        'dashboard' => 'Login & Dashboard Preferences',
+        'misc' => 'Miscellaneous',
+        'logos' => 'Logos & Display',
+        'colors' => 'Colors & Skins',
+        'footer' => 'Footer Preferences',
+        'security' => 'Security Preferences',
+        'general' => 'General',
+        'intervals' => 'Intervals & Thresholds',
+    ],
 
 
     /* Keywords for settings overview help */

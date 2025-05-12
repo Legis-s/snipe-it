@@ -390,6 +390,8 @@ return [
     'new_license'           => 'New License',
     'new_accessory'         => 'New Accessory',
     'new_consumable'        => 'New Consumable',
+    'new_component'         => 'New Component',
+    'new_user'              => 'New User',
     'collapse'              => 'Collapse',
     'assigned'              => 'Assigned',
     'asset_count'           => 'Asset Count',
@@ -520,7 +522,7 @@ return [
     'checked_out_to_fields' => 'Checked Out To Fields',
     'percent_complete' => '% complete',
     'uploading' => 'Uploading... ',
-    'upload_error' => 'Error uploading file. Please check that there are no empty rows and that no column names are duplicated.',
+    'upload_error' => 'Error uploading file. Please check that you have no empty rows or duplicated column names in your CSV, and that the server permissions allow uploads.',
     'copy_to_clipboard' => 'Copy to Clipboard',
     'copied' => 'Copied!',
     'status_compatibility' => 'If assets are already assigned, they cannot be changed to a non-deployable status type and this value change will be skipped.',
@@ -614,5 +616,14 @@ return [
     'deleted_users' => 'Deleted Users',
     'cost_each' => ':amount each',
     'remove_current_image' => 'Remove current :type image',
+
+    'seeding' => [
+        'manufacturers' => [
+            'button' => 'Create Manufacturers',
+            'prompt' => 'You do not have any manufacturers yet. Would you like to seed a list of common manufacturers? (THIS WILL OVERWRITE EXISTING MANUFACTURERS, including those that have been soft-deleted.)',
+            'success' => 'Manufacturers seeded successfully',
+            'error' => 'Could not seed manufacturers. A manufacturer record already exists and seeding would overwrite it.|Could not seed manufacturers. :count manufacturer records already exist and seeding would overwrite them.',
+        ],
+    ],
 
 ];

@@ -390,6 +390,8 @@ return [
     'new_license'           => 'Nova licenca',
     'new_accessory'         => 'Novi dodatak',
     'new_consumable'        => 'Nov potrošni materijal',
+    'new_component'         => 'Nova komponenta',
+    'new_user'              => 'Novi korisnik',
     'collapse'              => 'Skupi',
     'assigned'              => 'Dodeljeno',
     'asset_count'           => 'Količina imovine',
@@ -614,5 +616,14 @@ return [
     'deleted_users' => 'Obrisani korisnici',
     'cost_each' => ':amount svaki',
     'remove_current_image' => 'Ukloni trenutnu :type sliku',
+
+    'seeding' => [
+        'manufacturers' => [
+            'button' => 'Napravi proizvođače',
+            'prompt' => 'Još uvek nemate nijednog proizvođača. Da li bi ste želeli da popunite spisak sa uobičajenim proizvođačima? (OVO ĆE PREPISATI POSTOJEĆE PROIZVOĐAČE, uključujući one premeštene u kantu za otpatke.)',
+            'success' => 'Proizvođači su uspešno dodati',
+            'error' => 'Nije bilo moguće dodati proizvođače. Proizvođač već postoji i ovo bi ga prepisalo.|Nije bilo moguće dodati proizvođače. :count proizvođača već postoji i ovo bi ih prepisalo.',
+        ],
+    ],
 
 ];

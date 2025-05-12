@@ -76,10 +76,6 @@ class AssetsTransformer
                 'id' => (int) $asset->defaultLoc->id,
                 'name'=> e($asset->defaultLoc->name),
             ] : null,
-            'contract' => ($asset->contract) ? [
-                'id' => (int) $asset->contract->id,
-                'name'=> e($asset->contract->name)
-            ]  : null,
             'image' => ($asset->getImageUrl()) ? $asset->getImageUrl() : null,
             'qr' => ($setting->qr_code=='1') ? config('app.url').'/uploads/barcodes/qr-'.str_slug($asset->asset_tag).'-'.str_slug($asset->id).'.png' : null,
             'alt_barcode' => ($setting->alt_barcode_enabled=='1') ? config('app.url').'/uploads/barcodes/'.str_slug($setting->alt_barcode).'-'.str_slug($asset->asset_tag).'.png' : null,
@@ -101,17 +97,21 @@ class AssetsTransformer
             'last_checkin' => Helper::getFormattedDateObject($asset->last_checkin, 'datetime'),
             'expected_checkin' => Helper::getFormattedDateObject($asset->expected_checkin, 'date'),
             'purchase_cost' => Helper::formatCurrencyOutput($asset->purchase_cost),
-            'depreciable_cost' => Helper::formatCurrencyOutput($asset->depreciable_cost),
             'checkin_counter' => (int) $asset->checkin_counter,
             'checkout_counter' => (int) $asset->checkout_counter,
             'requests_counter' => (int) $asset->requests_counter,
             'user_can_checkout' => (bool) $asset->availableForCheckout(),
+            'book_value' => Helper::formatCurrencyOutput($asset->getLinearDepreciatedValue()),
             'user_can_review' => (bool) $asset->availableForReview(),
             'user_can_close_sell' => (bool) $asset->availableForCloseSell(),
             'purchase_id' => (int) $asset->purchase_id,
             'quality' => (int) $asset->quality,
             'nds' => (int) $asset->nds,
-            'book_value' => Helper::formatCurrencyOutput($asset->getLinearDepreciatedValue()),
+            'depreciable_cost' => Helper::formatCurrencyOutput($asset->depreciable_cost),
+//            'contract' => ($asset->contract) ? [
+//                'id' => (int) $asset->contract->id,
+//                'name'=> e($asset->contract->name)
+//            ]  : null,
         ];
 
 
@@ -165,12 +165,12 @@ class AssetsTransformer
             'clone'         => Gate::allows('create', Asset::class) ? true : false,
             'restore'       => ($asset->deleted_at!='' && Gate::allows('create', Asset::class)) ? true : false,
             'update'        => ($asset->deleted_at=='' && Gate::allows('update', Asset::class)) ? true : false,
-            'delete'        => ($asset->deleted_at=='' && $asset->assigned_to =='' && Gate::allows('delete', Asset::class)) ? true : false,
+            'audit'        => Gate::allows('audit', Asset::class) ? true : false,
+            'delete'        => ($asset->deleted_at=='' && $asset->assigned_to =='' && Gate::allows('delete', Asset::class) && ($asset->deleted_at == '')) ? true : false,
             'print_label'   => true,
             'inventory'     => ($asset->deleted_at=='' && Gate::allows('view', Asset::class)) ? true : false,
             'review'        =>  ($asset->deleted_at=='' && Gate::allows('review', Asset::class)) ? true : false,
         ];
-
 
         if (request('components')=='true') {
         

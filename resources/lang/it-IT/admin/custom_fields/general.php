@@ -5,7 +5,7 @@ return [
     'manage'                    => 'Gestire',
     'field'		                => 'Campo',
     'about_fieldsets_title'		=> 'Fileldsets',
-    'about_fieldsets_text'		=> 'I Fieldsets ti permettono di creare gruppi di campi personalizzati che sono frequentemente riutilizzati per modelli specifici di asset.',
+    'about_fieldsets_text'		=> 'I Fieldset ti permettono di creare gruppi di campi personalizzati che sono frequentemente riutilizzati per modelli specifici di Bene.',
     'custom_format'             => 'Formato Regex personalizzato...',
     'encrypt_field'      	        => 'Crittografare il valore di questo campo nel database',
     'encrypt_field_help'      => 'ATTENZIONE: Se il campo viene crittografato non sarà possibile cercarlo.',

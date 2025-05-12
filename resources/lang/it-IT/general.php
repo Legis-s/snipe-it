@@ -390,6 +390,8 @@ return [
     'new_license'           => 'Nuova Licenza',
     'new_accessory'         => 'Nuovo Accessorio',
     'new_consumable'        => 'Nuovo Consumabile',
+    'new_component'         => 'New Component',
+    'new_user'              => 'New User',
     'collapse'              => 'Riduci',
     'assigned'              => 'Assegnato',
     'asset_count'           => 'Quantità Beni',
@@ -614,5 +616,14 @@ return [
     'deleted_users' => 'Utenti cancellati',
     'cost_each' => ':amount ciascuno',
     'remove_current_image' => 'Rimuovi l\'immagine :type',
+
+    'seeding' => [
+        'manufacturers' => [
+            'button' => 'Crea Produttori',
+            'prompt' => 'You do not have any manufacturers yet. Would you like to seed a list of common manufacturers? (THIS WILL OVERWRITE EXISTING MANUFACTURERS, including those that have been soft-deleted.)',
+            'success' => 'Manufacturers seeded successfully',
+            'error' => 'Could not seed manufacturers. A manufacturer record already exists and seeding would overwrite it.|Could not seed manufacturers. :count manufacturer records already exist and seeding would overwrite them.',
+        ],
+    ],
 
 ];

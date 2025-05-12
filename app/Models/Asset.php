@@ -128,7 +128,8 @@ class Asset extends Depreciable
         'byod'              => ['nullable', 'boolean'],
         'order_number'      => ['nullable', 'string', 'max:191'],
         'notes'             => ['nullable', 'string', 'max:65535'],
-        'assigned_to'       => ['nullable', 'integer'],
+        'assigned_to'   => ['nullable', 'integer', 'required_with:assigned_type'],
+        'assigned_type' => ['nullable', 'required_with:assigned_to', 'in:'.User::class.",".Location::class.",".Asset::class],
         'requestable'       => ['nullable', 'boolean'],
         'assigned_user'     => ['nullable', 'exists:users,id,deleted_at,NULL'],
         'assigned_location' => ['nullable', 'exists:locations,id,deleted_at,NULL', 'fmcs_location'],
@@ -697,6 +698,8 @@ class Asset extends Depreciable
             return Storage::disk('public')->url(app('assets_upload_path').e($this->image));
         } elseif ($this->model && ! empty($this->model->image)) {
             return Storage::disk('public')->url(app('models_upload_path').e($this->model->image));
+        } elseif ($this->model->category && ! empty($this->model->category->image)) {
+            return Storage::disk('public')->url(app('categories_upload_path').e($this->model->category->image));
         }
 
         return false;

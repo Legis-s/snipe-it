@@ -25,7 +25,7 @@ return [
     'audit_interval_help'       => 'Ha rendszeresen fizikailag is ellenőrizni kell az eszközeit, adja meg az Ön által használt intervallumot hónapokban kifejezve. Ha frissíti ezt az értéket, a közelgő ellenőrzési dátummal rendelkező eszközök összes "következő ellenőrzési dátuma" megjelenik.',
     'audit_warning_days'        => 'Ellenőrzési figyelmeztető küszöbérték',
     'audit_warning_days_help'   => 'Hány nappal előre figyelmeztetni kell Önt arra, hogy az eszközöknek az ellenőrzésre van szükségük?',
-    'auto_increment_assets'		=> 'Enerate auto-incrementing asset tags',
+    'auto_increment_assets'		=> 'Automatikusan növekvő eszközazonosítók generálása',
     'auto_increment_prefix'		=> 'Előtag (opcionális)',
     'auto_incrementing_help'    => 'Először engedélyezze az eszközazonosítók automatikus növelését, hogy ezt beállítsa',
     'backups'					=> 'Biztonsági mentések',
@@ -64,6 +64,8 @@ return [
     'enabled'                   => 'Bekapcsolva',
     'eula_settings'				=> 'EULA beállítások',
     'eula_markdown'				=> 'Ez az EULA lehetővé teszi <a href="https://help.github.com/articles/github-flavored-markdown/">Github ízesített markdown</a>-et.',
+    'empty_row_count'           => 'Field Start Offset (Empty Rows)',
+    'empty_row_count_help'      => 'Fields will begin populating after this many empty rows are skipped at the top of the label.',
     'favicon'                   => 'Favicon',
     'favicon_format'            => 'Az elfogadott fájltípusok: ico, png és gif. A többi képformátum lehet, hogy nem működik minden böngészőben.',
     'favicon_size'          => 'A favicon egy 16x16 pixeles kép kell legyen.',
@@ -151,7 +153,9 @@ return [
     'full_multiple_companies_support_help_text' => 'A vállalatoknak a vállalat eszközeihez rendelt felhasználók (köztük az adminisztrátorok) korlátozása.',
     'full_multiple_companies_support_text' => 'Teljes több vállalat támogatása',
     'scope_locations_fmcs_support_text'  => 'Scope Locations with Full Multiple Companies Support',
-    'scope_locations_fmcs_support_help_text'  => 'In previous versions, locations were not restricted to a particular company. If this setting is disabled, this preserves backward compatibility with older versions and locations can be used across multiple companies. If this setting is enabled, locations are restricted to their selected company.',
+    'scope_locations_fmcs_support_help_text'  => 'Restrict locations to their selected company.',
+    'scope_locations_fmcs_check_button' => 'Check Compatibility',
+    'scope_locations_fmcs_support_disabled_text'  => 'This option is disabled because you have conflicting locations set for :count or more items.',
     'show_in_model_list'   => 'Mutassa a modellek lenyíló listájában',
     'optional'					=> 'választható',
     'per_page'                  => 'Eredmények oldalanként',
@@ -450,6 +454,24 @@ return [
         'logo_and_text' => 'Logo and Text',
     ],
 
+
+    'legends' => [
+        'scoping' => 'Scoping',
+        'formats' => 'Default Formats',
+        'profiles' => 'User Profiles',
+        'eula' => 'EULA & Acceptance Preferences',
+        'misc_display' => 'Miscellaneous Display Options',
+        'email' => 'Email Preferences',
+        'checkin' => 'Checkin Preferences',
+        'dashboard' => 'Login & Dashboard Preferences',
+        'misc' => 'Miscellaneous',
+        'logos' => 'Logos & Display',
+        'colors' => 'Colors & Skins',
+        'footer' => 'Footer Preferences',
+        'security' => 'Security Preferences',
+        'general' => 'General',
+        'intervals' => 'Intervals & Thresholds',
+    ],
 
 
     /* Keywords for settings overview help */
