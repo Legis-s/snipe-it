@@ -60,12 +60,12 @@ class SyncBitrix extends Command
 
         /** @var \GuzzleHttp\Client $client */
         $client = new \GuzzleHttp\Client();
-//        $this->synh_users($client, $bitrix_url);
-//        $this->synh_objects($client, $bitrix_url);
+        $this->synh_users($client, $bitrix_url);
+        $this->synh_objects($client, $bitrix_url);
         $this->synh_suppliers($client, $bitrix_url);
-//        $this->synh_legals($client, $bitrix_url);
-//        $this->synh_deals($client, $bitrix_url);
-//        $this->synh_types($client, $bitrix_url);
+        $this->synh_legals($client, $bitrix_url);
+        $this->synh_deals($client, $bitrix_url);
+        $this->synh_types($client, $bitrix_url);
 
         if (($this->option('output') == 'all') || ($this->option('output') == 'info')) {
             foreach ($output['info'] as $key => $output_text) {

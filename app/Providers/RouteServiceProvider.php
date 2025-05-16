@@ -51,6 +51,7 @@ class RouteServiceProvider extends ServiceProvider
             require base_path('routes/web/components.php');
             require base_path('routes/web/users.php');
             require base_path('routes/web/kits.php');
+            require base_path('routes/web/custom.php');
             require base_path('routes/web.php');
         });
     }
@@ -70,6 +71,7 @@ class RouteServiceProvider extends ServiceProvider
             'prefix' => 'api',
         ], function ($router) {
             require base_path('routes/api.php');
+            require base_path('routes/api_custom.php');
         });
     }
 

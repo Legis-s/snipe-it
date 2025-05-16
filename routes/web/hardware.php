@@ -1,9 +1,7 @@
 <?php
 
 use App\Http\Controllers\AssetMaintenancesController;
-use App\Http\Controllers\Assets\AssetRentController;
 use App\Http\Controllers\Assets\AssetsController;
-use App\Http\Controllers\Assets\AssetSellController;
 use App\Http\Controllers\Assets\BulkAssetsController;
 use App\Http\Controllers\Assets\AssetCheckoutController;
 use App\Http\Controllers\Assets\AssetCheckinController;
@@ -186,59 +184,6 @@ Route::group(
         Route::post('bulkcheckout',
             [BulkAssetsController::class, 'storeCheckout']
         )->name('hardware.bulkcheckout.store');
-
-
-
-        /**
-        |--------------------------------------------------------------------------
-        | BEGIN CUSTOM ROUTES
-        |--------------------------------------------------------------------------
-         */
-
-        // Sell
-        Route::get('{assetId}/sell/',
-            [AssetSellController::class, 'create']
-        )->name('hardware.sell.create');
-
-        Route::post('{assetId}/sell/',
-            [AssetSellController::class, 'store']
-        )->name('hardware.sell.store');
-
-        // Rent
-        Route::get('{assetId}/rent/',
-            [AssetRentController::class, 'create']
-        )->name('hardware.rent.create');
-
-        Route::post('{assetId}/rent/',
-            [AssetRentController::class, 'store']
-        )->name('hardware.rent.store');
-
-//        // Bulk sell
-//        Route::get('bulksell',
-//            [BulkAssetsController::class, 'showSell']
-//        )->name('hardware.bulksell.show');
-//
-//        Route::post('bulksell',
-//            [BulkAssetsController::class, 'storeSell']
-//        )->name('hardware.bulksell.store');
-//
-//
-//        // Bulk checkin
-//        Route::get('bulkcheckin',
-//            [BulkAssetsController::class, 'showCheckin']
-//        )->name('hardware.bulkcheckin.show');
-//
-//        Route::post('bulkcheckin',
-//            [BulkAssetsController::class, 'storeCheckin']
-//        )->name('hardware.bulkcheckin.store');
-
-        /**
-        |--------------------------------------------------------------------------
-        | END CUSTOM ROUTES
-        |--------------------------------------------------------------------------
-         */
-
-
 
     });
 

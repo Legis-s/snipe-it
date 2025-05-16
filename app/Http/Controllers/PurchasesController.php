@@ -299,7 +299,7 @@ class PurchasesController extends Controller
      * @return \Illuminate\Contracts\View\View
      * @since [v1.0]
      */
-    public function getClone($purchaseId = null): View|RedirectResponse
+    public function getClone($purchaseId): View|RedirectResponse
     {
         // Check if the asset exists
         if (is_null($purchase_to_clone = Purchase::find($purchaseId))) {

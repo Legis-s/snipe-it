@@ -94,7 +94,7 @@ class InventoriesController extends Controller
      * Display the specified resource.
      * @param  int  $id
      */
-    public function show($id): JsonResponse
+    public function show($id): JsonResponse | array
     {
 //        $this->authorize('view', Location::class);
 

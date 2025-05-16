@@ -14,12 +14,8 @@ class InventoryStatuslabelsController extends Controller
 {
     /**
      * Display a listing of the resource.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v4.0]
-     * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request) : array
     {
         $this->authorize('view', Statuslabel::class);
 
