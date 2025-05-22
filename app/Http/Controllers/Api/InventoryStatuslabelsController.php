@@ -6,20 +6,24 @@ use App\Http\Transformers\InventoryStatuslabelsTransformer;
 use App\Models\InventoryStatuslabel;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Helpers\Helper;
 use App\Models\Statuslabel;
-use App\Http\Transformers\StatuslabelsTransformer;
 
 class InventoryStatuslabelsController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request) : array
+    public function index(Request $request): array
     {
         $this->authorize('view', Statuslabel::class);
 
-        $allowed_columns = ['id','name','success','created_at','color'];
+        $allowed_columns = [
+            'id',
+            'name',
+            'success',
+            'created_at',
+            'color'
+        ];
 
         $statuslabels = InventoryStatuslabel::select([
             'inventory_status_labels.id',

@@ -54,11 +54,11 @@ class PurchasesController extends Controller
      * the content for the locations detail page.
      * @param int $purchaseId
      */
-    public function show($purchaseId = null): View|RedirectResponse
+    public function show(Purchase $purchase): View|RedirectResponse
     {
         $this->authorize('view', Asset::class);
 
-        $purchase = Purchase::find($purchaseId);
+        $purchase = Purchase::find($purchase->id);
         $old = false;
         if (isset($purchase->id)) {
             $consumables_json = $purchase->consumables_json;

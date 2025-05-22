@@ -22,37 +22,27 @@ Route::group(['middleware' => 'auth'], function () {
     /**
      * InvoiceTypes
      */
-    Route::resource('invoicetypes', InvoiceTypesController::class, [
-        'parameters' => ['invoicetype' => 'invoicetype_id']
-    ]);
+    Route::resource('invoicetypes', InvoiceTypesController::class);
 
     /**
      * Contracts
      */
-    Route::resource('contracts', ContractsController::class, [
-        'parameters' => ['contract' => 'contract_id']
-    ]);
+    Route::resource('contracts', ContractsController::class);
 
     /**
      * Deals
      */
-    Route::resource('deals', DealsController::class, [
-        'parameters' => ['deal' => 'deal_id']
-    ]);
+    Route::resource('deals', DealsController::class);
 
     /**
      * Inventories
      */
-    Route::resource('inventories', InventoriesController::class, [
-        'parameters' => ['inventory' => 'inventory_id']
-    ]);
+    Route::resource('inventories', InventoriesController::class);
 
     /**
      * Inventory Status Labels
      */
-    Route::resource('inventorystatuslabels', InventoryStatuslabelsController::class, [
-        'parameters' => ['inventorystatuslabel' => 'inventorystatuslabel_id']
-    ]);
+    Route::resource('inventorystatuslabels', InventoryStatuslabelsController::class);
 
     /**
      * Purchases
@@ -62,14 +52,13 @@ Route::group(['middleware' => 'auth'], function () {
         [PurchasesController::class, 'deleteAllRejected']
     )->name('purchases.delete_all_rejected');
 
-    Route::resource('purchases', PurchasesController::class, [
-        'parameters' => ['purchase' => 'purchase_id']
-    ]);
 
     Route::get(
         'purchases/{assetId}/clone',
         [PurchasesController::class, 'getClone']
     )->name('clone/purchases');
+
+    Route::resource('purchases', PurchasesController::class);
 
     /**
      * Map
@@ -82,9 +71,11 @@ Route::group(['middleware' => 'auth'], function () {
     /**
      * Devices
      */
-    Route::resource('devices', DevicesController::class, [
-        'parameters' => ['device' => 'device_id']
-    ]);
+    Route::resource('devices', DevicesController::class);
+
+
+
+
 
     /**
      * MassOperations
@@ -183,7 +174,7 @@ Route::group(
 //        )->name('hardware.bulkcheckin.store');
 
     }
-    );
+);
 /*
 |--------------------------------------------------------------------------
 | END Asset Routes

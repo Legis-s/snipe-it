@@ -8,16 +8,22 @@ use App\Models\Category;
 use App\Models\Company;
 use App\Models\Component;
 use App\Models\Consumable;
+use App\Models\Contract;
 use App\Models\CustomField;
 use App\Models\CustomFieldset;
+use App\Models\Deal;
 use App\Models\Department;
 use App\Models\Depreciation;
+use App\Models\Device;
 use App\Models\Group;
+use App\Models\Inventory;
+use App\Models\InventoryStatuslabel;
 use App\Models\License;
 use App\Models\LicenseSeat;
 use App\Models\Location;
 use App\Models\Manufacturer;
 use App\Models\PredefinedKit;
+use App\Models\Purchase;
 use App\Models\Statuslabel;
 use App\Models\Supplier;
 use App\Models\User;
@@ -569,6 +575,116 @@ class BreadcrumbsServiceProvider extends ServiceProvider
 
 
 
+        /**
+         * Map Breadcrumbs
+         */
+        Breadcrumbs::for('map', fn (Trail $trail) =>
+        $trail->parent('home', route('home'))
+            ->push(trans('general.map'), route('map'))
+        );
+
+        /**
+         * Inventories Breadcrumbs
+         */
+        Breadcrumbs::for('inventories.index', fn (Trail $trail) =>
+        $trail->parent('home', route('home'))
+            ->push(trans('general.inventories'), route('inventories.index'))
+        );
+
+        Breadcrumbs::for('inventories.show', fn (Trail $trail, Inventory $inventory) =>
+        $trail->parent('inventories.index', route('inventories.index'))
+            ->push($inventory->name, route('inventories.show', $inventory))
+        );
+
+
+
+        /**
+         * Purchases Breadcrumbs
+         */
+        Breadcrumbs::for('purchases.index', fn (Trail $trail) =>
+        $trail->parent('home', route('home'))
+            ->push(trans('general.purchases'), route('purchases.index'))
+        );
+
+        Breadcrumbs::for('purchases.show', fn (Trail $trail, Purchase $purchase) =>
+        $trail->parent('purchases.index', route('purchases.index'))
+            ->push($purchase->invoice_number, route('purchases.show', $purchase))
+        );
+
+        Breadcrumbs::for('purchases.create', fn (Trail $trail) =>
+        $trail->parent('purchases.index', route('purchases.index'))
+            ->push(trans('general.create'), route('purchases.create'))
+        );
+
+        Breadcrumbs::for('clone/purchases', fn (Trail $trail) =>
+        $trail->parent('purchases.index', route('purchases.index'))
+            ->push(trans('general.clone_purchase'), route('purchases.create'))
+        );
+
+
+        /**
+         * Devices Breadcrumbs
+         */
+        Breadcrumbs::for('devices.index', fn (Trail $trail) =>
+        $trail->parent('home', route('home'))
+            ->push(trans('general.devices'), route('devices.index'))
+        );
+
+        Breadcrumbs::for('devices.show', fn (Trail $trail, Device $device) =>
+        $trail->parent('devices.index', route('devices.index'))
+            ->push($device->imei, route('devices.show', $device))
+        );
+
+        /**
+         * Inventory Status Labels Breadcrumbs
+         */
+        Breadcrumbs::for('inventorystatuslabels.index', fn (Trail $trail) =>
+        $trail->parent('home', route('home'))
+            ->push(trans('admin/inventorystatuslabels/table.title'), route('inventorystatuslabels.index'))
+        );
+
+        Breadcrumbs::for('inventorystatuslabels.create', fn (Trail $trail) =>
+        $trail->parent('inventorystatuslabels.index', route('inventorystatuslabels.index'))
+            ->push(trans('general.create'), route('inventorystatuslabels.create'))
+        );
+
+        Breadcrumbs::for('inventorystatuslabels.show', fn (Trail $trail, InventoryStatuslabel $inventorystatuslabel) =>
+        $trail->parent('inventorystatuslabels.index', route('inventorystatuslabels.index'))
+            ->push($inventorystatuslabel->name, route('inventorystatuslabels.show', $inventorystatuslabel))
+        );
+
+        Breadcrumbs::for('inventorystatuslabels.edit', fn (Trail $trail, InventoryStatuslabel $inventorystatuslabel) =>
+        $trail->parent('inventorystatuslabels.index', route('inventorystatuslabels.index'))
+            ->push(trans('general.breadcrumb_button_actions.edit_item', ['name' => $inventorystatuslabel->name]), route('inventorystatuslabels.edit', $inventorystatuslabel))
+        );
+
+
+        /**
+         * Deals Breadcrumbs
+         */
+        Breadcrumbs::for('deals.index', fn (Trail $trail) =>
+        $trail->parent('home', route('home'))
+            ->push(trans('general.deals'), route('deals.index'))
+        );
+
+        Breadcrumbs::for('deals.show', fn (Trail $trail, Deal $deal) =>
+        $trail->parent('deals.index', route('deals.index'))
+            ->push($deal->name, route('deals.show', $deal))
+        );
+
+
+        /**
+         * Contracts Breadcrumbs
+         */
+        Breadcrumbs::for('contracts.index', fn (Trail $trail) =>
+        $trail->parent('home', route('home'))
+            ->push(trans('general.contracts'), route('contracts.index'))
+        );
+
+        Breadcrumbs::for('contracts.show', fn (Trail $trail, Contract $contract) =>
+        $trail->parent('contracts.index', route('contracts.index'))
+            ->push($contract->name, route('contracts.show', $contract))
+        );
     }
 
 

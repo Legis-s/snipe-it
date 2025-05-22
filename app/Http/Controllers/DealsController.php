@@ -32,8 +32,7 @@ class DealsController extends Controller
     {
         $this->authorize('view', Location::class);
 
-        $deal = Location::withTrashed()
-            ->find($deal->id);
+        $deal = Deal::find($deal->id);
 
         if (isset($deal->id)) {
             return view('deals/view', compact('deal'));

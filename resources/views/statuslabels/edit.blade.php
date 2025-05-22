@@ -3,7 +3,7 @@
     'updateText' => trans('admin/statuslabels/table.update'),
     'helpTitle' => trans('admin/statuslabels/table.about'),
     'helpText' => trans('admin/statuslabels/table.info'),
-    'formAction' => (isset($item->id)) ? route('statuslabels.update', ['statuslabel' => $item->id]) : route('statuslabels.store'),
+    'formAction' => (isset($item->id)) ? route('`inventorystatuslabels.update', ['statuslabel' => $item->id]) : route('statuslabels.store'),
 ])
 
 {{-- Page content --}}
@@ -78,14 +78,12 @@
 @section('moar_scripts')
     <!-- bootstrap color picker -->
     <script nonce="{{ csrf_token() }}">
-
         $(function() {
             $('.color').colorpicker({
                 color: `{{ old('color', $item->color) ?: '#AA3399' }}`,
                 format: 'hex'
             });
         });
-
     </script>
 
 @stop

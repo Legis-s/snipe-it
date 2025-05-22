@@ -660,5 +660,6 @@ return [
     'document_filetypes_help'  => 'Допустимые типы файлов - pdf. Максимальный размер файла :size.',
     'invoicetypes' => 'Типы счетов',
     'tag' => "Наклейка",
-    'clear_all_null' => "Очистить пустые"
+    'clear_all_null' => "Очистить пустые",
+    'clone_purchase' => "Клонировать закупку"
 ];

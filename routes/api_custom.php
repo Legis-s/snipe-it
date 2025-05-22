@@ -118,8 +118,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
         ['names' =>
             [
                 'index' => 'api.inventorystatuslabels.index',
-                'show' => 'api.inventorystatuslabels.show',
-                'update' => 'api.inventorystatuslabels.update',
             ],
             'except' => ['create', 'edit'],
             'parameters' => ['inventorystatuslabel' => 'iinventorystatuslabel_id'],

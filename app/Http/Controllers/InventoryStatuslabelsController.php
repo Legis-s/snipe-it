@@ -1,22 +1,13 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use App\Models\InventoryStatuslabel;
-use App\Models\Location;
-use Input;
-use Lang;
 use App\Models\Statuslabel;
-use App\Models\Asset;
-use Redirect;
-use DB;
-use App\Models\Setting;
-use Str;
-use View;
-use App\Helpers\Helper;
-use Auth;
+use App\Models\InventoryStatuslabel;
 use Illuminate\Http\Request;
-
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\RedirectResponse;
+use \Illuminate\Contracts\View\View;
 
 /**
  * This controller handles all actions related to Status Labels for
@@ -28,34 +19,26 @@ class InventoryStatuslabelsController extends Controller
 {
     /**
      * Show a list of all the statuslabels.
-     *
-     * @return \Illuminate\Contracts\View\View
      */
 
-    public function index()
+    public function index(): View
     {
         $this->authorize('view', Statuslabel::class);
         return view('inventorystatuslabels.index');
     }
 
-    public function show($id)
+    public function show(InventoryStatuslabel $inventorystatuslabel): View|RedirectResponse
     {
         $this->authorize('view', Statuslabel::class);
-        if ($statuslabel = InventoryStatuslabel::find($id)) {
-            return view('inventorystatuslabels.view')->with('inventorystatuslabels', $statuslabel);
-        }
-
-        return redirect()->route('inventorystatuslabels.index')->with('error', trans('admin/statuslabels/message.does_not_exist'));
+        return view('inventorystatuslabels.view')->with('statuslabel', $inventorystatuslabel);
     }
 
 
-
     /**
-     * Statuslabel create.
+     * InventoryStatuslabel create.
      *
-     * @return \Illuminate\Contracts\View\View
      */
-    public function create()
+    public function create(): View
     {
         // Show the page
         $this->authorize('create', Statuslabel::class);
@@ -66,12 +49,11 @@ class InventoryStatuslabelsController extends Controller
 
 
     /**
-     * Statuslabel create form processing.
+     * InventoryStatuslabel create form processing.
      *
      * @param Request $request
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
 
         $this->authorize('create', Statuslabel::class);
@@ -79,11 +61,11 @@ class InventoryStatuslabelsController extends Controller
         $statusLabel = new InventoryStatuslabel();
 
         // Save the Statuslabel data
-        $statusLabel->name              = Input::get('name');
-        $statusLabel->user_id           = Auth::id();
-        $statusLabel->notes             =  Input::get('notes');
-        $statusLabel->color             =  Input::get('color');
-        $statusLabel->success       =  Input::get('success', 0);
+        $statusLabel->name =  $request->input('name');
+        $statusLabel->user_id = auth()->id();
+        $statusLabel->notes =  $request->input('notes');
+        $statusLabel->color =  $request->input('color');
+        $statusLabel->success = $request->input('success', 0);
 
 
         if ($statusLabel->save()) {
@@ -94,63 +76,61 @@ class InventoryStatuslabelsController extends Controller
     }
 
     /**
-     * Statuslabel update.
+     * InventoryStatuslabel update.
      *
-     * @param  int  $statuslabelId
-     * @return \Illuminate\Contracts\View\View
+     * @param int $statuslabelId
      */
-    public function edit($statuslabelId = null)
+    public function edit(InventoryStatuslabel $inventorystatuslabel): View|RedirectResponse
     {
         $this->authorize('update', Statuslabel::class);
         // Check if the Statuslabel exists
-        if (is_null($item = InventoryStatuslabel::find($statuslabelId))) {
-            // Redirect to the blogs management page
-            return redirect()->route('inventorystatuslabels.index')->with('error', trans('admin/statuslabels/message.does_not_exist'));
-        }
+//        if (is_null($item = InventoryStatuslabel::find($statuslabel->id))) {
+//            // Redirect to the blogs management page
+//            return redirect()->route('inventorystatuslabels.index')->with('error', trans('admin/statuslabels/message.does_not_exist'));
+//        }
 
-        return view('inventorystatuslabels/edit', compact('item'));
+//        return view('inventorystatuslabels/edit', compact('item'));
+
+        return view('inventorystatuslabels/edit')
+            ->with('item', $inventorystatuslabel);
     }
 
 
     /**
      * Statuslabel update form processing page.
      *
-     * @param  int  $statuslabelId
-     * @return \Illuminate\Http\RedirectResponse
+     * @param int $inventorystatuslabelId
      */
-    public function update(Request $request, $statuslabelId = null)
+    public function update(Request $request, InventoryStatuslabel $inventorystatuslabel): RedirectResponse
     {
         $this->authorize('update', Statuslabel::class);
         // Check if the Statuslabel exists
-        if (is_null($statusLabel = InventoryStatuslabel::find($statuslabelId))) {
+        if (is_null($inventorystatuslabel = InventoryStatuslabel::find($inventorystatuslabel->id))) {
             // Redirect to the blogs management page
             return redirect()->route('inventorystatuslabels.index')->with('error', trans('admin/statuslabels/message.does_not_exist'));
         }
 
-
         // Save the Statuslabel data
-        $statusLabel->name              = Input::get('name');
-        $statusLabel->user_id           = Auth::id();
-        $statusLabel->notes             =  Input::get('notes');
-        $statusLabel->color             =  Input::get('color');
-        $statusLabel->success       =  Input::get('success', 0);
-
+        $inventorystatuslabel->name =  $request->input('name');
+        $inventorystatuslabel->user_id = auth()->id();
+        $inventorystatuslabel->notes =  $request->input('notes');
+        $inventorystatuslabel->color =  $request->input('color');
+        $inventorystatuslabel->success = $request->input('success', 0);
 
         // Was the asset created?
-        if ($statusLabel->save()) {
+        if ($inventorystatuslabel->save()) {
             // Redirect to the saved Statuslabel page
             return redirect()->route("inventorystatuslabels.index")->with('success', trans('admin/statuslabels/message.update.success'));
         }
-        return redirect()->back()->withInput()->withErrors($statusLabel->getErrors());
+        return redirect()->back()->withInput()->withErrors($inventorystatuslabel->getErrors());
     }
 
     /**
      * Delete the given Statuslabel.
      *
-     * @param  int  $statuslabelId
-     * @return \Illuminate\Http\RedirectResponse
+     * @param int $statuslabelId
      */
-    public function destroy($statuslabelId)
+    public function destroy($statuslabelId): RedirectResponse
     {
         $this->authorize('delete', Statuslabel::class);
         // Check if the Statuslabel exists
@@ -160,6 +140,6 @@ class InventoryStatuslabelsController extends Controller
 
         $statuslabel->delete();
         return redirect()->route('inventorystatuslabels.index')->with('success', trans('admin/statuslabels/message.delete.success'));
-}
+    }
 
 }

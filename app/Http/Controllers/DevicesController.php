@@ -24,9 +24,9 @@ class DevicesController extends Controller
      * Returns a view that invokes the ajax tables which actually contains
      * the content for the devices detail page.
      */
-    public function show($id = null): View|RedirectResponse
+    public function show(Device $device): View|RedirectResponse
     {
-        $device = Device::find($id);
+        $device = Device::find($device->id);
 
         if (isset($device->id)) {
             $asset = null;
