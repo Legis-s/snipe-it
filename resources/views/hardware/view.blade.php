@@ -287,14 +287,14 @@
                                                             </a>
                                                         </span>
                                                     </div>
-                                                    <div class="col-md-12 hidden-print" style="padding-top: 5px;">
-                                                        <span class="tooltip-wrapper"{!! (!$asset->model ? ' data-tooltip="true" title="'.trans('admin/hardware/general.model_invalid_fix').'"' : '') !!}>
-                                                            <a href="{{ route('hardware.rent.create', $asset->id)  }}" class="btn btn-sm bg-maroon btn-social btn-block hidden-print{{ (!$asset->model ? ' disabled' : '') }}">
-                                                                <x-icon type="checkout" />
-                                                                  {{ trans('general.rent') }}
-                                                            </a>
-                                                        </span>
-                                                    </div>
+{{--                                                    <div class="col-md-12 hidden-print" style="padding-top: 5px;">--}}
+{{--                                                        <span class="tooltip-wrapper"{!! (!$asset->model ? ' data-tooltip="true" title="'.trans('admin/hardware/general.model_invalid_fix').'"' : '') !!}>--}}
+{{--                                                            <a href="{{ route('hardware.rent.create', $asset->id)  }}" class="btn btn-sm bg-maroon btn-social btn-block hidden-print{{ (!$asset->model ? ' disabled' : '') }}">--}}
+{{--                                                                <x-icon type="checkout" />--}}
+{{--                                                                  {{ trans('general.rent') }}--}}
+{{--                                                            </a>--}}
+{{--                                                        </span>--}}
+{{--                                                    </div>--}}
                                         @endcan
                                     @endif
                                 @endif
@@ -1734,7 +1734,7 @@
     <script>
         $(function () {
             $('#print_tag').click(function () {
-                  console.log("test");
+                  // console.log("test");
                   {{--var dataToSend = {--}}
                   {{--  text: "{{ $sale->asset_tag }}"--}}
                   {{--};--}}

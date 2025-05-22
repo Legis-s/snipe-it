@@ -1069,7 +1069,7 @@
                     return '<div class="btn-group" style="min-width:270px">' +
                         '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/checkout" class="btn btn-sm bg-maroon" data-tooltip="true" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>'+
                         '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/sell" class="btn btn-sm bg-red" data-tooltip="true" title="{{ trans('general.sell_tooltip') }}">{{ trans('general.sell') }}</a>'+
-                        '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/rent" class="btn btn-sm bg-yellow" data-tooltip="true" title="{{ trans('general.rent_tooltip') }}">{{ trans('general.rent') }}</a>'+
+                        {{--'<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/rent" class="btn btn-sm bg-yellow" data-tooltip="true" title="{{ trans('general.rent_tooltip') }}">{{ trans('general.rent') }}</a>'+--}}
                         '</div>';
                     // The user is allowed to check items out, but the item is not deployable
                 } else if (((row.user_can_checkout == false)) && (row.available_actions.checkout == true) && (!row.assigned_to)) {

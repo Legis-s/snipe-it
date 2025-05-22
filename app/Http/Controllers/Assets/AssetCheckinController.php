@@ -107,7 +107,6 @@ class AssetCheckinController extends Controller
         if ($request->filled('status_id')) {
             $asset->status_id = e($request->get('status_id'));
         }else{
-
             $status_for_sell = Statuslabel::where('name', 'Выдано')->first();
             $status_ok = Statuslabel::where('name', 'Доступные')->first();
 

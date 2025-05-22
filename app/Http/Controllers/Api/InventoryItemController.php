@@ -87,7 +87,7 @@ class InventoryItemController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($id): JsonResponse
+    public function show($id): JsonResponse | array
     {
         $inventory_item = InventoryItem::findOrFail($id);
         return (new InventoryItemTransformer)->transformInventoryItem($inventory_item);
@@ -113,7 +113,7 @@ class InventoryItemController extends Controller
         }
         if ($inventory_item->status){
             if($inventory_item->status->success){
-                $inventory_item->successfully= true;
+                $inventory_item->successfully = true;
             }
         }
 
