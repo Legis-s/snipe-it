@@ -25,6 +25,8 @@
                     data-pagination="true"
                     data-id-table="statuslabelsTable"
                     data-search="true"
+                    data-search-highlight="true"
+                    data-show-print="true"
                     data-show-footer="false"
                     data-side-pagination="server"
                     data-show-columns="true"

@@ -51,6 +51,7 @@ use Carbon\Carbon;
 
 
 
+            @if ($assetMaintenance->supplier)
             <div class="row">
               <div class="col-md-3">
                 {{ trans('general.supplier') }}
@@ -61,6 +62,7 @@ use Carbon\Carbon;
                 </a>
               </div>
             </div> <!-- /row -->
+            @endif
 
             <div class="row">
               <div class="col-md-3">

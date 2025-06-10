@@ -153,7 +153,7 @@
 
                  @if (($user->isSuperUser()) || ($user->hasAccess('admin')))
                       <x-icon type="superadmin" class="fa-2x {{  ($user->isSuperUser()) ? 'text-danger' : 'text-orange'}}" />
-                        <div class="{{  ($user->isSuperUser()) ? 'text-danger' : ' text-orange'}}" style="font-weight: bold">{{  ($user->isSuperUser()) ? strtolower(trans('general.superuser')) : strtolower(trans('general.admin')) }}</div>
+                        <div class="{{  ($user->isSuperUser()) ? 'text-danger' : ' text-orange'}}" style="font-weight: bold">{{  ($user->isSuperUser()) ? strtolower(trans('general.superuser')) : strtolower(trans('general.admin_user')) }}</div>
                   @endif
 
                 
@@ -796,6 +796,8 @@
                     data-pagination="true"
                     data-id-table="userAssetsListingTable"
                     data-search="true"
+                    data-search-highlight="true"
+                    data-show-print="true"
                     data-side-pagination="server"
                     data-show-columns="true"
                     data-show-fullscreen="true"
@@ -827,6 +829,8 @@
                     data-id-table="userLicenseTable"
                     id="userLicenseTable"
                     data-search="true"
+                    data-search-highlight="true"
+                    data-show-print="true"
                     data-pagination="true"
                     data-side-pagination="client"
                     data-show-columns="true"
@@ -893,6 +897,8 @@
                     data-id-table="userAccessoryTable"
                     id="userAccessoryTable"
                     data-search="true"
+                    data-search-highlight="true"
+                    data-show-print="true"
                     data-pagination="true"
                     data-side-pagination="client"
                     data-show-columns="true"
@@ -945,6 +951,8 @@
                     data-id-table="userConsumableTable"
                     id="userConsumableTable"
                     data-search="true"
+                    data-search-highlight="true"
+                    data-show-print="true"
                     data-pagination="true"
                     data-side-pagination="server"
                     data-show-columns="true"
@@ -1007,6 +1015,8 @@
                     data-pagination="true"
                     data-id-table="usersHistoryTable"
                     data-search="true"
+                    data-search-highlight="true"
+                    data-show-print="true"
                     data-side-pagination="server"
                     data-show-columns="true"
                     data-show-fullscreen="true"
@@ -1059,6 +1069,8 @@
                     data-bulk-button-id="#bulkLocationsEditButton"
                     data-bulk-form-id="#locationsBulkForm"
                     data-search="true"
+                    data-search-highlight="true"
+                    data-show-print="true"
                     data-side-pagination="server"
                     data-show-columns="true"
                     data-show-fullscreen="true"
@@ -1091,6 +1103,8 @@
                       data-bulk-button-id="#bulkUserEditButton"
                       data-bulk-form-id="#usersBulkForm"
                       data-search="true"
+                      data-search-highlight="true"
+                      data-show-print="true"
                       data-side-pagination="server"
                       data-show-columns="true"
                       data-show-fullscreen="true"

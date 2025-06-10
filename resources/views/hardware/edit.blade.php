@@ -114,28 +114,8 @@
             <div id="optional_details" class="col-md-12" style="display:none">
                 @include ('partials.forms.edit.name', ['translated_name' => trans('admin/hardware/form.name')])
                 @include ('partials.forms.edit.warranty')
-
-                <!-- Datepicker -->
-                <div class="form-group{{ $errors->has('next_audit_date') ? ' has-error' : '' }}">
-
-                    <label class="col-md-3 control-label" for="next_audit_date">
-                        {{ trans('general.next_audit_date') }}
-                    </label>
-
-                    <div class="input-group col-md-4">
-                        <div class="input-group date" data-provide="datepicker" data-date-clear-btn="true" data-date-format="yyyy-mm-dd"  data-autoclose="true">
-                            <input type="text" class="form-control" placeholder="{{ trans('general.select_date') }}" name="next_audit_date" id="next_audit_date" value="{{ old('next_audit_date', $item->next_audit_date) }}" readonly style="background-color:inherit" maxlength="10">
-                            <span class="input-group-addon"><x-icon type="calendar" /></span>
-                        </div>
-                    </div>
-                    <div class="col-md-8 col-md-offset-3">
-                        {!! $errors->first('next_audit_date', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
-                        <p class="help-block">{!! trans('general.next_audit_date_help') !!}</p>
-                    </div>
-
-                </div>
-
-
+                @include ('partials.forms.edit.datepicker', ['translated_name' => trans('admin/hardware/form.expected_checkin'),'fieldname' => 'expected_checkin'])
+                @include ('partials.forms.edit.datepicker', ['translated_name' => trans('general.next_audit_date'),'fieldname' => 'next_audit_date', 'help_text' => trans('general.next_audit_date_help')])
                 <!-- byod checkbox -->
                 <div class="form-group byod">
                     <div class="col-md-7 col-md-offset-3">
@@ -167,8 +147,8 @@
 
                 <div id='order_details' class="col-md-12" style="display:none">
                     @include ('partials.forms.edit.order_number')
-                    @include ('partials.forms.edit.purchase_date')
-                    @include ('partials.forms.edit.eol_date')
+                    @include ('partials.forms.edit.datepicker', ['translated_name' => trans('general.purchase_date'),'fieldname' => 'purchase_date'])
+                    @include ('partials.forms.edit.datepicker', ['translated_name' => trans('admin/hardware/form.eol_date'),'fieldname' => 'asset_eol_date'])
                     @include ('partials.forms.edit.supplier-select', ['translated_name' => trans('general.supplier'), 'fieldname' => 'supplier_id'])
 
                     @php

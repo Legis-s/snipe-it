@@ -154,6 +154,17 @@ class Location extends SnipeModel
     }
 
     /**
+     * Establishes the location -> admin user relationship
+     *
+     * @author A. Gianotto <snipe@snipe.net>
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
+    public function adminuser()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'created_by');
+    }
+
+    /**
      * Find assets with this location as their location_id
      *
      * @author A. Gianotto <snipe@snipe.net>
@@ -392,6 +403,15 @@ class Location extends SnipeModel
     {
         return $query->leftJoin('companies as company_sort', 'locations.company_id', '=', 'company_sort.id')->orderBy('company_sort.name', $order);
     }
+
+    /**
+     * Query builder scope to order on the user that created it
+     */
+    public function scopeOrderByCreatedByName($query, $order)
+    {
+        return $query->leftJoin('users as admin_sort', 'locations.created_by', '=', 'admin_sort.id')->select('locations.*')->orderBy('admin_sort.first_name', $order)->orderBy('admin_sort.last_name', $order);
+    }
+
 
     public function inventories()
     {

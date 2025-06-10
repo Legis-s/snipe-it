@@ -54,10 +54,20 @@
         </div>
 
 
-        @include ('partials.forms.edit.asset-select', ['translated_name' => trans('general.asset'), 'fieldname' => 'asset_id', 'required' => 'true'])
-        @include ('partials.forms.edit.supplier-select', ['translated_name' => trans('general.supplier'), 'fieldname' => 'supplier_id', 'required' => 'true'])
-        @include ('partials.forms.edit.maintenance_type')
 
+        @include ('partials.forms.edit.asset-select', [
+          'translated_name' => trans('general.assets'),
+          'fieldname' => 'selected_assets[]',
+          'multiple' => true,
+          'required' => true,
+          'select_id' => 'assigned_assets_select',
+          'asset_selector_div_id' => 'assets_to_checkout_div',
+          'asset_ids' => old('selected_assets')
+        ])
+
+
+        @include ('partials.forms.edit.maintenance_type')
+        @include ('partials.forms.edit.supplier-select', ['translated_name' => trans('general.supplier'), 'fieldname' => 'supplier_id'])
 
 
         <!-- Start Date -->
@@ -65,10 +75,12 @@
           <label for="start_date" class="col-md-3 control-label">{{ trans('admin/asset_maintenances/form.start_date') }}</label>
 
           <div class="input-group col-md-3">
-            <div class="input-group date" data-provide="datepicker" data-date-format="yyyy-mm-dd"  data-autoclose="true" data-date-clear-btn="true">
-              <input type="text" class="form-control" placeholder="{{ trans('general.select_date') }}" name="start_date" id="start_date" value="{{ old('start_date', $item->start_date) }}"{{  (Helper::checkIfRequired($item, 'start_date')) ? ' required' : '' }}>
-              <span class="input-group-addon"><x-icon type="calendar" /></span>
-            </div>
+            <x-input.datepicker
+                    name="start_date"
+                    :value="old('start_date', $item->start_date)"
+                    placeholder="{{ trans('general.select_date') }}"
+                    required="{{ Helper::checkIfRequired($item, 'start_date') }}"
+            />
             {!! $errors->first('start_date', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
           </div>
         </div>
@@ -80,12 +92,12 @@
           <label for="start_date" class="col-md-3 control-label">{{ trans('admin/asset_maintenances/form.completion_date') }}</label>
 
           <div class="input-group col-md-3">
-            <div class="input-group date" data-date-clear-btn="true" data-provide="datepicker" data-date-format="yyyy-mm-dd"  data-autoclose="true">
-              <input type="text" class="form-control" placeholder="{{ trans('general.select_date') }}" name="completion_date" id="completion_date" value="{{ old('completion_date', $item->completion_date) }}"{{  (Helper::checkIfRequired($item, 'completion_date')) ? ' required' : '' }}>
-              <span class="input-group-addon">
-                <x-icon type="calendar" />
-              </span>
-            </div>
+            <x-input.datepicker
+                    name="completion_date"
+                    :value="old('start_date', $item->start_date)"
+                    placeholder="{{ trans('general.select_date') }}"
+                    required="Helper::checkIfRequired($item, 'completion_date')"
+            />
             {!! $errors->first('completion_date', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
           </div>
         </div>

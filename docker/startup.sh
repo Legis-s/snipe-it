@@ -100,9 +100,13 @@ chown -R docker:root /var/www/html/storage/framework/cache
 # Fix php settings
 if [ -v "PHP_UPLOAD_LIMIT" ]
 then
-    echo "Changing upload limit to ${PHP_UPLOAD_LIMIT}"
-    sed -i "s/^upload_max_filesize.*/upload_max_filesize = ${PHP_UPLOAD_LIMIT}M/" /etc/php*/php.ini
-    sed -i "s/^post_max_size.*/post_max_size = ${PHP_UPLOAD_LIMIT}M/" /etc/php*/php.ini
+  PHP_INI_FILE=$(find /etc/php/*/apache2/php.ini)
+  if [ -e $PHP_INI_FILE ]
+  then
+    echo "Changing upload limit to ${PHP_UPLOAD_LIMIT}M in ${PHP_INI_FILE}"
+    sed -i "s/^upload_max_filesize.*/upload_max_filesize = ${PHP_UPLOAD_LIMIT}M/" $PHP_INI_FILE
+    sed -i "s/^post_max_size.*/post_max_size = ${PHP_UPLOAD_LIMIT}M/" $PHP_INI_FILE
+  fi
 fi
 
 # If the Oauth DB files are not present copy the vendor files over to the db migrations
@@ -119,5 +123,10 @@ fi
 php artisan migrate --force
 php artisan config:clear
 php artisan config:cache
+
+# we do this after the artisan commands to ensure that if the laravel
+# log got created by root, we set the permissions back
+touch /var/www/html/storage/logs/laravel.log
+chown -R docker:root /var/www/html/storage/logs/laravel.log
 
 exec supervisord -c /supervisord.conf

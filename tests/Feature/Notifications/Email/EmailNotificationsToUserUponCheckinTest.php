@@ -11,12 +11,10 @@ use PHPUnit\Framework\Attributes\Group;
 use App\Events\CheckoutableCheckedIn;
 use App\Models\Asset;
 use App\Models\User;
-use App\Notifications\CheckinAssetNotification;
-use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 #[Group('notifications')]
-class EmailNotificationsUponCheckinTest extends TestCase
+class EmailNotificationsToUserUponCheckinTest extends TestCase
 {
     protected function setUp(): void
     {
@@ -25,10 +23,8 @@ class EmailNotificationsUponCheckinTest extends TestCase
         Mail::fake();
     }
 
-    public function testCheckInEmailSentToUserIfSettingEnabled()
+    public function test_check_in_email_sent_to_user_if_setting_enabled()
     {
-        Mail::fake();
-
         $user = User::factory()->create();
         $asset = Asset::factory()->assignedToUser($user)->create();
 
@@ -39,13 +35,11 @@ class EmailNotificationsUponCheckinTest extends TestCase
         Mail::assertSent(CheckinAssetMail::class, function($mail) use ($user) {
                 return $mail->hasTo($user->email);
         });
-
     }
 
-    public function testCheckInEmailNotSentToUserIfSettingDisabled()
+    public function test_check_in_email_not_sent_to_user_if_setting_disabled()
     {
         $this->settings->disableAdminCC();
-        Mail::fake();
 
         $user = User::factory()->create();
         $checkoutables = collect([
@@ -91,6 +85,18 @@ class EmailNotificationsUponCheckinTest extends TestCase
         Mail::assertNotSent(CheckinAssetMail::class, function ($mail) use ($user) {
             return $mail->hasTo($user->email);
         });
+    }
+
+    public function test_handles_user_not_having_email_address_set()
+    {
+        $user = User::factory()->create(['email' => null]);
+        $asset = Asset::factory()->assignedToUser($user)->create();
+
+        $asset->model->category->update(['checkin_email' => true]);
+
+        $this->fireCheckInEvent($asset, $user);
+
+        Mail::assertNothingSent();
     }
 
     private function fireCheckInEvent($asset, $user): void

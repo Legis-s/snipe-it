@@ -96,8 +96,28 @@
                                     <input type="email" name="admin_cc_email" value="{{ old('admin_cc_email', $setting->admin_cc_email) }}" class="form-control" placeholder="admin@yourcompany.com" maxlength="191">
                                     {!! $errors->first('admin_cc_email', '<span class="alert-msg" aria-hidden="true">:message</span><br>') !!}
                                     <p class="help-block">{{ trans('admin/settings/general.admin_cc_email_help') }}</p>
-
-
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-9 col-md-offset-3">
+                                    <label class="form-control">
+                                        <input
+                                            type="radio"
+                                            name="admin_cc_always"
+                                            value="1"
+                                            @checked($setting->admin_cc_always == 1)
+                                        >
+                                        {{ trans('admin/settings/general.admin_cc_always') }}
+                                    </label>
+                                    <label class="form-control">
+                                        <input
+                                            type="radio"
+                                            name="admin_cc_always"
+                                            value="0"
+                                            @checked($setting->admin_cc_always == 0)
+                                        >
+                                        {{ trans('admin/settings/general.admin_cc_when_acceptance_required') }}
+                                    </label>
                                 </div>
                             </div>
                         </fieldset>
@@ -136,7 +156,7 @@
                                 <div class="col-md-3">
                                     <label for="audit_interval">{{ trans('admin/settings/general.audit_interval') }}</label>
                                 </div>
-                                <div class="input-group col-xs-10 col-sm-6 col-md-6 col-lg-2 col-xl-2">
+                                <div class="input-group col-xs-10 col-sm-6 col-md-6 col-lg-3 col-xl-3">
                                     <input class="form-control" placeholder="12" maxlength="3" name="audit_interval" type="number" id="audit_interval" value="{{ old('audit_interval', $setting->audit_interval) }}">
                                     <span class="input-group-addon">{{ trans('general.months') }}</span>
                                 </div>
@@ -151,7 +171,7 @@
                                 <div class="col-md-3">
                                     <label for="audit_warning_days">{{ trans('admin/settings/general.audit_warning_days') }}</label>
                                 </div>
-                                <div class="input-group col-xs-10 col-sm-6 col-md-4 col-lg-2 col-xl-2">
+                                <div class="input-group col-xs-10 col-sm-6 col-md-4 col-lg-3 col-xl-3">
                                     <input class="form-control" placeholder="14" maxlength="3" name="audit_warning_days" type="number" id="audit_warning_days" value="{{ old('audit_warning_days', $setting->audit_warning_days) }}">
                                     <span class="input-group-addon">{{ trans('general.days') }}</span>
                                 </div>
@@ -166,7 +186,7 @@
                                 <div class="col-md-3">
                                     <label for="due_checkin_days">{{ trans('admin/settings/general.due_checkin_days') }}</label>
                                 </div>
-                                <div class="input-group col-xs-10 col-sm-6 col-md-4 col-lg-2 col-xl-2">
+                                <div class="input-group col-xs-10 col-sm-6 col-md-4 col-lg-3 col-xl-3">
                                     <input class="form-control" placeholder="14" maxlength="3" name="due_checkin_days" type="number" id="due_checkin_days" value="{{ old('due_checkin_days', $setting->due_checkin_days) }}">
                                     <span class="input-group-addon">{{ trans('general.days') }}</span>
                                 </div>

@@ -79,6 +79,7 @@ done
 chown -R apache:root /var/lib/snipeit/data/*
 chown -R apache:root /var/lib/snipeit/dumps
 chown -R apache:root /var/lib/snipeit/keys
+chown -R apache:root /var/www/html/storage/framework/cache
 
 # Fix php settings
 if [ ! -z "${PHP_UPLOAD_LIMIT}" ]

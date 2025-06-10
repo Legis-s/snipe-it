@@ -24,6 +24,7 @@
         @else
             @can('update', \App\Models\Asset::class)
                 <option value="edit">{{ trans('button.edit') }}</option>
+                <option value="maintenance">{{ trans('button.add_maintenance') }}</option>
             @endcan
             @can('checkout', \App\Models\Asset::class)
                 <option value="checkout">{{ trans('general.bulk_checkout') }}</option>

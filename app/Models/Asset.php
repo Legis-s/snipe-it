@@ -131,9 +131,9 @@ class Asset extends Depreciable
         'assigned_to'   => ['nullable', 'integer', 'required_with:assigned_type'],
         'assigned_type' => ['nullable', 'required_with:assigned_to', 'in:'.User::class.",".Location::class.",".Asset::class],
         'requestable'       => ['nullable', 'boolean'],
-        'assigned_user'     => ['nullable', 'exists:users,id,deleted_at,NULL'],
-        'assigned_location' => ['nullable', 'exists:locations,id,deleted_at,NULL', 'fmcs_location'],
-        'assigned_asset'    => ['nullable', 'exists:assets,id,deleted_at,NULL'],
+        'assigned_user'     => ['integer', 'nullable', 'exists:users,id,deleted_at,NULL'],
+        'assigned_location' => ['integer', 'nullable', 'exists:locations,id,deleted_at,NULL', 'fmcs_location'],
+        'assigned_asset'    => ['integer', 'nullable', 'exists:assets,id,deleted_at,NULL'],
         'depreciable_cost'  => ['nullable', 'numeric', 'gte:0', 'max:9999999999999'],
         'quality'           => ['nullable', 'integer', 'between:1,5'],
         'purchase_id'       => ['nullable', 'integer'],
@@ -1017,6 +1017,7 @@ class Asset extends Depreciable
             return $this->model->category->require_acceptance;
         }
 
+        return false;
     }
 
 
@@ -1385,7 +1386,7 @@ class Asset extends Depreciable
 
     public function scopeDueForAudit($query, $settings)
     {
-        $interval = $settings->audit_warning_days ?? 0;
+        $interval = (int) $settings->audit_warning_days ?? 0;
         $today = Carbon::now();
         $interval_date = $today->copy()->addDays($interval)->format('Y-m-d');
 
@@ -1453,7 +1454,7 @@ class Asset extends Depreciable
 
     public function scopeDueForCheckin($query, $settings)
     {
-        $interval = $settings->due_checkin_days ?? 0;
+        $interval = (int) $settings->due_checkin_days ?? 0;
         $today = Carbon::now();
         $interval_date = $today->copy()->addDays($interval)->format('Y-m-d');
 

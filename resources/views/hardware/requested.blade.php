@@ -28,6 +28,8 @@
                     id="requestedAssets"
                     data-advanced-search="true"
                     data-search="true"
+                    data-search-highlight="true"
+                    data-show-print="true"
                     data-show-columns="true"
                     data-show-export="true"
                     data-pagination="true"

@@ -958,9 +958,9 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                             <li class="breadcrumb-item">
                                                 <a href="{{ $crumbs->url() }}">
                                                     @if ($loop->first)
-                                                        {!! Blade::render($crumbs->title()) !!}
+                                                        <x-icon type="home" />
                                                     @else
-                                                        {{ Blade::render($crumbs->title()) }}
+                                                        {{ $crumbs->title() }}
                                                     @endif
                                                 </a>
                                                 <x-icon type="angle-right" />
@@ -1027,15 +1027,14 @@ dir="{{ Helper::determineLanguageDirection() }}">
             <footer class="main-footer hidden-print" style="display:grid;flex-direction:column;">
 
                 <div class="1hidden-xs pull-left">
-                    <div class="pull-left" >
-                        <a target="_blank" href="https://snipeitapp.com" rel="noopener">Snipe-IT</a> is open source software, made with <x-icon type="heart" style="color: #a94442; font-size: 10px" />
-                            <span class="sr-only">love</span> by <a href="https://bsky.app/profile/snipeitapp.com" rel="noopener">@snipeitapp</a>.
+                    <div class="pull-left">
+                         {!! trans('general.footer_credit') !!}
                     </div>
                     <div class="pull-right">
                     @if ($snipeSettings->version_footer!='off')
                         @if (($snipeSettings->version_footer=='on') || (($snipeSettings->version_footer=='admin') && (Auth::user()->isSuperUser()=='1')))
-                            &nbsp; <strong>Version</strong> {{ config('version.app_version') }} -
-                            build {{ config('version.build_version') }} ({{ config('version.branch') }})
+                            &nbsp; <strong>{{ trans('general.version') }}</strong> {{ config('version.app_version') }} -
+                            {{ trans('general.build') }} {{ config('version.build_version') }} ({{ config('version.branch') }})
                         @endif
                     @endif
 
@@ -1142,6 +1141,68 @@ dir="{{ Helper::determineLanguageDirection() }}">
 
 
         <script nonce="{{ csrf_token() }}">
+
+            $.fn.datepicker.dates['{{ app()->getLocale() }}'] = {
+                days: [
+                    "{{ trans('datepicker.days.sunday') }}",
+                    "{{ trans('datepicker.days.monday') }}",
+                    "{{ trans('datepicker.days.tuesday') }}",
+                    "{{ trans('datepicker.days.wednesday') }}",
+                    "{{ trans('datepicker.days.thursday') }}",
+                    "{{ trans('datepicker.days.friday') }}",
+                    "{{ trans('datepicker.days.saturday') }}"
+                ],
+                daysShort: [
+                    "{{ trans('datepicker.short_days.sunday') }}",
+                    "{{ trans('datepicker.short_days.monday') }}",
+                    "{{ trans('datepicker.short_days.tuesday') }}",
+                    "{{ trans('datepicker.short_days.wednesday') }}",
+                    "{{ trans('datepicker.short_days.thursday') }}",
+                    "{{ trans('datepicker.short_days.friday') }}",
+                    "{{ trans('datepicker.short_days.saturday') }}"
+                ],
+                daysMin: [
+                    "{{ trans('datepicker.min_days.sunday') }}",
+                    "{{ trans('datepicker.min_days.monday') }}",
+                    "{{ trans('datepicker.min_days.tuesday') }}",
+                    "{{ trans('datepicker.min_days.wednesday') }}",
+                    "{{ trans('datepicker.min_days.thursday') }}",
+                    "{{ trans('datepicker.min_days.friday') }}",
+                    "{{ trans('datepicker.min_days.saturday') }}"
+                ],
+                months: [
+                    "{{ trans('datepicker.months.january') }}",
+                    "{{ trans('datepicker.months.february') }}",
+                    "{{ trans('datepicker.months.march') }}",
+                    "{{ trans('datepicker.months.april') }}",
+                    "{{ trans('datepicker.months.may') }}",
+                    "{{ trans('datepicker.months.june') }}",
+                    "{{ trans('datepicker.months.july') }}",
+                    "{{ trans('datepicker.months.august') }}",
+                    "{{ trans('datepicker.months.september') }}",
+                    "{{ trans('datepicker.months.october') }}",
+                    "{{ trans('datepicker.months.november') }}",
+                    "{{ trans('datepicker.months.december') }}",
+                ],
+                monthsShort:  [
+                    "{{ trans('datepicker.months_short.january') }}",
+                    "{{ trans('datepicker.months_short.february') }}",
+                    "{{ trans('datepicker.months_short.march') }}",
+                    "{{ trans('datepicker.months_short.april') }}",
+                    "{{ trans('datepicker.months_short.may') }}",
+                    "{{ trans('datepicker.months_short.june') }}",
+                    "{{ trans('datepicker.months_short.july') }}",
+                    "{{ trans('datepicker.months_short.august') }}",
+                    "{{ trans('datepicker.months_short.september') }}",
+                    "{{ trans('datepicker.months_short.october') }}",
+                    "{{ trans('datepicker.months_short.november') }}",
+                    "{{ trans('datepicker.months_short.december') }}",
+                ],
+                today: "{{ trans('datepicker.today') }}",
+                clear: "{{ trans('datepicker.clear') }}",
+                format: "yyyy-mm-dd",
+                weekStart: 0
+            };
 
             var clipboard = new ClipboardJS('.js-copy-link');
 

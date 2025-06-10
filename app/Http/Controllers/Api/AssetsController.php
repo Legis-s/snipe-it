@@ -1226,7 +1226,7 @@ class AssetsController extends Controller
 
             // Validate the rest of the data before we turn off the event dispatcher
             if ($asset->isInvalid()) {
-                return response()->json(Helper::formatStandardApiResponse('error', null,  $asset->getErrors()));
+                return response()->json(Helper::formatStandardApiResponse('error', ['asset_tag' => $asset->asset_tag],  $asset->getErrors()));
             }
 
 

@@ -6,6 +6,7 @@ use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SaveUserRequest;
 use App\Http\Transformers\AccessoriesTransformer;
+use App\Http\Transformers\ActionlogsTransformer;
 use App\Http\Transformers\AssetsTransformer;
 use App\Http\Transformers\ConsumablesTransformer;
 use App\Http\Transformers\LicensesTransformer;
@@ -82,7 +83,7 @@ class UsersController extends Controller
             'users.autoassign_licenses',
             'users.website',
 
-        ])->with('manager', 'groups', 'userloc', 'company', 'department', 'assets', 'licenses', 'accessories', 'consumables', 'createdBy', 'managesUsers', 'managedLocations')
+        ])->with('manager', 'groups', 'userloc', 'company', 'department', 'assets', 'licenses', 'accessories', 'consumables', 'createdBy', 'managesUsers', 'managedLocations', 'eulas')
             ->withCount([
                 'assets as assets_count' => function(Builder $query) {
                     $query->withoutTrashed();
@@ -736,6 +737,25 @@ class UsersController extends Controller
     public function getCurrentUserInfo(Request $request) : array
     {
         return (new UsersTransformer)->transformUser($request->user());
+    }
+
+    /**
+     * Display the EULAs accepted by the user.
+     *
+     *  @param \App\Models\User $user
+     *  @param \App\Http\Transformers\ActionlogsTransformer $transformer
+     *  @return \Illuminate\Http\JsonResponse
+     *@since [v8.1.16]
+     * @author [Godfrey Martinez] [<gmartinez@grokability.com>]
+     */
+    public function eulas(User $user, ActionlogsTransformer $transformer)
+    {
+        $this->authorize('view', Asset::class);
+
+        $eulas = $user->eulas;
+        return response()->json(
+            $transformer->transformActionlogs($eulas, $eulas->count())
+        );
     }
 
     /**

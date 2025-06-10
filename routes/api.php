@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], function () {
+Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], function () {
 
 
     Route::get('/', function () {
@@ -1094,6 +1094,14 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
                 ]
             )->name('api.users.me');
 
+            Route::get('{user}/eulas',
+                [
+                    Api\UsersController::class,
+                    'eulas'
+                ]
+            )->name('api.user.eulas');
+
+
             Route::get('list/{status?}',
             [
                 Api\UsersController::class, 
@@ -1324,7 +1332,11 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
             return response()->json(
                 [
                     'version' => config('version.app_version'),
-                ], 200);
+                    'build_version' => config('version.build_version'),
+                    'hash_version' => config('version.hash_version'),
+                    'full_version' => config('version.full_app_version')
+                ]
+            );
         }); // end version api routes
 
 

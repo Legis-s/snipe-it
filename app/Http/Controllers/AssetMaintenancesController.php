@@ -67,16 +67,10 @@ class AssetMaintenancesController extends Controller
             // We have to set this so that the correct property is set in the select2 ajax dropdown
             $asset->asset_id = $asset->id;
         }
-
-        // Prepare Asset Maintenance Type List
-        $assetMaintenanceType = [
-                                    '' => 'Select an asset maintenance type',
-                                ] + AssetMaintenance::getImprovementOptions();
-        // Mark the selected asset, if it came in
-
+        
         return view('asset_maintenances/edit')
+                   ->with('assetMaintenanceType', AssetMaintenance::getImprovementOptions())
                    ->with('asset', $asset)
-                   ->with('assetMaintenanceType', $assetMaintenanceType)
                    ->with('item', new AssetMaintenance);
     }
 
@@ -91,43 +85,47 @@ class AssetMaintenancesController extends Controller
     public function store(Request $request) : RedirectResponse
     {
         $this->authorize('update', Asset::class);
-        // create a new model instance
-        $assetMaintenance = new AssetMaintenance();
-        $assetMaintenance->supplier_id = $request->input('supplier_id');
-        $assetMaintenance->is_warranty = $request->input('is_warranty');
-        $assetMaintenance->cost = $request->input('cost');
-        $assetMaintenance->notes = $request->input('notes');
-        $asset = Asset::find($request->input('asset_id'));
 
-        if ((! Company::isCurrentUserHasAccess($asset)) && ($asset != null)) {
-            return static::getInsufficientPermissionsRedirect();
+        $assets = Asset::whereIn('id', $request->input('selected_assets'))->get();
+
+        foreach ($assets as $asset) {
+            if ((! Company::isCurrentUserHasAccess($asset)) && ($asset != null)) {
+                return static::getInsufficientPermissionsRedirect();
+            }
+
+            $assetMaintenance = new AssetMaintenance();
+            $assetMaintenance->supplier_id = $request->input('supplier_id');
+            $assetMaintenance->is_warranty = $request->input('is_warranty');
+            $assetMaintenance->cost = $request->input('cost');
+            $assetMaintenance->notes = $request->input('notes');
+
+            // Save the asset maintenance data
+            $assetMaintenance->asset_id = $asset->id;
+            $assetMaintenance->asset_maintenance_type = $request->input('asset_maintenance_type');
+            $assetMaintenance->title = $request->input('title');
+            $assetMaintenance->start_date = $request->input('start_date');
+            $assetMaintenance->completion_date = $request->input('completion_date');
+            $assetMaintenance->created_by = auth()->id();
+
+            if (($assetMaintenance->completion_date !== null)
+                && ($assetMaintenance->start_date !== '')
+                && ($assetMaintenance->start_date !== '0000-00-00')
+            ) {
+                $startDate = Carbon::parse($assetMaintenance->start_date);
+                $completionDate = Carbon::parse($assetMaintenance->completion_date);
+                $assetMaintenance->asset_maintenance_time = (int) $completionDate->diffInDays($startDate, true);
+            }
+
+
+            // Was the asset maintenance created?
+            if (!$assetMaintenance->save()) {
+                return redirect()->back()->withInput()->withErrors($assetMaintenance->getErrors());
+            }
         }
 
-        // Save the asset maintenance data
-        $assetMaintenance->asset_id = $request->input('asset_id');
-        $assetMaintenance->asset_maintenance_type = $request->input('asset_maintenance_type');
-        $assetMaintenance->title = $request->input('title');
-        $assetMaintenance->start_date = $request->input('start_date');
-        $assetMaintenance->completion_date = $request->input('completion_date');
-        $assetMaintenance->created_by = auth()->id();
+        return redirect()->route('maintenances.index')
+            ->with('success', trans('admin/asset_maintenances/message.create.success'));
 
-        if (($assetMaintenance->completion_date !== null)
-            && ($assetMaintenance->start_date !== '')
-            && ($assetMaintenance->start_date !== '0000-00-00')
-        ) {
-            $startDate = Carbon::parse($assetMaintenance->start_date);
-            $completionDate = Carbon::parse($assetMaintenance->completion_date);
-            $assetMaintenance->asset_maintenance_time = (int) $completionDate->diffInDays($startDate, true);
-        }
-
-        // Was the asset maintenance created?
-        if ($assetMaintenance->save()) {
-            // Redirect to the new asset maintenance page
-            return redirect()->route('maintenances.index')
-                           ->with('success', trans('admin/asset_maintenances/message.create.success'));
-        }
-
-        return redirect()->back()->withInput()->withErrors($assetMaintenance->getErrors());
     }
 
     /**
@@ -149,7 +147,7 @@ class AssetMaintenancesController extends Controller
         }
 
         // Prepare Improvement Type List
-        $assetMaintenanceType = ['' => 'Select an improvement type'] + AssetMaintenance::getImprovementOptions();
+        $assetMaintenanceType = ['' => trans('general.select')] + AssetMaintenance::getImprovementOptions();
 
         return view('asset_maintenances/edit')
                    ->with('selectedAsset', null)
