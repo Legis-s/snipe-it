@@ -7,13 +7,15 @@ use App\Events\CheckoutableCheckedOut;
 use App\Events\CheckoutableSell;
 use App\Http\Requests\AssetCheckoutRequest;
 use App\Http\Requests\AssetSellRequest;
-use App\Models\Actionlog;
 use App\Models\Asset;
+use App\Models\Company;
 use App\Models\Consumable;
 use App\Models\ConsumableAssignment;
-use App\Models\Contract;
 use App\Models\Deal;
 use App\Models\MassOperation;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -24,10 +26,8 @@ class MassOperationsController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(): View
     {
         $this->authorize('checkout', Asset::class);
         return view('massoperations/index');
@@ -35,27 +35,27 @@ class MassOperationsController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param int $id
      */
-    public function show($massoperationId)
+    public function show(MassOperation $bulk): View|RedirectResponse
     {
         $this->authorize('checkout', Asset::class);
-        $mass_operation = MassOperation::find($massoperationId);
-        $assets = $mass_operation->assets;
-        return view('massoperations/view', ['massoperation' => MassOperation::find($massoperationId), 'assets' => $assets]);;
+
+        $massoperation = MassOperation::find($bulk->id);
+
+        if (isset($massoperation->id)) {
+            return view('massoperations/view', compact('massoperation'));
+        }
+
+        $assets = $massoperation->assets;
+        return view('massoperations/view', ['massoperation' => $massoperation, 'assets' => $assets]);;
     }
-
-
-
 
 
     /**
      * Show Bulk Checkout Page
-     * @return View View to checkout multiple assets
      */
-    public function showCheckout()
+    public function showCheckout(): View|RedirectResponse
     {
 
         $this->authorize('checkout', Asset::class);
@@ -78,9 +78,8 @@ class MassOperationsController extends Controller
 
     /**
      * Process Multiple Checkout Request
-     * @return View
      */
-    public function storeCheckout(AssetCheckoutRequest $request)
+    public function storeCheckout(AssetCheckoutRequest $request): RedirectResponse
     {
 
         $this->authorize('checkout', Asset::class);
@@ -90,11 +89,11 @@ class MassOperationsController extends Controller
 
             $target = $this->determineCheckoutTarget();
 
-            if (! is_array($request->get('selected_assets')) and ! is_array($request->get('selected_consumables'))) {
+            if (!is_array($request->get('selected_assets')) and !is_array($request->get('selected_consumables'))) {
                 return redirect()->route('bulk.checkout.show')->withInput()->with('error', trans('admin/hardware/message.checkout.no_assets_selected'));
             }
-            $asset_ids=[];
-            if (is_array($request->get('selected_assets')) and count($request->get('selected_assets'))>0){
+            $asset_ids = [];
+            if (is_array($request->get('selected_assets')) and count($request->get('selected_assets')) > 0) {
                 $asset_ids = array_filter($request->get('selected_assets'));
             }
 
@@ -106,7 +105,7 @@ class MassOperationsController extends Controller
                 }
             }
 
-            $consumbales_post  = is_array($request->get('selected_consumables')) ? array_filter($request->get('selected_consumables')) : [];
+            $consumbales_post = is_array($request->get('selected_consumables')) ? array_filter($request->get('selected_consumables')) : [];
             $consumbales_data = [];
             foreach ($consumbales_post as $consumbale) {
                 array_push($consumbales_data, explode(":", $consumbale));
@@ -137,7 +136,7 @@ class MassOperationsController extends Controller
             }
 
             $errors = [];
-            DB::transaction(function () use ($target, $admin, $checkout_at, $expected_checkin, $errors, $asset_ids,$consumbales_ids,$consumbales_data, $request) {
+            DB::transaction(function () use ($target, $admin, $checkout_at, $expected_checkin, $errors, $asset_ids, $consumbales_ids, $consumbales_data, $request) {
                 foreach ($asset_ids as $asset_id) {
                     $asset = Asset::findOrFail($asset_id);
                     $this->authorize('checkout', $asset);
@@ -162,30 +161,30 @@ class MassOperationsController extends Controller
                     $this->authorize('checkout', $consumable);
 
                     $ca = new ConsumableAssignment();
-                    $ca->consumable_id= $consumable->id;
-                    $ca->user_id= $admin->id;
-                    $ca->quantity= $consumbale_item[1];
-                    $ca->comment= e($request->get('note'));
-                    $ca->cost= $consumable->purchase_cost;
-                    $ca->type= ConsumableAssignment::ISSUED;
-                    $ca->assigned_to= $target->id;
-                    $ca->assigned_type= get_class($target);
+                    $ca->consumable_id = $consumable->id;
+                    $ca->user_id = $admin->id;
+                    $ca->quantity = $consumbale_item[1];
+                    $ca->comment = e($request->get('note'));
+                    $ca->cost = $consumable->purchase_cost;
+                    $ca->type = ConsumableAssignment::ISSUED;
+                    $ca->assigned_to = $target->id;
+                    $ca->assigned_type = get_class($target);
                     $ca->save();
-                    $consumbales_assigned_ids[]=$ca->id;
+                    $consumbales_assigned_ids[] = $ca->id;
 
-                    event(new CheckoutableCheckedOut($consumable, $target, $admin,e($request->get('note'))));
+                    event(new CheckoutableCheckedOut($consumable, $target, $admin, e($request->get('note'))));
                 }
 
                 $bitrix_task_id = intval($request->get('bitrix_task_id'));
                 $mo = new MassOperation();
                 $mo->operation_type = 'checkout';
-                $mo->name =  "Массовая выдача от " . date('d.m.Y');
-                $mo->user_id =  Auth::id();
+                $mo->name = "Массовая выдача от " . date('d.m.Y');
+                $mo->user_id = Auth::id();
                 $mo->assignedTo()->associate($target);
-                if ($bitrix_task_id>0){
-                    $mo->bitrix_task_id =  $bitrix_task_id;
+                if ($bitrix_task_id > 0) {
+                    $mo->bitrix_task_id = $bitrix_task_id;
                 }
-                $mo->note =  e($request->get('note'));
+                $mo->note = e($request->get('note'));
                 $mo->save();
                 $mo->assets()->attach($asset_ids);
                 $mo->consumables()->attach($consumbales_ids);
@@ -194,7 +193,7 @@ class MassOperationsController extends Controller
             });
 
 
-            if (! $errors) {
+            if (!$errors) {
                 // Redirect to the new asset page
                 return redirect()->to('bulk')->with('success', trans('admin/hardware/message.checkout.success'));
             }
@@ -208,9 +207,8 @@ class MassOperationsController extends Controller
 
     /**
      * Show Bulk Multiple Sell Page
-     * @return View View to sell multiple assets
      */
-    public function showSell()
+    public function showSell(): View|RedirectResponse
     {
 
         $this->authorize('checkout', Asset::class);
@@ -232,9 +230,8 @@ class MassOperationsController extends Controller
 
     /**
      * Process Multiple Checkout Request
-     * @return View
      */
-    public function storeSell(AssetSellRequest $request)
+    public function storeSell(AssetSellRequest $request): RedirectResponse
     {
 
         $this->authorize('checkout', Asset::class);
@@ -244,16 +241,16 @@ class MassOperationsController extends Controller
 
             $target = Deal::findOrFail(request('assigned_deal'));
 
-            if (! is_array($request->get('selected_assets')) and ! is_array($request->get('selected_consumables'))) {
+            if (!is_array($request->get('selected_assets')) and !is_array($request->get('selected_consumables'))) {
                 return redirect()->route('bulk.sell.show')->withInput()->with('error', trans('admin/hardware/message.checkout.no_assets_selected'));
             }
 
-            $asset_ids=[];
-            if (is_array($request->get('selected_assets')) and count($request->get('selected_assets'))>0){
+            $asset_ids = [];
+            if (is_array($request->get('selected_assets')) and count($request->get('selected_assets')) > 0) {
                 $asset_ids = array_filter($request->get('selected_assets'));
             }
 
-            $consumbales_post  = is_array($request->get('selected_consumables')) ? array_filter($request->get('selected_consumables')) : [];
+            $consumbales_post = is_array($request->get('selected_consumables')) ? array_filter($request->get('selected_consumables')) : [];
             $consumbales_data = [];
             foreach ($consumbales_post as $consumbale) {
                 array_push($consumbales_data, explode(":", $consumbale));
@@ -272,7 +269,7 @@ class MassOperationsController extends Controller
 
             $errors = [];
 
-            DB::transaction(function () use ($target, $admin, $checkout_at, $expected_checkin, $errors, $asset_ids,$consumbales_ids,$consumbales_data, $request) {
+            DB::transaction(function () use ($target, $admin, $checkout_at, $expected_checkin, $errors, $asset_ids, $consumbales_ids, $consumbales_data, $request) {
                 $consumbales_assigned_ids = [];
 
                 foreach ($asset_ids as $asset_id) {
@@ -289,44 +286,44 @@ class MassOperationsController extends Controller
                     $consumable = Consumable::findOrFail($consumbale_item[0]);
                     $this->authorize('checkout', $consumable);
 
-                    if (get_class($target) == Deal::class){
+                    if (get_class($target) == Deal::class) {
                         $contract_id = $target->id;
                     }
 
                     $ca = new ConsumableAssignment();
-                    $ca->consumable_id= $consumable->id;
-                    $ca->user_id= $admin->id;
-                    $ca->quantity= $consumbale_item[1];
-                    $ca->comment= e($request->get('note'));
-                    $ca->cost= $consumable->purchase_cost;
-                    $ca->type= ConsumableAssignment::SOLD;
-                    $ca->assigned_to= $target->id;
-                    $ca->assigned_type= get_class($target);
-                    $ca->contract_id= $contract_id;
+                    $ca->consumable_id = $consumable->id;
+                    $ca->user_id = $admin->id;
+                    $ca->quantity = $consumbale_item[1];
+                    $ca->comment = e($request->get('note'));
+                    $ca->cost = $consumable->purchase_cost;
+                    $ca->type = ConsumableAssignment::SOLD;
+                    $ca->assigned_to = $target->id;
+                    $ca->assigned_type = get_class($target);
+                    $ca->contract_id = $contract_id;
                     $ca->save();
 
-                    $consumbales_assigned_ids[]=$ca->id;
+                    $consumbales_assigned_ids[] = $ca->id;
 
-                    event(new CheckoutableSell($consumable, $target, $admin,e($request->get('note'))));
+                    event(new CheckoutableSell($consumable, $target, $admin, e($request->get('note'))));
                 }
 
                 $bitrix_task_id = intval($request->get('bitrix_task_id'));
                 $mo = new MassOperation();
                 $mo->operation_type = 'sell';
-                $mo->name =  "Массовая продажа от " . date('d.m.Y');
-                $mo->user_id =  Auth::id();
+                $mo->name = "Массовая продажа от " . date('d.m.Y');
+                $mo->user_id = Auth::id();
                 $mo->assignedTo()->associate($target);
-                if ($bitrix_task_id>0){
-                    $mo->bitrix_task_id =  $bitrix_task_id;
+                if ($bitrix_task_id > 0) {
+                    $mo->bitrix_task_id = $bitrix_task_id;
                 }
-                $mo->note =  e($request->get('note'));
+                $mo->note = e($request->get('note'));
                 $mo->save();
                 $mo->assets()->attach($asset_ids);
                 $mo->consumables()->attach($consumbales_ids);
                 $mo->consumables_assigments()->attach($consumbales_assigned_ids);
             });
 
-            if (! $errors) {
+            if (!$errors) {
                 // Redirect to the new asset page
                 return redirect()->to('bulk')->with('success', trans('admin/hardware/message.checkout.success'));
             }
@@ -340,9 +337,8 @@ class MassOperationsController extends Controller
 
     /**
      * Show Bulk Multiple Checkin Page
-     * @return View View to checkin multiple assets
      */
-    public function showCheckin()
+    public function showCheckin(): View|RedirectResponse
     {
         $this->authorize('checkin', Asset::class);
         if (request()->filled('purchase_bulk_id')) {
@@ -365,9 +361,8 @@ class MassOperationsController extends Controller
 
     /**
      * Process Multiple Checkin Request
-     * @return View
      */
-    public function storeCheckin(Request $request)
+    public function storeCheckin(Request $request): RedirectResponse
     {
         $this->authorize('checkin', Asset::class);
         try {
@@ -376,7 +371,6 @@ class MassOperationsController extends Controller
             if (!is_array($request->get('selected_assets'))) {
                 return redirect()->route('bulk.checkout.show')->withInput()->with('error', trans('admin/hardware/message.checkout.no_assets_selected'));
             }
-            \Debugbar::info("selected_assets ok ");
 
             $asset_ids = array_filter($request->get('selected_assets'));
             $bitrix_task_id = intval($request->get('bitrix_task_id'));
@@ -389,7 +383,7 @@ class MassOperationsController extends Controller
 
             $note = e($request->get('note'));
             $checkin_at = date("Y-m-d H:i:s");
-            if (($request->filled('checkin_at')) && ($request->get('checkin_at')!= date("Y-m-d"))) {
+            if (($request->filled('checkin_at')) && ($request->get('checkin_at') != date("Y-m-d"))) {
                 $checkin_at = e($request->get('checkin_at'));
             }
 
@@ -401,7 +395,7 @@ class MassOperationsController extends Controller
             }
 
             $errors = [];
-            DB::transaction(function () use ($target, $admin, $checkin_at,$location_id,$note, $errors, $asset_ids, $request) {
+            DB::transaction(function () use ($target, $admin, $checkin_at, $location_id, $note, $errors, $asset_ids, $request) {
                 foreach ($asset_ids as $asset_id) {
                     $asset = Asset::findOrFail($asset_id);
                     $this->authorize('checkin', $asset);
@@ -428,8 +422,8 @@ class MassOperationsController extends Controller
                         $asset->location_id = $location_id;
                         $asset->rtd_location_id = $location_id;
                     }
-                    if(!empty($asset->licenseseats->all())){
-                        foreach ($asset->licenseseats as $seat){
+                    if (!empty($asset->licenseseats->all())) {
+                        foreach ($asset->licenseseats as $seat) {
                             $seat->assigned_to = null;
                             $seat->save();
                         }
@@ -444,7 +438,7 @@ class MassOperationsController extends Controller
                     }
 
                     $error = $asset->save();
-                    event(new CheckoutableCheckedIn($asset, $target, $admin, $note, $checkin_at,$changed));
+                    event(new CheckoutableCheckedIn($asset, $target, $admin, $note, $checkin_at, $changed));
 
                     if ($error) {
                         array_merge_recursive($errors, $asset->getErrors()->toArray());
@@ -455,18 +449,17 @@ class MassOperationsController extends Controller
 
             $mo = new MassOperation();
             $mo->operation_type = 'checkin';
-            $mo->name =  "Массовый возврат от " . date('d.m.Y');
-            $mo->user_id =  Auth::id();
+            $mo->name = "Массовый возврат от " . date('d.m.Y');
+            $mo->user_id = Auth::id();
             $mo->assignedTo()->associate($target);
-            if ($bitrix_task_id>0){
-                $mo->bitrix_task_id =  $bitrix_task_id;
+            if ($bitrix_task_id > 0) {
+                $mo->bitrix_task_id = $bitrix_task_id;
             }
-            $mo->note =  $note;
+            $mo->note = $note;
             $mo->save();
             $mo->assets()->attach($asset_ids);
 
-
-            if (! $errors) {
+            if (!$errors) {
                 // Redirect to the new asset page
                 return redirect()->to('bulk')->with('success', trans('admin/hardware/message.checkout.success'));
             }
@@ -477,6 +470,4 @@ class MassOperationsController extends Controller
             return redirect()->route('bulk.checkout.show')->with('error', $e->getErrors());
         }
     }
-
-
 }

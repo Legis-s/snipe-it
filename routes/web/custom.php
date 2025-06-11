@@ -74,9 +74,6 @@ Route::group(['middleware' => 'auth'], function () {
     Route::resource('devices', DevicesController::class);
 
 
-
-
-
     /**
      * MassOperations
      */
@@ -114,9 +111,10 @@ Route::group(['middleware' => 'auth'], function () {
             )->name('bulk.checkout.store');
         }
     );
-    Route::resource('bulk', MassOperationsController::class, [
-        'parameters' => ['bulk' => 'bulk_id']
-    ]);
+    /**
+     * bulk
+     */
+    Route::resource('bulk', MassOperationsController::class);
 
 });
 
