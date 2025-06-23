@@ -209,11 +209,11 @@ class UsersController extends Controller
         }
 
         if ($request->filled('manages_users_count')) {
-            $users->has('manages_users_count', '=', $request->input('manages_users_count'));
+            $users->has('managesUsers', '=', $request->input('manages_users_count'));
         }
 
         if ($request->filled('manages_locations_count')) {
-            $users->has('manages_locations_count', '=', $request->input('manages_locations_count'));
+            $users->has('managedLocations', '=', $request->input('manages_locations_count'));
         }
 
         if ($request->filled('autoassign_licenses')) {
@@ -750,7 +750,7 @@ class UsersController extends Controller
      */
     public function eulas(User $user, ActionlogsTransformer $transformer)
     {
-        $this->authorize('view', Asset::class);
+        $this->authorize('view', User::class);
 
         $eulas = $user->eulas;
         return response()->json(

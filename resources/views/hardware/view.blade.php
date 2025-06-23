@@ -456,15 +456,17 @@
                                             @if (isset($asset->expected_checkin))
                                                 <li>
                                                     <x-icon type="calendar" class="fa-fw" />
-                                                    {{ trans('admin/hardware/form.expected_checkin') }}: {{ Helper::getFormattedDateObject($asset->expected_checkin, 'date', false) }}
+                                                    {{ trans('general.expected_checkin') }}: {{ Helper::getFormattedDateObject($asset->expected_checkin, 'date', false) }}
                                                 </li>
                                             @endif
                                         </ul>
                                     </div>
                                 @endif
+                                @if (($snipeSettings->qr_code=='1') || $snipeSettings->label2_2d_type!='none')
                                     <div class="col-md-12 text-center" style="padding-top: 15px;">
                                         <img src="{{ config('app.url') }}/hardware/{{ $asset->id }}/qr_code" class="img-thumbnail" style="height: 150px; width: 150px; margin-right: 10px;" alt="QR code for {{ $asset->getDisplayNameAttribute() }}">
                                     </div>
+                                @endif
                                 <br><br>
                             </div>
 
@@ -1238,7 +1240,7 @@
                                         <div class="row">
                                             <div class="col-md-3">
                                                 <strong>
-                                                    {{ trans('admin/hardware/form.expected_checkin') }}
+                                                    {{ trans('general.expected_checkin') }}
                                                 </strong>
                                             </div>
                                             <div class="col-md-9">

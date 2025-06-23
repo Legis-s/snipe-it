@@ -22,6 +22,7 @@ class AssetPresenter extends Presenter
                 'field' => 'checkbox',
                 'checkbox' => true,
                 'titleTooltip' => trans('general.select_all_none'),
+                'printIgnore' => true,
             ], [
                 'field' => 'id',
                 'searchable' => false,
@@ -108,6 +109,12 @@ class AssetPresenter extends Presenter
                 'title' => trans('general.employee_number'),
                 'visible' => false,
                 'formatter' => 'employeeNumFormatter',
+            ],[
+                'field' => 'jobtitle',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('admin/users/table.title'),
+                'visible' => false,
             ], [
                 'field' => 'location',
                 'searchable' => true,
@@ -365,6 +372,7 @@ class AssetPresenter extends Presenter
             'switchable' => false,
             'title' => trans('general.checkin').'/'.trans('general.checkout'),
             'visible' => true,
+            'printIgnore' => true,
             'formatter' => 'hardwareCustomInOutFormatter',
             "events" => "operateEvents"
         ];
@@ -376,7 +384,8 @@ class AssetPresenter extends Presenter
             'switchable' => false,
             'title' => trans('table.actions'),
             'formatter' => 'hardwareActionsFormatter',
-            "events" => "operateEvents"
+            "events" => "operateEvents",
+            'printIgnore' => true,
         ];
 
         return json_encode($layout);
@@ -600,6 +609,7 @@ class AssetPresenter extends Presenter
                 'switchable' => false,
                 'title' => trans('table.actions'),
                 'formatter' => 'accessoriesInOutFormatter',
+                'printIgnore' => true,
             ],
         ];
 

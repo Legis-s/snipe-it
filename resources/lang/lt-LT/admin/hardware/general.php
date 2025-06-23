@@ -9,6 +9,7 @@ return [
     'bulk_checkin'              => 'Paimti kelis',
     'checkin'  					=> 'Paimti turtą',
     'checkout'  				=> 'Išduoti turtą',
+    'clear'                     => 'Clear',
     'clone'  					=> 'Klonuoti turtą',
     'deployable'  				=> 'Galima naudoti',
     'deleted'  					=> 'Šis turtas buvo panaikintas.',

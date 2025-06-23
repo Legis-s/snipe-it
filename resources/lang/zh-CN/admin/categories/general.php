@@ -21,5 +21,9 @@ return array(
     'use_default_eula'					=> '使用<a href="#" data-toggle="modal" data-target="#eulaModal">默认 EULA（最终用户许可协议）</a>进行替换。',
     'use_default_eula_disabled'			=> '<del>使用默认的 EULA 替换。</del>没设置默认EULA（最终用户许可协议），请在设置中增加一个。',
     'use_default_eula_column'			=> '使用默认的 EULA',
+    'import_require_acceptance'         => '需要接受',
+    'import_checkin_email'              => '发送签入邮件',
+    'import_eula_text'                  => 'EULA（最终用户许可协议）文本',
+    'import_category_type'              => '分类类型',
 
 );

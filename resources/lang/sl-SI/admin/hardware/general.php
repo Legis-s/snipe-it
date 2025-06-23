@@ -9,6 +9,7 @@ return [
     'bulk_checkin'              => 'Bulk Checkin',
     'checkin'  					=> 'Sprejem sredstev',
     'checkout'  				=> 'Izdaja sredstev',
+    'clear'                     => 'Clear',
     'clone'  					=> 'Klonska sredstvo',
     'deployable'  				=> 'Razdeljeno',
     'deleted'  					=> 'To sredstvo je bilo izbrisano.',

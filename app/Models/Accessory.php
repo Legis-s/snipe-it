@@ -308,7 +308,7 @@ class Accessory extends SnipeModel
      */
     public function checkin_email()
     {
-        return $this->category->checkin_email;
+        return $this->category?->checkin_email;
     }
 
     /**

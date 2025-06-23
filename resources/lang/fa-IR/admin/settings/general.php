@@ -13,6 +13,8 @@ return [
     'admin_cc_email'            => 'ایمیل CC
 ',
     'admin_cc_email_help'       => 'Send a copy of checkin/checkout emails to this address.',
+    'admin_cc_always' => 'Always send copy upon checkin/checkout',
+    'admin_cc_when_acceptance_required' => 'Only send copy upon checkout if acceptance is required',
     'admin_settings'            => 'Admin Settings',
     'is_ad'				        => 'این سرور Active Directory است',
     'alerts'                	=> 'هشدار',
@@ -545,7 +547,7 @@ return [
         'filastname_format'			=> 'First Initial Last Name (jsmith)',
         'lastnamefirstinitial_format' =>  'Last Name First Initial (smithj)',
         'firstname_lastname_underscore_format' => 'First Name Last Name (jane_smith)',
-        'firstinitial.lastname' => 'First Initial Last Name (j.smith)',
+        'firstinitial_lastname' => 'First Initial Last Name (j.smith)',
         'lastname_firstinitial' => 'Last Name First Initial (smith_j)',
         'lastname_dot_firstinitial_format' => 'Last Name First Initial (smith.j)',
         'firstnamelastname'     => 'First Name Last Name (janesmith)',
@@ -561,7 +563,7 @@ return [
         'filastname_format'			=> 'اولین نام خانوادگی (jsmith@example.com)',
         'lastnamefirstinitial_format' =>  'فامیل نام میانه (smithj@example.com)',
         'firstname_lastname_underscore_format' => 'نام خانوادگی (jane.smith@example.com)',
-        'firstinitial.lastname' => 'نام میانه فامیل (j.smith@example.com)',
+        'firstinitial_lastname' => 'نام میانه فامیل (j.smith@example.com)',
         'lastname_firstinitial' => 'فامیل نام میانه (smith_j@example.com)',
         'lastname_dot_firstinitial_format' => 'فامیل نام میانه (smith.j@example.com)',
         'firstnamelastname'     => 'نام فامیل (janesmith@example.com)',
@@ -627,6 +629,7 @@ return [
 ',
         'security'          => 'رمز عبور، رمزهای عبور، الزامات، دو عاملی، دو عاملی، رمزهای عبور رایج، ورود از راه دور، خروج از سیستم، احراز هویت
 ',
+        'notifications'     => 'alerts, email, notifications, audit, threshold, email alerts, cc',
     ],
 
 ];

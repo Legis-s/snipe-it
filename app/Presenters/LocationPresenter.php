@@ -18,6 +18,8 @@ class LocationPresenter extends Presenter
                 'field' => 'bulk_selectable',
                 'checkbox' => true,
                 'formatter' => 'checkboxEnabledFormatter',
+                'titleTooltip' => trans('general.select_all_none'),
+                'printIgnore' => true,
             ], [
                 'field' => 'id',
                 'searchable' => false,

@@ -60,5 +60,11 @@ return [
     'display_checkin' => 'Teslimat formlarında görüntüle',
     'display_checkout' => 'Çıkış formlarında görüntüle',
     'display_audit' => 'Denetim formlarında görüntüle',
-
+    'types' => [
+        'text' => 'Text Box',
+        'listbox' => 'List Box',
+        'textarea' => 'Textarea (multi-line)',
+        'checkbox' => 'Checkbox',
+        'radio' => 'Radio Buttons',
+    ],
 ];

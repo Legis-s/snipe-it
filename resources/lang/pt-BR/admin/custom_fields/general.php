@@ -60,5 +60,11 @@ return [
     'display_checkin' => 'Exibir em formulários de entrada',
     'display_checkout' => 'Exibir em formulários de saída',
     'display_audit' => 'Display in audit forms',
-
+    'types' => [
+        'text' => 'Text Box',
+        'listbox' => 'List Box',
+        'textarea' => 'Textarea (multi-line)',
+        'checkbox' => 'Checkbox',
+        'radio' => 'Radio Buttons',
+    ],
 ];

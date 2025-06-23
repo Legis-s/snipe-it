@@ -31,6 +31,7 @@ return [
         'numeric' => 'Поле :attribute должно быть между :min и :max.',
         'string' => 'Поле :attribute должно содержать от :min до :max символов.',
     ],
+    'valid_regex' => 'The regular expression is invalid.',
     'boolean' => 'Поле :attribute должно быть true или false.',
     'can' => 'Поле :attribute содержит недопустимое значение.',
     'confirmed' => 'Подтверждение поля :attribute не совпадает.',

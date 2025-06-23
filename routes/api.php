@@ -40,6 +40,13 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             ]
         )->name('api.assets.requested');
 
+        Route::get('eulas',
+            [
+                Api\ProfileController::class,
+                'eulas'
+            ]
+        )->name('api.self.eulas');
+
         Route::post('request/{asset}', [Api\CheckoutRequest::class, 'store'])->name('api.assets.requests.store');
         Route::post('request/{asset}/cancel', [Api\CheckoutRequest::class, 'destroy'])->name('api.assets.requests.destroy');
 

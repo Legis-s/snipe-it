@@ -2,7 +2,7 @@
 
 return [
 
-    'undeployable' 		 => '<strong>Įspėjimas:</strong> Šis turtas pažymėtas kaip negalimas išduoti. Jei šio turto būsena pasikeitė, atnaujinkite būsenos žymą.',
+    'undeployable' 		 => 'The following assets cannot be deployed and have been removed from checkout: :asset_tags',
     'does_not_exist' 	 => 'Tokio turto nėra.',
     'does_not_exist_var' => 'Turtas su numeriu :asset_tag nerastas.',
     'no_tag' 	         => 'Nenurodytas inventorinis numeris.',
@@ -19,6 +19,11 @@ return [
         'success_linked' => 'Turtas su žyma :tag sukurtas sėkmingai. <strong><a href=":link" style="color: white;">Spustelėkite čia, kad peržiūrėtumėte</a></strong>.',
         'multi_success_linked' => 'Turtas su inventoriniu numeriu :links sukurtas sėkmingai.|:count turto vienetai(-ų) sukurti sėkmingai. :links.',
         'partial_failure' => 'Nepavyko sukurti turto. Priežastis: :failures|:count turto vienetų nepavyko sukurti. Priežastys: :failures',
+        'target_not_found' => [
+            'user' => 'The assigned user could not be found.',
+            'asset' => 'The assigned asset could not be found.',
+            'location' => 'The assigned location could not be found.',
+        ],
     ],
 
     'update' => [

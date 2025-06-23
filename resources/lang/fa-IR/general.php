@@ -8,9 +8,11 @@ return [
     'accessory'				=> 'لوازم جانبی',
     'accessory_report'		=> 'گزارش لوازم جانبی',
     'action'                => 'اقدام',
+    'action_date'			=> 'Action Date',
     'activity_report'		=> 'گزارش فعالیت',
     'address'				=> 'آدرس',
     'admin'					=> 'تنظیمات مدیر',
+    'admin_user'			=> 'Admin User',
     'admin_tooltip'			=> 'این کاربر دسترسی مدیر دارد',
     'superuser'				=> 'کاربر ارشد',
     'superuser_tooltip'		=> 'این کاربر دسترسی کاربر ارشد دارد',
@@ -312,6 +314,8 @@ return [
     'status'    			=> 'وضعیت',
     'accept_eula'           => 'توافق نامه پذیرش
 ',
+    'eula'                  => 'EULAs',
+    'eula_long'             => 'End-User License Agreements',
     'show_or_hide_eulas' => 'نمایش/مخفی کردن موافقت نامه',
     'supplier'              => 'تامین کننده',
     'suppliers'  			=> 'تامین کننده',
@@ -328,6 +332,7 @@ return [
     'type'  				=> 'نوع',
     'undeployable'			=> 'غیر قابل استقرار',
     'unknown_admin'			=> 'نامشخص مدیریت',
+    'unknown_user'          => 'Unknown User',
     'username'              => 'نام کاربری',
     'update'                => 'بروزرسانی',
     'updating_item' => 'بروزرسانی :item',
@@ -619,6 +624,9 @@ return [
     'action_source' => 'Action Source',
     'or' => 'or',
     'url'                   => 'نشانی اینترنتی',
+    'phone'                   => 'تلفن',
+    'fax'                   => 'دورنگار',
+    'contact'                   => 'Contact',
     'edit_fieldset' => 'Edit fieldset fields and options',
     'permission_denied_superuser_demo' => 'Permission denied. You cannot update user information for superadmins on the demo.',
     'pwd_reset_not_sent' => 'User is not activated, is LDAP synced, or does not have an email address',
@@ -663,6 +671,9 @@ return [
     'user_managed_passwords_allow' => 'Allow users to manage their own passwords',
     'from' => 'From',
     'by' => 'توسط',
+    'version' => 'Version',
+    'build' => 'build',
+    'footer_credit' => '<a target="_blank" href="https://snipeitapp.com" rel="noopener">Snipe-IT</a> is open source software, made with <i class="fa fa-heart" aria-hidden="true" style="color: #a94442; font-size: 10px" /></i><span class="sr-only">love</span> by <a href="https://bsky.app/profile/snipeitapp.com" rel="noopener">@snipeitapp.com</a>.',
 
 // Add form placeholders here
     'placeholders' => [

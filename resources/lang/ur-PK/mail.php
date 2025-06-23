@@ -32,7 +32,7 @@ return [
     'accessory_name' => 'Accessory Name',
     'additional_notes' => 'Additional Notes',
     'admin_has_created' => 'An administrator has created an account for you on the :web website.',
-    'asset' => 'Asset',
+    'asset' => 'اثاثہ',
     'asset_name' => 'Asset Name',
     'asset_requested' => 'Asset requested',
     'asset_tag' => 'Asset Tag',

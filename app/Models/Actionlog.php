@@ -69,8 +69,8 @@ class Actionlog extends SnipeModel
      */
     protected $searchableRelations = [
         'company'     => ['name'],
-        'adminuser'   => ['first_name','last_name','username', 'email'],
-        'user'        => ['first_name','last_name','username', 'email'],
+        'adminuser'   => ['first_name','last_name','username', 'email', 'employee_num'],
+        'user'        => ['first_name','last_name','username', 'email', 'employee_num'],
         'assets'      => ['asset_tag','name', 'serial', 'order_number', 'notes', 'purchase_date'],
         'assets.model'              => ['name', 'model_number', 'eol', 'notes'],
         'assets.model.category'     => ['name', 'notes'],

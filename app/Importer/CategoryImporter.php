@@ -66,7 +66,7 @@ class CategoryImporter extends ItemImporter
         $this->item['name'] = trim($this->findCsvMatch($row, 'name'));
         $this->item['notes'] = trim($this->findCsvMatch($row, 'notes'));
         $this->item['eula_text'] = trim($this->findCsvMatch($row, 'eula_text'));
-        $this->item['category_type'] = trim($this->findCsvMatch($row, 'category_type'));
+        $this->item['category_type'] = trim(strtolower($this->findCsvMatch($row, 'category_type')));
         $this->item['use_default_eula'] = trim(($this->fetchHumanBoolean($this->findCsvMatch($row, 'use_default_eula'))) == 1) ? 1 : 0;
         $this->item['require_acceptance'] = trim(($this->fetchHumanBoolean($this->findCsvMatch($row, 'require_acceptance'))) == 1) ? 1 : 0;
         $this->item['checkin_email'] = trim(($this->fetchHumanBoolean($this->findCsvMatch($row, 'checkin_email'))) == 1) ? 1 : 0;

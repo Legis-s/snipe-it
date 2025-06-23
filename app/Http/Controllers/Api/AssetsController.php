@@ -116,6 +116,7 @@ class AssetsController extends Controller
             'byod',
             'asset_eol_date',
             'requestable',
+            'jobtitle',
             'depreciable_cost',
             'quality',
             'purchase_id',
@@ -450,6 +451,9 @@ class AssetsController extends Controller
                 break;
             case 'assigned_to':
                 $assets->OrderAssigned($order);
+                break;
+            case 'jobtitle':
+                $assets->OrderByJobTitle($order);
                 break;
             case 'created_by':
                 $assets->OrderByCreatedByName($order);
@@ -1082,7 +1086,7 @@ class AssetsController extends Controller
             $asset->quality = intval($request->get('quality'));
         }
 
-        $checkin_at = $request->filled('checkin_at') ? $request->input('checkin_at').' '. date('H:i:s') : date('Y-m-d H:i:s');
+        $checkin_at = $request->filled('checkin_at') ? $request->input('checkin_at') . ' ' . date('H:i:s') : date('Y-m-d H:i:s');
         $originalValues = $asset->getRawOriginal();
 
         if (($request->filled('checkin_at')) && ($request->get('checkin_at') != date('Y-m-d'))) {
@@ -1385,9 +1389,9 @@ class AssetsController extends Controller
 
     /**
      * Generate asset labels by tag
-     *
+     * 
      * @author [Nebelkreis] [https://github.com/NebelKreis]
-     *
+     * 
      * @param Request $request Contains asset_tags array of asset tags to generate labels for
      * @return JsonResponse Returns base64 encoded PDF on success, error message on failure
      */
@@ -1398,7 +1402,7 @@ class AssetsController extends Controller
 
              // Validate that asset tags were provided in the request
             if (!$request->filled('asset_tags')) {
-                return response()->json(Helper::formatStandardApiResponse('error', null,
+                return response()->json(Helper::formatStandardApiResponse('error', null, 
                     trans('admin/hardware/message.no_assets_selected')), 400);
             }
 
@@ -1421,7 +1425,7 @@ class AssetsController extends Controller
 
 
                 $label = new Label();
-
+                
                 if (!$label) {
                     throw new \Exception('Label object could not be created');
                 }

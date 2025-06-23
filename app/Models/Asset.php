@@ -533,7 +533,7 @@ class Asset extends Depreciable
     /**
      * Determines whether the asset is checked out to a user
      *
-     * Even though we allow allow for checkout to things beyond users
+     * Even though we allow for checkout to things beyond users
      * this method is an easy way of seeing if we are checked out to a user.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
@@ -1184,6 +1184,7 @@ class Asset extends Depreciable
             $query = $query
                 ->orWhere('assets_users.first_name', 'LIKE', '%'.$term.'%')
                 ->orWhere('assets_users.last_name', 'LIKE', '%'.$term.'%')
+                ->orWhere('assets_users.jobtitle', 'LIKE', '%'.$term.'%')
                 ->orWhere('assets_users.username', 'LIKE', '%'.$term.'%')
                 ->orWhere('assets_users.employee_num', 'LIKE', '%'.$term.'%')
                 ->orWhereMultipleColumns([
@@ -1668,11 +1669,13 @@ class Asset extends Depreciable
                 })->orWhere(function ($query) use ($search) {
                     $query->where('assets_users.first_name', 'LIKE', '%'.$search.'%')
                         ->orWhere('assets_users.last_name', 'LIKE', '%'.$search.'%')
+                        ->orWhere('assets_users.username', 'LIKE', '%'.$search.'%')
+                        ->orWhere('assets_users.jobtitle', 'LIKE', '%'.$search.'%')
                         ->orWhereMultipleColumns([
                             'assets_users.first_name',
                             'assets_users.last_name',
+                            'assets_users.jobtitle',
                         ], $search)
-                        ->orWhere('assets_users.username', 'LIKE', '%'.$search.'%')
                         ->orWhere('assets_locations.name', 'LIKE', '%'.$search.'%')
                         ->orWhere('assigned_assets.name', 'LIKE', '%'.$search.'%');
                 })->orWhere('assets.name', 'LIKE', '%'.$search.'%')
@@ -2053,6 +2056,19 @@ class Asset extends Depreciable
     public function scopeOrderSupplier($query, $order)
     {
         return $query->leftJoin('suppliers as suppliers_assets', 'assets.supplier_id', '=', 'suppliers_assets.id')->orderBy('suppliers_assets.name', $order);
+    }
+
+    /**
+     * Query builder scope to order on supplier name
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query  Query builder instance
+     * @param  text                              $order       Order
+     *
+     * @return \Illuminate\Database\Query\Builder          Modified query builder
+     */
+    public function scopeOrderByJobTitle($query, $order)
+    {
+        return $query->leftJoin('users as users_sort', 'assets.assigned_to', '=', 'users_sort.id')->select('assets.*')->orderBy('users_sort.jobtitle', $order);
     }
 
     /**

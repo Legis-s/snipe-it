@@ -40,7 +40,7 @@ return [
     'assigned_to' => 'Toegewezen aan',
     'best_regards' => 'Met vriendelijke groeten,',
     'canceled' => 'Geannuleerd',
-    'checkin_date' => 'Ingecheckt datum',
+    'checkin_date' => 'Incheck datum',
     'checkout_date' => 'Uitcheck datum',
     'checkedout_from' => 'Uitgecheckt van',
     'checkedin_from'  => 'Ingecheckt op',

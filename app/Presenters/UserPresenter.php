@@ -25,6 +25,7 @@ class UserPresenter extends Presenter
                 'field' => 'checkbox',
                 'checkbox' => true,
                 'titleTooltip' => trans('general.select_all_none'),
+                'printIgnore' => true,
             ],
             [
                 'field' => 'id',
@@ -212,6 +213,15 @@ class UserPresenter extends Presenter
                 'title' => trans('general.department'),
                 'visible' => true,
                 'formatter' => 'departmentsLinkObjFormatter',
+            ],
+            [
+                'field' => 'department_manager',
+                'searchable' => true,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('admin/users/general.department_manager'),
+                'visible' => true,
+                'formatter' => 'usersLinkObjFormatter',
             ],
             [
                 'field' => 'location',
@@ -422,6 +432,7 @@ class UserPresenter extends Presenter
                 'title' => trans('table.actions'),
                 'visible' => true,
                 'formatter' => 'usersActionsFormatter',
+                'printIgnore' => true,
             ],
         ];
 

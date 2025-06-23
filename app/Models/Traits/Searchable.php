@@ -164,7 +164,7 @@ trait Searchable
                     }
                 }
                 // I put this here because I only want to add the concat one time in the end of the user relation search
-                if($relation == 'user') {
+                if(($relation == 'adminuser') || ($relation == 'user')) {
                     $query->orWhereRaw(
                             $this->buildMultipleColumnSearch([
                                 'users.first_name',

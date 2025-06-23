@@ -2,7 +2,7 @@
 
 return [
 
-    'undeployable' 		 => '<strong>Warning: </strong> This asset has been marked as currently undeployable. If this status has changed, please update the asset status.',
+    'undeployable' 		 => 'The following assets cannot be deployed and have been removed from checkout: :asset_tags',
     'does_not_exist' 	 => 'Asset does not exist.',
     'does_not_exist_var' => 'Asset with tag :asset_tag not found.',
     'no_tag' 	         => 'No asset tag provided.',

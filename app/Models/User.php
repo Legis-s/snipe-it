@@ -577,7 +577,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     {
         return $this->hasMany(Actionlog::class, 'target_id')
             ->with('item')
-            ->select(['id', 'target_id', 'target_type', 'action_type', 'filename', 'accept_signature', 'created_at', 'note'])
+            ->select(['id', 'target_id', 'target_type', 'action_type', 'filename', 'accept_signature', 'created_at', 'note', 'item_id', 'item_type'])
             ->where('target_type', self::class)
             ->where('action_type', 'accepted')
             ->whereNotNull('filename')
@@ -1001,5 +1001,75 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
 
 
 
+    }
+
+    /**
+     * Get all direct and indirect subordinates for this user.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function getAllSubordinates()
+    {
+        $subordinates = collect();
+        $this->fetchSubordinatesRecursive($this, $subordinates);
+        return $subordinates->unique('id');
+    }
+
+    /**
+     * Get all direct and indirect subordinates for this user, including self.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function getAllSubordinatesIncludingSelf()
+    {
+        $subordinates = collect([$this]);
+        $this->fetchSubordinatesRecursive($this, $subordinates);
+        return $subordinates->unique('id');
+    }
+
+    /**
+     * Recursive helper function to fetch subordinates.
+     *
+     * @param User $manager
+     * @param \Illuminate\Support\Collection $subs
+     */
+    protected function fetchSubordinatesRecursive(User $manager, \Illuminate\Support\Collection &$subs)
+    {
+        // Eager load 'managesUsers' to prevent N+1 queries in recursion
+        $directSubordinates = $manager->managesUsers()->with('managesUsers')->get();
+
+        foreach ($directSubordinates as $directSubordinate) {
+            // Add subordinate if not already in the collection
+            if (!$subs->contains('id', $directSubordinate->id)) {
+                 $subs->push($directSubordinate);
+                 // Recursive call for this subordinate's subordinates
+                 $this->fetchSubordinatesRecursive($directSubordinate, $subs);
+            }
+        }
+    }
+
+    /**
+     * Check if the current user is a direct or indirect manager of the given user.
+     *
+     * @param User $userToCheck
+     * @return bool
+     */
+    public function isManagerOf(User $userToCheck): bool
+    {
+        // Optimization: If it's the same user, they are not their own manager
+        if ($this->id === $userToCheck->id) {
+            return false;
+        }
+
+        // Eager load manager relationship to potentially reduce queries in the loop
+        $manager = $userToCheck->load('manager')->manager;
+        while ($manager) {
+            if ($manager->id === $this->id) {
+                return true;
+            }
+            // Move up the hierarchy (load relationship if not already loaded)
+            $manager = $manager->load('manager')->manager;
+        }
+        return false;
     }
 }

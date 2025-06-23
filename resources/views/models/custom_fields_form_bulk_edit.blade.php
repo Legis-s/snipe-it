@@ -1,7 +1,24 @@
 @php
 //set array up before loop so it doesn't get wiped at every iteration
     $fields = [];
+    $anyModelHasCustomFields = 0;
 @endphp
+
+@foreach($models as $model)
+    @if ($model->fieldset ? $model->fieldset->count() > 0 : false)
+        @php
+            $anyModelHasCustomFields++;
+        @endphp
+    @endif
+@endforeach
+
+@if ($anyModelHasCustomFields > 0)
+    <fieldset name="custom-fields" class="bottom-padded">
+        <legend class="highlight">
+            {{ trans('admin/custom_fields/general.custom_fields') }}
+        </legend>
+@endif
+
 @foreach($models as $model)
 @if (($model) && ($model->fieldset))
     @foreach($model->fieldset->fields AS $field)
@@ -45,7 +62,6 @@
                           <input type="checkbox" value="{{ $value }}" name="{{ $field->db_column_name() }}[]" {{  isset($item) ? (in_array($value, array_map('trim', explode(',', $item->{$field->db_column_name()}))) ? ' checked="checked"' : '') : (old($field->db_column_name()) != '' ? ' checked="checked"' : (in_array($key, array_map('trim', explode(',', $field->defaultValue($model->id)))) ? ' checked="checked"' : '')) }}>
                           {{ $value }}
                       </label>
-
                   @endforeach
             @elseif ($field->element=='radio')
             @foreach ($field->formatFieldValuesAsArray() as $value)
@@ -93,13 +109,19 @@
 
           @endif
 
+          <p class="help-block">
+              <x-icon type="warning" class="text-info" /> {{ trans('admin/hardware/form.bulk_update_model_prefix') }}:
+              @foreach ($field->assetModels()->pluck('name')->intersect($modelNames) as $modelName)
+                  <span class="label label-default">
+                {{ $modelName }}
+            </span>&nbsp;
+              @endforeach
+          </p>
+
         @if ($field->help_text!='')
             <p class="help-block">{{ $field->help_text }}</p>
         @endif
 
-        <p>{{ trans('admin/hardware/form.bulk_update_model_prefix') }}: 
-                    {{$field->assetModels()->pluck('name')->intersect($modelNames)->implode(', ')}} 
-            </p>     
 
               
               
@@ -119,8 +141,16 @@
         </div>
         @endif
 
-
+        <div class="col-md-8 col-md-offset-3" style="padding-bottom: 10px;">
+            <label class="form-control">
+                <input type="checkbox" name="{{ 'null'.$field->db_column_name() }}" value="1">
+                {{ trans_choice('general.set_to_null', count($assets),['selection_count' => count($assets)]) }}
+            </label>
+        </div>
     </div>
-  @endforeach
+    @endforeach
 @endif
  @endforeach
+@if ($anyModelHasCustomFields > 0)
+    </fieldset>
+@endif

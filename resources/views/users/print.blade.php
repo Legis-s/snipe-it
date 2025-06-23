@@ -34,7 +34,7 @@
         }
 
         @page {
-            size: A4;
+            size: auto;
         }
         
         .print-logo {
@@ -65,14 +65,14 @@
     @if ($snipeSettings->brand == '3')
 
         <h2>
-            @if ($snipeSettings->logo!='')
-                <img class="print-logo" src="{{ config('app.url') }}/uploads/{{ $snipeSettings->logo }}">
+            @if ($snipeSettings->acceptance_pdf_logo!='')
+                <img class="print-logo" src="{{ config('app.url') }}/uploads/{{ $snipeSettings->acceptance_pdf_logo }}">
             @endif
             {{ $snipeSettings->site_name }}
         </h2>
     @elseif ($snipeSettings->brand == '2')
-        @if ($snipeSettings->logo!='')
-            <img class="print-logo" src="{{ config('app.url') }}/uploads/{{ $snipeSettings->logo }}">
+        @if ($snipeSettings->acceptance_pdf_logo!='')
+            <img class="print-logo" src="{{ config('app.url') }}/uploads/{{ $snipeSettings->acceptance_pdf_logo }}">
         @endif
     @else
         <h2>{{ $snipeSettings->site_name }}</h2>
@@ -82,6 +82,10 @@
 @foreach ($users as $show_user)
     <div id="start_of_user_section"> {{-- used for page breaks when printing --}}</div>
     <h3>
+        @if ($show_user->company)
+            <b>{{ trans('admin/companies/table.name') }}:</b> {{ $show_user->company->name }}</b>
+        <br>
+        @endif
         {{ trans('general.assigned_to', ['name' => $show_user->present()->fullName()]) }}
         {{ ($show_user->employee_num!='') ? ' (#'.$show_user->employee_num.') ' : '' }}
         {{ ($show_user->jobtitle!='' ? ' - '.$show_user->jobtitle : '') }}
@@ -501,7 +505,7 @@
                 return newParams;
             },
             formatLoadingMessage: function () {
-                return '<h2><i class="fas fa-spinner fa-spin" aria-hidden="true"></i> {{ trans('general.loading') }} </h4>';
+                return '<h2><i class="fas fa-spinner fa-spin" aria-hidden="true"></i> {{ trans('general.loading') }} </h2>';
             },
             icons: {
                 advancedSearchIcon: 'fas fa-search-plus',

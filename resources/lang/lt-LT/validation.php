@@ -31,6 +31,7 @@ return [
         'numeric' => ':attribute laukas turi būti nuo :min iki :max.',
         'string' => ':attribute lauke turi būti nuo :min iki :max simbolių.',
     ],
+    'valid_regex' => 'The regular expression is invalid.',
     'boolean' => ':attribute lauke turi būti „Taip“ arba „Ne“.',
     'can' => ':attribute lauke yra neleistina reikšmė.',
     'confirmed' => ':attribute lauko patvirtinimas nesutampa.',
