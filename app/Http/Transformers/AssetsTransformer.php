@@ -102,7 +102,7 @@ class AssetsTransformer
             'checkout_counter' => (int) $asset->checkout_counter,
             'requests_counter' => (int) $asset->requests_counter,
             'user_can_checkout' => (bool) $asset->availableForCheckout(),
-            'book_value' => Helper::formatCurrencyOutput($asset->getLinearDepreciatedValue()),
+            'book_value' => Helper::formatCurrencyOutput($asset->getDepreciatedValue()),
             'user_can_review' => (bool) $asset->availableForReview(),
             'user_can_close_sell' => (bool) $asset->availableForCloseSell(),
             'purchase_id' => (int) $asset->purchase_id,
@@ -145,7 +145,7 @@ class AssetsTransformer
                     if (($field->format == 'DATE') && (!is_null($value)) && ($value!='')){
                         $value = Helper::getFormattedDateObject($value, 'date', false);
                     }
-
+                    
                     $fields_array[$field->name] = [
                         'field' => e($field->db_column),
                         'value' => e($value),

@@ -514,6 +514,7 @@ return [
         'manager_last_name' => 'Manager Last Name',
         'manager_full_name' => 'Manager Full Name',
         'manager_username' => 'Manager Username',
+        'manager_employee_num' => 'Manager Employee Number',
         'checkout_type' => 'Checkout Type',
         'checkout_location' => 'Checkout to Location',
         'image_filename' => 'Image Filename',
