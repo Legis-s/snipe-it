@@ -2,26 +2,15 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Asset;
 use App\Models\Category;
-use App\Models\Contract;
-use App\Models\CustomField;
 use App\Models\Device;
-use App\Models\Supplier;
-use App\Models\LegalPerson;
-use App\Models\InvoiceType;
 use DateInterval;
 use DateTime;
-use DateTimeInterface;
 use DateTimeZone;
 use Exception;
-
-//use False\True;
 use Illuminate\Console\Command;
-use App\Models\Asset;
-use App\Models\Location;
-use App\Models\User;
-use Illuminate\Support\Facades\Storage;
-use stdClass;
+
 
 class SyncDevices extends Command
 {
@@ -68,7 +57,7 @@ class SyncDevices extends Command
         $mdm_user = env('MDM_USER');
         $mdm_password = env('MDM_PASSWORD');
 
-        $response = $client->request('POST', $mdm_url.'public/jwt/login', [
+        $response = $client->request('POST', $mdm_url . 'public/jwt/login', [
             \GuzzleHttp\RequestOptions::JSON => ['login' => $mdm_user, 'password' => $mdm_password]
         ]);
         $response = $response->getBody()->getContents();
@@ -77,11 +66,11 @@ class SyncDevices extends Command
 //        print($token_json["id_token"]);
         $headers = [
             'Content-Type' => 'application/json',
-            'Authorization' => 'Bearer '.$token,
+            'Authorization' => 'Bearer ' . $token,
         ];
 
 
-        $response = $client->request('POST', $mdm_url.'private/devices/search', [
+        $response = $client->request('POST', $mdm_url . 'private/devices/search', [
             'headers' => $headers,
             \GuzzleHttp\RequestOptions::JSON => ['pageSize' => 1000000, 'pageNum' => 1]
         ]);
@@ -90,16 +79,17 @@ class SyncDevices extends Command
 
         $data = $json["data"];
         $devices = $data["devices"];
-        $items= $devices["items"];
+        $items = $devices["items"];
         $count = 0;
+
+        $number_array = [];
         foreach ($items as &$phone) {
 //            if ( $phone["number"] == "863258030469639"){
 //                print (json_encode($phone)."\n");
 //            }
-
             $count++;
             $date = new DateTime();
-            $date->setTimestamp($phone["lastUpdate"]/ 1000);
+            $date->setTimestamp($phone["lastUpdate"] / 1000);
             $date->setTimezone(new DateTimeZone('Europe/Moscow'));
             $date->sub(new DateInterval('PT3H'));
             $deviceId = null;
@@ -109,91 +99,91 @@ class SyncDevices extends Command
             $launcherVersion = null;
             $biometrikaVersion = null;
 
-            if (isset($phone["info"])){
+            if (isset($phone["info"])) {
                 $info = $phone["info"];
-                if (isset($info["deviceId"])){
+                if (isset($info["deviceId"])) {
                     $deviceId = $info["deviceId"];
                 }
-                if (isset($info["imei"])){
-                    $info_imei  = $info["imei"];
+                if (isset($info["imei"])) {
+                    $info_imei = $info["imei"];
+                    $number_array[] = $info_imei;
                 }
-                if (isset($info["batteryLevel"])){
+                if (isset($info["batteryLevel"])) {
                     $batteryLevel = $info["batteryLevel"];
                 }
-                if (isset($info["model"])){
+                if (isset($info["model"])) {
                     $model = $info["model"];
                 }
-                if (isset($info["applications"])){
-                    $applications =  $info["applications"];
+                if (isset($info["applications"])) {
+                    $applications = $info["applications"];
                     foreach ($applications as &$app) {
-                        if ($app["pkg"]=="ru.legis_s.biometrika"){
-                            $biometrikaVersion= $app["version"];
+                        if ($app["pkg"] == "ru.legis_s.biometrika") {
+                            $biometrikaVersion = $app["version"];
                         }
-                        if ($app["pkg"]=="com.hmdm.launcher"){
-                            $launcherVersion= $app["version"];
+                        if ($app["pkg"] == "com.hmdm.launcher") {
+                            $launcherVersion = $app["version"];
                         }
                     }
                 }
             }
-            $imei= null;
-            if (isset($phone["imei"])){
-                $imei =  $phone["imei"];
+            $imei = null;
+            if (isset($phone["imei"])) {
+                $imei = $phone["imei"];
             }
 
-            $description= null;
-            if (isset($phone["description"])){
-                $description =  $phone["description"];
+            $description = null;
+            if (isset($phone["description"])) {
+                $description = $phone["description"];
             }
             $statusCode = null;
-            if (isset($phone["statusCode"])){
-                $statusCode =  $phone["statusCode"];
+            if (isset($phone["statusCode"])) {
+                $statusCode = $phone["statusCode"];
             }
 
             $androidVersion = null;
-            if (isset($phone["androidVersion"])){
-                $androidVersion =  $phone["androidVersion"];
+            if (isset($phone["androidVersion"])) {
+                $androidVersion = $phone["androidVersion"];
             }
 
             $serial = null;
-            if (isset($phone["serial"])){
-                $serial =  $phone["serial"];
+            if (isset($phone["serial"])) {
+                $serial = $phone["serial"];
             }
 
-            $enrollTime= null;
-            if (isset($phone["enrollTime"])){
+            $enrollTime = null;
+            if (isset($phone["enrollTime"])) {
                 $dateEnrol = new DateTime();
-                $dateEnrol->setTimestamp($phone["enrollTime"]/ 1000);
+                $dateEnrol->setTimestamp($phone["enrollTime"] / 1000);
                 $dateEnrol->setTimezone(new DateTimeZone('Europe/Moscow'));
                 $dateEnrol->sub(new DateInterval('PT3H'));
-                $enrollTime =  $dateEnrol;
+                $enrollTime = $dateEnrol;
             }
             $publicIp = null;
-            if (isset($phone["publicIp"])){
-                $publicIp =  $phone["publicIp"];
+            if (isset($phone["publicIp"])) {
+                $publicIp = $phone["publicIp"];
             }
 
             $publicIp = null;
             $anyDesk = null;
-            if (isset($phone["custom1"])){
-                $anyDesk =  $phone["custom1"];
+            if (isset($phone["custom1"])) {
+                $anyDesk = $phone["custom1"];
             }
-
 
 
             $asset_id = null;
             $sim_id = null;
-            $asset = Asset::where('asset_tag', "it_".$phone["number"])->first();
-            if ($asset){
-                $asset_id =$asset->id;
+            $asset = Asset::where('asset_tag', "it_" . $phone["number"])->first();
+            if ($asset) {
+                $asset_id = $asset->id;
                 $assignedAssets = $asset->assignedAssets;
                 foreach ($assignedAssets as &$aa) {
-                    if ($aa->model->category->id ==$category_sim->id){
+                    if ($aa->model->category->id == $category_sim->id) {
                         $sim_id = $aa->id;
                     }
                 }
-                if ($asset->location){
-                    $locationAs =$asset->location->name;
-                    $responseupd = $client->request('POST', $mdm_url.'private/devices/'.$phone["id"].'/description', [
+                if ($asset->location) {
+                    $locationAs = $asset->location->name;
+                    $responseupd = $client->request('POST', $mdm_url . 'private/devices/' . $phone["id"] . '/description', [
                         'headers' => $headers,
                         'body' => $locationAs
                     ]);
@@ -201,25 +191,25 @@ class SyncDevices extends Command
 //                    print($responseupd);
                 }
             }
-            $coordinates=null;
-            $locationUpdate=null;
+            $coordinates = null;
+            $locationUpdate = null;
 
             try {
-                $response = $client->request('GET', $mdm_url.'plugins/devicelocations/devicelocations/private/device/'.$phone["id"].'/location', [
+                $response = $client->request('GET', $mdm_url . 'plugins/devicelocations/devicelocations/private/device/' . $phone["id"] . '/location', [
                     'headers' => $headers,
                 ]);
                 $response = $response->getBody()->getContents();
                 $json = json_decode($response, true);
-                if (isset($json["data"])){
-                    $data =  $json["data"];
-                    if (isset($data["lat"]) && isset($data["lon"])){
+                if (isset($json["data"])) {
+                    $data = $json["data"];
+                    if (isset($data["lat"]) && isset($data["lon"])) {
                         $lat = $data["lat"];
                         $lon = $data["lon"];
-                        $coordinates = $lat.",".$lon;
+                        $coordinates = $lat . "," . $lon;
                     }
-                    if (isset($data["ts"])){
+                    if (isset($data["ts"])) {
                         $dateLoc = new DateTime();
-                        $dateLoc->setTimestamp($data["ts"]/ 1000);
+                        $dateLoc->setTimestamp($data["ts"] / 1000);
                         $dateLoc->setTimezone(new DateTimeZone('Europe/Moscow'));
                         $dateLoc->sub(new DateInterval('PT3H'));
                         $locationUpdate = $dateLoc;
@@ -227,17 +217,17 @@ class SyncDevices extends Command
                 }
 
             } catch (Exception $e) {
-                print 'Caught exception: '.json_encode($e->getMessage()). "\n";
+                print 'Caught exception: ' . json_encode($e->getMessage()) . "\n";
             }
             $distance = null;
-            if($asset && $coordinates){
-                if ($asset->location){
-                   if  ($asset->location->coordinates){
-                       $obj_location = $asset->location->coordinates;
-                       $obj_location = explode(",", $obj_location);
-                       $dev_coordinates= explode(",", $coordinates);
-                       $distance = $this->getDistanceBetweenPointsNew($obj_location[0],$obj_location[1],$dev_coordinates[0],$dev_coordinates[1]);
-                   }
+            if ($asset && $coordinates) {
+                if ($asset->location) {
+                    if ($asset->location->coordinates) {
+                        $obj_location = $asset->location->coordinates;
+                        $obj_location = explode(",", $obj_location);
+                        $dev_coordinates = explode(",", $coordinates);
+                        $distance = $this->getDistanceBetweenPointsNew($obj_location[0], $obj_location[1], $dev_coordinates[0], $dev_coordinates[1]);
+                    }
                 }
             }
 
@@ -268,15 +258,25 @@ class SyncDevices extends Command
                 ]
             );
         }
-        print("Синхрониизтрованно " . $count . " устройств \n");
+        print("Синхронизировано " . $count . " устройств\n");
+
+        $devices_from_db = Device::all();
+        foreach($devices_from_db as $dev) {
+//            print($dev->number."\n");
+            if (!in_array($dev->number, $number_array)) {
+//                echo "нет в списке!\n";
+                $dev->delete();
+            }
+        }
     }
 
-    public function getDistanceBetweenPointsNew($latitude1, $longitude1, $latitude2, $longitude2) {
+    public function getDistanceBetweenPointsNew($latitude1, $longitude1, $latitude2, $longitude2): int
+    {
         $theta = $longitude1 - $longitude2;
         $distance = (sin(deg2rad($latitude1)) * sin(deg2rad($latitude2))) + (cos(deg2rad($latitude1)) * cos(deg2rad($latitude2)) * cos(deg2rad($theta)));
         $distance = acos($distance);
         $distance = rad2deg($distance);
-        $distance = $distance * 60 * 1.1515 *  1.609344 * 1000;
+        $distance = $distance * 60 * 1.1515 * 1.609344 * 1000;
         return intval($distance);
     }
 }

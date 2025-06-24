@@ -2,18 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
-
-use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Transformers\DevicesTransformer;
 use App\Http\Transformers\InventoryItemTransformer;
 use App\Models\Device;
-use App\Models\Inventory;
 use App\Models\InventoryItem;
-use Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Image;
 
 class DevicesController extends Controller
 {
@@ -24,7 +19,6 @@ class DevicesController extends Controller
     public function index(Request $request): JsonResponse|array
     {
         $devices = Device::with('asset')
-            ->withTrashed()
             ->select([
                 'devices.id',
                 'devices.number',
@@ -81,9 +75,7 @@ class DevicesController extends Controller
 
     /**
      * Display the specified resource.
-     *
      * @param int $id
-     * @return \Illuminate\Http\Response
      */
     public function show($id): JsonResponse|array
     {
