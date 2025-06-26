@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Asset;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\InvoiceTypesController;
 use App\Http\Controllers\PurchasesController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\DealsController;
 use App\Http\Controllers\Consumables;
 use App\Http\Controllers\Assets\AssetRentController;
 use App\Http\Controllers\Assets\AssetSellController;
+use Tabuna\Breadcrumbs\Trail;
 
 Route::impersonate();
 
@@ -134,23 +136,28 @@ Route::group(
     ],
 
     function () {
-        // Sell
-        Route::get('{assetId}/sell/',
-            [AssetSellController::class, 'create']
-        )->name('hardware.sell.create');
-
-        Route::post('{assetId}/sell/',
+        //Sell
+        Route::get('{asset}/sell', [AssetSellController::class, 'create'])
+            ->name('hardware.sell.create')
+            ->breadcrumbs(fn (Trail $trail, Asset $asset) =>
+            $trail->parent('hardware.show', $asset)
+                ->push(trans('admin/hardware/general.sell'), route('hardware.index'))
+            );
+        Route::post('{assetId}/sell',
             [AssetSellController::class, 'store']
         )->name('hardware.sell.store');
 
-        // Rent
-        Route::get('{assetId}/rent/',
-            [AssetRentController::class, 'create']
-        )->name('hardware.rent.create');
-
-        Route::post('{assetId}/rent/',
+        //Rent
+        Route::get('{asset}/rent', [AssetRentController::class, 'create'])
+            ->name('hardware.rent.create')
+            ->breadcrumbs(fn (Trail $trail, Asset $asset) =>
+            $trail->parent('hardware.show', $asset)
+                ->push(trans('admin/hardware/general.rent'), route('hardware.index'))
+            );
+        Route::post('{assetId}/rent',
             [AssetRentController::class, 'store']
         )->name('hardware.rent.store');
+
 
 //        // Bulk sell
 //        Route::get('bulksell',

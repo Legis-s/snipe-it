@@ -71,11 +71,9 @@ class LocationsTransformer
                     'id' => (int) $location->company->id,
                     'name'=> e($location->company->name)
                 ] : null,
-
                 'children' => $children_arr,
-
-                'bitrix_id' => ($location->bitrix_id) ? (int)$location->bitrix_id : null,
-                'bitrix_id_old' => ($location->bitrix_id_old) ? (int)$location->bitrix_id_old : null,
+                'bitrix_id' => ($location->bitrix_id) ? (int) $location->bitrix_id : null,
+                'bitrix_id_old' => ($location->bitrix_id_old) ? (int) $location->bitrix_id_old : null,
                 'sklad' => ($location->sklad) ? e($location->sklad) : null,
                 'active' => ($location->active) ? e($location->active) : null,
             ];

@@ -86,10 +86,18 @@
                         </div>
 
                     </div> <!--/.box-body-->
-                    <div class="box-footer">
-                        <a class="btn btn-link" href="{{ URL::previous() }}"> {{ trans('button.cancel') }}</a>
-                        <button type="submit" class="btn btn-primary pull-right"><i class="fas fa-check icon-white" aria-hidden="true"></i> {{ trans('general.sell') }}</button>
-                    </div>
+
+                    <x-redirect_submit_options
+                            index_route="hardware.index"
+                            :button_label="trans('general.sell')"
+                            :disabled_select="!$asset->model"
+                            :options="[
+                                'index' => trans('admin/hardware/form.redirect_to_all', ['type' => trans('general.assets')]),
+                                'item' => trans('admin/hardware/form.redirect_to_type', ['type' => trans('general.asset')]),
+                                'target' => trans('admin/hardware/form.redirect_to_checked_out_to'),
+
+                               ]"
+                    />
                 </form>
             </div>
         </div> <!--/.col-md-7-->

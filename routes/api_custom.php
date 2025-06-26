@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,7 +14,7 @@ use App\Http\Controllers\Api;
 |
 */
 
-Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], function () {
+Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], function () {
 
     /**
      * Consumable API routes
@@ -83,9 +83,12 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
         ['names' =>
             [
                 'index' => 'api.inventories.index',
-                'show' => 'api.inventories.show',
-                'update' => 'api.inventories.update',
+                'create' => 'api.inventories.create',
                 'store' => 'api.inventories.store',
+                'show' => 'api.inventories.show',
+                'edit' => 'api.inventories.edit',
+                'update' => 'api.inventories.update',
+                'destroy' => 'api.inventories.destroy'
             ],
             'except' => ['edit'],
             'parameters' => ['inventory' => 'inventory_id'],
@@ -118,6 +121,13 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
         ['names' =>
             [
                 'index' => 'api.inventorystatuslabels.index',
+                'create' => 'api.inventorystatuslabels.create',
+                'store' => 'api.inventorystatuslabels.store',
+                'show' => 'api.inventorystatuslabels.show',
+                'edit' => 'api.inventorystatuslabels.edit',
+                'update' => 'api.inventorystatuslabels.update',
+                'destroy' => 'api.inventorystatuslabels.destroy'
+
             ],
             'except' => ['create', 'edit'],
             'parameters' => ['inventorystatuslabel' => 'iinventorystatuslabel_id'],
@@ -134,7 +144,12 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
         ['names' =>
             [
                 'index' => 'api.devices.index',
+                'create' => 'api.devices.create',
+                'store' => 'api.devices.store',
                 'show' => 'api.devices.show',
+                'edit' => 'api.devices.edit',
+                'update' => 'api.devices.update',
+                'destroy' => 'api.devices.destroy'
             ],
             'except' => ['create', 'edit'],
             'parameters' => ['device' => 'device_id'],
@@ -211,6 +226,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'throttle:api']], functi
                 'show' => 'api.purchases.show',
                 'store' => 'api.purchases.store',
                 'update' => 'api.purchases.update',
+                'destroy' => 'api.purchases.destroy'
             ],
             'except' => ['create', 'edit'],
             'parameters' => ['purchase' => 'purchase_id'],

@@ -360,6 +360,7 @@
 
 @section('moar_scripts')
     @include('partials/assets-assigned')
+
     <script nonce="{{ csrf_token() }}">
         $(function () {
             var starRatingControl = new StarRating('.star-rating', {

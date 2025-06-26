@@ -62,15 +62,19 @@
                             </div>
                         </div>
 
-                        @include ('partials.forms.custom.contract-select', ['translated_name' => trans('general.contract'),  'fieldname' => 'assigned_contract','unselect' => 'true', 'required'=>'true'])
+                        @include ('partials.forms.custom.deal-select', ['translated_name' => trans('general.deal'),  'fieldname' => 'assigned_deal','unselect' => 'true', 'required'=>'true'])
 
                         <!-- Checkout/Checkin Date -->
                         <div class="form-group {{ $errors->has('checkout_at') ? 'error' : '' }}">
                             {{ Form::label('checkout_at', trans('admin/hardware/form.checkout_date'), array('class' => 'col-md-3 control-label')) }}
                             <div class="col-md-8">
-                                <div class="input-group date col-md-7" data-provide="datepicker" data-date-format="yyyy-mm-dd" data-date-end-date="0d" data-date-clear-btn="true">
-                                    <input type="text" class="form-control" placeholder="{{ trans('general.select_date') }}" name="checkout_at" id="checkout_at" value="{{ old('checkout_at', date('Y-m-d')) }}">
-                                    <span class="input-group-addon"><i class="fas fa-calendar" aria-hidden="true"></i></span>
+                                <div class="input-group date col-md-7" data-provide="datepicker"
+                                     data-date-format="yyyy-mm-dd" data-date-end-date="0d" data-date-clear-btn="true">
+                                    <input type="text" class="form-control"
+                                           placeholder="{{ trans('general.select_date') }}" name="checkout_at"
+                                           id="checkout_at" value="{{ old('checkout_at', date('Y-m-d')) }}">
+                                    <span class="input-group-addon"><i class="fas fa-calendar"
+                                                                       aria-hidden="true"></i></span>
                                 </div>
                                 {!! $errors->first('checkout_at', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                             </div>
@@ -80,16 +84,25 @@
                         <div class="form-group {{ $errors->has('note') ? 'error' : '' }}">
                             {{ Form::label('note', trans('admin/hardware/form.notes'), array('class' => 'col-md-3 control-label')) }}
                             <div class="col-md-8">
-                                <textarea class="col-md-6 form-control" id="note" name="note">{{ old('note', $asset->note) }}</textarea>
+                                <textarea class="col-md-6 form-control" id="note"
+                                          name="note">{{ old('note', $asset->note) }}</textarea>
                                 {!! $errors->first('note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                             </div>
                         </div>
 
                     </div> <!--/.box-body-->
-                    <div class="box-footer">
-                        <a class="btn btn-link" href="{{ URL::previous() }}"> {{ trans('button.cancel') }}</a>
-                        <button type="submit" class="btn btn-primary pull-right"><i class="fas fa-check icon-white" aria-hidden="true"></i> {{ trans('general.rent') }}</button>
-                    </div>
+
+                    <x-redirect_submit_options
+                            index_route="hardware.index"
+                            :button_label="trans('general.rent')"
+                            :disabled_select="!$asset->model"
+                            :options="[
+                                'index' => trans('admin/hardware/form.redirect_to_all', ['type' => trans('general.assets')]),
+                                'item' => trans('admin/hardware/form.redirect_to_type', ['type' => trans('general.asset')]),
+                                'target' => trans('admin/hardware/form.redirect_to_checked_out_to'),
+
+                               ]"
+                    />
                 </form>
             </div>
         </div> <!--/.col-md-7-->
