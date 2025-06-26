@@ -10,38 +10,26 @@
   @can('create', \App\Models\Consumable::class)
   <a href="{{ route('consumables.create') }}" {{$snipeSettings->shortcuts_enabled == 1 ? "accesskey=n" : ''}} class="btn btn-primary pull-right"> {{ trans('general.create') }}</a>
   @endcan
-    @can('create', \App\Models\Consumable::class)
-        <a href="{{ route('consumables.ncd.index') }}" accesskey="n" class="btn btn-primary pull-right"> Выданные расходники без закр. документов</a>
-        <a href="{{ route('consumables.create') }}" accesskey="n" class="btn btn-primary pull-right"> {{ trans('general.create') }}</a>
-    @endcan
 @stop
 
 {{-- Page content --}}
 @section('content')
 
-    <div class="row">
-        <div class="col-md-12">
+<div class="row">
+  <div class="col-md-12">
 
-            <div class="box box-default">
-                <div class="box-body">
-                    <div id="toolbar">
-                        <button class="btn btn-primary" id="compact" disabled>Собрать</button>
-{{--                        <button type="button" class="btn btn-primary"  id="show_active" data-toggle="button" aria-pressed="false">--}}
-{{--                            Показать доступные к выдаче--}}
-{{--                        </button>--}}
-                    </div>
-                    <table
+      <div class="box box-default">
+          <div class="box-body">
+              <div id="toolbar">
+                  <button class="btn btn-primary" id="compact" disabled>Собрать</button>
+              </div>
+              <table
                             data-columns="{{ \App\Presenters\ConsumablePresenter::dataTableLayout() }}"
                             data-cookie-id-table="consumablesTable"
-                            data-pagination="true"
                             data-id-table="consumablesTable"
-                            data-search="true"
                             data-side-pagination="server"
-                            data-show-columns="true"
-                            data-show-export="true"
-                            data-show-fullscreen="true"
+                            data-footer-style="footerStyle"
                             data-show-footer="true"
-                            data-show-refresh="true"
                             data-sort-order="asc"
                             data-sort-name="name"
                             data-toolbar="#toolbar"
@@ -52,17 +40,18 @@
                 "fileName": "export-consumables-{{ date('Y-m-d') }}",
                 "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
                 }'>
-                    </table>
+        </table>
 
-                </div><!-- /.box-body -->
-            </div><!-- /.box -->
+      </div><!-- /.box-body -->
+    </div><!-- /.box -->
 
-        </div> <!-- /.col-md-12 -->
-    </div> <!-- /.row -->
+  </div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
 @stop
 
 @section('moar_scripts')
-    @include ('partials.bootstrap-table', ['exportFile' => 'consumables-export', 'search' => true,'showFooter' => true, 'columns' => \App\Presenters\ConsumablePresenter::dataTableLayout()])
+@include ('partials.bootstrap-table', ['exportFile' => 'consumables-export', 'search' => true,'showFooter' => true, 'columns' => \App\Presenters\ConsumablePresenter::dataTableLayout()])
+
     <script nonce="{{ csrf_token() }}">
         $(function () {
             var compact = $('#compact');

@@ -848,6 +848,7 @@ class Asset extends Depreciable
             ->whereNotNull('warranty_months')
             ->whereNotNull('purchase_date')
             ->whereNull('deleted_at')
+            ->NotArchived()
             ->whereRaw('DATE_ADD(`purchase_date`, INTERVAL `warranty_months` MONTH) <= DATE_ADD(NOW(), INTERVAL '
                                  . $days
                                  . ' DAY) AND DATE_ADD(`purchase_date`, INTERVAL `warranty_months` MONTH) > NOW()')
@@ -2106,17 +2107,17 @@ class Asset extends Depreciable
 
     public function inventory_items()
     {
-        return $this->hasMany('\App\Models\InventoryItem');
+        return $this->hasMany(\App\Models\InventoryItem::class);
     }
 
     public function purchase()
     {
-        return $this->belongsTo('\App\Models\Purchase');
+        return $this->belongsTo(\App\Models\Purchase::class);
     }
 
     public function user_verified()
     {
-        return $this->belongsTo('\App\Models\User', 'user_verified_id');
+        return $this->belongsTo(\App\Models\User::class, 'user_verified_id');
     }
 
 
@@ -2156,11 +2157,8 @@ class Asset extends Depreciable
         $this->last_checkout = $checkout_at;
         $this->location_id = null;
         $this->rtd_location_id = null;
+        $this->name = $name;
 
-
-        if ($name != null) {
-            $this->name = $name;
-        }
         $status = Statuslabel::where('name', 'Продано')->first();
         $this->status_id = $status->id;
 //        $this->contract_id = $target->id;
@@ -2181,7 +2179,7 @@ class Asset extends Depreciable
             } elseif (get_class($admin) === \App\Models\User::class) {
                 $checkedOutBy = $admin;
             } else {
-                $checkedOutBy = Auth::user();
+                $checkedOutBy = auth()->user();
             }
             event(new CheckoutableSell($this, $target, $checkedOutBy, $note, $originalValues));
             $this->increment('checkout_counter', 1);
@@ -2214,10 +2212,7 @@ class Asset extends Depreciable
         $this->last_checkout = $checkout_at;
         $this->location_id = null;
         $this->rtd_location_id = null;
-
-        if ($name != null) {
-            $this->name = $name;
-        }
+        $this->name = $name;
 
         $status = Statuslabel::where('name', 'В аренде')->first();
         $this->status_id = $status->id;
@@ -2240,7 +2235,7 @@ class Asset extends Depreciable
             } elseif (get_class($admin) === \App\Models\User::class) {
                 $checkedOutBy = $admin;
             } else {
-                $checkedOutBy = Auth::user();
+                $checkedOutBy = auth()->user();
             }
             event(new CheckoutableRent($this, $target, $checkedOutBy, $note, $originalValues));
             $this->increment('checkout_counter', 1);
