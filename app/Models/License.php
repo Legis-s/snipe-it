@@ -43,7 +43,7 @@ class License extends Depreciable
 
     protected $rules = [
         'name'   => 'required|string|min:3|max:255',
-        'seats'   => 'required|min:1|integer',
+        'seats' => 'required|min:1|integer|limit_change:10000', // limit_change is a "pseudo-rule" that translates into 'between', see prepareLimitChangeRule() below
         'license_email'   => 'email|nullable|max:120',
         'license_name'   => 'string|nullable|max:100',
         'notes'   => 'string|nullable',
@@ -148,6 +148,14 @@ class License extends Depreciable
         });
     }
 
+    public function prepareLimitChangeRule($parameters, $field)
+    {
+        $actual_seat_count = $this->licenseseats()->count(); //we use the *actual* seat count here, in case your license has gone wonky
+        $lower_bound = $actual_seat_count - $parameters[0];
+        $upper_bound = $actual_seat_count + $parameters[0];
+        return ["between", ($lower_bound <= 0 ? 1 : $lower_bound), $upper_bound];
+    }
+
     /**
      * Balance seat counts
      *
@@ -164,21 +172,17 @@ class License extends Depreciable
         // On Create, we just make one for each of the seats.
         $change = abs($oldSeats - $newSeats);
         if ($oldSeats > $newSeats) {
-            $license->load('licenseseats.user');
 
             // Need to delete seats... lets see if if we have enough.
-            $seatsAvailableForDelete = $license->licenseseats->reject(function ($seat) {
-                return ((bool) $seat->assigned_to) || ((bool) $seat->asset_id);
-            });
+            $seatsAvailableForDelete = $license->licenseseats()->whereNull('assigned_to')->whereNull('asset_id')->limit($change);
 
             if ($change > $seatsAvailableForDelete->count()) {
                 Session::flash('error', trans('admin/licenses/message.assoc_users'));
 
                 return false;
             }
-            for ($i = 1; $i <= $change; $i++) {
-                $seatsAvailableForDelete->pop()->delete();
-            }
+            $seatsAvailableForDelete->delete();
+
             // Log Deletion of seats.
             $logAction = new Actionlog;
             $logAction->item_type = self::class;

@@ -453,18 +453,10 @@
               <table
                       class="table table-striped snipe-table"
                       id="consumableHistory"
-                      data-pagination="true"
                       data-id-table="consumableHistory"
-                      data-search="true"
-                      data-search-highlight="true"
-                      data-show-print="true"
                       data-side-pagination="server"
-                      data-show-columns="true"
-                      data-show-fullscreen="true"
-                      data-show-refresh="true"
                       data-sort-order="desc"
                       data-sort-name="created_at"
-                      data-show-export="true"
                       data-export-options='{
                          "fileName": "export-consumable-{{  $consumable->id }}-history",
                          "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]

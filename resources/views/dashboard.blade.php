@@ -230,10 +230,9 @@
 
                 <table
                     data-cookie-id-table="dashActivityReport"
-                    data-height="350"
+                    data-height="500"
                     data-pagination="false"
                     data-id-table="dashActivityReport"
-                    data-side-pagination="server"
                     data-sort-order="desc"
                     data-sort-name="created_at"
                     id="dashActivityReport"
@@ -312,7 +311,7 @@
 							<table
 									data-cookie-id-table="dashCompanySummary"
 									data-height="400"
-									data-pagination="true"
+                                    data-pagination="false"
 									data-side-pagination="server"
 									data-sort-order="desc"
 									data-sort-field="assets_count"
@@ -380,14 +379,13 @@
 							<table
 									data-cookie-id-table="dashLocationSummary"
 									data-height="400"
-									data-pagination="true"
 									data-side-pagination="server"
+                                    data-pagination="false"
 									data-sort-order="desc"
 									data-sort-field="assets_count"
 									id="dashLocationSummary"
 									class="table table-striped snipe-table"
 									data-url="{{ route('api.locations.index', ['sort' => 'assets_count', 'order' => 'asc']) }}">
-
 								<thead>
 								<tr>
 									<th class="col-sm-3" data-visible="true" data-field="name" data-formatter="locationsLinkFormatter" data-sortable="true">{{ trans('general.name') }}</th>
@@ -443,14 +441,13 @@
                         <table
                                 data-cookie-id-table="dashCategorySummary"
                                 data-height="400"
-                                data-pagination="true"
+                                data-pagination="false"
                                 data-side-pagination="server"
                                 data-sort-order="desc"
                                 data-sort-field="assets_count"
                                 id="dashCategorySummary"
                                 class="table table-striped snipe-table"
                                 data-url="{{ route('api.categories.index', ['sort' => 'assets_count', 'order' => 'asc']) }}">
-
                             <thead>
                             <tr>
                                 <th class="col-sm-3" data-visible="true" data-field="name" data-formatter="categoriesLinkFormatter" data-sortable="true">{{ trans('general.name') }}</th>

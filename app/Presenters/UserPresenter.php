@@ -469,6 +469,8 @@ class UserPresenter extends Presenter
         return $this->fullName();
     }
 
+
+
     /**
      * Returns the user Gravatar image url.
      *
@@ -481,7 +483,7 @@ class UserPresenter extends Presenter
         if ($this->avatar) {
 
             // Check if it's a google avatar or some external avatar
-            if (Str::startsWith($this->avatar, ['http://', 'https://'])) {
+            if ($this->isAvatarExternal()) {
                 return $this->avatar;
             }
 

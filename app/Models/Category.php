@@ -32,6 +32,7 @@ class Category extends SnipeModel
     protected $hidden = ['created_by', 'deleted_at'];
 
     protected $casts = [
+        'alert_on_response' => 'boolean',
         'created_by'      => 'integer',
     ];
 
@@ -69,6 +70,7 @@ class Category extends SnipeModel
         'eula_text',
         'name',
         'require_acceptance',
+        'alert_on_response',
         'use_default_eula',
         'created_by',
         'notes',

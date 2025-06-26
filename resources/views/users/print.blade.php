@@ -111,7 +111,6 @@
             data-side-pagination="client"
             data-sortable="true"
             data-toolbar="#assets-toolbar"
-            data-show-columns="true"
             data-sort-order="desc"
             data-sort-name="created_at"
             data-show-columns-toggle-all="true"
@@ -211,7 +210,6 @@
             data-search="false"
             data-side-pagination="client"
             data-sortable="true"
-            data-show-columns="true"
             data-sort-order="desc"
             data-sort-name="created_at"
             data-show-columns-toggle-all="true"
@@ -274,7 +272,6 @@
             data-search="false"
             data-side-pagination="client"
             data-sortable="true"
-            data-show-columns="true"
             data-sort-order="desc"
             data-sort-name="created_at"
             data-show-columns-toggle-all="true"
@@ -339,7 +336,6 @@
             data-search="false"
             data-side-pagination="client"
             data-sortable="true"
-            data-show-columns="true"
             data-sort-order="desc"
             data-sort-name="created_at"
             data-show-columns-toggle-all="true"
@@ -368,19 +364,19 @@
                         <td>
                         @if ($consumable->deleted_at!='')
                             <td>{{ ($consumable->manufacturer) ? $consumable->manufacturer->name : '' }}  {{ $consumable->name }} {{ $consumable->model_number }}</td>
-                            @else
-                                {{ ($consumable->manufacturer) ? $consumable->manufacturer->name : '' }}  {{ $consumable->name }} {{ $consumable->model_number }}
+                        @else
+                            {{ ($consumable->manufacturer) ? $consumable->manufacturer->name : '' }}  {{ $consumable->name }} {{ $consumable->model_number }}
+                        @endif
+                        </td>
+                        <td>{{ ($consumable->category) ? $consumable->category->name : ' invalid/deleted category' }} </td>
+                        <td>
+                            {{ Helper::getFormattedDateObject($consumable->pivot->created_at, 'datetime', false) }}
+                        </td>
+                        <td>
+                            @if ($consumable->getLatestSignedAcceptance($show_user))
+                                <img style="width:auto;height:100px;" src="{{ asset('/') }}display-sig/{{ $consumable->getLatestSignedAcceptance($show_user)->accept_signature }}">
                             @endif
-                            </td>
-                            <td>{{ ($consumable->category) ? $consumable->category->name : ' invalid/deleted category' }} </td>
-                            <td>
-                                {{ Helper::getFormattedDateObject($consumable->pivot->created_at, 'datetime', false) }}
-                            </td>
-                            <td>
-                                @if ($consumable->getLatestSignedAcceptance($show_user))
-                                    <img style="width:auto;height:100px;" src="{{ asset('/') }}display-sig/{{ $consumable->getLatestSignedAcceptance($show_user)->accept_signature }}">
-                                @endif
-                            </td>
+                        </td>
                     </tr>
                     @php
                         $ccounter++

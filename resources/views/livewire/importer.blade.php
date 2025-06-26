@@ -97,9 +97,9 @@
                         </div>
                         <div class="row">
                             <div class="col-md-12 table-responsive" style="padding-top: 30px;">
-                                <table data-pagination="true"
+                                <table
                                         data-id-table="upload-table"
-                                        data-search="true"
+
                                         data-side-pagination="client"
                                         id="upload-table"
                                         class="col-md-12 table table-striped snipe-table">
