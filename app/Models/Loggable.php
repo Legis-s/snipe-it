@@ -221,10 +221,14 @@ trait Loggable
      */
     public function logSell($note, $target, $action_date = null, $originalValues = [])
     {
+
         $log = new Actionlog;
+
+        $fields_array = [];
+
         $log = $this->determineLogItemType($log);
-        if (Auth::user()) {
-            $log->user_id = Auth::user()->id;
+        if (auth()->user()) {
+            $log->created_by = auth()->id();
         }
 
         if (! isset($target)) {
@@ -251,24 +255,39 @@ trait Loggable
             $log->location_id = $target->location_id;
         }
 
+        if (static::class == Asset::class) {
+            if ($asset = Asset::find($log->item_id)) {
+
+                // add the custom fields that were changed
+                if ($asset->model->fieldset) {
+                    $fields_array = [];
+                    foreach ($asset->model->fieldset->fields as $field) {
+                        if ($field->display_checkout == 1) {
+                            $fields_array[$field->db_column] = $asset->{$field->db_column};
+                        }
+                    }
+                }
+            }
+        }
+
         $log->note = $note;
         $log->action_date = $action_date;
 
-        if (! $log->action_date) {
-            $log->action_date = date('Y-m-d H:i:s');
-        }
-
         $changed = [];
-        $originalValues = array_intersect_key($originalValues, array_flip(['action_date','name','status_id','location_id','expected_checkin']));
+        $array_to_flip = array_keys($fields_array);
+        $array_to_flip = array_merge($array_to_flip, ['name','status_id','location_id','expected_checkin']);
+        $originalValues = array_intersect_key($originalValues, array_flip($array_to_flip));
 
         foreach ($originalValues as $key => $value) {
+            // TODO - action_date isn't a valid attribute of any first-class object, so we might want to remove this?
             if ($key == 'action_date' && $value != $action_date) {
                 $changed[$key]['old'] = $value;
                 $changed[$key]['new'] = is_string($action_date) ? $action_date : $action_date->format('Y-m-d H:i:s');
-            } elseif ($value != $this->getAttributes()[$key]) {
+            } elseif (array_key_exists($key, $this->getAttributes()) && $value != $this->getAttributes()[$key]) {
                 $changed[$key]['old'] = $value;
                 $changed[$key]['new'] = $this->getAttributes()[$key];
             }
+            // NOTE - if the attribute exists in $originalValues, but *not* in ->getAttributes(), it isn't added to $changed
         }
 
         if (!empty($changed)){
@@ -282,15 +301,17 @@ trait Loggable
 
 
     /**
-     * @since [v3.4]
      * @return \App\Models\Actionlog
      */
     public function logRent($note, $target, $action_date = null, $originalValues = [])
     {
         $log = new Actionlog;
+
+        $fields_array = [];
+
         $log = $this->determineLogItemType($log);
-        if (Auth::user()) {
-            $log->user_id = Auth::user()->id;
+        if (auth()->user()) {
+            $log->created_by = auth()->id();
         }
 
         if (! isset($target)) {
@@ -317,24 +338,39 @@ trait Loggable
             $log->location_id = $target->location_id;
         }
 
+        if (static::class == Asset::class) {
+            if ($asset = Asset::find($log->item_id)) {
+
+                // add the custom fields that were changed
+                if ($asset->model->fieldset) {
+                    $fields_array = [];
+                    foreach ($asset->model->fieldset->fields as $field) {
+                        if ($field->display_checkout == 1) {
+                            $fields_array[$field->db_column] = $asset->{$field->db_column};
+                        }
+                    }
+                }
+            }
+        }
+
         $log->note = $note;
         $log->action_date = $action_date;
 
-        if (! $log->action_date) {
-            $log->action_date = date('Y-m-d H:i:s');
-        }
-
         $changed = [];
-        $originalValues = array_intersect_key($originalValues, array_flip(['action_date','name','status_id','location_id','expected_checkin']));
+        $array_to_flip = array_keys($fields_array);
+        $array_to_flip = array_merge($array_to_flip, ['name','status_id','location_id','expected_checkin']);
+        $originalValues = array_intersect_key($originalValues, array_flip($array_to_flip));
 
         foreach ($originalValues as $key => $value) {
+            // TODO - action_date isn't a valid attribute of any first-class object, so we might want to remove this?
             if ($key == 'action_date' && $value != $action_date) {
                 $changed[$key]['old'] = $value;
                 $changed[$key]['new'] = is_string($action_date) ? $action_date : $action_date->format('Y-m-d H:i:s');
-            } elseif ($value != $this->getAttributes()[$key]) {
+            } elseif (array_key_exists($key, $this->getAttributes()) && $value != $this->getAttributes()[$key]) {
                 $changed[$key]['old'] = $value;
                 $changed[$key]['new'] = $this->getAttributes()[$key];
             }
+            // NOTE - if the attribute exists in $originalValues, but *not* in ->getAttributes(), it isn't added to $changed
         }
 
         if (!empty($changed)){
@@ -346,9 +382,88 @@ trait Loggable
         return $log;
     }
 
+
     /**
-     * @author  A. Gianotto <snipe@snipe.net>
-     * @since [v4.0]
+     * @return \App\Models\Actionlog
+     */
+    public function logTag($note = null, $originalValues = [])
+    {
+        $log = new Actionlog;
+        $log = $this->determineLogItemType($log);
+        if (auth()->user()) {
+            $log->created_by = auth()->id();
+        }
+
+        if (! isset($target)) {
+            throw new \Exception('All checkout logs require a target.');
+
+            return;
+        }
+
+        if (! isset($target->id)) {
+            throw new \Exception('That target seems invalid (no target ID available).');
+
+            return;
+        }
+
+        $log->target_type = get_class($target);
+        $log->target_id = $target->id;
+
+        // Figure out what the target is
+        if ($log->target_type == Location::class) {
+            $log->location_id = $target->id;
+        } elseif ($log->target_type == Asset::class) {
+            $log->location_id = $target->location_id;
+        } else {
+            $log->location_id = $target->location_id;
+        }
+
+        if (static::class == Asset::class) {
+            if ($asset = Asset::find($log->item_id)) {
+
+                // add the custom fields that were changed
+                if ($asset->model->fieldset) {
+                    $fields_array = [];
+                    foreach ($asset->model->fieldset->fields as $field) {
+                        if ($field->display_checkout == 1) {
+                            $fields_array[$field->db_column] = $asset->{$field->db_column};
+                        }
+                    }
+                }
+            }
+        }
+
+        $action_date = date('Y-m-d H:i:s');
+        $log->note = $note;
+        $log->action_date = $action_date;
+
+        $changed = [];
+        $array_to_flip = array_keys($fields_array);
+        $array_to_flip = array_merge($array_to_flip, ['name','status_id','location_id','expected_checkin']);
+        $originalValues = array_intersect_key($originalValues, array_flip($array_to_flip));
+
+        foreach ($originalValues as $key => $value) {
+            // TODO - action_date isn't a valid attribute of any first-class object, so we might want to remove this?
+            if ($key == 'action_date' && $value != $action_date) {
+                $changed[$key]['old'] = $value;
+                $changed[$key]['new'] = is_string($action_date) ? $action_date : $action_date->format('Y-m-d H:i:s');
+            } elseif (array_key_exists($key, $this->getAttributes()) && $value != $this->getAttributes()[$key]) {
+                $changed[$key]['old'] = $value;
+                $changed[$key]['new'] = $this->getAttributes()[$key];
+            }
+            // NOTE - if the attribute exists in $originalValues, but *not* in ->getAttributes(), it isn't added to $changed
+        }
+
+        if (!empty($changed)){
+            $log->log_meta = json_encode($changed);
+        }
+
+        $log->logaction('tag');
+
+        return $log;
+    }
+
+    /**
      * @return \App\Models\Actionlog
      */
     public function logAudit($note, $location_id, $filename = null, $originalValues = [])
@@ -417,45 +532,6 @@ trait Loggable
             Setting::getSettings()->notify(new AuditNotification($params));
         }
 
-        return $log;
-    }
-
-    /**
-     * @author  A. Gianotto <snipe@snipe.net>
-     * @since [v4.0]
-     * @return \App\Models\Actionlog
-     */
-    public function logTag($note = null, $originalValues = [])
-    {
-        $log = new Actionlog;
-        $log->item_type = static::class;
-        $log->item_id = $this->id;
-        $log->location_id = null;
-        $log->note = $note;
-        $log->user_id = Auth::user()->id;
-
-        $action_date = date('Y-m-d H:i:s');
-        $log->action_date = $action_date;
-
-        $changed = [];
-        $originalValues = array_intersect_key($originalValues, array_flip(['action_date','name','status_id','location_id','expected_checkin','asset_tag']));
-
-        foreach ($originalValues as $key => $value) {
-            if ($key == 'action_date' && $value != $action_date) {
-                $changed[$key]['old'] = $value;
-                $changed[$key]['new'] = is_string($action_date) ? $action_date : $action_date->format('Y-m-d H:i:s');
-            } elseif ($value != $this->getAttributes()[$key]) {
-                $changed[$key]['old'] = $value;
-                $changed[$key]['new'] = $this->getAttributes()[$key];
-            }
-        }
-
-        if (!empty($changed)){
-            $log->log_meta = json_encode($changed);
-        }
-
-        $log->logaction('tag');
-        $log->save();
         return $log;
     }
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Asset;
 use App\Models\Contract;
+use App\Models\Deal;
 use App\Models\Location;
 use App\Models\SnipeModel;
 use App\Models\User;
@@ -21,10 +22,12 @@ trait CheckInOutRequest
                 return Location::findOrFail(request('assigned_location'));
             case 'asset':
                 return Asset::findOrFail(request('assigned_asset'));
-            default:
-                return User::findOrFail(request('assigned_user'));
             case 'contract':
                 return Contract::findOrFail(request('assigned_contract'));
+            case 'deal':
+                return Deal::findOrFail(request('assigned_deal'));
+            default:
+                return User::findOrFail(request('assigned_user'));
         }
 
         return null;
@@ -41,7 +44,6 @@ trait CheckInOutRequest
         switch (request('checkout_to_type')) {
             case 'location':
                 $asset->location_id = $target->id;
-//                $asset->rtd_location_id = $target->id;
                 Asset::where('assigned_type', 'App\Models\Asset')->where('assigned_to', $asset->id)
                     ->update(['location_id' => $asset->location_id]);
                 break;

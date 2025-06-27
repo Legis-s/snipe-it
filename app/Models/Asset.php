@@ -129,7 +129,7 @@ class Asset extends Depreciable
         'order_number'      => ['nullable', 'string', 'max:191'],
         'notes'             => ['nullable', 'string', 'max:65535'],
         'assigned_to'   => ['nullable', 'integer', 'required_with:assigned_type'],
-        'assigned_type' => ['nullable', 'required_with:assigned_to', 'in:'.User::class.",".Location::class.",".Asset::class],
+        'assigned_type' => ['nullable', 'required_with:assigned_to', 'in:'.User::class.",".Location::class.",".Asset::class.",".Deal::class],
         'requestable'       => ['nullable', 'boolean'],
         'assigned_user'     => ['integer', 'nullable', 'exists:users,id,deleted_at,NULL'],
         'assigned_location' => ['integer', 'nullable', 'exists:locations,id,deleted_at,NULL', 'fmcs_location'],
@@ -552,6 +552,11 @@ class Asset extends Depreciable
     public function checkedOutToAsset(): bool
     {
       return $this->assignedType() === self::ASSET;
+    }
+
+    public function checkedOutToDeal(): bool
+    {
+        return $this->assignedType() === self::DEAL;
     }
 
     /**
@@ -2154,6 +2159,8 @@ class Asset extends Depreciable
             throw new CheckoutNotAllowed('You cannot check an asset out to itself.');
         }
 
+        \Debugbar::info("tada");
+
         $this->last_checkout = $checkout_at;
         $this->location_id = null;
         $this->rtd_location_id = null;
@@ -2172,8 +2179,8 @@ class Asset extends Depreciable
         if ($checkout_at && strpos($checkout_at, date('Y-m-d')) === false) {
             $originalValues['action_date'] = date('Y-m-d H:i:s');
         }
-
         if ($this->save()) {
+            \Debugbar::info("save");
             if (is_int($admin)) {
                 $checkedOutBy = User::findOrFail($admin);
             } elseif (get_class($admin) === \App\Models\User::class) {

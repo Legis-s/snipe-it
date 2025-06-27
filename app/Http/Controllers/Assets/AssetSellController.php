@@ -55,6 +55,7 @@ class AssetSellController extends Controller
     public function store(AssetSellRequest $request, $assetId): RedirectResponse
     {
 
+//        \Debugbar::info("target");
         try {
             if (!$asset = Asset::find($assetId)) {
                 return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));
@@ -62,13 +63,20 @@ class AssetSellController extends Controller
                 return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.sell.not_available'));
             }
             $this->authorize('checkout', $asset);
+
+            if (!$asset->model) {
+                return redirect()->route('hardware.show', $asset)->with('error', trans('admin/hardware/general.model_invalid_fix'));
+            }
+
             $admin = auth()->user();
 
             $target = Deal::findOrFail(request('assigned_deal'));
+
             $asset->location_id = null;
             $asset->rtd_location_id = null;
 
             $checkout_at = date('Y-m-d H:i:s');
+
             if (($request->filled('checkout_at')) && ($request->get('checkout_at') != date('Y-m-d'))) {
                 $checkout_at = $request->get('checkout_at');
             }
@@ -80,8 +88,10 @@ class AssetSellController extends Controller
             // Redirect to the asset management page with error
             return redirect()->route("hardware.sell.create", $asset)->with('error', trans('admin/hardware/message.sell.error') . $asset->getErrors());
         } catch (ModelNotFoundException $e) {
+            \Debugbar::info("ModelNotFoundExceptionpre sell");
             return redirect()->back()->with('error', trans('admin/hardware/message.checkout.error'))->withErrors($asset->getErrors());
         } catch (CheckoutNotAllowed $e) {
+            \Debugbar::info("CheckoutNotAllowedpre sell");
             return redirect()->back()->with('error', $e->getMessage());
         }
     }

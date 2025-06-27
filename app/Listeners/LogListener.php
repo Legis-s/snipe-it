@@ -8,7 +8,6 @@ use App\Events\AssetCheckedIn;
 use App\Events\AssetCheckedOut;
 use App\Events\CheckoutableCheckedIn;
 use App\Events\CheckoutableCheckedOut;
-use App\Events\CheckoutableForInstall;
 use App\Events\CheckoutableRent;
 use App\Events\CheckoutableSell;
 use App\Events\CheckoutAccepted;
@@ -175,7 +174,6 @@ class LogListener
             'CheckoutDeclined',
             'CheckoutableSell',
             'CheckoutableRent',
-            'CheckoutableForInstall',
             'UserMerged',
             'NoteAdded',
         ];

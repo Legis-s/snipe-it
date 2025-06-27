@@ -28,7 +28,9 @@
                         {{csrf_field()}}
                         @if ($asset->company && $asset->company->name)
                             <div class="form-group">
-                                {{ Form::label('model', trans('general.company'), array('class' => 'col-md-3 control-label')) }}
+                                <label for="company" class="col-md-3 control-label">
+                                    {{ trans('general.company') }}
+                                </label>
                                 <div class="col-md-8">
                                     <p class="form-control-static">
                                         {{ $asset->company->name }}
@@ -36,17 +38,27 @@
                                 </div>
                             </div>
                         @endif
+
+
                         <!-- AssetModel name -->
                         <div class="form-group">
-                            {{ Form::label('model', trans('admin/hardware/form.model'), array('class' => 'col-md-3 control-label')) }}
+                            <label for="model" class="col-md-3 control-label">
+                                {{ trans('admin/hardware/form.model') }}
+                            </label>
                             <div class="col-md-8">
                                 <p class="form-control-static">
                                     @if (($asset->model) && ($asset->model->name))
                                         {{ $asset->model->name }}
                                     @else
                                         <span class="text-danger text-bold">
-                  <i class="fas fa-exclamation-triangle"></i>{{ trans('admin/hardware/general.model_invalid')}}
-                  <a href="{{ route('hardware.edit', $asset->id) }}"></a> {{ trans('admin/hardware/general.model_invalid_fix')}}</span>
+                                              <x-icon type="warning" />
+                                              {{ trans('admin/hardware/general.model_invalid')}}
+                                        </span>
+
+                                        {{ trans('admin/hardware/general.model_invalid_fix')}}
+                                        <a href="{{ route('hardware.edit', $asset->id) }}">
+                                            <strong>{{ trans('admin/hardware/general.edit') }}</strong>
+                                        </a>
                                     @endif
                                 </p>
                             </div>
@@ -54,7 +66,10 @@
 
                         <!-- Asset Name -->
                         <div class="form-group {{ $errors->has('name') ? 'error' : '' }}">
-                            {{ Form::label('name', trans('admin/hardware/form.name'), array('class' => 'col-md-3 control-label')) }}
+                            <label for="name" class="col-md-3 control-label">
+                                {{ trans('admin/hardware/form.name') }}
+                            </label>
+
                             <div class="col-md-8">
                                 <input class="form-control" type="text" name="name" id="name"
                                        value="{{ old('name', $asset->name) }}" tabindex="1">
@@ -66,24 +81,41 @@
 
                         <!-- Checkout/Checkin Date -->
                         <div class="form-group {{ $errors->has('checkout_at') ? 'error' : '' }}">
-                            {{ Form::label('checkout_at', trans('admin/hardware/form.checkout_date'), array('class' => 'col-md-3 control-label')) }}
+                            <label for="checkout_at" class="col-md-3 control-label">
+                                {{ trans('admin/hardware/form.checkout_date') }}
+                            </label>
                             <div class="col-md-8">
-                                <div class="input-group date col-md-7" data-provide="datepicker" data-date-format="yyyy-mm-dd" data-date-end-date="0d" data-date-clear-btn="true">
-                                    <input type="text" class="form-control" placeholder="{{ trans('general.select_date') }}" name="checkout_at" id="checkout_at" value="{{ old('checkout_at', date('Y-m-d')) }}">
-                                    <span class="input-group-addon"><i class="fas fa-calendar" aria-hidden="true"></i></span>
-                                </div>
+
+                                <x-input.datepicker
+                                        name="checkout_at"
+                                        end_date="0d"
+                                        col_size_class="col-md-7"
+                                        :value="old('expected_checkin', date('Y-m-d'))"
+                                        placeholder="{{ trans('general.select_date') }}"
+                                        required="{{ Helper::checkIfRequired($item, 'checkout_at') }}"
+                                />
                                 {!! $errors->first('checkout_at', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                             </div>
                         </div>
 
                         <!-- Note -->
                         <div class="form-group {{ $errors->has('note') ? 'error' : '' }}">
-                            {{ Form::label('note', trans('admin/hardware/form.notes'), array('class' => 'col-md-3 control-label')) }}
+                            <label for="note" class="col-md-3 control-label">
+                                {{ trans('general.notes') }}
+                            </label>
+
                             <div class="col-md-8">
-                                <textarea class="col-md-6 form-control" id="note" name="note">{{ old('note', $asset->note) }}</textarea>
+                                <textarea class="col-md-6 form-control" id="note" @required($snipeSettings->require_checkinout_notes)
+                                name="note">{{ old('note', $asset->note) }}</textarea>
                                 {!! $errors->first('note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                             </div>
                         </div>
+
+                        <!-- Custom fields -->
+                        @include("models/custom_fields_form", [
+                                'model' => $asset->model,
+                                'show_custom_fields_type' => 'checkout'
+                        ])
 
                     </div> <!--/.box-body-->
 
