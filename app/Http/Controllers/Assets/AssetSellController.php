@@ -78,7 +78,7 @@ class AssetSellController extends Controller
                     ->with('success', trans('admin/hardware/message.checkout.success'));
             }
             // Redirect to the asset management page with error
-            return redirect()->route("hardware.checkout.sell", $asset)->with('error', trans('admin/hardware/message.sell.error') . $asset->getErrors());
+            return redirect()->route("hardware.sell.create", $asset)->with('error', trans('admin/hardware/message.sell.error') . $asset->getErrors());
         } catch (ModelNotFoundException $e) {
             return redirect()->back()->with('error', trans('admin/hardware/message.checkout.error'))->withErrors($asset->getErrors());
         } catch (CheckoutNotAllowed $e) {

@@ -565,29 +565,10 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                         </a>
                                     </li>
                                     @endcan
-                                    <li class="divider">&nbsp;</li>
-
-                                    <li{!! (Request::query('status') == 'Issued_for_sale' ? ' class="active"' : '') !!}><a href="{{ url('hardware?status=Issued_for_sale') }}"><i class="fas fa-usd text-blue fa-fw"></i>
-                                            {{ trans('admin/hardware/general.issued_for_sale') }}
-                                        </a>
-                                    </li>
                                     <li{!! (Request::query('status') == 'Sold' ? ' class="active"' : '') !!}><a href="{{ url('hardware?status=Sold') }}"><i class="fas fa-usd text-red fa-fw"></i>
                                             {{ trans('admin/hardware/general.sold') }}
                                         </a>
                                     </li>
-
-{{--                                    @can('audit', \App\Models\Asset::class)--}}
-{{--                                        <li{!! (Request::is('hardware/audit/due') ? ' class="active"' : '') !!}>--}}
-{{--                                            <a href="{{ route('assets.audit.due') }}">--}}
-{{--                                                <i class="fas fa-history text-yellow fa-fw"></i> {{ trans('general.audit_due') }}--}}
-{{--                                            </a>--}}
-{{--                                        </li>--}}
-{{--                                        <li{!! (Request::is('hardware/audit/overdue') ? ' class="active"' : '') !!}>--}}
-{{--                                            <a href="{{ route('assets.audit.overdue') }}">--}}
-{{--                                                <i class="fas fa-exclamation-triangle text-red fa-fw"></i> {{ trans('general.audit_overdue') }}--}}
-{{--                                            </a>--}}
-{{--                                        </li>--}}
-{{--                                    @endcan--}}
 
                                     <li class="divider">&nbsp;</li>
                                     @can('checkin', \App\Models\Asset::class)
@@ -832,13 +813,6 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                                 </a>
                                             </li>
                                         @endcan
-{{--                                        @can('view', \App\Models\Asset::class)--}}
-{{--                                            <li {!! (Request::is('invoicetypes*') ? ' class="active"' : '') !!}>--}}
-{{--                                                <a href="{{ route('invoicetypes.index') }}">--}}
-{{--                                                    {{ trans('general.invoicetypes') }}--}}
-{{--                                                </a>--}}
-{{--                                            </li>--}}
-{{--                                        @endcan--}}
                                 </ul>
                             </li>
                         @endcan

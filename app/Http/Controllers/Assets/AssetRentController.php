@@ -76,7 +76,7 @@ class AssetRentController extends Controller
                     ->with('success', trans('admin/hardware/message.rent.success'));
             }
             // Redirect to the asset management page with error
-            return redirect()->route("hardware.checkout.rent", $asset)->with('error', trans('admin/hardware/message.rent.error') . $asset->getErrors());
+            return redirect()->route("hardware.rent.create", $asset)->with('error', trans('admin/hardware/message.rent.error') . $asset->getErrors());
 
         } catch (ModelNotFoundException $e) {
             return redirect()->back()->with('error', trans('admin/hardware/message.checkout.error'))->withErrors($asset->getErrors());
