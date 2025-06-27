@@ -77,14 +77,31 @@ class Deal extends SnipeModel
         }
     }
 
-//    public function assets()
-//    {
-//        return $this->hasMany(\App\Models\Asset::class, 'deal_id');
-//    }
-//
-//    public function consumable()
-//    {
-//        return $this->hasMany(\App\Models\ConsumableAssignment::class, 'deal_id');
-//    }
+    public function assets()
+    {
+        return $this->hasMany(\App\Models\Asset::class, 'deal_id');
+    }
+
+    public function consumable()
+    {
+        return $this->hasMany(\App\Models\ConsumableAssignment::class, 'deal_id');
+    }
+
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
+    public function assignedAssets()
+    {
+        return $this->morphMany(\App\Models\Asset::class, 'assigned', 'assigned_type', 'assigned_to')->withTrashed();
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
+    public function assignedConsumables()
+    {
+        return $this->morphMany(\App\Models\ConsumableAssignment::class, 'assigned', 'assigned_type', 'assigned_to');
+    }
 
 }

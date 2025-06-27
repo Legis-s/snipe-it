@@ -222,6 +222,9 @@ class AssetsController extends Controller
             $assets->where('assets.assigned_to', '=', $request->input('deal_id'))
                 ->where('assets.assigned_type', '=', "App\Models\Deal");
             $settings->show_archived_in_list = "1";
+            if ($request->input('show_rent') == true ){
+
+            }
         }
 
 

@@ -46,23 +46,34 @@
               </div>
           @endif
 
-{{--          <!-- User -->--}}
-{{--            @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.select_user'), 'fieldname' => 'assigned_to', 'required'=> 'true'])--}}
+          <!-- total -->
+          <div class="form-group">
+              <label class="col-sm-3 control-label">{{  trans('admin/components/general.total') }}</label>
+              <div class="col-md-6">
+                  <p class="form-control-static">{{ $consumable->qty }}</p>
+              </div>
+          </div>
 
-{{--            --}}
-            @include ('partials.forms.checkout-selector', ['user_select' => 'true','asset_select' => 'true', 'location_select' => 'true'])
+          <!-- remaining -->
+          <div class="form-group">
+              <label class="col-sm-3 control-label">{{  trans('admin/components/general.remaining') }}</label>
+              <div class="col-md-6">
+                  <p class="form-control-static">{{ $consumable->numRemaining() }}</p>
+              </div>
+          </div>
 
-            @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'assigned_location', 'required'=>'true'])
+              @include ('partials.forms.checkout-selector', ['user_select' => 'true','asset_select' => 'true', 'location_select' => 'true'])
+
+              @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'assigned_location', 'required'=>'true'])
 
             @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.user'), 'fieldname' => 'assigned_user', 'style' => 'display:none;','required'=>'true'])
 
             @include ('partials.forms.edit.asset-select', ['translated_name' => trans('general.asset'), 'fieldname' => 'assigned_asset', 'unselect' => 'true', 'style' => 'display:none;', 'required'=>'true'])
 
-            @include ('partials.forms.custom.quantity_max')
+{{--            @include ('partials.forms.custom.quantity_max')--}}
 
 
-
-            @if ($consumable->requireAcceptance() || $consumable->getEula() || ($snipeSettings->slack_endpoint!=''))
+            @if ($consumable->requireAcceptance() || $consumable->getEula() || ($snipeSettings->webhook_endpoint!=''))
               <div class="form-group notification-callout">
                 <div class="col-md-8 col-md-offset-3">
                   <div class="callout callout-info">
@@ -93,7 +104,7 @@
               <label for="qty" class="col-md-3 control-label">{{ trans('general.qty') }}</label>
               <div class="col-md-7 col-sm-12 required">
                   <div class="col-md-2" style="padding-left:0px">
-                    <input class="form-control" type="number" name="qty" id="qty" value="1" min="1" max="{{$consumable->numRemaining()}}" />
+                    <input class="form-control" type="number" name="checkout_qty" id="checkout_qty" value="1" min="1" max="{{$consumable->numRemaining()}}" maxlength="999999"  />
                   </div>
               </div>
               {!! $errors->first('qty', '<div class="col-md-8 col-md-offset-3"><span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span></div>') !!}

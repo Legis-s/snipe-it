@@ -2159,8 +2159,6 @@ class Asset extends Depreciable
             throw new CheckoutNotAllowed('You cannot check an asset out to itself.');
         }
 
-        \Debugbar::info("tada");
-
         $this->last_checkout = $checkout_at;
         $this->location_id = null;
         $this->rtd_location_id = null;
@@ -2168,9 +2166,6 @@ class Asset extends Depreciable
 
         $status = Statuslabel::where('name', 'Продано')->first();
         $this->status_id = $status->id;
-//        $this->contract_id = $target->id;
-//        $this->assigned_to = $target;
-//        $this->assigned_type = null;
         $this->assignedTo()->associate($target);
 
         $originalValues = $this->getRawOriginal();
@@ -2180,7 +2175,6 @@ class Asset extends Depreciable
             $originalValues['action_date'] = date('Y-m-d H:i:s');
         }
         if ($this->save()) {
-            \Debugbar::info("save");
             if (is_int($admin)) {
                 $checkedOutBy = User::findOrFail($admin);
             } elseif (get_class($admin) === \App\Models\User::class) {
@@ -2223,11 +2217,7 @@ class Asset extends Depreciable
 
         $status = Statuslabel::where('name', 'В аренде')->first();
         $this->status_id = $status->id;
-        $this->contract_id = $target->id;
-        $this->assigned_to = null;
-        $this->assigned_type = null;
-
-//        $this->assignedTo()->associate($target);
+        $this->assignedTo()->associate($target);
 
         $originalValues = $this->getRawOriginal();
 
