@@ -30,7 +30,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     use CompanyableTrait;
 
     protected $presenter = \App\Presenters\UserPresenter::class;
-    use SoftDeletes, ValidatingTrait;
+    use SoftDeletes, ValidatingTrait, Loggable;
     use Authenticatable, Authorizable, CanResetPassword, HasApiTokens;
     use UniqueUndeletedTrait;
     use Notifiable;
