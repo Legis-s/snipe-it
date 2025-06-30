@@ -153,9 +153,9 @@ Context | Request Context
     'image_delete'         	=> 'Resmi sil',
     'include_deleted'       => 'Silinen Varlıkları Dahil Et',
     'image_upload'         	=> 'Resim yükle',
-    'filetypes_accepted_help'    => 'Accepted filetype is :types. The maximum size allowed is :size.|Accepted filetypes are :types. The maximum upload size allowed is :size.',
+    'filetypes_accepted_help'    => 'Kabul edilen dosya türü: :types. İzin verilen en büyük dosya boyutu: :size.|Kabul edilen dosya türleri: :types. İzin verilen en büyük dosya yükleme boyutu: :size.',
     'filetypes_size_help'   => 'The maximum upload size allowed is :size.',
-    'image_filetypes_help'  => 'Accepted Filetypes are jpg, webp, png, gif, svg, and avif. The maximum upload size allowed is :size.',
+    'image_filetypes_help'  => 'Kabul edilen dosya türleri jpg, webp, png, gif ve svg\'dir. İzin verilen en büyük dosya yükleme boyutu: :size.',
     'unaccepted_image_type'  => 'Bu dosya okunamadı. Kabul edilen dosya türleri jpg, webp, png, gif ve svg\'dir. Bu dosyanın mime tipi: :mimetype.',
     'import'         	    => 'İçeri aktar',
     'import_this_file'      => 'Alanları eşleyin ve bu dosyayı işleyin',
@@ -250,11 +250,11 @@ Context | Request Context
     'restored'				=> 'geri yüklendi',
     'restore'				=> 'Geri Yükle',
     'requestable_models'    => 'Talep Edilebilir Modeller',
-    'requestable_items'     => 'Requestable Items',
+    'requestable_items'     => 'Talep Edilebilir Öğeler',
     'requested'				=> 'Talep Edilen',
     'requested_date'        => 'Talep Tarihi',
     'requested_assets'      => 'Talep Edilen Varlıklar',
-    'requested_assets_menu' => 'Talep Edilen Varlıklar',
+    'requested_assets_menu' => 'Requested Items',
     'request_canceled'      => 'Talep iptal edildi',
     'request_item'          => 'Ürünü Talep Et',
     'external_link_tooltip' => 'Dış bağlantı',
@@ -324,8 +324,10 @@ Context | Request Context
     'unaccepted_asset_report' => 'Kabul Edilmeyen Varlıklar',
     'users'                 => 'Kullanıcılar',
     'viewall'				=> 'Tümünü Görüntüle',
-    'viewassets'  			=> 'Atanan Varlıkları Görüntüle',
-    'viewassetsfor'         => 'Şunun için varlıkları görüntüle :name',
+    'viewassets'  			=> 'View Assigned Items',
+    'viewassetsfor'         => 'View Items for :name',
+    'view_user_assets'      => 'View Items Assigned to User',
+    'me'                    => 'Me',
     'website'               => 'İnternet sitesi',
     'welcome'				=> 'Hoşgeldiniz, :name',
     'years'					=> 'Yıl',
@@ -339,9 +341,9 @@ Context | Request Context
     'login_enabled'         => 'Kullanıcı Aktif',
     'audit_due'             => 'Beklenen Denetimler',
     'audit_due_days'        => '{}Assets Due or Overdue for Audit|[1]Assets Due or Overdue for Audit Within a Day|[2,*]Assets Due or Overdue for Audit Within :days Days',
-    'checkin_due'           => 'Due for Checkin',
-    'checkin_overdue'       => 'Overdue for Checkin',
-    'checkin_due_days'      => '{}Due for Checkin|[1]Assets Due for Checkin Within :days Day|[2,*]Assets Due for Checkin Within :days Days',
+    'checkin_due'           => 'Kontrol zamanı gelenler',
+    'checkin_overdue'       => 'Kontrol zamanı geçenler',
+    'checkin_due_days'      => '{}Kontrol zamanı gelenler|[1]:days Gün İçinde Kontrol Zamanı Gelen Varlık|[2,*]:days Gün İçinde Kontrol Zamanı Gelen Varlıklar',
     'audit_overdue'         => 'Zamanı Geçmiş Denetimler',
     'accept'                => 'Demirbaş Kabul',
     'i_accept'              => 'Kabul ediyorum',
@@ -515,6 +517,7 @@ Context | Request Context
         'manager_last_name' => 'Yöneticinin Soyadı',
         'manager_full_name' => 'Yöneticinin Adı Soyadı',
         'manager_username' => 'Yöneticinin Kullanıcı Adı',
+        'manager_employee_num' => 'Manager Employee Number',
         'checkout_type' => 'Ödeme Tipi',
         'checkout_location' => 'Ödeme Konumu',
         'image_filename' => 'Dosya Adı',
@@ -561,7 +564,7 @@ Context | Request Context
                 'partial'   =>  'Deleted :success_count :object_type, but :error_count :object_type could not be deleted',
              ],
     ],
-    'no_requestable' => 'There are no requestable assets or asset models.',
+    'no_requestable' => 'Talep edilebilir bir varlık veya varlık modeli bulunmamaktadır.',
 
     'countable' => [
         'accessories'  => ':count Accessory|:count Accessories',
@@ -639,5 +642,25 @@ Context | Request Context
             'error' => 'Üreticiler eklenemedi. Bir üretici kaydı zaten mevcut ve ekleme işlemi üzerine yazacaktır.|Üreticiler eklenemedi. :count üretici kaydı zaten mevcut ve ekleme işlemi bunların üzerine yazacaktır.',
         ],
     ],
+
+    'file_upload_status' => [
+
+        'upload' => [
+            'success' => 'File successfully uploaded |:count files successfully uploaded',
+            'error' => 'File upload failed |:count file uploads failed',
+        ],
+
+        'delete' => [
+            'success' => 'File successfully deleted |:count files successfully deleted',
+            'error' => 'File deletion failed |:count file deletions failed',
+        ],
+
+        'file_not_found' => 'The selected file was not found on server',
+        'invalid_id' => 'That file ID is invalid',
+        'invalid_object' => 'That object ID is invalid',
+        'nofiles' => 'No files were included for upload',
+        'confirm_delete' => 'Are you sure you want to delete this file?',
+    ],
+
 
 ];

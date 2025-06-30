@@ -251,7 +251,7 @@ return [
     'requested'				=> 'Požadováno',
     'requested_date'        => 'Požadované datum',
     'requested_assets'      => 'Vyžádaný majetek',
-    'requested_assets_menu' => 'Vyžádaný majetek',
+    'requested_assets_menu' => 'Požadované položky',
     'request_canceled'      => 'Žádost zrušena',
     'request_item'          => 'Požádat o tuto položku',
     'external_link_tooltip' => 'Externí odkazy',
@@ -307,7 +307,7 @@ return [
     'type'  				=> 'Typ',
     'undeployable'			=> 'Ne-přiřaditelné',
     'unknown_admin'			=> 'Neznámy správce',
-    'unknown_user'          => 'Unknown User',
+    'unknown_user'          => 'Neznámý uživatel',
     'username'              => 'Uživatelské jméno',
     'update'                => 'Aktualizace',
     'updating_item' => 'Probíhá aktualizace položky :item',
@@ -322,7 +322,9 @@ return [
     'users'                 => 'Uživatelé',
     'viewall'				=> 'Zobrazit vše',
     'viewassets'  			=> 'Zobrazit přiřazený majetek',
-    'viewassetsfor'         => 'Zobrazit majetky pro :name',
+    'viewassetsfor'         => 'Zobrazit položky pro :name',
+    'view_user_assets'      => 'Zobrazit položky přiřazené uživateli',
+    'me'                    => 'Já',
     'website'               => 'Webová stránka',
     'welcome'				=> 'Vítej, :name',
     'years'					=> 'roky',
@@ -514,6 +516,7 @@ return [
         'manager_last_name' => 'Příjmení nadřízeného',
         'manager_full_name' => 'Celé jméno správce',
         'manager_username' => 'Uživatelské jméno správce',
+        'manager_employee_num' => 'Manager Employee Number',
         'checkout_type' => 'Typ pokladny',
         'checkout_location' => 'Rezervovat na umístění',
         'image_filename' => 'Název souboru obrázku',
@@ -638,5 +641,25 @@ return [
             'error' => 'Výrobce se nepodařilo načíst – již nějaký existuje a nový by ho přepsal.|Výrobce se nepodařilo načíst – existuje už :count záznamů a došlo by k jejich přepsání.',
         ],
     ],
+
+    'file_upload_status' => [
+
+        'upload' => [
+            'success' => 'File successfully uploaded |:count files successfully uploaded',
+            'error' => 'File upload failed |:count file uploads failed',
+        ],
+
+        'delete' => [
+            'success' => 'File successfully deleted |:count files successfully deleted',
+            'error' => 'File deletion failed |:count file deletions failed',
+        ],
+
+        'file_not_found' => 'The selected file was not found on server',
+        'invalid_id' => 'That file ID is invalid',
+        'invalid_object' => 'That object ID is invalid',
+        'nofiles' => 'No files were included for upload',
+        'confirm_delete' => 'Are you sure you want to delete this file?',
+    ],
+
 
 ];

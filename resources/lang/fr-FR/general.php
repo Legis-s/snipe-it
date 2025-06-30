@@ -251,7 +251,7 @@ return [
     'requested'				=> 'Demandé',
     'requested_date'        => 'Date de la demande',
     'requested_assets'      => 'Actifs demandés',
-    'requested_assets_menu' => 'Actifs demandés',
+    'requested_assets_menu' => 'Requested Items',
     'request_canceled'      => 'Demande annulée',
     'request_item'          => 'Demander cet article',
     'external_link_tooltip' => 'Lien externe vers',
@@ -321,8 +321,10 @@ return [
     'unaccepted_asset_report' => 'Actifs refusés',
     'users'                 => 'Utilisateurs',
     'viewall'				=> 'Afficher tout',
-    'viewassets'  			=> 'Voir les actifs associés',
-    'viewassetsfor'         => 'Voir les actifs pour :name',
+    'viewassets'  			=> 'View Assigned Items',
+    'viewassetsfor'         => 'View Items for :name',
+    'view_user_assets'      => 'View Items Assigned to User',
+    'me'                    => 'Me',
     'website'               => 'Site web',
     'welcome'				=> 'Bienvenue, :name',
     'years'					=> 'années',
@@ -512,6 +514,7 @@ return [
         'manager_last_name' => 'Nom de famille du·de la manager',
         'manager_full_name' => 'Prénom du manager',
         'manager_username' => 'Nom d\'utilisateur·trice du manager',
+        'manager_employee_num' => 'Manager Employee Number',
         'checkout_type' => 'Type d\'association',
         'checkout_location' => 'Associer à un lieu',
         'image_filename' => 'Nom du fichier image',
@@ -636,5 +639,25 @@ return [
             'error' => 'Could not seed manufacturers. A manufacturer record already exists and seeding would overwrite it.|Could not seed manufacturers. :count manufacturer records already exist and seeding would overwrite them.',
         ],
     ],
+
+    'file_upload_status' => [
+
+        'upload' => [
+            'success' => 'File successfully uploaded |:count files successfully uploaded',
+            'error' => 'File upload failed |:count file uploads failed',
+        ],
+
+        'delete' => [
+            'success' => 'File successfully deleted |:count files successfully deleted',
+            'error' => 'File deletion failed |:count file deletions failed',
+        ],
+
+        'file_not_found' => 'The selected file was not found on server',
+        'invalid_id' => 'That file ID is invalid',
+        'invalid_object' => 'That object ID is invalid',
+        'nofiles' => 'No files were included for upload',
+        'confirm_delete' => 'Are you sure you want to delete this file?',
+    ],
+
 
 ];

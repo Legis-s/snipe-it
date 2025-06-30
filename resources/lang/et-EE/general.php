@@ -251,7 +251,7 @@ return [
     'requested'				=> 'Taotletud',
     'requested_date'        => 'Taotletav kuupäev',
     'requested_assets'      => 'Taotletavad vahendid',
-    'requested_assets_menu' => 'Vaadake taotletud vahendeid',
+    'requested_assets_menu' => 'Requested Items',
     'request_canceled'      => 'Taotlus tühistati',
     'request_item'          => 'Taotle seda vara',
     'external_link_tooltip' => 'External link to',
@@ -321,8 +321,10 @@ return [
     'unaccepted_asset_report' => 'Mitteaktsepteeritud varad',
     'users'                 => 'Kasutajad',
     'viewall'				=> 'Vaata kõiki',
-    'viewassets'  			=> 'Vaadake määratud varasid',
-    'viewassetsfor'         => 'Vaata kasutaja :name vahendeid',
+    'viewassets'  			=> 'View Assigned Items',
+    'viewassetsfor'         => 'View Items for :name',
+    'view_user_assets'      => 'View Items Assigned to User',
+    'me'                    => 'Me',
     'website'               => 'Koduleht',
     'welcome'				=> 'Tere tulemast, :name',
     'years'					=> 'aastat',
@@ -512,6 +514,7 @@ return [
         'manager_last_name' => 'Manager Last Name',
         'manager_full_name' => 'Manager Full Name',
         'manager_username' => 'Manager Username',
+        'manager_employee_num' => 'Manager Employee Number',
         'checkout_type' => 'Checkout Type',
         'checkout_location' => 'Checkout to Location',
         'image_filename' => 'Image Filename',
@@ -636,5 +639,25 @@ return [
             'error' => 'Could not seed manufacturers. A manufacturer record already exists and seeding would overwrite it.|Could not seed manufacturers. :count manufacturer records already exist and seeding would overwrite them.',
         ],
     ],
+
+    'file_upload_status' => [
+
+        'upload' => [
+            'success' => 'File successfully uploaded |:count files successfully uploaded',
+            'error' => 'File upload failed |:count file uploads failed',
+        ],
+
+        'delete' => [
+            'success' => 'File successfully deleted |:count files successfully deleted',
+            'error' => 'File deletion failed |:count file deletions failed',
+        ],
+
+        'file_not_found' => 'The selected file was not found on server',
+        'invalid_id' => 'That file ID is invalid',
+        'invalid_object' => 'That object ID is invalid',
+        'nofiles' => 'No files were included for upload',
+        'confirm_delete' => 'Are you sure you want to delete this file?',
+    ],
+
 
 ];

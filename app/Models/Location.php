@@ -6,6 +6,7 @@ use App\Http\Traits\UniqueUndeletedTrait;
 use App\Models\Asset;
 use App\Models\Setting;
 use App\Models\SnipeModel;
+use App\Models\Traits\HasUploads;
 use App\Models\Traits\Searchable;
 use App\Models\User;
 use App\Presenters\Presentable;
@@ -25,6 +26,7 @@ class Location extends SnipeModel
     protected $presenter = \App\Presenters\LocationPresenter::class;
     use Presentable;
     use SoftDeletes;
+    use HasUploads;
 
     protected $table = 'locations';
     protected $rules = [
@@ -316,22 +318,6 @@ class Location extends SnipeModel
     public function setLdapOuAttribute($ldap_ou)
     {
         return $this->attributes['ldap_ou'] = empty($ldap_ou) ? null : $ldap_ou;
-    }
-
-    /**
-     * Get uploads for this location
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v4.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
-     */
-    public function uploads()
-    {
-        return $this->hasMany('\App\Models\Actionlog', 'item_id')
-            ->where('item_type', '=', Location::class)
-            ->where('action_type', '=', 'uploaded')
-            ->whereNotNull('filename')
-            ->orderBy('created_at', 'desc');
     }
 
 

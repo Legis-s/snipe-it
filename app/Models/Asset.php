@@ -13,12 +13,11 @@ use App\Http\Traits\UniqueSerialTrait;
 use App\Http\Traits\UniqueUndeletedTrait;
 use App\MassOperation;
 use App\Models\Traits\Acceptable;
+use App\Models\Traits\HasUploads;
 use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
 use App\Presenters\AssetPresenter;
-use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -26,7 +25,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 use Watson\Validating\ValidatingTrait;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * Model for Assets.
@@ -40,6 +38,7 @@ class Asset extends Depreciable
     protected $with = ['model', 'adminuser'];
 
     use CompanyableTrait;
+    use HasUploads;
     use HasFactory, Loggable, Requestable, Presentable, SoftDeletes, ValidatingTrait, UniqueUndeletedTrait;
 
     public const LOCATION = 'location';
@@ -513,22 +512,6 @@ class Asset extends Depreciable
         }
     }
 
-
-    /**
-     * Get uploads for this asset
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v4.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
-     */
-    public function uploads()
-    {
-        return $this->hasMany('\App\Models\Actionlog', 'item_id')
-                  ->where('item_type', '=', Asset::class)
-                  ->where('action_type', '=', 'uploaded')
-                  ->whereNotNull('filename')
-                  ->orderBy('created_at', 'desc');
-    }
 
     /**
      * Determines whether the asset is checked out to a user

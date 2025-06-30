@@ -251,7 +251,7 @@ return [
     'requested'				=> 'Побарано',
     'requested_date'        => 'Побаран датум',
     'requested_assets'      => 'Побарани средства',
-    'requested_assets_menu' => 'Побарани средства',
+    'requested_assets_menu' => 'Requested Items',
     'request_canceled'      => 'Барањето е откажано',
     'request_item'          => 'Побарајте оваа ставка',
     'external_link_tooltip' => 'Надворешна врска до',
@@ -321,8 +321,10 @@ return [
     'unaccepted_asset_report' => 'Неприфатени средства',
     'users'                 => 'Корисници',
     'viewall'				=> 'Прикажи се',
-    'viewassets'  			=> 'Прикажете ги доделените основни средства',
-    'viewassetsfor'         => 'Прикажи имот од корисникот :name',
+    'viewassets'  			=> 'View Assigned Items',
+    'viewassetsfor'         => 'View Items for :name',
+    'view_user_assets'      => 'View Items Assigned to User',
+    'me'                    => 'Me',
     'website'               => 'Веб страна',
     'welcome'				=> 'Добредојдовте :name',
     'years'					=> 'години',
@@ -512,6 +514,7 @@ return [
         'manager_last_name' => 'Менаџер Презиме',
         'manager_full_name' => 'Менаџер Целосно име',
         'manager_username' => 'Менаџер Корисничко име',
+        'manager_employee_num' => 'Manager Employee Number',
         'checkout_type' => 'Тип на задолжување',
         'checkout_location' => 'Локација на задолжување',
         'image_filename' => 'Име на датотеката за слика',
@@ -636,5 +639,25 @@ return [
             'error' => 'Could not seed manufacturers. A manufacturer record already exists and seeding would overwrite it.|Could not seed manufacturers. :count manufacturer records already exist and seeding would overwrite them.',
         ],
     ],
+
+    'file_upload_status' => [
+
+        'upload' => [
+            'success' => 'File successfully uploaded |:count files successfully uploaded',
+            'error' => 'File upload failed |:count file uploads failed',
+        ],
+
+        'delete' => [
+            'success' => 'File successfully deleted |:count files successfully deleted',
+            'error' => 'File deletion failed |:count file deletions failed',
+        ],
+
+        'file_not_found' => 'The selected file was not found on server',
+        'invalid_id' => 'That file ID is invalid',
+        'invalid_object' => 'That object ID is invalid',
+        'nofiles' => 'No files were included for upload',
+        'confirm_delete' => 'Are you sure you want to delete this file?',
+    ],
+
 
 ];

@@ -251,7 +251,7 @@ return [
     'requested'				=> 'បានស្នើសុំ',
     'requested_date'        => 'កាលបរិច្ឆេទដែលបានស្នើសុំ',
     'requested_assets'      => 'ទ្រព្យសកម្មដែលបានស្នើសុំ',
-    'requested_assets_menu' => 'ទ្រព្យសកម្មដែលបានស្នើសុំ',
+    'requested_assets_menu' => 'Requested Items',
     'request_canceled'      => 'សំណើត្រូវបានលុបចោល',
     'request_item'          => 'ស្នើសុំធាតុនេះ។',
     'external_link_tooltip' => 'តំណភ្ជាប់ទៅខាងក្រៅ',
@@ -321,8 +321,10 @@ return [
     'unaccepted_asset_report' => 'ទ្រព្យសម្បត្តិដែលមិនទាន់យល់ព្រម។',
     'users'                 => 'អ្នកប្រើប្រាស់ច្រើន',
     'viewall'				=> 'មើលទាំងអស់',
-    'viewassets'  			=> 'មើលទ្រព្យសកម្មដែលបានចាត់តាំង',
-    'viewassetsfor'         => 'មើលទ្រព្យសម្បត្តិសម្រាប់៖ ឈ្មោះ',
+    'viewassets'  			=> 'View Assigned Items',
+    'viewassetsfor'         => 'View Items for :name',
+    'view_user_assets'      => 'View Items Assigned to User',
+    'me'                    => 'Me',
     'website'               => 'វេបសាយ',
     'welcome'				=> 'សូមស្វាគមន៍៖ ឈ្មោះ',
     'years'					=> 'ឆ្នាំ',
@@ -512,6 +514,7 @@ return [
         'manager_last_name' => 'នាមត្រកូលអ្នកគ្រប់គ្រង',
         'manager_full_name' => 'ឈ្មោះពេញអ្នកគ្រប់គ្រង',
         'manager_username' => 'ឈ្មោះអ្នកប្រើអ្នកគ្រប់គ្រង',
+        'manager_employee_num' => 'Manager Employee Number',
         'checkout_type' => 'ប្រភេទ Checkout',
         'checkout_location' => 'Checkout ទៅកាន់ទីតាំង',
         'image_filename' => 'ឈ្មោះឯកសាររូបភាព',
@@ -636,5 +639,25 @@ return [
             'error' => 'Could not seed manufacturers. A manufacturer record already exists and seeding would overwrite it.|Could not seed manufacturers. :count manufacturer records already exist and seeding would overwrite them.',
         ],
     ],
+
+    'file_upload_status' => [
+
+        'upload' => [
+            'success' => 'File successfully uploaded |:count files successfully uploaded',
+            'error' => 'File upload failed |:count file uploads failed',
+        ],
+
+        'delete' => [
+            'success' => 'File successfully deleted |:count files successfully deleted',
+            'error' => 'File deletion failed |:count file deletions failed',
+        ],
+
+        'file_not_found' => 'The selected file was not found on server',
+        'invalid_id' => 'That file ID is invalid',
+        'invalid_object' => 'That object ID is invalid',
+        'nofiles' => 'No files were included for upload',
+        'confirm_delete' => 'Are you sure you want to delete this file?',
+    ],
+
 
 ];

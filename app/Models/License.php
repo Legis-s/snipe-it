@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Helpers\Helper;
+use App\Models\Traits\HasUploads;
 use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
 use Carbon\Carbon;
@@ -21,6 +22,7 @@ class License extends Depreciable
 
     use SoftDeletes;
     use CompanyableTrait;
+    use HasUploads;
     use Loggable, Presentable;
     protected $injectUniqueIdentifier = true;
     use ValidatingTrait;
@@ -113,6 +115,7 @@ class License extends Depreciable
         'company'      => ['name'],
         'category'     => ['name'],
         'depreciation' => ['name'],
+        'supplier'     => ['name'],
     ];
     protected $appends = ['free_seat_count'];
 
@@ -411,21 +414,6 @@ class License extends Depreciable
             ->orderBy('created_at', 'desc');
     }
 
-    /**
-     * Establishes the license -> action logs -> uploads relationship
-     *
-     * @author A. Gianotto <snipe@snipe.net>
-     * @since [v2.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
-     */
-    public function uploads()
-    {
-        return $this->hasMany(\App\Models\Actionlog::class, 'item_id')
-            ->where('item_type', '=', self::class)
-            ->where('action_type', '=', 'uploaded')
-            ->whereNotNull('filename')
-            ->orderBy('created_at', 'desc');
-    }
 
 
     /**

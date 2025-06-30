@@ -251,7 +251,7 @@ return [
     'requested'				=> 'Ζητήθηκαν',
     'requested_date'        => 'Ημερομηνία Που Ζητήθηκε',
     'requested_assets'      => 'Ζητούμενα Περιουσιακά Στοιχεία',
-    'requested_assets_menu' => 'Ζητούμενα Περιουσιακά Στοιχεία',
+    'requested_assets_menu' => 'Requested Items',
     'request_canceled'      => 'Το αίτημα ακυρώθηκε',
     'request_item'          => 'Request this item',
     'external_link_tooltip' => 'External link to',
@@ -321,8 +321,10 @@ return [
     'unaccepted_asset_report' => 'Μη αποδεκτά πάγια',
     'users'                 => 'Χρήστες',
     'viewall'				=> 'Προβολή Όλων',
-    'viewassets'  			=> 'Προβολή των Assigned Assets',
-    'viewassetsfor'         => 'Προβολή παγίων για :name',
+    'viewassets'  			=> 'View Assigned Items',
+    'viewassetsfor'         => 'View Items for :name',
+    'view_user_assets'      => 'View Items Assigned to User',
+    'me'                    => 'Me',
     'website'               => 'Τοποθεσία web',
     'welcome'				=> 'Καλώς ήρθατε, %name',
     'years'					=> 'έτη',
@@ -512,6 +514,7 @@ return [
         'manager_last_name' => 'Επώνυμο Διαχειριστή',
         'manager_full_name' => 'Πλήρες Όνομα Διαχειριστή',
         'manager_username' => 'Όνομα Χρήστη Διαχειριστή',
+        'manager_employee_num' => 'Manager Employee Number',
         'checkout_type' => 'Τύπος Αγοράς',
         'checkout_location' => 'Αγορά σε τοποθεσία',
         'image_filename' => 'Όνομα Αρχείου Εικόνας',
@@ -636,5 +639,25 @@ return [
             'error' => 'Could not seed manufacturers. A manufacturer record already exists and seeding would overwrite it.|Could not seed manufacturers. :count manufacturer records already exist and seeding would overwrite them.',
         ],
     ],
+
+    'file_upload_status' => [
+
+        'upload' => [
+            'success' => 'File successfully uploaded |:count files successfully uploaded',
+            'error' => 'File upload failed |:count file uploads failed',
+        ],
+
+        'delete' => [
+            'success' => 'File successfully deleted |:count files successfully deleted',
+            'error' => 'File deletion failed |:count file deletions failed',
+        ],
+
+        'file_not_found' => 'The selected file was not found on server',
+        'invalid_id' => 'That file ID is invalid',
+        'invalid_object' => 'That object ID is invalid',
+        'nofiles' => 'No files were included for upload',
+        'confirm_delete' => 'Are you sure you want to delete this file?',
+    ],
+
 
 ];
