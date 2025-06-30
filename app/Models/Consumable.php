@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\MassOperation;
 use App\Helpers\Helper;
 use App\Models\Traits\Acceptable;
 use App\Models\Traits\HasUploads;
@@ -212,10 +211,6 @@ class Consumable extends SnipeModel
         return $this->belongsTo(Category::class, 'category_id');
     }
 
-    public function mass_operations()
-    {
-        return $this->belongsToMany(MassOperation::class);
-    }
 
     /**
      * Establishes the component -> action logs relationship
@@ -471,12 +466,20 @@ class Consumable extends SnipeModel
         return $query->leftJoin('users as users_sort', 'consumables.created_by', '=', 'users_sort.id')->select('consumables.*')->orderBy('users_sort.first_name', $order)->orderBy('users_sort.last_name', $order);
     }
 
+    public function mass_operations()
+    {
+        return $this->belongsToMany(\App\Models\MassOperation::class);
+    }
 
-//    public function contract()
-//    {
-//        return $this->belongsTo(\App\Models\Contract::class);
-//    }
+    public function contract()
+    {
+        return $this->belongsTo(\App\Models\Contract::class);
+    }
 
+    public function deal()
+    {
+        return $this->belongsTo(\App\Models\Deal::class);
+    }
 
     public function purchase()
     {
@@ -488,7 +491,6 @@ class Consumable extends SnipeModel
         return $this->belongsTo(\App\Models\AssetModel::class, 'model_id')->withTrashed();
     }
 
-
     public function locations()
     {
         return $this->belongsToMany(\App\Models\Location::class, 'consumables_locations', 'consumable_id', 'assigned_to')->withPivot('user_id')->withTrashed()->withTimestamps();
@@ -498,8 +500,6 @@ class Consumable extends SnipeModel
     {
         return $this->belongsToMany(\App\Models\Location::class, 'consumables_locations', 'consumable_id', 'assigned_to')->count();
     }
-
-
 
 
     /**

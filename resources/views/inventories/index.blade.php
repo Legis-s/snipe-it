@@ -21,21 +21,18 @@
                     <div class="col-md-12">
                         <div class="box-body">
                             <table
-                                    data-click-to-select="true"
                                     data-columns="{{ \App\Presenters\InventoryPresenter::dataTableLayout() }}"
                                     data-cookie-id-table="inventoriesListTable"
-                                    data-pagination="true"
                                     data-id-table="inventoriesListTable"
-                                    data-search="true"
                                     data-side-pagination="server"
-                                    data-show-columns="true"
-                                    data-show-export="true"
-                                    data-show-refresh="true"
                                     data-sort-order="desc"
-                                    data-toolbar="#toolbar"
                                     id="inventoriesListTable"
                                     class="table table-striped snipe-table"
-                                    data-url="{{ route('api.inventories.index') }}">
+                                    data-url="{{ route('api.inventories.index') }}"
+                                    data-export-options='{
+              "fileName": "export-inventories-{{ date('Y-m-d') }}",
+              "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
+              }'>
                             </table>
                         </div>
                     </div>
@@ -50,24 +47,24 @@
     @include ('partials.bootstrap-table')
 
     <script type="text/javascript">
-        $( document ).ready(function() {
-            console.log( "ready!" );
-            $( "#clear_all_null" ).on( "click", function() {
-                console.log( "clear_all_null!" );
+        $(document).ready(function () {
+            console.log("ready!");
+            $("#clear_all_null").on("click", function () {
+                console.log("clear_all_null!");
                 $.ajax({
                     type: 'POST',
-                    url:"{{ route('api.inventories.clearallemply') }}",
+                    url: "{{ route('api.inventories.clearallemply') }}",
                     headers: {
                         "X-Requested-With": 'XMLHttpRequest',
                         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
                     },
                     success: function (data) {
-                        console.log( "success!" );
-                        console.log( data );
+                        console.log("success!");
+                        console.log(data);
                         $("#inventoriesListTable").bootstrapTable('refresh');
                     },
                 });
-            } );
+            });
         });
     </script>
 @stop

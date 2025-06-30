@@ -8,8 +8,13 @@ use App\Http\Requests\StoreAssetModelRequest;
 use App\Http\Transformers\AssetModelsTransformer;
 use App\Http\Transformers\AssetsTransformer;
 use App\Http\Transformers\SelectlistTransformer;
+use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\AssetModel;
+use App\Models\Category;
+use App\Models\Consumable;
+use App\Models\ConsumableAssignment;
+use App\Models\Statuslabel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
@@ -328,7 +333,7 @@ class AssetModelsController extends Controller
         $asset = $assets[0];
         $purchase_cost = null;
 
-        $status_ok = Statuslabel::where('name', 'Доступные')->first();
+//        $status_ok = Statuslabel::where('name', 'Доступные')->first();
         $free_count = 0;
         $busy_count = 0;
         $free_id=[];
@@ -366,7 +371,7 @@ class AssetModelsController extends Controller
         $comment = "Свободные  [".implode(";",$free_id)."] Выданные [".implode(";",$busy_id)."]";
         $consumable->locations()->attach($consumable->id, [
             'consumable_id' => $consumable->id,
-            'user_id' => Auth::id(),
+            'created_by' => auth()->id(),
             'quantity' => $all_count,
             'comment' => $comment,
             'cost' => $consumable->purchase_cost,
@@ -380,12 +385,12 @@ class AssetModelsController extends Controller
             if ((empty($asset->assigned_to)) && (empty($asset->deleted_at)) &&
                 (($asset->assetstatus) && ($asset->assetstatus->deployable == 1))) {
                 $log = new Actionlog();
-                $log->user_id = Auth::id();
+                $log->created_by = auth()->id();
                 $log->action_type = 'converted';
-                $log->target_type = "App\Models\Consumable";
+                $log->target_type = \App\Models\Consumable::class;
                 $log->target_id = $consumable->id;
                 $log->item_id = $asset->id;
-                $log->item_type = "App\Models\Asset";
+                $log->item_type = \App\Models\Asset::class;
 //                $log->note = json_encode($request->all());
                 $log->save();
             }
@@ -393,7 +398,7 @@ class AssetModelsController extends Controller
             if (empty($asset->deleted_at) && isset($asset->assigned_to) && $asset->assetstatus->deployable == 1 ){
                 $consumable->locations()->attach($consumable->id, [
                     'consumable_id' => $consumable->id,
-                    'user_id' => Auth::id(),
+                    'created_by' => auth()->id(),
                     'quantity' => 1,
 //            'comment' => $comment,
                     'cost' => $consumable->purchase_cost,
@@ -402,12 +407,12 @@ class AssetModelsController extends Controller
                     'assigned_type' => $asset->assigned_type,
                 ]);
                 $log = new Actionlog();
-                $log->user_id = Auth::id();
+                $log->created_by = auth()->id();
                 $log->action_type = 'converted';
-                $log->target_type = "App\Models\Consumable";
+                $log->target_type = \App\Models\Consumable::class;
                 $log->target_id = $consumable->id;
                 $log->item_id = $asset->id;
-                $log->item_type = "App\Models\Asset";
+                $log->item_type = \App\Models\Asset::class;
 //                $log->note = json_encode($request->all());
                 $log->save();
             }

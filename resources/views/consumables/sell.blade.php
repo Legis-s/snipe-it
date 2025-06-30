@@ -36,7 +36,7 @@
                             </div>
                         @endif
 
-                        @include ('partials.forms.custom.contract-select', ['translated_name' => "Договор", 'fieldname' => 'assigned_contract','required'=>'true'])
+                            @include ('partials.forms.custom.deal-select', ['translated_name' => trans('general.deal'),  'fieldname' => 'assigned_deal','unselect' => 'true', 'required'=>'true'])
 
                         <!-- Purchase Cost -->
                         <div class="form-group {{ $errors->has('purchase_cost') ? ' has-error' : '' }}">

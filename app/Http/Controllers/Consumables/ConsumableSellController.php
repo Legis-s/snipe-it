@@ -2,21 +2,19 @@
 
 namespace App\Http\Controllers\Consumables;
 
-use App\Events\CheckoutableCheckedOut;
+
 use App\Events\CheckoutableSell;
 use App\Http\Controllers\CheckInOutRequest;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\AssetCheckoutRequest;
 use App\Http\Requests\AssetSellRequest;
 use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\Consumable;
 use App\Models\ConsumableAssignment;
-use App\Models\Contract;
-use App\Models\Location;
+use App\Models\Deal;
 use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Input;
 
 class ConsumableSellController extends Controller
@@ -26,12 +24,10 @@ class ConsumableSellController extends Controller
 
     /**
      * Return a view to sell a consumable.
-     * @see ConsumableSellController::store() method that stores the data.
      * @param int $id
-     * @return \Illuminate\Contracts\View\View
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @see ConsumableSellController::store() method that stores the data.
      */
-    public function create($id)
+    public function create($id): View|RedirectResponse
     {
 
         if ($consumable = Consumable::find($id)) {
@@ -42,7 +38,7 @@ class ConsumableSellController extends Controller
             if ($consumable->category) {
 
                 // Make sure there is at least one available to sell
-                if ($consumable->numRemaining() <= 0){
+                if ($consumable->numRemaining() <= 0) {
                     return redirect()->route('consumables.index')
                         ->with('error', trans('admin/consumables/message.checkout.unavailable'));
                 }
@@ -63,10 +59,10 @@ class ConsumableSellController extends Controller
 
     /**
      * Saves the checkout information
-     * @see ConsumableSellController::create() method that returns the form.
      * @param int $consumableId
      * @return \Illuminate\Http\RedirectResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @see ConsumableSellController::create() method that returns the form.
      */
     public function store(AssetSellRequest $request, $consumableId)
     {
@@ -80,27 +76,28 @@ class ConsumableSellController extends Controller
         if ($consumable->numRemaining() <= 0) {
             return redirect()->route('consumables.index')->with('error', trans('admin/consumables/message.checkout.unavailable'));
         }
-        $admin_user = Auth::user();
 
-        $target = Contract::findOrFail(request('assigned_contract'));
-        $quantity = e($request->input('quantity'));
-        $note = $request->input('note');
+        $target = Deal::findOrFail(request('assigned_deal'));
+
+        $quantity = $request->input('checkout_qty');
+        if (!isset($quantity) || !ctype_digit((string)$quantity) || $quantity <= 0) {
+            $quantity = 1;
+        }
 
         $consumable->locations()->attach($consumable->id, [
             'consumable_id' => $consumable->id,
-            'user_id' => $admin_user->id,
+            'created_by' => auth()->id(),
             'quantity' => $quantity,
-            'comment' => $note,
+            'comment' => $request->input('note'),
             'cost' => $consumable->purchase_cost,
             'type' => ConsumableAssignment::SOLD,
             'assigned_to' => $target->id,
             'assigned_type' => get_class($target),
-            'contract_id' => $target->id,
-//            'note' => $request->input('note'),
+            'deal_id' => $target->id,
         ]);
 
 
-        event(new CheckoutableSell($consumable, $target, Auth::user(),$note));
+        event(new CheckoutableSell($consumable, $target, auth()->user(), $request->input('note')));
 
         // Redirect to the new consumable page
         return redirect()->route('consumables.index')->with('success', trans('admin/consumables/message.checkout.success'));

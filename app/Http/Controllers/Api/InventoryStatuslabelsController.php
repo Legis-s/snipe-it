@@ -22,6 +22,7 @@ class InventoryStatuslabelsController extends Controller
             'name',
             'success',
             'created_at',
+            'created_by',
             'color'
         ];
 
@@ -30,6 +31,7 @@ class InventoryStatuslabelsController extends Controller
             'inventory_status_labels.name',
             'inventory_status_labels.success',
             'inventory_status_labels.color',
+            'inventory_status_labels.created_by',
             'inventory_status_labels.created_at',
             'inventory_status_labels.updated_at',
             'inventory_status_labels.notes',

@@ -16,22 +16,15 @@
                         <table
                                 data-columns="{{ \App\Presenters\DealPresenter::dataTableLayout() }}"
                                 data-cookie-id-table="dealsTable"
-                                data-pagination="true"
                                 data-id-table="dealsTable"
-                                data-search="true"
-                                data-toolbar="#toolbar"
-                                data-show-footer="true"
                                 data-side-pagination="server"
-                                data-show-columns="true"
-                                data-show-export="true"
-                                data-show-refresh="true"
                                 data-sort-order="asc"
                                 data-query-params="dealsQueryParams"
                                 id="dealsTable"
                                 class="table table-striped snipe-table"
                                 data-url="{{ route('api.deals.index') }}"
                                 data-export-options='{
-              "fileName": "export-deals-{{ date('Y-m-d') }}",
+              "fileName": "export-locations-{{ date('Y-m-d') }}",
               "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
               }'>
                         </table>

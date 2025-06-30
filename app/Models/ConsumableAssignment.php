@@ -19,13 +19,13 @@ class ConsumableAssignment extends Model
     protected $dates = [
         'created_at',
         'updated_at',
-        'deleted_at',
     ];
 
     const LOCATION = 'location';
     const ASSET = 'asset';
     const USER = 'user';
     const CONTRACT = 'contract';
+    const DEAL = 'deal';
 
     const PURCHASE = 'purchase';
     const ISSUED = 'issued';
@@ -44,10 +44,10 @@ class ConsumableAssignment extends Model
         'type',
         'comment',
         'assigned_type',
-        'user_id',
         'consumable_id',
         'assigned_to',
         'contract_id',
+        'deal_id',
         'cost',
     ];
 
@@ -65,9 +65,7 @@ class ConsumableAssignment extends Model
      * @var array
      */
     protected $searchableRelations = [
-//        'assigned_to'        => ['name'],
-//        'contract_id'        => ['name'],
-//        'user_id'            => ['name'],
+        'deal_id'            => ['name'],
     ];
 
     public function getDisplayNameAttribute()
@@ -104,7 +102,8 @@ class ConsumableAssignment extends Model
 
 
     public $rules = [
-        'assigned_to'        => 'required|exists:users,id',
+        'assigned_to'   => ['nullable', 'integer', 'required_with:assigned_type'],
+        'assigned_type' => ['nullable', 'required_with:assigned_to', 'in:'.User::class.",".Location::class.",".Asset::class.",".Deal::class],
     ];
 
     public function consumable()
@@ -141,13 +140,13 @@ class ConsumableAssignment extends Model
         }
         return false;
     }
-    public function availableForCloseDocuments()
-    {
-        if ($this->type==$this::SOLD && $this->assigned_type=='App\Models\User'){
-            return true;
-        }
-        return false;
-    }
+//    public function availableForCloseDocuments()
+//    {
+//        if ($this->type==$this::SOLD && $this->assigned_type=='App\Models\User'){
+//            return true;
+//        }
+//        return false;
+//    }
 
 
 
@@ -162,9 +161,7 @@ class ConsumableAssignment extends Model
     public function scopeAssignedSearch($query, $search)
     {
 
-        \Debugbar::info("test");
         $search = explode(' OR ', $search);
-        \Debugbar::info($search);
         return $query->leftJoin('users as cl_users', function ($leftJoin) {
             $leftJoin->on("cl_users.id", "=", "consumables_locations.assigned_to")
                 ->where("consumables_locations.assigned_type", "=", User::class);
@@ -207,6 +204,11 @@ class ConsumableAssignment extends Model
     public function contract()
     {
         return $this->belongsTo(\App\Models\Contract::class, 'contract_id');
+    }
+
+    public function deal()
+    {
+        return $this->belongsTo(\App\Models\Deal::class, 'deal_id');
     }
 
     public function mass_operations()

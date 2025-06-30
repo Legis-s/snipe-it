@@ -25,7 +25,7 @@ class PurchasesController extends Controller
     {
         $this->authorize('view', Purchase::class);
         $status = Statuslabel::where('name', 'Доступные')->first();
-        $purchases = Purchase::with('supplier', 'assets', 'invoice_type', 'legal_person', 'user', 'consumables')
+        $purchases = Purchase::with('supplier', 'assets', 'invoice_type', 'legal_person', 'adminuser', 'consumables')
             ->select([
                 'purchases.id',
                 'purchases.invoice_number',
@@ -38,9 +38,10 @@ class PurchasesController extends Controller
                 'purchases.invoice_type_id',
                 'purchases.comment',
                 'purchases.currency',
-                'purchases.user_id',
+                'purchases.created_by',
                 'purchases.user_verified_id',
                 'purchases.created_at',
+                'purchases.updated_at',
                 'purchases.deleted_at',
                 'purchases.bitrix_task_id',
                 'purchases.consumables_json',
@@ -57,8 +58,8 @@ class PurchasesController extends Controller
             $purchases = $purchases->TextSearch($request->input('search'));
 
         }
-        if ($request->filled('user_id')) {
-            $purchases->where('user_id', '=', $request->input('user_id'));
+        if ($request->filled('created_by')) {
+            $purchases->where('created_by', '=', $request->input('created_by'));
         }
         if ($request->filled('status')) {
             $purchases->where('status', '=', $request->input('status'));
@@ -117,7 +118,7 @@ class PurchasesController extends Controller
                 'purchases.invoice_type_id',
                 'purchases.comment',
                 'purchases.currency',
-                'purchases.user_id',
+                'purchases.created_by',
                 'purchases.user_verified_id',
                 'purchases.created_at',
                 'purchases.deleted_at',
@@ -304,7 +305,7 @@ class PurchasesController extends Controller
         $params = json_decode($file_data, true);
         /** @var \GuzzleHttp\Client $client */
         $client = new \GuzzleHttp\Client();
-        $user = Auth::user();
+        $user = auth::user();
         if ($user->bitrix_token && $user->bitrix_id) {
             $raw_bitrix_token = Crypt::decryptString($user->bitrix_token);
             $response = $client->request('POST', env('BITRIX_URL') . 'rest/' . $user->bitrix_id . '/' . $raw_bitrix_token . '/lists.element.add.json/', $params);

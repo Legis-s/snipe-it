@@ -19,17 +19,16 @@
                                 <table
                                         data-columns="{{ \App\Presenters\InventoryItemPresenter::dataTableLayout() }}"
                                         data-cookie-id-table="inventoryItemsTable"
-                                        data-pagination="true"
                                         data-id-table="inventoryItems"
-                                        data-search="true"
                                         data-side-pagination="server"
-                                        data-show-columns="true"
-                                        data-show-export="true"
-                                        data-show-refresh="true"
                                         data-sort-order="asc"
                                         id="inventoryItemsTable"
                                         class="table table-striped snipe-table"
-                                        data-url="{{route('api.inventory_items.index', ['inventory_id' => $inventory->id])}}">
+                                        data-url="{{route('api.inventory_items.index', ['inventory_id' => $inventory->id])}}"
+                                        data-export-options='{
+              "fileName": "export-inventory-items-{{ date('Y-m-d') }}",
+              "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
+              }'>
                                 </table>
                             </div><!-- /.table-responsive -->
                         </div>
@@ -53,15 +52,15 @@
                 </div>
             @endif
 
-                <div class="col-md-12" style="padding-bottom: 2px;">
-                    Всего активов: {{ $inventory->inventory_items_count() }}
-                </div>
-                <div class="col-md-12" style="padding-bottom: 2px;">
-                    Найдено активов: {{ $inventory->inventory_items_checked_count() }}
-                </div>
-                <div class="col-md-12" style="padding-bottom: 10px;">
-                    Успешно найдено активов: {{ $inventory->inventory_items_checked_success_count() }}
-                </div>
+            <div class="col-md-12" style="padding-bottom: 2px;">
+                Всего активов: {{ $inventory->inventory_items_count() }}
+            </div>
+            <div class="col-md-12" style="padding-bottom: 2px;">
+                Найдено активов: {{ $inventory->inventory_items_checked_count() }}
+            </div>
+            <div class="col-md-12" style="padding-bottom: 10px;">
+                Успешно найдено активов: {{ $inventory->inventory_items_checked_success_count() }}
+            </div>
             @if (($inventory->location))
                 <div class="col-md-12" style="padding-bottom: 10px;">
                     Объект: <a

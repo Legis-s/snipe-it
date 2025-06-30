@@ -27,22 +27,15 @@
           <table
                   data-columns="{{ \App\Presenters\ContractPresenter::dataTableLayout() }}"
                   data-cookie-id-table="contractTable"
-                  data-pagination="true"
                   data-id-table="contractTable"
-                  data-search="true"
-                  data-toolbar="#toolbar"
-                  data-show-footer="true"
                   data-side-pagination="server"
-                  data-show-columns="true"
-                  data-show-export="true"
-                  data-show-refresh="true"
                   data-sort-order="asc"
                   data-query-params="contractQueryParams"
                   id="contractTable"
                   class="table table-striped snipe-table"
                   data-url="{{ route('api.contracts.index') }}"
                   data-export-options='{
-              "fileName": "export-contracts-{{ date('Y-m-d') }}",
+              "fileName": "export-locations-{{ date('Y-m-d') }}",
               "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
               }'>
           </table>

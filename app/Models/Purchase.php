@@ -24,18 +24,26 @@ class Purchase extends SnipeModel
     const INVENTORY = 'inventory';
     const REJECTED = 'rejected';
 
-    protected $dates = ['deleted_at'];
     protected $table = 'purchases';
-    protected $rules = array(
+    protected $rules = [
         'invoice_number' => 'required|min:1|max:255',
         'final_price' => 'required',
-        'supplier_id' => 'required',
         'comment' => 'required',
-        'legal_person_id' => 'required',
-        'invoice_type_id' => 'required',
+        'supplier_id' => ['required', 'integer', 'exists:suppliers,id', 'not_array'],
+        'legal_person_id' => ['required', 'integer', 'exists:legal_persons,id', 'not_array'],
+        'invoice_type_id' => ['required', 'integer', 'exists:invoice_types,id', 'not_array'],
         'invoice_file' => 'required',
         'bitrix_id' => 'min:1|max:10|nullable'
-    );
+    ];
+
+    protected $casts = [
+        'supplier_id' => 'integer',
+        'legal_person_id' => 'integer',
+        'invoice_type_id' => 'integer',
+        'bitrix_id' => 'integer',
+    ];
+
+    protected $dates = ['deleted_at'];
 
     /**
      * Whether the model should inject it's identifier to the unique
@@ -68,7 +76,7 @@ class Purchase extends SnipeModel
         "assets_json",
         "consumables_json",
         "bitrix_send_json",
-        "user_id",
+        "created_by",
         "bitrix_result_at",
         "verified_at",
         "bitrix_task_id",
@@ -91,9 +99,7 @@ class Purchase extends SnipeModel
      * @var array
      */
     protected $searchableRelations = [
-        'user' => ['first_name', 'last_name'],
         'supplier' => ['name'],
-
     ];
 
 
@@ -131,9 +137,9 @@ class Purchase extends SnipeModel
         return false;
     }
 
-    public function user()
+    public function adminuser()
     {
-        return $this->belongsTo(\App\Models\User::class, 'user_id');
+        return $this->belongsTo(\App\Models\User::class, 'created_by');
     }
 
     public function user_verified()

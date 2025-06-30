@@ -222,7 +222,7 @@ class ContractsController extends Controller
         $target = $contract;
         $checkout_at = request('checkout_at', date('Y-m-d H:i:s'));
         foreach ($assets as &$asset) {
-            $asset->closeSell($target, Auth::user(), $checkout_at, null, null);
+            $asset->closeSell($target, auth()::user(), $checkout_at, null, null);
         }
         $user = Auth::user();
         $consumableAssignments = ConsumableAssignment::where("contract_id",$contract->id)->where("assigned_type", User::class)->get();
@@ -235,7 +235,7 @@ class ContractsController extends Controller
             $consumableAssignment->comment = $consumableAssignment->comment." Закрывающие документы получены ".date("Y-m-d H:i:s").", ".$user_name." Расходник списан с пользователя: ".$user_name_pre;
             if ($consumableAssignment->save()) {
                 $log = new Actionlog();
-                $log->user_id = \Illuminate\Support\Facades\Auth::id();
+                $log->created_by = auth()::id();
                 $log->action_type = 'sell';
                 $log->target_type = Contract::class;
                 $log->target_id = $contract->id;
@@ -243,7 +243,6 @@ class ContractsController extends Controller
                 $log->item_type = Consumable::class;
                 $log->save();
             }
-
         }
         return response()->json(Helper::formatStandardApiResponse('success', null, trans('admin/hardware/message.checkout.success')));
     }

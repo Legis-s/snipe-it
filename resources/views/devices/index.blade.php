@@ -2,8 +2,8 @@
 
 {{-- Page title --}}
 @section('title')
-{{ trans('general.devices') }}
-@parent
+    {{ trans('general.devices') }}
+    @parent
 @stop
 
 @section('header_right')
@@ -19,15 +19,8 @@
                         <table
                                 data-columns="{{ \App\Presenters\DevicePresenter::dataTableLayout() }}"
                                 data-cookie-id-table="devicesTable"
-                                data-pagination="true"
                                 data-id-table="devicesTable"
-                                data-search="true"
-                                data-show-footer="true"
                                 data-side-pagination="server"
-                                data-show-columns="true"
-                                data-show-fullscreen="true"
-                                data-show-export="true"
-                                data-show-refresh="true"
                                 data-sort-order="asc"
                                 id="devicesTable"
                                 class="table table-striped snipe-table"

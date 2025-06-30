@@ -938,7 +938,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
      **/
     public function purchases()
     {
-        return $this->hasMany(\App\Models\Purchase::class, 'user_id');
+        return $this->hasMany(\App\Models\Purchase::class, 'created_by');
     }
 
 

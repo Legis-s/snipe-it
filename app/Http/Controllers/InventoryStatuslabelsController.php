@@ -62,7 +62,7 @@ class InventoryStatuslabelsController extends Controller
 
         // Save the Statuslabel data
         $statusLabel->name =  $request->input('name');
-        $statusLabel->user_id = auth()->id();
+        $statusLabel->created_by = auth()->id();
         $statusLabel->notes =  $request->input('notes');
         $statusLabel->color =  $request->input('color');
         $statusLabel->success = $request->input('success', 0);
@@ -112,7 +112,7 @@ class InventoryStatuslabelsController extends Controller
 
         // Save the Statuslabel data
         $inventorystatuslabel->name =  $request->input('name');
-        $inventorystatuslabel->user_id = auth()->id();
+        $inventorystatuslabel->created_by = auth()->id();
         $inventorystatuslabel->notes =  $request->input('notes');
         $inventorystatuslabel->color =  $request->input('color');
         $inventorystatuslabel->success = $request->input('success', 0);

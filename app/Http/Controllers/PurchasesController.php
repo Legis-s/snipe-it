@@ -26,12 +26,12 @@ class PurchasesController extends Controller
     {
 
         $purchases_d = DB::table('purchases')
-            ->select('user_id')
+            ->select('created_by')
             ->distinct()
             ->get();
         $ids = [];
         foreach ($purchases_d as &$value) {
-            array_push($ids, $value->user_id);
+            array_push($ids, $value->created_by);
         }
 
         $purchases_s = DB::table('purchases')
@@ -135,7 +135,7 @@ class PurchasesController extends Controller
         $purchase->consumables_json = $consumables;
         $purchase->assets_json = $request->input('assets');
         $purchase->delivery_cost = $request->input('delivery_cost');
-        $purchase->user_id = Auth::id();
+        $purchase->created_by = auth()->id();
         $purchase->setStatusInprogress();
 
         $assets = json_decode($request->input('assets'), true);
@@ -179,7 +179,7 @@ class PurchasesController extends Controller
                         $asset->purchase_date = $dt->format('Y-m-d H:i:s');
                         $asset->supplier_id = $purchase->supplier_id;
                         $asset->purchase_id = $purchase->id;
-                        $asset->user_id = Auth::id();
+                        $asset->created_by = auth()->id();
                         $asset->location_id = $location_id;
 
 

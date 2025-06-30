@@ -125,6 +125,7 @@
           var typename = typename_lower.charAt(0).toUpperCase() + typename_lower.slice(1);
           return '<nobr><i class="fa ' + icon_style + ' text-' + text_color + '"></i> ' + typename + '</nobr>';
 
+
       }
   </script>
 @stop
