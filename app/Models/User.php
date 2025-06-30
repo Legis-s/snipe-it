@@ -482,7 +482,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
      **/
     public function favoriteLocation()
     {
-        return $this->belongsTo('\App\Models\Location', 'favorite_location_id')->withTrashed();
+        return $this->belongsTo(\App\Models\Location::class, 'favorite_location_id')->withTrashed();
     }
 
 
@@ -932,13 +932,13 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         return $query->leftJoin('companies as companies_user', 'users.company_id', '=', 'companies_user.id')->orderBy('companies_user.name', $order);
     }
 
-
     /**
      * Get any purchases the user manages.
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
      **/
     public function purchases()
     {
-        return $this->hasMany('\App\Models\Purchase', 'user_id');
+        return $this->hasMany(\App\Models\Purchase::class, 'user_id');
     }
 
 
@@ -947,11 +947,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
      */
     public function canImpersonate()
     {
-        if ($this->isSuperUser()){
-            return true;
-        }else{
-            return false;
-        }
+        return $this->isSuperUser();
     }
 
     public function preferredLocale()
