@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 
@@ -19,11 +20,12 @@ final class InventoryItem extends SnipeModel
     use Presentable;
     use SoftDeletes;
     use Searchable;
+
     protected $dates = ['deleted_at'];
     protected $rules = array(
-        'model'        => 'required',
-        'tag'        => 'required',
-        'category'        => 'required',
+        'model' => 'required',
+        'tag' => 'required',
+        'category' => 'required',
     );
     /**
      * Whether the model should inject it's identifier to the unique
@@ -87,19 +89,21 @@ final class InventoryItem extends SnipeModel
 
     public function photo_url()
     {
-        return '/uploads/inventory_items/'.$this->photo;
+        return '/uploads/inventory_items/' . $this->photo;
     }
+
     public function inventory()
     {
-        return $this->belongsTo('\App\Models\Inventory');
+        return $this->belongsTo(\App\Models\Inventory::class);
     }
 
     public function asset()
     {
-        return $this->belongsTo('\App\Models\Asset')->withTrashed();
+        return $this->belongsTo(\App\Models\Asset::class)->withTrashed();
     }
+
     public function status()
     {
-        return $this->belongsTo('\App\Models\InventoryStatuslabel');
+        return $this->belongsTo(\App\Models\InventoryStatuslabel::class);
     }
 }

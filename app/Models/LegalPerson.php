@@ -44,7 +44,7 @@ class LegalPerson extends SnipeModel
 
     public function purchases()
     {
-        return $this->hasMany('\App\Models\Purchase', 'legal_person_id');
+        return $this->hasMany(\App\Models\Purchase::class, 'legal_person_id');
     }
 
 }
