@@ -12,7 +12,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Transformers\PurchasesTransformer;
 use App\Helpers\Helper;
 use App\Models\Purchase;
-use Auth;
 use Illuminate\Database\Eloquent\Builder;
 use Crypt;
 

@@ -214,7 +214,7 @@ class PurchasesController extends Controller
             // Encode the image string data into base64
             $file_data_base64 = base64_encode($file_data);
 
-            $user = Auth::user();
+            $user = auth()->user();
 //            \Debugbar::info("send bitrix");
 //            \Debugbar::info($user);
 //            \Debugbar::info($user->bitrix_token);

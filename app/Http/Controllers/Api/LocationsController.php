@@ -382,7 +382,7 @@ class LocationsController extends Controller
         $request->headers->get('referer') === route('profile')
             ? $this->authorize('self.edit_location')
             : $this->authorize('view.selectlists');
-        $user = Auth::user();
+        $user = auth()->user();
         $favorite_location = $user->favoriteLocation;
         $locations = Location::select([
             'locations.id',

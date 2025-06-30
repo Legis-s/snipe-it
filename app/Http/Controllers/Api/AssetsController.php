@@ -1572,7 +1572,7 @@ class AssetsController extends Controller
             $asset->purchase_date =date('Y-m-d H:i:s');
             $asset->next_audit_date = $dt;
             $asset->last_audit_date = date('Y-m-d H:i:s');
-            $user = Auth::user();
+            $user = auth()->user();
             $asset->user_verified_id = $user->id;
             $status = Statuslabel::where('name', 'Доступные')->first();
             $asset->status_id = $status->id;

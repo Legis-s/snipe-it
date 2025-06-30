@@ -4,30 +4,22 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use http\Exception;
-use Illuminate\Foundation\Auth\ResetsPasswords;
 use Illuminate\Http\Request;
-use Auth;
-use Config;
-use Input;
+use Illuminate\Support\Facades\Log;
 use Laravel\Passport\TokenRepository;
-use Redirect;
-use Log;
-use DB;
-use View;
-use PragmaRX\Google2FA\Google2FA;
+
 
 class AuthController extends Controller
 {
 
-//
-//    /**
-//     * Create a new authentication controller instance.
-//     *
-//     * @return void
-//     */
+
+    /**
+     * Create a new authentication controller instance.
+     *
+     * @return void
+     */
     public function __construct(TokenRepository $tokenRepository)
     {
-//        $this->middleware('guest');
         $this->tokenRepository = $tokenRepository;
     }
 
@@ -36,7 +28,7 @@ class AuthController extends Controller
         if ($request->filled('username') && $request->filled('password')) {
             $login = $request->get('username');
             $password= $request->get('password');
-            if (Auth::validate(['username' => $login, 'password' => $password, 'activated' => 1])){
+            if (auth()->validate(['username' => $login, 'password' => $password, 'activated' => 1])){
 
                 try {
                     $user = User::where('username', '=', $login)->whereNull('deleted_at')->where('activated', '=', '1')->first();
@@ -64,7 +56,8 @@ class AuthController extends Controller
         }
     }
 
-    public function bitrixAuth(Request $request) {
+    public function bitrixAuth(Request $request)
+    {
         if ($request->filled('code')) {
             $code = $request->get('code');
             $client = new \GuzzleHttp\Client();
@@ -78,14 +71,12 @@ class AuthController extends Controller
             ];
             $response = $client->request('GET','https://oauth.bitrix.info/oauth/token/',$params);
             if ($response->getStatusCode() == 200){
-                \Debugbar::info($response->getBody());
                 $data = json_decode((string) $response->getBody(), true);
                 $bitrixId = $data["user_id"];
-                \Debugbar::info($bitrixId);
                 $user = User::where('bitrix_id', '=', $bitrixId)->whereNull('deleted_at')->where('activated', '=', '1')->first();
                 if(!is_null($user)) {
-                    Auth::login($user, 1);
-                    if ($user = Auth::user()) {
+                    auth()->login($user, 1);
+                    if ($user = auth()->user()) {
                         $user->last_login = \Carbon::now();
                         $user->activated = 1;
                         $user->save();

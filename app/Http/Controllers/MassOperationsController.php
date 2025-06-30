@@ -85,7 +85,7 @@ class MassOperationsController extends Controller
         $this->authorize('checkout', Asset::class);
 
         try {
-            $admin = Auth::user();
+            $admin = auth()->user();
 
             $target = $this->determineCheckoutTarget();
 
@@ -179,7 +179,7 @@ class MassOperationsController extends Controller
                 $mo = new MassOperation();
                 $mo->operation_type = 'checkout';
                 $mo->name = "Массовая выдача от " . date('d.m.Y');
-                $mo->user_id = Auth::id();
+                $mo->user_id = auth()->id();
                 $mo->assignedTo()->associate($target);
                 if ($bitrix_task_id > 0) {
                     $mo->bitrix_task_id = $bitrix_task_id;
@@ -237,7 +237,7 @@ class MassOperationsController extends Controller
         $this->authorize('checkout', Asset::class);
 
         try {
-            $admin = Auth::user();
+            $admin =auth()->user();
 
             $target = Deal::findOrFail(request('assigned_deal'));
 
@@ -311,7 +311,7 @@ class MassOperationsController extends Controller
                 $mo = new MassOperation();
                 $mo->operation_type = 'sell';
                 $mo->name = "Массовая продажа от " . date('d.m.Y');
-                $mo->user_id = Auth::id();
+                $mo->user_id = auth()->id();
                 $mo->assignedTo()->associate($target);
                 if ($bitrix_task_id > 0) {
                     $mo->bitrix_task_id = $bitrix_task_id;
@@ -366,7 +366,7 @@ class MassOperationsController extends Controller
     {
         $this->authorize('checkin', Asset::class);
         try {
-            $admin = Auth::user();
+            $admin = auth()->user();
 
             if (!is_array($request->get('selected_assets'))) {
                 return redirect()->route('bulk.checkout.show')->withInput()->with('error', trans('admin/hardware/message.checkout.no_assets_selected'));
@@ -450,7 +450,7 @@ class MassOperationsController extends Controller
             $mo = new MassOperation();
             $mo->operation_type = 'checkin';
             $mo->name = "Массовый возврат от " . date('d.m.Y');
-            $mo->user_id = Auth::id();
+            $mo->user_id = auth()->id();
             $mo->assignedTo()->associate($target);
             if ($bitrix_task_id > 0) {
                 $mo->bitrix_task_id = $bitrix_task_id;
