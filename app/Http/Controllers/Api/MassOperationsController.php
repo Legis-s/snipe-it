@@ -28,15 +28,15 @@ class MassOperationsController extends Controller
 
 
         $allowed_columns = [
-            'id', 'operation_type', 'name', 'user_id', 'contract_id', 'assigned_type', 'assigned_to', 'bitrix_task_id', 'note',
+            'id', 'operation_type', 'name', 'created_by', 'contract_id', 'assigned_type', 'assigned_to', 'bitrix_task_id', 'note',
             'created_at',  'assets_count', 'consumables_count' ];
 
 
-        $massOperations = MassOperation::with('assignedTo','assets','consumables')->select([
+        $massOperations = MassOperation::with('assignedTo','assets','consumables','adminuser')->select([
             'mass_operations.id',
             'mass_operations.operation_type',
             'mass_operations.name',
-            'mass_operations.user_id',
+            'mass_operations.created_by',
             'mass_operations.contract_id',
             'mass_operations.assigned_type',
             'mass_operations.assigned_to',

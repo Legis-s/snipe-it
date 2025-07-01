@@ -2,9 +2,6 @@
 
 namespace App\Presenters;
 
-use App\Helpers\Helper;
-use Illuminate\Support\Facades\Gate;
-
 /**
  * Class MassOperationsPresenter
  * @package App\Presenters
@@ -53,31 +50,39 @@ class MassOperationsPresenter extends Presenter
                 'formatter' => 'polymorphicItemFormatter',
             ],
             [
-                "field" => "assets_count",
-                "searchable" => false,
-                "sortable" => true,
-                "title" => trans('admin/massoperations/general.assets_count'),
-            ],
-            [
-                "field" => "consumables_count",
-                "searchable" => false,
-                "sortable" => true,
-                "title" => trans('admin/massoperations/general.consumables_count'),
-            ],[
-                'field' => 'user',
+                'field' => 'assets_count',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
-                'title' =>  "Созданно",
+                'title' => trans('admin/massoperations/general.assets_count'),
+                'titleTooltip' => trans('admin/massoperations/general.assets_count'),
+                'tooltip' => 'true',
                 'visible' => false,
-                'formatter' => 'usersLinkObjFormatter',
+                'class' => 'css-barcode',
             ],
             [
+                "field" => "consumables_count",
+                'searchable' => false,
+                'sortable' => true,
+                'switchable' => true,
+                'title' =>  trans('admin/massoperations/general.consumables_count'),
+                'titleTooltip' => trans('admin/massoperations/general.consumables_count'),
+                'tooltip' => 'true',
+                'visible' => false,
+                'class' => 'css-consumable',
+            ], [
                 "field" => "notes",
                 "searchable" => true,
                 "sortable" => false,
                 "visible" => true,
                 "title" => "Комментарий",
+            ], [
+                'field' => 'created_by',
+                'searchable' => false,
+                'sortable' => true,
+                'title' => trans('general.created_by'),
+                'visible' => false,
+                'formatter' => 'usersLinkObjFormatter',
             ], [
                 'field' => 'created_at',
                 'searchable' => false,
@@ -101,8 +106,6 @@ class MassOperationsPresenter extends Presenter
 
     public function actionType()
     {
-        return mb_strtolower(trans('general.'.str_replace(' ', '_', $this->operation_type)));
+        return mb_strtolower(trans('general.' . str_replace(' ', '_', $this->operation_type)));
     }
-
-
 }

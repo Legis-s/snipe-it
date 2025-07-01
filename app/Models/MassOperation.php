@@ -2,11 +2,10 @@
 
 namespace App\Models;
 
-use App\Models\Asset;
+
 use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class MassOperation extends SnipeModel
@@ -18,6 +17,7 @@ class MassOperation extends SnipeModel
     const CONTRACT = 'contract';
 
     use HasFactory;
+
     protected $presenter = \App\Presenters\MassOperationsPresenter::class;
     use Presentable;
     use SoftDeletes;
@@ -26,7 +26,7 @@ class MassOperation extends SnipeModel
     protected $rules = [
         'operation_type' => 'max:32',
         'name' => 'max:255|nullable',
-        'user_id' => 'integer',
+        'created_by' => 'integer',
         'contract_id' => 'integer',
         'assigned_type' => 'max:255|nullable',
         'assigned_to' => 'integer',
@@ -36,15 +36,13 @@ class MassOperation extends SnipeModel
         'updated_at' => 'date|max:10|min:10|nullable'
     ];
     protected $casts = [
-        'user_id'     => 'integer',
-        'contract_id'     => 'integer',
+        'contract_id' => 'integer',
     ];
 
 
     protected $fillable = [
         'operation_type',
         'name',
-        'user_id',
         'contract_id',
         'assigned_type',
         'assigned_to',
@@ -63,10 +61,6 @@ class MassOperation extends SnipeModel
 
 
     /**
-     * Get the target this asset is checked out to
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v4.0]
      * @return \Illuminate\Database\Eloquent\Relations\Relation
      */
     public function assignedTo()
@@ -75,13 +69,6 @@ class MassOperation extends SnipeModel
     }
 
     /**
-     * Determines whether the asset is checked out to a user
-     *
-     * Even though we allow allow for checkout to things beyond users
-     * this method is an easy way of seeing if we are checked out to a user.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v4.0]
      * @return bool
      */
     public function checkedOutToUser()
@@ -91,12 +78,8 @@ class MassOperation extends SnipeModel
 
     /**
      * Gets the lowercased name of the type of target the asset is assigned to
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v4.0]
-     * @return string
      */
-    public function assignedType()
+    public function assignedType(): string
     {
         return strtolower(class_basename($this->assigned_type));
     }
@@ -104,22 +87,22 @@ class MassOperation extends SnipeModel
 
     public function assets()
     {
-        return $this->belongsToMany(Asset::class);
+        return $this->belongsToMany(\App\Models\Asset::class);
     }
 
     public function consumables()
     {
-        return $this->belongsToMany(Consumable::class);
+        return $this->belongsToMany(\App\Models\Consumable::class);
     }
+
     public function consumables_assigments()
     {
-        return $this->belongsToMany(ConsumableAssignment::class,'cons_assignment_mass_operation');
+        return $this->belongsToMany(\App\Models\ConsumableAssignment::class, 'cons_assignment_mass_operation');
     }
 
-    public function user()
+    public function adminuser()
     {
-        return $this->belongsTo(\App\Models\User::class, 'user_id');
+        return $this->belongsTo(\App\Models\User::class, 'created_by');
     }
-
 
 }

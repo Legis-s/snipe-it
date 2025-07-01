@@ -57,7 +57,7 @@ class LocationPresenter extends Presenter
                 "searchable" => true,
                 "sortable" => true,
                 "title" => "Склад",
-                "visible" => true,
+                "visible" => false,
                 "formatter" => "trueFalseFormatter"
             ],[
                 "field" => "active",
