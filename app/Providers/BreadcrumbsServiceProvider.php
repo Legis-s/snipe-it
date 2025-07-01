@@ -687,18 +687,18 @@ class BreadcrumbsServiceProvider extends ServiceProvider
             ->push($contract->name, route('contracts.show', $contract))
         );
 
-        /**
-         * Mass operations Breadcrumbs
-         */
-        Breadcrumbs::for('bulk.index', fn (Trail $trail) =>
-        $trail->parent('home', route('home'))
-            ->push(trans('admin/massoperations/general.title'), route('bulk.index'))
-        );
-
-        Breadcrumbs::for('bulk.show', fn (Trail $trail, MassOperation $massoperation) =>
-        $trail->parent('bulk.index', route('bulk.index'))
-            ->push($massoperation->name, route('bulk.show', $massoperation))
-        );
+//        /**
+//         * Mass operations Breadcrumbs
+//         */
+//        Breadcrumbs::for('bulk.index', fn (Trail $trail) =>
+//        $trail->parent('home', route('home'))
+//            ->push(trans('admin/massoperations/general.title'), route('bulk.index'))
+//        );
+//
+//        Breadcrumbs::for('bulk.show', fn (Trail $trail, MassOperation $massoperation) =>
+//        $trail->parent('bulk.index', route('bulk.index'))
+//            ->push($massoperation->name, route('bulk.show', $massoperation))
+//        );
     }
 
 

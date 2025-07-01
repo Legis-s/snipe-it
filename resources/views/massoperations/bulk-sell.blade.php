@@ -9,48 +9,50 @@
 {{-- Page content --}}
 @section('content')
 
-    <style>
-        .input-group {
-            padding-left: 0px !important;
-        }
-    </style>
-
-
     <div class="row">
-        <!-- left column -->
         <div class="col-md-6">
             <div class="box box-default">
                 <div class="box-header with-border">
-                    <h2 class="box-title"> {{ trans('admin/hardware/form.tag') }} </h2>
+                    <h2 class="box-title">{{ trans('admin/hardware/form.tag') }} </h2>
                 </div>
                 <div class="box-body">
                     <form class="form-horizontal" method="post" action="" autocomplete="off">
                         {{ csrf_field() }}
 
-{{--                        @include ('partials.forms.custom.contract-select', ['translated_name' => trans('general.contract'),  'fieldname' => 'assigned_contract','unselect' => 'true', 'required'=>'true'])--}}
-
                         @include ('partials.forms.custom.deal-select', ['translated_name' => trans('general.deal'),  'fieldname' => 'assigned_deal','unselect' => 'true', 'required'=>'true'])
 
                         <!-- Checkout/Checkin Date -->
                         <div class="form-group {{ $errors->has('checkout_at') ? 'error' : '' }}">
-                            {{ Form::label('checkout_at', trans('admin/hardware/form.checkout_date'), array('class' => 'col-md-3 control-label')) }}
+                            <label for="checkout_at" class="col-md-3 control-label">
+                                {{ trans('admin/hardware/form.checkout_date') }}
+                            </label>
                             <div class="col-md-8">
-                                <div class="input-group date col-md-8" data-provide="datepicker" data-date-format="yyyy-mm-dd" data-date-end-date="0d" data-date-clear-btn="true">
-                                    <input type="text" class="form-control" placeholder="{{ trans('general.select_date') }}" name="checkout_at" id="checkout_at" value="{{ old('checkout_at') }}">
-                                    <span class="input-group-addon"><i class="fas fa-calendar" aria-hidden="true"></i></span>
-                                </div>
+
+                                <x-input.datepicker
+                                        name="checkout_at"
+                                        end_date="0d"
+                                        col_size_class="col-md-7"
+                                        :value="old('expected_checkin', date('Y-m-d'))"
+                                        placeholder="{{ trans('general.select_date') }}"
+                                        required="true"
+                                />
                                 {!! $errors->first('checkout_at', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                             </div>
                         </div>
 
                         <!-- Note -->
                         <div class="form-group {{ $errors->has('note') ? 'error' : '' }}">
-                            {{ Form::label('note', trans('admin/hardware/form.notes'), array('class' => 'col-md-3 control-label')) }}
+                            <label for="note" class="col-md-3 control-label">
+                                {{ trans('general.notes') }}
+                            </label>
+
                             <div class="col-md-8">
-                                <textarea class="col-md-6 form-control" id="note" name="note">{{ old('note') }}</textarea>
+                                <textarea class="col-md-6 form-control" id="note" @required($snipeSettings->require_checkinout_notes)
+                                name="note"></textarea>
                                 {!! $errors->first('note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                             </div>
                         </div>
+
                         @include ('partials.forms.custom.bitrix_id')
 
 
@@ -82,6 +84,9 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="table table-responsive">
+                                <div class="title">
+
+                                </div>
                                 <table
                                         data-advanced-search="true"
                                         data-click-to-select="true"
@@ -114,6 +119,7 @@
         </div>
     </div>
     <div class="row">
+        <div class="col-md-6"></div>
         <div class="col-md-6">
             <div class="box box-default">
                 <div class="box-header with-border">

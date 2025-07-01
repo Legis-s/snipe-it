@@ -460,13 +460,13 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                 </a>
                             </li>
                         @endcan
-                        @can('checkout', \App\Models\Asset::class)
-                                <li {!! (\Request::route()->getName()=='bulk*' ? ' class="active"' : '') !!}>
-                                    <a href="{{ route('bulk.index') }}">
-                                        <i class="fas fa-dolly fa-fw" aria-hidden="true"></i> <span>{{ trans('general.mass_operations') }}</span>
-                                    </a>
-                                </li>
-                        @endcan
+{{--                        @can('checkout', \App\Models\Asset::class)--}}
+{{--                                <li {!! (\Request::route()->getName()=='bulk*' ? ' class="active"' : '') !!}>--}}
+{{--                                    <a href="{{ route('bulk.index') }}">--}}
+{{--                                        <i class="fas fa-dolly fa-fw" aria-hidden="true"></i> <span>{{ trans('general.mass_operations') }}</span>--}}
+{{--                                    </a>--}}
+{{--                                </li>--}}
+{{--                        @endcan--}}
                         @can('index', \App\Models\Asset::class)
                             <li class="treeview{{ ((Request::is('statuslabels/*') || Request::is('hardware*')) ? ' active' : '') }}">
                                 <a href="#">
@@ -583,6 +583,11 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                         <li{!! (Request::is('hardware/bulkcheckout') ? ' class="active"' : '') !!}>
                                             <a href="{{ route('hardware.bulkcheckout.show') }}">
                                                 {{ trans('general.bulk_checkout') }}
+                                            </a>
+                                        </li>
+                                        <li{!! (Request::is('hardware/bulksell') ? ' class="active"' : '') !!}>
+                                            <a href="{{ route('hardware.bulksell.show') }}">
+                                                {{ trans('general.bulk_sell') }}
                                             </a>
                                         </li>
                                         <li{!! (Request::is('hardware/requested') ? ' class="active"' : '') !!}>

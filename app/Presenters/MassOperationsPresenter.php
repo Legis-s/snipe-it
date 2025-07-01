@@ -33,7 +33,8 @@ class MassOperationsPresenter extends Presenter
                 "field" => "bitrix_task_id",
                 "searchable" => true,
                 "sortable" => true,
-                "title" => "BitrixID",
+                "visible" => false,
+                "title" => "Bitrix ID",
             ],
             [
                 "field" => "action_type",
@@ -74,8 +75,8 @@ class MassOperationsPresenter extends Presenter
                 "field" => "notes",
                 "searchable" => true,
                 "sortable" => false,
-                "visible" => true,
-                "title" => "Комментарий",
+                "visible" => false,
+                'title' => trans('general.notes'),
             ], [
                 'field' => 'created_by',
                 'searchable' => false,

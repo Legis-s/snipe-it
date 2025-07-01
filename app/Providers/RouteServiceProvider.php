@@ -41,6 +41,7 @@ class RouteServiceProvider extends ServiceProvider
             'middleware' => 'web',
 //            'namespace' => $this->namespace, //okay, I don't know what this means, but somehow this might be a problem for us?
         ], function ($router) {
+            require base_path('routes/web/custom.php');
             require base_path('routes/web/hardware.php');
             require base_path('routes/web/models.php');
             require base_path('routes/web/accessories.php');
@@ -51,7 +52,6 @@ class RouteServiceProvider extends ServiceProvider
             require base_path('routes/web/components.php');
             require base_path('routes/web/users.php');
             require base_path('routes/web/kits.php');
-            require base_path('routes/web/custom.php');
             require base_path('routes/web.php');
         });
     }

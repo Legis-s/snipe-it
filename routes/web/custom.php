@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Assets\BulkSellAssetsController;
 use App\Models\Asset;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\InvoiceTypesController;
@@ -76,47 +77,47 @@ Route::group(['middleware' => 'auth'], function () {
     Route::resource('devices', DevicesController::class);
 
 
-    /**
-     * MassOperations
-     */
-    Route::group(
-        [
-            'prefix' => 'bulk',
-        ],
-
-        function () {
-            // Bulk sell
-            Route::get('sell',
-                [MassOperationsController::class, 'showSell']
-            )->name('bulk.sell.show');
-
-            Route::post('sell',
-                [MassOperationsController::class, 'storeSell']
-            )->name('bulk.sell.store');
-
-            // Bulk checkin
-            Route::get('checkin',
-                [MassOperationsController::class, 'showCheckin']
-            )->name('bulk.checkin.show');
-
-            Route::post('checkin',
-                [MassOperationsController::class, 'storeCheckin']
-            )->name('bulk.checkin.store');
-
-            // Bulk checkout
-            Route::get('checkout',
-                [MassOperationsController::class, 'showCheckout']
-            )->name('bulk.checkout.show');
-
-            Route::post('checkout',
-                [MassOperationsController::class, 'storeCheckout']
-            )->name('bulk.checkout.store');
-        }
-    );
-    /**
-     * bulk
-     */
-    Route::resource('bulk', MassOperationsController::class);
+//    /**
+//     * MassOperations
+//     */
+//    Route::group(
+//        [
+//            'prefix' => 'bulk',
+//        ],
+//
+//        function () {
+//            // Bulk sell
+//            Route::get('sell',
+//                [MassOperationsController::class, 'showSell']
+//            )->name('bulk.sell.show');
+//
+//            Route::post('sell',
+//                [MassOperationsController::class, 'storeSell']
+//            )->name('bulk.sell.store');
+//
+//            // Bulk checkin
+//            Route::get('checkin',
+//                [MassOperationsController::class, 'showCheckin']
+//            )->name('bulk.checkin.show');
+//
+//            Route::post('checkin',
+//                [MassOperationsController::class, 'storeCheckin']
+//            )->name('bulk.checkin.store');
+//
+//            // Bulk checkout
+//            Route::get('checkout',
+//                [MassOperationsController::class, 'showCheckout']
+//            )->name('bulk.checkout.show');
+//
+//            Route::post('checkout',
+//                [MassOperationsController::class, 'storeCheckout']
+//            )->name('bulk.checkout.store');
+//        }
+//    );
+//    /**
+//     * bulk
+//     */
+//    Route::resource('bulk', MassOperationsController::class);
 
 });
 
@@ -136,6 +137,19 @@ Route::group(
     ],
 
     function () {
+        // Bulk sell
+        Route::get('bulksell', [BulkSellAssetsController::class, 'showCheckout'])
+            ->name('hardware.bulksell.show')
+            ->breadcrumbs(fn (Trail $trail) =>
+            $trail->parent('hardware.index')
+                ->push(trans('general.bulk_sell'), route('hardware.index'))
+            );
+
+        Route::post('bulksell',
+            [BulkSellAssetsController::class, 'storeCheckout']
+        )->name('hardware.bulksell.store');
+
+
         //Sell
         Route::get('{asset}/sell', [AssetSellController::class, 'create'])
             ->name('hardware.sell.create')
@@ -157,26 +171,6 @@ Route::group(
         Route::post('{assetId}/rent',
             [AssetRentController::class, 'store']
         )->name('hardware.rent.store');
-
-
-//        // Bulk sell
-//        Route::get('bulksell',
-//            [BulkAssetsController::class, 'showSell']
-//        )->name('hardware.bulksell.show');
-//
-//        Route::post('bulksell',
-//            [BulkAssetsController::class, 'storeSell']
-//        )->name('hardware.bulksell.store');
-//
-//
-//        // Bulk checkin
-//        Route::get('bulkcheckin',
-//            [BulkAssetsController::class, 'showCheckin']
-//        )->name('hardware.bulkcheckin.show');
-//
-//        Route::post('bulkcheckin',
-//            [BulkAssetsController::class, 'storeCheckin']
-//        )->name('hardware.bulkcheckin.store');
 
     }
 );
