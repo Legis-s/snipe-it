@@ -659,5 +659,12 @@ return [
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
 
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
+
 
 ];

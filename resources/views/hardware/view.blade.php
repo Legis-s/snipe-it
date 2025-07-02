@@ -1049,9 +1049,7 @@
                                                 </strong>
                                             </div>
                                             <div class="col-md-9">
-                                                {{ $asset->warranty_months }}
-                                                {{ trans('admin/hardware/form.months') }}
-
+                                                {{ trans_choice('general.months_plural', $asset->warranty_months) }}
                                                 @if (($asset->model) && ($asset->model->manufacturer) && ($asset->model->manufacturer->warranty_lookup_url!=''))
                                                     <a href="{{ $asset->present()->dynamicUrl($asset->model->manufacturer->warranty_lookup_url) }}" target="_blank">
                                                         <x-icon type="external-link" />
@@ -1093,8 +1091,7 @@
                                             </div>
                                             <div class="col-md-9">
                                                 {{ $asset->depreciation->name }}
-                                                ({{ $asset->depreciation->months }}
-                                                {{ trans('admin/hardware/form.months') }})
+                                                ({{ trans_choice('general.months_plural', $asset->depreciation->months) }})
                                             </div>
                                         </div>
                                         <div class="row">
