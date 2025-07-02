@@ -2,22 +2,17 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Contract;
-use App\Models\CustomField;
 use App\Models\Deal;
 use App\Models\Supplier;
 use App\Models\LegalPerson;
 use App\Models\InvoiceType;
 use DateTime;
-use Exception;
 
 //use False\True;
 use Illuminate\Console\Command;
 use App\Models\Asset;
 use App\Models\Location;
 use App\Models\User;
-use Illuminate\Support\Facades\Storage;
-use stdClass;
 
 class SyncBitrix extends Command
 {
@@ -54,34 +49,24 @@ class SyncBitrix extends Command
     {
         $output['info'] = [];
         $output['warn'] = [];
-        $output['error'] = [];
-        $bitrix_url = env('BITRIX_URL') . "rest/" . env('BITRIX_USER') . "/" . env('BITRIX_KEY') . "/";
+
+        if (env('BITRIX_URL') !== null && env('BITRIX_USER') !== null && env('BITRIX_KEY') !== null) {
+            $bitrix_url = env('BITRIX_URL') . "rest/" . env('BITRIX_USER') . "/" . env('BITRIX_KEY') . "/";
+
+            /** @var \GuzzleHttp\Client $client */
+            $client = new \GuzzleHttp\Client();
+            $this->synh_users($client, $bitrix_url);
+            $this->synh_objects($client, $bitrix_url);
+            $this->synh_suppliers($client, $bitrix_url);
+            $this->synh_legals($client, $bitrix_url);
+            $this->synh_deals($client, $bitrix_url);
+            $this->synh_types($client, $bitrix_url);
+        } else {
+            $this->error('Required Bitrix environment variables are not set. Please check BITRIX_URL, BITRIX_USER and BITRIX_KEY.');
+            return 1;
+        }
 
 
-        /** @var \GuzzleHttp\Client $client */
-        $client = new \GuzzleHttp\Client();
-        $this->synh_users($client, $bitrix_url);
-        $this->synh_objects($client, $bitrix_url);
-        $this->synh_suppliers($client, $bitrix_url);
-        $this->synh_legals($client, $bitrix_url);
-        $this->synh_deals($client, $bitrix_url);
-        $this->synh_types($client, $bitrix_url);
-
-        if (($this->option('output') == 'all') || ($this->option('output') == 'info')) {
-            foreach ($output['info'] as $key => $output_text) {
-                $this->info($output_text);
-            }
-        }
-        if (($this->option('output') == 'all') || ($this->option('output') == 'warn')) {
-            foreach ($output['warn'] as $key => $output_text) {
-                $this->warn($output_text);
-            }
-        }
-        if (($this->option('output') == 'all') || ($this->option('output') == 'error')) {
-            foreach ($output['error'] as $key => $output_text) {
-                $this->error($output_text);
-            }
-        }
     }
 
 
