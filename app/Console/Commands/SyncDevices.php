@@ -278,6 +278,7 @@ class SyncDevices extends Command
                 $this->error('- MDM_URL is not set');
             }
             if ($mdm_user === null) {
+
                 $this->error('- MDM_USER is not set');
             }
             if ($mdm_password === null) {
