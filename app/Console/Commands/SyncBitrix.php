@@ -243,6 +243,7 @@ class SyncBitrix extends Command
             }
         }
 
+
         print("Синхронизировано " . $count . " объектов Битрикс\n");
 
     }
