@@ -69,7 +69,7 @@ return [
     'checkin_note'  		=> 'Заметка о возврате',
     'checkout_note'  		=> 'Заметка о выдаче',
     'checkout'  			=> 'Выдать',
-    'checkouts_count'       => 'Выдадвалось',
+    'checkouts_count'       => 'Выдавалось',
     'checkins_count'        => 'Возвращалось',
     'checkin_and_delete'  	=> 'Вернуть и удалить',
     'user_requests_count'   => 'Запросы',
