@@ -295,25 +295,40 @@
                                     @endif
                                 @endcan
                             @endif
-{{--                            @can('checkout', \App\Models\Asset::class)--}}
-
-{{--                                <div class="col-md-12">--}}
-{{--                                    <br><br>--}}
-{{--                                    @if ($purchase->status == "finished")--}}
-{{--                                        <a href="{{ route('bulk.checkout.show', ['purchase_bulk_id' => $purchase->id]) }}"--}}
-{{--                                           style="margin-bottom:10px; width:100%" class="btn btn-primary btn-sm">--}}
-{{--                                            {{ trans('admin/massoperations/general.checkout') }}--}}
-{{--                                        </a>--}}
-{{--                                        <a href="{{ route('bulk.sell.show', ['purchase_bulk_id' => $purchase->id]) }}"--}}
-{{--                                           style="margin-bottom:10px; width:100%" class="btn btn-primary btn-sm">--}}
-{{--                                            {{ trans('admin/massoperations/general.sell') }}--}}
-{{--                                        </a>--}}
-{{--                                    @endif--}}
-{{--                                </div>--}}
-
-{{--                            @endcan--}}
                         </div><!-- /.box-body -->
                     </div> <!--/.box-->
+                    @can('checkout', \App\Models\Asset::class)
+
+                        <div class="col-md-12 hidden-print" style="padding-top: 5px;">
+                            @if ($purchase->status == "finished")
+                                <a href="{{ route('hardware.bulkcheckout.show', ['purchase_id' => $purchase->id]) }}"
+                                   style="width:100%" class="btn btn-sm bg-maroon btn-social btn-block hidden-print">
+                                    <x-icon type="checkout" />
+                                    {{ trans('general.bulk_checkout') }} активов
+                                </a>
+                                <a href="{{ route('hardware.bulksell.show', ['purchase_id' => $purchase->id]) }}"
+                                   style="width:100%" class="btn btn-sm bg-maroon btn-social btn-block hidden-print">
+                                    <x-icon type="checkout" />
+                                    {{ trans('general.bulk_sell') }} активов
+                                </a>
+                            @endif
+                        </div>
+
+                        <div class="col-md-12 hidden-print" style="padding-top: 20px;">
+                            @if ($purchase->status == "finished")
+                                <a href="{{ route('hardware.bulkcheckout.show', ['purchase_id' => $purchase->id]) }}"
+                                   style="width:100%" class="btn btn-sm btn-primary btn-block btn-social hidden-print">
+                                    <x-icon type="checkout" />
+                                    {{ trans('general.bulk_checkout') }} расходников
+                                </a>
+                                <a href="{{ route('hardware.bulksell.show', ['purchase_id' => $purchase->id]) }}"
+                                   style="width:100%" class="btn btn-sm btn-primary btn-block btn-social hidden-print">
+                                    <x-icon type="checkout" />
+                                    {{ trans('general.bulk_sell') }} расходников
+                                </a>
+                            @endif
+                        </div>
+                    @endcan
                 </div>
             </div>
         </div>
