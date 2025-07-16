@@ -13,11 +13,12 @@ abstract class Continuous_Landscape_0_59in extends GenericTape
     protected float $minHeight = 1;
 
     /**
-     * @param float $length Length of the label in inches (default 2.36in which is 60mm)
-     * @param bool $continuous Whether the tape is continuous or pre-cut
-     * @param float $spacing Spacing between labels for non-continuous tapes (in inches)
+     * @param float $length     Length of the label in inches (default 2.36in which is 60mm)
+     * @param bool  $continuous Whether the tape is continuous or pre-cut
+     * @param float $spacing    Spacing between labels for non-continuous tapes (in inches)
      */
-    public function __construct($length = 0.6, $continuous = true, $spacing = 0.0) {
+    public function __construct($length = 0.6, $continuous = true, $spacing = 0.0)
+    {
         // Swap width and height for landscape orientation
         // The height becomes the width, and the length becomes the height
         parent::__construct($length, self::TAPE_WIDTH, $continuous, $spacing);
@@ -44,24 +45,27 @@ abstract class Continuous_Landscape_0_59in extends GenericTape
         $this->tagSize = $baseFontSize * 0.8;            // 80% of base font size
     }
     
-    public function getBarcodeRatio() {
+    public function getBarcodeRatio()
+    {
         return 1.0;  // Barcode should use 100% of available height
     }
     
     /**
      * Calculate the required length for the content
      *
-     * @param $record The record to calculate length for
+     * @param  $record The record to calculate length for
      * @return float The calculated length in inches
      */
-    protected function calculateRequiredLength($record) {
+    protected function calculateRequiredLength($record)
+    {
 
         // Calculate length needed for barcode and fields side by side
         $requiredLength = 0;
         
         // Add barcode length if present
-        if (($record->has('barcode2d') && $this->getSupport2DBarcode()) ||
-            ($record->has('barcode') && $this->getSupport1DBarcode())) {
+        if (($record->has('barcode2d') && $this->getSupport2DBarcode()) 
+            || ($record->has('barcode') && $this->getSupport1DBarcode())
+        ) {
             // Use full tape width for barcode size
             $barcodeSize = self::TAPE_WIDTH;
             $requiredLength += $barcodeSize + $this->barcodeMargin * 0.3; // Minimal margin
@@ -107,14 +111,15 @@ abstract class Continuous_Landscape_0_59in extends GenericTape
     /**
      * Calculate text width accurately using the PDF object
      *
-     * @param $pdf The PDF object
-     * @param string $text The text to measure
-     * @param string $font The font to use
-     * @param string $style The font style
-     * @param float $size The font size
+     * @param  $pdf   The PDF object
+     * @param  string $text  The text to measure
+     * @param  string $font  The font to use
+     * @param  string $style The font style
+     * @param  float  $size  The font size
      * @return float The calculated width
      */
-    protected function calculateTextWidth($pdf, $text, $font, $style, $size) {
+    protected function calculateTextWidth($pdf, $text, $font, $style, $size)
+    {
         $originalFont = $pdf->getFontFamily();
         $originalStyle = $pdf->getFontStyle();
         $originalSize = $pdf->getFontSizePt();
@@ -131,37 +136,40 @@ abstract class Continuous_Landscape_0_59in extends GenericTape
     /**
      * Override the writeAll method to support dynamic page sizes for continuous tapes
      */
-    public function writeAll($pdf, $data) {
+    public function writeAll($pdf, $data)
+    {
         // Use auto-sizing for continuous tapes, fixed height for die-cut tapes
         if ($this->continuous) {
-            $data->each(function ($record, $index) use ($pdf) {
-                // Calculate the required length by calling write with calculateOnly=true
-                $requiredLength = $this->write($pdf, $record);
+            $data->each(
+                function ($record, $index) use ($pdf) {
+                    // Calculate the required length by calling write with calculateOnly=true
+                    $requiredLength = $this->write($pdf, $record);
                 
-                // If write didn't return a length (old implementation), fall back to calculateRequiredLength
-                if ($requiredLength === null) {
-                    $requiredLength = $this->calculateRequiredLength($record);
+                    // If write didn't return a length (old implementation), fall back to calculateRequiredLength
+                    if ($requiredLength === null) {
+                        $requiredLength = $this->calculateRequiredLength($record);
+                    }
+                
+                    // Temporarily update the height property
+                    $originalHeight = $this->height;
+                    $this->height = self::TAPE_WIDTH; // Keep height fixed at tape width
+                
+                    // Add a new page with the calculated dimensions
+                    // Keep height fixed at TAPE_WIDTH, use calculated length for width
+                    $pdf->AddPage(
+                        $this->getOrientation(),
+                        [$requiredLength, self::TAPE_WIDTH],
+                        false, // Don't reset page number
+                        false  // Don't reset object ID
+                    );
+                
+                    // Write the content
+                    $this->write($pdf, $record);
+                
+                    // Restore the original height
+                    $this->height = $originalHeight;
                 }
-                
-                // Temporarily update the height property
-                $originalHeight = $this->height;
-                $this->height = self::TAPE_WIDTH; // Keep height fixed at tape width
-                
-                // Add a new page with the calculated dimensions
-                // Keep height fixed at TAPE_WIDTH, use calculated length for width
-                $pdf->AddPage(
-                    $this->getOrientation(),
-                    [$requiredLength, self::TAPE_WIDTH],
-                    false, // Don't reset page number
-                    false  // Don't reset object ID
-                );
-                
-                // Write the content
-                $this->write($pdf, $record);
-                
-                // Restore the original height
-                $this->height = $originalHeight;
-            });
+            );
         } else {
             // Use the default implementation for non-continuous (die-cut) tapes
             parent::writeAll($pdf, $data);

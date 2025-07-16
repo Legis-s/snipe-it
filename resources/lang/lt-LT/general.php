@@ -225,11 +225,13 @@ return [
     'order_number'          => 'Užsakymo numeris',
     'only_deleted'          => 'Tik panaikintas turtas',
     'page_menu'				=> 'Rodomi _MENU_ elementai',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> 'Rodomi nuo _START_ iki _END_ iš _TOTAL_ vienetų',
     'pending'				=> 'Ruošiamas',
     'people'				=> 'Žmonės',
     'per_page'				=> 'Rezultatų puslapyje',
     'previous'				=> 'Ankstesnis',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> 'Vykdoma',
     'profile'				=> 'Jūsų profilis',
     'purchase_cost'                              => 'Įsigijimo kaina',
@@ -311,7 +313,7 @@ return [
     'username'              => 'Naudotojo vardas',
     'update'                => 'Atnaujinti',
     'updating_item' => 'Atnaujinamas :item',
-    'upload_filetypes_help'      => 'Leidžiami failų tipai yra: png, gif, jpg, jpeg, doc, docx, pdf, xls, xlsx, txt, lic, xml, zip, rtf ir rar. Didžiausias leidžiamas įkeliamų failų dydis yra :size.',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => 'Įkelta',
     'user'					=> 'Naudotojas',
     'accepted'			    => 'priimta',
@@ -658,6 +660,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

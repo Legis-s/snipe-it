@@ -225,11 +225,13 @@ return [
     'order_number'          => 'შეკვეთის ნომერი',
     'only_deleted'          => 'მხოლოდ წაშლილი ინვენტარი',
     'page_menu'				=> '_MENU_ ერთეულის ჩვენება',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> 'ჩვენება _START_-დან _END_-მდე, სულ _TOTAL_ ერთეული',
     'pending'				=> 'მოლოდინში',
     'people'				=> 'თანამშრომლები',
     'per_page'				=> 'რაოდენობა ერთ გვერდზე',
     'previous'				=> 'წინა',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> 'მუშავდება',
     'profile'				=> 'პროფილი',
     'purchase_cost'                              => 'შესყიდვის ღირებულება',
@@ -311,7 +313,7 @@ return [
     'username'              => 'მომხმარებლის სახელი',
     'update'                => 'განახლება',
     'updating_item' => ':item განახლება',
-    'upload_filetypes_help'      => 'დაშვებული ფაილის ტიპებია: png, gif, jpg, jpeg, doc, docx, pdf, xls, xlsx, txt, lic, xml, zip, rtf და rar. მაქსიმალური დასაშვები ატვირთვის ზომაა: :size.',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => 'ატვირთულია',
     'user'					=> 'მომხმარებელი',
     'accepted'			    => 'დამტკიცებულია',
@@ -658,6 +660,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

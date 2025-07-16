@@ -225,11 +225,13 @@ return [
     'order_number'          => '採購單號',
     'only_deleted'          => '只有已刪除的資產',
     'page_menu'				=> '顯示選項',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> '顯示全部',
     'pending'				=> '待處理',
     'people'				=> '組織成員',
     'per_page'				=> '每頁搜尋結果',
     'previous'				=> '前一頁',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> '處理中',
     'profile'				=> '您的個人資料',
     'purchase_cost'                              => '採購成本',
@@ -311,7 +313,7 @@ return [
     'username'              => '使用者名稱',
     'update'                => '更新',
     'updating_item' => '正在更新 :item',
-    'upload_filetypes_help'      => '允許的檔案類別為 png, gif, jpg, jpeg, doc, docx, pdf, xls, xlsx, txt, lic, xml, zip, rtf 與 rar. 最大允許上傳的大小是 :size.',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => '已上傳',
     'user'					=> '使用者',
     'accepted'			    => '已接受',
@@ -658,6 +660,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

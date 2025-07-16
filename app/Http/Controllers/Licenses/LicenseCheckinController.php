@@ -98,14 +98,17 @@ class LicenseCheckinController extends Controller
         $licenseSeat->notes = $request->input('notes');
 
         session()->put(['redirect_option' => $request->get('redirect_option')]);
-
+        if ($request->get('redirect_option') === 'target'){
+            session()->put(['checkout_to_type' => 'user']);
+        }
 
         // Was the asset updated?
         if ($licenseSeat->save()) {
             event(new CheckoutableCheckedIn($licenseSeat, $return_to, auth()->user(), $request->input('notes')));
 
 
-            return redirect()->to(Helper::getRedirectOption($request, $license->id, 'Licenses'))->with('success', trans('admin/licenses/message.checkin.success'));
+            return Helper::getRedirectOption($request, $license->id, 'Licenses')
+                ->with('success', trans('admin/licenses/message.checkin.success'));
         }
 
         // Redirect to the license page with error

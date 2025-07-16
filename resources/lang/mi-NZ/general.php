@@ -225,11 +225,13 @@ return [
     'order_number'          => 'Tau Tau',
     'only_deleted'          => 'Only Deleted Assets',
     'page_menu'				=> 'Te whakaatu i nga mea _MENU_',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> 'Whakaatu _START_ ki _END_ o nga mea _TOTAL_',
     'pending'				=> 'Kei te tatari',
     'people'				=> 'Te iwi',
     'per_page'				=> 'Nga Hua Nga Whārangi',
     'previous'				=> 'Tuhinga o mua',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> 'Te tukatuka',
     'profile'				=> 'To tohu',
     'purchase_cost'                              => 'Utu Hokona',
@@ -311,7 +313,7 @@ return [
     'username'              => 'Ingoa Kaiwhakamahi',
     'update'                => 'Whakahou',
     'updating_item' => 'Updating :item',
-    'upload_filetypes_help'      => 'Allowed filetypes are png, gif, jpg, jpeg, doc, docx, pdf, xls, xlsx, txt, lic, xml, zip, rtf and rar. Max upload size allowed is :size.',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => 'Kua tukuna',
     'user'					=> 'Kaiwhakamahi',
     'accepted'			    => 'whakaaetia',
@@ -658,6 +660,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

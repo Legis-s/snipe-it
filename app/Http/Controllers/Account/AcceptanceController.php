@@ -21,6 +21,7 @@ use App\Models\License;
 use App\Models\Component;
 use App\Models\Consumable;
 use App\Notifications\AcceptanceAssetAcceptedNotification;
+use App\Notifications\AcceptanceAssetAcceptedToUserNotification;
 use App\Notifications\AcceptanceAssetDeclinedNotification;
 use Exception;
 use Illuminate\Http\Request;
@@ -151,6 +152,8 @@ class AcceptanceController extends Controller
                 }
             }
 
+
+            $assigned_user = User::find($acceptance->assigned_to_id);
             // this is horrible
             switch($acceptance->checkoutable_type){
                 case 'App\Models\Asset':
@@ -160,35 +163,30 @@ class AcceptanceController extends Controller
                             return redirect()->back()->with('error', trans('admin/models/message.does_not_exist'));
                         }
                         $display_model = $asset_model->name;
-                        $assigned_to = User::find($acceptance->assigned_to_id)->present()->fullName;
                 break;
 
                 case 'App\Models\Accessory':
                         $pdf_view_route ='account.accept.accept-accessory-eula';
                         $accessory = Accessory::find($item->id);
                         $display_model = $accessory->name;
-                        $assigned_to = User::find($acceptance->assigned_to_id)->present()->fullName;
                 break;
 
                 case 'App\Models\LicenseSeat':
                         $pdf_view_route ='account.accept.accept-license-eula';
                         $license = License::find($item->license_id);
                         $display_model = $license->name;
-                        $assigned_to = User::find($acceptance->assigned_to_id)->present()->fullName;
                 break;
 
                 case 'App\Models\Component':
                         $pdf_view_route ='account.accept.accept-component-eula';
                         $component = Component::find($item->id);
                         $display_model = $component->name;
-                        $assigned_to = User::find($acceptance->assigned_to_id)->present()->fullName;
                 break;
 
                 case 'App\Models\Consumable':
                         $pdf_view_route ='account.accept.accept-consumable-eula';
                         $consumable = Consumable::find($item->id);
                         $display_model = $consumable->name;
-                        $assigned_to = User::find($acceptance->assigned_to_id)->present()->fullName;
                 break;
             }
 //            if ($acceptance->checkoutable_type == 'App\Models\Asset') {
@@ -229,7 +227,7 @@ class AcceptanceController extends Controller
                 'note' => $request->input('note'),
                 'check_out_date' => Carbon::parse($acceptance->created_at)->format('Y-m-d'),
                 'accepted_date' => Carbon::parse($acceptance->accepted_at)->format('Y-m-d'),
-                'assigned_to' => $assigned_to,
+                'assigned_to' => $assigned_user->present()->fullName,
                 'company_name' => $branding_settings->site_name,
                 'signature' => ($sig_filename) ? storage_path() . '/private_uploads/signatures/' . $sig_filename : null,
                 'logo' => $path_logo,
@@ -243,6 +241,19 @@ class AcceptanceController extends Controller
             }
 
             $acceptance->accept($sig_filename, $item->getEula(), $pdf_filename, $request->input('note'));
+
+            // Send the PDF to the signing user
+            if (($request->input('send_copy') == '1') && ($assigned_user->email !='')) {
+
+                // Add the attachment for the signing user into the $data array
+                $data['file'] = $pdf_filename;
+
+                try {
+                    $assigned_user->notify(new AcceptanceAssetAcceptedToUserNotification($data));
+                } catch (\Exception $e) {
+                    Log::warning($e);
+                }
+            }
             try {
                 $acceptance->notify(new AcceptanceAssetAcceptedNotification($data));
             } catch (\Exception $e) {

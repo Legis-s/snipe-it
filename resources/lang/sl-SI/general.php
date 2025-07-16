@@ -226,11 +226,13 @@ return [
     'order_number'          => 'Številka naročila',
     'only_deleted'          => 'Only Deleted Assets',
     'page_menu'				=> 'Prikazuj elemente _MENU_',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> 'Prikazuje _START_ za _END_ _TOTAL_ elementov',
     'pending'				=> 'V teku',
     'people'				=> 'Osebe',
     'per_page'				=> 'Rezultatov na stran',
     'previous'				=> 'Prejšnja',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> 'Obdelovanje...',
     'profile'				=> 'Vaš profil',
     'purchase_cost'                              => 'Stroški nakupa',
@@ -312,7 +314,7 @@ return [
     'username'              => 'Uporabniško ime',
     'update'                => 'Posodobi',
     'updating_item' => 'Updating :item',
-    'upload_filetypes_help'      => 'Dovoljeni tipi datotek so png, gif, jpg, jpeg, doc, docx, pdf, xls, xlsx, txt, lic, xml, zip, rtf in rar. Dovoljena je največja velikost nalaganja :size.',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => 'Naloženo',
     'user'					=> 'Uporabnik',
     'accepted'			    => 'sprejeto',
@@ -659,6 +661,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

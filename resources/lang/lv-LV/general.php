@@ -225,11 +225,13 @@ return [
     'order_number'          => 'Pasūtījuma numurs',
     'only_deleted'          => 'Tikai Dzēsts Inventārs',
     'page_menu'				=> 'Rāda _MENU_ vienumus',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> 'Rāda _START_ līdz _END_ no _TOTAL_ vienumiem',
     'pending'				=> 'Gaida',
     'people'				=> 'Cilvēki',
     'per_page'				=> 'Rezultāti lapā',
     'previous'				=> 'Iepriekšējā',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> 'Apstrāde',
     'profile'				=> 'Tavs profils',
     'purchase_cost'                              => 'Iegādes izmaksas',
@@ -311,7 +313,7 @@ return [
     'username'              => 'Lietotājvārds',
     'update'                => 'Atjaunināt',
     'updating_item' => 'Updating :item',
-    'upload_filetypes_help'      => 'Atļautie failu veidi ir: png, gif, jpg, jpeg, doc, docx, pdf, xls, xlsx, txt, lic, xml, zip, rtf un rar. Maks. augšupielādes izmērs ir: :size.',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => 'Augšupielādēts',
     'user'					=> 'Lietotājs',
     'accepted'			    => 'pieņemts',
@@ -658,6 +660,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

@@ -225,11 +225,13 @@ return [
     'order_number'          => 'Číslo objednávky',
     'only_deleted'          => 'Iba odstránený majetok',
     'page_menu'				=> 'Zobrazené _MENU_ položky',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> 'Zobrazené _START_ do _END_ z _TOTAL_ položiek',
     'pending'				=> 'Čakajúce',
     'people'				=> 'Používatelia',
     'per_page'				=> 'Výsledkov na stránku',
     'previous'				=> 'Predchádzajúce',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> 'Spracovávam',
     'profile'				=> 'Váš profil',
     'purchase_cost'                              => 'Kúpna cena',
@@ -311,7 +313,7 @@ return [
     'username'              => 'Používateľské meno',
     'update'                => 'Aktualizovať',
     'updating_item' => 'Aktualizujem :item',
-    'upload_filetypes_help'      => 'Povolené typy súborov sú png, gif, jpg, jpeg, doc, docx, pdf, xls, xlsx, txt, lic, xml, zip, rtf and rar. Maximálna povolená veľkosť :size.',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => 'Odoslané',
     'user'					=> 'Používateľ',
     'accepted'			    => 'akceptované',
@@ -658,6 +660,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

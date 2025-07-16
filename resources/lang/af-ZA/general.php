@@ -225,11 +225,13 @@ return [
     'order_number'          => 'Bestellingnommer',
     'only_deleted'          => 'Only Deleted Assets',
     'page_menu'				=> 'Wys _MENU_ items',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> 'Wys _START_ tot _END_ van _TOTAL_ items',
     'pending'				=> 'hangende',
     'people'				=> 'mense',
     'per_page'				=> 'Resultate per bladsy',
     'previous'				=> 'vorige',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> 'verwerking',
     'profile'				=> 'Jou profiel',
     'purchase_cost'                              => 'Aankoopskoste',
@@ -311,7 +313,7 @@ return [
     'username'              => 'Gebruikersnaam',
     'update'                => 'Opdateer',
     'updating_item' => 'Updating :item',
-    'upload_filetypes_help'      => 'Allowed filetypes are png, gif, jpg, jpeg, doc, docx, pdf, xls, xlsx, txt, lic, xml, zip, rtf and rar. Max upload size allowed is :size.',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => 'opgelaai',
     'user'					=> 'gebruiker',
     'accepted'			    => 'aanvaarde',
@@ -658,6 +660,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

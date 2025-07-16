@@ -225,11 +225,13 @@ return [
     'order_number'          => '주문 번호',
     'only_deleted'          => 'Only Deleted Assets',
     'page_menu'				=> 'Showing _MENU_ items',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> 'Showing _START_ to _END_ of _TOTAL_ items',
     'pending'				=> '대기중',
     'people'				=> '사용자',
     'per_page'				=> '페이지 당 결과',
     'previous'				=> '이전',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> '처리중',
     'profile'				=> '프로필',
     'purchase_cost'                              => '구매 원가',
@@ -311,7 +313,7 @@ return [
     'username'              => '사용자명',
     'update'                => '갱신',
     'updating_item' => 'Updating :item',
-    'upload_filetypes_help'      => '허용된 파일 형식은 png, gif, jpg, jpeg, doc, docx, pdf, xls, txt, lic, zip, rar 입니다. 최대 업로드 크기는 :size 입니다.',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => '업로드됨',
     'user'					=> '사용자',
     'accepted'			    => '승인됨',
@@ -658,6 +660,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

@@ -4,19 +4,42 @@ namespace App\Models\Labels\Tapes\Generic;
 
 class Continuous_Landscape_0_59in_A extends Continuous_Landscape_0_59in
 {
-    public function getUnit() { return 'in'; }
-    public function getSupportAssetTag() { return false; }
-    public function getSupport1DBarcode() { return true; }
-    public function getSupport2DBarcode() { return true; }
-    public function getSupportFields() { return 2; }
-    public function getSupportLogo() { return false; }
-    public function getSupportTitle() { return false; }
+    public function getUnit()
+    {
+        return 'in'; 
+    }
+    public function getSupportAssetTag()
+    {
+        return false; 
+    }
+    public function getSupport1DBarcode()
+    {
+        return true; 
+    }
+    public function getSupport2DBarcode()
+    {
+        return true; 
+    }
+    public function getSupportFields()
+    {
+        return 2; 
+    }
+    public function getSupportLogo()
+    {
+        return false; 
+    }
+    public function getSupportTitle()
+    {
+        return false; 
+    }
 
-    public function preparePDF($pdf) {
+    public function preparePDF($pdf)
+    {
         $pdf->SetAutoPageBreak(false);
     }
 
-    public function write($pdf, $record, $calculateOnly = false) {
+    public function write($pdf, $record, $calculateOnly = false)
+    {
         $pa = $this->getPrintableArea();
         
         $currentX = $pa->x1;

@@ -31,7 +31,7 @@ class UploadFileRequest extends Request
         $max_file_size = Helper::file_upload_max_size();
 
         return [
-            'file.*' => 'required|mimes:png,gif,jpg,svg,jpeg,doc,docx,pdf,txt,zip,rar,xls,xlsx,lic,xml,rtf,json,webp,avif|max:'.$max_file_size,
+            'file.*' => 'required|mimes:'.config('filesystems.allowed_upload_extensions_for_validator').'|max:'.$max_file_size,
         ];
     }
 

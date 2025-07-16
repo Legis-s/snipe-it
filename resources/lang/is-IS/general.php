@@ -225,11 +225,13 @@ return [
     'order_number'          => 'Reikningsnúmer',
     'only_deleted'          => 'Aðeins eyddar eignir',
     'page_menu'				=> 'Sýni _MENU_ atriði',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> 'Sýni atriði _START_ til _END_ af alls _TOTAL_ atriðum',
     'pending'				=> 'Á bið',
     'people'				=> 'Fólk',
     'per_page'				=> 'Niðurstöður á síðu',
     'previous'				=> 'Fyrri',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> 'Vinnsla',
     'profile'				=> 'Þinn prófíll',
     'purchase_cost'                              => 'Innkaupsverð',
@@ -311,7 +313,7 @@ return [
     'username'              => 'Notendanafn',
     'update'                => 'Uppfæra',
     'updating_item' => 'Updating :item',
-    'upload_filetypes_help'      => 'Allowed filetypes are png, gif, jpg, jpeg, doc, docx, pdf, xls, xlsx, txt, lic, xml, zip, rtf and rar. Max upload size allowed is :size.',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => 'Uploaded',
     'user'					=> 'Notandi',
     'accepted'			    => 'samþykkt',
@@ -658,6 +660,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

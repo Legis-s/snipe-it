@@ -225,11 +225,13 @@ return [
     'order_number'          => 'Nombor Pesanan',
     'only_deleted'          => 'Only Deleted Assets',
     'page_menu'				=> 'Menunjukkan _MENU_ item',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> 'Menunjukkan _START_ ke _END_ dari _TOTAL_ item',
     'pending'				=> 'Belum selesai',
     'people'				=> 'Orang',
     'per_page'				=> 'Senarai Setiap Mukasurat',
     'previous'				=> 'Sebelum ini',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> 'Pemprosesan',
     'profile'				=> 'Profail Anda',
     'purchase_cost'                              => 'Kos Pembelian',
@@ -311,7 +313,7 @@ return [
     'username'              => 'Nama Pengguna',
     'update'                => 'Kemas kini',
     'updating_item' => 'Updating :item',
-    'upload_filetypes_help'      => 'Allowed filetypes are png, gif, jpg, jpeg, doc, docx, pdf, xls, xlsx, txt, lic, xml, zip, rtf and rar. Max upload size allowed is :size.',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => 'Dimuat naik',
     'user'					=> 'Pengguna',
     'accepted'			    => 'diterima',
@@ -658,6 +660,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

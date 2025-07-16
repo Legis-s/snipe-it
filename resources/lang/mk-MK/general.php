@@ -225,11 +225,13 @@ return [
     'order_number'          => 'Број на нарачка',
     'only_deleted'          => 'Само избришани средства',
     'page_menu'				=> 'Прикажани се _MENU_ ставки',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> 'Прикажани се _START_ до _END_ од _TOTAL_ ставки',
     'pending'				=> 'Во чекање',
     'people'				=> 'Луѓе',
     'per_page'				=> 'Резултати по страница',
     'previous'				=> 'Претходна',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> 'Процесирање',
     'profile'				=> 'Ваш профил',
     'purchase_cost'                              => 'Набавна цена',
@@ -311,7 +313,7 @@ return [
     'username'              => 'Корисничко име',
     'update'                => 'Ажурирање',
     'updating_item' => 'Updating :item',
-    'upload_filetypes_help'      => 'Дозволени типови на датотеки се png, gif, jpg, jpeg, doc, docx, pdf, xls, xlsx, txt, lic, xml, zip, rtf and rar. Максимална дозволена големина е :size.',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => 'Прикачено',
     'user'					=> 'Корисник',
     'accepted'			    => 'прифатен',
@@ -658,6 +660,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

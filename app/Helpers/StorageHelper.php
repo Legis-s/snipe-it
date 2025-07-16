@@ -41,15 +41,21 @@ class StorageHelper
     {
 
         $allowed_inline = [
-            'pdf',
-            'svg',
-            'jpg',
-            'gif',
-            'svg',
             'avif',
-            'webp',
-            'png',
             'gif',
+            'gif',
+            'jpg',
+            'mov',
+            'mp3',
+            'mp4',
+            'ogg',
+            'pdf',
+            'png',
+            'svg',
+            'svg',
+            'wav',
+            'webm',
+            'webp',
         ];
 
 

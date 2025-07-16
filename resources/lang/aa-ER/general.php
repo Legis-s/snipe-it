@@ -225,11 +225,13 @@ return [
     'order_number'          => 'crwdns1829:0crwdne1829:0',
     'only_deleted'          => 'crwdns10520:0crwdne10520:0',
     'page_menu'				=> 'crwdns1276:0crwdne1276:0',
+    'page_error'            => 'crwdns13474:0crwdne13474:0',
     'pagination_info'		=> 'crwdns1277:0crwdne1277:0',
     'pending'				=> 'crwdns1077:0crwdne1077:0',
     'people'				=> 'crwdns1078:0crwdne1078:0',
     'per_page'				=> 'crwdns1079:0crwdne1079:0',
     'previous'				=> 'crwdns1278:0crwdne1278:0',
+    'previous_page'			=> 'crwdns13476:0crwdne13476:0',
     'processing'			=> 'crwdns1279:0crwdne1279:0',
     'profile'				=> 'crwdns1080:0crwdne1080:0',
     'purchase_cost'                              => 'crwdns1830:0crwdne1830:0',
@@ -311,7 +313,7 @@ return [
     'username'              => 'crwdns10464:0crwdne10464:0',
     'update'                => 'crwdns1341:0crwdne1341:0',
     'updating_item' => 'crwdns12804:0crwdne12804:0',
-    'upload_filetypes_help'      => 'crwdns5980:0crwdne5980:0',
+    'upload_filetypes_help' => 'crwdns13472:0crwdne13472:0',
     'uploaded'              => 'crwdns1289:0crwdne1289:0',
     'user'					=> 'crwdns1095:0crwdne1095:0',
     'accepted'			    => 'crwdns1342:0crwdne1342:0',
@@ -657,6 +659,13 @@ return [
         'nofiles' => 'crwdns13460:0crwdne13460:0',
         'confirm_delete' => 'crwdns13462:0crwdne13462:0',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'crwdns13466:0crwdne13466:0',
+        'percent' => 'crwdns13468:0crwdne13468:0',
+    ],
+
+    'months_plural' => 'crwdns13470:0crwdne13470:0',
 
 
 ];

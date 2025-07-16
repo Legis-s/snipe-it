@@ -5,23 +5,47 @@ namespace App\Models\Labels\Tapes\Generic;
 class Tape_53mm_A extends Tape_53mm
 {
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct(40.0, true, 0.0);
     }
     
-    public function getUnit() { return 'mm'; }
-    public function getSupportAssetTag() { return false; }
-    public function getSupport1DBarcode() { return false; }
-    public function getSupport2DBarcode() { return true; }
-    public function getSupportFields() { return 5; }
-    public function getSupportLogo() { return false; }
-    public function getSupportTitle() { return true; }
+    public function getUnit()
+    {
+        return 'mm'; 
+    }
+    public function getSupportAssetTag()
+    {
+        return false; 
+    }
+    public function getSupport1DBarcode()
+    {
+        return false; 
+    }
+    public function getSupport2DBarcode()
+    {
+        return true; 
+    }
+    public function getSupportFields()
+    {
+        return 5; 
+    }
+    public function getSupportLogo()
+    {
+        return false; 
+    }
+    public function getSupportTitle()
+    {
+        return true; 
+    }
     
-    public function preparePDF($pdf) {
+    public function preparePDF($pdf)
+    {
         $pdf->SetAutoPageBreak(false);
     }
     
-    public function write($pdf, $record) {
+    public function write($pdf, $record)
+    {
         $pa = $this->getPrintableArea();
         
         $currentX = $pa->x1;

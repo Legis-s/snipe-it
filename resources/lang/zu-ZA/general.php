@@ -225,11 +225,13 @@ return [
     'order_number'          => 'Inombolo Ye-oda',
     'only_deleted'          => 'Only Deleted Assets',
     'page_menu'				=> 'Ibonisa izinto ezingu-_MENU_',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> 'Ibonisa _START_ kuya _END_ kwezinto ezingu-_TOTAL_',
     'pending'				=> 'Kulindile',
     'people'				=> 'Abantu',
     'per_page'				=> 'Imiphumela Ngayo Ikhasi',
     'previous'				=> 'Ngaphambilini',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> 'Iyacubungula',
     'profile'				=> 'Iphrofayela yakho',
     'purchase_cost'                              => 'Izindleko zokuthenga',
@@ -311,7 +313,7 @@ return [
     'username'              => 'Igama lomsebenzisi',
     'update'                => 'Ukubuyekeza',
     'updating_item' => 'Updating :item',
-    'upload_filetypes_help'      => 'Allowed filetypes are png, gif, jpg, jpeg, doc, docx, pdf, xls, xlsx, txt, lic, xml, zip, rtf and rar. Max upload size allowed is :size.',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => 'Ilayishiwe',
     'user'					=> 'Umsebenzisi',
     'accepted'			    => 'yamukelwe',
@@ -658,6 +660,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

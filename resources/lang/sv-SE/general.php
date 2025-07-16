@@ -225,11 +225,13 @@ return [
     'order_number'          => 'Ordernummer',
     'only_deleted'          => 'Endast borttagna tillgångar',
     'page_menu'				=> 'Visar _MENU_ objekt',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> 'Visar _START_ till _END_ av _TOTAL_ objekt',
     'pending'				=> 'Väntande',
     'people'				=> 'Användare',
     'per_page'				=> 'Resultat per sida',
     'previous'				=> 'Föregående',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> 'Bearbetar',
     'profile'				=> 'Din profil',
     'purchase_cost'                              => 'Inköpspris',
@@ -311,7 +313,7 @@ return [
     'username'              => 'Användarnamn',
     'update'                => 'Uppdatera',
     'updating_item' => 'Uppdaterar :item',
-    'upload_filetypes_help'      => 'Tillåtna filtyper är png, gif, jpg, jpeg, doc, docx, pdf, xls, txt, lic, zip och rar. Max tillåten uppladdningsstorlek är: storlek.',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => 'Uppladdad',
     'user'					=> 'Användare',
     'accepted'			    => 'accepterad',
@@ -658,6 +660,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

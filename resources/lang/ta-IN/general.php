@@ -225,11 +225,13 @@ return [
     'order_number'          => 'ஆர்டர் எண்',
     'only_deleted'          => 'Only Deleted Assets',
     'page_menu'				=> '_MENU_ உருப்படிகளைக் காண்பிக்கிறது',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> '_TOTAL_ உருப்படிகளின் ____END_ காண்பிக்கிறது',
     'pending'				=> 'நிலுவையில்',
     'people'				=> 'மக்கள்',
     'per_page'				=> 'பக்கம் ஒன்றுக்கு முடிவு',
     'previous'				=> 'முந்தைய',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> 'செயலாக்க',
     'profile'				=> 'உங்கள் சுயவிவரம்',
     'purchase_cost'                              => 'கொள்முதல் செலவு',
@@ -311,7 +313,7 @@ return [
     'username'              => 'பயனர்பெயர்',
     'update'                => 'புதுப்பிக்கப்பட்டது',
     'updating_item' => 'Updating :item',
-    'upload_filetypes_help'      => 'Allowed filetypes are png, gif, jpg, jpeg, doc, docx, pdf, xls, xlsx, txt, lic, xml, zip, rtf and rar. Max upload size allowed is :size.',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => 'Uploaded',
     'user'					=> 'பயனர்',
     'accepted'			    => 'ஏற்றுக்கொள்ளப்பட்ட',
@@ -658,6 +660,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

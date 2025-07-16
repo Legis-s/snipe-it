@@ -225,11 +225,13 @@ return [
     'order_number'          => 'Захиалгын дугаар',
     'only_deleted'          => 'Only Deleted Assets',
     'page_menu'				=> '_MENU_ зүйлсийг харуулж байна',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> '_TOTAL_ зүйлсийн _START_-ээс харна уу',
     'pending'				=> 'Хүлээгдэж байна',
     'people'				=> 'Хүмүүс',
     'per_page'				=> 'Нэг хуудасны үр дүн',
     'previous'				=> 'Өмнөх',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> 'Боловсруулалт',
     'profile'				=> 'Таны профайл',
     'purchase_cost'                              => 'Худалдан авах зардал',
@@ -311,7 +313,7 @@ return [
     'username'              => 'Нэвтрэх нэр',
     'update'                => 'Шинэчлэх',
     'updating_item' => 'Updating :item',
-    'upload_filetypes_help'      => 'Allowed filetypes are png, gif, jpg, jpeg, doc, docx, pdf, xls, xlsx, txt, lic, xml, zip, rtf and rar. Max upload size allowed is :size.',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => 'Байршуулсан байна',
     'user'					=> 'Хэрэглэгч',
     'accepted'			    => 'хүлээн зөвшөөрсөн',
@@ -658,6 +660,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

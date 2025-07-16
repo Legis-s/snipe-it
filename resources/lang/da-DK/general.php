@@ -225,11 +225,13 @@ return [
     'order_number'          => 'Ordrenummer',
     'only_deleted'          => 'Kun slettede aktiver',
     'page_menu'				=> 'Viser _MENU_ emner',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> 'Viser _START_ til _END_ af _TOTAL_ emner',
     'pending'				=> 'Afventer',
     'people'				=> 'Personer',
     'per_page'				=> 'Resultater Per Side',
     'previous'				=> 'Forrige',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> 'Behandler',
     'profile'				=> 'Din profil',
     'purchase_cost'                              => 'Købsomkostninger',
@@ -311,7 +313,7 @@ return [
     'username'              => 'Brugernavn',
     'update'                => 'Opdatering',
     'updating_item' => 'Updating :item',
-    'upload_filetypes_help'      => 'Tilladte filtyper er png, gif, jpg, jpeg, doc, docx, pdf, xls, txt, lic, zip, og rar. Maksimalt tilladte uploadstørrelse er :size.',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => 'uploaded',
     'user'					=> 'Bruger',
     'accepted'			    => 'accepteret',
@@ -658,6 +660,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

@@ -225,11 +225,13 @@ return [
     'order_number'          => 'Rendelésszám',
     'only_deleted'          => 'Csak törölt eszközök',
     'page_menu'				=> '_MENU_ elemet megjelenítve',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> '_START_ to _END_ of _TOTAL_ elemet megjelenítve',
     'pending'				=> 'Függőben',
     'people'				=> 'Személyek',
     'per_page'				=> 'Eredmény/Oldal',
     'previous'				=> 'Korábbi',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> 'Feldolgozás alatt',
     'profile'				=> 'Profilod',
     'purchase_cost'                              => 'Vásárlási költség',
@@ -311,7 +313,7 @@ return [
     'username'              => 'Felhasználónév',
     'update'                => 'Frissités',
     'updating_item' => ':item frissítése',
-    'upload_filetypes_help'      => 'Az engedélyezett fájltípusok: png, gif, jpg, jpeg, doc, docx, pdf, xls, xlsx, txt, lic, xml, zip, rtf és rar. A feltöltés maximum mérete :size.',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => 'Feltöltve',
     'user'					=> 'Felhasználó',
     'accepted'			    => 'elfogadva',
@@ -659,6 +661,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

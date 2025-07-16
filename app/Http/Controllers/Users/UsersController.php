@@ -160,7 +160,8 @@ class UsersController extends Controller
                 $user->notify(new WelcomeNotification($data));
             }
 
-            return redirect()->to(Helper::getRedirectOption($request, $user->id, 'Users'))->with('success', trans('admin/users/message.success.create'));
+            return Helper::getRedirectOption($request, $user->id, 'Users')
+                ->with('success', trans('admin/users/message.success.create'));
         }
 
         return redirect()->back()->withInput()->withErrors($user->getErrors());
@@ -192,6 +193,7 @@ class UsersController extends Controller
     {
 
         $this->authorize('update', User::class);
+        session()->put('back_url', url()->previous());
         $user = User::with(['assets', 'assets.model', 'consumables', 'accessories', 'licenses', 'userloc'])->withTrashed()->find($user->id);
 
         if ($user) {
@@ -319,7 +321,7 @@ class UsersController extends Controller
 
         if ($user->save()) {
             // Redirect to the user page
-            return redirect()->to(Helper::getRedirectOption($request, $user->id, 'Users'))
+            return Helper::getRedirectOption($request, $user->id, 'Users')
                 ->with('success', trans('admin/users/message.success.update'));
         }
         return redirect()->back()->withInput()->withErrors($user->getErrors());
@@ -517,6 +519,8 @@ class UsersController extends Controller
                         trans('admin/companies/table.title'),
                         trans('admin/users/table.title'),
                         trans('general.employee_number'),
+                        trans('admin/users/table.first_name'),
+                        trans('admin/users/table.last_name'),
                         trans('admin/users/table.name'),
                         trans('admin/users/table.username'),
                         trans('admin/users/table.email'),
@@ -562,6 +566,8 @@ class UsersController extends Controller
                             ($user->company) ? $user->company->name : '',
                             $user->jobtitle,
                             $user->employee_num,
+                            $user->first_name,
+                            $user->last_name,
                             $user->present()->fullName(),
                             $user->username,
                             $user->email,

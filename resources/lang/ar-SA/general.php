@@ -225,11 +225,13 @@ return [
     'order_number'          => 'رقم الأمر',
     'only_deleted'          => 'الأصول المحذوفة فقط',
     'page_menu'				=> 'عرض عناصر _MENU_',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> 'عرض _START_ إلى _END_ من إجمالي العناصر البالغ عددها TOTAL_',
     'pending'				=> 'قيد الانتظار',
     'people'				=> 'الأشخاص',
     'per_page'				=> 'عدد النتائج في كل صفحة',
     'previous'				=> 'سابق',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> 'معالجة',
     'profile'				=> 'ملفك الشخصي',
     'purchase_cost'                              => 'تكلفة الشراء',
@@ -311,7 +313,7 @@ return [
     'username'              => 'اسم المستخدم',
     'update'                => 'تحديث',
     'updating_item' => 'Updating :item',
-    'upload_filetypes_help'      => 'أنواع الملفات المسموح بها هي png, gif, jpg, jpeg, doc, docx, pdf, xls, xlsx, txt, lic, xml, zip, rtf and rar. الحد الأقصى المسموح به هو :size.',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => 'تم تحميلها',
     'user'					=> 'المستخدم',
     'accepted'			    => 'قبلت',
@@ -658,6 +660,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

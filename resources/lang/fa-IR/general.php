@@ -242,11 +242,13 @@ return [
     'order_number'          => 'شماره سفارش',
     'only_deleted'          => 'فقط دارایی های حذف شده',
     'page_menu'				=> 'نمایش_موارد_منو',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> 'نمایش_آغاز_تا_پایان_از_همه_موارد',
     'pending'				=> 'در انتظار',
     'people'				=> 'مردم',
     'per_page'				=> 'نتایج در هر صفحه',
     'previous'				=> 'قبلي',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> 'در حال پردازش',
     'profile'				=> 'پروفایل شما',
     'purchase_cost'                              => 'هزینه خرید',
@@ -335,8 +337,7 @@ return [
     'username'              => 'نام کاربری',
     'update'                => 'بروزرسانی',
     'updating_item' => 'بروزرسانی :item',
-    'upload_filetypes_help'      => 'انواع فایل های مجاز عبارتند از png، gif، jpg، jpeg، doc، docx، pdf، xls، xlsx، txt، lic، xml، zip، rtf و rar. حداکثر اندازه مجاز بارگذاری: اندازه است.
-',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => 'بارگزاری شد',
     'user'					=> 'کاربر',
     'accepted'			    => 'تأیید شد',
@@ -741,6 +742,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

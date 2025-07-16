@@ -225,11 +225,13 @@ return [
     'order_number'          => 'Số đơn đặt hàng',
     'only_deleted'          => 'Chỉ những tài sản đã xóa',
     'page_menu'				=> 'Showing _MENU_ items',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> 'Showing _START_ to _END_ of _TOTAL_ items',
     'pending'				=> 'Đang chờ',
     'people'				=> 'Thành Viên',
     'per_page'				=> 'Kết quả trên trang',
     'previous'				=> 'Trước',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> 'Đang xử lý',
     'profile'				=> 'Hồ sơ của bạn',
     'purchase_cost'                              => 'Chi phí mua hàng',
@@ -311,7 +313,7 @@ return [
     'username'              => 'Tên đăng nhập',
     'update'                => 'Cập nhật',
     'updating_item' => 'Updating :item',
-    'upload_filetypes_help'      => 'Cho phép các định dạng png, gif, jpg, jpeg, doc, docx, pdf, xls, xlsx, txt, lic, xml, zip, rtf and rar. Dung lượng tối đa :size.',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => 'Đã tải lên',
     'user'					=> 'Người dùng',
     'accepted'			    => 'đã chấp nhận',
@@ -658,6 +660,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

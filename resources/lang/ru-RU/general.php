@@ -225,11 +225,13 @@ return [
     'order_number'          => 'Номер заказа',
     'only_deleted'          => 'Только удаленные активы',
     'page_menu'				=> 'Показаны элементы _MENU_',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> 'Показаны _START_ для _END_ _TOTAL_ элементы',
     'pending'				=> 'Ожидание',
     'people'				=> 'Пользователи',
     'per_page'				=> 'Результатов на страницу',
     'previous'				=> 'Пред',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> 'Обработка',
     'profile'				=> 'Ваш профиль',
     'purchase_cost'                              => 'Закупочная цена',
@@ -311,7 +313,7 @@ return [
     'username'              => 'Пользователь',
     'update'                => 'Обновить',
     'updating_item' => 'Обновление :item',
-    'upload_filetypes_help'      => 'Допустимые типы файлов: png, gif, jpg, jpeg, doc, docx, pdf, xlsx, txt, lic, xml, zip, rtf и rar. Максимальный размер - :size.',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => 'Загружено',
     'user'					=> 'Пользователь',
     'accepted'			    => 'принято',
@@ -657,6 +659,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
     'mass_operations' => 'Массовые операции',

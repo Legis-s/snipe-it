@@ -225,11 +225,13 @@ return [
     'order_number'          => 'Rhif Archeb',
     'only_deleted'          => 'Only Deleted Assets',
     'page_menu'				=> 'Showing _MENU_ items',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> 'Showing _START_ to _END_ of _TOTAL_ items',
     'pending'				=> 'Yn disgwl',
     'people'				=> 'Pobol',
     'per_page'				=> 'Canlyniadau fesul tudalen',
     'previous'				=> 'Blaenorol',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> 'Prosesu',
     'profile'				=> 'Eich proffil',
     'purchase_cost'                              => 'Cost pwrcasu',
@@ -311,7 +313,7 @@ return [
     'username'              => 'Enw defnyddiwr',
     'update'                => 'Diweddaru',
     'updating_item' => 'Updating :item',
-    'upload_filetypes_help'      => 'Allowed filetypes are png, gif, jpg, jpeg, doc, docx, pdf, xls, xlsx, txt, lic, xml, zip, rtf and rar. Max upload size allowed is :size.',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => 'Wedi Uwchlwytho',
     'user'					=> 'Defnyddiwr',
     'accepted'			    => 'derbynnir',
@@ -658,6 +660,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

@@ -225,11 +225,13 @@ return [
     'order_number'          => 'מספר הזמנה',
     'only_deleted'          => 'Only Deleted Assets',
     'page_menu'				=> 'מציג _MENU_ פריטים',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> 'מציג _START_ אל _END_ מתוך _TOTAL_ פריטים',
     'pending'				=> 'ממתין ל',
     'people'				=> 'אֲנָשִׁים',
     'per_page'				=> 'תוצאות לעמוד',
     'previous'				=> 'קודם',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> 'מעבד',
     'profile'				=> 'הפרופיל שלך',
     'purchase_cost'                              => 'עלות הרכישה',
@@ -311,7 +313,7 @@ return [
     'username'              => 'שם משתמש',
     'update'                => 'עדכון',
     'updating_item' => 'Updating :item',
-    'upload_filetypes_help'      => 'Allowed filetypes are png, gif, jpg, jpeg, doc, docx, pdf, xls, xlsx, txt, lic, xml, zip, rtf and rar. Max upload size allowed is :size.',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => 'הועלה',
     'user'					=> 'מִשׁתַמֵשׁ',
     'accepted'			    => 'מְקוּבָּל',
@@ -658,6 +660,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

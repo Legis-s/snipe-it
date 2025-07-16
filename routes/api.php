@@ -1314,7 +1314,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             'index'
         ]
     )->name('api.files.index')
-        ->where(['object_type' => 'assets|models|users|locations|accessories|consumables|licenses|components']);
+        ->where(['object_type' => 'assets|hardware|models|users|locations|accessories|consumables|licenses|components']);
 
     // Get a file
     Route::get('{object_type}/{id}/files/{file_id}',
@@ -1323,7 +1323,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             'show'
         ]
     )->name('api.files.show')
-        ->where(['object_type' => 'assets|models|users|locations|accessories|consumables|licenses|components']);
+        ->where(['object_type' => 'assets|hardware|models|users|locations|accessories|consumables|licenses|components']);
 
     // Upload files(s)
     Route::post('{object_type}/{id}/files',
@@ -1332,7 +1332,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             'store'
         ]
     )->name('api.files.store')
-        ->where(['object_type' => 'assets|models|users|locations|accessories|consumables|licenses|components']);
+        ->where(['object_type' => 'assets|hardware|models|users|locations|accessories|consumables|licenses|components']);
 
     // Delete files(s)
     Route::delete('{object_type}/{id}/files/{file_id}/delete',
@@ -1341,6 +1341,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             'destroy'
         ]
     )->name('api.files.destroy')
-        ->where(['object_type' => 'assets|models|users|locations|accessories|consumables|licenses|components']);
+        ->where(['object_type' => 'assets|hardware|models|users|locations|accessories|consumables|licenses|components']);
 
 }); // end API routes

@@ -228,11 +228,13 @@ Context | Request Context
     'order_number'          => 'Sipariş Numarası',
     'only_deleted'          => 'Yalnızca Silinen Varlıklar',
     'page_menu'				=> '_MENU_ Öğe gösteriliyor',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> '_START_ - _END_ of _TOTAL_ arası öğeler',
     'pending'				=> 'Bekliyor',
     'people'				=> 'Kişiler',
     'per_page'				=> 'Sayfa başına sonuç sayısı',
     'previous'				=> 'Önceki',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> 'İşleniyor',
     'profile'				=> 'Profiliniz',
     'purchase_cost'                              => 'Satın Alma Ücreti',
@@ -314,7 +316,7 @@ Context | Request Context
     'username'              => 'Kullanıcı Adı',
     'update'                => 'Güncelle',
     'updating_item' => 'Updating :item',
-    'upload_filetypes_help'      => 'İzin verilen dosya türleri png, gif, jpg, jpeg, doc, docx, pdf, xls, xlsx, txt, lic, xml, zip, rtf ve rar\'dır. İzin verilen maksimum yükleme boyutu :size.',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => 'Yüklendi',
     'user'					=> 'Kullanıcı',
     'accepted'			    => 'kabul edildi',
@@ -661,6 +663,13 @@ Context | Request Context
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

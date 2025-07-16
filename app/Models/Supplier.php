@@ -73,7 +73,7 @@ class Supplier extends SnipeModel
      * Otherwise calling "count()" on each model results in n+1.
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v4.0]
+     * @since  [v4.0]
      * @return \Illuminate\Database\Eloquent\Relations\Relation
      */
     public function assetsRelation()
@@ -86,7 +86,7 @@ class Supplier extends SnipeModel
      * Establishes the supplier -> assets relationship
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v1.0]
+     * @since  [v1.0]
      * @return \Illuminate\Database\Eloquent\Relations\Relation
      */
     public function assets()
@@ -98,7 +98,7 @@ class Supplier extends SnipeModel
      * Establishes the supplier -> accessories relationship
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v1.0]
+     * @since  [v1.0]
      * @return \Illuminate\Database\Eloquent\Relations\Relation
      */
     public function accessories()
@@ -110,7 +110,7 @@ class Supplier extends SnipeModel
      * Establishes the supplier -> component relationship
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v6.1.1]
+     * @since  [v6.1.1]
      * @return \Illuminate\Database\Eloquent\Relations\Relation
      */
     public function components()
@@ -122,7 +122,7 @@ class Supplier extends SnipeModel
      * Establishes the supplier -> component relationship
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v6.1.1]
+     * @since  [v6.1.1]
      * @return \Illuminate\Database\Eloquent\Relations\Relation
      */
     public function consumables()
@@ -146,7 +146,7 @@ class Supplier extends SnipeModel
      * Establishes the supplier -> asset maintenances relationship
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v1.0]
+     * @since  [v1.0]
      * @return \Illuminate\Database\Eloquent\Relations\Relation
      */
     public function asset_maintenances()
@@ -158,7 +158,7 @@ class Supplier extends SnipeModel
      * Return the number of assets by supplier
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v1.0]
+     * @since  [v1.0]
      * @return int
      */
     public function num_assets()
@@ -174,7 +174,7 @@ class Supplier extends SnipeModel
      * Establishes the supplier -> license relationship
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v1.0]
+     * @since  [v1.0]
      * @return \Illuminate\Database\Eloquent\Relations\Relation
      */
     public function licenses()
@@ -186,7 +186,7 @@ class Supplier extends SnipeModel
      * Return the number of licenses by supplier
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v1.0]
+     * @since  [v1.0]
      * @return int
      */
     public function num_licenses()
@@ -200,7 +200,7 @@ class Supplier extends SnipeModel
      * @todo this should be handled via validation, no?
      *
      * @author A. Gianotto <snipe@snipe.net>
-     * @since [v3.0]
+     * @since  [v3.0]
      * @return \Illuminate\Database\Eloquent\Relations\Relation
      */
     public function addhttp($url)

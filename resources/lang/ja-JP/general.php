@@ -225,11 +225,13 @@ return [
     'order_number'          => '注文番号',
     'only_deleted'          => '削除された資産のみ',
     'page_menu'				=> 'メニューアイテムを表示',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> '開始から終了までのアイテム合計を表示',
     'pending'				=> 'ペンディング',
     'people'				=> '人物',
     'per_page'				=> 'ページ単位の結果',
     'previous'				=> '前へ',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> '処理中',
     'profile'				=> 'あなたのプロファイル',
     'purchase_cost'                              => '購入費用',
@@ -311,7 +313,7 @@ return [
     'username'              => 'ユーザー名',
     'update'                => '更新',
     'updating_item' => ':item を更新中',
-    'upload_filetypes_help'      => '使用できるファイルは、png、gif、jpg、jpeg、doc、docx、pdf、xls、txt、lic、zip、およびrarです。許可される最大ファイルサイズは:sizeです。',
+    'upload_filetypes_help' => '許可されるファイル形式: :allowed_filetypes. 許可される最大アップロードサイズは :size です。',
     'uploaded'              => 'アップロード完了',
     'user'					=> '利用者',
     'accepted'			    => '承認済',
@@ -658,6 +660,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

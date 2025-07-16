@@ -225,11 +225,13 @@ return [
     'order_number'          => 'Nambarka dalbashada',
     'only_deleted'          => 'Kaliya Hantida La Tiray',
     'page_menu'				=> 'Muujinaya _MENU_ walxo',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> 'Muujinaya _START_ ilaa _END_ ee _TOTAL_ shay',
     'pending'				=> 'La sugayo',
     'people'				=> 'Dadka',
     'per_page'				=> 'Natiijooyinka boggiiba',
     'previous'				=> 'Hore',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> 'Habaynta',
     'profile'				=> 'Profile kaaga',
     'purchase_cost'                              => 'Qiimaha iibka',
@@ -311,7 +313,7 @@ return [
     'username'              => 'Magaca isticmaale',
     'update'                => 'Cusbooneysii',
     'updating_item' => 'Updating :item',
-    'upload_filetypes_help'      => 'Noocyada faylalka la oggol yahay waa png, gif, jpg, jpeg, doc, docx, pdf, xls, xlsx, txt, lic, xml, zip, rtf iyo rar. Cabbirka gelinta ugu badan ee la ogolyahay waa :size.',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => 'La soo galiyay',
     'user'					=> 'Isticmaale',
     'accepted'			    => 'aqbalay',
@@ -657,6 +659,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

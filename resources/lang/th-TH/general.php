@@ -225,11 +225,13 @@ return [
     'order_number'          => 'เลขที่ใบสั่งซื้อ',
     'only_deleted'          => 'Only Deleted Assets',
     'page_menu'				=> 'กำลังแสดง_MENU_รายการ',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> 'กำลังแสดง_START_ถึง_END_จากทั้งหมด_TOTAL_รายการ',
     'pending'				=> 'กําลังดำเนินการ',
     'people'				=> 'ผู้คน',
     'per_page'				=> 'ผลการค้นหาต่อหน้า',
     'previous'				=> 'ก่อนหน้า',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> 'กำลังดำเนินการ',
     'profile'				=> 'โปรไฟล์ของคุณ',
     'purchase_cost'                              => 'ซื้อต้นทุน',
@@ -311,7 +313,7 @@ return [
     'username'              => 'ชื่อผู้ใช้งาน',
     'update'                => 'ปรับปรุง',
     'updating_item' => 'Updating :item',
-    'upload_filetypes_help'      => 'Allowed filetypes are png, gif, jpg, jpeg, doc, docx, pdf, xls, xlsx, txt, lic, xml, zip, rtf and rar. Max upload size allowed is :size.',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => 'อัพโหลด',
     'user'					=> 'ผู้ใช้',
     'accepted'			    => 'ยอมรับ',
@@ -658,6 +660,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

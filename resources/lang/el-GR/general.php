@@ -225,11 +225,13 @@ return [
     'order_number'          => 'Αριθμός παραγγελίας',
     'only_deleted'          => 'Μόνο Διαγραμμένα Περιουσιακά Στοιχεία',
     'page_menu'				=> 'Εμφάνιση _MENU_ αντικειμένων',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> 'Εμφάνιση _START_ σε _END_ από _TOTAL_ στοιχεία',
     'pending'				=> 'Εκκρεμεί',
     'people'				=> 'Άτομα',
     'per_page'				=> 'Αποτελέσματα ανά σελίδα',
     'previous'				=> 'Προηγούμενο',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> 'Επεξεργάζεται',
     'profile'				=> 'Το προφίλ σας',
     'purchase_cost'                              => 'Κόστος αγοράς',
@@ -311,7 +313,7 @@ return [
     'username'              => 'Όνομα χρήστη',
     'update'                => 'Ενημέρωση',
     'updating_item' => 'Updating :item',
-    'upload_filetypes_help'      => 'Επιτρεπόμενοι τύποι αρχείων είναι png, gif, jpg, jpeg, doc, docx, pdf, xls, xlsx, txt, lic, xml, zip, rtf και rar. Το μέγιστο επιτρεπόμενο μέγεθος upload είναι :size.',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => 'Ανέβηκε',
     'user'					=> 'Χρήστης',
     'accepted'			    => 'αποδεκτή',
@@ -658,6 +660,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

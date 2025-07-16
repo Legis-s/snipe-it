@@ -52,7 +52,6 @@
             // This allows us to override the table defaults set below using the data-dash attributes
             var table = this;
             var data_with_default = function (key,default_value) {
-                console.dir($(table).data());
                 attrib_val = $(table).data(key);
                 if(attrib_val !== undefined) {
                     return attrib_val;
@@ -957,7 +956,6 @@
 
 
     function fileUploadNameFormatter(value) {
-        console.dir(value);
         if ((value) && (value.filename) && (value.url)) {
             return '<a href="' + value.url + '">' + value.filename + '</a>';
         }

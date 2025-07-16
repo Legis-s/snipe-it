@@ -225,11 +225,13 @@ return [
     'order_number'          => 'Tilausnumero',
     'only_deleted'          => 'Vain poistetut laitteet',
     'page_menu'				=> 'Näytetään _MENU_ kohteita',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> 'Näytetään _START_ - _END_ yhteensä _TOTAL_ nimikettä',
     'pending'				=> 'Odottaa',
     'people'				=> 'Ihmiset',
     'per_page'				=> 'Tuloksia sivua kohti',
     'previous'				=> 'Edellinen',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> 'Käsitellään',
     'profile'				=> 'Profiilisi',
     'purchase_cost'                              => 'Hankintameno',
@@ -311,7 +313,7 @@ return [
     'username'              => 'Käyttäjätunnus',
     'update'                => 'Päivitä',
     'updating_item' => 'Updating :item',
-    'upload_filetypes_help'      => 'Sallitut tiedostotyypit ovat png, gif, jpg, jpeg, doc, docx, pdf, xls, xlsx, txt, lic, xml, zip, rtf ja rar. Suurin sallittu lähetyskoko on :size.',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => 'Lähetetty',
     'user'					=> 'Käyttäjä',
     'accepted'			    => 'hyväksytty',
@@ -658,6 +660,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

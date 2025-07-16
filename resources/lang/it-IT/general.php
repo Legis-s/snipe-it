@@ -225,11 +225,13 @@ return [
     'order_number'          => 'Numero d\'ordine',
     'only_deleted'          => 'Solo Beni Eliminati',
     'page_menu'				=> 'Visualizza _MENU_ articoli',
+    'page_error'            => 'Impossibile determinare la pagina precedente. Reindirizzato alla homepage.',
     'pagination_info'		=> 'Visualizza dal _START_ al _END_ di _TOTAL_ articoli',
     'pending'				=> 'In attesa',
     'people'				=> 'Utenti',
     'per_page'				=> 'Risultati per Pagina',
     'previous'				=> 'Precedente',
+    'previous_page'			=> 'Pagina Precedente',
     'processing'			=> 'In elaborazione',
     'profile'				=> 'Il tuo profilo',
     'purchase_cost'                              => 'Prezzo d\'acquisto',
@@ -311,7 +313,7 @@ return [
     'username'              => 'Nome utente',
     'update'                => 'Aggiorna',
     'updating_item' => 'Aggiornamento :item',
-    'upload_filetypes_help'      => 'I tipi di file permessi sono png, gif, jpg, jpeg, doc, docx, pdf, xls, xlsx, txt, lic, xml, zip, rtf e rar. La dimensione massima di upload è di :size.',
+    'upload_filetypes_help' => 'I tipi di file consentiti sono: :allowed_filetypes. La dimensione massima di upload consentita è :size.',
     'uploaded'              => 'Caricato',
     'user'					=> 'Utente',
     'accepted'			    => 'accettato',
@@ -658,6 +660,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Quantità',
+        'percent' => 'Percentuale',
+    ],
+
+    'months_plural' => '1 mese|:count mesi',
 
 
 ];

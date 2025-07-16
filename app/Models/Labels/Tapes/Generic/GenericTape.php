@@ -35,12 +35,13 @@ abstract class GenericTape extends Label
     /**
      * Constructor for generic tape
      * 
-     * @param float $width Width of the tape in mm
-     * @param float $height Height of the label in mm (for continuous tapes, this is the default height)
-     * @param bool $continuous Whether the tape is continuous or pre-cut
-     * @param float $spacing Spacing between labels for non-continuous tapes (in mm)
+     * @param float $width      Width of the tape in mm
+     * @param float $height     Height of the label in mm (for continuous tapes, this is the default height)
+     * @param bool  $continuous Whether the tape is continuous or pre-cut
+     * @param float $spacing    Spacing between labels for non-continuous tapes (in mm)
      */
-    public function __construct(float $width, float $height, bool $continuous = true, float $spacing = 0.0) {
+    public function __construct(float $width, float $height, bool $continuous = true, float $spacing = 0.0)
+    {
         $this->width = $width;
         $this->height = $height;
         $this->continuous = $continuous;
@@ -70,17 +71,38 @@ abstract class GenericTape extends Label
     }
     
     // Unit of measurement
-    public function getUnit() { return 'mm'; }
+    public function getUnit()
+    {
+        return 'mm'; 
+    }
     
     // Label dimensions
-    public function getWidth() { return $this->width; }
-    public function getHeight() { return $this->height; }
+    public function getWidth()
+    {
+        return $this->width; 
+    }
+    public function getHeight()
+    {
+        return $this->height; 
+    }
     
     // Margins
-    public function getMarginTop() { return $this->marginTop; }
-    public function getMarginBottom() { return $this->marginBottom; }
-    public function getMarginLeft() { return $this->marginLeft; }
-    public function getMarginRight() { return $this->marginRight; }
+    public function getMarginTop()
+    {
+        return $this->marginTop; 
+    }
+    public function getMarginBottom()
+    {
+        return $this->marginBottom; 
+    }
+    public function getMarginLeft()
+    {
+        return $this->marginLeft; 
+    }
+    public function getMarginRight()
+    {
+        return $this->marginRight; 
+    }
 
     
     /**
@@ -88,7 +110,8 @@ abstract class GenericTape extends Label
      * 
      * @return bool
      */
-    public function isContinuous() {
+    public function isContinuous()
+    {
         return $this->continuous;
     }
     
@@ -97,7 +120,8 @@ abstract class GenericTape extends Label
      * 
      * @return float
      */
-    public function getSpacing() {
+    public function getSpacing()
+    {
         return $this->spacing;
     }
 }

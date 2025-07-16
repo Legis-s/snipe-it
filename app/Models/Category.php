@@ -18,7 +18,7 @@ use Illuminate\Support\Str;
  * to require acceptance from the user, whether or not to
  * send a EULA to the user, etc.
  *
- * @version    v1.0
+ * @version v1.0
  */
 class Category extends SnipeModel
 {
@@ -96,7 +96,7 @@ class Category extends SnipeModel
      * Checks if category can be deleted
      *
      * @author [Dan Meltzer] [<dmeltzer.devel@gmail.com>]
-     * @since [v5.0]
+     * @since  [v5.0]
      * @return bool
      */
     public function isDeletable()
@@ -119,7 +119,7 @@ class Category extends SnipeModel
      * Establishes the category -> accessories relationship
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v2.0]
+     * @since  [v2.0]
      * @return \Illuminate\Database\Eloquent\Relations\Relation
      */
     public function accessories()
@@ -131,7 +131,7 @@ class Category extends SnipeModel
      * Establishes the category -> licenses relationship
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v4.3]
+     * @since  [v4.3]
      * @return \Illuminate\Database\Eloquent\Relations\Relation
      */
     public function licenses()
@@ -143,7 +143,7 @@ class Category extends SnipeModel
      * Establishes the category -> consumables relationship
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v3.0]
+     * @since  [v3.0]
      * @return \Illuminate\Database\Eloquent\Relations\Relation
      */
     public function consumables()
@@ -155,7 +155,7 @@ class Category extends SnipeModel
      * Establishes the category -> consumables relationship
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v3.0]
+     * @since  [v3.0]
      * @return \Illuminate\Database\Eloquent\Relations\Relation
      */
     public function components()
@@ -170,7 +170,7 @@ class Category extends SnipeModel
      * It should only be used in a single category context.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v2.0]
+     * @since  [v2.0]
      * @return int
      */
     public function itemCount()
@@ -181,18 +181,18 @@ class Category extends SnipeModel
         }
 
         switch ($this->category_type) {
-            case 'asset':
-                return $this->assets->count();
-            case 'accessory':
-                return $this->accessories->count();
-            case 'component':
-                return $this->components->count();
-            case 'consumable':
-                return $this->consumables->count();
-            case 'license':
-                return $this->licenses->count();
-            default:
-                return 0;
+        case 'asset':
+            return $this->assets->count();
+        case 'accessory':
+            return $this->accessories->count();
+        case 'component':
+            return $this->components->count();
+        case 'consumable':
+            return $this->consumables->count();
+        case 'license':
+            return $this->licenses->count();
+        default:
+            return 0;
         }
 
     }
@@ -201,7 +201,7 @@ class Category extends SnipeModel
      * Establishes the category -> assets relationship
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v2.0]
+     * @since  [v2.0]
      * @return \Illuminate\Database\Eloquent\Relations\Relation
      */
     public function assets()
@@ -218,8 +218,8 @@ class Category extends SnipeModel
      * by their category.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v6.1.0]
-     * @see \App\Models\Asset::scopeAssetsForShow()
+     * @since  [v6.1.0]
+     * @see    \App\Models\Asset::scopeAssetsForShow()
      * @return \Illuminate\Database\Eloquent\Relations\Relation
      */
     public function showableAssets()
@@ -231,7 +231,7 @@ class Category extends SnipeModel
      * Establishes the category -> models relationship
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v2.0]
+     * @since  [v2.0]
      * @return \Illuminate\Database\Eloquent\Relations\Relation
      */
     public function models()
@@ -249,7 +249,7 @@ class Category extends SnipeModel
      * checks for a settings level EULA
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v2.0]
+     * @since  [v2.0]
      * @return string | null
      */
     public function getEula()
@@ -276,7 +276,7 @@ class Category extends SnipeModel
      *
      * This will also correctly parse a 1/0 if "true"/"false" is passed.
      *
-     * @param $value
+     * @param  $value
      * @return void
      */
     public function setCheckinEmailAttribute($value)
@@ -293,9 +293,9 @@ class Category extends SnipeModel
     /**
      * Query builder scope for whether or not the category requires acceptance
      *
-     * @author  Vincent Sposato <vincent.sposato@gmail.com>
+     * @author Vincent Sposato <vincent.sposato@gmail.com>
      *
-     * @param  \Illuminate\Database\Query\Builder  $query  Query builder instance
+     * @param  \Illuminate\Database\Query\Builder $query Query builder instance
      * @return \Illuminate\Database\Query\Builder          Modified query builder
      */
     public function scopeRequiresAcceptance($query)

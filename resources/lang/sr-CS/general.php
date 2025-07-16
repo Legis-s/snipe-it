@@ -225,11 +225,13 @@ return [
     'order_number'          => 'Broj narudžbe',
     'only_deleted'          => 'Samo izbrisana sredstva',
     'page_menu'				=> 'Showing _MENU_ items',
+    'page_error'            => 'Nismo mogli da utvrdimo prethodnu stranicu. Preusmeravamo na početnu.',
     'pagination_info'		=> 'Showing _START_ to _END_ of _TOTAL_ items',
     'pending'				=> 'Na čekanju',
     'people'				=> 'Ljudi',
     'per_page'				=> 'Rezultati po stranici',
     'previous'				=> 'Prethodna',
+    'previous_page'			=> 'Prethodna stranica',
     'processing'			=> 'Obrađuje se',
     'profile'				=> 'Vaš profil',
     'purchase_cost'                              => 'Trošak nabavke',
@@ -311,7 +313,7 @@ return [
     'username'              => 'Korisničko ime',
     'update'                => 'Ažuriraj',
     'updating_item' => 'Izmena :item',
-    'upload_filetypes_help'      => 'Dozvoljeni tipovi datoteka su png, gif, jpg, jpeg, doc, docx, pdf, xls, xlsx, txt, lic, xml, zip, rtf i rar. Maksimalna veličina datoteke je :size.',
+    'upload_filetypes_help' => 'Dozvoljeni tipovi datoteka su: :allowed_filetypes. Maksimalna veličina datoteke je :size.',
     'uploaded'              => 'Uploaded',
     'user'					=> 'Korisnik',
     'accepted'			    => 'accepted',
@@ -658,6 +660,13 @@ return [
         'nofiles' => 'Nisu izabrane datoteke za postavljanje',
         'confirm_delete' => 'Da li zaista želite da obrišete ovu datoteku?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Iznos',
+        'percent' => 'Procenat',
+    ],
+
+    'months_plural' => '1 mesec|:count meseci',
 
 
 ];

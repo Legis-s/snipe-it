@@ -225,11 +225,13 @@ return [
     'order_number'          => 'Номер замовлення',
     'only_deleted'          => 'Тільки видалені активи',
     'page_menu'				=> 'Показати _елементи MENU_',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> 'Показати _START_ до _END_ із _TOTAL_ елементів',
     'pending'				=> 'Очікуєтся',
     'people'				=> 'Люди',
     'per_page'				=> 'Результатів на стор',
     'previous'				=> 'Попередня',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> 'В обробці',
     'profile'				=> 'Ваш профіль',
     'purchase_cost'                              => 'Вартість покупки',
@@ -311,7 +313,7 @@ return [
     'username'              => 'Ім\'я кристувача',
     'update'                => 'Оновлення',
     'updating_item' => 'Оновлення :item',
-    'upload_filetypes_help'      => 'Дозволені типи файлів - png, gif, jpg, jpeg, doc, docx, pdf, xls, xlsx, txt, lic, xml, xml, zip, rtf і rar. Максимальний розмір завантаження - :size.',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => 'Завантажено',
     'user'					=> 'Користувач',
     'accepted'			    => 'прийнято',
@@ -658,6 +660,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

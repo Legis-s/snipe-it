@@ -225,11 +225,13 @@ return [
     'order_number'          => 'លេខបញ្ជាទិញ',
     'only_deleted'          => 'មានតែទ្រព្យសម្បត្តិដែលបានលុបប៉ុណ្ណោះ។',
     'page_menu'				=> 'បង្ហាញ _MENU_ ធាតុ',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> 'បង្ហាញ _START_ ទៅ _END_ នៃ _TOTAL_ ធាតុ',
     'pending'				=> 'កំពុងរង់ចាំ',
     'people'				=> 'មនុស្ស',
     'per_page'				=> 'លទ្ធផលក្នុងមួយទំព័រ',
     'previous'				=> 'មុន',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> 'កំពុងដំណើរការ',
     'profile'				=> 'ប្រវត្តិរូបរបស់អ្នក។',
     'purchase_cost'                              => 'ការចំណាយលើការទិញ',
@@ -311,7 +313,7 @@ return [
     'username'              => 'ឈ្មោះ​អ្នកប្រើប្រាស់',
     'update'                => 'ធ្វើបច្ចុប្បន្នភាព',
     'updating_item' => 'ការធ្វើបច្ចុប្បន្នភាព៖ ធាតុ',
-    'upload_filetypes_help'      => 'ប្រភេទឯកសារដែលបានអនុញ្ញាតគឺ png, gif, jpg, jpeg, doc, docx, pdf, xls, xlsx, txt, lic, xml, zip, rtf និង rar ។ ទំហំផ្ទុកឡើងអតិបរមាដែលអនុញ្ញាតគឺ៖ ទំហំ។',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => 'បានបង្ហោះ',
     'user'					=> 'អ្នក​ប្រើ',
     'accepted'			    => 'យល់ព្រម',
@@ -658,6 +660,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

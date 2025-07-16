@@ -225,11 +225,13 @@ return [
     'order_number'          => 'Tellimuse number',
     'only_deleted'          => 'Ainult kustutatud varad',
     'page_menu'				=> 'Näitab _MENU_ üksusi',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> 'Näitab _START_ kuni _END_ _TOTAL_ üksust',
     'pending'				=> 'Ootel',
     'people'				=> 'Inimesed',
     'per_page'				=> 'Tulemusi lehe kohta',
     'previous'				=> 'Eelmine',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> 'Töötlemises',
     'profile'				=> 'Sinu profiil',
     'purchase_cost'                              => 'Ostuhind',
@@ -311,7 +313,7 @@ return [
     'username'              => 'Kasutajanimi',
     'update'                => 'Uuenda',
     'updating_item' => 'Updating :item',
-    'upload_filetypes_help'      => 'Lubatud failileiendid on png, gif, jpg, jpeg, doc, docx, pdf, xls, txt, lic, zip ja rar. Suurim lubatud üleslaadimise maht on :size.',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => 'Üles laetud',
     'user'					=> 'Kasutaja',
     'accepted'			    => 'aktsepteeritud',
@@ -658,6 +660,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

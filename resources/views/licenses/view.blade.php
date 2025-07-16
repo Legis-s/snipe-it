@@ -31,8 +31,8 @@
             <span class="hidden-lg hidden-md">
               <x-icon type="seats" class="fa-2x" />
               </span>
-              <span class="hidden-xs hidden-sm">{{ trans('admin/licenses/form.seats') }}</span>
-              <span class="badge badge-secondary">{{ number_format($license->availCount()->count()) }} / {{ number_format($license->seats) }}</span>
+              <span class="hidden-xs hidden-sm">{{ trans('general.assigned') }}</span>
+              <span class="badge badge-secondary">{{ number_format($license->assignedCount()->count()) }} / {{ number_format($license->seats) }}</span>
 
             </a>
         </li>
@@ -443,7 +443,7 @@
                         data-sort-order="asc"
                         data-sort-name="name"
                         class="table table-striped snipe-table"
-                        data-url="{{ route('api.licenses.seats.index', $license->id) }}"
+                        data-url="{{ route('api.licenses.seats.index', [$license->id, 'status' => 'assigned']) }}"
                         data-export-options='{
                         "fileName": "export-seats-{{ str_slug($license->name) }}-{{ date('Y-m-d') }}",
                         "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]

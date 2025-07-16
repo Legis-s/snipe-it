@@ -157,7 +157,7 @@ return [
     'scope_locations_fmcs_support_text'  => '支持多个分公司架构的位置范围限定',
     'scope_locations_fmcs_support_help_text'  => '将位置限制在所选公司内。',
     'scope_locations_fmcs_check_button' => '检查兼容性',
-    'scope_locations_fmcs_test_needed' => 'Please Check Compatibility to enable this',
+    'scope_locations_fmcs_test_needed' => '请检查兼容性以启用此功能',
     'scope_locations_fmcs_support_disabled_text'  => '当前选项已禁用，原因是有至少:count个项目的位置存在冲突。',
     'show_in_model_list'   => '在型号下拉列表中显示',
     'optional'					=> '可选',

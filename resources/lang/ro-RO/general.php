@@ -225,11 +225,13 @@ return [
     'order_number'          => 'Numar de ordine',
     'only_deleted'          => 'Numai active șterse',
     'page_menu'				=> 'Se afișează elementele _MENU_',
+    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
     'pagination_info'		=> 'Se afișează _START_ la _END_ din _TOTAL_ elemente',
     'pending'				=> 'In asteptare',
     'people'				=> 'Oameni',
     'per_page'				=> 'Rezultate pe pagina',
     'previous'				=> 'Anterior',
+    'previous_page'			=> 'Previous Page',
     'processing'			=> 'Prelucrare',
     'profile'				=> 'Profilul dvs.',
     'purchase_cost'                              => 'Costul de achiziție',
@@ -311,7 +313,7 @@ return [
     'username'              => 'Utilizator',
     'update'                => 'Actualizează',
     'updating_item' => 'Se actualizează :item',
-    'upload_filetypes_help'      => 'Tipurile de fișiere permise sunt png, gif, jpg, jpeg, doc, docx, pdf, xls, xlsx, txt, lic, xml, zip, rtf și rar. Dimensiunea maximă permisă este :size.',
+    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
     'uploaded'              => 'Încărcat',
     'user'					=> 'Utilizator',
     'accepted'			    => 'acceptat',
@@ -658,6 +660,13 @@ return [
         'nofiles' => 'No files were included for upload',
         'confirm_delete' => 'Are you sure you want to delete this file?',
     ],
+
+    'depreciation_options' => [
+        'amount' => 'Amount',
+        'percent' => 'Percentage',
+    ],
+
+    'months_plural' => '1 month|:count months',
 
 
 ];

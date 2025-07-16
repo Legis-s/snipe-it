@@ -113,7 +113,7 @@
             data-toolbar="#assets-toolbar"
             data-sort-order="desc"
             data-sort-name="created_at"
-            data-show-columns-toggle-all="true"
+            data-show-columns="true"
             data-cookie-id-table="AssetsAssigned">
             <thead>
                 <th data-field="asset_id" data-sortable="false" data-visible="true" data-switchable="false">#</th>
@@ -212,7 +212,7 @@
             data-sortable="true"
             data-sort-order="desc"
             data-sort-name="created_at"
-            data-show-columns-toggle-all="true"
+            data-show-columns="true"
             data-cookie-id-table="licensessAssigned">
             <thead>
             <tr>
@@ -274,7 +274,7 @@
             data-sortable="true"
             data-sort-order="desc"
             data-sort-name="created_at"
-            data-show-columns-toggle-all="true"
+            data-show-columns="true"
             data-cookie-id-table="accessoriesAssigned">
             <thead>
             <tr>
@@ -338,7 +338,7 @@
             data-sortable="true"
             data-sort-order="desc"
             data-sort-name="created_at"
-            data-show-columns-toggle-all="true"
+            data-show-columns="true"
             data-cookie-id-table="consumablesAssigned">
             <thead>
             <tr>
