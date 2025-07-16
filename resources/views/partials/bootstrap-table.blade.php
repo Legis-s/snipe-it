@@ -1379,8 +1379,8 @@
         }
 
         function bitrixTaskIdFormatter(value, row) {
-            if (row.user && row.user.bitrix_id > 0) {
-                return "<a href='https://bitrix.legis-s.ru/company/personal/user/" + row.user.bitrix_id + "/tasks/task/view/" + value + "/' target='_blank'>" + value + "</a>";
+            if (value > 0) {
+                return "<a href='https://bitrix.legis-s.ru/company/personal/user/1/tasks/task/view/" + value + "/' target='_blank'>" + value + "</a>";
             } else {
                 return ' ';
             }
