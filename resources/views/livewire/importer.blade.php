@@ -33,7 +33,7 @@
                         <table class="table table-striped table-bordered" id="errors-table">
                             <thead>
                             <th>{{ trans('general.item') }}</th>
-                            <th>Field</th>
+                            <th>{{ trans('admin/custom_fields/general.field') }}</th>
                             <th>{{ trans('general.error') }}</th>
                             </thead>
                             <tbody>
@@ -191,7 +191,7 @@
 
 
 
-                                                                @if (($typeOfImport != 'location' && $typeOfImport!= 'assetModel' && $typeOfImport!= 'component' && $typeOfImport!= 'supplier') && $typeOfImport!= 'manufacturer' && $typeOfImport!= 'category' && ($typeOfImport!=''))
+                                                                @if ($typeOfImport === 'user')
                                                                 <label class="form-control">
                                                                     <input type="checkbox" name="send_welcome" data-livewire-component="{{ $this->getId() }}" wire:model.live="send_welcome">
                                                                     {{ trans('general.send_welcome_email_to_users') }}

@@ -33,7 +33,7 @@ return [
     'send_pdf_copy' => 'Send a copy of this acceptance to my email address',
     'accessory_name' => 'Accessory Name',
     'additional_notes' => 'Additional Notes',
-    'admin_has_created' => 'An administrator has created an account for you on the :web website.',
+    'admin_has_created' => 'An administrator has created an account for you on the :web website. Please find your username below, and click on the link to set a password.',
     'asset' => 'Asset',
     'asset_name' => 'Asset Name',
     'asset_requested' => 'Asset requested',

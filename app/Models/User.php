@@ -24,6 +24,7 @@ use Laravel\Passport\HasApiTokens;
 use Lab404\Impersonate\Models\Impersonate;
 use Watson\Validating\ValidatingTrait;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use App\Presenters\UserPresenter;
 
 class User extends SnipeModel implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract, HasLocalePreference
 {
@@ -31,7 +32,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     use CompanyableTrait;
     use HasUploads;
 
-    protected $presenter = \App\Presenters\UserPresenter::class;
+    protected $presenter = UserPresenter::class;
     use SoftDeletes, ValidatingTrait, Loggable;
     use Authenticatable, Authorizable, CanResetPassword, HasApiTokens;
     use UniqueUndeletedTrait;
@@ -40,7 +41,16 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     use Impersonate;
     use Searchable;
 
-    protected $hidden = ['password', 'remember_token', 'permissions', 'reset_password_code', 'persist_code'];
+    protected $hidden = [
+        'password',
+        'remember_token',
+        'permissions',
+        'reset_password_code',
+        'persist_code',
+        'two_factor_secret',
+        'activation_code',
+    ];
+
     protected $table = 'users';
     protected $injectUniqueIdentifier = true;
 

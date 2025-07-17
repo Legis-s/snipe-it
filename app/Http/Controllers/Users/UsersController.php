@@ -13,7 +13,6 @@ use App\Models\Company;
 use App\Models\Group;
 use App\Models\Setting;
 use App\Models\User;
-use App\Notifications\WelcomeNotification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -146,18 +145,6 @@ class UsersController extends Controller
                 $user->groups()->sync($request->input('groups'));
             } else {
                 $user->groups()->sync([]);
-            }
-
-            if (($request->input('email_user') == 1) && ($request->filled('email'))) {
-                // Send the credentials through email
-                $data = [];
-                $data['email'] = e($request->input('email'));
-                $data['username'] = e($request->input('username'));
-                $data['first_name'] = e($request->input('first_name'));
-                $data['last_name'] = e($request->input('last_name'));
-                $data['password'] = e($request->input('password'));
-
-                $user->notify(new WelcomeNotification($data));
             }
 
             return Helper::getRedirectOption($request, $user->id, 'Users')

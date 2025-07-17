@@ -87,15 +87,15 @@
                                     </div>
                                 </div>
                             </div>
+                        @endif
 
-                            @if (auth()->user()->email!='')
-                                <div class="col-md-12" style="padding-top: 20px; display: none;" id="showEmailBox">
-                                    <label class="form-control">
-                                        <input type="checkbox" value="1" name="send_copy" id="send_copy" checked="checked" aria-label="send_copy">
-                                        {{ trans('mail.send_pdf_copy') }} ({{ auth()->user()->email }})
-                                    </label>
-                                </div>
-                            @endif
+                        @if (auth()->user()->email!='')
+                            <div class="col-md-12" style="padding-top: 20px; display: none;" id="showEmailBox">
+                                <label class="form-control">
+                                    <input type="checkbox" value="1" name="send_copy" id="send_copy" checked="checked" aria-label="send_copy">
+                                    {{ trans('mail.send_pdf_copy') }} ({{ auth()->user()->email }})
+                                </label>
+                            </div>
                         @endif
 
                     </div> <!-- / box-body -->
