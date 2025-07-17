@@ -7,6 +7,7 @@ use App\Http\Controllers\CheckInOutRequest;
 use App\Http\Controllers\Controller;
 use App\Models\Asset;
 use App\Models\AssetModel;
+use App\Models\Company;
 use App\Models\Statuslabel;
 use App\Models\Setting;
 use App\View\Label;
@@ -614,13 +615,26 @@ class BulkAssetsController extends Controller
     /**
      * Show Bulk Checkout Page
      */
-    public function showCheckout() : View
+    public function showCheckout(Request $request) : View
     {
         $this->authorize('checkout', Asset::class);
 
+        $ids = [];
+        if (request()->filled('purchase_id')) {
+            $assets = Company::scopeCompanyables(Asset::select('assets.*'), "company_id", "assets")
+                ->with('location', 'assetstatus', 'assetlog', 'company', 'defaultLoc', 'assignedTo',
+                    'model.category', 'model.manufacturer', 'model.fieldset', 'supplier');
+            $assets->where('assets.purchase_id', '=', request()->input('purchase_id'))->where('status_id', '=', 2)->where('assigned_to', '=', null);
+
+            foreach ($assets->get() as $asset) {
+                array_push($ids, $asset->id);
+            }
+        }
+
+
         $do_not_change = ['' => trans('general.do_not_change')];
         $status_label_list = $do_not_change + Helper::deployableStatusLabelList();
-        return view('hardware/bulk-checkout')->with('statusLabel_list', $status_label_list);
+        return view('hardware/bulk-checkout', ['selected_assets' => $ids])->with('statusLabel_list', $status_label_list)->with('selected_assets', $ids);
     }
 
     /**

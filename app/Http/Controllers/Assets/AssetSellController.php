@@ -82,16 +82,14 @@ class AssetSellController extends Controller
             }
 
             if ($asset->sell($target, $admin, $checkout_at, $request->get('note'), $request->get('name'))) {
-                return redirect()->to(Helper::getRedirectOption($request, $asset->id, 'Assets'))
-                    ->with('success', trans('admin/hardware/message.checkout.success'));
+                return Helper::getRedirectOption($request, $asset->id, 'Assets')
+                    ->with('success', trans('admin/hardware/message.sell.success'));
             }
             // Redirect to the asset management page with error
             return redirect()->route("hardware.sell.create", $asset)->with('error', trans('admin/hardware/message.sell.error') . $asset->getErrors());
         } catch (ModelNotFoundException $e) {
-            \Debugbar::info("ModelNotFoundExceptionpre sell");
             return redirect()->back()->with('error', trans('admin/hardware/message.checkout.error'))->withErrors($asset->getErrors());
         } catch (CheckoutNotAllowed $e) {
-            \Debugbar::info("CheckoutNotAllowedpre sell");
             return redirect()->back()->with('error', $e->getMessage());
         }
     }

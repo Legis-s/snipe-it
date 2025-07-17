@@ -140,8 +140,7 @@ Route::group(
         // Bulk sell
         Route::get('bulksell', [BulkSellAssetsController::class, 'showCheckout'])
             ->name('hardware.bulksell.show')
-            ->breadcrumbs(fn (Trail $trail) =>
-            $trail->parent('hardware.index')
+            ->breadcrumbs(fn(Trail $trail) => $trail->parent('hardware.index')
                 ->push(trans('general.bulk_sell'), route('hardware.index'))
             );
 
@@ -153,8 +152,7 @@ Route::group(
         //Sell
         Route::get('{asset}/sell', [AssetSellController::class, 'create'])
             ->name('hardware.sell.create')
-            ->breadcrumbs(fn (Trail $trail, Asset $asset) =>
-            $trail->parent('hardware.show', $asset)
+            ->breadcrumbs(fn(Trail $trail, Asset $asset) => $trail->parent('hardware.show', $asset)
                 ->push(trans('admin/hardware/general.sell'), route('hardware.index'))
             );
         Route::post('{assetId}/sell',
@@ -164,8 +162,7 @@ Route::group(
         //Rent
         Route::get('{asset}/rent', [AssetRentController::class, 'create'])
             ->name('hardware.rent.create')
-            ->breadcrumbs(fn (Trail $trail, Asset $asset) =>
-            $trail->parent('hardware.show', $asset)
+            ->breadcrumbs(fn(Trail $trail, Asset $asset) => $trail->parent('hardware.show', $asset)
                 ->push(trans('admin/hardware/general.rent'), route('hardware.index'))
             );
         Route::post('{assetId}/rent',
@@ -206,6 +203,29 @@ Route::group(['prefix' => 'consumables', 'middleware' => ['auth']],
             '{consumableId}/sell',
             [Consumables\ConsumableSellController::class, 'store']
         )->name('consumables.sell.store');
+
+
+        Route::get(
+            'bulkcheckout',
+            [Consumables\BulkConsumablesController::class, 'create']
+        )->name('consumables.bulkcheckout.show');
+
+        Route::post(
+            'bulkcheckout',
+            [Consumables\BulkConsumablesController::class, 'store']
+        )->name('consumables.bulkcheckout.store');
+
+
+        Route::get(
+            'bulksell',
+            [Consumables\BulkSellConsumablesController::class, 'create']
+        )->name('consumables.bulksell.show');
+
+        Route::post(
+            'bulksell',
+            [Consumables\BulkSellConsumablesController::class, 'store']
+        )->name('consumables.bulksell.store');
+
 
     }
 );

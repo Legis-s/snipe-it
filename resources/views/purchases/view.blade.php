@@ -316,12 +316,12 @@
 
                         <div class="col-md-12 hidden-print" style="padding-top: 20px;">
                             @if ($purchase->status == "finished")
-                                <a href="{{ route('hardware.bulkcheckout.show', ['purchase_id' => $purchase->id]) }}"
+                                <a href="{{ route('consumables.bulkcheckout.show', ['purchase_id' => $purchase->id]) }}"
                                    style="width:100%" class="btn btn-sm btn-primary btn-block btn-social hidden-print">
                                     <x-icon type="checkout" />
                                     {{ trans('general.bulk_checkout') }} расходников
                                 </a>
-                                <a href="{{ route('hardware.bulksell.show', ['purchase_id' => $purchase->id]) }}"
+                                <a href="{{ route('consumables.bulksell.show', ['purchase_id' => $purchase->id]) }}"
                                    style="width:100%" class="btn btn-sm btn-primary btn-block btn-social hidden-print">
                                     <x-icon type="checkout" />
                                     {{ trans('general.bulk_sell') }} расходников
@@ -477,7 +477,6 @@
                                 }
                                 Swal.fire({
                                     title: "Принять - " + row.consumable,
-                                    // text: 'Do you want to continue',
                                     icon: 'question',
                                     input: "range",
                                     inputLabel: 'Количество',
@@ -510,7 +509,6 @@
                                             data: sendData,
                                             dataType: 'json',
                                             success: function (data) {
-                                                console.log(data);
                                                 if ("reviewed" in row) {
                                                     row.reviewed = parseInt(result.value) + parseInt(row.reviewed);
                                                 } else {

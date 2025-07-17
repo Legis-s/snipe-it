@@ -26,7 +26,6 @@
       <div class="box-body">
         <form class="form-horizontal" method="post" action="" autocomplete="off">
           {{ csrf_field() }}
-
             @include ('partials.forms.edit.asset-select', [
            'translated_name' => trans('general.assets'),
            'fieldname' => 'selected_assets[]',
@@ -35,9 +34,8 @@
            'asset_status_type' => 'RTD',
            'select_id' => 'assigned_assets_select',
            'asset_selector_div_id' => 'assets_to_checkout_div',
-           'asset_ids' => old('selected_assets')
+           'asset_ids' =>  old('selected_assets', $selected_assets),
          ])
-
 
             <!-- Status -->
             <div class="form-group {{ $errors->has('status_id') ? 'error' : '' }}">

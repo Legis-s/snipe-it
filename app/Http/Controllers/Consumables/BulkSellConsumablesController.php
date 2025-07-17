@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Assets;
+namespace App\Http\Controllers\Consumables;
 
 use App\Helpers\Helper;
 use App\Http\Controllers\CheckInOutRequest;
@@ -15,14 +15,14 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 
-class BulkSellAssetsController extends Controller
+class BulkSellConsumablesController extends Controller
 {
     use CheckInOutRequest;
 
     /**
      * Show Bulk Sell Page
      */
-    public function showCheckout() : View
+    public function show() : View
     {
         $this->authorize('checkout', Asset::class);
 
@@ -44,7 +44,7 @@ class BulkSellAssetsController extends Controller
     /**
      * Process Multiple Sell Request
      */
-    public function storeCheckout(AssetSellRequest $request) : RedirectResponse | ModelNotFoundException
+    public function store(AssetSellRequest $request) : RedirectResponse | ModelNotFoundException
     {
         $this->authorize('checkout', Asset::class);
 
