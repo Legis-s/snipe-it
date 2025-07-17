@@ -91,7 +91,6 @@
                         <div class="box-body">
                             <div class="row">
                                 <div class="col-md-12">
-                                    {{--                    <div class="table table-responsive">--}}
                                     <table
                                             data-columns="{{ \App\Presenters\ConsumableAssignmentPresenter::dataTableLayoutIn() }}"
                                             data-cookie-id-table="сonsumableAssignmentTable"
@@ -116,7 +115,9 @@
 
                 @endif
             @endif
-        </div><!--/.col-md-9-->
+        </div>
+        <!--/.col-md-9-->
+
         <div class="col-md-3">
             <div class="row">
                 <div class="col-md-12">
@@ -298,50 +299,38 @@
                         </div><!-- /.box-body -->
                     </div> <!--/.box-->
                     @can('checkout', \App\Models\Asset::class)
-
-                        <div class="col-md-12 hidden-print" style="padding-top: 5px;">
-                            @if ($purchase->status == "finished")
-                                <a href="{{ route('hardware.bulkcheckout.show', ['purchase_id' => $purchase->id]) }}"
-                                   style="width:100%" class="btn btn-sm bg-maroon btn-social btn-block hidden-print">
-                                    <x-icon type="checkout" />
-                                    {{ trans('general.bulk_checkout') }} активов
-                                </a>
-                                <a href="{{ route('hardware.bulksell.show', ['purchase_id' => $purchase->id]) }}"
-                                   style="width:100%" class="btn btn-sm bg-maroon btn-social btn-block hidden-print">
-                                    <x-icon type="checkout" />
-                                    {{ trans('general.bulk_sell') }} активов
-                                </a>
+                        @if ($purchase->status == "finished")
+                            @if (count($purchase->assets) > 0)
+                                <div class="col-md-12 hidden-print" style="padding-top: 5px;">
+                                    <a href="{{ route('hardware.bulkcheckout.show', ['purchase_id' => $purchase->id]) }}"
+                                       style="width:100%"
+                                       class="btn btn-sm bg-maroon btn-social btn-block hidden-print">
+                                        <x-icon type="checkout"/>
+                                        {{ trans('general.bulk_checkout') }} активов
+                                    </a>
+                                </div>
                             @endif
-                        </div>
-
-                        <div class="col-md-12 hidden-print" style="padding-top: 20px;">
-                            @if ($purchase->status == "finished")
-                                <a href="{{ route('consumables.bulkcheckout.show', ['purchase_id' => $purchase->id]) }}"
-                                   style="width:100%" class="btn btn-sm btn-primary btn-block btn-social hidden-print">
-                                    <x-icon type="checkout" />
-                                    {{ trans('general.bulk_checkout') }} расходников
-                                </a>
-                                <a href="{{ route('consumables.bulksell.show', ['purchase_id' => $purchase->id]) }}"
-                                   style="width:100%" class="btn btn-sm btn-primary btn-block btn-social hidden-print">
-                                    <x-icon type="checkout" />
-                                    {{ trans('general.bulk_sell') }} расходников
-                                </a>
+                            @if ( strlen($purchase->consumables_json) > 2)
+                                <div class="col-md-12 hidden-print" style="padding-top: 5px;">
+                                    <a href="{{ route('consumables.bulkcheckout.show', ['purchase_id' => $purchase->id]) }}"
+                                       style="width:100%"
+                                       class="btn btn-sm btn-primary btn-block btn-social hidden-print">
+                                        <x-icon type="checkout"/>
+                                        {{ trans('general.bulk_checkout') }} расходников
+                                    </a>
+                                </div>
                             @endif
-                        </div>
+                        @endif
                     @endcan
                 </div>
             </div>
         </div>
+        <!--/.col-md-3-->
     </div>
 
 @stop
 
 @section('moar_scripts')
-    @include ('partials.bootstrap-table', [
-    'exportFile' => 'locations-export',
-    'search' => true
- ])
-
 
     <script nonce="{{ csrf_token() }}">
 

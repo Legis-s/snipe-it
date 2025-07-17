@@ -396,10 +396,10 @@
             /**
              *  START CUSTOM
              */
+
             if ((row.available_actions) && (row.available_actions.print_label === true)) {
                 actions += '<span class="btn btn-sm btn-warning print_label" data-tooltip="true" title="Print label"><i class="fas fa-barcode" style="color: white" aria-hidden="true"></i><span class="sr-only">Print label</span></span>&nbsp;';
             }
-
 
             if ((row.available_actions) && (row.available_actions.inventory === true)) {
                 actions += '<span class="btn btn-sm btn-warning inventory" data-tooltip="true" title="Inventory Item"><i class="fas fa-key" style="color: white" aria-hidden="true"></i><span class="sr-only">Inventory</span></span>&nbsp;';
@@ -1114,8 +1114,6 @@
                 if ((row.available_actions.checkout == true) && (row.user_can_checkout == true) && ((!row.asset_id) && (!row.assigned_to))) {
                     return '<div class="btn-group" style="min-width:270px">' +
                         '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/checkout" class="btn btn-sm bg-maroon" data-tooltip="true" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>'+
-                        '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/sell" class="btn btn-sm bg-red" data-tooltip="true" title="{{ trans('general.sell_tooltip') }}">{{ trans('general.sell') }}</a>'+
-                        '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/rent" class="btn btn-sm bg-yellow" data-tooltip="true" title="{{ trans('general.rent_tooltip') }}">{{ trans('general.rent') }}</a>'+
                         '</div>';
                     // The user is allowed to check items out, but the item is not deployable
                 } else if (((row.user_can_checkout == false)) && (row.available_actions.checkout == true) && (!row.assigned_to)) {
@@ -1136,7 +1134,6 @@
             if ((row.available_actions.checkout == true) && (row.user_can_checkout == true) && ((!row.asset_id) && (!row.assigned_to))) {
                 return '<div class="btn-group" style="min-width:180px">' +
                     '<a href="{{ url('/') }}/' + destination + '/' + row.id + '/checkout" class="btn btn-sm bg-maroon" data-toggle="tooltip" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>'+
-                    '<a href="{{ url('/') }}/' + destination + '/' + row.id + '/sell" class="btn btn-sm bg-red" data-toggle="tooltip" title="{{ trans('general.sell_tooltip') }}">{{ trans('general.sell') }}</a>'+
                     '</div>';
 
                 // The user is allowed to check items out, but the item is not deployable
@@ -1173,36 +1170,6 @@
                 }
             }
         }
-
-        function photosFormatter(value, row) {
-            var result = "";
-            if (value) {
-                if (value.length > 0) {
-                    result = ' <div class="aniimated-thumbnials" >';
-                    value.forEach((photo) => {
-                        if (!photo.comment) {
-                            photo.comment = "";
-                        }
-                        result += '<a href="' + photo.path + '" data-lightbox="image-1" data-title="' + photo.comment + '"><img width="200" class="img-thumbnail"  data-toggle="tooltip" data-placement="bottom" title="' + photo.comment + '" src="' + photo.path + '" /></a>';
-                    });
-                    result += '  </div>';
-                    return result;
-                } else {
-                    return '';
-                }
-            } else {
-                return '';
-            }
-
-        }
-
-        // // Create a linked phone number in the table list
-        // function massOperationsFormatter(value, row) {
-        //     if (value) {
-        //         return '<a href="/massoperations/' + row.id + '">' + value + '</a>';
-        //     }
-        // }
-
 
         function inventoryStatusFormatter(value, row) {
             if ((row.status)) {
@@ -1370,7 +1337,6 @@
                 return "<a href='https://bitrix.legis-s.ru/services/lists/52/element/0/" + value + "/?list_section_id=' target='_blank'>" + value + "</a>";
             } else {
                 if (row.user) {
-                    {{--return '<a href="{{ url('/') }}/api/v1/purchases/' + row.id + '/resend"> Отправить заново</a>';--}}
                         return '<button type="button"  class="btn btn-default  btn-sm resend">Отправить заново</button>'
                 } else {
                     return ' ';
@@ -1387,15 +1353,8 @@
         }
 
         function priceFormatter(value, row) {
-            if (row.currency && row.final_price) {
-                return "<span style='font-size: 120%; font-weight: bold;' class='text-primary'>" + row.final_price + " " + row.currency + "</span>";
-            } else {
-            }
-        }
-
-        function deliveryСostFormatter(value, row) {
-            if (row.currency && row.delivery_cost) {
-                return "<span style='font-size: 120%; font-weight: bold;' class='text-primary'>" + row.delivery_cost + " " + row.currency + "</span>";
+            if (row.currency && value) {
+                return "<span style='font-size: 120%; font-weight: bold;' class='text-primary'>" + value + " " + row.currency + "</span>";
             } else {
             }
         }
@@ -1415,19 +1374,8 @@
             return "<button type='button' class='btn btn-danger  btn-sm bulk-clear'>Убрать</button>"
         }
 
-        function fileUploadFormatter(value) {
-            if ((value) && (value.url) && (value.inlineable)) {
-                return '<a href="' + value.url + '" data-toggle="lightbox" data-type="image"><img src="' + value.url + '" style="max-height: {{ $snipeSettings->thumbnail_max_h }}px; width: auto;" class="img-responsive"></a>';
-            } else if ((value) && (value.url)) {
-                return '<a href="' + value.url + '" class="btn btn-default"><i class="fas fa-download"></i></a>';
-            }
-        }
-
         function consumablesReturnFormatter(value, row) {
             if (row.can_return == true && row.quantity != 0) {
-                // if (row.can_close_documents == true) {
-                //     return '<button class="btn btn-sm bg-maroon return" data-tooltip="true" title="Вернуть">Вернуть</button><br><button class="btn btn-sm bg-maroon close_documents" data-tooltip="true" title="Вернуть">Получены закр. док.</button>';
-                // }
                 return '<button class="btn btn-sm bg-maroon return" data-tooltip="true" title="Вернуть">Вернуть</button>';
             } else {
                 return '';
@@ -1516,7 +1464,6 @@
             });
         },
         'click .inventory': function (e, value, row, index) {
-
             Swal.fire({
                 title: "Изменить тег актива <b>" + row.asset_tag + " </b>",
                 // text: 'Do you want to continue',
@@ -1658,120 +1605,6 @@
                     });
                 }
             });
-        },
-        'click .close_documents': function (e, value, row, index) {
-            if (row.contract) {
-                $.ajax({
-                    type: 'POST',
-                    url: "/api/v1/consumableassignments/" + row.id + "/close_documents",
-                    headers: {
-                        "X-Requested-With": 'XMLHttpRequest',
-                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                    },
-                    dataType: 'json',
-                    success: function (data) {
-                        $(".table").bootstrapTable('refresh', {"silent": true});
-                    },
-                });
-            } else {
-                Swal.fire({
-                    title: "Закрывающие документы - " + row.name + " " + row.assigned_to.name,
-                    // text: 'Do you want to continue',
-                    icon: 'question',
-                    html:
-                        '<select class="js-data-ajax" data-endpoint="contracts" data-placeholder="Выберите договор" name="assigned_contract" style="width: 100%" id="assigned_contract_contract_select" aria-label="assigned_contract">' +
-                        '<option value=""  role="option">Выберите договор</option>' +
-                        '</select>',
-                    reverseButtons: true,
-                    showCancelButton: true,
-                    confirmButtonText: 'Подтвердить',
-                    cancelButtonText: 'Отменить',
-                    preConfirm: () => {
-                        return [
-                            $('#assigned_contract_contract_select').val(),
-                        ]
-                    },
-                    didOpen: (toast) => {
-                        // Crazy select2 rich dropdowns with images!
-                        $('.js-data-ajax').each(function (i, item) {
-                            console.log("js-data-ajax")
-                            var link = $(item);
-                            var endpoint = link.data("endpoint");
-                            var select = link.data("select");
-                            link.select2({
-
-                                /**
-                                 * Adds an empty placeholder, allowing every select2 instance to be cleared.
-                                 * This placeholder can be overridden with the "data-placeholder" attribute.
-                                 */
-                                placeholder: '',
-                                allowClear: true,
-
-                                ajax: {
-
-                                    // the baseUrl includes a trailing slash
-                                    url: baseUrl + 'api/v1/' + endpoint + '/selectlist',
-                                    dataType: 'json',
-                                    delay: 250,
-                                    headers: {
-                                        "X-Requested-With": 'XMLHttpRequest',
-                                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                                    },
-                                    data: function (params) {
-                                        var data = {
-                                            search: params.term,
-                                            page: params.page || 1,
-                                            assetStatusType: link.data("asset-status-type"),
-                                        };
-                                        return data;
-                                    },
-                                    processResults: function (data, params) {
-
-                                        params.page = params.page || 1;
-
-                                        var answer = {
-                                            results: data.items,
-                                            pagination: {
-                                                more: "true" //(params.page  < data.page_count)
-                                            }
-                                        };
-
-                                        return answer;
-                                    },
-                                    cache: true
-                                },
-                                escapeMarkup: function (markup) {
-                                    return markup;
-                                }, // let our custom formatter work
-                                templateResult: formatDatalist,
-                                templateSelection: formatDataSelection
-                            });
-
-                        });
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        var contract_id = result.value[0];
-                        var sendData = {
-                            contract_id: contract_id,
-                        };
-
-                        $.ajax({
-                            type: 'POST',
-                            url: "/api/v1/consumableassignments/" + row.id + "/close_documents",
-                            headers: {
-                                "X-Requested-With": 'XMLHttpRequest',
-                                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                            },
-                            data: sendData,
-                            dataType: 'json',
-                            success: function (data) {
-                                $(".table").bootstrapTable('refresh');
-                            },
-                        });
-                    }
-                });
-            }
         },
     };
 

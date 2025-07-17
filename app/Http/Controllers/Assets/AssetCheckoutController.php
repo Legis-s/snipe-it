@@ -8,6 +8,7 @@ use App\Http\Controllers\CheckInOutRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AssetCheckoutRequest;
 use App\Models\Asset;
+use App\Models\Deal;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Session;
 use \Illuminate\Contracts\View\View;
@@ -138,9 +139,18 @@ class AssetCheckoutController extends Controller
 
             session()->put(['redirect_option' => $request->get('redirect_option'), 'checkout_to_type' => $request->get('checkout_to_type')]);
 
-            if ($asset->checkOut($target, $admin, $checkout_at, $expected_checkin, $request->get('note'), $request->get('name'))) {
-                return Helper::getRedirectOption($request, $asset->id, 'Assets')
-                    ->with('success', trans('admin/hardware/message.checkout.success'));
+            if (is_a($target, Deal::class, true)) {
+                $asset->location_id = null;
+                $asset->rtd_location_id = null;
+                if ($asset->sell($target, $admin, $checkout_at, $request->get('note'), $request->get('name'))) {
+                    return Helper::getRedirectOption($request, $asset->id, 'Assets')
+                        ->with('success', trans('admin/hardware/message.sell.success'));
+                }
+            }else{
+                if ($asset->sell($target, $admin, $checkout_at, $request->get('note'), $request->get('name'))) {
+                    return Helper::getRedirectOption($request, $asset->id, 'Assets')
+                        ->with('success', trans('admin/hardware/message.sell.success'));
+                }
             }
             // Redirect to the asset management page with error
             return redirect()->route("hardware.checkout.create", $asset)->with('error', trans('admin/hardware/message.checkout.error').$asset->getErrors());

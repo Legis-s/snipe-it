@@ -36,21 +36,21 @@ class BulkConsumablesController extends Controller
         $this->authorize('checkout', Consumable::class);
 
         $ids = [];
-        if (request()->filled('purchase_id')) {
-            $assets = Company::scopeCompanyables(Asset::select('assets.*'), "company_id", "assets")
-                ->with('location', 'assetstatus', 'assetlog', 'company', 'defaultLoc', 'assignedTo',
-                    'model.category', 'model.manufacturer', 'model.fieldset', 'supplier');
-            $assets->where('assets.purchase_id', '=', request()->input('purchase_id'))->where('status_id', '=', 2)->where('assigned_to', '=', null);
-
-            foreach ($assets->get() as $asset) {
-                array_push($ids, $asset->id);
-            }
-        }
+//        if (request()->filled('purchase_id')) {
+//            $assets = Company::scopeCompanyables(Asset::select('assets.*'), "company_id", "assets")
+//                ->with('location', 'assetstatus', 'assetlog', 'company', 'defaultLoc', 'assignedTo',
+//                    'model.category', 'model.manufacturer', 'model.fieldset', 'supplier');
+//            $assets->where('assets.purchase_id', '=', request()->input('purchase_id'))->where('status_id', '=', 2)->where('assigned_to', '=', null);
+//
+//            foreach ($assets->get() as $asset) {
+//                array_push($ids, $asset->id);
+//            }
+//        }
 
 
         $do_not_change = ['' => trans('general.do_not_change')];
         $status_label_list = $do_not_change + Helper::deployableStatusLabelList();
-        return view('hardware/bulk-checkout', ['selected_assets' => $ids])->with('statusLabel_list', $status_label_list)->with('selected_assets', $ids);
+        return view('consumables/bulk-checkout', ['selected_consumables' => $ids])->with('statusLabel_list', $status_label_list);
     }
 
     /**
@@ -120,12 +120,12 @@ class BulkConsumablesController extends Controller
 
             if (! $errors) {
                 // Redirect to the new asset page
-                return redirect()->to('hardware')->with('success', trans_choice('admin/hardware/message.multi-checkout.success', $asset_ids));
+                return redirect()->to('consumables')->with('success', trans_choice('admin/hardware/message.multi-checkout.success', $asset_ids));
             }
             // Redirect to the asset management page with error
-            return redirect()->route('hardware.bulkcheckout.show')->withInput()->with('error', trans_choice('admin/hardware/message.multi-checkout.error', $asset_ids))->withErrors($errors);
+            return redirect()->route('consumables.bulkcheckout.show')->withInput()->with('error', trans_choice('admin/hardware/message.multi-checkout.error', $asset_ids))->withErrors($errors);
         } catch (ModelNotFoundException $e) {
-            return redirect()->route('hardware.bulkcheckout.show')->withInput()->with('error', trans_choice('admin/hardware/message.multi-checkout.error', $request->input('selected_assets')));
+            return redirect()->route('consumables.bulkcheckout.show')->withInput()->with('error', trans_choice('admin/hardware/message.multi-checkout.error', $request->input('selected_assets')));
         }
         
     }

@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Consumables;
 
 use App\Events\CheckoutableCheckedOut;
+use App\Events\CheckoutableSell;
 use App\Helpers\Helper;
 use App\Http\Controllers\CheckInOutRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ConsumableCheckoutRequest;
 use App\Models\Consumable;
+use App\Models\Deal;
 use App\Models\User;
 use Illuminate\Http\Request;
 use \Illuminate\Contracts\View\View;
@@ -88,20 +90,27 @@ class ConsumableCheckoutController extends Controller
 
         $target = $this->determineCheckoutTarget();
 
+        $type = ConsumableAssignment::ISSUED;
+        if (is_a($target, Deal::class, true)) {
+            $type = ConsumableAssignment::SOLD;
+        }
         $consumable->locations()->attach($consumable->id, [
             'consumable_id' => $consumable->id,
             'created_by' => auth()->id(),
             'quantity' => $quantity,
             'comment' =>  $request->input('note'),
             'cost' => $consumable->purchase_cost,
-            'type' => ConsumableAssignment::ISSUED,
+            'type' => $type,
             'assigned_to' => $target->id,
             'assigned_type' => get_class($target),
         ]);
 
 
-        event(new CheckoutableCheckedOut($consumable, $target, auth()->user(), $request->input('note')));
-
+        if (is_a($target, Deal::class, true)) {
+            event(new CheckoutableSell($consumable, $target, auth()->user(), $request->input('note')));
+        }else{
+            event(new CheckoutableCheckedOut($consumable, $target, auth()->user(), $request->input('note')));
+        }
         session()->put(['redirect_option' => $request->get('redirect_option'), 'checkout_to_type' => $request->get('checkout_to_type')]);
 
 

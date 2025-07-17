@@ -585,11 +585,6 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                                 {{ trans('general.bulk_checkout') }}
                                             </a>
                                         </li>
-                                        <li{!! (Request::is('hardware/bulksell') ? ' class="active"' : '') !!}>
-                                            <a href="{{ route('hardware.bulksell.show') }}">
-                                                {{ trans('general.bulk_sell') }}
-                                            </a>
-                                        </li>
                                         <li{!! (Request::is('hardware/requested') ? ' class="active"' : '') !!}>
                                             <a href="{{ route('assets.requested') }}">
                                                 {{ trans('general.requested') }}</a>

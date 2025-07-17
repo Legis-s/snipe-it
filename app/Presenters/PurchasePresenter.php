@@ -100,7 +100,7 @@ class PurchasePresenter extends Presenter
                 "title" => "Доставка",
                 "visible" => true,
                 "align" => 'right',
-                "formatter" => 'deliveryСostFormatter',
+                "formatter" => 'priceFormatter',
             ], [
                 "field" => "status",
                 "searchable" => true,

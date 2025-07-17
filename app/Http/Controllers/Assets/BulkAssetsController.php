@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\Company;
+use App\Models\Deal;
 use App\Models\Statuslabel;
 use App\Models\Setting;
 use App\View\Label;
@@ -684,9 +685,13 @@ class BulkAssetsController extends Controller
                     if ($request->filled('status_id')) {
                         $asset->status_id = $request->get('status_id');
                     }
-
-                    $checkout_success = $asset->checkOut($target, $admin, $checkout_at, $expected_checkin, e($request->get('note')), $asset->name, null);
-
+                    if (is_a($target, Deal::class, true)) {
+                        $asset->location_id = null;
+                        $asset->rtd_location_id = null;
+                        $checkout_success = $asset->sell($target, $admin, $checkout_at, e($request->get('note'), $request->get('name')));
+                    }else{
+                        $checkout_success = $asset->checkOut($target, $admin, $checkout_at, $expected_checkin, e($request->get('note')), $asset->name, null);
+                    }
                     //TODO - I think this logic is duplicated in the checkOut method?
                     if ($target->location_id != '') {
                         $asset->location_id = $target->location_id;

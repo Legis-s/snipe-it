@@ -130,10 +130,67 @@
                             <form class="form-horizontal">
                                 @include ('partials.forms.purchases.model-select', ['translated_name' => trans('admin/hardware/form.model'), 'fieldname' => 'model_id', 'required' => 'true'])
                                 <p class="duble text-center text-bold text-danger hidden">Такая модель уже есть</p>
-                                @include ('partials.forms.purchases.purchase_cost')
-                                @include ('partials.forms.purchases.nds')
-                                @include ('partials.forms.purchases.warranty')
-                                @include ('partials.forms.purchases.quantity')
+                                <!-- Purchase Cost -->
+                                <div class="form-group {{ $errors->has('purchase_cost') ? ' has-error' : '' }}">
+                                    <label for="purchase_cost" class="col-md-3 control-label">{{ trans('general.purchase_cost') }}</label>
+                                    <div class="col-md-7">
+                                        <div class="input-group col-md-8" style="padding-left: 0px;">
+                                            <input class="form-control float" type="text" name="purchase_cost" aria-label="purchase_cost" id="purchase_cost" value="{{ old('purchase_cost', Helper::formatCurrencyOutput($item->purchase_cost)) }}" />
+                                            <span class="input-group-addon">
+                @if (isset($currency_type))
+                                                    {{ $currency_type }}
+                                                @else
+                                                    {{ $snipeSettings->default_currency }}
+                                                @endif
+            </span>
+                                        </div>
+                                        <div class="col-md-4" style="padding-left: 0px;">
+                                            {!! $errors->first('purchase_cost', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- nds -->
+                                <div class="form-group {{ $errors->has('nds') ? ' has-error' : '' }}">
+                                    <label for="nds" class="col-md-3 control-label">НДС</label>
+                                    <div class="col-md-7">
+                                        <div class="input-group col-md-8" style="padding-left: 0px;">
+                                            <input class="form-control" type="number" min="0" name="nds" aria-label="nds" id="nds" value="{{  $item->nds }}" />
+                                            <span class="input-group-addon">%</span>
+                                        </div>
+                                        <div class="col-md-4" style="padding-left: 0px;">
+                                            {!! $errors->first('nds', '<span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Warranty -->
+                                <div class="form-group {{ $errors->has('warranty_months') ? ' has-error' : '' }}">
+                                    <label for="warranty_months" class="col-md-3 control-label">{{ trans('admin/hardware/form.warranty') }}</label>
+                                    <div class="col-md-7">
+                                        <div class="input-group col-md-8" style="padding-left: 0px;">
+                                            <input class="form-control" type="text" name="warranty_months" id="warranty_months" value="{{ old('warranty_months', $item->warranty_months) }}" maxlength="3" />
+                                            <span class="input-group-addon">{{ trans('admin/hardware/form.months') }}</span>
+                                        </div>
+                                        <div class="col-md-4" style="padding-left: 0px;">
+                                            {!! $errors->first('warranty_months', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- QTY -->
+                                <div class="form-group {{ $errors->has('qty') ? ' has-error' : '' }}">
+                                    <label for="qty" class="col-md-3 control-label">{{ trans('general.quantity') }}</label>
+                                    <div class="col-md-7">
+                                        <div class="col-md-8" style="padding-left:0px">
+                                            <input class="form-control" type="number" min="0" name="quantity" aria-label="quantity" id="quantity" value="1"/>
+                                        </div>
+                                        <div class="col-md-4" style="padding-left: 0px;">
+                                            {!! $errors->first('qty', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                        </div>
+                                    </div>
+                                </div>
+
                                 @if(Auth::user()->favoriteLocation)
                                     @include ('partials.forms.purchases.location-select-checkin', ['translated_name' =>"Ожидаемый склад", 'fieldname' => 'location_id','hide_new'=>true])
                                 @else

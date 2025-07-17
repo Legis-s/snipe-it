@@ -413,6 +413,7 @@ $(function () {
                 $('#assigned_asset').show();
                 $('#assigned_user').hide();
                 $('#assigned_location').hide();
+                $('#assigned_deal').hide();
                 $('.notification-callout').fadeOut();
 
                 $('[name="assigned_location"]').val('').trigger('change.select2');
@@ -423,6 +424,17 @@ $(function () {
                 $('#assigned_asset').hide();
                 $('#assigned_user').hide();
                 $('#assigned_location').show();
+                $('#assigned_deal').hide();
+                $('.notification-callout').fadeOut();
+
+                $('[name="assigned_asset"]').val('').trigger('change.select2');
+                $('[name="assigned_user"]').val('').trigger('change.select2');
+            } else if (assignto_type == 'deal') {
+                $('#current_assets_box').fadeOut();
+                $('#assigned_asset').hide();
+                $('#assigned_user').hide();
+                $('#assigned_location').hide();
+                $('#assigned_deal').show();
                 $('.notification-callout').fadeOut();
 
                 $('[name="assigned_asset"]').val('').trigger('change.select2');
@@ -435,6 +447,7 @@ $(function () {
                 if (userid) {
                     $('#current_assets_box').fadeIn();
                 }
+                $('#assigned_deal').hide();
                 $('.notification-callout').fadeIn();
 
                 $('[name="assigned_asset"]').val('').trigger('change.select2');

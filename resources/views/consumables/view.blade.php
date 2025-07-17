@@ -112,12 +112,6 @@
                           {{ trans('general.checkout') }}
                         </a>
                       </div>
-                      <div class="col-md-12">
-                        <a href="{{ route('consumables.sell.show', $consumable->id) }}" style="margin-bottom:5px;" class="btn btn-sm btn-block bg-maroon btn-social hidden-print">
-                          <x-icon type="checkout" />
-                          {{ trans('general.sell') }}
-                        </a>
-                      </div>
                     @else
                       <div class="col-md-12">
                         <button style="margin-bottom:10px;" class="btn btn-block bg-maroon btn-sm btn-social hidden-print disabled">
