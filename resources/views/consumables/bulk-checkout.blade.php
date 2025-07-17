@@ -31,9 +31,9 @@
            'fieldname' => 'selected_consumables[]',
            'multiple' => true,
            'required' => true,
-           'consumable_status_type' => 'RTD',
+           'consumable_status_type' => 'notnull',
            'select_id' => 'assigned_consumables_select',
-           'consumable_selector_div_id' => 'consumableS_to_checkout_div',
+           'consumable_selector_div_id' => 'consumables_to_checkout_div',
            'consumable_ids' =>  old('selected_consumables', $selected_consumables),
          ])
             <!-- Checkout selector -->
@@ -68,7 +68,63 @@
 
 @section('moar_scripts')
     <script nonce="{{ csrf_token() }}">
-        // $(function () {});
+         $(function () {
+             $('#assigned_consumables_select').select2('destroy').select2();
+
+             function formatState (state) {
+                 console.log(state);
+                 if (!state.id) {
+                     return state.text;
+                 }
+
+                 var $state = $(
+                     '<span>аааааааааааааа</span>'
+                 );
+
+                 // Use .text() instead of HTML string concatenation to avoid script injection issues
+                 // $state.find("span").text(state.text);
+
+                 return $state;
+             };
+
+
+             $('#assigned_consumables_select').on('select2:select', function (e) {
+                 var data = e.params.data;
+                 console.log(data);
+                 var remaining =  data.numRemaining;
+                 if (!data.selected_quantity){
+                     data.selected_quantity = 1
+                 }else{
+                     remaining = remaining-data.selected_quantity
+                 }
+                 Swal.fire({
+                     title: "Выберите количество:<br>" + data.text,
+                     // text: 'Do you want to continue',
+                     icon: 'question',
+                     input: "range",
+                     inputLabel: 'Максимум '+remaining,
+                     inputAttributes: {
+                         min: 1,
+                         max: remaining,
+                         step: "1"
+                     },
+                     inputValue: data.selected_quantity,
+                     reverseButtons: true,
+                     showCancelButton: true,
+                     confirmButtonText: 'Подтвердить',
+                     cancelButtonText: 'Отменить',
+                 }).then((result) => {
+                     if (result.isConfirmed) {
+                         console.log(result.value);
+                         data.selected_quantity = result.value;
+                         data.text =  data.selected_quantity + " -> "+data.text;
+                         console.log(data);
+                         // $('#assigned_consumables_select').val(data.id).trigger("change");
+                         // $('#assigned_consumables_select option[value="'+data.id+'"]').text(data.text);
+                     }
+                 });
+             });
+         });
     </script>
 @stop
 

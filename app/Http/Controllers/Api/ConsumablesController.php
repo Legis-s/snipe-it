@@ -417,6 +417,7 @@ class ConsumablesController extends Controller
         $consumables = Consumable::select([
             'consumables.id',
             'consumables.name',
+            'consumables.qty',
         ]);
 
         if ($request->filled('search')) {
@@ -431,9 +432,7 @@ class ConsumablesController extends Controller
             $consumable->use_text .= "[" . $consumable->numRemaining() . "] ";
             $consumable->use_text .= (($consumable->location) ? " (" . e($consumable->location->name) . ') - ' : '');
             $consumable->use_text .= (($consumable->category) ? e($consumable->category->name) . ' - ' : '');
-
             $consumable->use_text .= (($consumable->manufacturer) ? e($consumable->manufacturer->name) . ' - ' : '');
-
             $consumable->use_text .= e($consumable->name) . ' - ';
             $consumable->use_text .= e($consumable->model_number);
 

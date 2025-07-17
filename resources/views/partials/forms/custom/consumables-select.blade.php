@@ -4,14 +4,15 @@
     <label for="{{ $fieldname }}" class="col-md-3 control-label">{{ $translated_name }}</label>
     <div class="col-md-7">
         <select class="js-data-ajax select2"
-                data-endpoint="consumable"
+                data-endpoint="consumables"
                 data-placeholder="{{ trans('general.select_consumable') }}"
                 aria-label="{{ $fieldname }}"
                 name="{{ $fieldname }}"
                 style="width: 100%"
                 id="{{ (isset($select_id)) ? $select_id : 'assigned_consumable_select' }}"
+                data-template-selection="formatState"
                 {{ ((isset($multiple)) && ($multiple === true)) ? ' multiple' : '' }}
-                {!! (!empty($consumable_status_type)) ? ' data-consumable-status-type="' . $consumable_status_type . '"' : '' !!}
+                {!! (!empty($consumable_status_type)) ? ' data-asset-status-type="' . $consumable_status_type . '"' : '' !!}
                 {!! (!empty($company_id)) ? ' data-company-id="' .$company_id.'"'  : '' !!}
                 {{  ((isset($required) && ($required =='true'))) ?  ' required' : '' }}
         >

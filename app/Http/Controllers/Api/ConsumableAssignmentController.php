@@ -19,9 +19,6 @@ class ConsumableAssignmentController extends Controller
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
-     * @since [v4.0]
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
      */
     public function index(Request $request): array
     {
@@ -146,53 +143,4 @@ class ConsumableAssignmentController extends Controller
         return response()->json(Helper::formatStandardApiResponse('error', null, $consumableAssignment->getErrors()));
     }
 
-//    /**
-//     * Update the specified resource in storage.
-//     *
-//     * @param \Illuminate\Http\Request $request
-//     * @param int $id
-//     * @return \Illuminate\Http\Response
-//     * @since [v4.0]
-//     * @author [A. Gianotto] [<snipe@snipe.net>]
-//     */
-//    public function close_documents(Request $request, $id)
-//    {
-//        $this->authorize('view', Consumable::class);
-//
-//        $consumableAssignment = ConsumableAssignment::findOrFail($id);
-//
-//        $user_pre = User::findOrFail($consumableAssignment->assigned_to);
-//        $user = Auth::user();
-//
-//
-//        $contract = $consumableAssignment->contract;
-//        if (!$contract && $request->filled('contract_id')){
-//            $contract_id = $request->input('contract_id');
-//            $contract = Contract::findOrFail($contract_id);
-//        }
-//        $consumableAssignment->assigned_type = Contract::class;
-//        $consumableAssignment->assigned_to = $contract->id;
-//
-//
-//        $user_name = "(".$user->id.") ".$user->last_name." ".$user->first_name;
-//        $user_name_pre = "(".$user_pre->id.") ".$user_pre->last_name." ".$user_pre->first_name;
-//        $consumableAssignment->comment = $consumableAssignment->comment." Закрывающие документы получены ".date("Y-m-d H:i:s").", ".$user_name." Расходник списан с пользователя: ".$user_name_pre;
-//
-//        if ($consumableAssignment->save()) {
-//            $log = new Actionlog();
-//            $log->user_id = Auth::id();
-//            $log->action_type = 'sell';
-//            $log->target_type = Contract::class;
-//            $log->target_id = $contract->id;
-//            $log->item_id = $consumableAssignment->consumable_id;
-//            $log->item_type = Consumable::class;
-//            $log->note = json_encode($request->all());
-//            $log->save();
-//
-//            return response()->json(Helper::formatStandardApiResponse('success', $consumableAssignment, trans('admin/consumables/message.update.success')));
-//        }else {
-//            return response()->json(Helper::formatStandardApiResponse('error', null, $consumableAssignment->getErrors()));
-//        }
-//        return response()->json(Helper::formatStandardApiResponse('error', null, $consumableAssignment->getErrors()));
-//    }
 }

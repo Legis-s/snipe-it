@@ -112,7 +112,6 @@ class Consumable extends SnipeModel
         'supplier'     => ['name'],
         'model' => ['name', 'model_number'],
         'model.category' => ['name'],
-        'model.manufacturer' => ['name'],
     ];
 
 
@@ -315,19 +314,16 @@ class Consumable extends SnipeModel
      * @since  [v5.0]
      * @return int
      */
-    public function numCheckedOut()
+    public function numCheckedOut() : int
     {
-        $checkedout = 0;
-        $consumable = ConsumableAssignment::where('consumable_id', $this->id)
+        $consumables = ConsumableAssignment::where('consumable_id', $this->id)
             ->whereIn("type",["sold", "issued"])
             ->get();
-        $checkedout = 0 ;
-        foreach ($consumable as &$consumabl) {
-            $checkedout += $consumabl->quantity;
+        $checked_out = 0 ;
+        foreach ($consumables as &$consumable) {
+            $checked_out += $consumable->quantity;
         }
-
-
-        return $checkedout;
+        return $checked_out;
     }
 
     /**
@@ -337,16 +333,9 @@ class Consumable extends SnipeModel
      * @since  [v4.0]
      * @return int
      */
-    public function numRemaining()
+    public function numRemaining() : int
     {
-
-        $consumable = ConsumableAssignment::where('consumable_id', $this->id)
-            ->whereIn("type",["sold", "issued"])
-            ->get();
-        $checkedout = 0 ;
-        foreach ($consumable as &$consumabl) {
-            $checkedout += $consumabl->quantity;
-        }
+        $checkedout = $this->numCheckedOut();
         $total = $this->qty;
         $remaining = $total - $checkedout;
 
@@ -466,11 +455,6 @@ class Consumable extends SnipeModel
         return $query->leftJoin('users as users_sort', 'consumables.created_by', '=', 'users_sort.id')->select('consumables.*')->orderBy('users_sort.first_name', $order)->orderBy('users_sort.last_name', $order);
     }
 
-    public function mass_operations()
-    {
-        return $this->belongsToMany(\App\Models\MassOperation::class);
-    }
-
     public function contract()
     {
         return $this->belongsTo(\App\Models\Contract::class);
@@ -495,42 +479,4 @@ class Consumable extends SnipeModel
     {
         return $this->belongsToMany(\App\Models\Location::class, 'consumables_locations', 'consumable_id', 'assigned_to')->withPivot('user_id')->withTrashed()->withTimestamps();
     }
-
-    public function hasLocations()
-    {
-        return $this->belongsToMany(\App\Models\Location::class, 'consumables_locations', 'consumable_id', 'assigned_to')->count();
-    }
-
-
-    /**
-     * Query builder scope to search on text, including catgeory and manufacturer name
-     *
-     * @param  Illuminate\Database\Query\Builder  $query  Query builder instance
-     * @param  text                              $search      Search term
-     *
-     * @return Illuminate\Database\Query\Builder          Modified query builder
-     */
-    public function scopeSearchByManufacturerOrCatOrLocation($query, $search)
-    {
-
-        return $query->where('name', 'LIKE', "%$search%")
-            ->orWhere('model_number', 'LIKE', "%$search%")
-            ->orWhere(function ($query) use ($search) {
-                $query->whereHas('category', function ($query) use ($search) {
-                    $query->where('categories.name', 'LIKE', '%'.$search.'%');
-                });
-            })
-            ->orWhere(function ($query) use ($search) {
-                $query->whereHas('manufacturer', function ($query) use ($search) {
-                    $query->where('manufacturers.name', 'LIKE', '%'.$search.'%');
-                });
-            })
-            ->orWhere(function ($query) use ($search) {
-                $query->whereHas('location', function ($query) use ($search) {
-                    $query->where('locations.name', 'LIKE', '%'.$search.'%');
-                });
-            });
-
-    }
-
 }

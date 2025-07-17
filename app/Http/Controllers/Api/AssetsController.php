@@ -1481,42 +1481,6 @@ class AssetsController extends Controller
     |--------------------------------------------------------------------------
      */
 
-//    /**
-//     * Returns JSON listing of all requestable assets
-//     *
-//     * @return \Illuminate\Http\JsonResponse
-//     * @since [v4.0]
-//     * @author [A. Gianotto] [<snipe@snipe.net>]
-//     */
-//    public function closesell(Request $request, $asset_id)
-//    {
-//        $this->authorize('checkout', Asset::class);
-//
-//        $asset = Asset::findOrFail($asset_id);
-//        $this->authorize('checkout', $asset);
-//
-//        $error_payload = [];
-//        $error_payload['asset'] = [
-//            'id' => $asset->id,
-//            'asset_tag' => $asset->asset_tag,
-//        ];
-//
-//        $target = Contract::find( $asset->contract_id);
-//        $note = request('note', null);
-//        $asset_name = request('name', null);
-//        $checkout_at = request('checkout_at', date('Y-m-d H:i:s'));
-//
-//        if (! isset($target)) {
-//            return response()->json(Helper::formatStandardApiResponse('error', $error_payload, 'Checkout target for asset '.e($asset->asset_tag).' is invalid - '.$error_payload['target_type'].' does not exist.'));
-//        }
-//
-//        if ($asset->closeSell($target, Auth::user(), $checkout_at, $note, $asset_name)) {
-//            return response()->json(Helper::formatStandardApiResponse('success', ['asset'=> e($asset->asset_tag)], trans('admin/hardware/message.checkout.success')));
-//        }
-//
-//        return response()->json(Helper::formatStandardApiResponse('error', ['asset'=> e($asset->asset_tag)], trans('admin/hardware/message.checkout.error')));
-//    }
-
     /**
      * Returns JSON with information about an asset for detail view.
      *
@@ -1557,7 +1521,6 @@ class AssetsController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function review($id)
-
     {
         $this->authorize('review', Asset::class);
         $asset = Asset::with('assetstatus')->withTrashed()->findOrFail($id);
@@ -1591,80 +1554,6 @@ class AssetsController extends Controller
 
         return response()->json(Helper::formatStandardApiResponse('error', ['asset_tag'=> e($asset->asset_tag)], 'Asset with tag '.e($asset->asset_tag).' not found'));
     }
-
-//    /**
-//     * Returns JSON with information about an asset for detail view.
-//     *
-//     * @param int $assetId
-//     * @return \Illuminate\Http\JsonResponse
-//     * @since [v4.0]
-//     * @author [A. Gianotto] [<snipe@snipe.net>]
-//     */
-//    public function tabel_create(Request $request)
-//    {
-//        $this->authorize('create');
-//        $asssets_count = 1;
-//
-//        if ($request->filled('name')){
-//            $model_name = 'Табель: '.$request->get('name');
-//        }else{
-//            return response()->json(Helper::formatStandardApiResponse('error', null,null, 200));
-//        }
-//
-//        if ($request->filled('count')) {
-//            $asssets_count = $request->get('count');
-//        }
-//        $purchase_cost = null;
-//        if ($request->filled('price')) {
-//            $purchase_cost = $request->get('price');
-//        }
-//
-//        $status = Statuslabel::where('name', 'Доступные')->first();
-//
-//
-//        $user = Auth::user();
-//
-//        $model = AssetModel::where("name",$model_name)->first();
-//
-//
-//        if (!$model){
-//            $category = Category::where("name","Tабель")->first();
-//            if (!$category){
-//                $category = new Category();
-//                $category->category_type = "asset";
-//                $category->name = "Tабель";
-//                $category->save();
-//            }
-//
-//            $model = new AssetModel();
-//            $model->name = $model_name;
-//            $model->category_id = $category->id;
-//            $model->save();
-//        }
-//
-//
-//
-//        while ($asssets_count != 0) {
-//            $asset = new Asset();
-//
-//            $asset->model_id = $model->id;
-//            $asset->asset_tag               = Asset::autoincrement_asset();
-//            $asset->user_id                 = $user;
-//            $asset->archived                = '0';
-//            $asset->physical                = '1';
-//            $asset->depreciate              = '0';
-//            $asset->status_id               = $status->id;
-//            $asset->quality                 = 5;
-//            if ($purchase_cost){
-//                $asset->purchase_cost = $purchase_cost;
-//            }
-//            $asset->save();
-//
-//            $asssets_count--;
-//        }
-//
-//        return response()->json(Helper::formatStandardApiResponse('success', null, trans('admin/hardware/message.create.success')));
-//    }
 
     /**
     |--------------------------------------------------------------------------
