@@ -582,7 +582,6 @@ class Asset extends Depreciable
         return $this->morphMany(\App\Models\AccessoryCheckout::class, 'assigned', 'assigned_type', 'assigned_to');
     }
 
-
     /**
      * Get the asset's location based on the assigned user
      *
