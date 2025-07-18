@@ -5,7 +5,7 @@ namespace App\Presenters;
 /**
  * Class AccessoryPresenter
  */
-class UploadsPresenter extends Presenter
+class UploadedFilesPresenter extends Presenter
 {
     /**
      * Json Column Layout for bootstrap table
