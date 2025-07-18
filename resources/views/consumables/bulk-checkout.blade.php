@@ -69,7 +69,11 @@
 @section('moar_scripts')
     <script nonce="{{ csrf_token() }}">
          $(function () {
-             $('#assigned_consumables_select').select2('destroy').select2();
+             $('#assigned_consumables_select').select2('destroy').select2(
+                 {
+
+                 }
+             );
 
              function formatState (state) {
                  console.log(state);
