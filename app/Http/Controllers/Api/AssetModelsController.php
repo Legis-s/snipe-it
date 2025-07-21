@@ -159,7 +159,7 @@ class AssetModelsController extends Controller
         $assetmodel = $request->handleImages($assetmodel);
 
         if ($assetmodel->save()) {
-            return response()->json(Helper::formatStandardApiResponse('success', $assetmodel, trans('admin/models/message.create.success')));
+            return response()->json(Helper::formatStandardApiResponse('success', (new AssetModelsTransformer)->transformAssetModel($assetmodel), trans('admin/models/message.create.success')));
         }
         return response()->json(Helper::formatStandardApiResponse('error', null, $assetmodel->getErrors()));
 
@@ -227,7 +227,7 @@ class AssetModelsController extends Controller
 
 
         if ($assetmodel->save()) {
-            return response()->json(Helper::formatStandardApiResponse('success', $assetmodel, trans('admin/models/message.update.success')));
+            return response()->json(Helper::formatStandardApiResponse('success', (new AssetModelsTransformer)->transformAssetModel($assetmodel), trans('admin/models/message.update.success')));
         }
 
         return response()->json(Helper::formatStandardApiResponse('error', null, $assetmodel->getErrors()));

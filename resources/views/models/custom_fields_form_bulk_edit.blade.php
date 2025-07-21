@@ -57,21 +57,42 @@
                 @endif
               @elseif ($field->element=='checkbox')
                     <!-- Checkboxes -->
+              @php
+                  $fieldName = $field->db_column_name();
+                  $oldValues = old($fieldName);
+                  $defaultValues = array_map('trim', explode(',', $field->defaultValue($model->id)));
+                  $currentValues = isset($item) ? array_map('trim', explode(',', $item->{$fieldName})) : $defaultValues;
+
+                  $selectedValues = is_array($oldValues) ? $oldValues : $currentValues;
+              @endphp
+
+              @foreach ($field->formatFieldValuesAsArray() as $key => $value)
+                  <label class="form-control">
+                      <input type="checkbox"
+                             name="{{ $fieldName }}[]"
+                             value="{{ $key }}"
+                              {{ in_array($key, $selectedValues) ? 'checked' : '' }}>
+                      {{ $value }}
+                  </label>
+              @endforeach
+            @elseif ($field->element=='radio')
+                  @php
+                      $fieldName = $field->db_column_name();
+                      $oldValue = old($fieldName);
+                      $default = trim($field->defaultValue($model->id));
+                      $current = isset($item) ? trim($item->{$fieldName}) : $default;
+
+                      $selectedValue = $oldValue !== null ? $oldValue : $current;
+                  @endphp
                   @foreach ($field->formatFieldValuesAsArray() as $key => $value)
                       <label class="form-control">
-                          <input type="checkbox" value="{{ $value }}" name="{{ $field->db_column_name() }}[]" {{  isset($item) ? (in_array($value, array_map('trim', explode(',', $item->{$field->db_column_name()}))) ? ' checked="checked"' : '') : (old($field->db_column_name()) != '' ? ' checked="checked"' : (in_array($key, array_map('trim', explode(',', $field->defaultValue($model->id)))) ? ' checked="checked"' : '')) }}>
+                          <input type="radio"
+                                 name="{{ $fieldName }}"
+                                 value="{{ $key }}"
+                                  {{ $selectedValue == $key ? 'checked' : '' }}>
                           {{ $value }}
                       </label>
                   @endforeach
-            @elseif ($field->element=='radio')
-            @foreach ($field->formatFieldValuesAsArray() as $value)
-
-                  <label class="form-control">
-                      <input type="radio" value="{{ $value }}" name="{{ $field->db_column_name() }}" {{ isset($item) ? ($item->{$field->db_column_name()} == $value ? ' checked="checked"' : '') : (old($field->db_column_name()) != '' ? ' checked="checked"' : (in_array($value, explode(', ', $field->defaultValue($model->id))) ? ' checked="checked"' : '')) }}>
-                      {{ $value }}
-                  </label>
-
-            @endforeach
                 <button type="button"
                         class="btn btn-default btn-xs clear-radio"
                         data-target-name="{{ $field->db_column_name() }}">

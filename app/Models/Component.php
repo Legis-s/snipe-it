@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Helpers\Helper;
 use App\Models\Traits\HasUploads;
 use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Watson\Validating\ValidatingTrait;
 
 /**
@@ -203,6 +205,36 @@ class Component extends SnipeModel
     {
         return $this->belongsTo(\App\Models\Manufacturer::class, 'manufacturer_id');
     }
+    /**
+     * Determine whether this asset requires acceptance by the assigned user
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v4.0]
+     * @return bool
+     */
+    public function requireAcceptance()
+    {
+        return $this->category->require_acceptance;
+    }
+
+    /**
+     * Checks for a category-specific EULA, and if that doesn't exist,
+     * checks for a settings level EULA
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v4.0]
+     * @return string | false
+     */
+    public function getEula()
+    {
+        if ($this->category->eula_text) {
+            return  Helper::parseEscapedMarkedown($this->category->eula_text);
+        } elseif ((Setting::getSettings()->default_eula_text) && ($this->category->use_default_eula == '1')) {
+            return  Helper::parseEscapedMarkedown(Setting::getSettings()->default_eula_text);
+        } else {
+            return null;
+        }
+    }
 
     /**
      * Establishes the component -> action logs relationship
@@ -246,6 +278,19 @@ class Component extends SnipeModel
             ->withPivot('id', 'assigned_qty', 'created_at', 'created_by', 'note')
             ->withoutGlobalScope(new CompanyableScope);
 
+    }
+
+    /**
+     * Determine whether to send a checkin/checkout email based on
+     * asset model category
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since [v4.0]
+     * @return bool
+     */
+    public function checkin_email()
+    {
+        return $this->category?->checkin_email;
     }
 
 

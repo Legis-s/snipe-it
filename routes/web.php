@@ -52,7 +52,12 @@ Route::group(['middleware' => 'auth'], function () {
         [LabelsController::class, 'show']
     )->where('labelName', '.*')->name('labels.show');
 
+    Route::get('/test-email', function () {
+        $mailable = new \App\Mail\CheckoutComponentMail(
 
+        );
+        return $mailable->render(); // dumps HTML
+    });
     /*
     * Manufacturers
     */

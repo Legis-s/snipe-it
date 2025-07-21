@@ -4,10 +4,12 @@ namespace App\Listeners;
 
 use App\Events\CheckoutableCheckedOut;
 use App\Mail\CheckinAccessoryMail;
+use App\Mail\CheckinComponentMail;
 use App\Mail\CheckinLicenseMail;
 use App\Mail\CheckoutAccessoryMail;
 use App\Mail\CheckoutAssetMail;
 use App\Mail\CheckinAssetMail;
+use App\Mail\CheckoutComponentMail;
 use App\Mail\CheckoutConsumableMail;
 use App\Mail\CheckoutLicenseMail;
 use App\Models\Accessory;
@@ -22,9 +24,11 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\CheckinAccessoryNotification;
 use App\Notifications\CheckinAssetNotification;
+use App\Notifications\CheckinComponentNotification;
 use App\Notifications\CheckinLicenseSeatNotification;
 use App\Notifications\CheckoutAccessoryNotification;
 use App\Notifications\CheckoutAssetNotification;
+use App\Notifications\CheckoutComponentNotification;
 use App\Notifications\CheckoutConsumableNotification;
 use App\Notifications\CheckoutLicenseSeatNotification;
 use GuzzleHttp\Exception\ClientException;
@@ -39,7 +43,7 @@ use Osama\LaravelTeamsNotification\TeamsNotification;
 class CheckoutableListener
 {
     private array $skipNotificationsFor = [
-        Component::class,
+//        Component::class,
     ];
 
     /**
@@ -145,7 +149,6 @@ class CheckoutableListener
         $shouldSendEmailToUser = $this->checkoutableCategoryShouldSendEmail($event->checkoutable);
         $shouldSendEmailToAlertAddress = $this->shouldSendEmailToAlertAddress();
         $shouldSendWebhookNotification = $this->shouldSendWebhookNotification();
-
         if (!$shouldSendEmailToUser && !$shouldSendEmailToAlertAddress && !$shouldSendWebhookNotification) {
             return;
         }
@@ -269,6 +272,9 @@ class CheckoutableListener
             case LicenseSeat::class:
                 $notificationClass = CheckinLicenseSeatNotification::class;
                 break;
+            case Component::class:
+                $notificationClass = CheckinComponentNotification::class;
+                break;
         }
 
         Log::debug('Notification class: '.$notificationClass);
@@ -299,6 +305,9 @@ class CheckoutableListener
             case LicenseSeat::class:
                 $notificationClass = CheckoutLicenseSeatNotification::class;
                 break;
+            case Component::class:
+                $notificationClass = CheckoutComponentNotification::class;
+            break;
         }
 
 
@@ -310,6 +319,7 @@ class CheckoutableListener
             Asset::class => CheckoutAssetMail::class,
             LicenseSeat::class => CheckoutLicenseMail::class,
             Consumable::class => CheckoutConsumableMail::class,
+            Component::class => CheckoutComponentMail::class,
         ];
         $mailable= $lookup[get_class($event->checkoutable)];
 
@@ -322,8 +332,8 @@ class CheckoutableListener
             Accessory::class => CheckinAccessoryMail::class,
             Asset::class => CheckinAssetMail::class,
             LicenseSeat::class => CheckinLicenseMail::class,
+            Component::class => CheckinComponentMail::class,
         ];
-
         $mailable= $lookup[get_class($event->checkoutable)];
 
         return new $mailable($event->checkoutable, $event->checkedOutTo, $event->checkedInBy, $event->note);
@@ -469,7 +479,8 @@ class CheckoutableListener
         return match (true) {
             $checkoutable instanceof Asset => $checkoutable->model->category,
             $checkoutable instanceof Accessory,
-                $checkoutable instanceof Consumable => $checkoutable->category,
+                $checkoutable instanceof Consumable,
+                $checkoutable instanceof Component => $checkoutable->category,
             $checkoutable instanceof LicenseSeat => $checkoutable->license->category,
         };
     }
