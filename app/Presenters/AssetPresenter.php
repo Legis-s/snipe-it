@@ -137,13 +137,6 @@ class AssetPresenter extends Presenter
                 'title' => trans('general.manufacturer'),
                 'visible' => false,
                 'formatter' => 'manufacturersLinkObjFormatter',
-            ],[
-                "field" => "contract",
-                "searchable" => true,
-                "sortable" => true,
-                "title" => "Договор",
-                "visible" => true,
-                "formatter" => "contractsLinkObjFormatter"
             ], [
                 'field' => 'supplier',
                 'searchable' => true,
@@ -373,9 +366,8 @@ class AssetPresenter extends Presenter
             'switchable' => false,
             'title' => trans('general.checkin').'/'.trans('general.checkout'),
             'visible' => true,
-            'printIgnore' => true,
             'formatter' => 'hardwareInOutFormatter',
-            "events" => "operateEvents"
+            'printIgnore' => true,
         ];
 
         $layout[] = [
@@ -391,162 +383,6 @@ class AssetPresenter extends Presenter
 
         return json_encode($layout);
     }
-
-
-    /**
-     * Json Column Layout for bootstrap table
-     * @return string
-     */
-    public static function dataTableLayoutBulk()
-    {
-        $layout = [[
-            "searchable" => false,
-            "switchable" => true,
-            "visible" => true,
-            "formatter" => "bulkListRemoveFormatter",
-            "events"=> "operateEventsBulk",
-        ], [
-            "field" => "id",
-            "searchable" => false,
-            "sortable" => true,
-            "switchable" => true,
-            "title" => trans('general.id'),
-            "visible" => false
-        ], [
-            "field" => "asset_tag",
-            "searchable" => true,
-            "sortable" => true,
-            "title" => trans('admin/hardware/table.asset_tag'),
-            "visible" => true,
-            "formatter" => "hardwareLinkFormatter"
-        ], [
-            "field" => "serial",
-            "searchable" => true,
-            "sortable" => true,
-            "title" => trans('admin/hardware/form.serial'),
-            "visible" => true,
-            "formatter" => "hardwareLinkFormatter"
-        ], [
-            "field" => "model",
-            "searchable" => true,
-            "sortable" => true,
-            "title" => trans('admin/hardware/form.model'),
-            "visible" => true,
-            "formatter" => "modelsLinkObjFormatter"
-        ], [
-            "field" => "model_number",
-            "searchable" => true,
-            "sortable" => true,
-            "title" => trans('admin/models/table.modelnumber'),
-            "visible" => false
-        ], [
-            "field" => "category",
-            "searchable" => true,
-            "sortable" => true,
-            "title" => trans('general.category'),
-            "visible" => true,
-            "formatter" => "categoriesLinkObjFormatter"
-        ], [
-            "field" => "status_label",
-            "searchable" => true,
-            "sortable" => true,
-            "title" => trans('admin/hardware/table.status'),
-            "visible" => true,
-            "formatter" => "statuslabelsLinkObjFormatter"
-        ], [
-            "field" => "manufacturer",
-            "searchable" => true,
-            "sortable" => true,
-            "title" => trans('general.manufacturer'),
-            "visible" => false,
-            "formatter" => "manufacturersLinkObjFormatter"
-        ], [
-            "field" => "purchase_date",
-            "searchable" => true,
-            "sortable" => true,
-            "visible" => false,
-            "title" => trans('general.purchase_date'),
-            "formatter" => "dateDisplayFormatter"
-        ], [
-            "field" => "purchase_cost",
-            "searchable" => true,
-            "sortable" => true,
-            "title" => trans('general.purchase_cost'),
-            "footerFormatter" => 'sumFormatter',
-        ], [
-            "field" => "depreciable_cost",
-            "searchable" => true,
-            "sortable" => true,
-            "title" => "Остаточная стоимость",
-            "footerFormatter" => 'sumFormatter',
-        ], [
-//                "field" => "depreciable_cost",
-//                "searchable" => true,
-            "sortable" => true,
-            "title" => "Срок эксплуатации",
-            "formatter" => 'lifetimeFormatter',
-        ], [
-            "field" => "quality",
-            "searchable" => true,
-            "sortable" => true,
-            "title" => "Состояние",
-            "formatter" => 'qualityFormatter',
-        ], [
-            "field" => "order_number",
-            "searchable" => true,
-            "sortable" => true,
-            "visible" => false,
-            "title" => trans('general.order_number'),
-            'formatter' => "orderNumberObjFilterFormatter"
-        ], [
-            "field" => "purchase_id",
-            "searchable" => false,
-            "sortable" => true,
-            "switchable" => true,
-            "title" => "ID закупки",
-            "visible" => false
-        ], [
-            "field" => "created_at",
-            "searchable" => false,
-            "sortable" => true,
-            "visible" => false,
-            "title" => trans('general.created_at'),
-            "formatter" => "dateDisplayFormatter"
-        ], [
-            "field" => "updated_at",
-            "searchable" => false,
-            "sortable" => true,
-            "visible" => false,
-            "title" => trans('general.updated_at'),
-            "formatter" => "dateDisplayFormatter"
-        ], [
-            "field" => "last_checkout",
-            "searchable" => false,
-            "sortable" => true,
-            "visible" => false,
-            "title" => trans('admin/hardware/table.checkout_date'),
-            "formatter" => "dateDisplayFormatter"
-        ], [
-            "field" => "nds",
-            "searchable" => false,
-            "sortable" => true,
-            "switchable" => true,
-            "title" => "НДС",
-            "visible" => false
-        ],
-        ];
-
-        // This looks complicated, but we have to confirm that the custom fields exist in custom fieldsets
-        // *and* those fieldsets are associated with models, otherwise we'll trigger
-        // javascript errors on the bootstrap tables side of things, since we're asking for properties
-        // on fields that will never be passed through the REST API since they're not associated with
-        // models. We only pass the fieldsets that pertain to each asset (via their model) so that we
-        // don't junk up the REST API with tons of custom fields that don't apply
-
-
-        return json_encode($layout);
-    }
-
 
 
     public static function assignedAccessoriesDataTableLayout()

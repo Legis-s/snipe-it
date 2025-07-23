@@ -59,9 +59,7 @@ class ActionlogsTransformer
         if ($actionlog->filename!='') {
             $icon =  Helper::filetype_icon($actionlog->filename);
         }
-//        if (($actionlog->photos) && ($actionlog->photos!='')) {
-//            $photos_array = json_decode($actionlog->photos);
-//        }
+
         // This is necessary since we can't escape special characters within a JSON object
         if (($actionlog->log_meta) && ($actionlog->log_meta!='')) {
             $meta_array = json_decode($actionlog->log_meta);
@@ -204,7 +202,6 @@ class ActionlogsTransformer
             'user_agent' => e($actionlog->user_agent) ?? null,
             'action_source'          => ($actionlog->action_source) ??  null,
             'action_date'   => ($actionlog->action_date) ? Helper::getFormattedDateObject($actionlog->action_date, 'datetime'): Helper::getFormattedDateObject($actionlog->created_at, 'datetime'),
-            // 'photos' =>  ((isset($photos_array)) && (is_array($photos_array))) ? $photos_array: null,
         ];
 
 //        Log::info("Clean Meta is: ".print_r($clean_meta,true));

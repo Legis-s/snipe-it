@@ -57,8 +57,6 @@ class InventoriesController extends Controller
 
             $inventory->inventory_items()->forceDelete();
             $inventory->forceDelete();
-
-//            $inventory->forceDelete();
         }
 
         return redirect()->to(route('inventories.index'))->with('success', trans('admin/locations/message.delete.success'));

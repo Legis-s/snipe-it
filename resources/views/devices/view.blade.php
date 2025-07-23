@@ -1008,7 +1008,7 @@
             }, {
                 preset: 'islands#greenDotIconWithCaption'
             }));
-            @if ($asset->location->coordinates!='')
+            @if ($asset->location and $asset->location->coordinates!='')
                 myMap.geoObjects.add(new ymaps.Placemark([{{$asset->location->coordinates}}], {
                     iconCaption: '{{$asset->location->name}} '
                 }, {

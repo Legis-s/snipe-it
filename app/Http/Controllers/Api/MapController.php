@@ -16,7 +16,7 @@ class MapController extends Controller
      * Display a list feature for a map.
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request): JsonResponse|array
+    public function index(Request $request): JsonResponse | array
     {
         $this->authorize('view', Location::class);
 
@@ -30,9 +30,6 @@ class MapController extends Controller
             'locations.active',
         ])
             ->whereIn('object_code', [843, 847,848])
-//            ->where('object_code', '=', 843)
-//            ->orWhere('object_code', '=', 847)
-//            ->orWhere('object_code', '=', 848)
             ->where('active', "=", true)
             ->withCount(['assets as assets_count',
                 'assets as checked_assets_count' => function (Builder $query) {

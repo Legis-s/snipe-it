@@ -103,15 +103,10 @@ class AssetsTransformer
             'user_can_checkout' => (bool) $asset->availableForCheckout(),
             'book_value' => Helper::formatCurrencyOutput($asset->getDepreciatedValue()),
             'user_can_review' => (bool) $asset->availableForReview(),
-            'user_can_close_sell' => (bool) $asset->availableForCloseSell(),
             'purchase_id' => (int) $asset->purchase_id,
             'quality' => (int) $asset->quality,
             'nds' => (int) $asset->nds,
             'depreciable_cost' => Helper::formatCurrencyOutput($asset->depreciable_cost),
-//            'contract' => ($asset->contract) ? [
-//                'id' => (int) $asset->contract->id,
-//                'name'=> e($asset->contract->name)
-//            ]  : null,
         ];
 
 

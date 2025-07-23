@@ -100,7 +100,6 @@ class AssetCheckinController extends Controller
         $asset->assignedTo()->disassociate($asset);
         $asset->accepted = null;
         $asset->name = $request->get('name');
-        $asset->contract_id = null;
         $asset->depreciable_cost = $request->get('depreciable_cost');
 
         if ($request->filled('status_id')) {

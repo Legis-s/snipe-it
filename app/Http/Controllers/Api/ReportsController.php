@@ -76,7 +76,6 @@ class ReportsController extends Controller
             'accept_signature',
             'action_type',
             'note',
-//            'photos',
             'remote_ip',
             'user_agent',
             'target_type',

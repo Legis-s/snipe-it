@@ -176,7 +176,6 @@ class Asset extends Depreciable
         'last_checkout',
         'user_verified_id',
         'purchase_id',
-        'contract_id',
         'depreciable_cost',
         'quality',
         'nds',
@@ -335,14 +334,6 @@ class Asset extends Depreciable
         return false;
     }
 
-    public function availableForCloseSell()
-    {
-        $status = Statuslabel::where('name', 'Выдано')->first();
-        if ($this->status_id == $status->id){
-            return true;
-        }
-        return false;
-    }
     public function availableForReview()
     {
         $status = Statuslabel::where('name', 'Ожидает проверки')->first();
@@ -351,12 +342,6 @@ class Asset extends Depreciable
         }
         return false;
     }
-
-    public function mass_operations()
-    {
-        return $this->belongsToMany(\App\Models\MassOperation::class);
-    }
-
 
 
     /**
@@ -896,19 +881,6 @@ class Asset extends Depreciable
     {
         return $this->belongsTo(\App\Models\Location::class, 'location_id');
     }
-
-    /**
-     * Establishes the asset -> contract relationship
-     *
-     * @author [S. Markin] [<markin@legis-s.ru>]
-     * @since [v2.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
-     */
-    public function contract()
-    {
-        return $this->belongsTo(\App\Models\Contract::class, 'contract_id');
-    }
-
 
 
     /**

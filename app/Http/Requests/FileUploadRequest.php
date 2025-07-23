@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Helpers\Helper;
 use App\Http\Requests\Request;
 use App\Models\SnipeModel;
 use enshrined\svgSanitize\Sanitizer;
@@ -26,7 +27,7 @@ class FileUploadRequest extends Request
      */
     public function rules()
     {
-        $max_file_size = \App\Helpers\Helper::file_upload_max_size();
+        $max_file_size = Helper::file_upload_max_size();
         return [
             'file.*' => 'required|mimes:png,gif,jpg,svg,jpeg,doc,docx,pdf,txt,zip,rar,xls,lic|max:'.$max_file_size,
         ];

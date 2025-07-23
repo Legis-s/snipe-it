@@ -2,10 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Helpers\Helper;
-use App\Http\Requests\ImageUploadRequest;
 use App\Http\Transformers\InvoiceTypesTransformer;
-use App\Http\Transformers\LocationsTransformer;
 use App\Models\Location;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -17,9 +14,6 @@ class InvoiceTypesController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v4.0]
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
@@ -55,13 +49,10 @@ class InvoiceTypesController extends Controller
 
     /**
      * Gets a paginated collection for the select2 menus
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v4.0.16]
      * @see \App\Http\Transformers\SelectlistTransformer
      *
      */
-    public function selectlist(Request $request)
+    public function selectlist(Request $request)  : array
     {
 
         $invoice_types = InvoiceType::select([

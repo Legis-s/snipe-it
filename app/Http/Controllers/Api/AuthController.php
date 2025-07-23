@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use http\Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Laravel\Passport\TokenRepository;
@@ -24,7 +25,8 @@ class AuthController extends Controller
     }
 
 
-    public function getToken(Request $request) {
+    public function getToken(Request $request)
+    {
         if ($request->filled('username') && $request->filled('password')) {
             $login = $request->get('username');
             $password= $request->get('password');

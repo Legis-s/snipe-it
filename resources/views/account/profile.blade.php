@@ -42,9 +42,6 @@
         @include ('partials.forms.edit.location-profile-select', ['translated_name' => trans('general.location')])
         @endcan
 
-{{--      <!-- Location -->--}}
-{{--      @include ('partials.forms.edit.location-select', ['translated_name' => "Основной склад", 'fieldname' => 'favorite_location_id'])--}}
-
 
         <!-- Language -->
         <div class="form-group {{ $errors->has('locale') ? 'has-error' : '' }}">

@@ -66,7 +66,6 @@ class UsersController extends Controller
             'users.locale',
             'users.location_id',
             'users.manager_id',
-            'users.bitrix_id',
             'users.notes',
             'users.permissions',
             'users.phone',
@@ -75,7 +74,6 @@ class UsersController extends Controller
             'users.two_factor_optin',
             'users.username',
             'users.zip',
-            'users.favorite_location_id',
             'users.remote',
             'users.ldap_import',
             'users.start_date',
@@ -83,6 +81,8 @@ class UsersController extends Controller
             'users.vip',
             'users.autoassign_licenses',
             'users.website',
+            'users.bitrix_id',
+            'users.favorite_location_id',
 
         ])->with('manager')
             ->with('groups')

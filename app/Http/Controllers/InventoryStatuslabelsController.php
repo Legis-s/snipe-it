@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Statuslabel;
 use App\Models\InventoryStatuslabel;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
 use \Illuminate\Contracts\View\View;
 
