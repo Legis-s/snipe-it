@@ -101,8 +101,8 @@
 
             @if ($inventory->responsible_photo)
                 <div class="col-md-12">
-                    <a href="{{$inventory->responsible_photo_url()}}" data-lightbox="inv">
-                        <img src="{{$inventory->responsible_photo_url()}}" class="img-responsive img-thumbnail">
+                    <a href="{{$inventory->responsible_photo_url()}}" data-toggle="lightbox">
+                        <img src="{{$inventory->responsible_photo_url()}}" class="img-responsive img-thumbnail img-fluid">
                     </a>
                 </div>
             @endif

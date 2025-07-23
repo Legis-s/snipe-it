@@ -1262,7 +1262,7 @@
 
         function photoDisplayFormatter(value,row) {
             if (value) {
-                return '<a href="' + value + '" data-title="'+ row.tag +'" data-lightbox="inventory"><i class="fa fa-camera fa-lg" aria-hidden="true"></i></a>';
+                return '<a href="' + value + '" data-title="'+ row.tag +'" data-toggle="lightbox" data-gallery="inv-gallery" data-lightbox="inventory"><i class="fa fa-camera fa-lg" aria-hidden="true"></i></a>';
             }
         }
 

@@ -206,7 +206,7 @@
                         @endif
 
 
-                        <!-- Purchase Cost -->
+                        <!-- Stars -->
                         <div class="form-group {{ $errors->has('quality') ? ' has-error' : '' }}">
                             <label for="quality" class="col-md-3 control-label">Состояние</label>
                             <div class="col-md-9">

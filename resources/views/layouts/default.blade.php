@@ -43,11 +43,7 @@ dir="{{ Helper::determineLanguageDirection() }}">
     {{-- page level css --}}
     @stack('css')
 
-    <!-- custom css -->
-    <link rel="stylesheet" href="{{ url(asset('js/star-rating/dist/star-rating.css')) }}">
-    <link rel="stylesheet" href="{{ url(asset('js/lightgallery/css/lightgallery.css')) }}">
-    <link rel="stylesheet" href="{{ url(asset('css/sweetalert2.min.css')) }}">
-    <link rel="stylesheet" href="{{ url(asset('js/lightbox/css/lightbox.min.css')) }}">
+
 
     @if (($snipeSettings) && ($snipeSettings->header_color!=''))
         <style nonce="{{ csrf_token() }}">
@@ -1095,14 +1091,6 @@ dir="{{ Helper::determineLanguageDirection() }}">
         {{-- Javascript files --}}
         <script src="{{ url(mix('js/dist/all.js')) }}" nonce="{{ csrf_token() }}"></script>
         <script src="{{ url('js/select2/i18n/'.Helper::mapBackToLegacyLocale(app()->getLocale()).'.js') }}"></script>
-
-        <!-- custom js -->
-        <script src="{{ url(asset('js/star-rating/dist/star-rating.js')) }}"></script>
-        <script src="{{ url(asset('js/lightgallery/js/lightgallery.min.js')) }}"></script>
-        <script src="{{ url(asset('js/sweetalert2.min.js')) }}"></script>
-        <script src="{{ url(asset('js/timeago.js')) }}"></script>
-        <script src="{{ url(asset('js/onscan.js')) }}"></script>
-        <script src="{{ url(asset('js/lightbox/js/lightbox.min.js')) }}" nonce="{{ csrf_token() }}"></script>
 
         <!-- v5-beta: This pGenerator call must remain here for v5 - until fixed - so that the JS password generator works for the user create modal. -->
         <script src="{{ url('js/pGenerator.jquery.js') }}"></script>

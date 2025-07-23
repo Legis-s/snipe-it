@@ -51,12 +51,16 @@
         "less-loader": "^6.0",
         "list.js": "^1.5.0",
         "morris.js": "github:morrisjs/morris.js",
+        "onscan.js": "^1.5.2",
         "papaparse": "5.5.2",
         "select2": "4.0.13",
         "sheetjs": "^2.0.0",
         "signature_pad": "^4.2.0",
+        "star-rating.js": "^4.3.1",
+        "sweetalert2": "^11.22.2",
         "tableexport.jquery.plugin": "1.32.0",
         "tether": "^1.4.0",
+        "timeago.js": "^4.0.2",
         "webpack": "^5.98.0"
     }
 }

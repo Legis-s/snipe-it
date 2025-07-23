@@ -26,6 +26,8 @@ mix
       "./node_modules/bootstrap-table/dist/bootstrap-table.css",
       "./public/css/build/app.css",
       "./node_modules/select2/dist/css/select2.css",
+      "./node_modules/star-rating.js/dist/star-rating.css",
+      "./node_modules/sweetalert2/dist/sweetalert2.css",
       "./public/css/build/overrides.css",
     ],
     "./public/css/dist/all.css"
@@ -132,6 +134,11 @@ mix.combine(
     "./node_modules/jquery-validation/dist/jquery.validate.js",
     "./node_modules/list.js/dist/list.js",
     "./node_modules/clipboard/dist/clipboard.js",
+      "./node_modules/star-rating.js/dist/star-rating.js",
+      "./node_modules/sweetalert2/dist/sweetalert2.js",
+      "./node_modules/timeago.js/dist/timeago.min.js",
+      "./node_modules/timeago.js/dist/timeago.min.js",
+      "./node_modules/onscan.js/onscan.js",
   ],
   "public/js/build/vendor.js" // this file seems OK!
 );
