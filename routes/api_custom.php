@@ -286,13 +286,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             ]
         )->name('api.contracts.selectlist');
 
-        Route::post('{id}/closesell',
-            [
-                Api\ContractsController::class,
-                'closesell'
-            ]
-        )->name('api.contracts.closesell');
-
     });
 
     Route::resource('contracts',
@@ -414,19 +407,4 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             'parameters' => ['consumableassignment' => 'consumableassignment_id'],
         ]
     );// end ConsumableAssignment API routes
-
-    /**
-     * Mass operations API routes
-     */
-
-    Route::resource('massoperations', Api\MassOperationsController::class,
-        [
-            'names' =>
-                [
-                    'index' => 'api.massoperations.index',
-                ],
-            'parameters' => ['massoperation' => 'massoperation_id']
-        ]
-    ); // Massoperations resource
-
 });
