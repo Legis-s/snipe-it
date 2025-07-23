@@ -113,6 +113,14 @@
 
                         @include ('partials.forms.custom.deal-select', ['translated_name' => trans('general.deal'), 'fieldname' => 'assigned_deal', 'style' => 'display:none;'])
 
+                        <div id="rent_box" class="form-group" style="display:none;">
+                            <div class="col-md-9 col-md-offset-3">
+                                <label class="form-control">
+                                    <input type="checkbox" name="rent" {{ old('rent') ? 'checked' : '' }}>
+                                    {{ trans('general.rent') }}
+                                </label>
+                            </div>
+                        </div>
 
                         <!-- Checkout/Checkin Date -->
                         <div class="form-group {{ $errors->has('checkout_at') ? 'error' : '' }}">

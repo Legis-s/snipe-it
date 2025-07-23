@@ -15,6 +15,8 @@ use App\Models\ConsumableAssignment;
 use App\Models\Purchase;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Http\Requests\ImageUploadRequest;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\JsonResponse;
 
 class ConsumablesController extends Controller
@@ -157,7 +159,7 @@ class ConsumablesController extends Controller
      * @since [v4.0]
      * @param  \App\Http\Requests\ImageUploadRequest $request
      */
-    public function store(StoreConsumableRequest $request): JsonResponse
+    public function store(StoreConsumableRequest $request) : JsonResponse
     {
         $this->authorize('create', Consumable::class);
         $consumable = new Consumable;
@@ -301,6 +303,12 @@ class ConsumablesController extends Controller
         if (!$consumable->category){
             return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.invalid_item_category_single', ['type' => trans('general.consumable')])));
         }
+
+        // Make sure there is at least one available to checkout
+        if ($consumable->numRemaining() <= 0 || $consumable->checkout_qty > $consumable->numRemaining()) {
+            return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/consumables/message.checkout.unavailable', ['requested' => $consumable->checkout_qty, 'remaining' => $consumable->numRemaining() ])));
+        }
+
 
 
         // Check if the user exists - @TODO:  this should probably be handled via validation, not here??
@@ -447,29 +455,6 @@ class ConsumablesController extends Controller
     }
 
 
-
-//    /**
-//     * Gets a paginated collection for the select2 menus
-//     *
-//     * @see \App\Http\Transformers\SelectlistTransformer
-//     */
-//    public function selectlist(Request $request)
-//    {
-//        $consumables = Consumable::select([
-//            'consumables.id',
-//            'consumables.name',
-//        ]);
-//
-//        if ($request->filled('search')) {
-//            $consumables = $consumables->where('consumables.name', 'LIKE', '%'.$request->get('search').'%');
-//        }
-//
-//        $consumables = $consumables->orderBy('name', 'ASC')->paginate(50);
-//
-//        return (new SelectlistTransformer)->transformSelectlist($consumables);
-//    }
-
-
     /**
      * Update the specified resource in storage.
      *
@@ -503,7 +488,6 @@ class ConsumablesController extends Controller
         } else {
             return response()->json(Helper::formatStandardApiResponse('error', null, $main_consumable->getErrors()));
         }
-
 
         return response()->json(Helper::formatStandardApiResponse('error', null, $main_consumable->getErrors()));
     }

@@ -142,14 +142,21 @@ class AssetCheckoutController extends Controller
             if (is_a($target, Deal::class, true)) {
                 $asset->location_id = null;
                 $asset->rtd_location_id = null;
-                if ($asset->sell($target, $admin, $checkout_at, $request->get('note'), $request->get('name'))) {
-                    return Helper::getRedirectOption($request, $asset->id, 'Assets')
-                        ->with('success', trans('admin/hardware/message.sell.success'));
+                if ($request->filled('rent') && $request->get('rent')) {
+                    if ($asset->rent($target, $admin, $checkout_at, $request->get('note'), $request->get('name'))) {
+                        return Helper::getRedirectOption($request, $asset->id, 'Assets')
+                            ->with('success', trans('admin/hardware/message.rent.success'));
+                    }
+                }else{
+                    if ($asset->sell($target, $admin, $checkout_at, $request->get('note'), $request->get('name'))) {
+                        return Helper::getRedirectOption($request, $asset->id, 'Assets')
+                            ->with('success', trans('admin/hardware/message.sell.success'));
+                    }
                 }
             }else{
-                if ($asset->sell($target, $admin, $checkout_at, $request->get('note'), $request->get('name'))) {
+                if ($asset->checkOut($target, $admin, $checkout_at, $expected_checkin, $request->get('note'), $request->get('name'))) {
                     return Helper::getRedirectOption($request, $asset->id, 'Assets')
-                        ->with('success', trans('admin/hardware/message.sell.success'));
+                        ->with('success', trans('admin/hardware/message.checkout.success'));
                 }
             }
             // Redirect to the asset management page with error

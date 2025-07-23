@@ -691,7 +691,11 @@ class BulkAssetsController extends Controller
                     if (is_a($target, Deal::class, true)) {
                         $asset->location_id = null;
                         $asset->rtd_location_id = null;
-                        $checkout_success = $asset->sell($target, $admin, $checkout_at, e($request->get('note'), $request->get('name')));
+                        if ($request->filled('rent') && $request->get('rent')) {
+                            $checkout_success = $asset->rent($target, $admin, $checkout_at,  e($request->get('note'), $request->get('name')));
+                        }else{
+                            $checkout_success = $asset->sell($target, $admin, $checkout_at, e($request->get('note'), $request->get('name')));
+                        }
                     }else{
                         $checkout_success = $asset->checkOut($target, $admin, $checkout_at, $expected_checkin, e($request->get('note')), $asset->name, null);
                     }

@@ -25,23 +25,26 @@
                         <a href="#assets" data-toggle="tab" data-tooltip="true"
                            title="{{ trans('admin/locations/message.sold_assets') }}">
                             <i class="fas fa-rub" style="font-size: 17px" aria-hidden="true"></i>
-{{--                            <span class="badge">--}}
-{{--                          {{ number_format($deal->assignedAssets()->AssetsForShow()->count()) }}--}}
-{{--                      </span>--}}
                             <span class="sr-only">
                           {{ trans('admin/locations/message.assigned_assets') }}
                       </span>
                         </a>
                     </li>
 
+{{--                    <li>--}}
+{{--                        <a href="#assets_rent" data-toggle="tab" data-tooltip="true"--}}
+{{--                           title="{{ trans('admin/locations/message.rent_assets') }}">--}}
+{{--                            <i class="fas fa-right-left" style="font-size: 17px" aria-hidden="true"></i>--}}
+{{--                            <span class="sr-only">--}}
+{{--                          {{ trans('admin/locations/message.rent_assets') }}--}}
+{{--                      </span>--}}
+{{--                        </a>--}}
+{{--                    </li>--}}
 
                     <li>
                         <a href="#consumables" data-toggle="tab" data-tooltip="true"
                            title="{{ trans('general.consumables') }}">
                             <i class="fas fa-tint" style="font-size: 17px" aria-hidden="true"></i>
-{{--                            <span class="badge">--}}
-{{--                                                  {{ number_format($deal->consumable->count()) }}--}}
-{{--                                              </span>--}}
                             <span class="sr-only">
                                                   {{ trans('general.consumables') }}
                                               </span>
@@ -49,12 +52,12 @@
                     </li>
 
                     <li>
-                        <a href="#history" data-toggle="tab" data-toggle="tab" data-tooltip="true"
+                        <a href="#history" data-toggle="tab" data-tooltip="true"
                            title="{{ trans('general.history') }}">
                             <i class="fa-solid fa-clock-rotate-left" style="font-size: 17px" aria-hidden="true"></i>
                             <span class="sr-only">
                           {{ trans('general.history') }}
-                    </span>
+                                                </span>
                         </a>
                     </li>
                 </ul>
@@ -77,6 +80,23 @@
                         </table>
                     </div><!-- /.table-responsive -->
                 </div><!-- /.tab-pane -->
+
+
+{{--                <div class="tab-pane" id="assets_rent">--}}
+{{--                    <h2 class="box-title">{{ trans('general.assets') }}</h2>--}}
+{{--                    <div class="table table-responsive">--}}
+{{--                        <table--}}
+{{--                                data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayout() }}"--}}
+{{--                                data-cookie-id-table="assetsRentTable"--}}
+{{--                                data-id-table="assetsRentTable"--}}
+{{--                                data-side-pagination="server"--}}
+{{--                                data-sort-order="asc"--}}
+{{--                                id="assetsRentTable"--}}
+{{--                                class="table table-striped snipe-table"--}}
+{{--                                data-url="{{route('api.assets.index', ['deal_id' => $deal->id,'show_rent' => true]) }}">--}}
+{{--                        </table>--}}
+{{--                    </div><!-- /.table-responsive -->--}}
+{{--                </div><!-- /.tab-pane -->--}}
 
                 <div class="tab-pane" id="consumables">
                     <h2 class="box-title">{{ trans('general.consumables') }}</h2>

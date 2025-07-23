@@ -61,7 +61,16 @@
           @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.user'), 'fieldname' => 'assigned_user', 'hide_new' => true, 'unselect' => 'true', 'style' => 'display:none;'])
           @include ('partials.forms.edit.asset-select', ['translated_name' => trans('general.asset'), 'asset_selector_div_id' => 'assigned_asset', 'fieldname' => 'assigned_asset', 'unselect' => 'true', 'style' => 'display:none;'])
           @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'assigned_location', 'hide_new' => true])
-          @include ('partials.forms.custom.deal-select', ['translated_name' => trans('general.general.deal'), 'fieldname' => 'assigned_deal', 'style' => 'display:none;', 'hide_new' => true])
+          @include ('partials.forms.custom.deal-select', ['translated_name' => trans('general.deal'), 'fieldname' => 'assigned_deal', 'style' => 'display:none;', 'hide_new' => true])
+
+            <div id="rent_box" class="form-group" style="display:none;">
+                <div class="col-md-9 col-md-offset-3">
+                    <label class="form-control">
+                        <input type="checkbox" name="rent" {{ old('rent') ? 'checked' : '' }}>
+                        {{ trans('general.rent') }}
+                    </label>
+                </div>
+            </div>
 
             <!-- Checkout/Checkin Date -->
               <div class="form-group {{ $errors->has('checkout_at') ? 'error' : '' }}">

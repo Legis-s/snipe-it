@@ -414,6 +414,7 @@ $(function () {
                 $('#assigned_user').hide();
                 $('#assigned_location').hide();
                 $('#assigned_deal').hide();
+                $('#rent_box').hide();
                 $('.notification-callout').fadeOut();
 
                 $('[name="assigned_location"]').val('').trigger('change.select2');
@@ -425,6 +426,7 @@ $(function () {
                 $('#assigned_user').hide();
                 $('#assigned_location').show();
                 $('#assigned_deal').hide();
+                $('#rent_box').hide();
                 $('.notification-callout').fadeOut();
 
                 $('[name="assigned_asset"]').val('').trigger('change.select2');
@@ -435,6 +437,7 @@ $(function () {
                 $('#assigned_user').hide();
                 $('#assigned_location').hide();
                 $('#assigned_deal').show();
+                $('#rent_box').show();
                 $('.notification-callout').fadeOut();
 
                 $('[name="assigned_asset"]').val('').trigger('change.select2');
@@ -448,6 +451,7 @@ $(function () {
                     $('#current_assets_box').fadeIn();
                 }
                 $('#assigned_deal').hide();
+                $('#rent_box').hide();
                 $('.notification-callout').fadeIn();
 
                 $('[name="assigned_asset"]').val('').trigger('change.select2');

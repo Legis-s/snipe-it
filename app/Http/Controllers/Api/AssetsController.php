@@ -26,7 +26,6 @@ use App\Models\Company;
 use App\Models\CustomField;
 use App\Models\License;
 use App\Models\Location;
-use App\Models\MassOperation;
 use App\Models\Setting;
 use App\Models\User;
 use Carbon\Carbon;
@@ -214,18 +213,24 @@ class AssetsController extends Controller
             $assets->where('assets.purchase_id', '=', $request->input('purchase_id'));
             $settings->show_archived_in_list = "1";
         }
+
         if ($request->filled('contract_id')) {
             $assets->where('assets.contract_id', '=', $request->input('contract_id'));
             $settings->show_archived_in_list = "1";
         }
+
         if ($request->filled('deal_id')) {
             $assets->where('assets.assigned_to', '=', $request->input('deal_id'))
-                ->where('assets.assigned_type', '=', "App\Models\Deal");
+                ->where('assets.assigned_type', '=',\App\Models\Deal::class);
             $settings->show_archived_in_list = "1";
             if ($request->input('show_rent') == true ){
 
             }
         }
+
+        /**
+         * End handling due and overdue audits and checkin dates
+         */
 
 
         // This is used by the sidenav, mostly
@@ -234,18 +239,10 @@ class AssetsController extends Controller
         // related to fulltext searches on complex queries.
         // I am sad. :(
         switch ($request->input('status')) {
-
             case 'Sold':
                 $assets->join('status_labels AS status_alias', function ($join) {
                     $join->on('status_alias.id', "=", "assets.status_id")
                         ->where('status_alias.name', '=', "Продано");
-                });
-//                $assets->withTrashed()->Deleted();
-                break;
-            case 'Issued_for_sale':
-                $assets->join('status_labels AS status_alias', function ($join) {
-                    $join->on('status_alias.id', "=", "assets.status_id")
-                        ->where('status_alias.name', '=', "Выдано");
                 });
                 break;
             case 'Deleted':
@@ -389,30 +386,11 @@ class AssetsController extends Controller
         }
 
         //Custom filters
-
-
         if ($request->filled('bitrix_object_id')) {
             $bitrix_object_id = $request->input('bitrix_object_id');
             $location = Location::where('bitrix_id', $bitrix_object_id)->firstOrFail();
             $assets->where('assets.location_id', '=', $location->id);
         }
-
-        if ($request->filled('bulk')) {
-            $data = json_decode($request->input('data'), true);
-            if (is_array($data)){
-//                \Debugbar::info($data);
-                $assets->whereIn('assets.id', $data);
-            }else{
-                $assets->whereIn('assets.id', []);
-            }
-        }
-
-        if ($request->filled('massoperation_id')) {
-            $assets->join('asset_mass_operation', 'asset_mass_operation.asset_id', '=', 'assets.id')->where('asset_mass_operation.mass_operation_id', '=', $request->input('massoperation_id'));
-            $settings->show_archived_in_list = "1";
-            $settings->show_pending_in_list = "1";
-        }
-
         // This is kinda gross, but we need to do this because the Bootstrap Tables
         // API passes custom field ordering as custom_fields.fieldname, and we have to strip
         // that out to let the default sorter below order them correctly on the assets table.
@@ -995,14 +973,20 @@ class AssetsController extends Controller
             return response()->json(Helper::formatStandardApiResponse('error', $error_payload, 'Checkout target for asset ' . e($asset->asset_tag) . ' is invalid - ' . $error_payload['target_type'] . ' does not exist.'));
         }
 
+        if ($request->filled('depreciable_cost')) {
+            $asset->depreciable_cost = $request->get('depreciable_cost');
+        }
+        if ($request->filled('quality')) {
+            $asset->quality = intval($request->get('quality'));
+        }
+
+
         $checkout_at = request('checkout_at', date('Y-m-d H:i:s'));
         $expected_checkin = request('expected_checkin', null);
         $note = request('note', null);
         // Using `->has` preserves the asset name if the name parameter was not included in request.
         $asset_name = request()->has('name') ? request('name') : $asset->name;
-        $quality = request('quality', null);
         $photos = request('photos', null);
-        $depreciable_cost = request('depreciable_cost', null);
         $photos_json = [];
         if ($photos != null && count($photos) > 0) {
             foreach ($photos as &$photo) {
@@ -1017,7 +1001,6 @@ class AssetsController extends Controller
                 ]);
             }
         }
-
 
         // Set the location ID to the RTD location id if there is one
         // Wait, why are we doing this? This overrides the stuff we set further up, which makes no sense.
@@ -1544,11 +1527,6 @@ class AssetsController extends Controller
                 $log = $asset->logAudit($note, request('location_id'));
 
                 return (new AssetsTransformer)->transformAsset($asset);
-//                return response()->json(Helper::formatStandardApiResponse('success', [
-//                    'asset_tag'=> e($asset->asset_tag),
-//                    'note'=> $note,
-//                    'next_audit_date' => Helper::getFormattedDateObject($asset->next_audit_date),
-//                ], trans('admin/hardware/message.audit.success')));
             }
         }
 
