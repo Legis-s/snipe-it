@@ -55,7 +55,7 @@ return [
     'default_eula_text_placeholder' => 'Add your default EULA text',
     'default_language'			=> 'Ang Default na Linggwahe',
     'default_eula_help_text'	=> 'Maaari kang mag-ugnay ng kustom na EULAS sa partikular na mga katergorya ng asset.',
-    'acceptance_note'           => 'Magdagdag ng paalala para sa iyong desisyon (Opsiyonal)',
+    'acceptance_note'           => 'Add a note for your decision (required if declining)',
     'display_asset_name'        => 'Ipakita ang Pangalan ng Asset',
     'display_checkout_date'     => 'Ang Petsa ng Pag-checkout ay Ipakita',
     'display_eol'               => 'Ipakita sa table view ang EOL',

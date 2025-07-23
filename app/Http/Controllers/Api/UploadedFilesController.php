@@ -93,6 +93,7 @@ class UploadedFilesController extends Controller
                 'id',
                 'filename',
                 'action_type',
+                'action_date',
                 'note',
                 'created_at',
             ];

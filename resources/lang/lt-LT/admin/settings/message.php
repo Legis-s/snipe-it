@@ -50,10 +50,10 @@ return [
         'error_misc' => 'Kažkas ne taip. :( ',
         'webhook_fail' => ' „Webhook“ pranešimas nepavyko: patikrinkite ar URL vis dar galioja.',
         'webhook_channel_not_found' => ' „webhook“ kanalas nerastas.',
-        'ms_teams_deprecation' => 'The selected Microsoft Teams webhook URL will be deprecated Dec 31st, 2025. Please use a workflow URL. Microsoft\'s documentation on creating a workflow can be found <a href="https://support.microsoft.com/en-us/office/create-incoming-webhooks-with-workflows-for-microsoft-teams-8ae491c7-0394-4861-ba59-055e33f75498" target="_blank"> here.</a>',
+        'ms_teams_deprecation' => 'Pasirinktas „Microsoft Teams“ „webhook“ URL bus nebenaudojamas nuo 2025 m. gruodžio 31 d. Naudokite darbo eigos URL. „Microsoft“ dokumentaciją apie darbo eigos kūrimą galite rasti <a href="https://support.microsoft.com/en-us/office/create-incoming-webhooks-with-workflows-for-microsoft-teams-8ae491c7-0394-4861-ba59-055e33f75498" target="_blank">čia.</a>',
     ],
     'location_scoping' => [
-        'not_saved' => 'Your settings were not saved.',
-        'mismatch' => 'There is 1 item in the database that need your attention before you can enable location scoping.|There are :count items in the database that need your attention before you can enable location scoping.',
+        'not_saved' => 'Jūsų nustatymai nebuvo išsaugoti.',
+        'mismatch' => 'Duomenų bazėje yra 1 elementas, į kurį reikia atkreipti dėmesį, prieš įjungiant vietų susiejimą.|Duomenų bazėje yra :count elementai (-ų), į kuriuos reikia atkreipti dėmesį, prieš įjungiant vietų susiejimą.',
     ],
 ];

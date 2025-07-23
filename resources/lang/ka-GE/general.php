@@ -346,6 +346,8 @@ return [
     'audit_overdue'         => 'გადასამოწმებელი ვადა გადაცილებულია',
     'accept'                => 'მიიღე :asset',
     'i_accept'              => 'ვეთანხმები',
+    'i_decline_item'        => 'Decline this item',
+    'i_accept_item'         => 'Accept this item',
     'i_decline'             => 'უარვყოფ',
     'accept_decline'        => 'დამოწმება/უარყოფა',
     'sign_tos'              => 'გთხოვთ მოაწეროთ ხელი ქვემოთ, რათა დაადასტუროთ, რომ ეთანხმებით მომსახურების პირობებს:',
@@ -594,6 +596,7 @@ return [
     'version' => 'ვერსია',
     'build' => 'აგება',
     'footer_credit' => '<p>©2025 ინფორმაციული ტექნოლოგიებით უზრუნველყოფის სამმართველო</p>',
+    'set_password' => 'Set a Password',
 
 // Add form placeholders here
     'placeholders' => [

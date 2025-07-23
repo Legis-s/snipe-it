@@ -55,7 +55,7 @@ return [
     'default_eula_text_placeholder' => 'Add your default EULA text',
     'default_language'			=> 'Мова за замовчуванням',
     'default_eula_help_text'	=> 'Ви також можете пов\'язати користувальницькі EULA з конкретними категоріями активів.',
-    'acceptance_note'           => 'Додати примітку для вашого рішення (необов\'язково)',
+    'acceptance_note'           => 'Add a note for your decision (required if declining)',
     'display_asset_name'        => 'Відображення назви активу',
     'display_checkout_date'     => 'Показувати дату оформлення замовлення',
     'display_eol'               => 'Відображати EOL у вигляді таблиці',

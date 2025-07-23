@@ -55,7 +55,7 @@ return [
     'default_eula_text_placeholder' => 'Add your default EULA text',
     'default_language'			=> 'இயல்புநிலை மொழி',
     'default_eula_help_text'	=> 'நீங்கள் தனிபயன் EULA களை குறிப்பிட்ட சொத்து வகையுடன் இணைக்கலாம்.',
-    'acceptance_note'           => 'Add a note for your decision (Optional)',
+    'acceptance_note'           => 'Add a note for your decision (required if declining)',
     'display_asset_name'        => 'சொத்து பெயரைக் காட்டு',
     'display_checkout_date'     => 'காட்சி புதுப்பிப்பு தேதி',
     'display_eol'               => 'அட்டவணை பார்வையில் EOL காட்டவும்',

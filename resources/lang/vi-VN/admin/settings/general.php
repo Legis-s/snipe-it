@@ -55,7 +55,7 @@ return [
     'default_eula_text_placeholder' => 'Add your default EULA text',
     'default_language'			=> 'Ngôn ngữ mặc định',
     'default_eula_help_text'	=> 'Bạn cũng có thể liên kế EULA tùy chỉnh đến danh mục tài sản riêng biệt.',
-    'acceptance_note'           => 'Add a note for your decision (Optional)',
+    'acceptance_note'           => 'Add a note for your decision (required if declining)',
     'display_asset_name'        => 'Hiển thị tên tài sản',
     'display_checkout_date'     => 'Hiển thị ngày checkout',
     'display_eol'               => 'Hiển thị EOL ở bảng',

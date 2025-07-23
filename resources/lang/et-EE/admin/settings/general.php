@@ -55,7 +55,7 @@ return [
     'default_eula_text_placeholder' => 'Add your default EULA text',
     'default_language'			=> 'Vaikimisi keel',
     'default_eula_help_text'	=> 'Võite ka kohandatud EULA-sid siduda kindlate varakategooriatega.',
-    'acceptance_note'           => 'Lisa märkus oma otsusele (Valikuline)',
+    'acceptance_note'           => 'Add a note for your decision (required if declining)',
     'display_asset_name'        => 'Kuvatava vara nimi',
     'display_checkout_date'     => 'Display Checkout Kuupäev',
     'display_eol'               => 'Kuva EOL tabeli vaates',

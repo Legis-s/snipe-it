@@ -346,6 +346,8 @@ return [
     'audit_overdue'         => 'Audit întârziat',
     'accept'                => 'Acceptă :asset',
     'i_accept'              => 'Accept',
+    'i_decline_item'        => 'Decline this item',
+    'i_accept_item'         => 'Accept this item',
     'i_decline'             => 'Am refuzat',
     'accept_decline'        => 'Acceptă/Refuză',
     'sign_tos'              => 'Înregistrează-te mai jos pentru a indica faptul că ești de acord cu termenii serviciului:',
@@ -594,6 +596,7 @@ return [
     'version' => 'Versiune',
     'build' => 'build',
     'footer_credit' => '<a target="_blank" href="https://snipeitapp.com" rel="noopener">Snipe-IT</a> este software open source, realizat cu <i class="fa fa-heart" aria-hidden="true" style="color: #a94442; font-size: 10px" /></i><span class="sr-only">dragoste</span> de <a href="https://bsky.app/profile/snipeitapp.com" rel="noopener">@snipeitapp.com</a>.',
+    'set_password' => 'Set a Password',
 
 // Add form placeholders here
     'placeholders' => [

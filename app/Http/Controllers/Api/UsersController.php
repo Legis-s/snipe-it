@@ -23,6 +23,7 @@ use App\Notifications\CurrentInventory;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
@@ -83,7 +84,12 @@ class UsersController extends Controller
             'users.autoassign_licenses',
             'users.website',
 
-        ])->with('manager', 'groups', 'userloc', 'company', 'department', 'assets', 'licenses', 'accessories', 'consumables', 'createdBy', 'managesUsers', 'managedLocations', 'eulas')
+        ])->with('manager')
+            ->with('groups')
+            ->with('userloc')
+            ->with('company')
+            ->with('department')
+            ->with('createdBy')
             ->withCount([
                 'assets as assets_count' => function(Builder $query) {
                     $query->withoutTrashed();
@@ -477,8 +483,25 @@ class UsersController extends Controller
                 return response()->json(Helper::formatStandardApiResponse('error', null, 'You cannot be your own manager'));
             }
 
-            if ($request->filled('password')) {
-                $user->password = bcrypt($request->input('password'));
+            // check for permissions related fields and pull them out if the current user cannot edit them
+            if (auth()->user()->can('canEditAuthFields', $user) && auth()->user()->can('editableOnDemo')) {
+
+                if ($request->filled('password')) {
+                    $user->password = bcrypt($request->input('password'));
+                }
+
+                if ($request->filled('username')) {
+                    $user->username = $request->input('username');
+                }
+
+                if ($request->filled('email')) {
+                    $user->email = $request->input('email');
+                }
+
+                if ($request->filled('activated')) {
+                    $user->activated = $request->input('activated');
+                }
+
             }
 
             // We need to use has()  instead of filled()

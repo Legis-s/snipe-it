@@ -80,9 +80,20 @@ class UploadFileRequest extends Request
     {
         $attributes = [];
 
-        if ($this->file) {
+        if (($this->file) && (is_array($this->file))) {
+
             for ($i = 0; $i < count($this->file); $i++) {
-                $attributes['file.'.$i] = $this->file[$i]->getClientOriginalName();
+
+                try {
+
+                    if ($this->file[$i]) {
+                        $attributes['file.'.$i] = $this->file[$i]->getClientOriginalName();
+                    }
+
+                } catch (\Exception $e) {
+                    $attributes['file.'.$i] = 'Invalid file';
+                }
+
             }
         }
 

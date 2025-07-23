@@ -55,7 +55,7 @@ return [
     'default_eula_text_placeholder' => 'Add your default EULA text',
     'default_language'			=> 'ភាសាលំនាំដើម',
     'default_eula_help_text'	=> 'អ្នកក៏អាចភ្ជាប់ EULAs ផ្ទាល់ខ្លួនទៅនឹងប្រភេទទ្រព្យសម្បត្តិជាក់លាក់ផងដែរ។',
-    'acceptance_note'           => 'បន្ថែមកំណត់ចំណាំសម្រាប់ការសម្រេចចិត្តរបស់អ្នក (ជាជម្រើស)',
+    'acceptance_note'           => 'Add a note for your decision (required if declining)',
     'display_asset_name'        => 'បង្ហាញ​ឈ្មោះ​ទ្រព្យសកម្ម',
     'display_checkout_date'     => 'Display Checkout Date',
     'display_eol'               => 'បង្ហាញ EOL នៅក្នុងទិដ្ឋភាពតារាង',

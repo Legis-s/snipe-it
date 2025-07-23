@@ -1,7 +1,7 @@
 <?php
 
 return array(
-    'about'      	=> 'About Status Types',
+    'about'      	=> 'O vrstah stanja',
     'archived'      	=> 'Arhivirano',
     'create'      	=> 'Ustvari oznako stanja',
     'color'      	=> 'Barva grafikona',

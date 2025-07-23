@@ -55,7 +55,7 @@ return [
     'default_eula_text_placeholder' => 'Add your default EULA text',
     'default_language'			=> 'Standardspråk',
     'default_eula_help_text'	=> 'Du kan också associera anpassade EULA till specifika tillgångskategorier.',
-    'acceptance_note'           => 'Lägg till en anteckning för ditt beslut (valfritt)',
+    'acceptance_note'           => 'Add a note for your decision (required if declining)',
     'display_asset_name'        => 'Visa företagsnamn',
     'display_checkout_date'     => 'Visa utcheck.dat.',
     'display_eol'               => 'Visa EOL i tabellvy',

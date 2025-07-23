@@ -55,7 +55,7 @@ return [
     'default_eula_text_placeholder' => 'Add your default EULA text',
     'default_language'			=> 'Zadani jezik',
     'default_eula_help_text'	=> 'Također možete povezati prilagođene EULA-e s određenim kategorijama imovine.',
-    'acceptance_note'           => 'Add a note for your decision (Optional)',
+    'acceptance_note'           => 'Add a note for your decision (required if declining)',
     'display_asset_name'        => 'Prikaz naziva imovine',
     'display_checkout_date'     => 'Prikaz datuma narudžbe',
     'display_eol'               => 'Prikaži EOL u prikazu tablice',

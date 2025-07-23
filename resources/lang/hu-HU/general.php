@@ -346,6 +346,8 @@ return [
     'audit_overdue'         => 'Elévült az ellenőrzés',
     'accept'                => ':asset elfogadva',
     'i_accept'              => 'Elfogadom',
+    'i_decline_item'        => 'Decline this item',
+    'i_accept_item'         => 'Accept this item',
     'i_decline'             => 'Elutasítom',
     'accept_decline'        => 'Elfogad/Elutasít',
     'sign_tos'              => 'A lenti aláírásoddal jelzed, hogy elfogadod a szolgáltatási feltételeket:',
@@ -594,6 +596,7 @@ return [
     'version' => 'Verzió',
     'build' => 'build',
     'footer_credit' => 'A <a target="_blank" href="https://snipeitapp.com" rel="noopener">Snipe-IT</a> nyílt forráskódú szoftver, amelyet <i class="fa fa-heart" aria-hidden="true" style="color: #a94442; font-size: 10px" /></i><span class="sr-only">szeretettel</span> készített a <a href="https://bsky.app/profile/snipeitapp.com" rel="noopener">@snipeitapp.com</a> csapata.',
+    'set_password' => 'Set a Password',
 
 // Add form placeholders here
     'placeholders' => [

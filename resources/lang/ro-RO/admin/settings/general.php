@@ -55,7 +55,7 @@ return [
     'default_eula_text_placeholder' => 'Add your default EULA text',
     'default_language'			=> 'Limba implicita',
     'default_eula_help_text'	=> 'De asemenea, puteți asocia clauze personalizate personalizate cu anumite categorii de active.',
-    'acceptance_note'           => 'Add a note for your decision (Optional)',
+    'acceptance_note'           => 'Add a note for your decision (required if declining)',
     'display_asset_name'        => 'Afiseaza nume activ',
     'display_checkout_date'     => 'Arata data predare',
     'display_eol'               => 'Arata EOL in tabel',

@@ -53,5 +53,5 @@ return [
     'next_save_user' => 'Toliau: išsaugoti naudotoją',
     'all_assigned_list_generation' => 'Sugeneruota:',
     'email_user_creds_on_create' => 'Siųsti naudotojui jo prisijungimo duomenis?',
-    'department_manager' => 'Department Manager',
+    'department_manager' => 'Skyriaus vadovas',
 ];

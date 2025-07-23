@@ -55,7 +55,7 @@ return [
     'default_eula_text_placeholder' => 'Add your default EULA text',
     'default_language'			=> 'Bahasa utama',
     'default_eula_help_text'	=> 'Anda juga dapat mengaitkan kustom EULAs untuk kategori aset tertentu.',
-    'acceptance_note'           => 'Tambahkan catatan untuk keputusan Anda (Opsional)',
+    'acceptance_note'           => 'Add a note for your decision (required if declining)',
     'display_asset_name'        => 'Tampilan Nama Aset',
     'display_checkout_date'     => 'Tampilan Tanggal Keluar',
     'display_eol'               => 'Tampilan EOL dalam bentuk tabel',

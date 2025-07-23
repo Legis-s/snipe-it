@@ -55,7 +55,7 @@ return [
     'default_eula_text_placeholder' => 'Add your default EULA text',
     'default_language'			=> '既定の言語',
     'default_eula_help_text'	=> '特殊な資産カテゴリーにカスタムEULAを関連付けられます。',
-    'acceptance_note'           => 'Add a note for your decision (Optional)',
+    'acceptance_note'           => 'Add a note for your decision (required if declining)',
     'display_asset_name'        => '資産名を表示',
     'display_checkout_date'     => 'チェックアウト日を表示',
     'display_eol'               => '表形式でEOLを表示',

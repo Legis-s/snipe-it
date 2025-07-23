@@ -55,7 +55,7 @@ return [
     'default_eula_text_placeholder' => 'Aggiungi il testo EULA predefinito',
     'default_language'			=> 'Lingua predefinita',
     'default_eula_help_text'	=> 'Puoi associare EULA personalizzati a categorie di beni specifici.',
-    'acceptance_note'           => 'Aggiungi una nota alla tua decisione (facoltativo)',
+    'acceptance_note'           => 'Aggiungi una nota per la tua decisione (richiesta in caso di declino)',
     'display_asset_name'        => 'Mostra Nome Bene',
     'display_checkout_date'     => 'Mostra Data Assegnazione',
     'display_eol'               => 'Visualizza EOL nella vista tabella',

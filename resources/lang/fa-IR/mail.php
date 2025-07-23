@@ -10,14 +10,18 @@ return [
     'Confirm_Accessory_Checkin' => 'تأیید ورود لوازم جانبی',
     'Confirm_Asset_Checkin' => 'تأیید ورود دارایی
 ',
+    'Confirm_component_checkin' => 'Component checkin confirmation',
     'Confirm_accessory_delivery' => 'تاییدیه تحویل لوازم جانبی',
     'Confirm_asset_delivery' => 'تاییدیه تحویل دارایی
 ',
     'Confirm_consumable_delivery' => 'تاییدیه تحویل مصرفی
 ',
+    'Confirm_component_delivery' => 'Component delivery confirmation',
     'Confirm_license_delivery' => 'تاییدیه تحویل مجوز
 ',
     'Consumable_checkout_notification' => 'Consumable checked out',
+    'Component_checkout_notification' => 'Component checked out',
+    'Component_checkin_notification' => 'Component checked in',
     'Days' => 'روزها',
     'Expected_Checkin_Date' => 'دارایی‌ای که برای شما بررسی شده است باید دوباره در تاریخ :date بررسی شود',
     'Expected_Checkin_Notification' => 'یادآوری: :نام مهلت اعلام حضور نزدیک است
@@ -41,7 +45,7 @@ return [
     'send_pdf_copy' => 'Send a copy of this acceptance to my email address',
     'accessory_name' => 'نام وسیله',
     'additional_notes' => 'یادداشت های اضافی',
-    'admin_has_created' => 'یک مدیر یک حساب کاربری برای شما در وب سایت وب ایجاد کرده است.',
+    'admin_has_created' => 'An administrator has created an account for you on the :web website. Please find your username below, and click on the link to set a password.',
     'asset' => 'دارایی',
     'asset_name' => 'نام دارایی',
     'asset_requested' => 'دارایی درخواست شد',

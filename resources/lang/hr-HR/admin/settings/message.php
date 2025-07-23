@@ -23,7 +23,7 @@ return [
         'success'               => 'Izbrisana su evidencija uspješno očišćena.',
     ],
     'mail' => [
-        'sending' => 'Sending Test Email...',
+        'sending' => 'Slanje testnog e-maila...',
         'success' => 'E-mail poslan!',
         'error' => 'Mail could not be sent.',
         'additional' => 'No additional error message provided. Check your mail settings and your app log.'

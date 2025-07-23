@@ -346,6 +346,8 @@ return [
     'audit_overdue'         => '盘点逾期',
     'accept'                => '接受 :asset',
     'i_accept'              => '我接受',
+    'i_decline_item'        => '拒绝此物品',
+    'i_accept_item'         => '接受这个物品',
     'i_decline'             => '我拒绝',
     'accept_decline'        => '接受/拒绝',
     'sign_tos'              => '请在下面登录以表明您同意服务条款：',
@@ -594,6 +596,7 @@ return [
     'version' => '版本',
     'build' => '版本号',
     'footer_credit' => '<a target="_blank" href="https://snipeitapp.com" rel="noopener">Snipe-IT</a> 是开源软件，用 <i class="fa fa-heart" aria-hidden="true" style="color: #a94442; font-size: 10px" /></i><span class="sr-only">爱</span> 由 <a href="https://bsky.app/profile/snipeitapp.com" rel="noopener">@snipeitapp.com</a> 制作。',
+    'set_password' => 'Set a Password',
 
 // Add form placeholders here
     'placeholders' => [

@@ -7,6 +7,7 @@ use App\Models\Department;
 use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\WelcomeNotification;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 
@@ -81,6 +82,7 @@ class UserImporter extends ItemImporter
             $this->item['username'] = $user_formatted_array['username'];
         }
 
+
         // Check if a numeric ID was passed. If it does, use that above all else.
         if ((array_key_exists('id', $this->item) && ($this->item['id'] != "") && (is_numeric($this->item['id']))))  {
             $user = User::find($this->item['id']);
@@ -90,12 +92,25 @@ class UserImporter extends ItemImporter
 
         if ($user) {
 
+            // If the user does not want to update existing values, only add new ones, bail out
             if (! $this->updating) {
                 Log::debug('A matching User '.$this->item['name'].' already exists.  ');
                 return;
             }
+
             $this->log('Updating User');
+
+            // Todo - check that this works
+            if (!Gate::allows('canEditAuthFields', $user)) {
+                unset($user->username);
+                unset($user->email);
+                unset($user->password);
+                unset($user->activated);
+            }
+
             $user->update($this->sanitizeItemForUpdating($user));
+
+            // Why do we have to do this twice? Update should
             $user->save();
 
             // Update the location of any assets checked out to this user
@@ -116,7 +131,11 @@ class UserImporter extends ItemImporter
         $this->log('No matching user, creating one');
         $user = new User();
         $user->created_by = auth()->id();
+
         $user->fill($this->sanitizeItemForStoring($user));
+
+        // TODO - check for gate here I guess
+
 
         if ($user->save()) {
             $this->log('User '.$this->item['name'].' was created');
@@ -142,6 +161,7 @@ class UserImporter extends ItemImporter
 
         $this->logError($user, 'User');
     }
+
 
     /**
      * Fetch an existing department, or create new if it doesn't exist

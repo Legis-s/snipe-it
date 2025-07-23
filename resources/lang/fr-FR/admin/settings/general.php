@@ -55,7 +55,7 @@ return [
     'default_eula_text_placeholder' => 'Add your default EULA text',
     'default_language'			=> 'Langue par défaut',
     'default_eula_help_text'	=> 'Vous pouvez également associer les licences d\'utilisations personnalisés à des catégories spécifiques d\'actifs .',
-    'acceptance_note'           => 'Ajouter une note pour votre décision (facultatif)',
+    'acceptance_note'           => 'Add a note for your decision (required if declining)',
     'display_asset_name'        => 'Afficher le nom des actifs',
     'display_checkout_date'     => 'Afficher la date d\'association',
     'display_eol'               => 'Afficher la fin de vie dans les tables',

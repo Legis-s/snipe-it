@@ -55,7 +55,7 @@ return [
     'default_eula_text_placeholder' => 'Add your default EULA text',
     'default_language'			=> 'Teanga Réamhshocraithe',
     'default_eula_help_text'	=> 'Is féidir leat freisin EULAs saincheaptha a chomhcheangal le catagóirí sonracha sócmhainne.',
-    'acceptance_note'           => 'Add a note for your decision (Optional)',
+    'acceptance_note'           => 'Add a note for your decision (required if declining)',
     'display_asset_name'        => 'Taispeáin Ainm na Sócmhainne',
     'display_checkout_date'     => 'Taispeáin Dáta Seiceáil',
     'display_eol'               => 'Taispeáin EOL in amharc an tábla',

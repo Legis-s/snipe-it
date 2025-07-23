@@ -292,7 +292,7 @@ return [
     'status'    			=> 'Stato',
     'accept_eula'           => 'Accettazione Accordo',
     'eula'                  => 'EULAs',
-    'eula_long'             => 'End-User License Agreements',
+    'eula_long'             => 'Contratto di licenza con l\'utente finale',
     'show_or_hide_eulas' => 'Mostra/Nascondi EULA',
     'supplier'              => 'Fornitore',
     'suppliers'  			=> 'Fornitori',
@@ -323,10 +323,10 @@ return [
     'unaccepted_asset_report' => 'Beni non accettati',
     'users'                 => 'Utenti',
     'viewall'				=> 'Visualizza tutto',
-    'viewassets'  			=> 'View Assigned Items',
-    'viewassetsfor'         => 'View Items for :name',
-    'view_user_assets'      => 'View Items Assigned to User',
-    'me'                    => 'Me',
+    'viewassets'  			=> 'Visualizza Elementi Assegnati',
+    'viewassetsfor'         => 'Visualizza elementi per :name',
+    'view_user_assets'      => 'Visualizza gli elementi assegnati all\'utente',
+    'me'                    => 'Io',
     'website'               => 'Sito Web',
     'welcome'				=> 'Benvenuto, :name',
     'years'					=> 'anni',
@@ -346,6 +346,8 @@ return [
     'audit_overdue'         => 'Scaduto per Controllo Inventario',
     'accept'                => 'Accetta :asset',
     'i_accept'              => 'Accetto',
+    'i_decline_item'        => 'Rifiuta questo elemento',
+    'i_accept_item'         => 'Accetta questo elemento',
     'i_decline'             => 'Rifiuto',
     'accept_decline'        => 'Accetta/Rifiuta',
     'sign_tos'              => 'Firma qui sotto per indicare che accetti i termini di servizio:',
@@ -594,6 +596,7 @@ return [
     'version' => 'Versione',
     'build' => 'build',
     'footer_credit' => '<a target="_blank" href="https://snipeitapp.com" rel="noopener">Snipe-IT</a> è un software open source, realizzato con <i class="fa fa-heart" aria-hidden="true" style="color: #a94442; font-size: 10px" /></i><span class="sr-only">amore</span> da <a href="https://bsky.app/profile/snipeitapp.com" rel="noopener">@snipeitapp.com</a>.',
+    'set_password' => 'Set a Password',
 
 // Add form placeholders here
     'placeholders' => [
@@ -645,13 +648,13 @@ return [
     'file_upload_status' => [
 
         'upload' => [
-            'success' => 'File successfully uploaded |:count files successfully uploaded',
-            'error' => 'File upload failed |:count file uploads failed',
+            'success' => 'File caricato con successo |:count file caricati con successo',
+            'error' => 'Caricamento file fallito <unk> :count caricamento file fallito',
         ],
 
         'delete' => [
-            'success' => 'File successfully deleted |:count files successfully deleted',
-            'error' => 'File deletion failed |:count file deletions failed',
+            'success' => 'File cancellato con successo i file |:count eliminati con successo',
+            'error' => 'Eliminazione file fallita |:count cancellazione file fallita',
         ],
 
         'file_not_found' => 'The selected file was not found on server',

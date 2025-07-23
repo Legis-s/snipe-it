@@ -2,7 +2,7 @@
 
 return [
 
-    'undeployable' 		 => 'The following assets cannot be deployed and have been removed from checkout: :asset_tags',
+    'undeployable' 		 => 'Šis turtas negali būti išduotas, todėl buvo pašalintas iš išduodamų sąrašo: :asset_tags',
     'does_not_exist' 	 => 'Tokio turto nėra.',
     'does_not_exist_var' => 'Turtas su numeriu :asset_tag nerastas.',
     'no_tag' 	         => 'Nenurodytas inventorinis numeris.',
@@ -20,9 +20,9 @@ return [
         'multi_success_linked' => 'Turtas su inventoriniu numeriu :links sukurtas sėkmingai.|:count turto vienetai(-ų) sukurti sėkmingai. :links.',
         'partial_failure' => 'Nepavyko sukurti turto. Priežastis: :failures|:count turto vienetų nepavyko sukurti. Priežastys: :failures',
         'target_not_found' => [
-            'user' => 'The assigned user could not be found.',
-            'asset' => 'The assigned asset could not be found.',
-            'location' => 'The assigned location could not be found.',
+            'user' => 'Priskirto naudotojo rasti nepavyko.',
+            'asset' => 'Priskirto turto rasti nepavyko.',
+            'location' => 'Priskirtos vietos rasti nepavyko.',
         ],
     ],
 
@@ -105,9 +105,9 @@ return [
     ],
 
     'requests' => [
-        'error'   		=> 'Request was not successful, please try again.',
-        'success' 		=> 'Request successfully submitted.',
-        'canceled'      => 'Request successfully canceled.',
+        'error'   		=> 'Prašymas buvo nesėkmingas, bandykite dar kartą.',
+        'success' 		=> 'Prašymas sėkmingai pateiktas.',
+        'canceled'      => 'Prašymas sėkmingai atšauktas.',
         'cancel'        => 'Atšaukti šio daikto užklausą',
     ],
 

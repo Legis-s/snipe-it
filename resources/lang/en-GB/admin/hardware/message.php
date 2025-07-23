@@ -107,7 +107,7 @@ return [
     'requests' => [
         'error'   		=> 'Request was not successful, please try again.',
         'success' 		=> 'Request successfully submitted.',
-        'canceled'      => 'Request successfully canceled.',
+        'canceled'      => 'Request successfully cancelled.',
         'cancel'        => 'Cancel this item request',
     ],
 

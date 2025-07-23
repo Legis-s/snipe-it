@@ -55,7 +55,7 @@ return [
     'default_eula_text_placeholder' => 'Добавете ваш EULA',
     'default_language'			=> 'Език по подразбиране',
     'default_eula_help_text'	=> 'Можете да асоциирате специфична EULA към всяка избрана категория.',
-    'acceptance_note'           => 'Добавете бележка за вашето решение (По желание)',
+    'acceptance_note'           => 'Add a note for your decision (required if declining)',
     'display_asset_name'        => 'Визуализиране на актив',
     'display_checkout_date'     => 'Визуализиране на дата на изписване',
     'display_eol'               => 'Визуализиране на EOL в таблиците',

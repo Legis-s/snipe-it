@@ -346,6 +346,8 @@ return [
     'audit_overdue'         => 'Po termíne na inventúru',
     'accept'                => 'Prijať :asset',
     'i_accept'              => 'Príjmam',
+    'i_decline_item'        => 'Decline this item',
+    'i_accept_item'         => 'Accept this item',
     'i_decline'             => 'Odmietam',
     'accept_decline'        => 'Prijať/Odmietnuť',
     'sign_tos'              => 'Podpísaním nižšie akceptujete podmienky služby:',
@@ -594,6 +596,7 @@ return [
     'version' => 'Version',
     'build' => 'build',
     'footer_credit' => '<a target="_blank" href="https://snipeitapp.com" rel="noopener">Snipe-IT</a> is open source software, made with <i class="fa fa-heart" aria-hidden="true" style="color: #a94442; font-size: 10px" /></i><span class="sr-only">love</span> by <a href="https://bsky.app/profile/snipeitapp.com" rel="noopener">@snipeitapp.com</a>.',
+    'set_password' => 'Set a Password',
 
 // Add form placeholders here
     'placeholders' => [

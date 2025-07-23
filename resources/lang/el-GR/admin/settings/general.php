@@ -55,7 +55,7 @@ return [
     'default_eula_text_placeholder' => 'Add your default EULA text',
     'default_language'			=> 'Προκαθορισμένη γλώσσα',
     'default_eula_help_text'	=> 'Μπορείτε επίσης να συσχετίσετε προσαρμοσμένες ΑΔΕΚ με συγκεκριμένες κατηγορίες περιουσιακών στοιχείων.',
-    'acceptance_note'           => 'Add a note for your decision (Optional)',
+    'acceptance_note'           => 'Add a note for your decision (required if declining)',
     'display_asset_name'        => 'Εμφάνιση ονόματος παγίου',
     'display_checkout_date'     => 'Εμφάνιση ημερομηνίας αποχώρησης',
     'display_eol'               => 'Εμφάνιση του EOL στην προβολή πίνακα',

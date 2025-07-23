@@ -346,6 +346,8 @@ return [
     'audit_overdue'         => 'Erääntynyt tarkastettava',
     'accept'                => 'Hyväksy :asset',
     'i_accept'              => 'Hyväksyn',
+    'i_decline_item'        => 'Decline this item',
+    'i_accept_item'         => 'Accept this item',
     'i_decline'             => 'Kieltäydyn',
     'accept_decline'        => 'Hyväksy/Hylkää',
     'sign_tos'              => 'Allekirjoita osoittaaksesi, että hyväksyt käyttöehdot:',
@@ -594,6 +596,7 @@ return [
     'version' => 'Version',
     'build' => 'build',
     'footer_credit' => '<a target="_blank" href="https://snipeitapp.com" rel="noopener">Snipe-IT</a> is open source software, made with <i class="fa fa-heart" aria-hidden="true" style="color: #a94442; font-size: 10px" /></i><span class="sr-only">love</span> by <a href="https://bsky.app/profile/snipeitapp.com" rel="noopener">@snipeitapp.com</a>.',
+    'set_password' => 'Set a Password',
 
 // Add form placeholders here
     'placeholders' => [

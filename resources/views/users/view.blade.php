@@ -164,15 +164,6 @@
         <div class="tab-pane active" id="details">
           <div class="row">
 
-            @if ($user->deleted_at!='')
-              <div class="col-md-12">
-                <div class="callout callout-warning">
-                  <i class="icon fas fa-exclamation-triangle"></i>
-                  {{ trans('admin/users/message.user_deleted_warning') }}
-                </div>
-              </div>
-            @endif
-
         <div class="info-stack-container">
             <!-- Start button column -->
             <div class="col-md-3 col-xs-12 col-sm-push-9 info-stack">
@@ -241,7 +232,7 @@
                 @endcan
 
                 @can('update', $user)
-                  @if (($user->activated == '1') && ($user->ldap_import == '0'))
+                  @if ((($user->deleted_at=='')) && ($user->activated == '1') && ($user->ldap_import == '0'))
                   <div class="col-md-12" style="padding-top: 5px;">
                     @if (($user->email != '') && ($user->activated=='1'))
                       <form action="{{ route('users.password',['userId'=> $user->id]) }}" method="POST">
@@ -271,7 +262,7 @@
                 @endcan
 
 
-            @can('delete', $user)
+            @can('update', $user)
                   @if ($user->deleted_at=='')
                     <div class="col-md-12" style="padding-top: 30px;">
                         @if ($user->isDeletable())
@@ -1025,38 +1016,20 @@
           <div class="table-responsive">
 
 
-            <table
-                    data-cookie-id-table="usersHistoryTable"
-                    data-id-table="usersHistoryTable"
-                    data-side-pagination="server"
-                    data-sort-order="desc"
-                    id="usersHistoryTable"
-                    class="table table-striped snipe-table"
-                    data-url="{{ route('api.activity.index', ['target_id' => $user->id, 'target_type' => 'user']) }}"
-                    data-export-options='{
-                "fileName": "export-{{ str_slug($user->present()->fullName ) }}-history-{{ date('Y-m-d') }}",
-                "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                }'>
-              <thead>
-              <tr>
-                <th data-field="icon" style="width: 40px;" class="hidden-xs" data-formatter="iconFormatter">Icon</th>
-                <th data-field="created_at" data-formatter="dateDisplayFormatter" data-sortable="true">{{ trans('general.date') }}</th>
-                  <th data-field="item" data-formatter="polymorphicItemFormatter">{{ trans('general.item') }}</th>
-                  <th data-field="action_type">{{ trans('general.action') }}</th>
-                  <th data-field="target" data-formatter="polymorphicItemFormatter">{{ trans('general.target') }}</th>
-                  <th data-field="note">{{ trans('general.notes') }}</th>
-                  @if  ($snipeSettings->require_accept_signature=='1')
-                      <th data-field="signature_file" data-visible="false"  data-formatter="imageFormatter">{{ trans('general.signature') }}</th>
-                  @endif
-                  <th data-field="item.serial" data-visible="false">{{ trans('admin/hardware/table.serial') }}</th>
-                  <th data-field="admin" data-formatter="usersLinkObjFormatter">{{ trans('general.created_by') }}</th>
-                  <th data-field="remote_ip" data-visible="false" data-sortable="true">{{ trans('admin/settings/general.login_ip') }}</th>
-                  <th data-field="user_agent" data-visible="false" data-sortable="true">{{ trans('admin/settings/general.login_user_agent') }}</th>
-                  <th data-field="action_source" data-visible="false" data-sortable="true">{{ trans('general.action_source') }}</th>
-
-              </tr>
-              </thead>
-            </table>
+              <table
+                      data-columns="{{ \App\Presenters\HistoryPresenter::dataTableLayout() }}"
+                      class="table table-striped snipe-table"
+                      data-cookie-id-table="UserHistoryTable"
+                      data-id-table="UserHistoryTable"
+                      id="UserHistoryTable"
+                      data-side-pagination="server"
+                      data-sort-order="desc"
+                      data-export-options='{
+                       "fileName": "export-{{ str_slug($user->name) }}-history-{{ date('Y-m-d') }}",
+                       "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
+                     }'
+                      data-url="{{ route('api.activity.index', ['target_id' => $user->id, 'item_type' => User::class]) }}">
+              </table>
 
           </div>
         </div><!-- /.tab-pane -->

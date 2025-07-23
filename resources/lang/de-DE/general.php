@@ -225,13 +225,13 @@ return [
     'order_number'          => 'Bestellnummer',
     'only_deleted'          => 'Nur gelöschte Gegenstände',
     'page_menu'				=> 'Zeige _MENU_ Einträge',
-    'page_error'            => 'Could not determine previous page. Redirected to homepage.',
+    'page_error'            => 'Vorherige Seite konnte nicht ermittelt werden. Sie wurden auf die Startseite weitergeleitet.',
     'pagination_info'		=> 'Zeige _START_ bis _END_ von _TOTAL_ Einträgen',
     'pending'				=> 'Ausstehende',
     'people'				=> 'Benutzer',
     'per_page'				=> 'Ergebnisse pro Seite',
     'previous'				=> 'Vorherige',
-    'previous_page'			=> 'Previous Page',
+    'previous_page'			=> 'Vorherige Seite',
     'processing'			=> 'Wird verarbeitet',
     'profile'				=> 'Ihr Profil',
     'purchase_cost'                              => 'Einkaufspreis',
@@ -253,7 +253,7 @@ return [
     'requested'				=> 'Angefordert',
     'requested_date'        => 'Angefordertes Datum',
     'requested_assets'      => 'Angeforderte Assets',
-    'requested_assets_menu' => 'Requested Items',
+    'requested_assets_menu' => 'Angeforderte Gegenstände',
     'request_canceled'      => 'Anfrage abgebrochen',
     'request_item'          => 'Diesen Artikel anfordern',
     'external_link_tooltip' => 'Externer Link zu',
@@ -309,11 +309,11 @@ return [
     'type'  				=> 'Typ',
     'undeployable'			=> 'Nicht herausgebbar',
     'unknown_admin'			=> 'Unbekannter Administrator',
-    'unknown_user'          => 'Unknown User',
+    'unknown_user'          => 'Unbekannter Benutzer',
     'username'              => 'Benutzername',
     'update'                => 'Aktualisieren',
     'updating_item' => ':item wird aktualisiert',
-    'upload_filetypes_help' => 'Allowed filetypes are: :allowed_filetypes. Max upload size allowed is :size.',
+    'upload_filetypes_help' => 'Erlaubte Dateitypen sind: :allowed_filetypes. Maximale Upload-Größe ist :size.',
     'uploaded'              => 'Hochgeladen',
     'user'					=> 'Benutzer',
     'accepted'			    => 'angenommen',
@@ -323,9 +323,9 @@ return [
     'unaccepted_asset_report' => 'Nicht akzeptierte Assets',
     'users'                 => 'Benutzer',
     'viewall'				=> 'Alle anzeigen',
-    'viewassets'  			=> 'View Assigned Items',
-    'viewassetsfor'         => 'View Items for :name',
-    'view_user_assets'      => 'View Items Assigned to User',
+    'viewassets'  			=> 'Zugewiesene Gegenstände anzeigen',
+    'viewassetsfor'         => 'Gegenstände von :name anzeigen',
+    'view_user_assets'      => 'Dem Benutzer zugewiesene Gegenstände anzeigen',
     'me'                    => 'Ich',
     'website'               => 'Webseite',
     'welcome'				=> 'Willkommen, :name',
@@ -346,6 +346,8 @@ return [
     'audit_overdue'         => 'Prüfung überfällig',
     'accept'                => ':asset akzeptieren',
     'i_accept'              => 'Ich akzeptiere',
+    'i_decline_item'        => 'Decline this item',
+    'i_accept_item'         => 'Accept this item',
     'i_decline'             => 'Ich lehne ab',
     'accept_decline'        => 'Akzeptieren/Ablehnen',
     'sign_tos'              => 'Unterschreiben Sie unten, um den Nutzungsbedingungen zuzustimmen:',
@@ -516,7 +518,7 @@ return [
         'manager_last_name' => 'Vorgesetzter Nachname',
         'manager_full_name' => 'Vorgesetzter Voller Name',
         'manager_username' => 'Vorgesetzter Benutzername',
-        'manager_employee_num' => 'Manager Employee Number',
+        'manager_employee_num' => 'Leitungsmitarbeiternummer',
         'checkout_type' => 'Herausgabetyp',
         'checkout_location' => 'Herausgeben an Ort',
         'image_filename' => 'Bild Dateiname',
@@ -594,6 +596,7 @@ return [
     'version' => 'Version',
     'build' => 'Build',
     'footer_credit' => '<a target="_blank" href="https://snipeitapp.com" rel="noopener">Snipe-IT</a> ist Open-Source-Software, entwickelt mit <i class="fa fa-heart" aria-hidden="true" style="color: #a94442; font-size: 10px" /></i><span class="sr-only">Liebe</span> von <a href="https://bsky.app/profile/snipeitapp.com" rel="noopener">@snipeitapp.com</a>.',
+    'set_password' => 'Set a Password',
 
 // Add form placeholders here
     'placeholders' => [
@@ -645,28 +648,28 @@ return [
     'file_upload_status' => [
 
         'upload' => [
-            'success' => 'File successfully uploaded |:count files successfully uploaded',
-            'error' => 'File upload failed |:count file uploads failed',
+            'success' => 'Datei wurde erfolgreich hochgeladen|:count Dateien wurden erfolgreich hochgeladen',
+            'error' => 'Datei-Upload fehlgeschlagen |:count Datei-Uploads fehlgeschlagen',
         ],
 
         'delete' => [
-            'success' => 'File successfully deleted |:count files successfully deleted',
-            'error' => 'File deletion failed |:count file deletions failed',
+            'success' => 'Datei wurde erfolgreich gelöscht|:count Dateien wurden erfolgreich gelöscht',
+            'error' => 'Datei-Löschung fehlgeschlagen|:count Datei-Löschungen fehlgeschlagen',
         ],
 
-        'file_not_found' => 'The selected file was not found on server',
-        'invalid_id' => 'That file ID is invalid',
-        'invalid_object' => 'That object ID is invalid',
-        'nofiles' => 'No files were included for upload',
-        'confirm_delete' => 'Are you sure you want to delete this file?',
+        'file_not_found' => 'Die ausgewählte Datei wurde nicht auf dem Server gefunden',
+        'invalid_id' => 'Diese Datei-ID ist ungültig',
+        'invalid_object' => 'Diese Objekt-ID ist ungültig',
+        'nofiles' => 'Keine Dateien zum Hochladen vorhanden',
+        'confirm_delete' => 'Sind sie sicher das diese Datei gelöscht werden soll?',
     ],
 
     'depreciation_options' => [
-        'amount' => 'Amount',
-        'percent' => 'Percentage',
+        'amount' => 'Anzahl',
+        'percent' => 'Prozentsatz',
     ],
 
-    'months_plural' => '1 month|:count months',
+    'months_plural' => '1 Monat|:count Monate',
 
 
 ];

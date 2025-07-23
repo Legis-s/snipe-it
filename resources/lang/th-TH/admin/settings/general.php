@@ -55,7 +55,7 @@ return [
     'default_eula_text_placeholder' => 'Add your default EULA text',
     'default_language'			=> 'ภาษาเริ่มต้น',
     'default_eula_help_text'	=> 'คุณยังสามารถปรับแต่งข้อตกลงการใช้งานสำหรับกกำหนดให้กับหมวดหมู่ทรัพย์สินได้',
-    'acceptance_note'           => 'Add a note for your decision (Optional)',
+    'acceptance_note'           => 'Add a note for your decision (required if declining)',
     'display_asset_name'        => 'แสดงชื่อทรัพย์สิน',
     'display_checkout_date'     => 'แสดงวันที่นำออก',
     'display_eol'               => 'ดู EOL ในแบบตาราง',

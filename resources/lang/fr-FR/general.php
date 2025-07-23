@@ -346,6 +346,8 @@ return [
     'audit_overdue'         => 'En retard pour l\'audit',
     'accept'                => 'Accepter :asset',
     'i_accept'              => 'J\'accepte',
+    'i_decline_item'        => 'Decline this item',
+    'i_accept_item'         => 'Accept this item',
     'i_decline'             => 'Je refuse',
     'accept_decline'        => 'Accepter/refuser',
     'sign_tos'              => 'Signez ci-dessous pour indiquer que vous acceptez les conditions d\'utilisation :',
@@ -594,6 +596,7 @@ return [
     'version' => 'Version',
     'build' => 'build',
     'footer_credit' => '<a target="_blank" href="https://snipeitapp.com" rel="noopener">Snipe-IT</a> is open source software, made with <i class="fa fa-heart" aria-hidden="true" style="color: #a94442; font-size: 10px" /></i><span class="sr-only">love</span> by <a href="https://bsky.app/profile/snipeitapp.com" rel="noopener">@snipeitapp.com</a>.',
+    'set_password' => 'Set a Password',
 
 // Add form placeholders here
     'placeholders' => [

@@ -346,6 +346,8 @@ return [
     'audit_overdue'         => '監査期日を超過',
     'accept'                => ':assetを承認',
     'i_accept'              => '承認',
+    'i_decline_item'        => 'Decline this item',
+    'i_accept_item'         => 'Accept this item',
     'i_decline'             => '却下',
     'accept_decline'        => '承認/拒否',
     'sign_tos'              => '利用規約に同意された方は、ご署名ください。',
@@ -594,6 +596,7 @@ return [
     'version' => 'バージョン',
     'build' => 'ビルド',
     'footer_credit' => '<a target="_blank" href="https://snipeitapp.com" rel="noopener">Snipe-IT</a> is open source software, made with <i class="fa fa-heart" aria-hidden="true" style="color: #a94442; font-size: 10px" /></i><span class="sr-only">love</span> by <a href="https://bsky.app/profile/snipeitapp.com" rel="noopener">@snipeitapp.com</a>.',
+    'set_password' => 'パスワードを設定',
 
 // Add form placeholders here
     'placeholders' => [

@@ -55,7 +55,7 @@ return [
     'default_eula_text_placeholder' => 'Añade tu texto de EULA por defecto',
     'default_language'			=> 'Idioma predeterminado',
     'default_eula_help_text'	=> 'También puede asociar acuerdos de uso personalizados a categorías específicas.',
-    'acceptance_note'           => 'Añada una nota para su decisión (opcional)',
+    'acceptance_note'           => 'Add a note for your decision (required if declining)',
     'display_asset_name'        => 'Mostrar nombre del activo',
     'display_checkout_date'     => 'Mostrar fecha de asignación',
     'display_eol'               => 'Mostrar fin de soporte (EOL) en la vista de tabla',

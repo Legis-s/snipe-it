@@ -55,7 +55,7 @@ return [
     'default_eula_text_placeholder' => '添加默认最终用户许可协议（EULA）文本',
     'default_language'			=> '默认语言',
     'default_eula_help_text'	=> '你也可以将自定义的最终用户许可协议（EULA）与特定资产分类相关联。',
-    'acceptance_note'           => '为您的决定添加备注(可选)',
+    'acceptance_note'           => '为您的决定添加备注(拒绝的话需要)',
     'display_asset_name'        => '显示资产名称',
     'display_checkout_date'     => '显示签出日期',
     'display_eol'               => '以表格形式显示寿命期限',

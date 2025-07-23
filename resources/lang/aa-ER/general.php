@@ -346,6 +346,8 @@ return [
     'audit_overdue'         => 'crwdns5988:0crwdne5988:0',
     'accept'                => 'crwdns6016:0crwdne6016:0',
     'i_accept'              => 'crwdns6018:0crwdne6018:0',
+    'i_decline_item'        => 'crwdns13490:0crwdne13490:0',
+    'i_accept_item'         => 'crwdns13492:0crwdne13492:0',
     'i_decline'             => 'crwdns6020:0crwdne6020:0',
     'accept_decline'        => 'crwdns6163:0crwdne6163:0',
     'sign_tos'              => 'crwdns6022:0crwdne6022:0',
@@ -593,6 +595,7 @@ return [
     'version' => 'crwdns13278:0crwdne13278:0',
     'build' => 'crwdns13280:0crwdne13280:0',
     'footer_credit' => 'crwdns13282:0crwdne13282:0',
+    'set_password' => 'crwdns13494:0crwdne13494:0',
 
 // Add form placeholders here
     'placeholders' => [

@@ -38,10 +38,10 @@ return array(
         'delete' => 'Kullanıcı silinirken bir problem oluştu. Lütfen tekrar deneyin.',
         'delete_has_assets' => 'Bu kullanıcının atadığı öğeler var ve silinemiyor.',
         'delete_has_assets_var' => 'Bu kullanıcının atanan bir varlığı var. Lütfen önce bunu teslim alın.|Bu kullanıcının :count adet atanan varlığı var. Lütfen önce bu varlıkları teslim alın.',
-        'delete_has_licenses_var' => 'This user still has a license seats assigned. Please check it in first.|This user still has :count license seats assigned. Please check them in first.',
-        'delete_has_accessories_var' => 'This user still has an accessory assigned. Please check it in first.|This user still has :count accessories assigned. Please check their assets in first.',
-        'delete_has_locations_var' => 'This user still manages a location. Please select another manager first.|This user still manages :count locations. Please select another manager first.',
-        'delete_has_users_var' => 'This user still manages another user. Please select another manager for that user first.|This user still manages :count users. Please select another manager for them first.',
+        'delete_has_licenses_var' => 'Bu kullanıcıya hâlâ bir lisans hakkı atanmış. Lütfen önce bunu teslim edin.|Bu kullanıcıya hâlâ :count adet lisans hakkı atanmış. Lütfen önce bunları teslim edin.',
+        'delete_has_accessories_var' => 'Bu kullanıcının hala atanmış bir aksesuarı var. Lütfen önce onu kontrol edin.|Bu kullanıcıya hala atanmış :count aksesuar var. Lütfen önce varlıklarını kontrol edin.',
+        'delete_has_locations_var' => 'Bu kullanıcı hala bir konumu yönetiyor. Lütfen önce başka bir yönetici seçin.|Bu kullanıcı hala :count konum yönetiyor. Lütfen önce başka bir yönetici seçin.',
+        'delete_has_users_var' => 'Bu kullanıcı hala başka bir kullanıcıyı yönetiyor. Lütfen önce o kullanıcı için başka bir yönetici seçin Bu kullanıcı hala :count kullanıcı yönetiyor. Lütfen önce onlar için başka bir yönetici seçin.',
         'unsuspend' => 'Kullanıcı erişimi açılırken bir sorun oluştu. Lütfen yeniden deneyin.',
         'import'    => 'Kullanıcılar içe aktarılırken bir sorun oluştu. Lütfen yeniden deneyin.',
         'asset_already_accepted' => 'Bu varlık zaten kabul etti.',
@@ -53,7 +53,7 @@ return array(
         'ldap_could_not_search' => 'LDAP sunucusuna bağlanamadı. LDAP yapılandırma dosyası LDAP sunucusu yapılandırmanızda gözden geçirin. <br> LDAP sunucusundan Hata:',
         'ldap_could_not_get_entries' => 'LDAP sunucusuna bağlanamadı. LDAP yapılandırma dosyası LDAP sunucusu yapılandırmanızda gözden geçirin. <br> LDAP sunucusundan Hata:',
         'password_ldap' => 'Bu hesabın parolası LDAP / Active Directory tarafından yönetilir. Lütfen şifrenizi değiştirmek için BT departmanınızla iletişime geçin.',
-        'multi_company_items_assigned' => 'This user has items assigned that belong to a different company. Please check them in or edit their company.'
+        'multi_company_items_assigned' => 'Bu kullanıcının farklı bir şirkete ait atanmış öğeleri var. Lütfen onları kontrol edin veya şirketini düzenleyin.'
     ),
 
     'deletefile' => array(

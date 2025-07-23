@@ -17,6 +17,7 @@ use Tests\TestCase;
 
 class StoreAssetTest extends TestCase
 {
+
     public function testRequiresPermissionToCreateAsset()
     {
         $this->actingAsForApi(User::factory()->create())
@@ -82,6 +83,8 @@ class StoreAssetTest extends TestCase
         $this->assertTrue($asset->assetstatus->is($status));
         $this->assertTrue($asset->supplier->is($supplier));
         $this->assertEquals(10, $asset->warranty_months);
+
+        $this->assertHasTheseActionLogs($asset, ['create', 'checkout']);
     }
 
     public function testSetsLastAuditDateToMidnightOfProvidedDate()
@@ -180,6 +183,8 @@ class StoreAssetTest extends TestCase
         $asset = Asset::find($response->json()['payload']['id']);
         $this->assertEquals($user->id, $asset->assigned_to);
         $this->assertEquals('Asset created successfully. :)', $response->json('messages'));
+
+        $this->assertHasTheseActionLogs($asset, ['create'/*, 'checkout'*/]); // TODO - this _should_ be the two actions
     }
 
 
@@ -571,6 +576,7 @@ class StoreAssetTest extends TestCase
         $this->assertTrue($asset->adminuser->is($user));
         $this->assertTrue($asset->checkedOutToUser());
         $this->assertTrue($asset->assignedTo->is($userAssigned));
+        $this->assertHasTheseActionLogs($asset, ['create', 'checkout']);
     }
 
     public static function checkoutTargets()
@@ -655,6 +661,7 @@ class StoreAssetTest extends TestCase
         $this->assertTrue($asset->adminuser->is($user));
         $this->assertTrue($asset->checkedOutToLocation());
         $this->assertTrue($asset->location->is($location));
+        $this->assertHasTheseActionLogs($asset, ['create', 'checkout']);
     }
 
     public function testAnAssetCanBeCheckedOutToAssetOnStore()
@@ -682,6 +689,7 @@ class StoreAssetTest extends TestCase
         $this->assertTrue($apiAsset->checkedOutToAsset());
         // I think this makes sense, but open to a sanity check
         $this->assertTrue($asset->assignedAssets()->find($response['payload']['id'])->is($apiAsset));
+        $this->assertHasTheseActionLogs($asset, ['create'/*, 'checkout'*/]); // TODO - should be the two events
     }
 
     /**

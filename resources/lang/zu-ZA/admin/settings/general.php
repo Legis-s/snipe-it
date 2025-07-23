@@ -55,7 +55,7 @@ return [
     'default_eula_text_placeholder' => 'Add your default EULA text',
     'default_language'			=> 'Ulimi oluzenzakalelayo',
     'default_eula_help_text'	=> 'Ungase futhi uhlobanise ama-EULA wangokwezifiso kwizigaba ezithile zefa.',
-    'acceptance_note'           => 'Add a note for your decision (Optional)',
+    'acceptance_note'           => 'Add a note for your decision (required if declining)',
     'display_asset_name'        => 'Bonisa igama lomhlaba',
     'display_checkout_date'     => 'Bonisa usuku lokuhlola',
     'display_eol'               => 'Bonisa i-EOL ekubukeni kwetafula',

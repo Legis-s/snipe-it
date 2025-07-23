@@ -208,11 +208,19 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     {
         $user_groups = $this->groups;
         if (($this->permissions == '') && (count($user_groups) == 0)) {
-
             return false;
         }
 
-        $user_permissions = json_decode($this->permissions, true);
+        $user_permissions = $this->permissions;
+
+        if (is_object($this->permissions)) {
+            $user_permissions = json_decode(json_encode($this->permissions), true);
+        }
+
+        if (is_string($this->permissions)) {
+            $user_permissions = json_decode($this->permissions, true);
+        }
+
 
         $is_user_section_permissions_set = ($user_permissions != '') && array_key_exists($section, $user_permissions);
         //If the user is explicitly granted, return true
@@ -266,6 +274,18 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         return $this->checkPermissionSection('superuser');
     }
 
+    /**
+     * Checks if the user is an admin
+     *
+     * @author A. Gianotto <snipe@snipe.net>
+     * @since  [v8.1.18]
+     * @return bool
+     */
+    public function isAdmin()
+    {
+        return $this->checkPermissionSection('admin');
+    }
+
 
     /**
      * Checks if the user can edit their own profile
@@ -293,13 +313,15 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
      */
     public function isDeletable()
     {
+
         return Gate::allows('delete', $this)
-            && ($this->assets->count() === 0)
-            && ($this->licenses->count() === 0)
-            && ($this->consumables->count() === 0)
-            && ($this->accessories->count() === 0)
-            && ($this->managedLocations->count() === 0)
-            && ($this->managesUsers->count() === 0)
+            && (($this->assets_count ?? $this->assets()->count()) === 0)
+            && (($this->accessories_count ?? $this->accessories()->count()) === 0)
+            && (($this->licenses_count ?? $this->licenses()->count()) === 0)
+            && (($this->consumables_count ?? $this->consumables()->count()) === 0)
+            && (($this->accessories_count ?? $this->accessories()->count()) === 0)
+            && (($this->manages_users_count ?? $this->managesUsers()->count()) === 0)
+            && (($this->manages_locations_count ?? $this->managedLocations()->count()) === 0)
             && ($this->deleted_at == '');
     }
 

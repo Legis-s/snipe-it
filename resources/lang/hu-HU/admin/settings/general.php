@@ -55,7 +55,7 @@ return [
     'default_eula_text_placeholder' => 'Add your default EULA text',
     'default_language'			=> 'Alapértelmezett nyelv',
     'default_eula_help_text'	=> 'Egyéni EULA-kat is társíthat bizonyos eszközkategóriákhoz.',
-    'acceptance_note'           => 'Add a note for your decision (Optional)',
+    'acceptance_note'           => 'Add a note for your decision (required if declining)',
     'display_asset_name'        => 'Eszköznév megjelenítése',
     'display_checkout_date'     => 'Megjelenik a Checkout dátum',
     'display_eol'               => 'Táblázat nézetben az EOL megjelenítése',

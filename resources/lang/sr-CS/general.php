@@ -346,6 +346,8 @@ return [
     'audit_overdue'         => 'Preko roka za reviziju',
     'accept'                => 'Prihvati :asset',
     'i_accept'              => 'Prihvatam',
+    'i_decline_item'        => 'Odbij ovu stavku',
+    'i_accept_item'         => 'Prihvati ovu stavku',
     'i_decline'             => 'Odbijam',
     'accept_decline'        => 'Prihvati/odbij',
     'sign_tos'              => 'Potpišite se ispod kako bi potvrdili da prihvatate uslove korišćenja:',
@@ -594,6 +596,7 @@ return [
     'version' => 'Verzija',
     'build' => 'izdanje',
     'footer_credit' => '<a target="_blank" href="https://snipeitapp.com" rel="noopener">Snipe-IT</a> je softver otvorenog koda, napravljen sa <i class="fa fa-heart" aria-hidden="true" style="color: #a94442; font-size: 10px" /></i><span class="sr-only">ljubavlju</span> od strane <a href="https://bsky.app/profile/snipeitapp.com" rel="noopener">@snipeitapp.com</a>.',
+    'set_password' => 'Postavi lozinku',
 
 // Add form placeholders here
     'placeholders' => [
