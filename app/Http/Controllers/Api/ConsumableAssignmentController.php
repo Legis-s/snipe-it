@@ -50,7 +50,7 @@ class ConsumableAssignmentController extends Controller
 
         if ($request->filled('no_contract')) {
             $consumableAssignments->where('type', '=', 'sold');
-            $consumableAssignments->where('assigned_type', "App\Models\User");
+            $consumableAssignments->where('assigned_type', \App\Models\User::class);
         }
 
 
@@ -59,31 +59,31 @@ class ConsumableAssignmentController extends Controller
         }
         if ($request->filled('asset_id')) {
             $consumableAssignments->where('assigned_to', $request->input('asset_id'));
-            $consumableAssignments->where('assigned_type', "App\Models\Asset");
+            $consumableAssignments->where('assigned_type', \App\Models\Asset::class);
         }
         if ($request->filled('user_id')) {
             $consumableAssignments->where('assigned_to', $request->input('user_id'));
-            $consumableAssignments->where('assigned_type', "App\Models\User");
+            $consumableAssignments->where('assigned_type', \App\Models\User::class);
         }
 
         if ($request->filled('location_id')) {
             $consumableAssignments->where('assigned_to', $request->input('location_id'));
-            $consumableAssignments->where('assigned_type', "App\Models\Location");
+            $consumableAssignments->where('assigned_type', \App\Models\Location::class);
         }
         if ($request->filled('contract_id')) {
             $consumableAssignments->where('assigned_to', $request->input('contract_id'));
-            $consumableAssignments->where('assigned_type', "App\Models\Contract");
+            $consumableAssignments->where('assigned_type', \App\Models\Contract::class);
             $consumableAssignments->orWhere('contract_id', $request->input('contract_id'));
         }
 
         if ($request->filled('deal_id')) {
             $consumableAssignments->where('assigned_to', $request->input('deal_id'));
-            $consumableAssignments->where('assigned_type', "App\Models\Deal");
+            $consumableAssignments->where('assigned_type', \App\Models\Deal::class);
         }
 
         if ($request->filled('purchase_id')) {
             $consumableAssignments->where('assigned_to', $request->input('purchase_id'));
-            $consumableAssignments->where('assigned_type', "App\Models\Purchase");
+            $consumableAssignments->where('assigned_type', \App\Models\Purchase::class);
         }
 
 

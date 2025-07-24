@@ -27,31 +27,11 @@ class ConsumablesController extends Controller
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @since [v4.0]
      */
-    public function index(Request $request): array
+    public function index(Request $request) : array
     {
         $this->authorize('index', Consumable::class);
 
-        $allowed_columns =
-            [
-                'id',
-                'name',
-                'order_number',
-                'min_amt',
-                'purchase_date',
-                'purchase_cost',
-                'company',
-                'category',
-                'model_number',
-                'item_no',
-                'qty',
-                'image',
-                'notes',
-            ];
-
-        $consumables = Company::scopeCompanyables(
-            Consumable::select('consumables.*')
-                ->with('company', 'location', 'category', 'users', 'supplier','manufacturer', 'purchase')
-        );
+        $consumables = Consumable::with('company', 'location', 'category', 'supplier', 'manufacturer');
 
         if ($request->filled('search')) {
             $consumables = $consumables->TextSearch(e($request->input('search')));
@@ -127,7 +107,6 @@ class ConsumablesController extends Controller
                 $allowed_columns = [
                     'id',
                     'name',
-                    'order_number',
                     'min_amt',
                     'purchase_date',
                     'purchase_cost',
@@ -135,7 +114,6 @@ class ConsumablesController extends Controller
                     'category',
                     'model_number',
                     'item_no',
-                    'manufacturer',
                     'location',
                     'qty',
                     'image'

@@ -30,7 +30,6 @@ class ConsumablesTransformer
             'company'   => ($consumable->company) ? ['id' => (int) $consumable->company->id, 'name' => e($consumable->company->name)] : null,
             'item_no'       => e($consumable->item_no),
             'location'      => ($consumable->location) ? ['id' => (int) $consumable->location->id, 'name' => e($consumable->location->name)] : null,
-            'manufacturer'  => ($consumable->manufacturer) ? ['id' => (int) $consumable->manufacturer->id, 'name' => e($consumable->manufacturer->name)] : null,
             'supplier' => ($consumable->supplier) ? ['id' => $consumable->supplier->id, 'name'=> e($consumable->supplier->name)] : null,
             'min_amt'       => (int) $consumable->min_amt,
             'model_number'  => ($consumable->model_number != '') ? e($consumable->model_number) : null,

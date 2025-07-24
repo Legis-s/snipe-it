@@ -59,14 +59,6 @@ class ConsumablePresenter extends Presenter
                 'title' => trans('general.category'),
                 'formatter' => 'categoriesLinkObjFormatter',
             ], [
-                'field' => 'supplier',
-                'searchable' => true,
-                'sortable' => true,
-                'switchable' => true,
-                'title' => trans('general.supplier'),
-                'visible' => false,
-                'formatter' => 'suppliersLinkObjFormatter',
-            ], [
                 'field' => 'model_number',
                 'searchable' => true,
                 'sortable' => true,
@@ -113,26 +105,6 @@ class ConsumablePresenter extends Presenter
                 'title' => trans('general.manufacturer'),
                 'visible' => false,
                 'formatter' => 'manufacturersLinkObjFormatter',
-            ], [
-                "field" => "purchase",
-                "searchable" => false,
-                "sortable" => true,
-                "switchable" => true,
-                "title" => "Закупка",
-                "formatter" => "purchasesLinkObjFormatter"
-            ], [
-                'field' => 'order_number',
-                'searchable' => true,
-                'sortable' => true,
-                'title' => trans('general.order_number'),
-                'visible' => true,
-            ], [
-                'field' => 'purchase_date',
-                'searchable' => true,
-                'sortable' => true,
-                'title' => trans('general.purchase_date'),
-                'visible' => true,
-                'formatter' => 'dateDisplayFormatter',
             ], [
                 'field' => 'purchase_cost',
                 'searchable' => true,
@@ -207,5 +179,10 @@ class ConsumablePresenter extends Presenter
     public function nameUrl()
     {
         return (string) link_to_route('consumables.show', e($this->name), $this->id);
+    }
+
+    public function fullName()
+    {
+        return "[" . $this->numRemaining() ."] " . $this->name;
     }
 }

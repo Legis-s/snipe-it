@@ -42,7 +42,7 @@
             @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'assigned_location', 'hide_new' => true])
             @include ('partials.forms.custom.deal-select', ['translated_name' => trans('general.deal'), 'fieldname' => 'assigned_deal', 'style' => 'display:none;', 'hide_new' => true])
 
-            <select id="consumables_json" name="consumables_json" hidden></select>
+            <input id="consumables_json" name="consumables_json"   value="{{ old('consumables_json', $consumable_json) }}" ></input>
 
             <!-- Note -->
             <div class="form-group {{ $errors->has('note') ? 'error' : '' }}">
@@ -87,6 +87,17 @@
         <script nonce="{{ csrf_token() }}">
          $(function () {
              var table_consumables = $('#table_consumables');
+
+             console.log($('#consumables_json').val());
+             var startJson = $('#consumables_json').val();
+
+             var data = [];
+
+             if (startJson && startJson.length > 1){
+                 console.log(startJson);
+                 data =  JSON.parse(startJson);
+                 table_consumables.bootstrapTable('load', JSON.parse(startJson));
+             }
 
              $('#assigned_consumables_select').on('select2:select', function (e) {
                  const data = e.params.data;
@@ -136,6 +147,8 @@
              $('form').on('submit', function() {
                  var tabele_data = table_consumables.bootstrapTable('getData');
                  let jsonString = JSON.stringify(tabele_data);
+
+                 $('#consumables_json').val(jsonString);
                  const hiddenInput = document.createElement('input');
                  hiddenInput.type = 'hidden';
                  hiddenInput.name = 'consumables_json';
@@ -144,9 +157,10 @@
                  return true;
              });
 
+
              table_consumables.bootstrapTable('destroy').bootstrapTable({
                  locale: 'ru',
-                 data: [],
+                 data:  data,
                  search: true,
                  showRefresh: false,
                  columns: [{
@@ -158,7 +172,10 @@
                      field: 'consumable',
                      name: 'Модель',
                      align: 'left',
-                     valign: 'middle'
+                     valign: 'middle',
+                     formatter: function (value, row, index) {
+                         return '<a href="/consumables/' + row.consumable_id + '">' + value + '</a>';
+                     }
                  }, {
                      field: 'quantity',
                      name: 'Количество',

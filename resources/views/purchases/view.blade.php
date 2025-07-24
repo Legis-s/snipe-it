@@ -347,6 +347,7 @@
                                     </a>
                                 </div>
                             @endif
+                        @endif
                             @if ( strlen($purchase->consumables_json) > 2)
                                 <div class="col-md-12 hidden-print" style="padding-top: 5px;">
                                     <a href="{{ route('consumables.bulkcheckout.show', ['purchase_id' => $purchase->id]) }}"
@@ -357,7 +358,6 @@
                                     </a>
                                 </div>
                             @endif
-                        @endif
                     @endcan
                 </div>
             </div>
