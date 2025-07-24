@@ -24,13 +24,28 @@
                     <div class="box-body">
                         <div class="row">
                             <div class="col-md-12">
+
+                                @include('partials.asset-bulk-actions')
+
                                 <table
                                         data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayout() }}"
-                                        data-id-table="assetsListingTable"
+                                        data-cookie-id-table="assetsPurchaseTable"
+                                        data-id-table="assetsPurchaseTable"
+                                        data-search-text="{{ e(Session::get('search')) }}"
                                         data-side-pagination="server"
-                                        id="assetsListingTable"
+                                        data-show-footer="true"
+                                        data-sort-order="asc"
+                                        data-sort-name="name"
+                                        data-toolbar="#assetsBulkEditToolbar"
+                                        data-bulk-button-id="#bulkAssetEditButton"
+                                        data-bulk-form-id="#assetsBulkForm"
+                                        id="assetsPurchaseTable"
                                         class="table table-striped snipe-table"
-                                        data-url="{{route('api.assets.index', ['purchase_id' => $purchase->id]) }}">
+                                        data-url="{{ route('api.assets.index',['purchase_id' => $purchase->id]) }}"
+                                        data-export-options='{
+                    "fileName": "export_purchase_{{ (Request::has('status')) ? '-'.str_slug(Request::get('status')) : '' }}-assets-{{ date('Y-m-d') }}",
+                    "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
+                    }'>
                                 </table>
                             </div>
                         </div>
@@ -49,8 +64,9 @@
                         <div class="box-body">
                             <div class="row">
                                 <div class="col-md-12">
-                                    {{--                    <div class="table table-responsive">--}}
-                                    <table id="table_consumables" class="table table-striped snipe-table">
+                                    <table
+                                            id="table_consumables"
+                                            class="table table-striped snipe-table">
                                         @if($old)
                                             <thead>
                                             <th>#</th>
@@ -77,7 +93,6 @@
                                             </thead>
                                         @endif
                                     </table>
-                                    {{--                    </div><!-- /.table-responsive -->--}}
                                 </div>
                             </div>
                         </div><!-- /.box-body -->
@@ -92,22 +107,20 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <table
-                                            data-columns="{{ \App\Presenters\ConsumableAssignmentPresenter::dataTableLayoutIn() }}"
+                                            data-columns="{{ \App\Presenters\ConsumableAssignmentPresenter::dataTableLayout() }}"
                                             data-cookie-id-table="сonsumableAssignmentTable"
-                                            data-pagination="true"
                                             data-id-table="сonsumableAssignmentTable"
-                                            data-search="true"
                                             data-side-pagination="server"
-                                            data-show-columns="true"
-                                            data-show-export="true"
-                                            data-show-refresh="true"
-                                            data-sort-order="asc"
+                                            data-footer-style="footerStyle"
+                                            data-toolbar="#toolbar"
                                             id="сonsumableAssignmentTable"
                                             class="table table-striped snipe-table"
-                                            data-url="{{route('api.consumableassignments.index',['purchase_id'=> $purchase->id])}}">
-
+                                            data-url="{{route('api.consumableassignments.index',['purchase_id'=> $purchase->id])}}"
+                                            data-export-options='{
+                "fileName": "export-consumables-{{ date('Y-m-d') }}",
+                "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
+                }'>
                                     </table>
-                                    {{--                    </div><!-- /.table-responsive -->--}}
                                 </div>
                             </div>
                         </div><!-- /.box-body -->
@@ -178,6 +191,30 @@
                                     </div>
                                     <div class="col-md-8">
                                         {{ $purchase->invoice_number }}
+                                    </div>
+                                </div>
+                            @endif
+                            @if ($purchase->assets)
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <strong>
+                                            Активов
+                                        </strong>
+                                    </div>
+                                    <div class="col-md-8">
+                                        {{ count($purchase->assets) }}
+                                    </div>
+                                </div>
+                            @endif
+                            @if ($purchase->consumables)
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <strong>
+                                            Расходников
+                                        </strong>
+                                    </div>
+                                    <div class="col-md-8">
+                                        {{ count($purchase->consumables) }}
                                     </div>
                                 </div>
                             @endif
@@ -330,6 +367,8 @@
 
 @stop
 
+@include ('partials.bootstrap-table')
+
 @section('moar_scripts')
 
     <script nonce="{{ csrf_token() }}">
@@ -365,6 +404,7 @@
                 table_consumables.bootstrapTable('destroy').bootstrapTable({
                     data: data,
                     search: true,
+                    locale: 'ru',
                     toolbar: '#toolbar_consumables',
                     columns: [{
                         field: 'id',
@@ -414,6 +454,7 @@
                     data: data,
                     search: true,
                     stickyHeader: false,
+                    locale: 'ru',
                     toolbar: '#toolbar_consumables',
                     columns: [{
                         field: 'id',

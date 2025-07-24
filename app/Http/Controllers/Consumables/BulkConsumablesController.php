@@ -52,15 +52,16 @@ class BulkConsumablesController extends Controller
         try {
             $target = $this->determineCheckoutTarget();
 
-            $consumables_ids = [];
             $errors = [];
+            $consumabl_ids = [];
             $consumables_json = $request->input('consumables_json');
             $consumables_array = json_decode($consumables_json, true);
 
             if (is_array($consumables_array)) {
-                DB::transaction(function () use ($target, &$errors, $consumables_array, $request) {
+                DB::transaction(function () use ($target, &$errors, $consumables_array, $consumabl_ids, $request) {
                     foreach ($consumables_array as $c_data) {
                         $consumable = Consumable::find($c_data["consumable_id"]);
+                        $consumabl_ids[] = $c_data["consumable_id"];
                         $quantity = $c_data["quantity"];
                         $this->authorize('checkout', $consumable);
 
@@ -72,15 +73,15 @@ class BulkConsumablesController extends Controller
                     }
                 });
             }else{
-                return redirect()->route('consumables.bulkcheckout.show')->withInput()->with('error', trans_choice('admin/hardware/message.multi-checkout.error', $consumables_json))->withErrors($errors);
+                return redirect()->route('consumables.bulkcheckout.show')->withInput()->with('error', trans_choice('admin/hardware/message.multi-checkout.error', $consumabl_ids))->withErrors($errors);
             }
 
             if (! $errors) {
                 // Redirect to the new consumables page
-                return redirect()->to('consumables')->with('success', trans_choice('admin/hardware/message.multi-checkout.success', $consumables_json));
+                return redirect()->to('consumables')->with('success', trans_choice('admin/hardware/message.multi-checkout.success', $consumabl_ids));
             }
             // Redirect to the consumable management page with error
-            return redirect()->route('consumables.bulkcheckout.show')->withInput()->with('error', trans_choice('admin/hardware/message.multi-checkout.error', $consumables_json))->withErrors($errors);
+            return redirect()->route('consumables.bulkcheckout.show')->withInput()->with('error', trans_choice('admin/hardware/message.multi-checkout.error', $consumabl_ids))->withErrors($errors);
         } catch (ModelNotFoundException $e) {
             return redirect()->route('consumables.bulkcheckout.show')->withInput()->with('error', trans_choice('admin/hardware/message.multi-checkout.error', $request->input('selected_assets')));
         }

@@ -223,9 +223,6 @@ class AssetsController extends Controller
             $assets->where('assets.assigned_to', '=', $request->input('deal_id'))
                 ->where('assets.assigned_type', '=',\App\Models\Deal::class);
             $settings->show_archived_in_list = "1";
-            if ($request->input('show_rent') == true ){
-
-            }
         }
 
         /**
@@ -1466,12 +1463,9 @@ class AssetsController extends Controller
 
     /**
      * Returns JSON with information about an asset for detail view.
-     *
      * @param int $assetId
-     * @return \Illuminate\Http\JsonResponse
-     * @since [v4.0]
      */
-    public function inventory($id)
+    public function inventory($id) : JsonResponse
     {
 
         $this->authorize('update', Asset::class);
@@ -1498,12 +1492,9 @@ class AssetsController extends Controller
 
     /**
      * Mark an asset as audited
-     *
      * @param int $id
-     * @since [v4.0]
-     * @return \Illuminate\Http\JsonResponse
      */
-    public function review($id)
+    public function review($id) : array| JsonResponse
     {
         $this->authorize('review', Asset::class);
         $asset = Asset::with('assetstatus')->withTrashed()->findOrFail($id);
