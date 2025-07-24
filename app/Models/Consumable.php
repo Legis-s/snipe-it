@@ -2,24 +2,20 @@
 
 namespace App\Models;
 
+use App\Events\CheckoutableCheckedOut;
+use App\Events\CheckoutableSell;
 use App\Helpers\Helper;
 use App\Models\Traits\Acceptable;
 use App\Models\Traits\HasUploads;
 use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 use Watson\Validating\ValidatingTrait;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use App\Presenters\ConsumablePresenter;
-use App\Models\Actionlog;
-use App\Models\ConsumableAssignment;
-use App\Models\User;
-use App\Models\Location;
-use App\Models\Manufacturer;
-use App\Models\Supplier;
-use App\Models\Category;
 
 class Consumable extends SnipeModel
 {
@@ -478,5 +474,38 @@ class Consumable extends SnipeModel
     public function locations()
     {
         return $this->belongsToMany(\App\Models\Location::class, 'consumables_locations', 'consumable_id', 'assigned_to')->withPivot('user_id')->withTrashed()->withTimestamps();
+    }
+
+    /**
+     * Checks the Consumable out to the target
+     */
+    public function checkOut($target, $quantity = null, $note = null): bool
+    {
+        if (! $target) {
+            return false;
+        }
+
+        $type = ConsumableAssignment::ISSUED;
+        if (is_a($target, Deal::class, true)) {
+            $type = ConsumableAssignment::SOLD;
+        }
+
+        $this->locations()->attach($this->id, [
+            'consumable_id' => $this->id,
+            'created_by' => auth()->id(),
+            'quantity' => $quantity,
+            'comment' => $note,
+            'cost' => $this->purchase_cost,
+            'type' => $type,
+            'assigned_to' => $target->id,
+            'assigned_type' => get_class($target),
+        ]);
+
+        if (is_a($target, Deal::class, true)) {
+            event(new CheckoutableSell($this, $target, auth()->user(), $note));
+        }else{
+            event(new CheckoutableCheckedOut($this, $target, auth()->user(), $note));
+        }
+        return true;
     }
 }

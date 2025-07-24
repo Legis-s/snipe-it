@@ -5,24 +5,13 @@ namespace App\Http\Controllers\Consumables;
 use App\Helpers\Helper;
 use App\Http\Controllers\CheckInOutRequest;
 use App\Http\Controllers\Controller;
-use App\Models\Asset;
-use App\Models\AssetModel;
-use App\Models\Company;
-use App\Models\Consumable;
-use App\Models\Statuslabel;
-use App\Models\Setting;
-use App\View\Label;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Log;
 use App\Http\Requests\AssetCheckoutRequest;
-use App\Models\CustomField;
+use App\Models\Consumable;
 use Illuminate\Contracts\View\View;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class BulkConsumablesController extends Controller
 {
@@ -61,72 +50,39 @@ class BulkConsumablesController extends Controller
         $this->authorize('checkout', Consumable::class);
 
         try {
-            $admin = auth()->user();
-
             $target = $this->determineCheckoutTarget();
 
-            if (! is_array($request->get('selected_assets'))) {
-                return redirect()->route('hardware.bulkcheckout.show')->withInput()->with('error', trans('admin/hardware/message.checkout.no_assets_selected'));
-            }
-
-            $asset_ids = array_filter($request->get('selected_assets'));
-
-            $assets = Asset::findOrFail($asset_ids);
-
-            if (request('checkout_to_type') == 'asset') {
-                foreach ($asset_ids as $asset_id) {
-                    if ($target->id == $asset_id) {
-                        return redirect()->back()->with('error', 'You cannot check an asset out to itself.');
-                    }
-                }
-            }
-            $checkout_at = date('Y-m-d H:i:s');
-            if (($request->filled('checkout_at')) && ($request->get('checkout_at') != date('Y-m-d'))) {
-                $checkout_at = $request->get('checkout_at');
-            }
-
-            $expected_checkin = '';
-
-            if ($request->filled('expected_checkin')) {
-                $expected_checkin = $request->get('expected_checkin');
-            }
-
+            $consumables_ids = [];
             $errors = [];
-            DB::transaction(function () use ($target, $admin, $checkout_at, $expected_checkin, &$errors, $assets, $request) { //NOTE: $errors is passsed by reference!
-                foreach ($assets as $asset) {
-                    $this->authorize('checkout', $asset);
+            $consumables_json = $request->input('consumables_json');
+            $consumables_array = json_decode($consumables_json, true);
 
-                    // See if there is a status label passed
-                    if ($request->filled('status_id')) {
-                        $asset->status_id = $request->get('status_id');
+            if (is_array($consumables_array)) {
+                DB::transaction(function () use ($target, &$errors, $consumables_array, $request) {
+                    foreach ($consumables_array as $c_data) {
+                        $consumable = Consumable::find($c_data["consumable_id"]);
+                        $quantity = $c_data["quantity"];
+                        $this->authorize('checkout', $consumable);
+
+                        $checkout_success = $consumable->checkOut($target, $quantity, e($request->get('note')));
+
+                        if (!$checkout_success) {
+                            $errors = array_merge_recursive($errors, $consumable->getErrors()->toArray());
+                        }
                     }
-
-                    $checkout_success = $asset->checkOut($target, $admin, $checkout_at, $expected_checkin, e($request->get('note')), $asset->name, null);
-
-                    //TODO - I think this logic is duplicated in the checkOut method?
-                    if ($target->location_id != '') {
-                        $asset->location_id = $target->location_id;
-                        // TODO - I don't know why this is being saved without events
-                        $asset::withoutEvents(function () use ($asset) {
-                            $asset->save();
-                        });
-                    }
-
-                    if (!$checkout_success) {
-                        $errors = array_merge_recursive($errors, $asset->getErrors()->toArray());
-                    }
-                }
-            });
+                });
+            }else{
+                return redirect()->route('consumables.bulkcheckout.show')->withInput()->with('error', trans_choice('admin/hardware/message.multi-checkout.error', $consumables_json))->withErrors($errors);
+            }
 
             if (! $errors) {
-                // Redirect to the new asset page
-                return redirect()->to('consumables')->with('success', trans_choice('admin/hardware/message.multi-checkout.success', $asset_ids));
+                // Redirect to the new consumables page
+                return redirect()->to('consumables')->with('success', trans_choice('admin/hardware/message.multi-checkout.success', $consumables_json));
             }
-            // Redirect to the asset management page with error
-            return redirect()->route('consumables.bulkcheckout.show')->withInput()->with('error', trans_choice('admin/hardware/message.multi-checkout.error', $asset_ids))->withErrors($errors);
+            // Redirect to the consumable management page with error
+            return redirect()->route('consumables.bulkcheckout.show')->withInput()->with('error', trans_choice('admin/hardware/message.multi-checkout.error', $consumables_json))->withErrors($errors);
         } catch (ModelNotFoundException $e) {
             return redirect()->route('consumables.bulkcheckout.show')->withInput()->with('error', trans_choice('admin/hardware/message.multi-checkout.error', $request->input('selected_assets')));
         }
-        
     }
 }

@@ -10,7 +10,6 @@
                 name="{{ $fieldname }}"
                 style="width: 100%"
                 id="{{ (isset($select_id)) ? $select_id : 'assigned_consumable_select' }}"
-                data-template-selection="formatState"
                 {{ ((isset($multiple)) && ($multiple === true)) ? ' multiple' : '' }}
                 {!! (!empty($consumable_status_type)) ? ' data-asset-status-type="' . $consumable_status_type . '"' : '' !!}
                 {!! (!empty($company_id)) ? ' data-company-id="' .$company_id.'"'  : '' !!}

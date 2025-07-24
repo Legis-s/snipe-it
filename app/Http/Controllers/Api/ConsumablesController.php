@@ -435,14 +435,7 @@ class ConsumablesController extends Controller
         $consumables = $consumables->paginate(50);
 
         foreach ($consumables as $consumable) {
-            $consumable->use_text = '';
-
-            $consumable->use_text .= "[" . $consumable->numRemaining() . "] ";
-            $consumable->use_text .= (($consumable->location) ? " (" . e($consumable->location->name) . ') - ' : '');
-            $consumable->use_text .= (($consumable->category) ? e($consumable->category->name) . ' - ' : '');
-            $consumable->use_text .= (($consumable->manufacturer) ? e($consumable->manufacturer->name) . ' - ' : '');
-            $consumable->use_text .= e($consumable->name) . ' - ';
-            $consumable->use_text .= e($consumable->model_number);
+            $consumable->use_text = "[" . $consumable->numRemaining() . "] ".e($consumable->name);;
 
         }
         if ($request->filled('assetStatusType') && $request->input('assetStatusType') === 'notnull') {
@@ -456,7 +449,7 @@ class ConsumablesController extends Controller
 
 
     /**
-     * Update the specified resource in storage.
+     * Compact Consumable.
      *
      * @param \Illuminate\Http\Request $request
      * @param int $id

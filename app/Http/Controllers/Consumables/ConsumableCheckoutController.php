@@ -76,9 +76,11 @@ class ConsumableCheckoutController extends Controller
         }
 
         $this->authorize('checkout', $consumable);
+        $target = $this->determineCheckoutTarget();
 
         // If the quantity is not present in the request or is not a positive integer, set it to 1
         $quantity = $request->input('checkout_qty');
+
         if (!isset($quantity) || !ctype_digit((string)$quantity) || $quantity <= 0) {
             $quantity = 1;
         }
@@ -88,31 +90,30 @@ class ConsumableCheckoutController extends Controller
             return redirect()->route('consumables.index')->with('error', trans('admin/consumables/message.checkout.unavailable', ['requested' => $quantity, 'remaining' => $consumable->numRemaining() ]));
         }
 
-        $target = $this->determineCheckoutTarget();
+//        $type = ConsumableAssignment::ISSUED;
+//        if (is_a($target, Deal::class, true)) {
+//            $type = ConsumableAssignment::SOLD;
+//        }
+//        $consumable->locations()->attach($consumable->id, [
+//            'consumable_id' => $consumable->id,
+//            'created_by' => auth()->id(),
+//            'quantity' => $quantity,
+//            'comment' =>  $request->input('note'),
+//            'cost' => $consumable->purchase_cost,
+//            'type' => $type,
+//            'assigned_to' => $target->id,
+//            'assigned_type' => get_class($target),
+//        ]);
+//
+//
+//        if (is_a($target, Deal::class, true)) {
+//            event(new CheckoutableSell($consumable, $target, auth()->user(), $request->input('note')));
+//        }else{
+//            event(new CheckoutableCheckedOut($consumable, $target, auth()->user(), $request->input('note')));
+//        }
 
-        $type = ConsumableAssignment::ISSUED;
-        if (is_a($target, Deal::class, true)) {
-            $type = ConsumableAssignment::SOLD;
-        }
-        $consumable->locations()->attach($consumable->id, [
-            'consumable_id' => $consumable->id,
-            'created_by' => auth()->id(),
-            'quantity' => $quantity,
-            'comment' =>  $request->input('note'),
-            'cost' => $consumable->purchase_cost,
-            'type' => $type,
-            'assigned_to' => $target->id,
-            'assigned_type' => get_class($target),
-        ]);
-
-
-        if (is_a($target, Deal::class, true)) {
-            event(new CheckoutableSell($consumable, $target, auth()->user(), $request->input('note')));
-        }else{
-            event(new CheckoutableCheckedOut($consumable, $target, auth()->user(), $request->input('note')));
-        }
+        $consumable->checkOut($target, $quantity, $request->input('note'));
         session()->put(['redirect_option' => $request->get('redirect_option'), 'checkout_to_type' => $request->get('checkout_to_type')]);
-
 
         // Redirect to the new consumable page
         return Helper::getRedirectOption($request, $consumable->id, 'Consumables')

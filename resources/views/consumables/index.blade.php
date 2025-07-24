@@ -56,40 +56,8 @@
     <script nonce="{{ csrf_token() }}">
         $(function () {
             var compact = $('#compact');
-            var show_active = $('#show_active');
             var table = $('#consumablesTable');
             var selections = []
-
-            function getIdSelections() {
-                return $.map(table.bootstrapTable('getSelections'), function (row) {
-                    return row.id
-                })
-            }
-            // show_active.click(function () {
-            //     if(show_active.hasClass( "active" )){
-            //         show_active.html("Показать все");
-            //         // table.bootstrapTable('refresh', {
-            //         //     query: {
-            //         //         only_active: true
-            //         //     }
-            //         // });
-            //         // table.bootstrapTable('filterBy', {remaining: >0});
-            //         // table.bootstrapTable('filterBy',{
-            //         //     'filterAlgorithm': (row, filters) => {
-            //         //         console.log(row);
-            //         //         return row.remaining > 0;
-            //         //     }
-            //         // })
-            //         table.bootstrapTable('filterBy',function (row, filters) {
-            //                 console.log(row);
-            //                 return row.remaining > 0;
-            //             })
-            //     }else{
-            //         show_active.html("Показать доступные к выдаче");
-            //
-            //     }
-            //
-            // });
 
             table.on('check.bs.table uncheck.bs.table ' + 'check-all.bs.table uncheck-all.bs.table',
                 function () {
@@ -118,16 +86,12 @@
                     cancelButtonText: 'Отменить',
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        var idS=[]
+                        var idS=[];
                         selected.forEach(function(item, i, arr) {
-                            if (item.id !=result.value){
+                            if (item.id !== result.value){
                                 idS.push(item.id);
                             }
                         });
-
-                        var sendData = {
-                            id_array:idS,
-                        };
                         $.ajax({
                             type: 'POST',
                             url:"/api/v1/consumables/"+result.value+"/compact",
@@ -135,7 +99,9 @@
                                 "X-Requested-With": 'XMLHttpRequest',
                                 "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
                             },
-                            data: sendData,
+                            data: {
+                                id_array:idS,
+                            },
                             dataType: 'json',
                             success: function (data) {
                                 table.bootstrapTable('refresh');
@@ -145,7 +111,6 @@
                 });
                 compact.prop('disabled', true)
             });
-
         });
     </script>
 
