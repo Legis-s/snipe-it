@@ -777,6 +777,21 @@
                                                     </strong>
                                                 </div>
                                                 <div class="col-md-9{{ (($field->format=='URL') && ($asset->{$field->db_column_name()}!='')) ? ' ellipsis': '' }}">
+                                                    @if (!empty($asset->{$field->db_column_name()}))
+                                                        {{-- Hidden span used as copy target --}}
+                                                        {{-- It's tempting to break out the HTML into separate lines for this, but it results in extra spaces being added onto the end of the coipied value --}}
+                                                        <span class="js-copy-{{ $field->id }} hidden-print" style="font-size: 0px;">{{ ($field->isFieldDecryptable($asset->{$field->db_column_name()}) ? Helper::gracefulDecrypt($field, $asset->{$field->db_column_name()}) : $asset->{$field->db_column_name()}) }}</span>
+
+                                                        {{-- Clipboard icon --}}
+                                                        <i class="fa-regular fa-clipboard js-copy-link hidden-print"
+                                                           data-clipboard-target=".js-copy-{{ $field->id }}"
+                                                           aria-hidden="true"
+                                                           data-tooltip="true"
+                                                           data-placement="top"
+                                                           title="{{ trans('general.copy_to_clipboard') }}">
+                                                            <span class="sr-only">{{ trans('general.copy_to_clipboard') }}</span>
+                                                        </i>
+                                                    @endif
                                                     @if (($field->field_encrypted=='1') && ($asset->{$field->db_column_name()}!=''))
 
                                                         <i class="fas fa-lock" data-tooltip="true" data-placement="top" title="{{ trans('admin/custom_fields/general.value_encrypted') }}" onclick="showHideEncValue(this)" id="text-{{ $field->id }}"></i>
@@ -785,16 +800,17 @@
                                                     @if ($field->isFieldDecryptable($asset->{$field->db_column_name()} ))
                                                         @can('assets.view.encrypted_custom_fields')
                                                             @php
-                                                                $fieldSize=strlen(Helper::gracefulDecrypt($field, $asset->{$field->db_column_name()}))
+                                                                $fieldSize = strlen(Helper::gracefulDecrypt($field, $asset->{$field->db_column_name()}))
                                                             @endphp
-                                                            @if ($fieldSize>0)
+                                                            @if ($fieldSize > 0)
                                                                 <span id="text-{{ $field->id }}-to-hide">{{ str_repeat('*', $fieldSize) }}</span>
                                                                     @if (($field->format=='URL') && ($asset->{$field->db_column_name()}!=''))
                                                                         <span class="js-copy-{{ $field->id }} hidden-print"
                                                                               id="text-{{ $field->id }}-to-show"
-                                                                              style="font-size: 0px;"><a
-                                                                                    href="{{ Helper::gracefulDecrypt($field, $asset->{$field->db_column_name()}) }}"
-                                                                                    target="_new">{{ Helper::gracefulDecrypt($field, $asset->{$field->db_column_name()}) }}</a></span>
+                                                                              style="font-size: 0px;">
+                                                                            <a href="{{ Helper::gracefulDecrypt($field, $asset->{$field->db_column_name()}) }}"
+                                                                                    target="_new">{{ Helper::gracefulDecrypt($field, $asset->{$field->db_column_name()}) }}</a>
+                                                                        </span>
                                                                     @elseif (($field->format=='DATE') && ($asset->{$field->db_column_name()}!=''))
                                                                         <span class="js-copy-{{ $field->id }} hidden-print"
                                                                               id="text-{{ $field->id }}-to-show"
@@ -804,10 +820,6 @@
                                                                               id="text-{{ $field->id }}-to-show"
                                                                               style="font-size: 0px;">{{ Helper::gracefulDecrypt($field, $asset->{$field->db_column_name()}) }}</span>
                                                                     @endif
-                                                                </span>
-                                                                <i class="fa-regular fa-clipboard js-copy-link hidden-print" data-clipboard-target=".js-copy-{{ $field->id }}" aria-hidden="true" data-tooltip="true" data-placement="top" title="{{ trans('general.copy_to_clipboard') }}">
-                                                                    <span class="sr-only">{{ trans('general.copy_to_clipboard') }}</span>
-                                                                </i>
                                                             @endif
                                                         @else
                                                             {{ strtoupper(trans('admin/custom_fields/general.encrypted')) }}
@@ -1679,9 +1691,6 @@
         $(function () {
             $('#print_tag').click(function () {
                   // console.log("test");
-                  {{--var dataToSend = {--}}
-                  {{--  text: "{{ $sale->asset_tag }}"--}}
-                  {{--};--}}
                   $.ajax('http://localhost:8001/termal_print?text={{ $asset->asset_tag }}', {
                     success: function (data, textStatus, xhr) {
                       console.log(xhr.status);
@@ -1709,19 +1718,6 @@
                   });
 
                 });
-            {{--$('#closesell').click(function () {--}}
-            {{--    $.ajax({--}}
-            {{--        url: '/api/v1/hardware/{{ $asset->id }}/closesell',--}}
-            {{--        method: "POST",--}}
-            {{--        headers: {--}}
-            {{--          "X-Requested-With": 'XMLHttpRequest',--}}
-            {{--          "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')--}}
-            {{--        },--}}
-            {{--        success: function () {--}}
-            {{--          location.reload();--}}
-            {{--        }--}}
-            {{--      });--}}
-            {{--});--}}
         });
     </script>
 
