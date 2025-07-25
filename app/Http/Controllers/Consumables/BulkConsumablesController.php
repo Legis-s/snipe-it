@@ -67,7 +67,6 @@ class BulkConsumablesController extends Controller
     {
         $this->authorize('checkout', Consumable::class);
 
-
         try {
             $target = $this->determineCheckoutTarget();
 
