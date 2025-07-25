@@ -1028,7 +1028,7 @@
                        "fileName": "export-{{ str_slug($user->name) }}-history-{{ date('Y-m-d') }}",
                        "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
                      }'
-                      data-url="{{ route('api.activity.index', ['target_id' => $user->id, 'item_type' => User::class]) }}">
+                      data-url="{{ route('api.activity.index', ['item_id' => $user->id, 'item_type' => User::class]) }}">
               </table>
 
           </div>
