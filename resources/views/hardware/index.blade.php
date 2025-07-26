@@ -25,10 +25,12 @@
     {{ trans('general.archived') }}
   @elseif (Request::get('status')=='Deleted')
     {{ trans('general.deleted') }}
+  @elseif (Request::get('status')=='byod')
+    {{ trans('general.byod') }}
   @elseif (Request::get('status')=='Sold')
-    Проданные
+    {{ trans('general.sold') }}
   @elseif (Request::get('status')=='Issued_for_sale')
-    Выданные на продажу
+    {{ trans('general.for_sale') }}
   @endif
 @else
 {{ trans('general.all') }}
@@ -36,7 +38,7 @@
 {{ trans('general.assets') }}
 
   @if (Request::has('order_number'))
-    : Order #{{ Request::get('order_number') }}
+    : Order #{{ strval(Request::get('order_number')) }}
   @endif
 @stop
 
@@ -49,7 +51,7 @@
   <a href="{{ route('reports/custom') }}" style="margin-right: 5px;" class="btn btn-default">
     {{ trans('admin/hardware/general.custom_export') }}</a>
   @can('create', \App\Models\Asset::class)
-  <a href="{{ route('hardware.create') }}" accesskey="n" class="btn btn-primary pull-right"></i> {{ trans('general.create') }}</a>
+  <a href="{{ route('hardware.create') }}" {{$snipeSettings->shortcuts_enabled == 1 ? "n" : ''}} class="btn btn-primary pull-right"></i> {{ trans('general.create') }}</a>
   @endcan
 
 @stop
@@ -64,36 +66,26 @@
        
           <div class="row">
             <div class="col-md-12">
-              
-              @if (Request::get('status')!='Deleted' or Request::get('status')!='Sold')
 
-                @include('partials.asset-bulk-actions')
-              @endif
+                @include('partials.asset-bulk-actions', ['status' => Request::get('status')])
 
               <table
-                data-advanced-search="true"
-                data-click-to-select="true"
                 data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayout() }}"
-                data-cookie-id-table="assetsListingTable"
-                data-pagination="true"
-                data-id-table="assetsListingTable"
-                data-search="true"
+                data-cookie-id-table="{{ request()->has('status') ? e(request()->input('status')) : ''  }}assetsListingTable"
+                data-id-table="{{ request()->has('status') ? e(request()->input('status')) : ''  }}assetsListingTable"
+                data-search-text="{{ e(Session::get('search')) }}"
                 data-side-pagination="server"
-                data-show-columns="true"
-                data-show-export="true"
                 data-show-footer="true"
-                data-show-refresh="true"
                 data-sort-order="asc"
                 data-sort-name="name"
-                data-show-fullscreen="true"
                 data-toolbar="#assetsBulkEditToolbar"
                 data-bulk-button-id="#bulkAssetEditButton"
                 data-bulk-form-id="#assetsBulkForm"
-                id="assetsListingTable"
+                id="{{ request()->has('status') ? e(request()->input('status')) : ''  }}assetsListingTable"
                 class="table table-striped snipe-table"
                 data-url="{{ route('api.assets.index',
                     array('status' => e(Request::get('status')),
-                    'order_number'=>e(Request::get('order_number')),
+                    'order_number'=>e(strval(Request::get('order_number'))),
                     'company_id'=>e(Request::get('company_id')),
                     'status_id'=>e(Request::get('status_id')))) }}"
                 data-export-options='{
@@ -113,5 +105,39 @@
 
 @section('moar_scripts')
 @include('partials.bootstrap-table')
+<script nonce="{{ csrf_token() }}">
 
+// Initialize with options
+// onScan.attachTo(document, {
+//     suffixKeyCodes: [13], // enter-key expected at the end of a scan
+//     reactToPaste: true, // Compatibility to built-in scanners in paste-mode (as opposed to keyboard-mode)
+//     onScan: function(sCode, iQty) { // Alternative to document.addEventListener('scan')
+//         console.log('Scanned: ' + sCode);
+//         $.ajax({
+//           type: 'GET',
+//           url:  "api/v1/hardware/bytag/"+sCode,
+//           headers: {
+//             "X-Requested-With": 'XMLHttpRequest',
+//             "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+//           },
+//           dataType: 'json',
+//           success: function (data) {
+//             console.log(data);
+//             if (data != null && "id" in data) {
+//               console.log(data["id"]);
+//               window.location.href = "/hardware/"+data["id"];
+//             }else{
+//               Swal.fire({
+//                 icon: "error",
+//                 title: "Нет актива с меткой "+ sCode,
+//                 timer: 1200
+//               });
+//               console.log("No tag ");
+//             }
+//           },
+//         });
+//     },
+// });
+
+</script>
 @stop

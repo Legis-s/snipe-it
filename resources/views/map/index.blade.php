@@ -11,17 +11,15 @@
     <div class="row">
         <div class="col-md-12">
             <div class="box box-default">
-                <div class="box-body" style="font-size: 120%">
-                    Всего: <span id="all_count" style="font-weight: bold"></span>
-                    Готово: <span id="ok_count" style="font-weight: bold"></span>
-                    Без имущества: <span id="null_count" style="font-weight: bold"></span>
+                <div class="box-header with-border">
+                    <div class="box-heading">
+                        <h2 class="box-title">
+                            Всего: <span id="all_count" style="font-weight: bold"></span>
+                            Готово: <span id="ok_count" style="font-weight: bold"></span>
+                            Без имущества: <span id="null_count" style="font-weight: bold"></span>
+                        </h2>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12">
-            <div class="box box-default">
                 <div class="box-body">
                     <div id="map" style=" width: 100%; height: 900px"></div>
                 </div>
@@ -32,7 +30,7 @@
 @stop
 
 @section('moar_scripts')
-    @include ('partials.bootstrap-table', ['exportFile' => 'locations-export', 'search' => true])
+    {{--    @include ('partials.bootstrap-table', ['exportFile' => 'locations-export', 'search' => true])--}}
     <script src="https://api-maps.yandex.ru/2.1/?apikey=9aff6103-40f7-49e4-ad79-aa2a69d421d6&lang=ru_RU"
             type="text/javascript">
     </script>
@@ -44,10 +42,6 @@
         function init() {
             // Создание карты.
             var myMap = new ymaps.Map("map", {
-                // Координаты центра карты.
-                // Порядок по умолчанию: «широта, долгота».
-                // Чтобы не определять координаты центра карты вручную,
-                // воспользуйтесь инструментом Определение координат.
                 center: [55.76, 37.64],
                 // Уровень масштабирования. Допустимые значения:
                 // от 0 (весь мир) до 19.
@@ -67,7 +61,6 @@
                     this._lastCenter = null;
                     this.getParent().getChildElement(this).then(this._onGetChildElement, this);
                 },
-
                 onRemoveFromMap: function (oldMap) {
                     this._lastCenter = null;
                     if (this._$content) {
@@ -76,7 +69,6 @@
                     }
                     CustomControlClass.superclass.onRemoveFromMap.call(this, oldMap);
                 },
-
                 _onGetChildElement: function (parentDomContainer) {
                     // Создаем HTML-элемент с текстом.
                     this._$content = $('<div class="customControl">' +
@@ -85,7 +77,7 @@
                         '<label class="form-check-label" for="flexCheckDefault">' +
                         ' Показать без имущества' +
                         '</label>' +
-                        '</div>'+
+                        '</div>' +
                         '</div>').appendTo(parentDomContainer);
                     this._mapEventGroup = this.getMap().events.group();
                     // Запрашиваем данные после изменения положения карты.
@@ -93,13 +85,8 @@
                     // Сразу же запрашиваем название места.
                     this._createRequest();
                 },
-
                 _createRequest: function () {
-
-
-
                 },
-
                 _onServerResponse: function (result) {
                     // Данные от сервера были получены и теперь их необходимо отобразить.
                     // Описание ответа в формате JSON.
@@ -146,18 +133,18 @@
                 $null_count = 0;
                 data.features.forEach((element) => {
                     console.log(element)
-                    if (element.assets_count == 0){
+                    if (element.assets_count == 0) {
                         $null_count++;
-                    }else{
-                        if(element.assets_count == element.checked_assets_count){
+                    } else {
+                        if (element.assets_count == element.checked_assets_count) {
                             $ok_count++;
                         }
                     }
 
                 });
-                $("#all_count").html( data.features.length);
-                $("#ok_count").html( $ok_count);
-                $("#null_count").html( $null_count);
+                $("#all_count").html(data.features.length);
+                $("#ok_count").html($ok_count);
+                $("#null_count").html($null_count);
                 objectManager.add(data);
             });
         }

@@ -3,7 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Gate;
+use Illuminate\Support\Facades\Gate;
 
 class CheckPermissions
 {
@@ -26,6 +26,6 @@ class CheckPermissions
 
         return response()->view('layouts/basic', [
             'content' => view('errors/403'),
-        ]);
+        ], 403);
     }
 }

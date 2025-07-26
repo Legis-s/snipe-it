@@ -194,62 +194,13 @@ class ContractsController extends Controller
                 $name_str .= "[".e($contract->number).'] ';
             }
             $name_str .= e($contract->name);
-
-
-            $contract->use_text = $name_str;
+            $contract->use_text = preg_replace('/&quot;/', '"', $name_str);;
         }
 
         $paginated_results =  new LengthAwarePaginator($contracts->forPage($page, 500), $contracts->count(), 500, $page, []);
 
-//        return [];
         return (new SelectlistTransformer)->transformSelectlist($paginated_results);
 
     }
-
-    /**
-     * Returns JSON listing of all requestable assets
-     *
-     * @return JsonResponse
-     * @since [v4.0]
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     */
-    public function closesell(Request $request, $contract_id)
-    {
-        $this->authorize('checkout', Asset::class);
-
-        $contract = Contract::findOrFail($contract_id);
-        $status = Statuslabel::where('name', 'Выдано')->first();
-        $assets = Asset::where("contract_id",$contract->id)->where("status_id",$status->id)->whereNotNull("assigned_to")->get();
-        $target = $contract;
-        $checkout_at = request('checkout_at', date('Y-m-d H:i:s'));
-        foreach ($assets as &$asset) {
-            $asset->closeSell($target, Auth::user(), $checkout_at, null, null);
-        }
-        $user = Auth::user();
-        $consumableAssignments = ConsumableAssignment::where("contract_id",$contract->id)->where("assigned_type", User::class)->get();
-        foreach ($consumableAssignments as &$consumableAssignment) {
-            $user_pre = User::findOrFail($consumableAssignment->assigned_to);
-            $consumableAssignment->assigned_type = Contract::class;
-            $consumableAssignment->assigned_to = $contract->id;
-            $user_name = "(".$user->id.") ".$user->last_name." ".$user->first_name;
-            $user_name_pre = "(".$user_pre->id.") ".$user_pre->last_name." ".$user_pre->first_name;
-            $consumableAssignment->comment = $consumableAssignment->comment." Закрывающие документы получены ".date("Y-m-d H:i:s").", ".$user_name." Расходник списан с пользователя: ".$user_name_pre;
-            if ($consumableAssignment->save()) {
-                $log = new Actionlog();
-                $log->user_id = \Illuminate\Support\Facades\Auth::id();
-                $log->action_type = 'sell';
-                $log->target_type = Contract::class;
-                $log->target_id = $contract->id;
-                $log->item_id = $consumableAssignment->consumable_id;
-                $log->item_type = Consumable::class;
-                $log->save();
-            }
-
-        }
-        return response()->json(Helper::formatStandardApiResponse('success', null, trans('admin/hardware/message.checkout.success')));
-    }
-
-
-
 
 }

@@ -4,7 +4,7 @@ namespace App\Http\Transformers;
 
 use App\Helpers\Helper;
 use App\Models\AssetModel;
-use Gate;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Storage;
 
@@ -22,6 +22,22 @@ class AssetModelsTransformer
 
     public function transformAssetModel(AssetModel $assetmodel)
     {
+
+        $default_field_values = array();
+
+        // Reach into the custom fields and models_custom_fields pivot table to find the default values for this model
+        if ($assetmodel->fieldset) {
+            foreach($assetmodel->fieldset->fields AS $field) {
+                $default_field_values[] = [
+                    'name' => e($field->name),
+                    'db_column_name' => e($field->db_column_name()),
+                    'default_value' => ($field->defaultValue($assetmodel->id)) ? e($field->defaultValue($assetmodel->id)) : null,
+                    'format' =>  e($field->format),
+                    'required' => ($field->pivot->required == '1') ? true : false,
+                ];
+            }
+        }
+
         $array = [
             'id' => (int) $assetmodel->id,
             'name' => e($assetmodel->name),
@@ -30,13 +46,14 @@ class AssetModelsTransformer
                 'name'=> e($assetmodel->manufacturer->name),
             ] : null,
             'image' => ($assetmodel->image != '') ? Storage::disk('public')->url('models/'.e($assetmodel->image)) : null,
-            'model_number' => e($assetmodel->model_number),
+            'model_number' => ($assetmodel->model_number ? e($assetmodel->model_number): null),
+            'min_amt'   => ($assetmodel->min_amt) ? (int) $assetmodel->min_amt : null,
+            'remaining' => (int) ($assetmodel->assets_count - $assetmodel->min_amt),
             'depreciation' => ($assetmodel->depreciation) ? [
                 'id' => (int) $assetmodel->depreciation->id,
                 'name'=> e($assetmodel->depreciation->name),
             ] : null,
             'assets_count' => (int) $assetmodel->assets_count,
-            'lifetime' => (int) $assetmodel->lifetime,
             'category' => ($assetmodel->category) ? [
                 'id' => (int) $assetmodel->category->id,
                 'name'=> e($assetmodel->category->name),
@@ -45,9 +62,14 @@ class AssetModelsTransformer
                 'id' => (int) $assetmodel->fieldset->id,
                 'name'=> e($assetmodel->fieldset->name),
             ] : null,
+            'default_fieldset_values' => $default_field_values,
             'eol' => ($assetmodel->eol > 0) ? $assetmodel->eol.' months' : 'None',
             'requestable' => ($assetmodel->requestable == '1') ? true : false,
-            'notes' => e($assetmodel->notes),
+            'notes' => Helper::parseEscapedMarkedownInline($assetmodel->notes),
+            'created_by' => ($assetmodel->adminuser) ? [
+                'id' => (int) $assetmodel->adminuser->id,
+                'name'=> e($assetmodel->adminuser->present()->fullName()),
+            ] : null,
             'created_at' => Helper::getFormattedDateObject($assetmodel->created_at, 'datetime'),
             'updated_at' => Helper::getFormattedDateObject($assetmodel->updated_at, 'datetime'),
             'deleted_at' => Helper::getFormattedDateObject($assetmodel->deleted_at, 'datetime'),
@@ -56,13 +78,49 @@ class AssetModelsTransformer
 
         $permissions_array['available_actions'] = [
             'update' => (Gate::allows('update', AssetModel::class) && ($assetmodel->deleted_at == '')),
-            'delete' => (Gate::allows('delete', AssetModel::class) && ($assetmodel->assets_count == 0)),
+            'delete' => $assetmodel->isDeletable(),
             'clone' => (Gate::allows('create', AssetModel::class) && ($assetmodel->deleted_at == '')),
             'restore' => (Gate::allows('create', AssetModel::class) && ($assetmodel->deleted_at != '')),
         ];
 
         $array += $permissions_array;
 
+        return $array;
+    }
+
+    public function transformAssetModelFiles($assetmodel, $total)
+    {
+
+        $array = [];
+        foreach ($assetmodel->uploads as $file) {
+            $array[] = self::transformAssetModelFile($file, $assetmodel);
+        }
+
+        return (new DatatablesTransformer)->transformDatatables($array, $total);
+    }
+
+    public function transformAssetModelFile($file, $assetmodel)
+    {
+
+        $array = [
+            'id' => (int) $file->id,
+            'filename' => e($file->filename),
+            'note' => $file->note,
+            'url' => route('show/modelfile', [$assetmodel->id, $file->id]),
+            'created_by' => ($file->adminuser) ? [
+                'id' => (int) $file->adminuser->id,
+                'name'=> e($file->adminuser->present()->fullName),
+            ] : null,
+            'created_at' => Helper::getFormattedDateObject($file->created_at, 'datetime'),
+            'updated_at' => Helper::getFormattedDateObject($file->updated_at, 'datetime'),
+            'deleted_at' => Helper::getFormattedDateObject($file->deleted_at, 'datetime'),
+        ];
+
+        $permissions_array['available_actions'] = [
+            'delete' => (Gate::allows('update', AssetModel::class) && ($assetmodel->deleted_at == '')),
+        ];
+
+        $array += $permissions_array;
         return $array;
     }
 

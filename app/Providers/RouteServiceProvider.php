@@ -39,12 +39,14 @@ class RouteServiceProvider extends ServiceProvider
     {
         Route::group([
             'middleware' => 'web',
-            'namespace' => $this->namespace,
+//            'namespace' => $this->namespace, //okay, I don't know what this means, but somehow this might be a problem for us?
         ], function ($router) {
+            require base_path('routes/web/custom.php');
             require base_path('routes/web/hardware.php');
             require base_path('routes/web/models.php');
             require base_path('routes/web/accessories.php');
             require base_path('routes/web/licenses.php');
+            require base_path('routes/web/locations.php');
             require base_path('routes/web/consumables.php');
             require base_path('routes/web/fields.php');
             require base_path('routes/web/components.php');
@@ -65,15 +67,18 @@ class RouteServiceProvider extends ServiceProvider
     {
         Route::group([
             'middleware' => 'auth:api',
-            'namespace' => $this->namespace,
+//            'namespace' => $this->namespace, // this might also be a problem? I don't really know :/
             'prefix' => 'api',
         ], function ($router) {
             require base_path('routes/api.php');
+            require base_path('routes/api_custom.php');
         });
     }
 
     /**
      * Configure the rate limiters for the application.
+     *
+     * This ONLY fires on 429 responses.
      *
      * https://laravel.com/docs/8.x/routing#rate-limiting
      *
@@ -82,9 +87,17 @@ class RouteServiceProvider extends ServiceProvider
     protected function configureRateLimiting()
     {
 
-        // Rate limiter for API calls
+        // Rate limiter for API calls - this sends the correct API headers to show the user the remaining time they have to wait and gives them the 429 status code if they are throttled
         RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(config('app.api_throttle_per_minute'))->by(optional($request->user())->id ?: $request->ip());
+            return Limit::perMinute(config('app.api_throttle_per_minute'))->by(optional($request->user())->id ?: $request->ip())
+                ->response(function ($request, $headers) {
+                    return response()->json([
+                        'status' => 'error',
+                        'messages' => 'Too many requests. Try again in '.$headers['Retry-After'].' seconds.',
+                        'status_code' => 429,
+                        'retryAfter' => $headers['Retry-After'] ?? 60,
+                    ], 429, $headers);
+                });
         });
 
         // Rate limiter for forgotten password requests

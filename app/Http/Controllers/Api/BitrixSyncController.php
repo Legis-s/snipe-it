@@ -3,25 +3,21 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Transformers\UsersTransformer;
 use App\Models\InvoiceType;
 use App\Models\LegalPerson;
 use App\Models\Location;
 use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Rollbar\Payload\Trace;
 
 class BitrixSyncController extends Controller
 {
-
     public function syncUsers(Request $request)
     {
 
         /** @var \GuzzleHttp\Client $client */
         $client = new \GuzzleHttp\Client();
-
-
+        $bitrix_url = env('BITRIX_URL')."rest/".env('BITRIX_USER')."/".env('BIREIX_KEY')."/";
         /**
          * Начинаем с нуля или с какого то предыдущего шага
          */
@@ -29,7 +25,7 @@ class BitrixSyncController extends Controller
         $finish = false;
         $bitrix_users_final = [];
         while (!$finish){
-            $response = $client->request('GET', 'https://bitrix.legis-s.ru/rest/1/rzrrat22t46msv7v/user.get.json?ACTIVE=True&start='.$leadID);
+            $response = $client->request('GET', $bitrix_url.'user.get.json?ACTIVE=True&start='.$leadID);
             $response = $response->getBody()->getContents();
             $bitrix_users = json_decode($response, true);
             $bitrix_users = $bitrix_users["result"];
@@ -71,8 +67,9 @@ class BitrixSyncController extends Controller
     {
         /** @var \GuzzleHttp\Client $client */
         $client = new \GuzzleHttp\Client();
+        $bitrix_url = env('BITRIX_URL')."rest/".env('BITRIX_USER')."/".env('BITRIX_KEY')."/";
 
-        $response = $client->request('GET', 'https://bitrix.legis-s.ru/rest/1/rzrrat22t46msv7v/legis_crm.object.list/?select%5B0%5D=UF_*&select%5B1%5D=*');
+        $response = $client->request('GET', $bitrix_url.'legis_crm.object.list/?select%5B0%5D=UF_*&select%5B1%5D=*');
         $response = $response->getBody()->getContents();
         $bitrix_objects = json_decode($response, true);
         $bitrix_objects = $bitrix_objects["result"];
@@ -117,12 +114,13 @@ class BitrixSyncController extends Controller
 
         /** @var \GuzzleHttp\Client $client */
         $client = new \GuzzleHttp\Client();
+        $bitrix_url = env('BITRIX_URL')."rest/".env('BITRIX_USER')."/".env('BITRIX_KEY')."/";
 
         $next = 0;
         $finish = false;
         $bitrix_suppliers = [];
         while ($finish == false){
-            $response = $client->request('GET', 'https://bitrix.legis-s.ru/rest/1/rzrrat22t46msv7v/crm.company.list?FILTER[COMPANY_TYPE]=1&start='."$next");
+            $response = $client->request('GET', $bitrix_url.'crm.company.list?FILTER[COMPANY_TYPE]=1&start='."$next");
             $response = $response->getBody()->getContents();
             $suppliers_response = json_decode($response, true);
             $suppliers_data = $suppliers_response["result"];
@@ -170,8 +168,8 @@ class BitrixSyncController extends Controller
     {
         /** @var \GuzzleHttp\Client $client */
         $client = new \GuzzleHttp\Client();
-
-        $response = $client->request('GET', 'https://bitrix.legis-s.ru/rest/1/rzrrat22t46msv7v/lists.element.get?IBLOCK_TYPE_ID=lists&IBLOCK_ID=77');
+        $bitrix_url = env('BITRIX_URL')."rest/".env('BITRIX_USER')."/".env('BITRIX_KEY')."/";
+        $response = $client->request('GET', $bitrix_url.'lists.element.get?IBLOCK_TYPE_ID=lists&IBLOCK_ID=77');
         $response = $response->getBody()->getContents();
         $bitrix_legal_persons = json_decode($response, true);
         $bitrix_legal_persons = $bitrix_legal_persons["result"];
@@ -203,8 +201,8 @@ class BitrixSyncController extends Controller
     {
         /** @var \GuzzleHttp\Client $client */
         $client = new \GuzzleHttp\Client();
-
-        $response = $client->request('GET', 'https://bitrix.legis-s.ru/rest/1/rzrrat22t46msv7v/lists.element.get?IBLOCK_TYPE_ID=lists&IBLOCK_ID=166');
+        $bitrix_url = env('BITRIX_URL')."rest/".env('BITRIX_USER')."/".env('BITRIX_KEY')."/";
+        $response = $client->request('GET', $bitrix_url.'lists.element.get?IBLOCK_TYPE_ID=lists&IBLOCK_ID=166');
         $response = $response->getBody()->getContents();
         $bitrix_invoice_types = json_decode($response, true);
         $bitrix_invoice_types = $bitrix_invoice_types["result"];

@@ -68,15 +68,13 @@ class InventoryPresenter extends Presenter
                 "switchable" => true,
                 "title" => "Ответственный",
                 "visible" => true,
-//                "formatter" => 'companiesLinkFormatter',
             ],[
                 "field" => "device",
                 "searchable" => true,
                 "sortable" => true,
                 "switchable" => true,
                 "title" => "Устройство",
-                "visible" => true,
-//                "formatter" => 'companiesLinkFormatter',
+                "visible" => false,
             ],[
                 "field" => "comment",
                 "searchable" => true,
@@ -84,7 +82,6 @@ class InventoryPresenter extends Presenter
                 "switchable" => true,
                 "title" => "Коммментарий",
                 "visible" => true,
-//                "formatter" => 'companiesLinkFormatter',
             ],[
                 "field" => "updated_at",
                 "searchable" => false,

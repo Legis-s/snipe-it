@@ -2,32 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ImageUploadRequest;
 use App\Models\Contract;
 use App\Models\Location;
-use App\Models\User;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 
 /**
  * This controller handles all actions related to Contract for
  * the Snipe-IT Asset Management application.
- *
- * @version    v1.0
  */
 class ContractsController extends Controller
 {
     /**
      * Returns a view that invokes the ajax tables which actually contains
-     * the content for the locations listing, which is generated in getDatatable.
+     * the content for the contract listing, which is generated in getDatatable.
      *
-     * @author [S. MArkin] [<markin@legis-s.ru>]
      * @see ContractsController::getDatatable() method that generates the JSON response
-     * @since [v1.0]
-     * @return \Illuminate\Contracts\View\View
-     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function index()
+    public function index(): View
     {
         // Grab all the locations
         $this->authorize('view', Location::class);
@@ -38,16 +30,13 @@ class ContractsController extends Controller
 
     /**
      * Returns a view that invokes the ajax tables which actually contains
-     * the content for the locations detail page.
+     * the content for the contract detail page.
      *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @param int $contractId
-     * @since [v1.0]
-     * @return \Illuminate\Contracts\View\View
+     * @param int $id
      */
-    public function show($contractId = null)
+    public function show(Contract $contract): View|RedirectResponse
     {
-        $contract = Contract::find($contractId);
+        $contract = Contract::find($contract->id);
 
         if (isset($contract->id)) {
             return view('contracts/view', compact('contract'));
@@ -55,6 +44,4 @@ class ContractsController extends Controller
 
         return redirect()->route('contracts.index')->with('error', trans('admin/locations/message.does_not_exist'));
     }
-
-
 }

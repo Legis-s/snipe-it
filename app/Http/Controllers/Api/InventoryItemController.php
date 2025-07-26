@@ -2,41 +2,31 @@
 namespace App\Http\Controllers\Api;
 
 
-use App\Http\Transformers\InventoriesTransformer;
-use App\Http\Transformers\LocationsTransformer;
-use App\Models\Location;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Request;
+use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Transformers\InventoryItemTransformer;
-use App\Models\Company;
-use App\Models\User;
 use App\Models\Inventory;
 use App\Models\InventoryItem;
-use App\Helpers\Helper;
-use App\Http\Requests\SaveUserRequest;
-use App\Models\Asset;
-use App\Http\Transformers\AssetsTransformer;
-use App\Http\Transformers\SelectlistTransformer;
-use App\Http\Transformers\AccessoriesTransformer;
-use App\Http\Transformers\LicensesTransformer;
 use Auth;
-use App\Models\AssetModel;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Image;
 
+/**
+ * This class controls all actions related to inventory items for
+ * the Snipe-IT Asset Management application.
+ *
+ * @version    v1.0
+ */
 class InventoryItemController extends Controller
 {
 
     /**
-     * Display a listing of the resource.
-     * @return \Illuminate\Http\Response
+     * Returns JSON listing of all inventory items
      */
-    public function index(Request $request)
+    public function index(Request $request) : JsonResponse | array
     {
-//        $this->authorize('view', User::class);
-
         $inventory_items = InventoryItem::with('asset','inventory','status')
-            ->withTrashed()
             ->select([
                 'inventory_items.id',
                 'inventory_items.notes',
@@ -64,7 +54,6 @@ class InventoryItemController extends Controller
         if ($request->filled('asset_id')) {
             $inventory_items->where('inventory_items.asset_id', '=', $request->input('asset_id'));
         }
-
 
         if ($request->filled('search')) {
             $inventory_items = $inventory_items->TextSearch($request->input('search'));
@@ -97,29 +86,19 @@ class InventoryItemController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($id): JsonResponse | array
     {
-//        $this->authorize('view', Location::class);
         $inventory_item = InventoryItem::findOrFail($id);
         return (new InventoryItemTransformer)->transformInventoryItem($inventory_item);
     }
 
     /**
      * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): JsonResponse
     {
-//        $this->authorize('update', Location::class);
         $inventory_item = InventoryItem::findOrFail($id);
-
         $inventory_item->fill($request->all());
 
         if ($request['photo']){
@@ -134,10 +113,9 @@ class InventoryItemController extends Controller
         }
         if ($inventory_item->status){
             if($inventory_item->status->success){
-                $inventory_item->successfully= true;
+                $inventory_item->successfully = true;
             }
         }
-
 
         if ($inventory_item->save()) {
             if ($inventory_item->checked == true){
@@ -161,7 +139,6 @@ class InventoryItemController extends Controller
                 $inventory->status = "FINISH_OK";
                 $inventory->save();
             }
-
 
             return response()->json(
                 Helper::formatStandardApiResponse(

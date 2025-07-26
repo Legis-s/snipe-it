@@ -12,7 +12,7 @@ class MigrateMacAddress extends Migration
      */
     public function up()
     {
-        DB::getDoctrineSchemaManager()->getDatabasePlatform()->registerDoctrineTypeMapping('enum', 'string');
+        //DB::getDoctrineSchemaManager()->getDatabasePlatform()->registerDoctrineTypeMapping('enum', 'string');
 
         $f2 = new \App\Models\CustomFieldset(['name' => 'Asset with MAC Address']);
         $f2->timestamps = false; //when this model was first created, it had no timestamps. But later on it gets them.
@@ -48,13 +48,19 @@ class MigrateMacAddress extends Migration
      */
     public function down()
     {
-        //
         $f = \App\Models\CustomFieldset::where(['name' => 'Asset with MAC Address'])->first();
-        $f->fields()->delete();
-        $f->delete();
+
+        if ($f) {
+            $f->fields()->delete();
+            $f->delete();
+        }
+
         Schema::table('models', function (Blueprint $table) {
             $table->renameColumn('deprecated_mac_address', 'show_mac_address');
         });
-        DB::statement('ALTER TABLE assets CHANGE _snipeit_mac_address mac_address varchar(255)');
+
+        if (Schema::hasColumn('assets', '_snipeit_mac_address')) {
+            DB::statement('ALTER TABLE assets CHANGE _snipeit_mac_address mac_address varchar(255)');
+        }
     }
 }

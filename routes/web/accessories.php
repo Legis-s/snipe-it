@@ -13,7 +13,7 @@ Route::group(['prefix' => 'accessories', 'middleware' => ['auth']], function () 
     )->name('accessories.checkout.show');
 
     Route::post(
-        '{accessoryID}/checkout',
+        '{accessory}/checkout',
         [Accessories\AccessoryCheckoutController::class, 'store']
     )->name('accessories.checkout.store');
 
@@ -42,9 +42,16 @@ Route::group(['prefix' => 'accessories', 'middleware' => ['auth']], function () 
         [Accessories\AccessoriesFilesController::class, 'show']
     )->name('show.accessoryfile');
 
+    Route::get('{accessory}/clone',
+            [Accessories\AccessoriesController::class, 'getClone']
+        )->name('clone/accessories');
+
+    Route::post('{accessoryId}/clone', 
+        [Accessories\AccessoriesController::class, 'postCreate']
+    );
+
 });
 
 Route::resource('accessories', Accessories\AccessoriesController::class, [
-    'middleware' => ['auth'],
-    'parameters' => ['accessory' => 'accessory_id'],
+    'middleware' => ['auth']
 ]);

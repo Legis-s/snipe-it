@@ -4,28 +4,28 @@ namespace App\Models;
 use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
 use Illuminate\Database\Eloquent\Model;
+use Watson\Validating\ValidatingTrait;
 
 class ConsumableAssignment extends Model
 {
     use CompanyableTrait;
+    use ValidatingTrait;
 
-    protected $presenter = 'App\Presenters\ConsumableAssignmentPresenter';
+    protected $table = 'consumables_locations';
 
+    protected $presenter = \App\Presenters\ConsumableAssignmentPresenter::class;
     use Presentable;
     use Searchable;
     protected $dates = [
         'created_at',
         'updated_at',
-        'deleted_at',
     ];
-
-    protected $table = 'consumables_locations';
-
 
     const LOCATION = 'location';
     const ASSET = 'asset';
     const USER = 'user';
     const CONTRACT = 'contract';
+    const DEAL = 'deal';
 
     const PURCHASE = 'purchase';
     const ISSUED = 'issued';
@@ -44,10 +44,10 @@ class ConsumableAssignment extends Model
         'type',
         'comment',
         'assigned_type',
-        'user_id',
         'consumable_id',
         'assigned_to',
         'contract_id',
+        'deal_id',
         'cost',
     ];
 
@@ -65,9 +65,7 @@ class ConsumableAssignment extends Model
      * @var array
      */
     protected $searchableRelations = [
-//        'assigned_to'        => ['name'],
-//        'contract_id'        => ['name'],
-//        'user_id'            => ['name'],
+        'deal_id'            => ['name'],
     ];
 
     public function getDisplayNameAttribute()
@@ -103,6 +101,11 @@ class ConsumableAssignment extends Model
     }
 
 
+    public $rules = [
+        'assigned_to'   => ['nullable', 'integer', 'required_with:assigned_type'],
+        'assigned_type' => ['nullable', 'required_with:assigned_to', 'in:'.User::class.",".Location::class.",".Asset::class.",".Deal::class],
+    ];
+
     public function consumable()
     {
         return $this->belongsTo(\App\Models\Consumable::class);
@@ -114,9 +117,9 @@ class ConsumableAssignment extends Model
         return $this->belongsTo(\App\Models\User::class, 'assigned_to');
     }
 
-    public function responsibleUser()
+    public function adminuser()
     {
-        return $this->belongsTo(\App\Models\User::class, 'user_id');
+        return $this->belongsTo(\App\Models\User::class, 'created_by');
     }
 
     public function location()
@@ -137,13 +140,13 @@ class ConsumableAssignment extends Model
         }
         return false;
     }
-    public function availableForCloseDocuments()
-    {
-        if ($this->type==$this::SOLD && $this->assigned_type=='App\Models\User'){
-            return true;
-        }
-        return false;
-    }
+//    public function availableForCloseDocuments()
+//    {
+//        if ($this->type==$this::SOLD && $this->assigned_type=='App\Models\User'){
+//            return true;
+//        }
+//        return false;
+//    }
 
 
 
@@ -158,9 +161,7 @@ class ConsumableAssignment extends Model
     public function scopeAssignedSearch($query, $search)
     {
 
-        \Debugbar::info("test");
         $search = explode(' OR ', $search);
-        \Debugbar::info($search);
         return $query->leftJoin('users as cl_users', function ($leftJoin) {
             $leftJoin->on("cl_users.id", "=", "consumables_locations.assigned_to")
                 ->where("consumables_locations.assigned_type", "=", User::class);
@@ -203,6 +204,11 @@ class ConsumableAssignment extends Model
     public function contract()
     {
         return $this->belongsTo(\App\Models\Contract::class, 'contract_id');
+    }
+
+    public function deal()
+    {
+        return $this->belongsTo(\App\Models\Deal::class, 'deal_id');
     }
 
     public function mass_operations()

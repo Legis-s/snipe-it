@@ -5,10 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Models\LegalPerson;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Helpers\Helper;
-use App\Models\InvoiceType;
-use App\Http\Transformers\DatatablesTransformer;
-use App\Http\Transformers\ManufacturersTransformer;
 use App\Http\Transformers\SelectlistTransformer;
 
 class LegalPersonsController extends Controller
@@ -16,13 +12,10 @@ class LegalPersonsController extends Controller
 
     /**
      * Gets a paginated collection for the select2 menus
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v4.0.16]
      * @see \App\Http\Transformers\SelectlistTransformer
      *
      */
-    public function selectlist(Request $request)
+    public function selectlist(Request $request) : array
     {
 
         $legal_persons = LegalPerson::select([

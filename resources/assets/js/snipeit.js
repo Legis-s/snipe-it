@@ -1,4 +1,11 @@
 
+
+// var jQuery = require('jquery');
+// window.jQuery = jQuery
+// window.$ = jQuery
+
+require('./bootstrap');
+
 /**
  * Module containing core application logic.
  * @param  {jQuery} $        Insulated jQuery object
@@ -75,84 +82,45 @@ pieOptions = {
 
 var baseUrl = $('meta[name="baseUrl"]').attr('content');
 
-(function($, settings) {
-    var Components = {};
-    Components.modals = {};
+$(function () {
+
+    var $el = $('table');
 
     // confirm restore modal
-    Components.modals.confirmRestore = function() {
-        var $el = $('table');
 
-        var events = {
-            'click': function(evnt) {
-                var $context = $(this);
-                var $restoreConfirmModal = $('#restoreConfirmModal');
-                var href = $context.attr('href');
-                var message = $context.attr('data-content');
-                var title = $context.attr('data-title');
+    $el.on('click', '.restore-asset', function (evnt) {
+        var $context = $(this);
+        var $restoreConfirmModal = $('#restoreConfirmModal');
+        var href = $context.attr('href');
+        var message = $context.attr('data-content');
+        var title = $context.attr('data-title');
 
-                $('#restoreConfirmModalLabel').text(title);
-                $restoreConfirmModal.find('.modal-body').text(message);
-                $('#restoreForm').attr('action', href);
-                $restoreConfirmModal.modal({
-                    show: true
-                });
-                return false;
-            }
-        };
-
-        var render = function() {
-            $el.on('click', '.restore-asset', events['click']);
-        };
-
-        return {
-            render: render
-        };
-    };
+        $('#confirmModalLabel').text(title);
+        $restoreConfirmModal.find('.modal-body').text(message);
+        $('#restoreForm').attr('action', href);
+        $restoreConfirmModal.modal({
+            show: true
+        });
+        return false;
+    });
 
     // confirm delete modal
-    Components.modals.confirmDelete = function() {
-        var $el = $('table');
 
-        var events = {
-            'click': function(evnt) {
-                var $context = $(this);
-                var $dataConfirmModal = $('#dataConfirmModal');
-                var href = $context.attr('href');
-                var message = $context.attr('data-content');
-                var title = $context.attr('data-title');
+    $el.on('click', '.delete-asset', function (evnt) {
+        var $context = $(this);
+        var $dataConfirmModal = $('#dataConfirmModal');
+        var href = $context.attr('href');
+        var message = $context.attr('data-content');
+        var title = $context.attr('data-title');
 
-                $('#myModalLabel').text(title);
-                $dataConfirmModal.find('.modal-body').text(message);
-                $('#deleteForm').attr('action', href);
-                $dataConfirmModal.modal({
-                    show: true
-                });
-                return false;
-            }
-        };
-
-        var render = function() {
-            $el.on('click', '.delete-asset', events['click']);
-        };
-
-        return {
-            render: render
-        };
-    };
-
-
-    /**
-     * Application start point
-     * Component definition stays out of load event, execution only happens.
-     */
-    $(function() {
-        new Components.modals.confirmRestore().render();
-        new Components.modals.confirmDelete().render();
+        $('#myModalLabel').text(title);
+        $dataConfirmModal.find('.modal-body').text(message);
+        $('#deleteForm').attr('action', href);
+        $dataConfirmModal.modal({
+            show: true
+        });
+        return false;
     });
-}(jQuery, window.snipeit.settings));
-
-$(document).ready(function () {
 
     /*
     * Slideout help menu
@@ -180,31 +148,18 @@ $(document).ready(function () {
         }
      });
 
-     /*
-     * iCheck checkbox plugin
-     */
-
-     $('input[type="checkbox"].minimal, input[type="radio"].minimal').iCheck({
-         checkboxClass: 'icheckbox_minimal-blue',
-         radioClass: 'iradio_minimal-blue'
-     });
 
 
      /*
      * Select2
      */
 
-     var iOS = /iPhone|iPad|iPod/.test(navigator.userAgent)  && !window.MSStream;
-     if(!iOS)
-     {
-        // Vue collision: Avoid overriding a vue select2 instance
-        // by checking to see if the item has already been select2'd.
         $('select.select2:not(".select2-hidden-accessible")').each(function (i,obj) {
             {
                 $(obj).select2();
             }
         });
-     }
+
 
     // $('.datepicker').datepicker();
     // var datepicker = $.fn.datepicker.noConflict(); // return $.fn.datepicker to previously assigned value
@@ -225,6 +180,8 @@ $(document).ready(function () {
              */
             placeholder: '',
             allowClear: true,
+            language: $('meta[name="language"]').attr('content'),
+            dir: $('meta[name="language-direction"]').attr('content'),
             
             ajax: {
 
@@ -241,6 +198,7 @@ $(document).ready(function () {
                         search: params.term,
                         page: params.page || 1,
                         assetStatusType: link.data("asset-status-type"),
+                        companyId: link.data("company-id"),
                     };
                     return data;
                 },
@@ -267,41 +225,41 @@ $(document).ready(function () {
     });
 
 	function getSelect2Value(element) {
-
+		
 		// if the passed object is not a jquery object, assuming 'element' is a selector
 		if (!(element instanceof jQuery)) element = $(element);
 
 		var select = element.data("select2");
 
-		// There's two different locations where the select2-generated input element can be.
+		// There's two different locations where the select2-generated input element can be. 
 		searchElement = select.dropdown.$search || select.$container.find(".select2-search__field");
 
 		var value = searchElement.val();
 		return value;
 	}
-
+	
 	$(".select2-hidden-accessible").on('select2:selecting', function (e) {
 		var data = e.params.args.data;
 		var isMouseUp = false;
 		var element = $(this);
 		var value = getSelect2Value(element);
-
+		
 		if(e.params.args.originalEvent) isMouseUp = e.params.args.originalEvent.type == "mouseup";
-
+		
 		// if selected item does not match typed text, do not allow it to pass - force close for ajax.
 		if(!isMouseUp) {
 			if(value.toLowerCase() && data.text.toLowerCase().indexOf(value) < 0) {
 				e.preventDefault();
 
 				element.select2('close');
-
+				
 			// if it does match, we set a flag in the event (which gets passed to subsequent events), telling it not to worry about the ajax
 			} else if(value.toLowerCase() && data.text.toLowerCase().indexOf(value) > -1) {
 				e.params.args.noForceAjax = true;
 			}
 		}
 	});
-
+	
 	$(".select2-hidden-accessible").on('select2:closing', function (e) {
 		var element = $(this);
 		var value = getSelect2Value(element);
@@ -309,7 +267,7 @@ $(document).ready(function () {
 		var isMouseUp = false;
 		if(e.params.args.originalSelect2Event) noForceAjax = e.params.args.originalSelect2Event.noForceAjax;
 		if(e.params.args.originalEvent) isMouseUp = e.params.args.originalEvent.type == "mouseup";
-
+		
 		if(value && !noForceAjax && !isMouseUp) {
 			var endpoint = element.data("endpoint");
 			var assetStatusType = element.data("asset-status-type");
@@ -321,22 +279,22 @@ $(document).ready(function () {
 					"X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
 				},
 			}).done(function(response) {
-				var currentlySelected = element.select2('data').map(function (x){
+				var currentlySelected = element.select2('data').map(function (x){ 
                     return +x.id;
                 }).filter(function (x) {
                     return x !== 0;
                 });
-
+				
 				// makes sure we're not selecting the same thing twice for multiples
 				var filteredResponse = response.results.filter(function(item) {
 					return currentlySelected.indexOf(+item.id) < 0;
 				});
 
 				var first = (currentlySelected.length > 0) ? filteredResponse[0] : response.results[0];
-
+				
 				if(first && first.id) {
 					first.selected = true;
-
+					
 					if($("option[value='" + first.id + "']", element).length < 1) {
 						var option = new Option(first.text, first.id, true, true);
 						element.append(option);
@@ -388,16 +346,16 @@ $(document).ready(function () {
         if (datalist.image) {
             var inner_div = $("<div style='width: 30px;'>");
             /******************************************************************
-             *
-             * We are specifically chosing empty alt-text below, because this
+             * 
+             * We are specifically chosing empty alt-text below, because this 
              * image conveys no additional information, relative to the text
              * that will *always* be there in any select2 list that is in use
              * in Snipe-IT. If that changes, we would probably want to change
              * some signatures of some functions, but right now, we don't want
-             * screen readers to say "HP SuperJet 5000, .... picture of HP
+             * screen readers to say "HP SuperJet 5000, .... picture of HP 
              * SuperJet 5000..." and so on, for every single row in a list of
              * assets or models or whatever.
-             *
+             * 
              *******************************************************************/
             var img = $("<img src='' style='max-height: 20px; max-width: 30px;' alt=''>");
             // console.warn("Img is: ");
@@ -449,39 +407,55 @@ $(document).ready(function () {
         $('input[name=checkout_to_type]').on("change",function () {
             var assignto_type = $('input[name=checkout_to_type]:checked').val();
             var userid = $('#assigned_user option:selected').val();
+
             if (assignto_type == 'asset') {
                 $('#current_assets_box').fadeOut();
                 $('#assigned_asset').show();
                 $('#assigned_user').hide();
                 $('#assigned_location').hide();
-                $('#assigned_contract').hide();
+                $('#assigned_deal').hide();
+                $('#rent_box').hide();
                 $('.notification-callout').fadeOut();
+
+                $('[name="assigned_location"]').val('').trigger('change.select2');
+                $('[name="assigned_user"]').val('').trigger('change.select2');
 
             } else if (assignto_type == 'location') {
                 $('#current_assets_box').fadeOut();
                 $('#assigned_asset').hide();
                 $('#assigned_user').hide();
                 $('#assigned_location').show();
-                $('#assigned_contract').hide();
+                $('#assigned_deal').hide();
+                $('#rent_box').hide();
                 $('.notification-callout').fadeOut();
-            } else if (assignto_type == 'contract') {
+
+                $('[name="assigned_asset"]').val('').trigger('change.select2');
+                $('[name="assigned_user"]').val('').trigger('change.select2');
+            } else if (assignto_type == 'deal') {
                 $('#current_assets_box').fadeOut();
                 $('#assigned_asset').hide();
                 $('#assigned_user').hide();
                 $('#assigned_location').hide();
-                $('#assigned_contract').show();
+                $('#assigned_deal').show();
+                $('#rent_box').show();
                 $('.notification-callout').fadeOut();
+
+                $('[name="assigned_asset"]').val('').trigger('change.select2');
+                $('[name="assigned_user"]').val('').trigger('change.select2');
             } else  {
 
                 $('#assigned_asset').hide();
                 $('#assigned_user').show();
                 $('#assigned_location').hide();
-                $('#assigned_contract').hide();
                 if (userid) {
                     $('#current_assets_box').fadeIn();
                 }
+                $('#assigned_deal').hide();
+                $('#rent_box').hide();
                 $('.notification-callout').fadeIn();
 
+                $('[name="assigned_asset"]').val('').trigger('change.select2');
+                $('[name="assigned_location"]').val('').trigger('change.select2');
             }
         });
     });
@@ -544,10 +518,16 @@ $(document).ready(function () {
         var id = '#' + $this.attr('id');
         var status = id + '-status';
         var $status = $(status);
+        var delete_id = $(id + '-deleteCheckbox');
+        var preview_container = $(id + '-previewContainer');
+
+
+
         $status.removeClass('text-success').removeClass('text-danger');
         $(status + ' .goodfile').remove();
         $(status + ' .badfile').remove();
         $(status + ' .previewSize').hide();
+        preview_container.hide();
         $(id + '-info').html('');
 
         var max_size = $this.data('maxsize');
@@ -558,17 +538,15 @@ $(document).ready(function () {
             $(id + '-info').append('<span class="label label-default">' + htmlEntities(this.files[i].name) + ' (' + formatBytes(this.files[i].size) + ')</span> ');
         }
 
-        console.log('Max size is: ' + max_size);
-        console.log('Real size is: ' + total_size);
-
         if (total_size > max_size) {
             $status.addClass('text-danger').removeClass('help-block').prepend('<i class="badfile fas fa-times"></i> ').append('<span class="previewSize"> Upload is ' + formatBytes(total_size) + '.</span>');
         } else {
-
             $status.addClass('text-success').removeClass('help-block').prepend('<i class="goodfile fas fa-check"></i> ');
             var $preview =  $(id + '-imagePreview');
             readURL(this, $preview);
             $preview.fadeIn();
+            preview_container.fadeIn();
+            delete_id.hide();
         }
 
 
@@ -586,7 +564,7 @@ function htmlEntities(str) {
  * Toggle disabled
  */
 (function($){
-
+		
     $.fn.toggleDisabled = function(callback){
         return this.each(function(){
             var disabled, $this = $(this);
@@ -603,5 +581,37 @@ function htmlEntities(str) {
             }
         });
     };
-
+    
 })(jQuery);
+
+/**
+ * Universal Livewire Select2 integration
+ *
+ * How to use:
+ *
+ * 1. Set the class of your select2 elements to 'livewire-select2').
+ * 2. Name your element to match a property in your Livewire component
+ * 3. Add an attribute called 'data-livewire-component' that points to $this->getId() (via `{{ }}` if you're in a blade,
+ *    or just $this->getId() if not).
+ */
+document.addEventListener('livewire:init', () => {
+    $('.livewire-select2').select2()
+
+    $(document).on('select2:select', '.livewire-select2', function (event) {
+        var target = $(event.target)
+        if(!event.target.name || !target.data('livewire-component')) {
+            console.error("You need to set both name (which should match a Livewire property) and data-livewire-component on your Livewire-ed select2 elements!")
+            console.error("For data-livewire-component, you probably want to use $this->getId() or {{ $this->getId() }}, as appropriate")
+            return false
+        }
+        Livewire.find(target.data('livewire-component')).set(event.target.name, this.options[this.selectedIndex].value)
+    });
+
+    Livewire.hook('request', ({succeed}) => {
+        succeed(() => {
+            queueMicrotask(() => {
+                $('.livewire-select2').select2();
+            });
+        });
+    });
+});

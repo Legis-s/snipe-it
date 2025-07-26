@@ -1,21 +1,20 @@
 @extends('layouts/edit-form', [
-    'createText' => "Создать статус инвентаризации" ,
-    'updateText' =>"Изменить статус инвентаризации",
-    'helpTitle' => trans('admin/statuslabels/table.about'),
-    'helpText' => "",
-    'formAction' => ($item) ? route('inventorystatuslabels.update', ['inventorystatuslabel' => $item->id]) : route('inventorystatuslabels.store'),
+    'createText' => trans('admin/inventorystatuslabels/table.create') ,
+    'updateText' => trans('admin/inventorystatuslabels/table.update'),
+    'helpTitle' => trans('admin/inventorystatuslabels/table.about'),
+    'helpText' => trans('admin/inventorystatuslabels/table.info'),
+    'formAction' => (isset($item->id)) ? route('inventorystatuslabels.update', ['inventorystatuslabel' => $item->id]) : route('inventorystatuslabels.store'),
 ])
 
 {{-- Page content --}}
 @section('content')
-<style>
-    .input-group-addon {
-        width: 30px;
-    }
-</style>
-<!-- Bootstrap Color Picker -->
-<link rel="stylesheet" href="{{ asset('js/plugins/colorpicker/bootstrap-colorpicker.min.css') }}">
-@parent
+    <style>
+        .input-group-addon {
+            width: 30px;
+        }
+    </style>
+
+    @parent
 @stop
 
 @section('inputFields')
@@ -50,8 +49,14 @@
 @section('moar_scripts')
     <!-- bootstrap color picker -->
     <script nonce="{{ csrf_token() }}">
-        //color picker with addon
-        $(".color").colorpicker();
+
+        $(function() {
+            $('.color').colorpicker({
+                color: `{{ old('color', $item->color) ?: '#AA3399' }}`,
+                format: 'hex'
+            });
+        });
+
     </script>
 
 @stop

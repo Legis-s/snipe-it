@@ -7,7 +7,7 @@ namespace App\Presenters;
  */
 class ActionlogPresenter extends Presenter
 {
-    public function admin()
+    public function adminuser()
     {
         if ($user = $this->model->user) {
             if (empty($user->deleted_at)) {
@@ -38,19 +38,88 @@ class ActionlogPresenter extends Presenter
 
     public function icon()
     {
-        $itemicon = 'fas fa-paperclip';
 
-        if ($this->itemType() == 'asset') {
-            return 'fas fa-barcode';
-        } elseif ($this->itemType() == 'accessory') {
-            return 'far fa-keyboard';
-        } elseif ($this->itemType() == 'consumable') {
-            return 'fas fa-tint';
-        } elseif ($this->itemType() == 'license') {
-            return 'far fa-save';
-        } elseif ($this->itemType() == 'component') {
-            return 'fas fa-hdd';
+        // User related icons
+        if ($this->itemType() == 'user') {
+
+            if ($this->action_type == '2fa reset') {
+                return 'fa-solid fa-mobile-screen';
+            }
+
+            if ($this->action_type == 'create') {
+                return 'fa-solid fa-user-plus';
+            }
+
+            if ($this->action_type == 'merged') {
+                return 'fa-solid fa-people-arrows';
+            }
+
+            if ($this->action_type == 'delete') {
+                return 'fa-solid fa-user-minus';
+            }
+
+            if ($this->action_type == 'delete') {
+                return 'fa-solid fa-user-minus';
+            }
+
+            if ($this->action_type == 'update') {
+                return 'fa-solid fa-user-pen';
+            }
+
+             return 'fa-solid fa-user';
         }
+
+        // Everything else
+        if ($this->action_type == 'create') {
+            return 'fa-solid fa-plus';
+        }
+
+        if ($this->action_type == 'delete') {
+            return 'fa-solid fa-trash';
+        }
+
+        if ($this->action_type == 'update') {
+            return 'fa-solid fa-pen';
+        }
+
+        if ($this->action_type == 'restore') {
+            return 'fa-solid fa-trash-arrow-up';
+        }
+
+        if ($this->action_type == 'upload') {
+            return 'fas fa-paperclip';
+        }
+
+        if ($this->action_type == 'checkout') {
+            return 'fa-solid fa-rotate-left';
+        }
+
+        if ($this->action_type == 'checkin from') {
+            return 'fa-solid fa-rotate-right';
+        }
+
+        if ($this->action_type == 'note_added') {
+            return 'fas fa-sticky-note';
+        }
+
+        if ($this->action_type == 'audit') {
+            return 'fas fa-clipboard-check';
+        }
+
+        if ($this->action_type=='sell') {
+            return 'fa-solid fa-ruble-sign';
+        }
+
+        if ($this->action_type=='rented') {
+            return 'fa-solid fa-right-left';
+        }
+
+        if ($this->action_type=='tag') {
+            return 'fa-solid fa-tag';
+        }
+
+
+        return 'fa-solid fa-rotate-right';
 
     }
 

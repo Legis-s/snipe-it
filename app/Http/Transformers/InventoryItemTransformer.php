@@ -1,11 +1,9 @@
 <?php
 namespace App\Http\Transformers;
 
+use App\Helpers\Helper;
 use App\Models\InventoryItem;
 use Illuminate\Database\Eloquent\Collection;
-use phpDocumentor\Reflection\Types\Integer;
-use Gate;
-use App\Helpers\Helper;
 
 class InventoryItemTransformer
 {

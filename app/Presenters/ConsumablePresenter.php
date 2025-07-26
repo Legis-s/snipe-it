@@ -2,14 +2,11 @@
 
 namespace App\Presenters;
 
-
 /**
  * Class ComponentPresenter
- * @package App\Presenters
  */
 class ConsumablePresenter extends Presenter
 {
-
     /**
      * Json Column Layout for bootstrap table
      * @return string
@@ -30,120 +27,137 @@ class ConsumablePresenter extends Presenter
                 "visible" => false
             ],
             [
-                "field" => "company",
-                "searchable" => true,
-                "sortable" => true,
-                "switchable" => true,
-                "title" => trans('general.company'),
-                "visible" => false,
-                "formatter" => 'companiesLinkObjFormatter',
+                'field' => 'company',
+                'searchable' => true,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('general.company'),
+                'visible' => false,
+                'formatter' => 'companiesLinkObjFormatter',
             ],
             [
-                "field" => "name",
-                "searchable" => true,
-                "sortable" => true,
-                "title" => trans('general.name'),
-                "visible" => true,
-                "formatter" => 'consumablesLinkFormatter',
+                'field' => 'name',
+                'searchable' => true,
+                'sortable' => true,
+                'switchable' => false,
+                'title' => trans('general.name'),
+                'visible' => true,
+                'formatter' => 'consumablesLinkFormatter',
             ],
             [
-                "field" => "image",
-                "searchable" => false,
-                "sortable" => true,
-                "switchable" => true,
-                "title" => trans('general.image'),
-                "visible" => false,
-                "formatter" => 'imageFormatter',
+                'field' => 'image',
+                'searchable' => false,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('general.image'),
+                'visible' => false,
+                'formatter' => 'imageFormatter',
             ], [
-                "field" => "category",
-                "searchable" => true,
-                "sortable" => true,
-                "title" => trans('general.category'),
-                "formatter" => "categoriesLinkObjFormatter"
+                'field' => 'category',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('general.category'),
+                'formatter' => 'categoriesLinkObjFormatter',
+            ], [
+                'field' => 'model_number',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('general.model_no'),
+            ], [
+                'field' => 'item_no',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('admin/consumables/general.item_no'),
+            ], [
+                'field' => 'qty',
+                'searchable' => false,
+                'sortable' => true,
+                'title' => trans('admin/components/general.total'),
+                'visible' => true,
+                'class' => 'text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
+            ], [
+                'field' => 'remaining',
+                'searchable' => false,
+                'sortable' => true,
+                'title' => trans('admin/components/general.remaining'),
+                'visible' => true,
+                'class' => 'text-right text-padding-number-cell',
+                'footerFormatter' => 'qtySumFormatter',
+            ], [
+                'field' => 'min_amt',
+                'searchable' => false,
+                'sortable' => true,
+                'title' => trans('general.min_amt'),
+                'visible' => true,
+                'formatter' => 'minAmtFormatter',
+                'class' => 'text-right text-padding-number-cell',
+            ], [
+                'field' => 'location',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('general.location'),
+                'formatter' => 'locationsLinkObjFormatter',
+            ], [
+                'field' => 'manufacturer',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('general.manufacturer'),
+                'visible' => false,
+                'formatter' => 'manufacturersLinkObjFormatter',
+            ], [
+                'field' => 'purchase_cost',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('general.purchase_cost'),
+                'visible' => true,
+                'footerFormatter' => 'sumFormatterQuantity',
+                'class' => 'text-right text-padding-number-cell',
+            ], [
+                'field' => 'notes',
+                'searchable' => true,
+                'sortable' => true,
+                'visible' => false,
+                'title' => trans('general.notes'),
+                'formatter' => 'notesFormatter',
+            ], [
+                'field' => 'created_by',
+                'searchable' => false,
+                'sortable' => true,
+                'title' => trans('general.created_by'),
+                'visible' => false,
+                'formatter' => 'usersLinkObjFormatter',
             ],[
-                "field" => "model_number",
-                "searchable" => true,
-                "sortable" => true,
-                "title" => trans('general.model_no'),
-            ],[
-                "field" => "item_no",
-                "searchable" => true,
-                "sortable" => true,
-                "title" => trans('admin/consumables/general.item_no')
+                'field' => 'created_at',
+                'searchable' => false,
+                'sortable' => true,
+                'visible' => false,
+                'title' => trans('general.created_at'),
+                'formatter' => 'dateDisplayFormatter',
             ], [
-                "field" => "qty",
-                "searchable" => false,
-                "sortable" => false,
-                "title" => trans('admin/components/general.total'),
-                "visible" => true,
+                'field' => 'updated_at',
+                'searchable' => false,
+                'sortable' => true,
+                'visible' => false,
+                'title' => trans('general.updated_at'),
+                'formatter' => 'dateDisplayFormatter',
             ], [
-                "field" => "remaining",
-                "searchable" => false,
-                "sortable" => false,
-                "title" => trans('admin/components/general.remaining'),
-                "visible" => true,
+                'field' => 'change',
+                'searchable' => false,
+                'sortable' => false,
+                'visible' => true,
+                'title' => trans('general.change'),
+                'formatter' => 'consumablesCustomInOutFormatter',
             ], [
-                "field" => "min_amt",
-                "searchable" => false,
-                "sortable" => false,
-                "title" => trans('general.min_amt'),
-                "visible" => true,
-            ],  [
-                "field" => "location",
-                "searchable" => true,
-                "sortable" => true,
-                "title" => trans('general.location'),
-                "formatter" => "locationsLinkObjFormatter"
-            ], [
-                "field" => "manufacturer",
-                "searchable" => true,
-                "sortable" => true,
-                "title" => trans('general.manufacturer'),
-                "visible" => false,
-                "formatter" => "manufacturersLinkObjFormatter"
-            ], [
-                "field" => "purchase",
-                "searchable" => false,
-                "sortable" => true,
-                "switchable" => true,
-                "title" => "Закупка",
-                "formatter" => "purchasesLinkObjFormatter"
-            ], [
-                "field" => "order_number",
-                "searchable" => true,
-                "sortable" => true,
-                "title" => trans('general.order_number'),
-                "visible" => true,
-            ],[
-                "field" => "purchase_date",
-                "searchable" => true,
-                "sortable" => true,
-                "title" => trans('general.purchase_date'),
-                "visible" => true,
-                "formatter" => "dateDisplayFormatter",
-            ],[
-                "field" => "purchase_cost",
-                "searchable" => true,
-                "sortable" => true,
-                "title" => trans('general.purchase_cost'),
-                "visible" => true,
-                "footerFormatter" => 'sumFormatter',
-            ],[
-                "field" => "change",
-                "searchable" => false,
-                "sortable" => false,
-                "visible" => true,
-                "title" =>"Выдать",
-                "formatter" => "consumablesCustomInOutFormatter",
-            ], [
-                "field" => "actions",
-                "searchable" => false,
-                "sortable" => false,
-                "switchable" => false,
-                "title" => trans('table.actions'),
-                "visible" => true,
-                "formatter" => "consumablesActionsFormatter",
-            ]
+                'field' => 'actions',
+                'searchable' => false,
+                'sortable' => false,
+                'switchable' => false,
+                'title' => trans('table.actions'),
+                'visible' => true,
+                'formatter' => 'consumablesActionsFormatter',
+                'printIgnore' => true,
+            ],
         ];
 
         return json_encode($layout);
@@ -167,5 +181,8 @@ class ConsumablePresenter extends Presenter
         return (string) link_to_route('consumables.show', e($this->name), $this->id);
     }
 
-
+    public function fullName()
+    {
+        return "[" . $this->numRemaining() ."] " . $this->name;
+    }
 }

@@ -8,8 +8,12 @@ use App\Http\Controllers\CheckInOutRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AssetCheckoutRequest;
 use App\Models\Asset;
+use App\Models\Deal;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
+use \Illuminate\Contracts\View\View;
+use \Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Validator;
 
 class AssetCheckoutController extends Controller
 {
@@ -22,23 +26,35 @@ class AssetCheckoutController extends Controller
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @param int $assetId
      * @since [v1.0]
-     * @return View
+     * @return \Illuminate\Contracts\View\View
      */
-    public function create($assetId)
+    public function create(Asset $asset) : View | RedirectResponse
     {
-        // Check if the asset exists
-        if (is_null($asset = Asset::find(e($assetId)))) {
-            return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));
-        }
 
         $this->authorize('checkout', $asset);
 
-        if ($asset->availableForCheckout()) {
-            return view('hardware/checkout', compact('asset'))
-                ->with('statusLabel_list', Helper::deployableStatusLabelList());
+        if (!$asset->model) {
+            return redirect()->route('hardware.show', $asset)
+                ->with('error', trans('admin/hardware/general.model_invalid_fix'));
         }
 
-        return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.checkout.not_available'));
+        // Invoke the validation to see if the audit will complete successfully
+        $asset->setRules($asset->getRules() + $asset->customFieldValidationRules());
+
+        if ($asset->isInvalid()) {
+            return redirect()->route('hardware.edit', $asset)->withErrors($asset->getErrors());
+        }
+
+        
+        if ($asset->availableForCheckout()) {
+            return view('hardware/checkout', compact('asset'))
+                ->with('statusLabel_list', Helper::deployableStatusLabelList())
+                ->with('table_name', 'Assets')
+                ->with('item', $asset);
+        }
+
+        return redirect()->route('hardware.index')
+            ->with('error', trans('admin/hardware/message.checkout.not_available'));
     }
 
     /**
@@ -46,11 +62,9 @@ class AssetCheckoutController extends Controller
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @param AssetCheckoutRequest $request
-     * @param int $assetId
-     * @return Redirect
      * @since [v1.0]
      */
-    public function store(AssetCheckoutRequest $request, $assetId)
+    public function store(AssetCheckoutRequest $request, $assetId) : RedirectResponse
     {
         try {
             // Check if the asset exists
@@ -60,7 +74,12 @@ class AssetCheckoutController extends Controller
                 return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.checkout.not_available'));
             }
             $this->authorize('checkout', $asset);
-            $admin = Auth::user();
+
+            if (!$asset->model) {
+                return redirect()->route('hardware.show', $asset)->with('error', trans('admin/hardware/general.model_invalid_fix'));
+            }
+
+            $admin = auth()->user();
 
             $target = $this->determineCheckoutTarget();
 
@@ -75,18 +94,27 @@ class AssetCheckoutController extends Controller
             if ($request->filled('expected_checkin')) {
                 $expected_checkin = $request->get('expected_checkin');
             }
-            $depreciable_cost = null;
-            if ($request->filled('new_depreciable_cost')) {
-                $depreciable_cost = $request->get('new_depreciable_cost');
+
+            if ($request->filled('purchase_cost')) {
+                $asset->purchase_cost = $request->get('purchase_cost');
             }
-            $quality = null;
+
+            if ($request->filled('new_depreciable_cost')) {
+                $asset->depreciable_cost =$request->get('new_depreciable_cost');
+            }
+
             if ($request->filled('quality')) {
                 $quality =intval( $request->get('quality'));
+                if ($quality == 5) {
+                    $quality = 4;
+                }
+                $asset->quality = $quality;
             }
 
             if ($request->filled('status_id')) {
                 $asset->status_id = $request->get('status_id');
             }
+
 
             if(!empty($asset->licenseseats->all())){
                 if(request('checkout_to_type') == 'user') {
@@ -97,12 +125,42 @@ class AssetCheckoutController extends Controller
                 }
             }
 
-            if ($asset->checkOut($target, $admin, $checkout_at, $expected_checkin, e($request->get('note')), $request->get('name'), $location = null, $quality, $depreciable_cost, null)) {
-                return redirect()->route('hardware.index')->with('success', trans('admin/hardware/message.checkout.success'));
+            // Add any custom fields that should be included in the checkout
+            $asset->customFieldsForCheckinCheckout('display_checkout');
+
+            $settings = \App\Models\Setting::getSettings();
+
+            // We have to check whether $target->company_id is null here since locations don't have a company yet
+            if (($settings->full_multiple_companies_support) && ((!is_null($target->company_id)) &&  (!is_null($asset->company_id)))) {
+                if ($target->company_id != $asset->company_id){
+                    return redirect()->route('hardware.checkout.create', $asset)->with('error', trans('general.error_user_company'));
+                }
             }
 
-            return redirect()->to("hardware/$assetId/checkout")->with('error', trans('admin/hardware/message.checkout.error').$asset->getErrors());
+            session()->put(['redirect_option' => $request->get('redirect_option'), 'checkout_to_type' => $request->get('checkout_to_type')]);
 
+            if (is_a($target, Deal::class, true)) {
+                $asset->location_id = null;
+                $asset->rtd_location_id = null;
+                if ($request->filled('rent') && $request->get('rent')) {
+                    if ($asset->rent($target, $admin, $checkout_at, $request->get('note'), $request->get('name'))) {
+                        return Helper::getRedirectOption($request, $asset->id, 'Assets')
+                            ->with('success', trans('admin/hardware/message.rent.success'));
+                    }
+                }else{
+                    if ($asset->sell($target, $admin, $checkout_at, $request->get('note'), $request->get('name'))) {
+                        return Helper::getRedirectOption($request, $asset->id, 'Assets')
+                            ->with('success', trans('admin/hardware/message.sell.success'));
+                    }
+                }
+            }else{
+                if ($asset->checkOut($target, $admin, $checkout_at, $expected_checkin, $request->get('note'), $request->get('name'))) {
+                    return Helper::getRedirectOption($request, $asset->id, 'Assets')
+                        ->with('success', trans('admin/hardware/message.checkout.success'));
+                }
+            }
+            // Redirect to the asset management page with error
+            return redirect()->route("hardware.checkout.create", $asset)->with('error', trans('admin/hardware/message.checkout.error').$asset->getErrors());
         } catch (ModelNotFoundException $e) {
             return redirect()->back()->with('error', trans('admin/hardware/message.checkout.error'))->withErrors($asset->getErrors());
         } catch (CheckoutNotAllowed $e) {

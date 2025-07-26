@@ -1,14 +1,9 @@
 <?php
 namespace App\Http\Transformers;
 
-use App\Http\Transformers\InventoryItemTransformer;
-use App\Http\Transformers\LocationsTransformer;
-use App\Http\Transformers\SuppliersTransformer;
 use App\Models\Purchase;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
-use phpDocumentor\Reflection\Types\Integer;
-use Gate;
+use Illuminate\Support\Facades\Gate;
 use App\Helpers\Helper;
 
 class PurchasesTransformer
@@ -47,14 +42,16 @@ class PurchasesTransformer
             ] : null,
             'legal_person' => ($purchase->legal_person) ? e($purchase->legal_person->name) : null,
             'invoice_type' => ($purchase->invoice_type) ? e($purchase->invoice_type->name) : null,
-
             'assets_count' => (int)$purchase->assets_count,
             'consumables_count_real' => (int)$purchase->consumables_count,
             'assets_count_ok' => (int)$purchase->assets_count_ok,
             'consumables_count' => (int)$consumables_count,
             'consumables_check_count' => (int)$check_count,
             'comment' => ($purchase->comment) ? e($purchase->comment) : null,
-            'user' => ($purchase->user) ? (new UsersTransformer)->transformUser($purchase->user) : null,
+            'created_by' => ($purchase->adminuser) ? [
+                'id' => (int) $purchase->adminuser->id,
+                'name'=> e($purchase->adminuser->present()->fullName()),
+            ] : null,
             'created_at' => Helper::getFormattedDateObject($purchase->created_at, 'datetime'),
             'updated_at' => Helper::getFormattedDateObject($purchase->updated_at, 'datetime'),
             'bitrix_task_id' => (int)$purchase->bitrix_task_id,
@@ -62,6 +59,7 @@ class PurchasesTransformer
 
         $permissions_array['available_actions'] = [
             'clone' => (Gate::allows('create', Purchase::class) && ($purchase->deleted_at == '')),
+            'delete' => (Gate::allows('superadmin') && ($purchase->status ==  $purchase::REJECTED)),
         ];
         if ($full) {
             $array += ['consumables_json' => ($purchase->consumables_json) ? $consumables : null];

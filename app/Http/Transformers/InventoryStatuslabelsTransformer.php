@@ -27,6 +27,10 @@ class InventoryStatuslabelsTransformer
             'success' => e($statuslabel->success),
             'color' => ($statuslabel->color) ? e($statuslabel->color) : null,
             'notes' => e($statuslabel->notes),
+            'created_by' => ($statuslabel->adminuser) ? [
+                'id' => (int) $statuslabel->adminuser->id,
+                'name'=> e($statuslabel->adminuser->present()->fullName()),
+            ] : null,
             'created_at' => Helper::getFormattedDateObject($statuslabel->created_at, 'datetime'),
             'updated_at' => Helper::getFormattedDateObject($statuslabel->updated_at, 'datetime'),
         ];

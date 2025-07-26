@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Manufacturer;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -12,17 +13,24 @@ class ManufacturerSeeder extends Seeder
     public function run()
     {
         Manufacturer::truncate();
-        Manufacturer::factory()->count(1)->apple()->create(); // 1
-        Manufacturer::factory()->count(1)->microsoft()->create(); // 2
-        Manufacturer::factory()->count(1)->dell()->create(); // 3
-        Manufacturer::factory()->count(1)->asus()->create(); // 4
-        Manufacturer::factory()->count(1)->hp()->create(); // 5
-        Manufacturer::factory()->count(1)->lenovo()->create(); // 6
-        Manufacturer::factory()->count(1)->lg()->create(); // 7
-        Manufacturer::factory()->count(1)->polycom()->create(); // 8
-        Manufacturer::factory()->count(1)->adobe()->create(); // 9
-        Manufacturer::factory()->count(1)->avery()->create(); // 10
-        Manufacturer::factory()->count(1)->crucial()->create(); // 10
+
+        $admin = User::where('permissions->superuser', '1')->first() ?? User::factory()->firstAdmin()->create();
+
+        Manufacturer::factory()->count(1)->apple()->create(['created_by' => $admin->id]);
+        Manufacturer::factory()->count(1)->microsoft()->create(['created_by' => $admin->id]);
+        Manufacturer::factory()->count(1)->dell()->create(['created_by' => $admin->id]);
+        Manufacturer::factory()->count(1)->asus()->create(['created_by' => $admin->id]);
+        Manufacturer::factory()->count(1)->hp()->create(['created_by' => $admin->id]);
+        Manufacturer::factory()->count(1)->lenovo()->create(['created_by' => $admin->id]);
+        Manufacturer::factory()->count(1)->lg()->create(['created_by' => $admin->id]);
+        Manufacturer::factory()->count(1)->polycom()->create(['created_by' => $admin->id]);
+        Manufacturer::factory()->count(1)->adobe()->create(['created_by' => $admin->id]);
+        Manufacturer::factory()->count(1)->avery()->create(['created_by' => $admin->id]);
+        Manufacturer::factory()->count(1)->crucial()->create(['created_by' => $admin->id]);
+        Manufacturer::factory()->count(1)->samsung()->create(['created_by' => $admin->id]);
+        Manufacturer::factory()->count(1)->google()->create(['created_by' => $admin->id]);
+        Manufacturer::factory()->count(1)->huawei()->create(['created_by' => $admin->id]);
+        Manufacturer::factory()->count(1)->sony()->create(['created_by' => $admin->id]);
 
         $src = public_path('/img/demo/manufacturers/');
         $dst = 'manufacturers'.'/';

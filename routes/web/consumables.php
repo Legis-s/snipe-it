@@ -31,34 +31,10 @@ Route::group(['prefix' => 'consumables', 'middleware' => ['auth']], function () 
         [Consumables\ConsumablesFilesController::class, 'show']
     )->name('show.consumablefile');
 
-
-    /**
-    |--------------------------------------------------------------------------
-    | BEGIN CUSTOM ROUTES
-    |--------------------------------------------------------------------------
-     */
-
-    Route::get(
-        'ncd',
-        [Consumables\ConsumablesController::class, 'noclosingdocuments']
-    )->name('consumables.ncd.index');
-
-    Route::get(
-        '{consumableId}/sell',
-        [Consumables\ConsumableSellController::class, 'create']
-    )->name('consumables.sell.show');
-
-    Route::post(
-        '{consumableId}/sell',
-        [Consumables\ConsumableSellController::class, 'store']
-    )->name('consumables.sell.store');
-
-
-    /**
-    |--------------------------------------------------------------------------
-    | END CUSTOM ROUTES
-    |--------------------------------------------------------------------------
-     */
+    Route::get('{consumable}/clone',
+        [Consumables\ConsumablesController::class, 'clone']
+    )->name('consumables.clone.create');
+    
 
 });
 

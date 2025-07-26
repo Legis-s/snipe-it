@@ -8,7 +8,6 @@ use App\Events\AssetCheckedIn;
 use App\Events\AssetCheckedOut;
 use App\Events\CheckoutableCheckedIn;
 use App\Events\CheckoutableCheckedOut;
-use App\Events\CheckoutableForInstall;
 use App\Events\CheckoutableRent;
 use App\Events\CheckoutableSell;
 use App\Events\CheckoutAccepted;
@@ -21,7 +20,10 @@ use App\Events\ItemDeclined;
 use App\Events\LicenseCheckedIn;
 use App\Events\LicenseCheckedOut;
 use App\Models\Actionlog;
+use App\Models\User;
 use App\Models\LicenseSeat;
+use App\Events\UserMerged;
+use Illuminate\Support\Facades\Log;
 
 class LogListener
 {
@@ -34,7 +36,7 @@ class LogListener
      */
     public function onCheckoutableCheckedIn(CheckoutableCheckedIn $event)
     {
-        $event->checkoutable->logCheckin($event->checkedOutTo, $event->note, $event->action_date,$event->changed);
+        $event->checkoutable->logCheckin($event->checkedOutTo, $event->note, $event->action_date, $event->originalValues);
     }
 
     /**
@@ -47,46 +49,34 @@ class LogListener
      */
     public function onCheckoutableCheckedOut(CheckoutableCheckedOut $event)
     {
-        $event->checkoutable->logCheckout($event->note, $event->checkedOutTo, $event->checkoutable->last_checkout,$event->changed);
+        $event->checkoutable->logCheckout($event->note, $event->checkedOutTo, $event->checkoutable->last_checkout, $event->originalValues);
     }
+
 
     /**
      * These onBlah methods are used by the subscribe() method further down in this file.
-     * This one creates an action_logs entry for the checkout
+     * This one creates an action_logs entry for the sell
      *
-     * @param CheckoutableCheckedOut $event
-     * @return void
-     *
-     */
-    public function onCheckoutableForInstall(CheckoutableForInstall $event)
-    {
-        $event->checkoutable->logForInstall($event->note, $event->checkedOutTo, $event->checkoutable->last_checkout,$event->changed);
-    }
-
-    /**
-     * These onBlah methods are used by the subscribe() method further down in this file.
-     * This one creates an action_logs entry for the checkout
-     *
-     * @param CheckoutableCheckedOut $event
+     * @param CheckoutableSell $event
      * @return void
      *
      */
     public function onCheckoutableSell(CheckoutableSell $event)
     {
-        $event->checkoutable->logSell($event->note, $event->checkedOutTo, $event->checkoutable->last_checkout,$event->changed);
+        $event->checkoutable->logSell($event->note, $event->checkedOutTo, $event->checkoutable->last_checkout, $event->originalValues);
     }
 
     /**
      * These onBlah methods are used by the subscribe() method further down in this file.
-     * This one creates an action_logs entry for the checkout
+     * This one creates an action_logs entry for the rent
      *
-     * @param CheckoutableCheckedOut $event
+     * @param CheckoutableRent $event
      * @return void
      *
      */
     public function onCheckoutableRent(CheckoutableRent $event)
     {
-        $event->checkoutable->logRent($event->note, $event->checkedOutTo, $event->checkoutable->last_checkout,$event->changed);
+        $event->checkoutable->logRent($event->note, $event->checkedOutTo, $event->checkoutable->last_checkout, $event->originalValues);
     }
 
 
@@ -97,20 +87,21 @@ class LogListener
     public function onCheckoutAccepted(CheckoutAccepted $event)
     {
 
-        \Log::debug('event passed to the onCheckoutAccepted listener:');
+        Log::debug('event passed to the onCheckoutAccepted listener:');
         $logaction = new Actionlog();
         $logaction->item()->associate($event->acceptance->checkoutable);
         $logaction->target()->associate($event->acceptance->assignedTo);
         $logaction->accept_signature = $event->acceptance->signature_filename;
         $logaction->filename = $event->acceptance->stored_eula_file;
+        $logaction->note = $event->acceptance->note;
         $logaction->action_type = 'accepted';
+        $logaction->action_date = $event->acceptance->accepted_at;
 
         // TODO: log the actual license seat that was checked out
         if ($event->acceptance->checkoutable instanceof LicenseSeat) {
             $logaction->item()->associate($event->acceptance->checkoutable->license);
         }
 
-        \Log::debug('New onCheckoutAccepted Listener fired. logaction: '.print_r($logaction, true));
         $logaction->save();
     }
 
@@ -120,7 +111,9 @@ class LogListener
         $logaction->item()->associate($event->acceptance->checkoutable);
         $logaction->target()->associate($event->acceptance->assignedTo);
         $logaction->accept_signature = $event->acceptance->signature_filename;
+        $logaction->note = $event->acceptance->note;
         $logaction->action_type = 'declined';
+        $logaction->action_date = $event->acceptance->declined_at;
 
         // TODO: log the actual license seat that was checked out
         if ($event->acceptance->checkoutable instanceof LicenseSeat) {
@@ -128,6 +121,43 @@ class LogListener
         }
 
         $logaction->save();
+    }
+
+
+    public function onUserMerged(UserMerged $event)
+    {
+
+        $to_from_array = [
+            'to_id' => $event->merged_to->id,
+            'to_username' => $event->merged_to->username,
+            'from_id' => $event->merged_from->id,
+            'from_username' => $event->merged_from->username,
+        ];
+
+        // Add a record to the users being merged FROM
+        Log::debug('Users merged: '.$event->merged_from->id .' ('.$event->merged_from->username.') merged into '. $event->merged_to->id. ' ('.$event->merged_to->username.')');
+        $logaction = new Actionlog();
+        $logaction->item_id = $event->merged_from->id;
+        $logaction->item_type = User::class;
+        $logaction->target_id = $event->merged_to->id;
+        $logaction->target_type = User::class;
+        $logaction->action_type = 'merged';
+        $logaction->note = trans('general.merged_log_this_user_from', $to_from_array);
+        $logaction->created_by = $event->admin->id ?? null;
+        $logaction->save();
+
+        // Add a record to the users being merged TO
+        $logaction = new Actionlog();
+        $logaction->target_id = $event->merged_from->id;
+        $logaction->target_type = User::class;
+        $logaction->item_id = $event->merged_to->id;
+        $logaction->item_type = User::class;
+        $logaction->action_type = 'merged';
+        $logaction->note = trans('general.merged_log_this_user_into', $to_from_array);
+        $logaction->created_by = $event->admin->id ?? null;
+        $logaction->save();
+
+
     }
 
     /**
@@ -144,7 +174,8 @@ class LogListener
             'CheckoutDeclined',
             'CheckoutableSell',
             'CheckoutableRent',
-            'CheckoutableForInstall'
+            'UserMerged',
+            'NoteAdded',
         ];
 
         foreach ($list as $event) {
@@ -154,4 +185,6 @@ class LogListener
             );
         }
     }
+
+
 }

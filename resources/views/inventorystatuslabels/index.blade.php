@@ -2,14 +2,14 @@
 
 {{-- Page title --}}
 @section('title')
-Статусы инвентаризаций
+{{ trans('admin/inventorystatuslabels/table.title') }}
 @parent
 @stop
 
 @section('header_right')
     @can('create', \App\Models\Statuslabel::class)
         <a href="{{ route('inventorystatuslabels.create') }}" class="btn btn-primary pull-right">
-{{ trans('general.create') }}</a>
+        {{ trans('general.create') }}</a>
     @endcan
 @stop
 {{-- Page content --}}
@@ -22,35 +22,22 @@
         <div class="table-responsive">
 
             <table
-                    data-cookie-id-table="statuslabelsTable"
-                    data-pagination="true"
-                    data-id-table="statuslabelsTable"
-                    data-search="true"
+                    data-columns="{{ \App\Presenters\InventoryStatusLabelPresenter::dataTableLayout() }}"
+                    data-cookie-id-table="inventoryStatuslabelsTable"
+                    data-id-table="inventoryStatuslabelsTable"
                     data-show-footer="false"
                     data-side-pagination="server"
-                    data-show-columns="true"
-                    data-show-export="true"
-                    data-show-refresh="true"
                     data-sort-order="asc"
                     data-sort-name="name"
-                    id="statuslabelsTable"
+                    id="inventoryStatuslabelsTable"
                     class="table table-striped snipe-table"
                     data-url="{{ route('api.inventorystatuslabels.index') }}"
                     data-export-options='{
-                "fileName": "export-statuslabels-{{ date('Y-m-d') }}",
+                "fileName": "export-inventorystatuslabels-{{ date('Y-m-d') }}",
                 "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
                 }'>
-            <thead>
-              <tr>
-                <th data-sortable="true" data-field="id" data-visible="false">{{ trans('general.id') }}</th>
-                <th data-sortable="true" data-field="name">{{ trans('admin/statuslabels/table.name') }}</th>
+            </table>
 
-                <th data-sortable="false" data-field="type" data-formatter="statusLabelSuccessFormatter">{{ trans('admin/statuslabels/table.status_type') }}</th>
-                <th data-sortable="true" data-field="color" data-formatter="colorSqFormatter">{{ trans('admin/statuslabels/table.color') }}</th>
-              <th data-formatter="inventorystatuslabelsActionsFormatter" data-searchable="false" data-sortable="false" data-field="actions">{{ trans('table.actions') }}</th>
-              </tr>
-            </thead>
-          </table>
         </div>
       </div>
     </div>
@@ -70,10 +57,17 @@
 
       function statusLabelSuccessFormatter (row, value) {
           if (value.success=="1"){
-              return "Успешно"
+              text_color = 'green';
+              icon_style = 'fa-circle';
+              trans  = 'Успешно';
           }else{
-              return "Не успешно"
+              text_color = 'red';
+              icon_style = 'fa-circle';
+              trans  ='Не успешно';
           }
+          var typename_lower = trans;
+          var typename = typename_lower.charAt(0).toUpperCase() + typename_lower.slice(1);
+          return '<i class="fa ' + icon_style + ' text-' + text_color + '"></i> ' + typename;
       }
   </script>
 @stop

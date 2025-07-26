@@ -14,42 +14,28 @@
       <div class="box-body">
         <div class="table-responsive">
           <div id="toolbar">
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" value="" id="only_assets_checkbox">
-              <label class="form-check-label" for="only_assets_checkbox">
-                Активы без з/д
-              </label>
-              &nbsp;
-              <input class="form-check-input" type="checkbox" value="" id="only_consumables_checkbox">
-              <label class="form-check-label" for="only_consumables_checkbox">
-                Расходники без з/д
-              </label>
-              &nbsp;
-              <input class="form-check-input" type="checkbox" value="" id="sum_checkbox">
-              <label class="form-check-label" for="sum_checkbox">
-                Превышение суммы
-              </label>
-            </div>
+            <label class="form-control">
+              <input type="checkbox" value="" id="only_assets_checkbox">Активы без з/д
+            </label>
+            <label class="form-control">
+              <input type="checkbox" value="" id="only_consumables_checkbox">Расходники без з/д
+            </label>
+            <label class="form-control">
+              <input type="checkbox" value="" id="sum_checkbox">Превышение суммы
+            </label>
           </div>
           <table
                   data-columns="{{ \App\Presenters\ContractPresenter::dataTableLayout() }}"
                   data-cookie-id-table="contractTable"
-                  data-pagination="true"
                   data-id-table="contractTable"
-                  data-search="true"
-                  data-toolbar="#toolbar"
-                  data-show-footer="true"
                   data-side-pagination="server"
-                  data-show-columns="true"
-                  data-show-export="true"
-                  data-show-refresh="true"
                   data-sort-order="asc"
                   data-query-params="contractQueryParams"
                   id="contractTable"
                   class="table table-striped snipe-table"
                   data-url="{{ route('api.contracts.index') }}"
                   data-export-options='{
-              "fileName": "export-contracts-{{ date('Y-m-d') }}",
+              "fileName": "export-locations-{{ date('Y-m-d') }}",
               "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
               }'>
           </table>

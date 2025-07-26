@@ -7,6 +7,8 @@ use App\Http\Transformers\ImportsTransformer;
 use App\Models\Import;
 use App\Models\Inventory;
 use App\Models\Location;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -23,17 +25,14 @@ class InventoriesController extends Controller
      * Returns a view that invokes the ajax tables which actually contains
      * the content for the locations detail page.
      *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @param int $inventoryId
-     * @since [v1.0]
-     * @return \Illuminate\Contracts\View\View
+     * @param int $id
      */
-    public function show($inventoryId = null)
+    public function show(Inventory $inventory): View | RedirectResponse
     {
         // Grab all the locations
         $this->authorize('view', Location::class);
 
-        $inventory = Inventory::find($inventoryId);
+        $inventory = Inventory::find($inventory->id);
 
         if (isset($inventory->id)) {
             return view('inventories/view', compact('inventory'));
@@ -58,8 +57,6 @@ class InventoriesController extends Controller
 
             $inventory->inventory_items()->forceDelete();
             $inventory->forceDelete();
-
-//            $inventory->forceDelete();
         }
 
         return redirect()->to(route('inventories.index'))->with('success', trans('admin/locations/message.delete.success'));

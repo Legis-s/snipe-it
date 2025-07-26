@@ -100,18 +100,8 @@ class PurchasePresenter extends Presenter
                 "title" => "Доставка",
                 "visible" => true,
                 "align" => 'right',
-                "formatter" => 'deliveryСostFormatter',
-            ]
-            ,[
-                "field" => "user",
-                "searchable" => true,
-                "sortable" => true,
-                "switchable" => true,
-                "title" => "Добавил",
-                "visible" => true,
-                "formatter" => 'usersLinkObjFormatter',
-            ],
-            [
+                "formatter" => 'priceFormatter',
+            ], [
                 "field" => "status",
                 "searchable" => true,
                 "sortable" => true,
@@ -126,19 +116,26 @@ class PurchasePresenter extends Presenter
                 "switchable" => true,
                 "title" => "Комментарий",
                 "visible" => true,
-            ],[
-                "field" => "updated_at",
-                "searchable" => false,
-                "sortable" => true,
-                "visible" => false,
-                "title" => trans('general.updated_at'),
-                "formatter" => "dateDisplayFormatter"
+            ], [
+                'field' => 'created_by',
+                'searchable' => false,
+                'sortable' => true,
+                'title' => trans('general.created_by'),
+                'visible' => false,
+                'formatter' => 'usersLinkObjFormatter',
             ],[
                 "field" => "created_at",
                 "searchable" => false,
                 "sortable" => true,
                 "visible" => false,
                 "title" => trans('general.created_at'),
+                "formatter" => "dateDisplayFormatter"
+            ],[
+                "field" => "updated_at",
+                "searchable" => false,
+                "sortable" => true,
+                "visible" => false,
+                "title" => trans('general.updated_at'),
                 "formatter" => "dateDisplayFormatter"
             ], [
                 "field" => "actions",

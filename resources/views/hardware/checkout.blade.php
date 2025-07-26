@@ -29,24 +29,44 @@
         <!-- left column -->
         <div class="col-md-7">
             <div class="box box-default">
-                <form class="form-horizontal" method="post" action="" autocomplete="off" id="formId">
+                <form class="form-horizontal" method="post" action="" autocomplete="off">
                     <div class="box-header with-border">
-                        <h2 class="box-title"> {{ trans('admin/hardware/form.tag') }}: <b style="font-size: 120%"> {{ $asset->asset_tag }}</b></h2>
+                        <h2 class="box-title"> {{ trans('admin/hardware/form.tag') }} {{ $asset->asset_tag }}</h2>
                     </div>
                     <div class="box-body">
-                    {{csrf_field()}}
+                        {{csrf_field()}}
+                        @if ($asset->company && $asset->company->name)
+                            <div class="form-group">
+                                <label for="company" class="col-md-3 control-label">
+                                    {{ trans('general.company') }}
+                                </label>
+                                <div class="col-md-8">
+                                    <p class="form-control-static" style="padding-top: 7px;">
+                                        {{ $asset->company->name }}
+                                    </p>
+                                </div>
+                            </div>
+                        @endif
+
                         <!-- AssetModel name -->
                         <div class="form-group">
-                            {{ Form::label('model', trans('admin/hardware/form.model'), array('class' => 'col-md-3 control-label')) }}
+                            <label for="model" class="col-md-3 control-label">
+                                {{ trans('admin/hardware/form.model') }}
+                            </label>
                             <div class="col-md-8">
-                                <p class="form-control-static">
+                                <p class="form-control-static" style="padding-top: 7px;">
                                     @if (($asset->model) && ($asset->model->name))
                                         {{ $asset->model->name }}
-
                                     @else
                                         <span class="text-danger text-bold">
-                  <i class="fas fa-exclamation-triangle"></i>This asset's model is invalid!
-                  The asset <a href="{{ route('hardware.edit', $asset->id) }}">should be edited</a> to correct this before attempting to check it in or out.</span>
+                                              <x-icon type="warning" />
+                                              {{ trans('admin/hardware/general.model_invalid')}}
+                                        </span>
+
+                                        {{ trans('admin/hardware/general.model_invalid_fix')}}
+                                        <a href="{{ route('hardware.edit', $asset->id) }}">
+                                            <strong>{{ trans('admin/hardware/general.edit') }}</strong>
+                                        </a>
                                     @endif
                                 </p>
                             </div>
@@ -54,87 +74,131 @@
 
                         <!-- Asset Name -->
                         <div class="form-group {{ $errors->has('name') ? 'error' : '' }}">
-                            {{ Form::label('name', trans('admin/hardware/form.name'), array('class' => 'col-md-3 control-label')) }}
+                            <label for="name" class="col-md-3 control-label">
+                                {{ trans('admin/hardware/form.name') }}
+                            </label>
+
                             <div class="col-md-8">
-                                <input class="form-control" type="text" name="name" id="name" value="{{ old('name', $asset->name) }}" tabindex="1">
+                                <input class="form-control" type="text" name="name" id="name"
+                                       value="{{ old('name', $asset->name) }}" tabindex="1">
                                 {!! $errors->first('name', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                             </div>
                         </div>
 
-
                         <!-- Status -->
                         <div class="form-group {{ $errors->has('status_id') ? 'error' : '' }}">
-                            {{ Form::label('status_id', trans('admin/hardware/form.status'), array('class' => 'col-md-3 control-label')) }}
+                            <label for="status_id" class="col-md-3 control-label">
+                                {{ trans('admin/hardware/form.status') }}
+                            </label>
                             <div class="col-md-7 required">
-                                {{ Form::select('status_id', $statusLabel_list, $asset->status_id, array('class'=>'select2', 'style'=>'width:100%','', 'aria-label'=>'status_id')) }}
+                                <x-input.select
+                                    name="status_id"
+                                    :options="$statusLabel_list"
+                                    :selected="$asset->status_id"
+                                    style="width: 100%;"
+                                    aria-label="status_id"
+                                />
                                 {!! $errors->first('status_id', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                             </div>
                         </div>
 
-                        @include ('partials.forms.checkout-selector', ['user_select' => 'true','asset_select' => 'true', 'location_select' => 'true'])
+                        @include ('partials.forms.checkout-selector', ['user_select' => 'true','asset_select' => 'true', 'location_select' => 'true', 'deal_select' => 'true'])
 
-                        @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'assigned_location', 'required'=>'true','hide_new' => 'true'])
-
-                        @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.user'), 'fieldname' => 'assigned_user','unselect' => 'true', 'style' => 'display:none;', 'required'=>'true','hide_new' => 'true'])
+                        @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.user'), 'fieldname' => 'assigned_user', 'style' => 'display:none;', 'hide_new' => true])
 
                         <!-- We have to pass unselect here so that we don't default to the asset that's being checked out. We want that asset to be pre-selected everywhere else. -->
-                        @include ('partials.forms.edit.asset-select', ['translated_name' => trans('general.asset'), 'fieldname' => 'assigned_asset', 'unselect' => 'true', 'style' => 'display:none;', 'required'=>'true'])
+                        @include ('partials.forms.edit.asset-select', ['translated_name' => trans('general.asset'), 'fieldname' => 'assigned_asset', 'unselect' => 'true', 'style' => 'display:none;'])
 
+                        @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'assigned_location', 'hide_new' => true])
+
+                        @include ('partials.forms.custom.deal-select', ['translated_name' => trans('general.deal'), 'fieldname' => 'assigned_deal', 'style' => 'display:none;'])
+
+                        <div id="rent_box" class="form-group" style="display:none;">
+                            <div class="col-md-9 col-md-offset-3">
+                                <label class="form-control">
+                                    <input type="checkbox" name="rent" {{ old('rent') ? 'checked' : '' }}>
+                                    {{ trans('general.rent') }}
+                                </label>
+                            </div>
+                        </div>
 
                         <!-- Checkout/Checkin Date -->
                         <div class="form-group {{ $errors->has('checkout_at') ? 'error' : '' }}">
-                            {{ Form::label('checkout_at', trans('admin/hardware/form.checkout_date'), array('class' => 'col-md-3 control-label')) }}
+                            <label for="checkout_at" class="col-md-3 control-label">
+                                {{ trans('admin/hardware/form.checkout_date') }}
+                            </label>
                             <div class="col-md-8">
-                                <div class="input-group date col-md-7" data-provide="datepicker" data-date-format="yyyy-mm-dd" data-date-end-date="0d" data-date-clear-btn="true">
-                                    <input type="text" class="form-control" placeholder="{{ trans('general.select_date') }}" name="checkout_at" id="checkout_at" value="{{ old('checkout_at', date('Y-m-d')) }}">
-                                    <span class="input-group-addon"><i class="fas fa-calendar" aria-hidden="true"></i></span>
-                                </div>
+
+                                <x-input.datepicker
+                                        name="checkout_at"
+                                        end_date="0d"
+                                        col_size_class="col-md-7"
+                                        :value="old('expected_checkin', date('Y-m-d'))"
+                                        placeholder="{{ trans('general.select_date') }}"
+                                        required="{{ Helper::checkIfRequired($item, 'checkout_at') }}"
+                                />
                                 {!! $errors->first('checkout_at', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                             </div>
                         </div>
 
-
                         <!-- Expected Checkin Date -->
                         <div class="form-group {{ $errors->has('expected_checkin') ? 'error' : '' }}">
-                            {{ Form::label('expected_checkin', trans('admin/hardware/form.expected_checkin'), array('class' => 'col-md-3 control-label')) }}
+                            <label for="expected_checkin" class="col-md-3 control-label">
+                                {{ trans('admin/hardware/form.expected_checkin') }}
+                            </label>
+
                             <div class="col-md-8">
-                                <div class="input-group date col-md-7" data-provide="datepicker" data-date-format="yyyy-mm-dd" data-date-start-date="0d" data-date-clear-btn="true">
-                                    <input type="text" class="form-control" placeholder="{{ trans('general.select_date') }}" name="expected_checkin" id="expected_checkin" value="{{ old('expected_checkin') }}">
-                                    <span class="input-group-addon"><i class="fas fa-calendar" aria-hidden="true"></i></span>
-                                </div>
+                                <x-input.datepicker
+                                        name="expected_checkin"
+                                        :value="old('expected_checkin', $item->expected_checkin)"
+                                        placeholder="{{ trans('general.select_date') }}"
+                                        required="{{ Helper::checkIfRequired($item, 'expected_checkin') }}"
+                                />
                                 {!! $errors->first('expected_checkin', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                             </div>
                         </div>
 
                         <!-- Note -->
                         <div class="form-group {{ $errors->has('note') ? 'error' : '' }}">
-                            {{ Form::label('note', trans('admin/hardware/form.notes'), array('class' => 'col-md-3 control-label')) }}
+                            <label for="note" class="col-md-3 control-label">
+                                {{ trans('general.notes') }}
+                            </label>
+
                             <div class="col-md-8">
-                                <textarea class="col-md-6 form-control" id="note" name="note">{{ old('note', $asset->note) }}</textarea>
+                                <textarea class="col-md-6 form-control" id="note" @required($snipeSettings->require_checkinout_notes)
+                                name="note">{{ old('note', $asset->note) }}</textarea>
                                 {!! $errors->first('note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                             </div>
                         </div>
+                        
+                        <!-- Custom fields -->
+                        @include("models/custom_fields_form", [
+                                'model' => $asset->model,
+                                'show_custom_fields_type' => 'checkout'
+                        ])
 
-                        @if ($asset->requireAcceptance() || $asset->getEula() || ($snipeSettings->slack_endpoint!=''))
+
+
+                        @if ($asset->requireAcceptance() || $asset->getEula() || ($snipeSettings->webhook_endpoint!=''))
                             <div class="form-group notification-callout">
                                 <div class="col-md-8 col-md-offset-3">
                                     <div class="callout callout-info">
 
                                         @if ($asset->requireAcceptance())
-                                            <i class="far fa-envelope" aria-hidden="true"></i>
+                                            <x-icon type="email" />
                                             {{ trans('admin/categories/general.required_acceptance') }}
                                             <br>
                                         @endif
 
                                         @if ($asset->getEula())
-                                            <i class="far fa-envelope" aria-hidden="true"></i>
+                                            <x-icon type="email" />
                                             {{ trans('admin/categories/general.required_eula') }}
                                             <br>
                                         @endif
 
-                                        @if ($snipeSettings->slack_endpoint!='')
+                                        @if ($snipeSettings->webhook_endpoint!='')
                                             <i class="fab fa-slack" aria-hidden="true"></i>
-                                            {{ trans('general.slack_msg_note')}}
+                                            {{ trans('general.webhook_msg_note') }}
                                         @endif
                                     </div>
                                 </div>
@@ -142,80 +206,23 @@
                         @endif
 
 
-                        <!-- Purchase Cost -->
+                        <!-- Stars -->
                         <div class="form-group {{ $errors->has('quality') ? ' has-error' : '' }}">
                             <label for="quality" class="col-md-3 control-label">Состояние</label>
                             <div class="col-md-9">
                                 <div class="input-group col-md-4" style="padding-left: 0px;">
                                     <select class="star-rating" name="quality" id="quality">
-                                        @if ($quality = Request::old('quality', (isset($asset)) ? $asset->quality : ''))
-                                            @if ($quality == 1)
-                                                <option value="">Оцените состояние</option>
-                                                <option value="5">Новое запакованное</option>
-                                                <option value="4">В отличном состоянии, но использовалось</option>
-                                                <option value="3">Рабочее, но с небольшими следами повреждений,
-                                                    небольшим загрязнением
-                                                </option>
-                                                <option value="2">Частично рабочее или сильно загрязненное</option>
-                                                <option selected value="1">Полностью не рабочее</option>
-                                            @elseif ($quality ==2 )
-                                                <option value="">Оцените состояние</option>
-                                                <option value="5">Новое запакованное</option>
-                                                <option value="4">В отличном состоянии, но использовалось</option>
-                                                <option value="3">Рабочее, но с небольшими следами повреждений,
-                                                    небольшим загрязнением
-                                                </option>
-                                                <option selected value="2">Частично рабочее или сильно загрязненное
-                                                </option>
-                                                <option value="1">Полностью не рабочее</option>
-                                            @elseif ($quality ==3 )
-                                                <option value="">Оцените состояние</option>
-                                                <option value="5">Новое запакованное</option>
-                                                <option value="4">В отличном состоянии, но использовалось</option>
-                                                <option selected value="3">Рабочее, но с небольшими следами повреждений,
-                                                    небольшим загрязнением
-                                                </option>
-                                                <option value="2">Частично рабочее или сильно загрязненное</option>
-                                                <option value="1">Полностью не рабочее</option>
-                                            @elseif ($quality ==4 )
-                                                <option value="">Оцените состояние</option>
-                                                <option value="5">Новое запакованное</option>
-                                                <option selected value="4">В отличном состоянии, но использовалось
-                                                </option>
-                                                <option value="3">Рабочее, но с небольшими следами повреждений,
-                                                    небольшим загрязнением
-                                                </option>
-                                                <option value="2">Частично рабочее или сильно загрязненное</option>
-                                                <option value="1">Полностью не рабочее</option>
-                                            @elseif ($quality ==5 )
-                                                <option value="">Оцените состояние</option>
-                                                <option selected value="5">Новое запакованное</option>
-                                                <option value="4">В отличном состоянии, но использовалось</option>
-                                                <option value="3">Рабочее, но с небольшими следами повреждений,
-                                                    небольшим загрязнением
-                                                </option>
-                                                <option value="2">Частично рабочее или сильно загрязненное</option>
-                                                <option value="1">Полностью не рабочее</option>
-                                            @else
-                                                <option selected value="">Оцените состояние</option>
-                                                <option value="5">Новое запакованное</option>
-                                                <option value="4">В отличном состоянии, но использовалось</option>
-                                                <option value="3">Рабочее, но с небольшими следами повреждений,
-                                                    небольшим загрязнением
-                                                </option>
-                                                <option value="2">Частично рабочее или сильно загрязненное</option>
-                                                <option value="1">Полностью не рабочее</option>
-                                            @endif
-                                        @else
-                                            <option selected value="">Оцените состояние</option>
-                                            <option value="5">Новое запакованное</option>
-                                            <option value="4">В отличном состоянии, но использовалось</option>
-                                            <option value="3">Рабочее, но с небольшими следами повреждений, небольшим
-                                                загрязнением
+                                        @php
+                                            $quality = Request::old('quality', (isset($asset)) ? $asset->quality :null);
+                                        @endphp
+                                            <option @if (!isset($quality)) selected @endif value="">Оцените состояние</option>
+                                            <option @if ($quality == 5) selected @endif value="5">Новое запакованное</option>
+                                            <option @if ($quality == 4) selected @endif value="4">В отличном состоянии, но использовалось</option>
+                                            <option @if ($quality == 3) selected @endif value="3">Рабочее, но с небольшими следами повреждений,
+                                                небольшим загрязнением
                                             </option>
-                                            <option value="2">Частично рабочее или сильно загрязненное</option>
-                                            <option value="1">Полностью не рабочее</option>
-                                        @endif
+                                            <option @if ($quality == 2) selected @endif value="2">Частично рабочее или сильно загрязненное</option>
+                                            <option @if ($quality == 1) selected @endif value="1">Полностью не рабочее</option>
                                     </select>
                                </div>
                                 <div class="col-md-9" style="padding-left: 0px;">
@@ -228,26 +235,23 @@
                             <label for="life" class="col-md-3 control-label">Срок эксплуатации (прошло/рассчетный)</label>
                             <div class="col-md-9">
                                @php
-                               if ($asset->purchase_date){
-                                    $now = new DateTime();
-                                    $d2 = new DateTime($asset->purchase_date);
-                                    $interval = $d2->diff($now);
-                                    $result =  $interval->m + 12*$interval->y;
-
-                                }else{
-                                    $result = "???";
-                                }
-                                if($asset->model->lifetime){
-                                     $lifetime = $asset->model->lifetime;
-                                }else if($asset->model->category->lifetime){
-                                    $lifetime = $asset->model->category->lifetime;
-                                }else{
-                                    $lifetime = 36;
-                                }
+                                   if ($asset->purchase_date){
+                                        $now = new DateTime();
+                                        $d2 = new DateTime($asset->purchase_date);
+                                        $interval = $d2->diff($now);
+                                        $result =  $interval->m + 12*$interval->y;
+                                    }else{
+                                        $result = "Нет даты закупки";
+                                    }
+                                    if($asset->model && $asset->model->depreciation &&  $asset->model->depreciation->months){
+                                         $months= $asset->model->depreciation->months;
+                                    }else{
+                                        $months = 36;
+                                    }
                                @endphp
                                 <div class="input-group col-md-4" style="padding-left: 0px;">
                                     <input class="form-control float" type="text" disabled
-                                           value="{{$result}}/{{ $lifetime }}"/>
+                                           value="{{$result}}/{{ $months }}"/>
                                     <span class="input-group-addon">Месяцев</span>
                                 </div>
                             </div>
@@ -260,7 +264,9 @@
                                     <input class="form-control float" type="text"
                                            name="purchase_cost" aria-label="Purchase_cost"
                                            id="purchase_cost"
+                                           @if (isset($asset->purchase_cost))
                                            disabled
+                                           @endif
                                            value="{{ Request::old('purchase_cost', \App\Helpers\Helper::formatCurrencyOutput($asset->purchase_cost)) }}"/>
                                     <span class="input-group-addon">
                                         @if (isset($currency_type))
@@ -268,7 +274,7 @@
                                         @else
                                             {{ $snipeSettings->default_currency }}
                                         @endif
-                                </span>
+                                    </span>
                                 </div>
 
                                 <div class="col-md-9" style="padding-left: 0px;">
@@ -276,6 +282,7 @@
                                 </div>
                             </div>
                         </div>
+                        @if (isset($asset->depreciable_cost))
                         <!-- depreciable Cost -->
                         <div class="form-group {{ $errors->has('depreciable_cost') ? ' has-error' : '' }}">
                             <label for="purchase_cost" class="col-md-3 control-label">Старая остаточная
@@ -288,12 +295,12 @@
                                            disabled
                                            value="{{ Request::old('depreciable_cost', \App\Helpers\Helper::formatCurrencyOutput($asset->depreciable_cost)) }}"/>
                                     <span class="input-group-addon">
-                @if (isset($currency_type))
+                                        @if (isset($currency_type))
                                             {{ $currency_type }}
                                         @else
                                             {{ $snipeSettings->default_currency }}
                                         @endif
-            </span>
+                                    </span>
                                 </div>
 
                                 <div class="col-md-9" style="padding-left: 0px;">
@@ -301,6 +308,7 @@
                                 </div>
                             </div>
                         </div>
+                        @endif
                         <!-- new depreciable Cost -->
                         <div class="form-group {{ $errors->has('new_depreciable_cost') ? ' has-error' : '' }}">
                             <label for="purchase_cost" class="col-md-3 control-label">Новая остаточная
@@ -327,12 +335,19 @@
                         </div>
 
                     </div> <!--/.box-body-->
-                    <div class="box-footer">
-                        <div class="box-footer">
-                            <a class="btn btn-link" href="{{ URL::previous() }}"> {{ trans('button.cancel') }}</a>
-                            <button type="submit" class="btn btn-primary pull-right"><i class="fas fa-check icon-white" aria-hidden="true"></i> {{ trans('general.checkout') }}</button>
-                        </div>
-                    </div>
+
+                    <x-redirect_submit_options
+                            index_route="hardware.index"
+                            :button_label="trans('general.checkout')"
+                            :disabled_select="!$asset->model"
+                            :options="[
+                                'index' => trans('admin/hardware/form.redirect_to_all', ['type' => trans('general.assets')]),
+                                'item' => trans('admin/hardware/form.redirect_to_type', ['type' => trans('general.asset')]),
+                                'target' => trans('admin/hardware/form.redirect_to_checked_out_to'),
+
+                               ]"
+                    />
+
                 </form>
             </div>
         </div> <!--/.col-md-7-->
@@ -350,13 +365,11 @@
             </div>
         </div>
     </div>
-
-    @include('partials/assets-assigned')
-
 @stop
 
-
 @section('moar_scripts')
+    @include('partials/assets-assigned')
+
     <script nonce="{{ csrf_token() }}">
         $(function () {
             var starRatingControl = new StarRating('.star-rating', {
@@ -366,125 +379,75 @@
             });
             calculeteCoast();
 
+            function calculeteCoast() {
 
-            var biometric = $("#biometric")
-            biometric.click(function () {
-                $.ajax('http://localhost:8001/find ', {
-                    success: function (data, textStatus, xhr) {
-                        if (xhr.status === 200) {
-                            if (data.requestUID){
-                                var uid = data.requestUID
-                                startCheck(uid);
-                            }
-                        } else {
-                            console.log(data);
-                        }
-                    },
-                    error: function () {
-                        console.log("error");
+                $buyVal = parseFloat($("#purchase_cost").val().replace(",",""));
+                $quality = parseInt($("#quality").val());
+
+                if ($buyVal > 0 && $quality > 0) {
+                    //quality count
+                    $quality_divider = 1;
+                    switch ($quality) {
+                        case 4:
+                            $quality_divider = 0.8
+                            break;
+                        case 3:
+                            $quality_divider = 0.50
+                            break;
+                        case 2:
+                            $quality_divider = 0.3
+                            break;
+                        case 1:
+                            $quality_divider = 0
+                            break;
                     }
-                });
-            });
-
-            function startCheck(uid){
-                console.log("startCheck:"+ uid);
-                $.ajax({
-                    type: 'GET',
-                    url: '/api/v1/biometric/check/'+uid,
-                    headers: {
-                        "X-Requested-With": 'XMLHttpRequest',
-                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                    },
-                    dataType: 'json',
-                    success: function (data) {
-                        if (data.status){
-                            if (data.status == "processing"){
-                                setTimeout(500);
-                                startCheck(uid);
-                            }else if(data.status == "finished"){
-                                if (data.answer){
-                                    var result = data.answer;
-                                    processBiometricResult(uid,result);
-                                }
-                            }
-                        }
-                    },
-                    error: function (data) {
-                        console.log(data);
-                        // window.location.reload(true);
-                    }
-                });
-            }
-
-        });
-        function processBiometricResult(uid,result){
-            $("#biometric_uid").val(uid);
-            $("#biometric_result").val(JSON.stringify(result));
-            $("#formId").submit()
-        }
 
 
-        function calculeteCoast() {
-            $buyVal = $("#purchase_cost").val();
-            $quality = $("#quality").val();
-            if ($buyVal > 0 && $quality > 0) {
-                //quality count
-                $quality_divider = 1;
-                switch (parseInt($quality)) {
-                    case 4:
-                        $quality_divider = 0.75
-                        break;
-                    case 3:
-                        $quality_divider = 0.50
-                        break;
-                    case 2:
-                        $quality_divider = 0.25
-                        break;
-                    case 1:
-                        $quality_divider = 0
-                        break;
-                }
-                //lifetime count
-                @if (isset($asset->model->lifetime))
-                    $lifetime = {{$asset->model->lifetime}};
-                @elseif (isset($asset->model->category->lifetime))
-                    $lifetime = {{$asset->model->category->lifetime}};
-                @else
-                    $lifetime = 36;
-                @endif
+                    @if (isset($asset->model) && isset($asset->model->depreciation) && isset($asset->model->depreciation->months))
+                        $lifetime = {{$asset->model->depreciation->months}};
+                    @else
+                        $lifetime = 36;
+                    @endif
 
-                @if (isset($asset->purchase_date))
-                    $buydate = "{{$asset->purchase_date}}";
+                            @if (isset($asset->purchase_date))
+                        $buydate = "{{$asset->purchase_date}}";
                     $buydate = new Date($buydate.substr(0, 10));
                     $usetime = monthDiff($buydate);
-                    if ($usetime<=12){
+                    if ($usetime <= 12) {
                         $time_divider = 0;
-                    }else{
+                    } else {
                         $time_divider = ($lifetime - $usetime) / $lifetime;
                         if ($time_divider < 0) {
                             $time_divider = 0;
                         }
                     }
-                @else
-                    $time_divider = 1/3;
-                @endif
+                    @else
+                        $time_divider = 1 / 3;
+                    @endif
 
-                //final count
-                $newVal = $buyVal * $quality_divider * $time_divider;
-                $newVal = $newVal.toFixed(2);
-                $("#new_depreciable_cost").val($newVal);
+                    // console.log(`HelcalculeteCoastlo $usetime ${$usetime}  $lifetime${$lifetime}`)
+                    $newVal = (($buyVal - ($buyVal/$lifetime) * $usetime) * $quality_divider).toFixed(2);
+                    if ($newVal<0){
+                        $newVal = 0;
+                    }
+                    $("#new_depreciable_cost").val($newVal);
+                }
             }
-        }
 
-        $("#quality").change(function () {
-            calculeteCoast();
+            $("#quality").change(function () {
+                calculeteCoast();
+            });
+
+            $("#purchase_cost").change(function () {
+                calculeteCoast();
+            });
+
+            function monthDiff(dateFrom) {
+                var dateTo = new Date();
+                return dateTo.getMonth() - dateFrom.getMonth() +
+                    (12 * (dateTo.getFullYear() - dateFrom.getFullYear()))
+            }
         });
-
-        function monthDiff(dateFrom) {
-            var dateTo = new Date();
-            return dateTo.getMonth() - dateFrom.getMonth() +
-                (12 * (dateTo.getFullYear() - dateFrom.getFullYear()))
-        }
 
     </script>
 @stop

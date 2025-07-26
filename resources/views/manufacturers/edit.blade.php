@@ -12,7 +12,7 @@
 @include ('partials.forms.edit.name', ['translated_name' => trans('admin/manufacturers/table.name')])
     <!-- URL -->
     <div class="form-group {{ $errors->has('url') ? ' has-error' : '' }}">
-        <label for="url" class="col-md-3 control-label">{{ trans('admin/manufacturers/table.url') }}
+        <label for="url" class="col-md-3 control-label">{{ trans('general.url') }}
         </label>
         <div class="col-md-6">
             <input class="form-control" type="text" name="url" id="url" value="{{ old('url', $item->url) }}" />
@@ -25,8 +25,19 @@
         <label for="support_url" class="col-md-3 control-label">{{ trans('admin/manufacturers/table.support_url') }}
         </label>
         <div class="col-md-6">
-            <input class="form-control" type="text" name="support_url" id="support_url" value="{{ old('support_url', $item->support_url) }}" />
+            <input class="form-control" type="url" name="support_url" id="support_url" value="{{ old('support_url', $item->support_url) }}" />
             {!! $errors->first('support_url', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+        </div>
+    </div>
+
+    <!-- Warranty Lookup URL -->
+    <div class="form-group {{ $errors->has('warranty_lookup_url') ? ' has-error' : '' }}">
+        <label for="support_url" class="col-md-3 control-label">{{ trans('admin/manufacturers/table.warranty_lookup_url') }}
+        </label>
+        <div class="col-md-6">
+            <input class="form-control" type="url" name="warranty_lookup_url" id="warranty_lookup_url" value="{{ old('warranty_lookup_url', $item->warranty_lookup_url) }}" />
+            <p class="help-block">{!! trans('admin/manufacturers/message.support_url_help') !!}</p>
+            {!! $errors->first('warranty_lookup_url', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
         </div>
     </div>
 
@@ -50,23 +61,23 @@
         </div>
     </div>
 
-<!-- Image -->
-    @if (($item->image) && ($item->image!=''))
-    <div class="form-group {{ $errors->has('image_delete') ? 'has-error' : '' }}">
-        <label class="col-md-3 control-label" for="image_delete">{{ trans('general.image_delete') }}</label>
-        <div class="col-md-5">
-            <label for="image_delete">
-                {{ Form::checkbox('image_delete', '1', old('image_delete'), array('class' => 'minimal', 'aria-label'=>'required')) }}
-            </label>
-            <br>
-            <img src="{{ url('/') }}/uploads/manufacturers/{{ $item->image }}" alt="Image for {{ $item->name }}" class="img-responsive">
-            {!! $errors->first('image_delete', '<span class="alert-msg" aria-hidden="true"><br>:message</span>') !!}
-        </div>
+@include ('partials.forms.edit.image-upload', ['image_path' => app('manufacturers_upload_path')])
+
+<div class="form-group{!! $errors->has('notes') ? ' has-error' : '' !!}">
+    <label for="notes" class="col-md-3 control-label">{{ trans('general.notes') }}</label>
+    <div class="col-md-8">
+        <x-input.textarea
+                name="notes"
+                id="notes"
+                :value="old('notes', $item->notes)"
+                placeholder="{{ trans('general.placeholders.notes') }}"
+                aria-label="notes"
+                rows="5"
+        />
+        {!! $errors->first('notes', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
     </div>
-    @endif
+</div>
 
-
-    @include ('partials.forms.edit.image-upload')
 
 
 @stop

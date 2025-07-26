@@ -3,16 +3,18 @@
 namespace App\Http\Controllers\Consumables;
 
 use App\Events\CheckoutableCheckedOut;
+use App\Events\CheckoutableSell;
+use App\Helpers\Helper;
 use App\Http\Controllers\CheckInOutRequest;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\AssetCheckoutRequest;
-use App\Models\Asset;
+use App\Http\Requests\ConsumableCheckoutRequest;
 use App\Models\Consumable;
-use App\Models\ConsumableAssignment;
-use App\Models\Location;
+use App\Models\Deal;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use \Illuminate\Contracts\View\View;
+use \Illuminate\Http\RedirectResponse;
+use App\Models\ConsumableAssignment;
 use Illuminate\Support\Facades\Input;
 
 class ConsumableCheckoutController extends Controller
@@ -25,18 +27,36 @@ class ConsumableCheckoutController extends Controller
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @see ConsumableCheckoutController::store() method that stores the data.
      * @since [v1.0]
-     * @param int $consumableId
-     * @return \Illuminate\Contracts\View\View
-     * @throws \Illuminate\Auth\Access\AuthorizationException
+     * @param int $id
      */
-    public function create($consumableId)
+    public function create($id) : View | RedirectResponse
     {
-        if (is_null($consumable = Consumable::find($consumableId))) {
-            return redirect()->route('consumables.index')->with('error', trans('admin/consumables/message.does_not_exist'));
-        }
-        $this->authorize('checkout', $consumable);
 
-        return view('consumables/checkout', compact('consumable'));
+        if ($consumable = Consumable::find($id)) {
+
+            $this->authorize('checkout', $consumable);
+
+            // Make sure the category is valid
+            if ($consumable->category) {
+
+                // Make sure there is at least one available to checkout
+                if ($consumable->numRemaining() <= 0){
+                    return redirect()->route('consumables.index')
+                        ->with('error', trans('admin/consumables/message.checkout.unavailable', ['requested' => 1, 'remaining' => $consumable->numRemaining()]));
+                }
+
+                // Return the checkout view
+                return view('consumables/checkout', compact('consumable'));
+            }
+
+            // Invalid category
+            return redirect()->route('consumables.edit', ['consumable' => $consumable->id])
+                ->with('error', trans('general.invalid_item_category_single', ['type' => trans('general.consumable')]));
+        }
+
+        // Not found
+        return redirect()->route('consumables.index')->with('error', trans('admin/consumables/message.does_not_exist'));
+
     }
 
     /**
@@ -49,37 +69,54 @@ class ConsumableCheckoutController extends Controller
      * @return \Illuminate\Http\RedirectResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function store(AssetCheckoutRequest $request, $consumableId)
+    public function store(ConsumableCheckoutRequest $request, $consumableId)
     {
         if (is_null($consumable = Consumable::find($consumableId))) {
             return redirect()->route('consumables.index')->with('error', trans('admin/consumables/message.not_found'));
         }
 
         $this->authorize('checkout', $consumable);
-
-        $admin_user = Auth::user();
-
-        $quantity = e($request->input('quantity'));
-        $note = $request->input('note');
-
-
         $target = $this->determineCheckoutTarget();
 
-        $consumable->locations()->attach($consumable->id, [
-            'consumable_id' => $consumable->id,
-            'user_id' => $admin_user->id,
-            'quantity' => $quantity,
-            'comment' => $note,
-            'cost' => $consumable->purchase_cost,
-            'type' => ConsumableAssignment::ISSUED,
-            'assigned_to' => $target->id,
-            'assigned_type' => get_class($target),
-        ]);
+        // If the quantity is not present in the request or is not a positive integer, set it to 1
+        $quantity = $request->input('checkout_qty');
 
+        if (!isset($quantity) || !ctype_digit((string)$quantity) || $quantity <= 0) {
+            $quantity = 1;
+        }
 
-        event(new CheckoutableCheckedOut($consumable, $target, Auth::user(),$note,null));
+        // Make sure there is at least one available to checkout
+        if ($consumable->numRemaining() <= 0 || $quantity > $consumable->numRemaining()) {
+            return redirect()->route('consumables.index')->with('error', trans('admin/consumables/message.checkout.unavailable', ['requested' => $quantity, 'remaining' => $consumable->numRemaining() ]));
+        }
+
+//        $type = ConsumableAssignment::ISSUED;
+//        if (is_a($target, Deal::class, true)) {
+//            $type = ConsumableAssignment::SOLD;
+//        }
+//        $consumable->locations()->attach($consumable->id, [
+//            'consumable_id' => $consumable->id,
+//            'created_by' => auth()->id(),
+//            'quantity' => $quantity,
+//            'comment' =>  $request->input('note'),
+//            'cost' => $consumable->purchase_cost,
+//            'type' => $type,
+//            'assigned_to' => $target->id,
+//            'assigned_type' => get_class($target),
+//        ]);
+//
+//
+//        if (is_a($target, Deal::class, true)) {
+//            event(new CheckoutableSell($consumable, $target, auth()->user(), $request->input('note')));
+//        }else{
+//            event(new CheckoutableCheckedOut($consumable, $target, auth()->user(), $request->input('note')));
+//        }
+
+        $consumable->checkOut($target, $quantity, $request->input('note'));
+        session()->put(['redirect_option' => $request->get('redirect_option'), 'checkout_to_type' => $request->get('checkout_to_type')]);
 
         // Redirect to the new consumable page
-        return redirect()->route('consumables.index')->with('success', trans('admin/consumables/message.checkout.success'));
+        return Helper::getRedirectOption($request, $consumable->id, 'Consumables')
+            ->with('success', trans('admin/consumables/message.checkout.success'));
     }
 }

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\Helper;
 use App\Http\Requests\FileUploadRequest;
 use App\Models\Asset;
 use App\Models\AssetModel;
@@ -26,12 +25,12 @@ class PurchasesController extends Controller
     {
 
         $purchases_d = DB::table('purchases')
-            ->select('user_id')
+            ->select('created_by')
             ->distinct()
             ->get();
         $ids = [];
         foreach ($purchases_d as &$value) {
-            array_push($ids, $value->user_id);
+            array_push($ids, $value->created_by);
         }
 
         $purchases_s = DB::table('purchases')
@@ -54,11 +53,11 @@ class PurchasesController extends Controller
      * the content for the locations detail page.
      * @param int $purchaseId
      */
-    public function show($purchaseId = null)
+    public function show(Purchase $purchase): View|RedirectResponse
     {
         $this->authorize('view', Asset::class);
 
-        $purchase = Purchase::find($purchaseId);
+        $purchase = Purchase::find($purchase->id);
         $old = false;
         if (isset($purchase->id)) {
             $consumables_json = $purchase->consumables_json;
@@ -77,7 +76,7 @@ class PurchasesController extends Controller
      * Returns a form view used to create a new purchase.
      * @see PurchasesController::postCreate() method that validates and stores the data
      */
-    public function create()
+    public function create(): View
     {
         $this->authorize('create', Purchase::class);
         return view('purchases/edit')
@@ -89,7 +88,7 @@ class PurchasesController extends Controller
      * Validates and stores a new purchase.
      * @see PurchasesController::getCreate() method that makes the form
      */
-    public function store(FileUploadRequest $request)
+    public function store(FileUploadRequest $request): RedirectResponse
     {
         $this->authorize('create', Purchase::class);
 
@@ -126,7 +125,6 @@ class PurchasesController extends Controller
 
 
         $purchase = new Purchase();
-        $purchase->currency = "руб";
         $purchase->invoice_number = $request->input('invoice_number');
         $purchase->final_price = $request->input('final_price');
         $purchase->supplier_id = $request->input('supplier_id');
@@ -136,7 +134,7 @@ class PurchasesController extends Controller
         $purchase->consumables_json = $consumables;
         $purchase->assets_json = $request->input('assets');
         $purchase->delivery_cost = $request->input('delivery_cost');
-        $purchase->user_id = Auth::id();
+        $purchase->created_by = auth()->id();
         $purchase->setStatusInprogress();
 
         $assets = json_decode($request->input('assets'), true);
@@ -180,7 +178,7 @@ class PurchasesController extends Controller
                         $asset->purchase_date = $dt->format('Y-m-d H:i:s');
                         $asset->supplier_id = $purchase->supplier_id;
                         $asset->purchase_id = $purchase->id;
-                        $asset->user_id = Auth::id();
+                        $asset->created_by = auth()->id();
                         $asset->location_id = $location_id;
 
 
@@ -215,7 +213,7 @@ class PurchasesController extends Controller
             // Encode the image string data into base64
             $file_data_base64 = base64_encode($file_data);
 
-            $user = Auth::user();
+            $user = auth()->user();
 //            \Debugbar::info("send bitrix");
 //            \Debugbar::info($user);
 //            \Debugbar::info($user->bitrix_token);
@@ -250,13 +248,18 @@ class PurchasesController extends Controller
             $purchase->bitrix_send_json = $purchase->id . '.json';
             $purchase->save();
 
+//            \Debugbar::info("send bitrix");
             if ($user->bitrix_token && $user->bitrix_id) {
-                $raw_bitrix_token = Crypt::decryptString($user->bitrix_token);
-                $response = $client->request('POST', 'https://bitrix.legis-s.ru/rest/' . $user->bitrix_id . '/' . $raw_bitrix_token . '/lists.element.add.json/', $params);
+                try {
+//                    \Debugbar::info("raw_bitrix_token");
+                    $raw_bitrix_token = Crypt::decryptString($user->bitrix_token);
+                    $response = $client->request('POST',  env('BITRIX_URL').'rest/' . $user->bitrix_id . '/' . $raw_bitrix_token . '/lists.element.add.json/', $params);
 
+                } catch (DecryptException $e) {
+                    $response = $client->request('POST',  env('BITRIX_URL').'rest/'.env('BITRIX_USER').'/'.env('BITRIX_KEY').'/lists.element.add.json/', $params);
+                }
             } else {
-                $response = $client->request('POST', 'https://bitrix.legis-s.ru/rest/722/q7e6fc3qrkiok64x/lists.element.add.json/', $params);
-
+                $response = $client->request('POST',  env('BITRIX_URL').'rest/'.env('BITRIX_USER').'/'.env('BITRIX_KEY').'/lists.element.add.json/', $params);
             }
             $response = $response->getBody()->getContents();
 
@@ -276,7 +279,7 @@ class PurchasesController extends Controller
      * @param int $purchaseId
      * @since [v1.0]
      */
-    public function edit($purchaseId = null)
+    public function edit($purchaseId = null): View|RedirectResponse
     {
         $this->authorize('update', Purchase::class);
         // Check if the location exists
@@ -295,7 +298,7 @@ class PurchasesController extends Controller
      * @return \Illuminate\Contracts\View\View
      * @since [v1.0]
      */
-    public function getClone($purchaseId = null)
+    public function getClone($purchaseId): View|RedirectResponse
     {
         // Check if the asset exists
         if (is_null($purchase_to_clone = Purchase::find($purchaseId))) {
@@ -344,7 +347,7 @@ class PurchasesController extends Controller
     }
 
 
-    public function deleteAllRejected()
+    public function deleteAllRejected(): View|RedirectResponse
     {
         $this->authorize('delete', Purchase::class);
 

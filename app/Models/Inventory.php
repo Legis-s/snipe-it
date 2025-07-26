@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use App\Models\Traits\Searchable;
@@ -15,13 +16,13 @@ final class Inventory extends SnipeModel
 {
     protected $table = 'inventories';
 
-    protected $presenter = 'App\Presenters\InventoryPresenter';
+    protected $presenter = \App\Presenters\InventoryPresenter::class;
     use Presentable;
     use SoftDeletes;
+
     protected $dates = ['deleted_at'];
     protected $rules = array(
-//        'bitrix_id'        => 'required',
-        'responsible_id'        => 'required',
+        'responsible_id' => 'required',
     );
 
     /**
@@ -33,9 +34,7 @@ final class Inventory extends SnipeModel
      */
     protected $injectUniqueIdentifier = true;
     use ValidatingTrait;
-
     use Searchable;
-
 
 
     /**
@@ -72,14 +71,31 @@ final class Inventory extends SnipeModel
 
     public function responsible_photo_url()
     {
-        return '/uploads/inventories/'.$this->responsible_photo;
+        return '/uploads/inventories/' . $this->responsible_photo;
     }
 
-    public function inventory_items() {
-        return $this->hasMany('\App\Models\InventoryItem');
+    public function inventory_items()
+    {
+        return $this->hasMany(\App\Models\InventoryItem::class);
     }
+
     public function location()
     {
-        return $this->belongsTo('\App\Models\Location');
+        return $this->belongsTo(\App\Models\Location::class);
+    }
+
+    public function inventory_items_count()
+    {
+        return $this->inventory_items->count();
+    }
+
+    public function inventory_items_checked_count()
+    {
+        return $this->inventory_items->where('checked', true)->count();
+    }
+
+    public function inventory_items_checked_success_count()
+    {
+        return $this->inventory_items->where('successfully', true)->count();
     }
 }

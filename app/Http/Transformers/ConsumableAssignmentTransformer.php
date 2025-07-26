@@ -5,9 +5,7 @@ namespace App\Http\Transformers;
 
 
 use App\Helpers\Helper;
-use App\Models\Consumable;
 use App\Models\ConsumableAssignment;
-use App\Models\Location;
 use Illuminate\Database\Eloquent\Collection;
 
 class ConsumableAssignmentTransformer
@@ -34,13 +32,20 @@ class ConsumableAssignmentTransformer
                 'type' => e($consumableAssignment->type),
                 'cost' => e($consumableAssignment->cost),
                 'contract' => ($consumableAssignment->contract) ? (new ContractsTransformer())->transformContract($consumableAssignment->contract) : null,
+                'deal' => ($consumableAssignment->deal) ? (new DealsTransformer())->transformDeal($consumableAssignment->deal) : null,
                 'responsibleUser' => ($consumableAssignment->responsibleUser) ? (new UsersTransformer)->transformUser($consumableAssignment->responsibleUser) : null,
                 'assigned_to' => $this->transformAssignedTo($consumableAssignment),
                 'comment' => ($consumableAssignment->comment) ? e($consumableAssignment->comment) : null,
                 'created_at' => Helper::getFormattedDateObject($consumableAssignment->created_at, 'datetime'),
                 'updated_at' => Helper::getFormattedDateObject($consumableAssignment->updated_at, 'datetime'),
                 'can_return' => (bool) $consumableAssignment->availableForReturn(),
-                'can_close_documents' => (bool) $consumableAssignment->availableForCloseDocuments(),
+//                'can_close_documents' => (bool) $consumableAssignment->availableForCloseDocuments(),
+                'created_by' => ($consumableAssignment->adminuser) ? [
+                    'id' => (int) $consumableAssignment->adminuser->id,
+                    'name' => e($consumableAssignment->adminuser->getFullNameAttribute()),
+                    'first_name'=> e($consumableAssignment->adminuser->first_name),
+                    'last_name'=> e($consumableAssignment->adminuser->last_name)
+                ] : null,
             ];
 
 
@@ -92,6 +97,9 @@ class ConsumableAssignmentTransformer
                     case ConsumableAssignment::LOCATION:
                         $str=" на объект";
                         break;
+                    case ConsumableAssignment::DEAL:
+                        $str=" по сделке";
+                        break;
                 }
                 return "Выдано ".$str;
             case ConsumableAssignment::SOLD:
@@ -108,6 +116,9 @@ class ConsumableAssignmentTransformer
                         break;
                     case ConsumableAssignment::CONTRACT:
                         $str=" по договору";
+
+                    case ConsumableAssignment::DEAL:
+                        $str=" по сделке";
                         break;
                 }
                 return "Продано ".$str;
