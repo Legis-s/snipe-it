@@ -1458,6 +1458,9 @@
                             },
                             success: function (data) {
                                 $(".table").bootstrapTable('refresh');
+                            },
+                            error: function (data) {
+                                console.log(data);
                             }
                         });
                     } else {
@@ -1502,6 +1505,9 @@
                         success: function (data) {
                             $(".table").bootstrapTable('refresh');
                         },
+                        error: function (data) {
+                            console.log(data);
+                        }
                     });
                 }
             });
@@ -1521,6 +1527,8 @@
             });
         },
         'click .review': function (e, value, row, index) {
+
+            console.log(row);
             $.ajax({
                 url: '/api/v1/hardware/' + row.id + '/review',
                 method: "POST",
