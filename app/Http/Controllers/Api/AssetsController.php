@@ -1506,7 +1506,7 @@ class AssetsController extends Controller
             // We don't want to log this as a normal update, so let's bypass that
             $asset->unsetEventDispatcher();
             $note = "Проверка после покупки";
-            $asset->purchase_date =date('Y-m-d H:i:s');
+            $asset->purchase_date =date('Y-m-d');
             $asset->next_audit_date = $dt;
             $asset->last_audit_date = date('Y-m-d H:i:s');
             $user = auth()->user();

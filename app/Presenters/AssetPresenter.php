@@ -366,7 +366,7 @@ class AssetPresenter extends Presenter
             'switchable' => false,
             'title' => trans('general.checkin').'/'.trans('general.checkout'),
             'visible' => true,
-            'formatter' => 'hardwareInOutFormatter',
+            'formatter' => 'hardwareCustomInOutFormatter',
             'printIgnore' => true,
         ];
 
