@@ -145,16 +145,16 @@ class PurchasesController extends Controller
 
         $assets = [];
         \Debugbar::info($request->input('assets'));
-        if ($request->filled('$assets')) {
+        if ($request->filled('assets')) {
             $assets = json_decode($request->input('assets'), true);
         }
 
         $purchase = $request->handleFile($purchase, public_path() . '/uploads/purchases');
 
         $status = Statuslabel::where('name', 'В закупке')->first();
-        $settings = \App\Models\Setting::getSettings();
         if ($purchase->save()) {
             if (count($assets) > 0) {
+                \Debugbar::info($assets);
                 $asset_tag = Asset::autoincrement_asset();
                 \Debugbar::info($asset_tag);
                 $data_list .= "Активы:" . "\n";
@@ -193,10 +193,6 @@ class PurchasesController extends Controller
                         $asset->created_by    = auth()->id();
                         $asset->location_id = $location_id;
 
-
-                        if (!empty($settings->audit_interval)) {
-                            $asset->next_audit_date = Carbon::now()->addMonths($settings->audit_interval)->toDateString();
-                        }
 
                         if ($asset->save()) {
                             if ($settings->zerofill_count > 0) {
