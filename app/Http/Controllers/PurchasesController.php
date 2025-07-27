@@ -94,6 +94,8 @@ class PurchasesController extends Controller
 
         $data_list = "";
         $consumables = [];
+        \Debugbar::info($request->all());
+        \Debugbar::info($request->input('consumables'));
         if ($request->filled('consumables')) {
             $consumables = json_decode($request->input('consumables'), true);
         }
@@ -140,9 +142,13 @@ class PurchasesController extends Controller
         $purchase->created_by = auth()->id();
         $purchase->setStatusInprogress();
 
-        $assets = json_decode($request->input('assets'), true);
-        $purchase = $request->handleFile($purchase, public_path() . '/uploads/purchases');
+        $assets = [];
+        \Debugbar::info($request->input('assets'));
+        if ($request->filled('$assets')) {
+            $assets = json_decode($request->input('assets'), true);
+        }
 
+        $purchase = $request->handleFile($purchase, public_path() . '/uploads/purchases');
 
         $status = Statuslabel::where('name', 'В закупке')->first();
         $settings = \App\Models\Setting::getSettings();
