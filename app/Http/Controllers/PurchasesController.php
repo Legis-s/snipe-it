@@ -93,7 +93,10 @@ class PurchasesController extends Controller
         $this->authorize('create', Purchase::class);
 
         $data_list = "";
-        $consumables = json_decode($request->input('consumables'), true);
+        $consumables = [];
+        if ($request->filled('consumables')) {
+            $consumables = json_decode($request->input('consumables'), true);
+        }
 
         if (count($consumables) > 0) {
             $data_list .= "Компоненты:" . "\n";
