@@ -30,8 +30,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('auth:clear-resets')->everyFifteenMinutes();
         $schedule->command('saml:clear_expired_nonces')->weekly();
 
-        $schedule->command('snipeit:sync-bitrix')->everyFifteenMinutes()->appendOutputTo(storage_path('logs/sync-bitrix.log'));
-        $schedule->command('snipeit:sync-devices')->everyFifteenMinutes()->appendOutputTo(storage_path('logs/sync-mdm.log'));
+        $schedule->command('snipeit:sync-bitrix')->everyFiveMinutes()->appendOutputTo(storage_path('logs/sync-bitrix.log'));
+        $schedule->command('snipeit:sync-devices')->everyFiveMinutes()->appendOutputTo(storage_path('logs/sync-mdm.log'));
     }
 
     /**
