@@ -94,8 +94,6 @@ class PurchasesController extends Controller
 
         $data_list = "";
         $consumables = [];
-        \Debugbar::info($request->all());
-        \Debugbar::info($request->input('consumables'));
         if ($request->filled('consumables')) {
             $consumables = json_decode($request->input('consumables'), true);
         }
@@ -144,7 +142,6 @@ class PurchasesController extends Controller
         $purchase->setStatusInprogress();
 
         $assets = [];
-        \Debugbar::info($request->input('assets'));
         if ($request->filled('assets')) {
             $assets = json_decode($request->input('assets'), true);
         }
@@ -154,11 +151,9 @@ class PurchasesController extends Controller
         $status = Statuslabel::where('name', 'В закупке')->first();
         if ($purchase->save()) {
             if (count($assets) > 0) {
-                \Debugbar::info($assets);
-                $asset_tag = Asset::autoincrement_asset();
-                \Debugbar::info($asset_tag);
                 $data_list .= "Активы:" . "\n";
                 foreach ($assets as &$value) {
+                    \Debugbar::info("foreach json asset");
                     \Debugbar::info($value);
                     $model = $value["model"];
                     $model_id = $value["model_id"];
@@ -174,9 +169,12 @@ class PurchasesController extends Controller
 
                     $dt = new DateTime();
                     for ($i = 1; $i <= $quantity; $i++) {
+                        $asset_tag = Asset::autoincrement_asset();
+                        \Debugbar::info("NEW asset_tag");
+                        \Debugbar::info($asset_tag);
                         $asset = new Asset();
                         $asset->model()->associate(AssetModel::find((int) $model_id));
-                        $asset->asset_tag = $asset_tag;
+                        $asset->asset_tag =  $asset_tag;
                         $asset->model_id = $model_id;
                         $asset->order_number = $purchase->invoice_number;
                         $asset->archived = '0';
@@ -194,17 +192,17 @@ class PurchasesController extends Controller
                         $asset->location_id = $location_id;
 
 
-                        if ($asset->save()) {
-                            if ($settings->zerofill_count > 0) {
-                                $asset_tag_digits = preg_replace('/\D/', '', $asset_tag);
-                                $asset_tag = preg_replace('/^0*/', '', $asset_tag_digits);
-                                $asset_tag++;
-                                $asset_tag = $settings->auto_increment_prefix . Asset::zerofill($asset_tag, $settings->zerofill_count);
-                            } else {
-                                $asset_tag = $settings->auto_increment_prefix . $asset_tag;
-                            }
+                        if ($asset->isValid() && $asset->save()) {
+//                            if ($settings->zerofill_count > 0) {
+//                                $asset_tag_digits = preg_replace('/\D/', '', $asset_tag);
+//                                $asset_tag = preg_replace('/^0*/', '', $asset_tag_digits);
+//                                $asset_tag++;
+//                                $asset_tag = $settings->auto_increment_prefix . Asset::zerofill($asset_tag, $settings->zerofill_count);
+//                            } else {
+//                                $asset_tag = $settings->auto_increment_prefix . $asset_tag;
+//                            }
                         } else {
-                            \Debugbar::info($consumables);
+                            \Debugbar::info($asset->getErrors()->all());
                         }
                     }
                 }
