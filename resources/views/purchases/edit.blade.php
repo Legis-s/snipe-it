@@ -41,7 +41,7 @@
         </div>
     </div>
 
-    @include ('partials.forms.edit.currency-select', ['translated_name' => "Валюта", 'fieldname' => 'currency_id'])
+{{--    @include ('partials.forms.edit.currency-select', ['translated_name' => "Валюта", 'fieldname' => 'currency_id'])--}}
 
 
 
