@@ -140,6 +140,7 @@ class PurchasesController extends Controller
         $purchase->assets_json = $request->input('assets');
         $purchase->delivery_cost = $request->input('delivery_cost');
         $purchase->created_by = auth()->id();
+        $purchase->currency = "руб";
         $purchase->setStatusInprogress();
 
         $assets = [];
@@ -237,7 +238,7 @@ class PurchasesController extends Controller
                 'form_params' => [
                     "IBLOCK_TYPE_ID" => "lists",
                     "IBLOCK_ID" => 52,
-                    "ELEMENT_CODE" => "dev_warehouse_buy_" . $purchase->id,
+                    "ELEMENT_CODE" => "warehouse_buy_" . $purchase->id,
                     "FIELDS[NAME]" => $purchase->invoice_number,
                     "FIELDS[CREATED_BY]" => $user->bitrix_id,
                     "FIELDS[PROPERTY_758]" => $purchase->invoice_type->bitrix_id, // тип платежа
