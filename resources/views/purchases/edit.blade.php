@@ -41,7 +41,14 @@
         </div>
     </div>
 
-{{--    @include ('partials.forms.edit.currency-select', ['translated_name' => "Валюта", 'fieldname' => 'currency_id'])--}}
+    <!-- comment -->
+    <div class="form-group{{ $errors->has('comment') ? ' has-error' : '' }}">
+        <label for="comment" class="col-md-3 control-label">Комментарий</label>
+        <div class="col-md-7 col-sm-12">
+            <textarea class="col-md-6 form-control" id="comment" aria-label="comment" name="comment" style="min-width:100%;">{{ old('notes', (isset($item) ? $item->comment : '')) }}</textarea>
+            {!! $errors->first('comment', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+        </div>
+    </div>
 
 
 
