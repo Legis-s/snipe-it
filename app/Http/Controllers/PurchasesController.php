@@ -185,7 +185,7 @@ class PurchasesController extends Controller
                         $asset->warranty_months = $warranty;
                         $asset->purchase_cost = $purchase_cost;
                         $asset->nds = $nds;
-                        $asset->purchase_date = $dt->format('YYYY-MM-DD');
+                        $asset->purchase_date = date('Y-m-d');
                         $asset->supplier_id = $purchase->supplier_id;
                         $asset->purchase_id = $purchase->id;
                         $asset->created_by    = auth()->id();
