@@ -156,8 +156,10 @@ class PurchasesController extends Controller
         if ($purchase->save()) {
             if (count($assets) > 0) {
                 $asset_tag = Asset::autoincrement_asset();
+                \Debugbar::info($asset_tag);
                 $data_list .= "Активы:" . "\n";
                 foreach ($assets as &$value) {
+                    \Debugbar::info($value);
                     $model = $value["model"];
                     $model_id = $value["model_id"];
                     $purchase_cost = $value["purchase_cost"];
@@ -173,7 +175,7 @@ class PurchasesController extends Controller
                     $dt = new DateTime();
                     for ($i = 1; $i <= $quantity; $i++) {
                         $asset = new Asset();
-                        $asset->model()->associate(AssetModel::find((int)$model_id));
+                        $asset->model()->associate(AssetModel::find((int) $model_id));
                         $asset->asset_tag = $asset_tag;
                         $asset->model_id = $model_id;
                         $asset->order_number = $purchase->invoice_number;
@@ -188,7 +190,7 @@ class PurchasesController extends Controller
                         $asset->purchase_date = $dt->format('Y-m-d H:i:s');
                         $asset->supplier_id = $purchase->supplier_id;
                         $asset->purchase_id = $purchase->id;
-                        $asset->created_by = auth()->id();
+                        $asset->created_by    = auth()->id();
                         $asset->location_id = $location_id;
 
 
