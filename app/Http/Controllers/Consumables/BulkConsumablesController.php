@@ -27,12 +27,12 @@ class BulkConsumablesController extends Controller
         $this->authorize('checkout', Consumable::class);
 
         $ids = [];
+        $consumable_array = [];
+        $consumable_json ="";
         if (request()->filled('purchase_id')) {
             $purchase_id = $request->input('purchase_id');
 
             $purchase = Purchase::with('consumables')->find($purchase_id);
-            $consumable_array = [];
-
             if ($purchase) {
                 $consumable_assignments = ConsumableAssignment::with('user', 'assignedTo', 'consumable', 'contract', 'deal')
                     ->where('assigned_to', '=', $purchase->id)
