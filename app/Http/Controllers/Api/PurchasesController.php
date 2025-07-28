@@ -104,7 +104,7 @@ class PurchasesController extends Controller
     {
         $this->authorize('view', Purchase::class);
         $status = Statuslabel::where('name', 'Доступные')->first();
-        $purchise = Purchase::with('supplier', 'assets', 'invoice_type', 'legal_person', 'created_by', 'consumables')
+        $purchise = Purchase::with('supplier', 'assets', 'invoice_type', 'legal_person', 'consumables')
             ->select([
                 'purchases.id',
                 'purchases.invoice_number',
