@@ -42,7 +42,7 @@
             @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'assigned_location', 'hide_new' => true])
             @include ('partials.forms.custom.deal-select', ['translated_name' => trans('general.deal'), 'fieldname' => 'assigned_deal', 'style' => 'display:none;', 'hide_new' => true])
 
-            <input id="consumables_json" name="consumables_json"   value="{{ old('consumables_json', $consumable_json) }}" ></input>
+            <input id="consumables_json" name="consumables_json"   value="{{ old('consumables_json', $consumable_json) }}" hidden></input>
 
             <!-- Note -->
             <div class="form-group {{ $errors->has('note') ? 'error' : '' }}">
