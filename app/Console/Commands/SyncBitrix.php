@@ -366,7 +366,7 @@ class SyncBitrix extends Command
                         'UF_CRM_1407316260',//number
                     ],
                     'filter' => [
-                        'CATEGORY_ID' => [3, 2, 13]
+                        'CATEGORY_ID' => [3, 2, 13, 14]
                     ],
                     'start' => $next,
                 ]
