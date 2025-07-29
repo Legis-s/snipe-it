@@ -94,6 +94,7 @@ class AssetCheckinController extends Controller
             'App\Models\User' => 'user',
             'App\Models\Location' => 'location',
             'App\Models\Asset' => 'asset',
+            'App\Models\Deal' => 'deal',
         });
 
         $asset->expected_checkin = null;
