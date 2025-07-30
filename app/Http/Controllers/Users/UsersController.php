@@ -14,6 +14,7 @@ use App\Models\Group;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Password;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Notifications\CurrentInventory;
@@ -115,6 +116,7 @@ class UsersController extends Controller
         $user->start_date = $request->input('start_date', null);
         $user->end_date = $request->input('end_date', null);
         $user->autoassign_licenses = $request->input('autoassign_licenses', 0);
+        $user->bitrix_id = $request->input('bitrix_id', null);
 
         // Strip out the superuser permission if the user isn't a superadmin
         $permissions_array = $request->input('permission');
@@ -262,9 +264,14 @@ class UsersController extends Controller
         $user->end_date = $request->input('end_date', null);
         $user->autoassign_licenses = $request->input('autoassign_licenses', 0);
         $user->favorite_location_id = $request->input('favorite_location_id', null);
-
+        $user->bitrix_id = $request->input('bitrix_id', null);
         // Set this here so that we can overwrite it later if the user is an admin or superadmin
         $user->activated = $request->input('activated', auth()->user()->is($user) ? 1 : $user->activated);
+
+
+        if ($request->filled('new_bitrix_token')) {
+            $user->bitrix_token = Crypt::encryptString($request->input('new_bitrix_token'));
+        }
 
 
         // Update the location of any assets checked out to this user
