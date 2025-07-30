@@ -59,30 +59,30 @@ class SyncDevices extends Command
 
         if ($mdm_url != null && $mdm_user != null && $mdm_password != null) {
             $this->info('Attempting to authenticate with MDM...');
+            $token = $this->getToken($client, $mdm_url, $mdm_user, $mdm_password);
 
-            $response = $client->request('POST', $mdm_url . 'public/jwt/login', [
-                \GuzzleHttp\RequestOptions::JSON => ['login' => $mdm_user, 'password' => $mdm_password]
-            ]);
-            $response = $response->getBody()->getContents();
-            $token_json = json_decode($response, true);
-            $token = $token_json["id_token"];
-//        print($token_json["id_token"]);
-            $headers = [
-                'Content-Type' => 'application/json',
-                'Authorization' => 'Bearer ' . $token,
-            ];
+            $devices = $this->getDevices($client, $mdm_url, $token);
+//
+//            $headers = [
+//                'Content-Type' => 'application/json',
+//                'Authorization' => 'Bearer ' . $token,
+//            ];
+//
+//            $response = $client->request('POST', $mdm_url . 'private/devices/search', [
+//                'headers' => $headers,
+//                \GuzzleHttp\RequestOptions::JSON => ['pageSize' => 1, 'pageNum' => 1]
+//            ]);
+//            $response = $response->getBody()->getContents();
+//            $json = json_decode($response, true);
+//
+//            $data = $json["data"];
+//            $devices = $data["devices"];
+//
+//            print_r($devices);
+//            $items = $devices["items"];
 
+            $items = $devices;
 
-            $response = $client->request('POST', $mdm_url . 'private/devices/search', [
-                'headers' => $headers,
-                \GuzzleHttp\RequestOptions::JSON => ['pageSize' => 1000000, 'pageNum' => 1]
-            ]);
-            $response = $response->getBody()->getContents();
-            $json = json_decode($response, true);
-
-            $data = $json["data"];
-            $devices = $data["devices"];
-            $items = $devices["items"];
             $count = 0;
 
             $number_array = [];
@@ -186,55 +186,54 @@ class SyncDevices extends Command
                     }
                     if ($asset->location) {
                         $locationAs = $asset->location->name;
-                        $responseupd = $client->request('POST', $mdm_url . 'private/devices/' . $phone["id"] . '/description', [
-                            'headers' => $headers,
-                            'body' => $locationAs
-                        ]);
-//                    $responseupd = $responseupd->getBody()->getContents();
-//                    print($responseupd);
+
+//                         $client->request('POST', $mdm_url . 'private/devices/' . $phone["id"] . '/description', [
+//                            'headers' => $headers,
+//                            'body' => $locationAs
+//                        ]);
                     }
                 }
                 $coordinates = null;
                 $locationUpdate = null;
 
-                try {
-                    $response = $client->request('GET', $mdm_url . 'plugins/devicelocations/devicelocations/private/device/' . $phone["id"] . '/location', [
-                        'headers' => $headers,
-                    ]);
-                    $response = $response->getBody()->getContents();
-                    $json = json_decode($response, true);
-                    if (isset($json["data"])) {
-                        $data = $json["data"];
-                        if (isset($data["lat"]) && isset($data["lon"])) {
-                            $lat = $data["lat"];
-                            $lon = $data["lon"];
-                            $coordinates = $lat . "," . $lon;
-                        }
-                        if (isset($data["ts"])) {
-                            $dateLoc = new DateTime();
-                            $dateLoc->setTimestamp($data["ts"] / 1000);
-                            $dateLoc->setTimezone(new DateTimeZone('Europe/Moscow'));
-                            $dateLoc->sub(new DateInterval('PT3H'));
-                            $locationUpdate = $dateLoc;
-                        }
-                    }
-
-                } catch (Exception $e) {
-                    $error_msg = sprintf('Failed to get device location: %s', $e->getMessage());
-                    $output['error'][] = $error_msg;
-                    $this->error($error_msg);
-                }
-                $distance = null;
-                if ($asset && $coordinates) {
-                    if ($asset->location) {
-                        if ($asset->location->coordinates) {
-                            $obj_location = $asset->location->coordinates;
-                            $obj_location = explode(",", $obj_location);
-                            $dev_coordinates = explode(",", $coordinates);
-                            $distance = $this->getDistanceBetweenPointsNew($obj_location[0], $obj_location[1], $dev_coordinates[0], $dev_coordinates[1]);
-                        }
-                    }
-                }
+//                try {
+//                    $response = $client->request('GET', $mdm_url . 'plugins/devicelocations/devicelocations/private/device/' . $phone["id"] . '/location', [
+//                        'headers' => $headers,
+//                    ]);
+//                    $response = $response->getBody()->getContents();
+//                    $json = json_decode($response, true);
+//                    if (isset($json["data"])) {
+//                        $data = $json["data"];
+//                        if (isset($data["lat"]) && isset($data["lon"])) {
+//                            $lat = $data["lat"];
+//                            $lon = $data["lon"];
+//                            $coordinates = $lat . "," . $lon;
+//                        }
+//                        if (isset($data["ts"])) {
+//                            $dateLoc = new DateTime();
+//                            $dateLoc->setTimestamp($data["ts"] / 1000);
+//                            $dateLoc->setTimezone(new DateTimeZone('Europe/Moscow'));
+//                            $dateLoc->sub(new DateInterval('PT3H'));
+//                            $locationUpdate = $dateLoc;
+//                        }
+//                    }
+//
+//                } catch (Exception $e) {
+//                    $error_msg = sprintf('Failed to get device location: %s', $e->getMessage());
+//                    $output['error'][] = $error_msg;
+//                    $this->error($error_msg);
+//                }
+//                $distance = null;
+//                if ($asset && $coordinates) {
+//                    if ($asset->location) {
+//                        if ($asset->location->coordinates) {
+//                            $obj_location = $asset->location->coordinates;
+//                            $obj_location = explode(",", $obj_location);
+//                            $dev_coordinates = explode(",", $coordinates);
+//                            $distance = $this->getDistanceBetweenPointsNew($obj_location[0], $obj_location[1], $dev_coordinates[0], $dev_coordinates[1]);
+//                        }
+//                    }
+//                }
 
                 $device = Device::updateOrCreate(
                     ['mdm_id' => $phone["id"]],
@@ -256,7 +255,7 @@ class SyncDevices extends Command
                         'locationUpdate' => $locationUpdate,
                         'asset_id' => $asset_id,
                         'asset_sim_id' => $sim_id,
-                        'distance' => $distance,
+//                        'distance' => $distance,
                         'publicIp' => $publicIp,
                         'enrollTime' => $enrollTime,
                         'anyDesk' => $anyDesk,
@@ -296,5 +295,41 @@ class SyncDevices extends Command
         $distance = rad2deg($distance);
         $distance = $distance * 60 * 1.1515 * 1.609344 * 1000;
         return intval($distance);
+    }
+
+
+    public function getToken($client, $mdm_url, $mdm_user, $mdm_password): string
+    {
+        $response = $client->request('POST', $mdm_url . 'public/jwt/login', [
+            \GuzzleHttp\RequestOptions::JSON => ['login' => $mdm_user, 'password' => $mdm_password]
+        ]);
+        $response = $response->getBody()->getContents();
+        $token_json = json_decode($response, true);
+        return $token_json["id_token"];
+    }
+
+    public function getDevices($client, $mdm_url, $token)
+    {
+        $headers = [
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer ' . $token,
+        ];
+
+        for ($i = 1; $i < 10; $i++) {
+            $response = $client->request('POST', $mdm_url . 'private/devices/search', [
+                'headers' => $headers,
+                \GuzzleHttp\RequestOptions::JSON => ['pageSize' => 1, 'pageNum' => 1]
+            ]);
+            $response = $response->getBody()->getContents();
+            $json = json_decode($response, true);
+            print_r($json);
+        }
+
+
+        $data = $json["data"];
+        $devices = $data["devices"];
+
+        $items = $devices["items"];
+        return $items;
     }
 }
