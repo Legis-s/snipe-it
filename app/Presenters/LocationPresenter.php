@@ -50,7 +50,7 @@ class LocationPresenter extends Presenter
                 "sortable" => true,
                 "switchable" => true,
                 "title" => "Bitrix id OLD",
-                "visible" => true,
+                "visible" => false,
                 "formatter"=>"bitrixIdLocationFormatter"
             ],[
                 "field" => "sklad",
@@ -58,13 +58,6 @@ class LocationPresenter extends Presenter
                 "sortable" => true,
                 "title" => "Склад",
                 "visible" => false,
-                "formatter" => "trueFalseFormatter"
-            ],[
-                "field" => "active",
-                "searchable" => true,
-                "sortable" => true,
-                "title" => "Активность",
-                "visible" => true,
                 "formatter" => "trueFalseFormatter"
             ],[
                 'field' => 'name',
