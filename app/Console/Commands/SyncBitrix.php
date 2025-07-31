@@ -55,12 +55,12 @@ class SyncBitrix extends Command
 
             /** @var \GuzzleHttp\Client $client */
             $client = new \GuzzleHttp\Client();
-            $this->synh_users($client, $bitrix_url);
+//            $this->synh_users($client, $bitrix_url);
             $this->synh_objects($client, $bitrix_url);
-            $this->synh_suppliers($client, $bitrix_url);
-            $this->synh_legals($client, $bitrix_url);
-            $this->synh_deals($client, $bitrix_url);
-            $this->synh_types($client, $bitrix_url);
+//            $this->synh_suppliers($client, $bitrix_url);
+//            $this->synh_legals($client, $bitrix_url);
+//            $this->synh_deals($client, $bitrix_url);
+//            $this->synh_types($client, $bitrix_url);
         } else {
             $this->error('Required Bitrix environment variables are not set. Please check BITRIX_URL, BITRIX_USER and BITRIX_KEY.');
             return 1;
@@ -158,7 +158,12 @@ class SyncBitrix extends Command
         $count = 0;
         foreach ($bitrix_objects as &$value) {
             $count++;
+            if ($value["id"] == 14596){
+                print_r($value);
+                print("\n");
+            }
             $location = Location::where('bitrix_id', $value["id"])->withTrashed()->first();
+
             $active = true;
             $bitrix_user = $value["assignedById"];
             /** @var User $sklad_user */
@@ -178,7 +183,6 @@ class SyncBitrix extends Command
                 $address = property_exists($yandex_map, 'address') ? $yandex_map->address : '';
                 $coordinates = property_exists($yandex_map, 'coord') ? implode(",", $yandex_map->coord) : '';
             }
-
 
             $obj_code = $value["ufCrm5_1721062689"];
             $bitrix_id_old = $value["ufCrm5_1721066282"];
@@ -210,7 +214,9 @@ class SyncBitrix extends Command
             }
 
             if (!$active && $location && $location->isDeletableNoGate()) {
-                $location->delete();
+                if (!$location->trashed()) {
+                    $location->delete();
+                }
             } else {
                 if ($location) {
                     $location->update([
@@ -220,12 +226,10 @@ class SyncBitrix extends Command
                         'coordinates' => $coordinates,
                         'object_code' => intval($obj_code),
                         'manager_id' => $sklad_user_id,
-                        'active' => $active
                     ]);
                     if ($location->trashed()) {
                         $location->restore();
                     }
-                    $location->save();
                 } else {
                     Location::updateOrCreate(
                         ['bitrix_id' => $value["id"]],
@@ -236,7 +240,6 @@ class SyncBitrix extends Command
                             'coordinates' => $coordinates,
                             'object_code' => intval($obj_code),
                             'manager_id' => $sklad_user_id,
-                            'active' => $active
                         ]
                     );
                 }

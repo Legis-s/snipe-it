@@ -84,7 +84,6 @@ class Location extends SnipeModel
         'bitrix_id',
         'bitrix_id_old',
         'coordinates',
-        'active',
         'sklad',
         'contract_number',
         'object_code',
@@ -137,10 +136,7 @@ class Location extends SnipeModel
      */
     public function isDeletableNoGate()
     {
-        return  ($this->assets_count == 0)
-            && ($this->assigned_assets_count == 0)
-            && ($this->children_count == 0)
-            && ($this->users_count == 0);
+        return  (count($this->assets) === 0) && (count($this->rtd_assets) === 0) && (count($this->assignedAssets) === 0);
     }
 
     /**

@@ -82,7 +82,6 @@ class LocationsController extends Controller
             'locations.bitrix_id',
             'locations.bitrix_id_old',
             'locations.sklad',
-            'locations.active',
         ])
             ->withCount('assignedAssets as assigned_assets_count')
             ->withCount('assignedAssets as assigned_assets_count')
@@ -228,7 +227,6 @@ class LocationsController extends Controller
                 'locations.bitrix_id',
                 'locations.bitrix_id_old',
                 'locations.sklad',
-                'locations.active',
             ])
             ->withCount('assignedAssets as assigned_assets_count')
             ->withCount('assets as assets_count')
@@ -381,8 +379,7 @@ class LocationsController extends Controller
         $request->headers->get('referer') === route('profile')
             ? $this->authorize('self.edit_location')
             : $this->authorize('view.selectlists');
-        $user = auth()->user();
-        $favorite_location = $user->favoriteLocation;
+
         $locations = Location::select([
             'locations.id',
             'locations.name',
@@ -410,6 +407,7 @@ class LocationsController extends Controller
         $locations_with_children = [];
 
         $locations_new = collect([]);
+        $favorite_location = auth()->user()->favoriteLocation;
         if ($favorite_location){
 
             foreach ($locations as $location) {
