@@ -55,12 +55,12 @@ class SyncBitrix extends Command
 
             /** @var \GuzzleHttp\Client $client */
             $client = new \GuzzleHttp\Client();
-//            $this->synh_users($client, $bitrix_url);
+            $this->synh_users($client, $bitrix_url);
             $this->synh_objects($client, $bitrix_url);
-//            $this->synh_suppliers($client, $bitrix_url);
-//            $this->synh_legals($client, $bitrix_url);
-//            $this->synh_deals($client, $bitrix_url);
-//            $this->synh_types($client, $bitrix_url);
+            $this->synh_suppliers($client, $bitrix_url);
+            $this->synh_legals($client, $bitrix_url);
+            $this->synh_deals($client, $bitrix_url);
+            $this->synh_types($client, $bitrix_url);
         } else {
             $this->error('Required Bitrix environment variables are not set. Please check BITRIX_URL, BITRIX_USER and BITRIX_KEY.');
             return 1;
@@ -369,7 +369,7 @@ class SyncBitrix extends Command
                         'UF_CRM_1407316260',//number
                     ],
                     'filter' => [
-                        'CATEGORY_ID' => [3, 2, 13, 14]
+                        'CATEGORY_ID' => [3, 2, 13, 14,9]
                     ],
                     'start' => $next,
                 ]
