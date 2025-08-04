@@ -22,7 +22,7 @@ Route::group(['prefix' => 'consumables', 'middleware' => ['auth']], function () 
     )->name('upload/consumable');
 
     Route::delete(
-        '{consumableId}/deletefile/{fileId}',
+        '{consumableId}/showfile/{fileId}/delete',
         [Consumables\ConsumablesFilesController::class, 'destroy']
     )->name('delete/consumablefile');
 

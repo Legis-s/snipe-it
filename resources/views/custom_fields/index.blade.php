@@ -33,7 +33,8 @@
                 data-side-pagination="client"
                 data-sort-order="asc"
                 data-sort-name="name"
-                id="customFieldsTable"
+                id="customFieldsetTable"
+                data-buttons="customFieldsetButtons"
                 class="table table-striped snipe-table"
                 data-export-options='{
                 "fileName": "export-fieldsets-{{ date('Y-m-d') }}",
@@ -89,7 +90,7 @@
                   @if($fieldset->models->count() > 0)
                   <button type="submit" class="btn btn-danger btn-sm disabled" data-tooltip="true" title="{{ trans('general.cannot_be_deleted') }}" disabled><i class="fas fa-trash"></i></button>
                   @else
-                  <button type="submit" class="btn btn-danger btn-sm" data-tooltip="true" title="{{ trans('general.delete') }}"><i class="fas fa-trash"></i></button>
+                  <button type="submit" class="btn btn-danger btn-sm delete-asset" data-tooltip="true" title="{{ trans('general.delete') }}" data-toggle="modal" data-title="{{ trans('general.delete') }}" data-content="{{ trans('general.sure_to_delete_var', ['item' => $fieldset->name]) }}" data-icon="fa fa-trash" data-target="#dataConfirmModal" onClick="return false;"><i class="fas fa-trash"></i></button>
                   @endif
                 </form>
                 @endcan
@@ -130,6 +131,7 @@
                 data-sort-order="asc"
                 data-sort-name="name"
                 id="customFieldsTable"
+                data-buttons="customFieldButtons"
                 class="table table-striped snipe-table"
                 data-export-options='{
                 "fileName": "export-fields-{{ date('Y-m-d') }}",
@@ -252,7 +254,7 @@
                       <i class="fas fa-trash" aria-hidden="true"></i>
                       <span class="sr-only">{{ trans('button.delete') }}</span></button>
                   @else
-                    <button type="submit" class="btn btn-danger btn-sm" data-tooltip="true" title="{{ trans('general.delete') }}">
+                    <button type="submit" class="btn btn-danger btn-sm delete-asset" data-tooltip="true" title="{{ trans('general.delete') }}" data-toggle="modal" data-title="{{ trans('general.delete') }}" data-content="{{ trans('general.sure_to_delete_var', ['item' => $field->name]) }}" data-target="#dataConfirmModal" data-icon="fa fa-trash" onClick="return false;">
                       <i class="fas fa-trash" aria-hidden="true"></i>
                       <span class="sr-only">{{ trans('button.delete') }}</span>
                     </button>

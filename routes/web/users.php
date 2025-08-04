@@ -73,7 +73,7 @@ Route::group(['prefix' => 'users', 'middleware' => ['auth']], function () {
     )->name('upload/user')->withTrashed();
 
     Route::delete(
-        '{userId}/deletefile/{fileId}',
+        '{userId}/showfile/{fileId}/delete',
         [
             Users\UserFilesController::class, 
             'destroy'

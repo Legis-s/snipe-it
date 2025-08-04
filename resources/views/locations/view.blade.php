@@ -169,7 +169,7 @@
                     </span>
                       <span class="hidden-xs hidden-sm">
                         {{ trans('general.files') }}
-                          {!! ($location->uploads->count() > 0 ) ? '<badge class="badge badge-secondary">'.number_format($location->uploads->count()).'</badge>' : '' !!}
+                          {!! ($location->uploads->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($location->uploads->count()).'</span>' : '' !!}
                       </span>
                   </a>
               </li>
@@ -211,6 +211,7 @@
                               data-bulk-button-id="#bulkUserEditButton"
                               data-bulk-form-id="#usersBulkForm"
                               id="usersTable"
+                              data-buttons="userButtons"
                               class="table table-striped snipe-table"
                               data-url="{{route('api.users.index', ['location_id' => $location->id])}}"
                               data-export-options='{
@@ -234,6 +235,7 @@
                               data-bulk-button-id="#bulkAssetEditButton"
                               data-bulk-form-id="#assetsBulkForm"
                               id="assetsListingTable"
+                              data-buttons="assetButtons"
                               class="table table-striped snipe-table"
                               data-url="{{route('api.assets.index', ['location_id' => $location->id]) }}"
                               data-export-options='{
@@ -260,6 +262,7 @@
                               data-bulk-button-id="#AssignedbulkAssetEditButton"
                               data-bulk-form-id="#assignedAssetsBulkForm"
                               id="assetsAssignedListingTable"
+                              data-buttons="assetButtons"
                               class="table table-striped snipe-table"
                               data-url="{{route('api.assets.index', ['assigned_to' => $location->id, 'assigned_type' => 'App\Models\Location']) }}"
                               data-export-options='{
@@ -284,6 +287,7 @@
                               data-bulk-button-id="#RTDbulkAssetEditButton"
                               data-bulk-form-id="#RTDassetsBulkEditToolbar"
                               id="RTDassetsListingTable"
+                              data-buttons="assetButtons"
                               class="table table-striped snipe-table"
                               data-url="{{route('api.assets.index', ['rtd_location_id' => $location->id]) }}"
                               data-export-options='{
@@ -305,6 +309,7 @@
                               data-side-pagination="server"
                               data-sort-order="asc"
                               id="accessoriesListingTable"
+                              data-buttons="accessoryButtons"
                               class="table table-striped snipe-table"
                               data-url="{{route('api.accessories.index', ['location_id' => $location->id]) }}"
                               data-export-options='{
@@ -327,6 +332,7 @@
                               data-side-pagination="server"
                               data-sort-order="asc"
                               id="accessoriesAssignedListingTable"
+                              data-buttons="accessoryButtons"
                               class="table table-striped snipe-table"
                               data-url="{{ route('api.locations.assigned_accessories', ['location' => $location]) }}"
                               data-export-options='{
@@ -347,6 +353,7 @@
                                   data-side-pagination="server"
                                   data-sort-order="asc"
                                   id="consumablesListingTable"
+                                  data-buttons="consumableButtons"
                                   class="table table-striped snipe-table"
                                   data-url="{{route('api.consumableassignments.index', ['location_id' => $location->id]) }}"
                                   data-export-options='{
@@ -366,6 +373,7 @@
                                   data-side-pagination="server"
                                   data-sort-order="asc"
                                   id="componentsTable"
+                                  data-buttons="componentButtons"
                                   class="table table-striped snipe-table"
                                   data-url="{{route('api.components.index', ['location_id' => $location->id])}}"
                                   data-export-options='{
@@ -379,13 +387,7 @@
 
                       <div class="row">
                           <div class="col-md-12">
-
-                              <x-filestable
-                                      filepath="private_uploads/locations/"
-                                      showfile_routename="show/locationsfile"
-                                      deletefile_routename="delete/locationsfile"
-                                      :object="$location" />
-
+                              <x-filestable object_type="locations" :object="$location" />
                           </div> <!-- /.col-md-12 -->
                       </div> <!-- /.row -->
 
@@ -397,34 +399,20 @@
                     <div class="row">
                         <div class="col-md-12">
                             <table
+                                    data-columns="{{ \App\Presenters\HistoryPresenter::dataTableLayout() }}"
                                     class="table table-striped snipe-table"
-                                    id="assetHistory"
-                                    data-id-table="assetHistory"
+                                    id="locationHistory"
+                                    data-id-table="locationHistory"
                                     data-side-pagination="server"
                                     data-sort-order="desc"
                                     data-sort-name="created_at"
                                     data-export-options='{
-                        "fileName": "export-location-asset-{{  $location->id }}-history",
-                        "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                    }'
-
-                    data-url="{{ route('api.activity.index', ['target_id' => $location->id, 'target_type' => 'location']) }}"
-                    data-cookie-id-table="assetHistory"
-                    data-cookie="true">
-                                <thead>
-                                    <tr>
-                                        <th data-visible="true" data-field="icon" style="width: 40px;" class="hidden-xs" data-formatter="iconFormatter">{{ trans('admin/hardware/table.icon') }}</th>
-                                        <th class="col-sm-2" data-visible="true" data-field="action_date" data-formatter="dateDisplayFormatter">{{ trans('general.date') }}</th>
-                                        <th class="col-sm-1" data-visible="true" data-field="admin" data-formatter="usersLinkObjFormatter">{{ trans('general.created_by') }}</th>
-                                        <th class="col-sm-1" data-visible="true" data-field="action_type">{{ trans('general.action') }}</th>
-                                        <th class="col-sm-2" data-visible="true" data-field="item" data-formatter="polymorphicItemFormatter">{{ trans('general.item') }}</th>
-                                        <th class="col-sm-2" data-visible="true" data-field="target" data-formatter="polymorphicItemFormatter">{{ trans('general.target') }}</th>
-                                        <th class="col-sm-2" data-field="note">{{ trans('general.notes') }}</th>
-                                        <th class="col-md-3" data-field="signature_file" data-visible="false"  data-formatter="imageFormatter">{{ trans('general.signature') }}</th>
-                                        <th class="col-md-3" data-visible="false" data-field="file" data-visible="false"  data-formatter="fileUploadFormatter">{{ trans('general.download') }}</th>
-                                        <th class="col-sm-2" data-field="log_meta" data-visible="true" data-formatter="changeLogFormatter">{{ trans('admin/hardware/table.changed')}}</th>
-                                    </tr>
-                                </thead>
+                                        "fileName": "export-location-asset-{{  $location->id }}-history",
+                                        "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
+                                    }'
+                                    data-url="{{ route('api.activity.index', ['target_id' => $location->id, 'target_type' => 'location']) }}"
+                                    data-cookie-id-table="locationHistory"
+                                    data-cookie="true">
                             </table>
                         </div>
                     </div> <!-- /.row -->
@@ -556,7 +544,7 @@
             @if ($location->deleted_at=='')
 
                 @if ($location->isDeletable())
-                      <button class="btn btn-sm btn-block btn-danger btn-social delete-location" data-toggle="modal" data-title="{{ trans('general.delete') }}" data-content="{{ trans('general.sure_to_delete_var', ['item' => $location->name]) }}" data-target="#dataConfirmModal">
+                      <button class="btn btn-sm btn-block btn-danger btn-social delete-asset" data-toggle="modal" data-title="{{ trans('general.delete') }}" data-content="{{ trans('general.sure_to_delete_var', ['item' => $location->name]) }}" data-target="#dataConfirmModal">
                           <x-icon type="delete" />
                           {{ trans('general.delete') }}
                       </button>
@@ -599,14 +587,6 @@
         @include ('modals.upload-file', ['item_type' => 'locations', 'item_id' => $location->id])
     @endcan
 
-    <script>
-        $('#dataConfirmModal').on('show.bs.modal', function (event) {
-            var content = $(event.relatedTarget).data('content');
-            var title = $(event.relatedTarget).data('title');
-            $(this).find(".modal-body").text(content);
-            $(this).find(".modal-header").text(title);
-        });
-    </script>
 
 @include ('partials.bootstrap-table', [
 'exportFile' => 'locations-export',

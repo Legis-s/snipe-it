@@ -27,6 +27,7 @@
             data-side-pagination="server"
             data-sort-order="asc"
             id="suppliersTable"
+            data-buttons="supplierButtons"
             class="table table-striped snipe-table"
             data-url="{{ route('api.suppliers.index') }}"
             data-export-options='{

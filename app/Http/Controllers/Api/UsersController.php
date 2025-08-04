@@ -110,6 +110,14 @@ class UsersController extends Controller
             $users = $users->where('users.activated', '=', $request->input('activated'));
         }
 
+        if ($request->input('admins') == 'true') {
+            $users = $users->OnlyAdminsAndSuperAdmins();
+        }
+
+        if ($request->input('superadmins') == 'true') {
+            $users = $users->OnlySuperAdmins();
+        }
+
         if ($request->filled('company_id')) {
             $users = $users->where('users.company_id', '=', $request->input('company_id'));
         }

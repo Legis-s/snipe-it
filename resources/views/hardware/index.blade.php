@@ -26,7 +26,7 @@
   @elseif (Request::get('status')=='Deleted')
     {{ trans('general.deleted') }}
   @elseif (Request::get('status')=='byod')
-    {{ trans('general.byod') }}
+    {{ strtoupper(trans('general.byod')) }}
   @elseif (Request::get('status')=='Sold')
     {{ trans('general.sold') }}
   @elseif (Request::get('status')=='Issued_for_sale')
@@ -47,14 +47,6 @@
 @yield('title0')  @parent
 @stop
 
-@section('header_right')
-  <a href="{{ route('reports/custom') }}" style="margin-right: 5px;" class="btn btn-default">
-    {{ trans('admin/hardware/general.custom_export') }}</a>
-  @can('create', \App\Models\Asset::class)
-  <a href="{{ route('hardware.create') }}" {{$snipeSettings->shortcuts_enabled == 1 ? "n" : ''}} class="btn btn-primary pull-right"></i> {{ trans('general.create') }}</a>
-  @endcan
-
-@stop
 
 {{-- Page content --}}
 @section('content')
@@ -68,7 +60,7 @@
             <div class="col-md-12">
 
                 @include('partials.asset-bulk-actions', ['status' => Request::get('status')])
-
+                   
               <table
                 data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayout() }}"
                 data-cookie-id-table="{{ request()->has('status') ? e(request()->input('status')) : ''  }}assetsListingTable"
@@ -81,6 +73,7 @@
                 data-toolbar="#assetsBulkEditToolbar"
                 data-bulk-button-id="#bulkAssetEditButton"
                 data-bulk-form-id="#assetsBulkForm"
+                data-buttons="assetButtons"
                 id="{{ request()->has('status') ? e(request()->input('status')) : ''  }}assetsListingTable"
                 class="table table-striped snipe-table"
                 data-url="{{ route('api.assets.index',
@@ -105,39 +98,39 @@
 
 @section('moar_scripts')
 @include('partials.bootstrap-table')
-<script nonce="{{ csrf_token() }}">
+{{--<script nonce="{{ csrf_token() }}">--}}
 
-// Initialize with options
-// onScan.attachTo(document, {
-//     suffixKeyCodes: [13], // enter-key expected at the end of a scan
-//     reactToPaste: true, // Compatibility to built-in scanners in paste-mode (as opposed to keyboard-mode)
-//     onScan: function(sCode, iQty) { // Alternative to document.addEventListener('scan')
-//         console.log('Scanned: ' + sCode);
-//         $.ajax({
-//           type: 'GET',
-//           url:  "api/v1/hardware/bytag/"+sCode,
-//           headers: {
-//             "X-Requested-With": 'XMLHttpRequest',
-//             "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-//           },
-//           dataType: 'json',
-//           success: function (data) {
-//             console.log(data);
-//             if (data != null && "id" in data) {
-//               console.log(data["id"]);
-//               window.location.href = "/hardware/"+data["id"];
-//             }else{
-//               Swal.fire({
-//                 icon: "error",
-//                 title: "Нет актива с меткой "+ sCode,
-//                 timer: 1200
-//               });
-//               console.log("No tag ");
-//             }
-//           },
-//         });
-//     },
-// });
+{{--// Initialize with options--}}
+{{--// onScan.attachTo(document, {--}}
+{{--//     suffixKeyCodes: [13], // enter-key expected at the end of a scan--}}
+{{--//     reactToPaste: true, // Compatibility to built-in scanners in paste-mode (as opposed to keyboard-mode)--}}
+{{--//     onScan: function(sCode, iQty) { // Alternative to document.addEventListener('scan')--}}
+{{--//         console.log('Scanned: ' + sCode);--}}
+{{--//         $.ajax({--}}
+{{--//           type: 'GET',--}}
+{{--//           url:  "api/v1/hardware/bytag/"+sCode,--}}
+{{--//           headers: {--}}
+{{--//             "X-Requested-With": 'XMLHttpRequest',--}}
+{{--//             "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')--}}
+{{--//           },--}}
+{{--//           dataType: 'json',--}}
+{{--//           success: function (data) {--}}
+{{--//             console.log(data);--}}
+{{--//             if (data != null && "id" in data) {--}}
+{{--//               console.log(data["id"]);--}}
+{{--//               window.location.href = "/hardware/"+data["id"];--}}
+{{--//             }else{--}}
+{{--//               Swal.fire({--}}
+{{--//                 icon: "error",--}}
+{{--//                 title: "Нет актива с меткой "+ sCode,--}}
+{{--//                 timer: 1200--}}
+{{--//               });--}}
+{{--//               console.log("No tag ");--}}
+{{--//             }--}}
+{{--//           },--}}
+{{--//         });--}}
+{{--//     },--}}
+{{--// });--}}
 
-</script>
+{{--</script>--}}
 @stop

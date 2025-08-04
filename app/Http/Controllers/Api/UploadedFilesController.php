@@ -98,15 +98,22 @@ class UploadedFilesController extends Controller
                 'created_at',
             ];
 
-        $uploads = $object->uploads();
-        $offset = ($request->input('offset') > $object->count()) ? $object->count() : abs($request->input('offset'));
+
+        $uploads = Actionlog::select('action_logs.*')
+            ->whereNotNull('filename')
+            ->where('item_type', self::$map_object_type[$object_type])
+            ->where('item_id', $object->id)
+            ->where('action_type', '=', 'uploaded')
+            ->with('adminuser');
+
+        $offset = ($request->input('offset') > $uploads->count()) ? $uploads->count() : abs($request->input('offset'));
         $limit = app('api_limit_value');
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
-        $sort = in_array($request->input('sort'), $allowed_columns) ? $request->input('sort') : 'action_logs.created_at';
+        $sort = in_array($request->input('sort'), $allowed_columns) ? $request->input('sort') : 'created_at';
 
         // Text search on action_logs fields
-        // We could use the normal Actionlogs text scope, but it's a very heavy query since it's searcghing across all relations
-        // And we generally won't need that here
+        // We could use the normal Actionlogs text scope, but it's a very heavy query since it's searching across all relations
+        // and we generally won't need that here
         if ($request->filled('search')) {
 
             $uploads->where(
@@ -117,8 +124,10 @@ class UploadedFilesController extends Controller
             );
         }
 
+        $total = $uploads->count();
         $uploads = $uploads->skip($offset)->take($limit)->orderBy($sort, $order)->get();
-        return (new UploadedFilesTransformer())->transformFiles($uploads, $uploads->count());
+
+        return (new UploadedFilesTransformer())->transformFiles($uploads, $total);
     }
 
 

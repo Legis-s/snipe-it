@@ -86,7 +86,6 @@ dir="{{ Helper::determineLanguageDirection() }}">
     <script src="{{ url(asset('js/respond.js')) }}" nonce="{{ csrf_token() }}"></script>
 
 
-
 </head>
 
 @if (($snipeSettings) && ($snipeSettings->allow_user_skin==1) && Auth::check() && Auth::user()->present()->skin != '')
@@ -1037,17 +1036,18 @@ dir="{{ Helper::determineLanguageDirection() }}">
 
         <!-- end main container -->
 
-        <div class="modal modal-danger fade" id="dataConfirmModal" tabindex="-1" role="dialog"
-             aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal modal-danger fade" id="dataConfirmModal" tabindex="-1" role="dialog" aria-labelledby="dataConfirmModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                        <h2 class="modal-title" id="myModalLabel">&nbsp;</h2>
+                        <h2 class="modal-title" id="dataConfirmModalLabel">
+                            <span class="modal-header-icon"></span>&nbsp;
+                        </h2>
                     </div>
                     <div class="modal-body"></div>
                     <div class="modal-footer">
-                        <form method="post" id="deleteForm" role="form">
+                        <form method="post" id="deleteForm" role="form" action="">
                             {{ csrf_field() }}
                             {{ method_field('DELETE') }}
 
@@ -1091,9 +1091,6 @@ dir="{{ Helper::determineLanguageDirection() }}">
         {{-- Javascript files --}}
         <script src="{{ url(mix('js/dist/all.js')) }}" nonce="{{ csrf_token() }}"></script>
         <script src="{{ url('js/select2/i18n/'.Helper::mapBackToLegacyLocale(app()->getLocale()).'.js') }}"></script>
-
-        <!-- v5-beta: This pGenerator call must remain here for v5 - until fixed - so that the JS password generator works for the user create modal. -->
-        <script src="{{ url('js/pGenerator.jquery.js') }}"></script>
 
         {{-- Page level javascript --}}
         @stack('js')

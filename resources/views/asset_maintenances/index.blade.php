@@ -7,12 +7,6 @@
 @stop
 
 
-@section('header_right')
-  @can('update', \App\Models\Asset::class)
-    <a href="{{ route('maintenances.create') }}" class="btn btn-primary pull-right"> {{ trans('general.create') }}</a>
-  @endcan
-@stop
-
 {{-- Page content --}}
 @section('content')
 
@@ -24,17 +18,10 @@
           <table
               data-columns="{{ \App\Presenters\AssetMaintenancesPresenter::dataTableLayout() }}"
               data-cookie-id-table="maintenancesTable"
-
-
-
-
               data-side-pagination="server"
-
-
               data-show-footer="true"
-
-
               id="maintenancesTable"
+              data-buttons="maintenanceButtons"
               class="table table-striped snipe-table"
               data-url="{{route('api.maintenances.index') }}"
               data-export-options='{

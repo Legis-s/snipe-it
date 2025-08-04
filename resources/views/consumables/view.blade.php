@@ -41,7 +41,7 @@
                 <x-icon type="users" class="fa-2x" />
                 </span>
                     <span class="hidden-xs hidden-sm">{{ trans('general.assigned') }}
-                      {!! ($consumable->users_consumables > 0 ) ? '<badge class="badge badge-secondary">'.number_format($consumable->users_consumables).'</badge>' : '' !!}
+                      {!! ($consumable->users_consumables > 0 ) ? '<span class="badge badge-secondary">'.number_format($consumable->users_consumables).'</span>' : '' !!}
                     </span>
                   </a>
             </li>
@@ -54,7 +54,7 @@
                   <i class="far fa-file fa-2x" aria-hidden="true"></i>
                 </span>
                 <span class="hidden-xs hidden-sm">{{ trans('general.file_uploads') }}
-                    {!! ($consumable->uploads->count() > 0 ) ? '<badge class="badge badge-secondary">'.number_format($consumable->uploads->count()).'</badge>' : '' !!}
+                    {!! ($consumable->uploads->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($consumable->uploads->count()).'</span>' : '' !!}
                   </span>
                 </a>
               </li>
@@ -139,7 +139,7 @@
                   @can('delete', $consumable)
                     <div class="col-md-12" style="padding-top: 10px; padding-bottom: 20px">
                       @if ($consumable->deleted_at=='')
-                        <button class="btn btn-sm btn-block btn-danger btn-social hidden-print delete-asset" data-toggle="modal" data-title="{{ trans('general.delete') }}" data-content="{{ trans('general.sure_to_delete_var', ['item' => $consumable->name]) }}" data-target="#dataConfirmModal">
+                        <button class="btn btn-sm btn-block btn-danger btn-social hidden-print delete-asset" data-icon="fa fa-trash" data-toggle="modal" data-title="{{ trans('general.delete') }}" data-content="{{ trans('general.sure_to_delete_var', ['item' => $consumable->name]) }}" data-target="#dataConfirmModal" onClick="return false;">
                           <x-icon type="delete" />
                           {{ trans('general.delete') }}
                         </button>
@@ -430,12 +430,7 @@
 
             <div class="row">
               <div class="col-md-12">
-                <x-filestable
-                        filepath="private_uploads/consumables/"
-                        showfile_routename="show.consumablefile"
-                        deletefile_routename="delete/consumablefile"
-                        :object="$consumable" />
-
+                <x-filestable object_type="consumables" :object="$consumable" />
               </div>
             </div>
 
@@ -476,18 +471,6 @@
 @stop
 
 @section('moar_scripts')
-
-        <script>
-
-          $('#dataConfirmModal').on('show.bs.modal', function (event) {
-            var content = $(event.relatedTarget).data('content');
-            var title = $(event.relatedTarget).data('title');
-            $(this).find(".modal-body").text(content);
-            $(this).find(".modal-header").text(title);
-          });
-
-        </script>
-
 
   @include ('partials.bootstrap-table', ['simple_view' => true])
 @endsection

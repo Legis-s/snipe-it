@@ -10,10 +10,6 @@
   @can('create', \App\Models\Consumable::class)
   <a href="{{ route('consumables.create') }}" {{$snipeSettings->shortcuts_enabled == 1 ? "accesskey=n" : ''}} class="btn btn-primary pull-right"> {{ trans('general.create') }}</a>
   @endcan
-
-  @can('checkout', \App\Models\Consumable::class)
-      <a href="{{ route('consumables.bulkcheckout.show') }}" class="btn bg-maroon pull-right">{{ trans('general.bulk_checkout') }}</a>
-  @endcan
 @stop
 
 {{-- Page content --}}
@@ -35,6 +31,7 @@
                             data-footer-style="footerStyle"
                             data-toolbar="#toolbar"
                             id="consumablesTable"
+                            data-buttons="consumableButtons"
                             class="table table-striped snipe-table"
                             data-url="{{ route('api.consumables.index') }}"
                             data-export-options='{

@@ -53,7 +53,7 @@ Route::group(['prefix' => 'licenses', 'middleware' => ['auth']], function () {
     )->name('upload/license');
 
     Route::delete(
-    '{licenseId}/deletefile/{fileId}',
+    '{licenseId}/showfile/{fileId}/delete',
         [Licenses\LicenseFilesController::class, 'destroy']
     )->name('delete/licensefile');
     Route::get(
