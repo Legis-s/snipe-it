@@ -299,7 +299,7 @@ class SyncBitrix extends Command
                 [
                     'name' => $value["TITLE"],
                     'city' => $value["ADDRESS_CITY"],
-                    'notes' => $value["COMMENTS"],
+                    'notes' => substr($value["COMMENTS"], 0, 185),
                     'address' => $value["ADDRESS"],
                     'address2' => $value["ADDRESS_2"],
                 ]
