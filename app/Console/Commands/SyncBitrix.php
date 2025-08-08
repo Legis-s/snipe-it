@@ -21,6 +21,7 @@ class SyncBitrix extends Command
      *
      * @var string
      */
+    //php artisan
     protected $signature = 'snipeit:sync-bitrix {--output= : info|warn|error|all} ';
 
     /**
@@ -158,12 +159,7 @@ class SyncBitrix extends Command
         $count = 0;
         foreach ($bitrix_objects as &$value) {
             $count++;
-            if ($value["id"] == 14596){
-                print_r($value);
-                print("\n");
-            }
             $location = Location::where('bitrix_id', $value["id"])->withTrashed()->first();
-
             $active = true;
             $bitrix_user = $value["assignedById"];
             /** @var User $sklad_user */
@@ -293,13 +289,13 @@ class SyncBitrix extends Command
         foreach ($bitrix_suppliers as &$value) {
             $count++;
             $existing_suppliers[] = $value["ID"];
-//            print_r($value);
+            print_r($value);
             Supplier::updateOrCreate(
                 ['bitrix_id' => $value["ID"]],
                 [
                     'name' => $value["TITLE"],
                     'city' => $value["ADDRESS_CITY"],
-                    'notes' => $value["COMMENTS"],
+                    'notes' => substr($value["COMMENTS"], 0, 185),
                     'address' => $value["ADDRESS"],
                     'address2' => $value["ADDRESS_2"],
                 ]
