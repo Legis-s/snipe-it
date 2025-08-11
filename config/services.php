@@ -53,4 +53,19 @@ return [
     ],
 
 
+    'bitrix' => [
+        'url' => env('BITRIX_URL'),
+        'user' => env('BITRIX_USER'),
+        'key' => env('BITRIX_KEY'),
+        'auth_client_id' => env('BITRIX_AUTH_CLIENT_ID'),
+        'auth_client_secret' => env('BITRIX_AUTH_CLIENT_SECRET')
+    ],
+
+    'mdm' => [
+        'url' => env('MDM_URL'),
+        'user' => env('MDM_USER'),
+        'password' => env('MDM_PASSWORD'),
+    ],
+
+
 ];

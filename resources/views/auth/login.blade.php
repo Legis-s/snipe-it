@@ -99,10 +99,19 @@
                                     {{ trans('auth/general.login')  }}
                                 </button>
                             @endif
+                            @if (config('services.bitrix.auth_client_id'))
+                                    @php
+                                        $clientId = config('services.bitrix.auth_client_id');
+                                        $baseUrl = rtrim(config('services.bitrix.url'), '/');
+                                        $state = "erv3rvefvetbvev" // Лучше генерировать и сохранять в сессию в контроллере
+                                    @endphp
 
-                            <br>
-                            <a href="https://bitrix.legis-s.ru/oauth/authorize/?client_id=local.6384cb37df2c27.72657963&state=JJHgsdgfkdaslg7lbadsfg" class="btn btn-lg btn-primary btn-block" id="bitrix"><img src="{{ url('img/triangle.svg') }}" style="height: 15px;padding-bottom: 2px;"/> Продолжить с Bitrix</a>
-
+                                    <br>
+                                    <a href="{{ $baseUrl }}/oauth/authorize/?client_id={{ urlencode($clientId) }}&state={{ urlencode($state) }}"
+                                       class="btn btn-lg btn-primary btn-block">
+                                        {{ trans('auth/general.bitrix_login')  }}
+                                    </a>
+                                @endif
                         </div>
                         <div class="text-right col-md-12 col-sm-12 col-xs-12" style="padding-top: 10px;">
                             @if ($snipeSettings->custom_forgot_pass_url)

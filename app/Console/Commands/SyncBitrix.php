@@ -49,9 +49,12 @@ class SyncBitrix extends Command
     {
         $output['info'] = [];
         $output['warn'] = [];
+        $bitrix_main_url = config('services.bitrix.url');
+        $bitrix_user = config('services.bitrix.user');
+        $bitrix_key = config('services.bitrix.key');
 
-        if (env('BITRIX_URL') !== null && env('BITRIX_USER') !== null && env('BITRIX_KEY') !== null) {
-            $bitrix_url = env('BITRIX_URL') . "rest/" . env('BITRIX_USER') . "/" . env('BITRIX_KEY') . "/";
+        if ($bitrix_main_url !== null && $bitrix_user !== null && $bitrix_key !== null) {
+            $bitrix_url = $bitrix_main_url . "rest/" . $bitrix_user . "/" . $bitrix_key . "/";
 
             /** @var \GuzzleHttp\Client $client */
             $client = new \GuzzleHttp\Client();
@@ -158,7 +161,7 @@ class SyncBitrix extends Command
         $count = 0;
         foreach ($bitrix_objects as &$value) {
             $count++;
-            if ($value["id"] == 14596){
+            if ($value["id"] == 14596) {
                 print_r($value);
                 print("\n");
             }
@@ -369,7 +372,7 @@ class SyncBitrix extends Command
                         'UF_CRM_1407316260',//number
                     ],
                     'filter' => [
-                        'CATEGORY_ID' => [3, 2, 13, 14,9]
+                        'CATEGORY_ID' => [3, 2, 13, 14, 9]
                     ],
                     'start' => $next,
                 ]

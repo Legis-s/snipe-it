@@ -53,9 +53,9 @@ class SyncDevices extends Command
 
         /** @var \GuzzleHttp\Client $client */
         $client = new \GuzzleHttp\Client();
-        $mdm_url = env('MDM_URL');
-        $mdm_user = env('MDM_USER');
-        $mdm_password = env('MDM_PASSWORD');
+        $mdm_url = config('services.mdm.url');
+        $mdm_user = config('services.mdm.user');
+        $mdm_password = config('services.mdm.password');
 
         if ($mdm_url != null && $mdm_user != null && $mdm_password != null) {
             $this->info('Attempting to authenticate with MDM...');

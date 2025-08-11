@@ -5,6 +5,7 @@ return [
     'email_reset_password'			=> 'Сброс пароля по эл.почте',
     'reset_password'			    => 'Восстановление пароля',
     'saml_login'                    => 'Вход через SAML',
+    'bitrix_login'                    => 'Вход через Bitrix',
     'login'                         => 'Логин',
     'login_prompt'                  => 'Пожалуйста, авторизуйтесь',
     'forgot_password'               => 'Я забыл мой пароль',

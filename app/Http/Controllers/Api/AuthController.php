@@ -63,11 +63,13 @@ class AuthController extends Controller
         if ($request->filled('code')) {
             $code = $request->get('code');
             $client = new \GuzzleHttp\Client();
+            $client_id = config('services.bitrix.auth_client_id');
+            $client_secret = config('services.bitrix.auth_client_secret');
             $params = [
                 'query' => [
                     'grant_type' => 'authorization_code',
-                    'client_id' => 'local.6384cb37df2c27.72657963',
-                    'client_secret' => 'uLx3Ht6F07S0gwJanKry7jV1oMAeMW40s9ARDfv1PzBMvH6nrP',
+                    'client_id' => $client_id,
+                    'client_secret' => $client_secret,
                     'code' => $code,
                 ]
             ];
