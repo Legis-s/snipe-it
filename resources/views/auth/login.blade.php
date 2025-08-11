@@ -108,7 +108,7 @@
 
                                     <br>
                                     <a href="{{ $baseUrl }}/oauth/authorize/?client_id={{ urlencode($clientId) }}&state={{ urlencode($state) }}"
-                                       class="btn btn-lg btn-primary btn-block">
+                                       class="btn btn-primary btn-block" >
                                         {{ trans('auth/general.bitrix_login')  }}
                                     </a>
                                 @endif
