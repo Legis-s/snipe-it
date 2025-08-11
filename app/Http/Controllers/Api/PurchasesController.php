@@ -309,7 +309,7 @@ class PurchasesController extends Controller
             $raw_bitrix_token = Crypt::decryptString($user->bitrix_token);
             $response = $client->request('POST', env('BITRIX_URL') . 'rest/' . $user->bitrix_id . '/' . $raw_bitrix_token . '/lists.element.add.json/', $params);
         } else {
-            $response = $client->request('POST', env('BITRIX_URL') . 'rest/' . env('BITRIX_USER') . '/' . env('BITRIX_KEY') . '/lists.element.add.json/', $params);
+            return response()->json(Helper::formatStandardApiResponse('error', null, $purchase->getErrors()));
         }
 
         $response = $response->getBody()->getContents();
