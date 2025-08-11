@@ -193,14 +193,6 @@ class PurchasesController extends Controller
 
 
                         if ($asset->isValid() && $asset->save()) {
-//                            if ($settings->zerofill_count > 0) {
-//                                $asset_tag_digits = preg_replace('/\D/', '', $asset_tag);
-//                                $asset_tag = preg_replace('/^0*/', '', $asset_tag_digits);
-//                                $asset_tag++;
-//                                $asset_tag = $settings->auto_increment_prefix . Asset::zerofill($asset_tag, $settings->zerofill_count);
-//                            } else {
-//                                $asset_tag = $settings->auto_increment_prefix . $asset_tag;
-//                            }
                         } else {
                             \Debugbar::info($asset->getErrors()->all());
                         }
@@ -220,10 +212,6 @@ class PurchasesController extends Controller
             $file_data_base64 = base64_encode($file_data);
 
             $user = auth()->user();
-//            \Debugbar::info("send bitrix");
-//            \Debugbar::info($user);
-//            \Debugbar::info($user->bitrix_token);
-//            \Debugbar::info($user->bitrix_id);
 
             /** @var \GuzzleHttp\Client $client */
             $client = new \GuzzleHttp\Client();
@@ -262,10 +250,10 @@ class PurchasesController extends Controller
                     $response = $client->request('POST',  env('BITRIX_URL').'rest/' . $user->bitrix_id . '/' . $raw_bitrix_token . '/lists.element.add.json/', $params);
 
                 } catch (DecryptException $e) {
-                    $response = $client->request('POST',  env('BITRIX_URL').'rest/'.env('BITRIX_USER').'/'.env('BITRIX_KEY').'/lists.element.add.json/', $params);
+                    return redirect()->back()->withInput()->with('error', 'Ключ битрикс неверный замените ');
                 }
             } else {
-                $response = $client->request('POST',  env('BITRIX_URL').'rest/'.env('BITRIX_USER').'/'.env('BITRIX_KEY').'/lists.element.add.json/', $params);
+                return redirect()->back()->withInput()->with('error', 'Для совершения закупок заполните ключ битрикс');
             }
             $response = $response->getBody()->getContents();
 
