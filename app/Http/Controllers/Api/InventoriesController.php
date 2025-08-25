@@ -129,10 +129,6 @@ class InventoriesController extends Controller
     }
 
 
-    /**
-     *
-     * @param  \Illuminate\Http\Request  $request
-     */
     public function store(Request $request) : JsonResponse
     {
         $data = $request->all();
