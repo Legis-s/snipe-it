@@ -1350,7 +1350,7 @@ class Helper
         return $settings;
         }
 
-    public static function getFormattedStatus($status): string {
+    public static function getFormattedStatus($status): string | null {
 
         if ($status=='') {
             return null;

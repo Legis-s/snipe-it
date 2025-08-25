@@ -30,26 +30,30 @@ class InventoriesTransformer
             }
         }
 
+
         $array = [
             'id' => (int)$inventory->id,
-            'status' => ($inventory->status) ? e($inventory->status) : null,
-            'status_text' => Helper::getFormattedStatus($inventory->status),
+            'status' => $inventory->status ? e($inventory->status) : null,
+            'status_text' => $inventory->status
+                ? Helper::getFormattedStatus($inventory->status)
+                : "",
             'name' => e($inventory->name),
-            'device' => ($inventory->device) ? e($inventory->device) : null,
-            'responsible' => ($inventory->responsible) ? e($inventory->responsible) : null,
-            'responsible_photo' => ($inventory->responsible_photo) ? e($inventory->responsible_photo_url()) : null,
-            'coords' => ($inventory->coords) ? e($inventory->coords) : null,
-            'log' => ($inventory->log) ? e($inventory->log) : null,
-            'comment' => ($inventory->comment) ? e($inventory->comment) : null,
+            'device' => $inventory->device ? e($inventory->device) : null,
+            'responsible' => $inventory->responsible ? e($inventory->responsible) : null,
+            'responsible_photo' => $inventory->responsible_photo ? e($inventory->responsible_photo_url()) : null,
+            'coords' => $inventory->coords ? e($inventory->coords) : null,
+            'log' => $inventory->log ? e($inventory->log) : null,
+            'comment' => $inventory->comment ? e($inventory->comment) : null,
             'created_at' => Helper::getFormattedDateObject($inventory->created_at, 'datetime'),
             'updated_at' => Helper::getFormattedDateObject($inventory->updated_at, 'datetime'),
             'total' => (int)$inventory->total,
             'checked' => (int)$inventory->checked,
             'successfully' => (int)$inventory->successfully,
-            'location' => ($inventory->location) ? (new LocationsTransformer)->transformLocation($inventory->location) : null,
+            'location' => $inventory->location
+                ? (new LocationsTransformer)->transformLocation($inventory->location)
+                : null,
             'inventory_items' => $inventory_items_arr,
         ];
-
         $permissions_array['available_actions'] = [
             'delete' => (Gate::allows('superadmin')) ? true : false,
         ];
