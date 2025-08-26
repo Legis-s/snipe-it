@@ -114,19 +114,30 @@
 
 
               @can('view', \App\Models\Consumable::class)
-                      @if ($location->consumables->count() > 0)
-                          <li>
-                              <a href="#consumables" data-toggle="tab" data-tooltip="true" title="{{ trans('general.consumables') }}">
-                                  <i class="fas fa-tint" style="font-size: 17px" aria-hidden="true"></i>
-                                  <span class="badge">
+                      <li>
+                          <a href="#consumables" data-toggle="tab" data-tooltip="true" title="{{ trans('general.consumables') }}">
+                              <i class="fas fa-tint" style="font-size: 17px" aria-hidden="true"></i>
+                              <span class="badge">
                               {{ number_format($location->consumables->count()) }}
                           </span>
-                                  <span class="sr-only">
+                              <span class="sr-only">
                               {{ trans('general.consumables') }}
                           </span>
-                              </a>
-                          </li>
-                      @endif
+                          </a>
+                      </li>
+{{--                      @if ($location->consumables->count() > 0)--}}
+{{--                          <li>--}}
+{{--                              <a href="#consumables" data-toggle="tab" data-tooltip="true" title="{{ trans('general.consumables') }}">--}}
+{{--                                  <i class="fas fa-tint" style="font-size: 17px" aria-hidden="true"></i>--}}
+{{--                                  <span class="badge">--}}
+{{--                              {{ number_format($location->consumables->count()) }}--}}
+{{--                          </span>--}}
+{{--                                  <span class="sr-only">--}}
+{{--                              {{ trans('general.consumables') }}--}}
+{{--                          </span>--}}
+{{--                              </a>--}}
+{{--                          </li>--}}
+{{--                      @endif--}}
                   @endcan
 
                   @can('view', \App\Models\Component::class)
