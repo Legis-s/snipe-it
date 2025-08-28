@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Transformers\InventoryItemTransformer;
 use App\Models\Inventory;
 use App\Models\InventoryItem;
+use App\Models\InventoryStatuslabel;
 use Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -115,10 +116,13 @@ class InventoryItemController extends Controller
             if($inventory_item->status->success){
                 $inventory_item->successfully = true;
             }
+            if($inventory_item->status->id == 4 && str_starts_with($inventory_item->asset->asset_tag, 'it_') ) {
+                $inventory_item->status =  InventoryStatusLabel::find(1);
+            }
         }
 
         if ($inventory_item->save()) {
-            if ($inventory_item->checked == true){
+            if ($inventory_item->checked){
                 $asset = $inventory_item->asset;
                 $asset->last_audit_date = date('Y-m-d h:i:s');
                 $asset->save();
@@ -130,7 +134,7 @@ class InventoryItemController extends Controller
             $finished = true;
             foreach ($inventory_items as $item) {
                 /** @var InventoryItem $item */
-                if  ($item->checked == false){
+                if  (!$item->checked){
                     $finished = false;
                     break;
                 }
