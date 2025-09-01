@@ -104,13 +104,13 @@ class InventoryItemController extends Controller
         $payload = $request->except(['status_id', 'asset', 'inventory', 'photo']);
         $inventory_item->fill($payload);
 
+        if ($request['photo']){
+            $destinationPath = public_path().'/uploads/inventory_items/';
 
-        if ($request->filled('photo')) {
-            $raw = $request->input('photo'); // base64
-            $file = base64_decode($raw, true);
-            if ($file !== false) {
-                $filename = 'items-'.$inventory_item->id.'-'.Str::random(8).'.jpg';
-                Storage::disk('public')->put('uploads/inventory_items/'.$filename, $file);
+            $file = base64_decode($inventory_item->photo);
+            $filename = 'items-'.$inventory_item->id.'-'.str_random(8).".jpg";
+            $success = file_put_contents($destinationPath.$filename, $file);
+            if ($success>0){
                 $inventory_item->photo = $filename;
             }
         }
