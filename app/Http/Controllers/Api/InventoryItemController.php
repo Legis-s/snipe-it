@@ -128,6 +128,9 @@ class InventoryItemController extends Controller
             }
         }
 
+        $label = InventoryStatuslabel::findOrFail($inventory_item->status_id);
+        $inventory_item->status()->associate($label);
+
         if ($inventory_item->save()) {
             if ($inventory_item->checked){
                 $asset = $inventory_item->asset;
