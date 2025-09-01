@@ -11,6 +11,7 @@ use App\Models\InventoryStatuslabel;
 use Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Image;
 
 /**
@@ -99,19 +100,29 @@ class InventoryItemController extends Controller
      */
     public function update(Request $request, $id): JsonResponse
     {
-        $inventory_item = InventoryItem::findOrFail($id);
-        $inventory_item->fill($request->all());
+        $inventory_item = InventoryItem::with(['asset','inventory','status'])->findOrFail($id);
+        $payload = $request->except(['status', 'asset', 'inventory', 'photo']);
+        $inventory_item->fill($payload);
 
-        if ($request['photo']){
-            $destinationPath = public_path().'/uploads/inventory_items/';
 
-            $file = base64_decode($inventory_item->photo);
-            $filename = 'items-'.$inventory_item->id.'-'.str_random(8).".jpg";
-            $success = file_put_contents($destinationPath.$filename, $file);
-            if ($success>0){
+        if ($request->filled('photo')) {
+            $raw = $request->input('photo'); // base64
+            $file = base64_decode($raw, true);
+            if ($file !== false) {
+                $filename = 'items-'.$inventory_item->id.'-'.Str::random(8).'.jpg';
+                Storage::disk('public')->put('uploads/inventory_items/'.$filename, $file);
                 $inventory_item->photo = $filename;
             }
         }
+
+        if ($request->has('status_id')) {
+            $in = $request->input('status_id');
+            $statusId = is_array($in) ? ($in['id'] ?? null) : (is_numeric($in) ? (int)$in : null);
+            if ($statusId) {
+                $inventory_item->status_id = $statusId;
+            }
+        }
+
         if ($inventory_item->status){
             if($inventory_item->status->success){
                 $inventory_item->successfully = true;
