@@ -54,6 +54,7 @@ final class InventoryItem extends SnipeModel
         'checked_at',
         'inventory_id',
         'status_id',
+        'status',
         'asset_id',
         'notes',
         'successfully',
