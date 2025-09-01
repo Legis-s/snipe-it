@@ -123,12 +123,13 @@ class InventoryItemController extends Controller
             }
         }
 
-        if ($inventory_item->status){
-            if($inventory_item->status->success){
-                $inventory_item->successfully = true;
+        if ($inventory_item->status_id){
+            if($inventory_item->status_id == 4 && str_starts_with($inventory_item->asset->asset_tag, 'it_') ) {
+                $inventory_item->status_id = 1;
+
             }
-            if($inventory_item->status->id == 4 && str_starts_with($inventory_item->asset->asset_tag, 'it_') ) {
-                $inventory_item->status =  InventoryStatusLabel::find(1);
+            if($inventory_item->status_id = 1){
+                $inventory_item->successfully = true;
             }
         }
 
