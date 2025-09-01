@@ -101,7 +101,7 @@ class InventoryItemController extends Controller
     public function update(Request $request, $id): JsonResponse
     {
         $inventory_item = InventoryItem::with(['asset','inventory','status'])->findOrFail($id);
-        $payload = $request->except(['status', 'asset', 'inventory', 'photo']);
+        $payload = $request->except(['status_id', 'asset', 'inventory', 'photo']);
         $inventory_item->fill($payload);
 
 
@@ -116,14 +116,14 @@ class InventoryItemController extends Controller
         }
 
         if ($request->has('status_id')) {
-            $inventory_item->status_id = $request->input('status_id');
+            $inventory_item->status =  InventoryStatuslabel::find($request->input('status_id'));
         }
 
-        if ($inventory_item->status_id){
-            if($inventory_item->status_id == 4 && str_starts_with($inventory_item->asset->asset_tag, 'it_') ) {
-                $inventory_item->status_id = 1;
+        if ($inventory_item->status){
+            if($inventory_item->status->id == 4 && str_starts_with($inventory_item->asset->asset_tag, 'it_') ) {
+                $inventory_item->status = InventoryStatuslabel::find(1);
             }
-            if($inventory_item->status_id = 1){
+            if($inventory_item->status->id == 1){
                 $inventory_item->successfully = true;
             }
         }
