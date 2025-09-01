@@ -116,17 +116,12 @@ class InventoryItemController extends Controller
         }
 
         if ($request->has('status_id')) {
-            $in = $request->input('status_id');
-            $statusId = is_array($in) ? ($in['id'] ?? null) : (is_numeric($in) ? (int)$in : null);
-            if ($statusId) {
-                $inventory_item->status_id = $statusId;
-            }
+            $inventory_item->status_id = $request->input('status_id');
         }
 
         if ($inventory_item->status_id){
             if($inventory_item->status_id == 4 && str_starts_with($inventory_item->asset->asset_tag, 'it_') ) {
                 $inventory_item->status_id = 1;
-
             }
             if($inventory_item->status_id = 1){
                 $inventory_item->successfully = true;
