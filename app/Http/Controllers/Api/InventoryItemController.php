@@ -115,7 +115,7 @@ class InventoryItemController extends Controller
             }
         }
 
-        if ($request->has('status_id')) {
+        if ($request->filled('status_id')) {
             $inventory_item->status_id = $request->input('status_id');
         }
 
@@ -123,7 +123,7 @@ class InventoryItemController extends Controller
             if($inventory_item->status_id == 4 && str_starts_with($inventory_item->asset->asset_tag, 'it_') ) {
                 $inventory_item->status_id = 1;
             }
-            if($inventory_item->status->id == 1){
+            if($inventory_item->status_id == 1){
                 $inventory_item->successfully = true;
             }
         }
