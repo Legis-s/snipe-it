@@ -44,7 +44,7 @@ class InventoryItemTransformer
             'checked_at' => Helper::getFormattedDateObject($inventory_item->checked_at, 'datetime'),
             'asset_id' =>   (int) $inventory_item->asset_id,
 //            'asset' => ($inventory_item->asset_id) ? (new AssetsTransformer)->transformAsset($inventory_item->asset) : null,
-//            'status' => ($inventory_item->status_id) ? (new InventoryStatuslabelsTransformer())->transformInventoryStatuslabel($inventory_item->status) : null,
+            'status' => ($inventory_item->status_id) ? (new InventoryStatuslabelsTransformer())->transformInventoryStatuslabel($inventory_item->status) : null,
             'inventory_id' =>  (int) $inventory_item->inventory_id,
             'created_at' => Helper::getFormattedDateObject($inventory_item->created_at, 'datetime'),
             'updated_at' => Helper::getFormattedDateObject($inventory_item->updated_at, 'datetime'),
