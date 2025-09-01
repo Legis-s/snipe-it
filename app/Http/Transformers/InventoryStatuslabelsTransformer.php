@@ -44,6 +44,18 @@ class InventoryStatuslabelsTransformer
         return $array;
     }
 
+    public function transformInventoryStatuslabelShort (InventoryStatuslabel $statuslabel)
+    {
+        $array = [
+            'id' => (int) $statuslabel->id,
+            'name' => e($statuslabel->name),
+            'success' => e($statuslabel->success),
+        ];
+
+        return $array;
+    }
+
+
 
 
 }
