@@ -114,6 +114,9 @@ class AssetCheckoutController extends Controller
             if ($request->filled('status_id')) {
                 $asset->status_id = $request->get('status_id');
             }
+            if (is_a($target, Asset::class, true)) {
+                $asset->location_id = null;
+            }
 
 
             if(!empty($asset->licenseseats->all())){

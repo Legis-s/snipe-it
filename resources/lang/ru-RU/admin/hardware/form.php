@@ -22,6 +22,7 @@ return [
     'date'				=> 'Дата покупки',
     'depreciation'	    => 'обесценивание',
     'depreciates_on'	=> 'Обесценивается на',
+    'location'	=> 'Расположение',
     'default_location'	=> 'Расположение склада',
     'default_location_phone' => 'Телефон расположение склада',
     'eol_date'			=> 'Срок эксплуатации',
