@@ -101,8 +101,6 @@ class InventoryItemController extends Controller
     public function update(Request $request, $id): JsonResponse
     {
         $inventory_item = InventoryItem::with(['asset','inventory','status'])->findOrFail($id);
-        $payload = $request->except(['status_id', 'asset', 'inventory', 'photo']);
-        $inventory_item->fill($payload);
 
         if ($request['photo']){
             $destinationPath = public_path().'/uploads/inventory_items/';
@@ -114,6 +112,11 @@ class InventoryItemController extends Controller
                 $inventory_item->photo = $filename;
             }
         }
+
+        $payload = $request->except(['status_id', 'asset', 'inventory', 'photo']);
+        $inventory_item->fill($payload);
+
+
 
         if ($request->filled('status_id')) {
             $inventory_item->status_id = $request->input('status_id');
