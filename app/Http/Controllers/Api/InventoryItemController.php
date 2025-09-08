@@ -113,7 +113,7 @@ class InventoryItemController extends Controller
             }
         }
 
-        $payload = $request->except(['status_id', 'asset', 'inventory', 'photo']);
+        $payload = $request->except(['asset', 'inventory']);
         $inventory_item->fill($payload);
 
 
