@@ -135,7 +135,6 @@ class SyncBitrix extends Command
                         'title',
                         'stageId',
                         'assignedById',
-                        'ufCrm5_1721066282', // old id
                         'ufCrm5_1721062689', // type
                         'ufCrm5_1721063355', // UF_CLOSEDATE
                         'ufCrm5_1742195522', // yandex_map
@@ -161,7 +160,7 @@ class SyncBitrix extends Command
         $count = 0;
         foreach ($bitrix_objects as &$value) {
             $count++;
-            if ($value["id"] == 14596) {
+            if ($value["id"] == 18957) {
                 print_r($value);
                 print("\n");
             }
@@ -188,7 +187,6 @@ class SyncBitrix extends Command
             }
 
             $obj_code = $value["ufCrm5_1721062689"];
-            $bitrix_id_old = $value["ufCrm5_1721066282"];
             switch ($obj_code) {
                 case 845:
                     $name = "[Тех. безопасность] " . $value["title"];
@@ -224,7 +222,6 @@ class SyncBitrix extends Command
                 if ($location) {
                     $location->update([
                         'name' => $name,
-                        'bitrix_id_old' => $bitrix_id_old,
                         'address' => $address,
                         'coordinates' => $coordinates,
                         'object_code' => intval($obj_code),
@@ -238,7 +235,6 @@ class SyncBitrix extends Command
                         ['bitrix_id' => $value["id"]],
                         [
                             'name' => $name,
-                            'bitrix_id_old' => $bitrix_id_old,
                             'address' => $address,
                             'coordinates' => $coordinates,
                             'object_code' => intval($obj_code),
