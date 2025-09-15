@@ -160,10 +160,6 @@ class SyncBitrix extends Command
         $count = 0;
         foreach ($bitrix_objects as &$value) {
             $count++;
-            if ($value["id"] == 18957) {
-                print_r($value);
-                print("\n");
-            }
             $location = Location::where('bitrix_id', $value["id"])->withTrashed()->first();
 
             $active = true;
@@ -214,6 +210,13 @@ class SyncBitrix extends Command
                 $name = "[Закрыто]" . $value["title"];
             }
 
+            if ($value["id"] == 18957) {
+                print_r($value);
+                print("\n");
+                print_r("$address");
+                print_r($address);
+            }
+
             if (!$active && $location && $location->isDeletableNoGate()) {
                 if (!$location->trashed()) {
                     $location->delete();
@@ -225,7 +228,7 @@ class SyncBitrix extends Command
                         'address' => $address,
                         'coordinates' => $coordinates,
                         'object_code' => intval($obj_code),
-                        'manager_id' => $sklad_user_id,
+                        'manager_id' => $sklad_user_id,3
                     ]);
                     if ($location->trashed()) {
                         $location->restore();
