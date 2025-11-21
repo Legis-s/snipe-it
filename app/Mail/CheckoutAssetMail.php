@@ -8,8 +8,6 @@ use App\Models\Location;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
@@ -17,7 +15,7 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Queue\SerializesModels;
 
-class CheckoutAssetMail extends Mailable
+class CheckoutAssetMail extends BaseMailable
 {
     use Queueable, SerializesModels;
 
@@ -87,7 +85,7 @@ class CheckoutAssetMail extends Mailable
             $name  = $this->target->assignedto?->display_name;
         }
         else if($this->target instanceof Location){
-            $name  = $this->target->manager->name;
+            $name  = $this->target->manager?->name;
         }
 
         // Check if the item has custom fields associated with it

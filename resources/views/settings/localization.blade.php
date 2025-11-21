@@ -41,10 +41,10 @@
                     <div class="col-md-12">
 
                         <!-- Language -->
-                        <div class="form-group {{ $errors->has('site_name') ? 'error' : '' }}">
-                            <div class="col-md-3 col-xs-12">
-                                <label for="site_name">{{ trans('admin/settings/general.default_language') }}</label>
-                            </div>
+                        <div class="form-group {{ $errors->has('locale') ? 'error' : '' }}">
+
+                           <label for="site_name" class="col-md-3 control-label">{{ trans('admin/settings/general.default_language') }}</label>
+
                             <div class="col-md-5 col-xs-12">
                                 <x-input.locale-select name="locale" :selected="old('locale', $setting->locale)" />
 
@@ -54,9 +54,9 @@
 
                         <!-- name display format -->
                         <div class="form-group {{ $errors->has('name_display_format') ? 'error' : '' }}">
-                            <div class="col-md-3 col-xs-12">
-                                <label for="name_display_format">{{ trans('general.name_display_format') }}</label>
-                            </div>
+
+                            <label for="name_display_format" class="col-md-3 control-label">{{ trans('general.name_display_format') }}</label>
+
                             <div class="col-md-5 col-xs-12">
                                 <x-input.select
                                     name="name_display_format"
@@ -72,9 +72,9 @@
 
                         <!-- Date format -->
                         <div class="form-group {{ $errors->has('time_display_format') ? 'error' : '' }}">
-                            <div class="col-md-3 col-xs-12">
-                                <label for="time_display_format">{{ trans('general.time_and_date_display') }}</label>
-                            </div>
+
+                            <label for="time_display_format" class="col-md-3 control-label">{{ trans('general.time_and_date_display') }}</label>
+
                             <div class="col-md-5 col-xs-12">
                                 <x-input.date-display-format name="date_display_format" :selected="old('date_display_format', $setting->date_display_format)" style="min-width:100%" />
                             </div>
@@ -86,11 +86,48 @@
 
                         </div>
 
+                        <!-- Week Start format -->
+                        <div class="form-group {{ $errors->has('week_start') ? 'error' : '' }}">
+
+                            <label for="week_start" class="col-md-3 control-label">{{ trans('datepicker.week_start') }}</label>
+
+                            <div class="col-md-5 col-xs-12">
+                                <select name="week_start" class="select2" style="width: 100%;" aria-label="week_start" data-placeholder="{{ trans('datepicker.select_day') }}">
+                                    <option value="0" @selected(old('week_start', $setting->week_start) == 0)>
+                                        {{ trans('datepicker.days.sunday') }}
+                                    </option>
+                                    <option value="1" @selected(old('week_start', $setting->week_start) == 1)>
+                                        {{ trans('datepicker.days.monday') }}
+                                    </option>
+                                    <option value="2" @selected(old('week_start', $setting->week_start) == 2)>
+                                        {{ trans('datepicker.days.tuesday') }}
+                                    </option>
+                                    <option value="3" @selected(old('week_start', $setting->week_start) == 3)>
+                                        {{ trans('datepicker.days.wednesday') }}
+                                    </option>
+                                    <option value="4" @selected(old('week_start', $setting->week_start) == 4)>
+                                        {{ trans('datepicker.days.thursday') }}
+                                    </option>
+                                    <option value="5" @selected(old('week_start', $setting->week_start) == 5)>
+                                        {{ trans('datepicker.days.friday') }}
+                                    </option>
+                                    <option value="6" @selected(old('week_start', $setting->week_start) == 6)>
+                                        {{ trans('datepicker.days.saturday') }}
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                            {!! $errors->first('week_start', '<div class="col-md-9 col-md-offset-3"><span class="alert-msg" aria-hidden="true">:message</span> </div>') !!}
+
+                        </div>
+
                         <!-- Currency -->
                         <div class="form-group {{ $errors->has('default_currency') ? 'error' : '' }}">
-                            <div class="col-md-3 col-xs-12">
-                                <label for="default_currency">{{ trans('admin/settings/general.default_currency') }}</label>
-                            </div>
+
+                                <label for="default_currency" class="col-md-3 control-label">{{ trans('admin/settings/general.default_currency') }}</label>
+
                             <div class="col-md-9 col-xs-12">
                                 <input
                                     class="form-control select2-container"

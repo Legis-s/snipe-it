@@ -149,6 +149,7 @@ class ActionlogsTransformer
                     'filename' => $actionlog->filename,
                     'inlineable' => StorageHelper::allowSafeInline($actionlog->uploads_file_path()),
                     'exists_on_disk' => Storage::exists($actionlog->uploads_file_path()) ? true : false,
+                    'mediatype' => StorageHelper::getMediaType($actionlog->uploads_file_path()),
                 ] : null,
 
             'item' => ($actionlog->item) ? [
@@ -160,6 +161,7 @@ class ActionlogsTransformer
             'location' => ($actionlog->location) ? [
                 'id' => (int) $actionlog->location->id,
                 'name' => e($actionlog->location->name),
+                'tag_color'=> ($actionlog->location->tag_color) ? e($actionlog->location->tag_color) : null,
             ] : null,
             'created_at'    => Helper::getFormattedDateObject($actionlog->created_at, 'datetime'),
             'updated_at'    => Helper::getFormattedDateObject($actionlog->updated_at, 'datetime'),

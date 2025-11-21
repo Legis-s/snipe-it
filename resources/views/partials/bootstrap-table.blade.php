@@ -294,6 +294,28 @@
     @endcan
 
 
+    @can('create', \App\Models\Groups::class)
+    // Groups table buttons
+    window.groupButtons = () => ({
+        btnAdd: {
+            text: '{{ trans('general.create') }}',
+            icon: 'fa fa-plus',
+            event () {
+                window.location.href = '{{ route('groups.create') }}';
+            },
+            attributes: {
+                class: 'btn-info',
+                title: '{{ trans('general.create') }}',
+                @if ($snipeSettings->shortcuts_enabled == 1)
+                accesskey: 'n'
+                @endif
+            }
+        },
+
+    }); // End Groups table buttons
+    @endcan
+
+
     // Asset table buttons
     window.assetButtons = () => ({
         @can('create', \App\Models\Asset::class)
@@ -882,8 +904,15 @@
     // This only works for model index pages because it uses the row's model ID
     function genericRowLinkFormatter(destination) {
         return function (value,row) {
+
+            if ((row) && (row.tag_color) && (row.tag_color!='') && (row.tag_color!=undefined)) {
+                var tag_icon = '<i class="fa-solid fa-square" style="color: ' + row.tag_color + ';" aria-hidden="true"></i> ';
+            } else {
+                var tag_icon = '';
+            }
+
             if (value) {
-                return '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '">' + value + '</a>';
+                return tag_icon + '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '">' + value + '</a>';
             }
         };
     }
@@ -950,15 +979,35 @@
 
                 // Add some overrides for any funny urls we have
                 var dest = destination;
+                var tag_color;
                 var polymorphicItemFormatterDest = '';
+
+
+
                 if (destination == 'fieldsets') {
                     var polymorphicItemFormatterDest = 'fields/';
                 }
 
-                return '<nobr><a href="{{ config('app.url') }}/' + polymorphicItemFormatterDest + dest + '/' + value.id + '">' + value.name + '</a></span>';
+                // Handle the preceding icon if a tag_color is given in the API response
+                if ((value.tag_color) && (value.tag_color!='')) {
+                    var tag_icon = '<i class="fa-solid fa-square" style="color: ' + value.tag_color + ';" aria-hidden="true"></i>';
+                } else {
+                    var tag_icon = '';
+                }
+
+                return '<nobr>'+ tag_icon + ' <a href="{{ config('app.url') }}/' + polymorphicItemFormatterDest + dest + '/' + value.id + '">' + value.name + '</a></span>';
             }
         };
     }
+
+
+    function colorTagFormatter(value, row) {
+        if (value) {
+            return '<i class="fa-solid fa-square" style="color: ' + value + ';" aria-hidden="true"></i> ' + value;
+        }
+    }
+
+
 
 
     function licenseKeyFormatter(value, row) {
@@ -1426,7 +1475,14 @@
 
     function deployedLocationFormatter(row, value) {
         if ((row) && (row!=undefined)) {
-            return '<a href="{{ config('app.url') }}/locations/' + row.id + '">' + row.name + '</a>';
+            // Handle the preceding icon if a tag_color is given in the API response
+            if ((row.tag_color) && (row.tag_color!='')) {
+                var tag_icon = '<i class="fa-solid fa-square" style="color: ' + row.tag_color + ';" aria-hidden="true"></i> ';
+            } else {
+                var tag_icon = '';
+            }
+
+            return '<nobr>' + tag_icon +'<a href="{{ config('app.url') }}/locations/' + row.id + '">' + row.name + '</a></nobr>';
         } else if (value.rtd_location) {
             return '<a href="{{ config('app.url') }}/locations/' + value.rtd_location.id + '">' + value.rtd_location.name + '</a>';
         }
@@ -1551,9 +1607,9 @@
         }
     }
 
-    function auditImageFormatter(value){
-        if (value){
-            return '<a href="' + value.url + '" data-toggle="lightbox" data-type="image"><img src="' + value.url + '" style="max-height: {{ $snipeSettings->thumbnail_max_h }}px; width: auto;" class="img-responsive" alt=""></a>'
+    function auditImageFormatter(value, row) {
+        if ((row) && (row.file) && (row.file.url)) {
+            return '<a href="' + row.file.url + '" data-toggle="lightbox" data-type="image"><img src="' + row.file.url + '" style="max-height: {{ $snipeSettings->thumbnail_max_h }}px; width: auto;" class="img-responsive" alt=""></a>'
         }
     }
 

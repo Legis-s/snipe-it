@@ -3,7 +3,7 @@
     'updateText' => trans('admin/statuslabels/table.update'),
     'helpTitle' => trans('admin/statuslabels/table.about'),
     'helpText' => trans('admin/statuslabels/table.info'),
-    'formAction' => (isset($item->id)) ? route('`inventorystatuslabels.update', ['statuslabel' => $item->id]) : route('statuslabels.store'),
+    'formAction' => (isset($item->id)) ? route('statuslabels.update', ['statuslabel' => $item->id]) : route('statuslabels.store'),
 ])
 
 {{-- Page content --}}
@@ -42,10 +42,7 @@
 <div class="form-group{{ $errors->has('color') ? ' has-error' : '' }}">
     <label for="color" class="col-md-3 control-label">{{ trans('admin/statuslabels/table.color') }}</label>
     <div class="col-md-9">
-        <div class="input-group color">
-            <input class="form-control col-md-10" maxlength="20" name="color" type="text" id="color" value="{{ old('color', $item->color) }}">
-            <div class="input-group-addon"><i></i></div>
-        </div><!-- /.input group -->
+        <x-input.colorpicker :item="$item" id="color" :value="old('color', ($item->color ?? '#f4f4f4'))" name="color" id="color" />
         {!! $errors->first('color', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
     </div>
 </div>
@@ -75,15 +72,3 @@
 
 @stop
 
-@section('moar_scripts')
-    <!-- bootstrap color picker -->
-    <script nonce="{{ csrf_token() }}">
-        $(function() {
-            $('.color').colorpicker({
-                color: `{{ old('color', $item->color) ?: '#AA3399' }}`,
-                format: 'hex'
-            });
-        });
-    </script>
-
-@stop

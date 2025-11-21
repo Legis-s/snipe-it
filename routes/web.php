@@ -366,6 +366,7 @@ Route::group(['prefix' => 'account', 'middleware' => ['auth']], function () {
         ->name('account.password.index')
         ->breadcrumbs(fn (Trail $trail) =>
         $trail->parent('home')
+            ->push(trans('general.profile'), route('account'))
             ->push(trans('general.changepassword'), route('account.password.index')));
 
     Route::post('password', [ProfileController::class, 'passwordSave'])
@@ -375,6 +376,7 @@ Route::group(['prefix' => 'account', 'middleware' => ['auth']], function () {
         ->name('user.api')
         ->breadcrumbs(fn (Trail $trail) =>
         $trail->parent('home')
+            ->push(trans('general.profile'), route('account'))
             ->push(trans('general.manage_api_keys'), route('user.api')));
 
     // View Assets
@@ -382,12 +384,14 @@ Route::group(['prefix' => 'account', 'middleware' => ['auth']], function () {
         ->name('view-assets')
         ->breadcrumbs(fn (Trail $trail) =>
         $trail->parent('home')
+            ->push(trans('general.profile'), route('account'))
             ->push(trans('general.viewassets'), route('view-assets')));
 
     Route::get('requested', [ViewAssetsController::class, 'getRequestedAssets'])
         ->name('account.requested')
         ->breadcrumbs(fn (Trail $trail) =>
         $trail->parent('home')
+            ->push(trans('general.profile'), route('account'))
             ->push(trans('general.requested_assets_menu'), route('account.requested')));
 
     Route::get(
@@ -425,12 +429,14 @@ Route::group(['prefix' => 'account', 'middleware' => ['auth']], function () {
         ->name('account.accept')
         ->breadcrumbs(fn (Trail $trail) =>
         $trail->parent('home')
-            ->push(trans('general.accept_assets_menu'), route('account.accept')));
+            ->push(trans('general.profile'), route('account'))
+            ->push(trans('general.accept_items'), route('account.accept')));
 
     Route::get('accept/{id}', [Account\AcceptanceController::class, 'create'])
         ->name('account.accept.item')
         ->breadcrumbs(fn (Trail $trail, $id) =>
-        $trail->parent('account.accept')
+        $trail->parent('home')
+            ->push(trans('general.profile'), route('account'))
             ->push(trans('general.accept_item'), route('account.accept.item', $id)));
 
     Route::post('accept/{id}', [Account\AcceptanceController::class, 'store'])
@@ -716,7 +722,7 @@ Route::group(['middleware' => 'web'], function () {
             'show'
         ]
     )->name('ui.files.show')
-        ->where(['object_type' => 'assets|maintenances|hardware|models|users|locations|accessories|consumables|licenses|components']);
+        ->where(['object_type' => 'assets|audits|maintenances|hardware|models|users|locations|accessories|consumables|licenses|suppliers|components']);
 
     // Upload files(s)
     Route::post('{object_type}/{id}/files',
@@ -725,7 +731,7 @@ Route::group(['middleware' => 'web'], function () {
             'store'
         ]
     )->name('ui.files.store')
-        ->where(['object_type' => 'assets|maintenances|hardware|models|users|locations|accessories|consumables|licenses|components']);
+        ->where(['object_type' => 'assets|audits|maintenances|hardware|models|users|locations|accessories|consumables|licenses|suppliers|components']);
 
     // Delete files(s)
     Route::delete('{object_type}/{id}/files/{file_id}/delete',
@@ -734,7 +740,7 @@ Route::group(['middleware' => 'web'], function () {
             'destroy'
         ]
     )->name('ui.files.destroy')
-        ->where(['object_type' => 'assets|maintenances|hardware|models|users|locations|accessories|consumables|licenses|components']);
+        ->where(['object_type' => 'assets|maintenances|hardware|models|users|locations|accessories|consumables|licenses|suppliers|components']);
 });
 
 
