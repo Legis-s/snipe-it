@@ -48,7 +48,7 @@
                                 <x-icon type="files" class="fa-2x" />
                                 </span>
                                 <span class="hidden-xs hidden-sm">{{ trans('general.file_uploads') }}
-                                    {!! ($accessory->uploads->count() > 0 ) ? '<badge class="badge badge-secondary">'.number_format($accessory->uploads->count()).'</badge>' : '' !!}
+                                    {!! ($accessory->uploads->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($accessory->uploads->count()).'</span>' : '' !!}
                                 </span>
                             </a>
                         </li>
@@ -125,11 +125,7 @@
 
                             <div class="row">
                                 <div class="col-md-12">
-                                    <x-filestable
-                                        filepath="private_uploads/accessories/"
-                                        showfile_routename="show.accessoryfile"
-                                        deletefile_routename="delete/accessoryfile"
-                                        :object="$accessory" />
+                                    <x-filestable object_type="accessories" :object="$accessory" />
                                 </div>
                             </div>
                         </div> <!-- /.tab-pane -->
@@ -240,11 +236,23 @@
               <div class="row">
                   <div class="col-md-3" style="padding-bottom: 10px;">
                       <strong>
-                          {{ trans('general.purchase_cost') }}
+                          {{ trans('general.unit_cost') }}
                       </strong>
                   </div>
                   <div class="col-md-9" style="word-wrap: break-word;">
                       {{ Helper::formatCurrencyOutput($accessory->purchase_cost) }}
+                  </div>
+              </div>
+          @endif
+          @if ($accessory->purchase_cost)
+              <div class="row">
+                  <div class="col-md-3" style="padding-bottom: 10px;">
+                      <strong>
+                          {{ trans('general.total_cost') }}
+                      </strong>
+                  </div>
+                  <div class="col-md-9" style="word-wrap: break-word;">
+                      {{ Helper::formatCurrencyOutput($accessory->totalCostSum()) }}
                   </div>
               </div>
           @endif
@@ -338,7 +346,7 @@
         @can('delete', $accessory)
             @if ($accessory->checkouts_count == 0)
                 <div class="text-center" style="padding-top:5px;">
-                    <button class="btn btn-block btn-danger btn-sm btn-social delete-asset" style="padding-top:5px;" data-toggle="modal" data-title="{{ trans('general.delete') }}" data-content="{{ trans('general.delete_confirm_no_undo', ['item' => $accessory->name]) }}" data-target="#dataConfirmModal">
+                    <button class="btn btn-block btn-danger btn-sm btn-social delete-asset" style="padding-top:5px;" data-toggle="modal" data-title="{{ trans('general.delete') }}" data-content="{{ trans('general.delete_confirm_no_undo', ['item' => $accessory->name]) }}" data-target="#dataConfirmModal" onClick="return false;">
                         <x-icon type="delete" />
                     {{ trans('general.delete') }}
                     </button>
@@ -364,17 +372,6 @@
 @endcan
 @stop
 
-
-
-
 @section('moar_scripts')
-    <script>
-        $('#dataConfirmModal').on('show.bs.modal', function (event) {
-            var content = $(event.relatedTarget).data('content');
-            var title = $(event.relatedTarget).data('title');
-            $(this).find(".modal-body").text(content);
-            $(this).find(".modal-header").text(title);
-        });
-    </script>
 @include ('partials.bootstrap-table')
 @stop

@@ -20,9 +20,9 @@ return array(
         'confirm'   => 'Er du sikker på at du vil slette denne leverandøren?',
         'error'   => 'Det oppstod et problem under sletting av leverandør. Prøv igjen.',
         'success' => 'Sletting av leverandør vellykket.',
-        'assoc_assets'	 => 'Denne leverandøren er tilknyttet med :asset_count eiendel(er), og kan ikke slettes. Oppdater eiendelene dine til ikke å bruke denne leverandøren og prøv igjen. ',
-        'assoc_licenses'	 => 'Denne leverandøren er tilknyttet med :licenses_count lisens(er), og kan ikke slettes. Oppdater lisensene dine til ikke å bruke denne leverandøren og prøv igjen. ',
-        'assoc_maintenances'	 => 'Denne leverandøren er tilknyttet med :asset_maintenances_count eiendelsvedlikehold, og kan ikke slettes. Oppdater dine eiendelsvedlikehold til ikke å bruke denne leverandøren og prøv igjen. ',
+        'not_found'               => 'Supplier not found.',
+        'bulk_success'            => 'Suppliers were deleted successfully.',
+        'partial_success'        => 'Supplier deleted successfully. See additional information below. | :count suppliers were deleted successfully. See additional information below.',
     )
 
 );

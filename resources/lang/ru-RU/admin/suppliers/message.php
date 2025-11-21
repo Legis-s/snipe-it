@@ -20,9 +20,9 @@ return array(
         'confirm'   => 'Вы уверены, что хотите удалить данного поставщика?',
         'error'   => 'При удалении поставщика произошла ошибка. Попробуйте еще раз.',
         'success' => 'Поставщик успешно удален.',
-        'assoc_assets'	 => 'Этот поставщик в настоящее время связан с :asset_count активом(активами) и не может быть удален. Обновите свои активы, чтобы больше не ссылаться на этого поставщика и повторите попытку. ',
-        'assoc_licenses'	 => 'Этот поставщик в настоящее время связан с: license_count лицензией(лицензиями) и не может быть удален. Обновите свои лицензии, чтобы больше не ссылаться на этого поставщика и повторите попытку. ',
-        'assoc_maintenances'	 => 'Этот поставщик в настоящее время связан с:asset_maintenances_count активом(активами)на обслуживании и не может быть удален. Пожалуйста, обновите информацию о своих активах на ремонте, чтобы больше не ссылаться на этого поставщика и повторите попытку. ',
+        'not_found'               => 'Supplier not found.',
+        'bulk_success'            => 'Suppliers were deleted successfully.',
+        'partial_success'        => 'Supplier deleted successfully. See additional information below. | :count suppliers were deleted successfully. See additional information below.',
     )
 
 );

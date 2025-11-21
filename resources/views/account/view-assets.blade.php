@@ -2,14 +2,14 @@
 
 {{-- Page title --}}
 @section('title')
-{{ trans('general.hello_name', array('name' => $user->present()->getFullNameAttribute())) }}
+{{ trans('general.hello_name', array('name' => $user->display_name)) }}
 @parent
 @stop
 
 {{-- Account page content --}}
 @section('content')
 
-@if ($acceptances = \App\Models\CheckoutAcceptance::forUser(Auth::user())->pending()->count())
+@if ($acceptanceQuantity = \App\Models\CheckoutAcceptance::forUser(Auth::user())->pending()->sum('qty'))
   <div class="row">
     <div class="col-md-12">
       <div class="alert alert alert-warning fade in">
@@ -17,7 +17,7 @@
 
         <strong>
           <a href="{{ route('account.accept') }}" style="color: white;">
-            {{ trans_choice('general.unaccepted_profile_warning', $acceptances, ['count' => $acceptances]) }}
+            {{ trans_choice('general.unaccepted_profile_warning', $acceptanceQuantity, ['count' => $acceptanceQuantity]) }}
           </a>
           </strong>
       </div>
@@ -37,7 +37,7 @@
           <select name="user_id" id="user_id" class="form-control select2" onchange="this.form.submit()" style="width: 250px; display: inline-block;">
             @foreach ($subordinates as $subordinate)
               <option value="{{ $subordinate->id }}" {{ (int)$selectedUserId === (int)$subordinate->id ? ' selected' : '' }}>
-                {{ $subordinate->present()->fullName() }}
+                {{ $subordinate->display_name }}
                 @if ($subordinate->id == auth()->id())
                   ({{ trans('general.me') }})
                 @endif
@@ -133,7 +133,7 @@
               <div class="col-md-3 col-xs-12 col-sm-push-9">
 
                 <div class="col-md-12 text-center">
-                  <img src="{{ $user->present()->gravatar() }}"  class=" img-thumbnail hidden-print" style="margin-bottom: 20px;" alt="{{ $user->present()->fullName() }}" alt="User avatar">
+                  <img src="{{ $user->present()->gravatar() }}"  class=" img-thumbnail hidden-print" style="margin-bottom: 20px;" alt="{{ $user->display_name }}" alt="User avatar">
                 </div>
                 @can('self.profile')
                   <div class="col-md-12">
@@ -204,7 +204,7 @@
                       {{ trans('admin/users/table.name') }}
                     </div>
                     <div class="col-md-9 col-sm-2">
-                      {{ $user->present()->fullName() }}
+                      {{ $user->display_name }}
                     </div>
 
                   </div>
@@ -309,9 +309,7 @@
                         {{ trans('admin/users/table.manager') }}
                       </div>
                       <div class="col-md-9">
-                        <a href="{{ route('users.show', $user->manager->id) }}">
-                          {{ $user->manager->getFullNameAttribute() }}
-                        </a>
+                        <x-full-user-name :user="$user->manager" />
                       </div>
 
                     </div>
@@ -448,6 +446,9 @@
                       <th class="col-md-2" data-switchable="true" data-visible="false">
                         {{ trans('general.name') }}
                       </th>
+                      <th class="col-md-2" data-switchable="true" data-visible="false">
+                        {{ trans('general.status') }}
+                      </th>
                       <th class="col-md-2" data-switchable="true" data-visible="true">
                         {{ trans('admin/hardware/table.asset_model') }}
                       </th>
@@ -463,7 +464,9 @@
                       <th class="col-md-2" data-switchable="true" data-visible="false">
                         {{ trans('general.location') }}
                       </th>
-
+                      <th class="col-md-2" data-switchable="true" data-visible="true">
+                        {{ trans('admin/hardware/form.expected_checkin') }}
+                      </th>
                       @can('self.view_purchase_cost')
                         <th class="col-md-6" data-footer-formatter="sumFormatter" data-fieldname="purchase_cost">
                           {{ trans('general.purchase_cost') }}
@@ -511,6 +514,11 @@
                           {{ $asset->name }}
                         </td>
                         <td>
+                          <x-icon type="circle-solid" class="text-blue" />
+                          {{ $asset->assetstatus->name }}
+                          <label class="label label-default">{{ trans('general.deployed') }}</label>
+                        </td>
+                        <td>
                             {{ $asset->model->name }}
                         </td>
                         <td>
@@ -524,6 +532,9 @@
                         </td>
                         <td>
                           {{ ($asset->location) ? $asset->location->name : '' }}
+                        </td>
+                        <td>
+                          {{ ($asset->expected_checkin) ? $asset->expected_checkin_formatted_date : '' }}
                         </td>
                         @can('self.view_purchase_cost')
                         <td>

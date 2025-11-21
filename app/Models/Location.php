@@ -3,16 +3,11 @@
 namespace App\Models;
 
 use App\Http\Traits\UniqueUndeletedTrait;
-use App\Models\Asset;
-use App\Models\Setting;
-use App\Models\SnipeModel;
+use App\Models\Traits\CompanyableTrait;
 use App\Models\Traits\HasUploads;
 use App\Models\Traits\Searchable;
-use App\Models\User;
 use App\Presenters\Presentable;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Gate;
 use Watson\Validating\ValidatingTrait;
@@ -47,6 +42,7 @@ class Location extends SnipeModel
         'manager_id'    => 'integer',
         'company_id'    => 'integer',
     ];
+
 
     /**
      * Whether the model should inject its identifier to the unique
@@ -124,12 +120,18 @@ class Location extends SnipeModel
     {
 
         return Gate::allows('delete', $this)
-                && ($this->assets_count == 0)
-                && ($this->assigned_assets_count == 0)
-                && ($this->children_count == 0)
-                && ($this->accessories_count == 0)
-                && ($this->users_count == 0);
+            && ($this->deleted_at == '')
+            && (($this->assets_count ?? $this->assets()->count()) === 0)
+            && (($this->assigned_assets_count ?? $this->assignedAssets()->count()) === 0)
+            && (($this->accessories_count ?? $this->accessories()->count()) === 0)
+            && (($this->assigned_accessories_count ?? $this->assignedAccessories()->count()) === 0)
+            && (($this->children_count ?? $this->children()->count()) === 0)
+            && (($this->components_count ?? $this->components()->count()) === 0)
+            && (($this->consumables_count ?? $this->consumables()->count()) === 0)
+            && (($this->rtd_assets_count ?? $this->rtd_assets()->count()) === 0)
+            && (($this->users_count ?? $this->users()->count()) === 0);
     }
+
 
     /**
      * Determine whether or not this location can be deleted

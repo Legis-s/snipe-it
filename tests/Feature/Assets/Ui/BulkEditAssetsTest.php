@@ -29,7 +29,26 @@ class BulkEditAssetsTest extends TestCase
         ])->assertStatus(200);
     }
 
-    public function testStandardUserCannotAccessPage()
+    public function test_handles_model_being_deleted()
+    {
+        $this->withoutExceptionHandling();
+
+        $user = User::factory()->viewAssets()->editAssets()->create();
+        $assets = Asset::factory()->count(2)->create();
+
+        $assets->first()->model->forceDelete();
+
+        $id_array = $assets->pluck('id')->toArray();
+
+        $this->actingAs($user)->post('/hardware/bulkedit', [
+            'ids' => $id_array,
+            'order' => 'asc',
+            'bulk_actions' => 'edit',
+            'sort' => 'id'
+        ])->assertStatus(200);
+    }
+
+    public function test_standard_user_cannot_access_page()
     {
         $user = User::factory()->create();
         $assets = Asset::factory()->count(2)->create();
@@ -44,7 +63,7 @@ class BulkEditAssetsTest extends TestCase
         ])->assertStatus(403);
     }
 
-    public function testBulkEditAssetsAcceptsAllPossibleAttributes()
+    public function test_bulk_edit_assets_accepts_all_possible_attributes()
     {
         // sets up all needed models and attributes on the assets
         // this test does not deal with custom fields - will be dealt with in separate cases
@@ -69,7 +88,8 @@ class BulkEditAssetsTest extends TestCase
             'order_number'     => '123456',
             'warranty_months'  => 24,
             'next_audit_date'  => '2024-06-01',
-            'requestable'      => false
+            'requestable'      => false,
+            'notes'            => 'This is a new note!',
         ]);
 
         // gets the ids together to submit to the endpoint
@@ -89,7 +109,8 @@ class BulkEditAssetsTest extends TestCase
             'order_number'     => '7890',
             'warranty_months'  => 36,
             'next_audit_date'  => '2025-01-01',
-            'requestable'      => true
+            'requestable'      => true,
+            'notes'            => 'This is a newer note!',
         ])
             ->assertStatus(302)
             ->assertSessionHasNoErrors();
@@ -109,10 +130,11 @@ class BulkEditAssetsTest extends TestCase
             $this->assertEquals('2025-01-01', $asset->next_audit_date);
             // shouldn't requestable be cast as a boolean??? it's not.
             $this->assertEquals(1, $asset->requestable);
+            $this->assertEquals('This is a newer note!', $asset->notes);
         });
     }
 
-    public function testBulkEditAssetsNullsOutFieldsIfSelected()
+    public function test_bulk_edit_assets_nulls_out_fields_if_selected()
     {
         // sets up all needed models and attributes on the assets
         // this test does not deal with custom fields - will be dealt with in separate cases
@@ -137,7 +159,8 @@ class BulkEditAssetsTest extends TestCase
             'order_number'     => '123456',
             'warranty_months'  => 24,
             'next_audit_date'  => '2024-06-01',
-            'requestable'      => false
+            'requestable'      => false,
+            'notes'            => 'This is a note that will be deleted',
         ]);
 
         // gets the ids together to submit to the endpoint
@@ -150,6 +173,7 @@ class BulkEditAssetsTest extends TestCase
             'null_purchase_date'    => '1',
             'null_expected_checkin_date' => '1',
             'null_next_audit_date'        => '1',
+            'null_notes'            => '1',
             'status_id'        => $status2->id,
             'model_id'         => $model2->id,
         ])
@@ -162,10 +186,11 @@ class BulkEditAssetsTest extends TestCase
             $this->assertNull($asset->purchase_date);
             $this->assertNull($asset->expected_checkin);
             $this->assertNull($asset->next_audit_date);
+            $this->assertNull($asset->notes);
         });
     }
 
-    public function testBulkEditAssetsAcceptsAndUpdatesUnencryptedCustomFields()
+    public function test_bulk_edit_assets_accepts_and_updates_unencrypted_custom_fields()
     {
         $this->markIncompleteIfMySQL('Custom Fields tests do not work on MySQL');
 
@@ -197,7 +222,7 @@ class BulkEditAssetsTest extends TestCase
         });
     }
 
-    public function testBulkEditAssetsNullsCustomFieldsIfSelected()
+    public function test_bulk_edit_assets_nulls_custom_fields_if_selected()
     {
         $this->markIncompleteIfMySQL('Custom Fields tests do not work on MySQL');
 
@@ -238,7 +263,7 @@ class BulkEditAssetsTest extends TestCase
         });
     }
 
-    public function testBulkEditAssetsAcceptsAndUpdatesEncryptedCustomFields()
+    public function test_bulk_edit_assets_accepts_and_updates_encrypted_custom_fields()
     {
         $this->markIncompleteIfMySQL('Custom Fields tests do not work on MySQL');
 
@@ -262,7 +287,7 @@ class BulkEditAssetsTest extends TestCase
         });
     }
 
-    public function testBulkEditAssetsRequiresadminToUpdateEncryptedCustomFields()
+    public function test_bulk_edit_assets_requires_admin_to_update_encrypted_custom_fields()
     {
         $this->markIncompleteIfMySQL('Custom Fields tests do not work on mysql');
         $edit_user = User::factory()->editAssets()->create();

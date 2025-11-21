@@ -2,7 +2,7 @@
 
 return array(
 
-    'deleted' => 'Deleted supplier',
+    'deleted' => 'Xóa nhà cung cấp',
     'does_not_exist' => 'Nhà cung cấp không tồn tại.',
 
 
@@ -20,9 +20,9 @@ return array(
         'confirm'   => 'Bạn có chắc muốn xóa nhà cung cấp này?',
         'error'   => 'Có vấn đề xảy ra khi xóa nhà cung cấp. Xin thử lại.',
         'success' => 'Nhà cung cấp đã xóa thành công.',
-        'assoc_assets'	 => 'Nhà cung cấp này hiện tại đang có liên kết với: asset_count tài sản và không thể xóa. Xin vui lòng cập nhật các tài sản để không còn liên kết với nhà cung cấp này và thử lại. ',
-        'assoc_licenses'	 => 'Nhà cung cấp này hiện tại đang có liên kết với: licenses_count license(s) và không thể xóa. Xin vui lòng cập nhật các licence để không còn liên kết với nhà cung cấp này và thử lại. ',
-        'assoc_maintenances'	 => 'Nhà cung cấp này hiện tại đang có liên kết với: asset_maintainces_count tài sản đang trong trạng thái bảo trì và không thể xóa. Xin vui lòng cập nhật các tài sản đó để không còn liên kết với nhà cung cấp này và thử lại. ',
+        'not_found'               => 'Supplier not found.',
+        'bulk_success'            => 'Suppliers were deleted successfully.',
+        'partial_success'        => 'Supplier deleted successfully. See additional information below. | :count suppliers were deleted successfully. See additional information below.',
     )
 
 );

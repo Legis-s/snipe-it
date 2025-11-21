@@ -20,9 +20,9 @@ return array(
         'confirm'   => 'Ви дійсно хочете видалити цього постачальника?',
         'error'   => 'Виникла проблема при видаленні постачальника. Будь ласка, спробуйте ще раз.',
         'success' => 'Постачальника успішно видалено.',
-        'assoc_assets'	 => 'Цей постачальник наразі асоціюється з :asset_count медіафайлів і не може бути видалений. Будь ласка, оновіть ваші активи, щоб більше не посилалися на цього постачальника і повторіть спробу. ',
-        'assoc_licenses'	 => 'Цей постачальник наразі асоціюється з :licenses_count ліцензіями і не може бути видалений. Оновіть свої ліцензії, щоб більше не посилатися на цього постачальника і повторіть спробу. ',
-        'assoc_maintenances'	 => 'Цей постачальник наразі асоціюється з :asset_maintenances_count asset і не може бути видалений. Будь ласка, оновіть технічне обслуговування активів, щоб більше не посилатись на цього постачальника і спробувати ще раз. ',
+        'not_found'               => 'Supplier not found.',
+        'bulk_success'            => 'Suppliers were deleted successfully.',
+        'partial_success'        => 'Supplier deleted successfully. See additional information below. | :count suppliers were deleted successfully. See additional information below.',
     )
 
 );

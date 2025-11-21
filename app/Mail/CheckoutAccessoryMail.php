@@ -3,6 +3,8 @@
 namespace App\Mail;
 
 use App\Models\Accessory;
+use App\Models\Asset;
+use App\Models\Location;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
@@ -41,7 +43,7 @@ class CheckoutAccessoryMail extends Mailable
 
         return new Envelope(
             from: $from,
-            subject: (trans('mail.Accessory_Checkout_Notification')),
+            subject: trans_choice('mail.Accessory_Checkout_Notification', $this->checkout_qty),
         );
     }
 
@@ -54,6 +56,17 @@ class CheckoutAccessoryMail extends Mailable
         $eula = $this->item->getEula();
         $req_accept = $this->item->requireAcceptance();
         $accept_url = is_null($this->acceptance) ? null : route('account.accept.item', $this->acceptance);
+        $name = null;
+
+        if($this->target instanceof User){
+            $name = $this->target->display_name;
+        }
+        else if($this->target instanceof Asset){
+            $name  = $this->target->assignedto?->display_name;
+        }
+        else if($this->target instanceof Location){
+            $name  = $this->target->manager->name;
+        }
 
         return new Content(
             markdown: 'mail.markdown.checkout-accessory',
@@ -61,13 +74,36 @@ class CheckoutAccessoryMail extends Mailable
                 'item'          => $this->item,
                 'admin'         => $this->admin,
                 'note'          => $this->note,
-                'target'        => $this->target,
+                'target'        => $name,
                 'eula'          => $eula,
                 'req_accept'    => $req_accept,
                 'accept_url'    => $accept_url,
                 'checkout_qty'  => $this->checkout_qty,
+                'introduction_line' => $this->introductionLine(),
             ],
         );
+    }
+
+    private function introductionLine(): string
+    {
+        if ($this->target instanceof Location) {
+            return trans_choice('mail.new_item_checked_location', $this->checkout_qty, ['location' => $this->target->name]);
+        }
+
+        if ($this->requiresAcceptance()) {
+            return trans_choice('mail.new_item_checked_with_acceptance', $this->checkout_qty);
+        }
+
+        if (!$this->requiresAcceptance()) {
+            return trans_choice('mail.new_item_checked', $this->checkout_qty);
+        }
+
+        // we shouldn't get here but let's send a default message just in case
+        return trans('new_item_checked');
+    }
+    private function requiresAcceptance(): int|bool
+    {
+        return method_exists($this->item, 'requireAcceptance') ? $this->item->requireAcceptance() : 0;
     }
 
     /**

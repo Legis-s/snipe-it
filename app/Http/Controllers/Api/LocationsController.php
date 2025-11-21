@@ -37,10 +37,14 @@ class LocationsController extends Controller
             'address',
             'address2',
             'assets_count',
-            'assets_count',
+            'assigned_assets_count',
+            'rtd_assets_count',
+            'accessories_count',
             'assigned_accessories_count',
-            'assigned_assets_count',
-            'assigned_assets_count',
+            'components_count',
+            'consumables_count',
+            'users_count',
+            'children_count',
             'city',
             'country',
             'created_at',
@@ -54,7 +58,6 @@ class LocationsController extends Controller
             'rtd_assets_count',
             'state',
             'updated_at',
-            'users_count',
             'zip',
             'notes',
             ];
@@ -79,11 +82,11 @@ class LocationsController extends Controller
             'locations.currency',
             'locations.company_id',
             'locations.notes',
+            'locations.created_by',
+            'locations.deleted_at',
             'locations.bitrix_id',
-            'locations.bitrix_id_old',
             'locations.sklad',
         ])
-            ->withCount('assignedAssets as assigned_assets_count')
             ->withCount('assignedAssets as assigned_assets_count')
             ->withCount('assets as assets_count')
             ->withCount('assignedAccessories as assigned_accessories_count')
@@ -91,6 +94,8 @@ class LocationsController extends Controller
             ->withCount('rtd_assets as rtd_assets_count')
             ->withCount('children as children_count')
             ->withCount('users as users_count')
+            ->withCount('consumables as consumables_count')
+            ->withCount('components as components_count')
             ->with('adminuser');
 
         // Only scope locations if the setting is enabled
@@ -132,6 +137,14 @@ class LocationsController extends Controller
 
         if ($request->filled('company_id')) {
             $locations->where('locations.company_id', '=', $request->input('company_id'));
+        }
+
+        if ($request->filled('parent_id')) {
+            $locations->where('locations.parent_id', '=', $request->input('parent_id'));
+        }
+
+        if ($request->input('status') == 'deleted') {
+            $locations->onlyTrashed();
         }
 
         // Make sure the offset and limit are actually integers and do not exceed system limits
@@ -186,7 +199,7 @@ class LocationsController extends Controller
             // check if parent is set and has a different company
             if ($location->parent_id && Location::find($location->parent_id)->company_id != $location->company_id) {
                 response()->json(Helper::formatStandardApiResponse('error', null, 'different company than parent'));
-            }
+            }    
         }
 
         if ($location->save()) {
@@ -225,13 +238,17 @@ class LocationsController extends Controller
                 'locations.company_id',
                 'locations.notes',
                 'locations.bitrix_id',
-                'locations.bitrix_id_old',
                 'locations.sklad',
             ])
             ->withCount('assignedAssets as assigned_assets_count')
             ->withCount('assets as assets_count')
+            ->withCount('assignedAccessories as assigned_accessories_count')
+            ->withCount('accessories as accessories_count')
             ->withCount('rtd_assets as rtd_assets_count')
+            ->withCount('children as children_count')
             ->withCount('users as users_count')
+            ->withCount('consumables as consumables_count')
+            ->withCount('components as components_count')
             ->findOrFail($id);
 
         return (new LocationsTransformer)->transformLocation($location);
@@ -261,7 +278,7 @@ class LocationsController extends Controller
                 // check if there are related objects with different company
                 if (Helper::test_locations_fmcs(false, $id, $location->company_id)) {
                     return response()->json(Helper::formatStandardApiResponse('error', null, 'error scoped locations'));
-                }
+                }                
             } else {
                 $location->company_id = $request->get('company_id');
             }
@@ -326,11 +343,15 @@ class LocationsController extends Controller
     {
         $this->authorize('delete', Location::class);
         $location = Location::withCount('assignedAssets as assigned_assets_count')
+            ->withCount('assignedAssets as assigned_assets_count')
             ->withCount('assets as assets_count')
+            ->withCount('assignedAccessories as assigned_accessories_count')
+            ->withCount('accessories as accessories_count')
             ->withCount('rtd_assets as rtd_assets_count')
             ->withCount('children as children_count')
             ->withCount('users as users_count')
-            ->withCount('accessories as accessories_count')
+            ->withCount('consumables as consumables_count')
+            ->withCount('components as components_count')
             ->findOrFail($id);
 
         if (! $location->isDeletable()) {
@@ -385,7 +406,6 @@ class LocationsController extends Controller
             'locations.name',
             'locations.parent_id',
             'locations.image',
-            'locations.sklad',
         ]);
 
         // Only scope locations if the setting is enabled

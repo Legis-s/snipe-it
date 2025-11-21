@@ -2,7 +2,7 @@
 
 use App\Models\Accessory;
 use App\Models\Asset;
-use App\Models\AssetMaintenance;
+use App\Models\Maintenance;
 use App\Models\AssetModel;
 use App\Models\Category;
 use App\Models\Company;
@@ -81,12 +81,12 @@ class BreadcrumbsServiceProvider extends ServiceProvider
 
         Breadcrumbs::for('hardware.show', fn (Trail $trail, Asset $asset) =>
         $trail->parent('hardware.index', route('hardware.index'))
-            ->push($asset->present()->fullName(), route('hardware.show', $asset))
+            ->push($asset->display_name, route('hardware.show', $asset))
         );
 
         Breadcrumbs::for('hardware.edit', fn (Trail $trail, Asset $asset) =>
         $trail->parent('hardware.index', route('hardware.index'))
-            ->push($asset->present()->fullName(), route('hardware.show', $asset))
+            ->push($asset->display_name, route('hardware.show', $asset))
             ->push(trans('admin/hardware/general.edit'))
         );
 
@@ -356,10 +356,24 @@ class BreadcrumbsServiceProvider extends ServiceProvider
         /**
          * Licenses Breadcrumbs
          */
-        Breadcrumbs::for('licenses.index', fn (Trail $trail) =>
-        $trail->parent('home', route('home'))
-            ->push(trans('general.licenses'), route('licenses.index'))
-        );
+        if ((request()->is('licenses*')) && (request()->status=='inactive')) {
+            Breadcrumbs::for('licenses.index', fn(Trail $trail) => $trail->parent('home', route('home'))
+                ->push(trans('general.licenses'), route('licenses.index'))
+                ->push(trans('general.show_inactive'), route('licenses.index'))
+            );
+        } elseif ((request()->is('licenses*')) && (request()->status=='expiring')) {
+            Breadcrumbs::for('licenses.index', fn (Trail $trail) =>
+            $trail->parent('home', route('home'))
+                ->push(trans('general.licenses'), route('licenses.index'))
+                ->push(trans('general.show_expiring'), route('licenses.index'))
+            );
+        } else {
+            Breadcrumbs::for('licenses.index', fn (Trail $trail) =>
+            $trail->parent('home', route('home'))
+                ->push(trans('general.licenses'), route('licenses.index'))
+            );
+        }
+
 
         Breadcrumbs::for('licenses.create', fn (Trail $trail) =>
         $trail->parent('licenses.index', route('licenses.index'))
@@ -420,14 +434,14 @@ class BreadcrumbsServiceProvider extends ServiceProvider
             ->push(trans('general.create'), route('maintenances.create'))
         );
 
-        Breadcrumbs::for('maintenances.show', fn (Trail $trail, AssetMaintenance $maintenance) =>
+        Breadcrumbs::for('maintenances.show', fn (Trail $trail, Maintenance $maintenance) =>
         $trail->parent('maintenances.index', route('maintenances.index'))
-            ->push($maintenance->title, route('maintenances.show', $maintenance))
+            ->push($maintenance->name, route('maintenances.show', $maintenance))
         );
 
-        Breadcrumbs::for('maintenances.edit', fn (Trail $trail, AssetMaintenance $maintenance) =>
+        Breadcrumbs::for('maintenances.edit', fn (Trail $trail, Maintenance $maintenance) =>
         $trail->parent('maintenances.index', route('maintenances.index'))
-            ->push(trans('general.breadcrumb_button_actions.edit_item', ['name' => $maintenance->title]), route('maintenances.edit', $maintenance))
+            ->push(trans('general.breadcrumb_button_actions.edit_item', ['name' => $maintenance->name]), route('maintenances.edit', $maintenance))
         );
 
 
@@ -546,6 +560,26 @@ class BreadcrumbsServiceProvider extends ServiceProvider
                 ->push(trans('general.users'), route('users.index'))
                 ->push(trans('general.deleted_users'), route('users.index'))
             );
+        } elseif ((request()->is('users*')) && (request()->admins=='true')) {
+            Breadcrumbs::for('users.index', fn(Trail $trail) => $trail->parent('home', route('home'))
+                ->push(trans('general.users'), route('users.index'))
+                ->push(trans('general.show_admins'), route('users.index'))
+            );
+        } elseif ((request()->is('users*')) && (request()->superadmins=='true')) {
+            Breadcrumbs::for('users.index', fn(Trail $trail) => $trail->parent('home', route('home'))
+                ->push(trans('general.users'), route('users.index'))
+                ->push(trans('general.show_superadmins'), route('users.index'))
+            );
+        } elseif ((request()->is('users*')) && (request()->activated=='0')) {
+            Breadcrumbs::for('users.index', fn(Trail $trail) => $trail->parent('home', route('home'))
+                ->push(trans('general.users'), route('users.index'))
+                ->push(trans('general.login_disabled'), route('users.index'))
+            );
+        } elseif ((request()->is('users*')) && (request()->activated=='1')) {
+            Breadcrumbs::for('users.index', fn(Trail $trail) => $trail->parent('home', route('home'))
+                ->push(trans('general.users'), route('users.index'))
+                ->push(trans('general.login_enabled'), route('users.index'))
+            );
         } else {
             Breadcrumbs::for('users.index', fn(Trail $trail) => $trail->parent('home', route('home'))
                 ->push(trans('general.users'), route('users.index'))
@@ -566,7 +600,7 @@ class BreadcrumbsServiceProvider extends ServiceProvider
 
         Breadcrumbs::for('users.show', fn (Trail $trail, User $user) =>
         $trail->parent('users.index', route('users.index'))
-            ->push($user->getFullNameAttribute() ?? 'Missing Username!', route('users.show', $user))
+            ->push($user->display_name ?? 'Missing Username!', route('users.show', $user))
         );
 
         Breadcrumbs::for('users.edit', fn (Trail $trail, User $user) =>

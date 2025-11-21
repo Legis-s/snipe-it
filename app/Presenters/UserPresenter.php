@@ -60,9 +60,7 @@ class UserPresenter extends Presenter
                 'title' => trans('admin/users/table.name'),
                 'visible' => true,
                 'formatter' => 'usersLinkFormatter',
-            ],
-
-            [
+            ], [
                 'field' => 'first_name',
                 'searchable' => true,
                 'sortable' => true,
@@ -85,6 +83,30 @@ class UserPresenter extends Presenter
                 'title' => trans('general.last_name'),
                 'visible' => false,
                 'formatter' => 'usersLinkFormatter',
+            ],
+            [
+                'field' => 'display_name',
+                'searchable' => true,
+                'sortable' => true,
+                'switchable' => false,
+                'title' => trans('admin/users/table.display_name'),
+                'visible' => false,
+            ], [
+                'field' => 'username',
+                'searchable' => true,
+                'sortable' => true,
+                'switchable' => false,
+                'title' => trans('admin/users/table.username'),
+                'visible' => true,
+                'formatter' => 'usernameRoleLinkFormatter',
+            ],
+            [
+                'field' => 'employee_num',
+                'searchable' => true,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('general.employee_number'),
+                'visible' => false,
             ],
             [
                 'field' => 'jobtitle',
@@ -128,8 +150,17 @@ class UserPresenter extends Presenter
                 'sortable' => true,
                 'switchable' => true,
                 'title' => trans('admin/users/table.phone'),
-                'visible' => true,
+                'visible' => false,
                 'formatter'    => 'phoneFormatter',
+            ],
+            [
+                'field' => 'mobile',
+                'searchable' => true,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('admin/users/table.mobile'),
+                'visible' => false,
+                'formatter'    => 'mobileFormatter',
             ],
             [
                 'field' => 'website',
@@ -180,23 +211,7 @@ class UserPresenter extends Presenter
                 'title' => trans('general.zip'),
                 'visible' => false,
             ],
-            [
-                'field' => 'username',
-                'searchable' => true,
-                'sortable' => true,
-                'switchable' => false,
-                'title' => trans('admin/users/table.username'),
-                'visible' => true,
-                'formatter' => 'usersLinkFormatter',
-            ],
-            [
-                'field' => 'employee_num',
-                'searchable' => true,
-                'sortable' => true,
-                'switchable' => true,
-                'title' => trans('general.employee_number'),
-                'visible' => false,
-            ],
+
             [
                 'field' => 'locale',
                 'searchable' => true,
@@ -220,7 +235,7 @@ class UserPresenter extends Presenter
                 'sortable' => true,
                 'switchable' => true,
                 'title' => trans('admin/users/general.department_manager'),
-                'visible' => true,
+                'visible' => false,
                 'formatter' => 'usersLinkObjFormatter',
             ],
             [
@@ -246,7 +261,7 @@ class UserPresenter extends Presenter
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/users/table.manager'),
-                'visible' => true,
+                'visible' => false,
                 'formatter' => 'usersLinkObjFormatter',
             ],
             [
@@ -454,20 +469,23 @@ class UserPresenter extends Presenter
      *
      * @return string
      */
-    public function fullName()
-    {
-        return html_entity_decode($this->first_name.' '.$this->last_name, ENT_QUOTES | ENT_XML1, 'UTF-8');
-    }
+//    public function fullName()
+//    {
+//        if ($this->display_name) {
+//            return 'kjdfh'.html_entity_decode($this->display_name, ENT_QUOTES | ENT_XML1, 'UTF-8');
+//        }
+//        return 'roieuoe'.html_entity_decode($this->first_name.' '.$this->last_name, ENT_QUOTES | ENT_XML1, 'UTF-8');
+//    }
 
-    /**
-     * Standard accessor.
-     * @TODO Remove presenter::fullName() entirely?
-     * @return string
-     */
-    public function name()
-    {
-        return $this->fullName();
-    }
+//    /**
+//     * Standard accessor.
+//     * @TODO Remove presenter::fullName() entirely?
+//     * @return string
+//     */
+//    public function name()
+//    {
+//        return $this->fullName();
+//    }
 
 
 

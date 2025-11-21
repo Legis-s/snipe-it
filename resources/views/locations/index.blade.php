@@ -6,12 +6,6 @@
 @parent
 @stop
 
-@section('header_right')
-  @can('create', \App\Models\Location::class)
-      <a href="{{ route('locations.create') }}" class="btn btn-primary pull-right">
-  {{ trans('general.create') }}</a>
-  @endcan
-@stop
 {{-- Page content --}}
 @section('content')
 <div class="row">
@@ -28,10 +22,12 @@
                   data-bulk-button-id="#bulkLocationsEditButton"
                   data-bulk-form-id="#locationsBulkForm"
                   data-side-pagination="server"
+                  data-advanced-search="false"
                   data-sort-order="asc"
+                  data-buttons="locationButtons"
                   id="locationTable"
                   class="table table-striped snipe-table"
-                  data-url="{{ route('api.locations.index', array('company_id'=>e(Request::get('company_id')))) }}"
+                  data-url="{{ route('api.locations.index', ['company_id'=>e(request('company_id')), 'status' => e(request('status'))]) }}"
                   data-export-options='{
               "fileName": "export-locations-{{ date('Y-m-d') }}",
               "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]

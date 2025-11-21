@@ -20,9 +20,9 @@ return array(
         'confirm'   => 'Kas oled kindel, et soovid selle tarnija kustutada?',
         'error'   => 'Tarnija kustutamisel tekkis probleem. Palun proovi uuesti.',
         'success' => 'Tarnija kustutamine õnnestus.',
-        'assoc_assets'	 => 'Selle tarnijaga on seotud :asset_count vahendi(t) ja seda ei saa kustutada. Palun uuenda oma vahendeid, et need ei viitaks sellele tarnijale ning proovi uuesti. ',
-        'assoc_licenses'	 => 'Selle tarnijaga on seotud :licenses_count litsents(i) ja seda ei saa kustutada. Palun uuenda oma litsentse, et need ei viitaks sellele tarnijale ning proovi uuesti. ',
-        'assoc_maintenances'	 => 'Selle tarnijaga on seotud :asset_maintenances_count vahendi hooldustöö(d) ja seda ei saa kustutada. Palun uuenda oma hooldustöid, et need ei viitaks sellele tarnijale ning proovi uuesti. ',
+        'not_found'               => 'Supplier not found.',
+        'bulk_success'            => 'Suppliers were deleted successfully.',
+        'partial_success'        => 'Supplier deleted successfully. See additional information below. | :count suppliers were deleted successfully. See additional information below.',
     )
 
 );

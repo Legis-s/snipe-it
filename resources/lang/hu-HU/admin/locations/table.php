@@ -12,7 +12,8 @@ return [
     'create'                    => 'Helyszín létrehozása',
     'update'                    => 'Helyszín frissítése',
     'print_assigned'            => 'Hozzárendelt nyomtatása',
-    'print_all_assigned'        => 'Az összes hozzárendelt nyomtatása',
+    'print_inventory'           => 'Leltár nyomtatása',
+    'print_all_assigned'        => 'Leltár és hozzárendelt eszközök nyomtatása',
     'name'                      => 'Helyszín neve',
     'address'                   => 'Cím',
     'address2'                   => 'Cím sor 2',
@@ -39,5 +40,5 @@ return [
     'signed_by_finance_auditor' => 'Aláírta (Pénzügyi könyvvizsgáló):',
     'signed_by_location_manager' => 'Aláírva (Helykezelő):',
     'signed_by'                 => 'Aláírta:',
-    'clone'  					=> 'Clone Location',
+    'clone'  					=> 'Helyszín klónozása',
 ];

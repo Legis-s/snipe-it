@@ -49,10 +49,18 @@ class LicensePresenter extends Presenter
                 'title' => trans('admin/licenses/form.expiration'),
                 'formatter' => 'dateDisplayFormatter',
             ], [
+                'field' => 'termination_date',
+                'searchable' => true,
+                'sortable' => true,
+                'visible' => false,
+                'title' => trans('admin/licenses/form.termination_date'),
+                'formatter' => 'dateDisplayFormatter',
+            ], [
                 'field' => 'license_email',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/licenses/form.to_email'),
+                'formatter' => 'emailFormatter',
             ], [
                 'field' => 'license_name',
                 'searchable' => true,
@@ -107,14 +115,6 @@ class LicensePresenter extends Presenter
                 'sortable' => true,
                 'visible' => false,
                 'title' => trans('general.purchase_date'),
-                'formatter' => 'dateDisplayFormatter',
-            ],
-            [
-                'field' => 'termination_date',
-                'searchable' => true,
-                'sortable' => true,
-                'visible' => false,
-                'title' => trans('admin/licenses/form.termination_date'),
                 'formatter' => 'dateDisplayFormatter',
             ],
             [
@@ -201,7 +201,7 @@ class LicensePresenter extends Presenter
             'switchable' => false,
             'title' => trans('general.checkin').'/'.trans('general.checkout'),
             'visible' => true,
-            'formatter' => 'licensesInOutFormatter',
+            'formatter' => 'licenseInOutFormatter',
             'printIgnore' => true,
         ];
 

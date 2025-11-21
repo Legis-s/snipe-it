@@ -72,6 +72,7 @@ class AssetModel extends SnipeModel
         'name',
         'notes',
         'requestable',
+        'require_serial',
         'user_id',
         'lifetime'
     ];
@@ -101,8 +102,16 @@ class AssetModel extends SnipeModel
         'manufacturer' => ['name'],
     ];
 
+    protected static function booted(): void
+    {
+        static::forceDeleted(function (AssetModel $assetModel) {
+            $assetModel->requests()->forceDelete();
+        });
 
-
+        static::softDeleted(function (AssetModel $assetModel) {
+            $assetModel->requests()->delete();
+        });
+    }
 
     /**
      * Establishes the model -> assets relationship
@@ -114,6 +123,22 @@ class AssetModel extends SnipeModel
     public function assets()
     {
         return $this->hasMany(\App\Models\Asset::class, 'model_id');
+    }
+
+
+    public function availableAssets()
+    {
+        return $this->hasMany(\App\Models\Asset::class, 'model_id')->RTD();
+    }
+
+    public function assignedAssets()
+    {
+        return $this->hasMany(\App\Models\Asset::class, 'model_id')->Deployed();
+    }
+
+    public function archivedAssets()
+    {
+        return $this->hasMany(\App\Models\Asset::class, 'model_id')->Archived();
     }
 
     /**
@@ -233,6 +258,57 @@ class AssetModel extends SnipeModel
      * BEGIN QUERY SCOPES
      * -----------------------------------------------
      **/
+
+    /**
+     * Query builder scope to search on text filters for complex Bootstrap Tables API
+     *
+     * @param \Illuminate\Database\Query\Builder $query  Query builder instance
+     * @param text                               $filter JSON array of search keys and terms
+     *
+     * @return \Illuminate\Database\Query\Builder          Modified query builder
+     */
+    public function scopeByFilter($query, $filter)
+    {
+        return $query->where(
+            function ($query) use ($filter) {
+                foreach ($filter as $fieldname => $search_val) {
+
+                    if ($fieldname == 'name') {
+                        $query->where('models.name', 'LIKE', '%' . $search_val . '%');
+                    }
+
+                    if ($fieldname == 'notes') {
+                        $query->where('models.notes', 'LIKE', '%' . $search_val . '%');
+                    }
+
+                    if ($fieldname == 'model_number') {
+                        $query->where('models.model_number', 'LIKE', '%' . $search_val . '%');
+                    }
+
+                    if ($fieldname == 'category') {
+                        $query->whereHas(
+                            'category', function ($query) use ($search_val) {
+                            $query->where('categories.name', 'LIKE', '%'.$search_val.'%');
+                        }
+                        );
+                    }
+
+                    if ($fieldname == 'manufacturer') {
+                        $query->whereHas(
+                            'manufacturer', function ($query) use ($search_val) {
+                            $query->where('manufacturers.name', 'LIKE', '%'.$search_val.'%');
+                        }
+                        );
+                    }
+
+
+
+                }
+
+
+            }
+        );
+    }
 
     /**
      * scopeInCategory

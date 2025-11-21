@@ -20,9 +20,9 @@ return array(
         'confirm'   => 'អ្នកផ្គត់ផ្គង់បានបង្កើតដោយជោគជ័យ។',
         'error'   => 'មានបញ្ហាក្នុងការលុបអ្នកផ្គត់ផ្គង់។ សូម​ព្យាយាម​ម្តង​ទៀត។',
         'success' => 'អ្នកផ្គត់ផ្គង់ត្រូវបានលុបដោយជោគជ័យ។',
-        'assoc_assets'	 => 'បច្ចុប្បន្នអ្នកផ្គត់ផ្គង់នេះត្រូវបានភ្ជាប់ជាមួយ៖ asset_count asset(s) ហើយមិនអាចលុបបានទេ។ សូមអាប់ដេតទ្រព្យសកម្មរបស់អ្នកដើម្បីកុំយោងអ្នកផ្គត់ផ្គង់នេះតទៅទៀត ហើយព្យាយាមម្តងទៀត។ ',
-        'assoc_licenses'	 => 'បច្ចុប្បន្នអ្នកផ្គត់ផ្គង់នេះត្រូវបានភ្ជាប់ជាមួយ :licenses_count licences ហើយមិនអាចលុបបានទេ។ សូមអាប់ដេតអាជ្ញាប័ណ្ណរបស់អ្នកដើម្បីកុំឱ្យយោងអ្នកផ្គត់ផ្គង់នេះតទៅទៀត ហើយព្យាយាមម្តងទៀត។ ',
-        'assoc_maintenances'	 => 'បច្ចុប្បន្នអ្នកផ្គត់ផ្គង់នេះត្រូវបានភ្ជាប់ជាមួយ៖ asset_maintenances_count asset cares(s) ហើយមិនអាចលុបបានទេ។ សូម​ធ្វើ​បច្ចុប្បន្នភាព​ការ​ថែទាំ​ទ្រព្យ​សកម្ម​របស់​អ្នក​ដើម្បី​លែង​យោង​អ្នក​ផ្គត់ផ្គង់​នេះ​ហើយ​ព្យាយាម​ម្ដង​ទៀត។ ',
+        'not_found'               => 'Supplier not found.',
+        'bulk_success'            => 'Suppliers were deleted successfully.',
+        'partial_success'        => 'Supplier deleted successfully. See additional information below. | :count suppliers were deleted successfully. See additional information below.',
     )
 
 );

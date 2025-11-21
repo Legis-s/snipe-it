@@ -20,9 +20,9 @@ return array(
         'confirm'   => 'Oletko varma että haluat poistaa tämän toimittajan?',
         'error'   => 'Toimittajan poistossa tapahtui virhe. Yritä uudelleen.',
         'success' => 'Toimittaja poistettiin onnistuneesti.',
-        'assoc_assets'	 => 'Tähän toimittajaan liittyy tällä hetkellä :asset_count laitetta ja sitä ei voi poistaa. Ole hyvä ja päivitä laitteet, jotta ne eivät enää viittaa tähän toimittajaan ja yritä uudelleen. ',
-        'assoc_licenses'	 => 'Tähän toimittajaan liittyy tällä hetkellä :licenses_count lisenssiä ja sitä ei voi poistaa. Ole hyvä ja päivitä lisenssit, jotta ne eivät enää viittaa tähän toimittajaan ja yritä uudelleen. ',
-        'assoc_maintenances'	 => 'Tähän toimittajaan liittyy tällä hetkellä :asset_maintenances_count huoltoa ja sitä ei voi poistaa. Ole hyvä ja päivitä huoltotietosi , poista viittaukset tähän toimittajaan ja yritä uudelleen. ',
+        'not_found'               => 'Supplier not found.',
+        'bulk_success'            => 'Suppliers were deleted successfully.',
+        'partial_success'        => 'Supplier deleted successfully. See additional information below. | :count suppliers were deleted successfully. See additional information below.',
     )
 
 );

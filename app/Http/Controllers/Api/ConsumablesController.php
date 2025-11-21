@@ -33,9 +33,52 @@ class ConsumablesController extends Controller
 
         $consumables = Consumable::with('company', 'location', 'category', 'supplier', 'manufacturer');
 
-        if ($request->filled('search')) {
-            $consumables = $consumables->TextSearch(e($request->input('search')));
+        // This array is what determines which fields should be allowed to be sorted on ON the table itself.
+        // These must match a column on the consumables table directly.
+        $allowed_columns = [
+            'id',
+            'name',
+            'order_number',
+            'min_amt',
+            'purchase_date',
+            'purchase_cost',
+            'company',
+            'category',
+            'model_number',
+            'item_no',
+            'manufacturer',
+            'location',
+            'qty',
+            'image',
+            // These are *relationships* so we wouldn't normally include them in this array,
+            // since they would normally create a `column not found` error,
+            // BUT we account for them in the ordering switch down at the end of this method
+            // DO NOT ADD ANYTHING TO THIS LIST WITHOUT CHECKING THE ORDERING SWITCH BELOW!
+            'company',
+            'location',
+            'category',
+            'supplier',
+            'manufacturer',
+        ];
+
+
+        $filter = [];
+
+        if ($request->filled('filter')) {
+            $filter = json_decode($request->input('filter'), true);
+
+            $filter = array_filter($filter, function ($key) use ($allowed_columns) {
+                return in_array($key, $allowed_columns);
+            }, ARRAY_FILTER_USE_KEY);
+
         }
+
+        if ((! is_null($filter)) && (count($filter)) > 0) {
+            $consumables->ByFilter($filter);
+        } elseif ($request->filled('search')) {
+            $consumables->TextSearch($request->input('search'));
+        }
+
 
         if ($request->filled('name')) {
             $consumables->where('name', '=', $request->input('name'));
@@ -102,23 +145,6 @@ class ConsumablesController extends Controller
                 $consumables = $consumables->OrderByCreatedBy($order);
                 break;
             default:
-                // This array is what determines which fields should be allowed to be sorted on ON the table itself.
-                // These must match a column on the consumables table directly.
-                $allowed_columns = [
-                    'id',
-                    'name',
-                    'min_amt',
-                    'purchase_date',
-                    'purchase_cost',
-                    'company',
-                    'category',
-                    'model_number',
-                    'item_no',
-                    'location',
-                    'qty',
-                    'image'
-                ];
-
                 $sort = in_array($request->input('sort'), $allowed_columns) ? $request->input('sort') : 'created_at';
                 $consumables = $consumables->orderBy($sort, $order);
                 break;
@@ -187,7 +213,7 @@ class ConsumablesController extends Controller
         $consumable = Consumable::findOrFail($id);
         $consumable->fill($request->all());
         $consumable = $request->handleImages($consumable);
-
+        
         if ($consumable->save()) {
             return response()->json(Helper::formatStandardApiResponse('success', $consumable, trans('admin/consumables/message.update.success')));
         }
@@ -240,11 +266,16 @@ class ConsumablesController extends Controller
         foreach ($consumable->consumableAssignments as $consumable_assignment) {
             $rows[] = [
                 'avatar' => ($consumable_assignment->user) ? e($consumable_assignment->user->present()->gravatar) : '',
-                'name' => ($consumable_assignment->user) ? $consumable_assignment->user->present()->nameUrl() : 'Deleted User',
+                'user' => ($consumable_assignment->user) ? [
+                    'id' => (int) $consumable_assignment->user->id,
+                    'name'=> e($consumable_assignment->user->display_name),
+                ] : null,
                 'created_at' => Helper::getFormattedDateObject($consumable_assignment->created_at, 'datetime'),
                 'note' => ($consumable_assignment->note) ? e($consumable_assignment->note) : null,
-                'admin' => ($consumable_assignment->adminuser) ? $consumable_assignment->adminuser->present()->nameUrl() : null, // legacy, so we don't change the shape of the response
-                'created_by' => ($consumable_assignment->adminuser) ? $consumable_assignment->adminuser->present()->nameUrl() : null,
+                'created_by' => ($consumable_assignment->adminuser) ? [
+                    'id' => (int) $consumable_assignment->adminuser->id,
+                    'name'=> e($consumable_assignment->adminuser->display_name),
+                ] : null,
             ];
         }
 

@@ -20,9 +20,9 @@ return array(
         'confirm'   => 'Ma hubtaa inaad rabto inaad tirtirto alaab-qeybiyahan?',
         'error'   => 'Cillad ayaa ka taagan tir-tiraanka alaab gudbiyahan. Fadlan ku celi marakale.',
         'success' => 'Gaarsiiyaha si guul leh ayaa loo sameeyay.',
-        'assoc_assets'	 => 'Alaab-qeybiyahan hadda waxa lala xidhiidhiyaa :asset_count hantida lamana tirtiri karo Fadlan cusboonaysii hantidaada si aanay mar dambe tixraac alaab-qeybiyahan oo isku day mar kale. ',
-        'assoc_licenses'	 => 'Iibiyahan hadda waxa lala xidhiidhiyaa :licenses_count shatiyada lamana tirtiri karo Fadlan cusboonaysii shatiyadaada si aadan mar dambe u tixraacin alaab-qeybiyaha oo isku day mar kale. ',
-        'assoc_maintenances'	 => 'Alaab-qeybiyahan waxa uu hadda ku xidhan yahay :asset_maintenances_count dayactirka(yada) hantida lamana tirtiri karo Fadlan cusboonaysii dayactirka hantidaada si aadan mar dambe tixraac alaab-qeybiyahan oo isku day mar kale. ',
+        'not_found'               => 'Supplier not found.',
+        'bulk_success'            => 'Suppliers were deleted successfully.',
+        'partial_success'        => 'Supplier deleted successfully. See additional information below. | :count suppliers were deleted successfully. See additional information below.',
     )
 
 );

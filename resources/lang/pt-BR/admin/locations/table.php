@@ -12,7 +12,8 @@ return [
     'create'                    => 'Criar Local',
     'update'                    => 'Atualizar Local',
     'print_assigned'            => 'Impressão atribuída',
-    'print_all_assigned'        => 'Imprimir Todos Atribuídos',
+    'print_inventory'           => 'Print Inventory',
+    'print_all_assigned'        => 'Print Inventory and Assigned',
     'name'                      => 'Nome do Local',
     'address'                   => 'Endereço',
     'address2'                   => 'Linha de Endereço 2',
@@ -39,5 +40,5 @@ return [
     'signed_by_finance_auditor' => 'Assinado por (Auditoria Financeira):',
     'signed_by_location_manager' => 'Assinado por (Gerente Local):',
     'signed_by'                 => 'Assinado por:',
-    'clone'  					=> 'Clone Location',
+    'clone'  					=> 'Clonar Localização',
 ];

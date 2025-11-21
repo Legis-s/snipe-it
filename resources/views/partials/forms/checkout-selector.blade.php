@@ -1,6 +1,7 @@
 <div class="form-group" id="assignto_selector"{!!  (isset($style)) ? ' style="'.e($style).'"' : ''  !!}>
     <label for="checkout_to_type" class="col-md-3 control-label">{{ trans('admin/hardware/form.checkout_to') }}</label>
     <div class="col-md-8">
+
         <div class="btn-group" data-toggle="buttons">
             @if ((isset($location_select)) && ($location_select!='false'))
             <label class="btn btn-default active">

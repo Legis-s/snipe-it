@@ -3,7 +3,7 @@
 @section('title')
 	@if ($user->id)
 		{{ trans('admin/users/table.updateuser') }}
-		{{ $user->present()->fullName() }}
+		{{ $user->display_name }}
 	@else
 		{{ trans('admin/users/table.createuser') }}
 	@endif
@@ -288,6 +288,30 @@
 
                   </div>
                 </div>
+
+                  <!-- Send welcome email to user -->
+                  @if (!$user->id)
+                      <div class="form-group" id="email_user_row">
+
+                          <div class="col-md-8 col-md-offset-3">
+                              <label class="form-control form-control--disabled">
+                                  <input
+                                      type="checkbox"
+                                      name="send_welcome"
+                                      id="email_user_checkbox"
+                                      value="1"
+                                      aria-label="send_welcome"
+                                      @checked(old('send_welcome'))
+                                  />
+                                  {{ trans('general.send_welcome_email_to_users') }}
+                              </label>
+
+                              <p class="help-block"> {{ trans('general.send_welcome_email_help') }}</p>
+
+                          </div>
+                      </div> <!--/form-group-->
+                  @endif
+
                   
                   @include ('partials.forms.edit.image-upload', ['fieldname' => 'avatar', 'image_path' => app('users_upload_path')])
 
@@ -298,12 +322,12 @@
 
                       <fieldset name="optional-details">
 
-                          <legend class="highlight">
+                          <x-form-legend>
                               <a id="optional_user_info">
                                   <x-icon type="caret-right" id="optional_user_info_icon" />
                                   {{ trans('admin/hardware/form.optional_infos') }}
                               </a>
-                          </legend>
+                          </x-form-legend>
 
                           <div id="optional_user_details" class="col-md-12" style="display:none">
 
@@ -311,6 +335,24 @@
 
                               <!-- everything here should be what is considered optional -->
                               <br>
+
+                              <!-- Display Name -->
+                              <div class="form-group {{ $errors->has('display_name') ? 'has-error' : '' }}">
+                                  <label class="col-md-3 control-label" for="display_name">{{ trans('admin/users/table.display_name') }}</label>
+                                  <div class="col-md-6">
+                                      <input
+                                              class="form-control"
+                                              type="text"
+                                              maxlength="191"
+                                              name="display_name"
+                                              id="display_name"
+                                              value="{{ old('display_name', $user->getRawOriginal('display_name')) }}"
+                                      />
+                                      {!! $errors->first('display_name', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                  </div>
+                              </div>
+
+
                               <!-- Company -->
                               @if ((Gate::allows('canEditAuthFields', $user)) && (\App\Models\Company::canManageUsersCompanies()))
                                   @include ('partials.forms.edit.company-select', ['translated_name' => trans('general.select_company'), 'fieldname' => 'company_id'])
@@ -436,6 +478,15 @@
                                   </div>
                               </div>
 
+                              <!-- Mobile -->
+                              <div class="form-group {{ $errors->has('mobile') ? 'has-error' : '' }}">
+                                  <label class="col-md-3 control-label" for="phone">{{ trans('admin/users/table.mobile') }}</label>
+                                  <div class="col-md-6">
+                                      <input class="form-control" type="text" name="mobile" id="mobile" value="{{ old('mobile', $user->mobile) }}" maxlength="191" />
+                                      {!! $errors->first('mobile', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                  </div>
+                              </div>
+
                               <!-- Website URL -->
                               <div class="form-group {{ $errors->has('website') ? ' has-error' : '' }}">
                                   <label for="website" class="col-md-3 control-label">{{ trans('general.website') }}</label>
@@ -486,7 +537,7 @@
                               <!-- Zip -->
                               <div class="form-group{{ $errors->has('zip') ? ' has-error' : '' }}">
                                   <label class="col-md-3 control-label" for="zip">{{ trans('general.zip') }}</label>
-                                  <div class="col-md-3">
+                                  <div class="col-md-3 text-right">
                                       <input class="form-control" type="text" name="zip" id="zip" value="{{ old('zip', $user->zip) }}" maxlength="10" />
                                       {!! $errors->first('zip', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
                                   </div>
@@ -675,7 +726,28 @@
 $(document).ready(function() {
 
 
+    // Set some defaults
+    $('#email_user_checkbox').prop("disabled", true);
+    $('#email_user_checkbox').prop("checked", false);
+    $("#email_user_checkbox").removeAttr('checked');
 
+    // If the email address is longer than 5 characters, enable the "send email" checkbox
+    $('#email').on('keyup',function(){
+        //event.preventDefault();
+
+        @if (!config('app.lock_passwords'))
+
+        if (this.value.length > 5) {
+            $('#email_user_checkbox').prop("disabled", false);
+            $("#email_user_checkbox").parent().removeClass("form-control--disabled");
+        } else {
+            $('#email_user_checkbox').prop("disabled", true);
+            $('#email_user_checkbox').prop("checked", false);
+            $("#email_user_checkbox").parent().addClass("form-control--disabled");
+        }
+
+        @endif
+    });
 
 
 	// Check/Uncheck all radio buttons in the group

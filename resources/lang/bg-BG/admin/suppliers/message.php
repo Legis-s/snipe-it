@@ -20,9 +20,9 @@ return array(
         'confirm'   => 'Сигурни ли сте, че искате да изтриете този доставчик?',
         'error'   => 'Възникна проблем при изтриване на доставчика. Моля, опитайте отново.',
         'success' => 'Доставчикът е изтрит.',
-        'assoc_assets'	 => 'Този доставчик е текущо асоцииран с :asset_count актива и не може да бъде изтрит. Моля, променете връзките на моделите по отношение на този доставчик и опитайте отново. ',
-        'assoc_licenses'	 => 'Този доставчик е текущо асоцииран с :licenses_count лиценза и не може да бъде изтрит. Моля, променете връзките на лицензите по отношение на този доставчик и опитайте отново. ',
-        'assoc_maintenances'	 => 'Този доставчик е текущо асоцииран с :asset_maintenances_count инвентаризации и не може да бъде изтрит. Моля, променете връзките на инвентаризациите по отношение на този доставчик и опитайте отново. ',
+        'not_found'               => 'Supplier not found.',
+        'bulk_success'            => 'Suppliers were deleted successfully.',
+        'partial_success'        => 'Supplier deleted successfully. See additional information below. | :count suppliers were deleted successfully. See additional information below.',
     )
 
 );
