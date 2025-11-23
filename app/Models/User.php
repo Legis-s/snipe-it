@@ -40,6 +40,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     use UniqueUndeletedTrait;
     use Notifiable;
     use Presentable;
+    use Impersonate;
     use Searchable;
 
     protected $hidden = [
