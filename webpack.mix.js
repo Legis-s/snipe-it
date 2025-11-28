@@ -143,7 +143,7 @@ mix
             './resources/assets/js/FileSaver.min.js',
             './node_modules/xlsx/dist/xlsx.core.min.js',
             './node_modules/bootstrap-table/dist/extensions/sticky-header/bootstrap-table-sticky-header.js',
-            './node_modules/bootstrap-table/dist/extensions/toolbar/bootstrap-table-toolbar.js'
+            './node_modules/bootstrap-table/dist/extensions/toolbar/bootstrap-table-toolbar.js',
             "./node_modules/star-rating.js/dist/star-rating.js",
             "./node_modules/sweetalert2/dist/sweetalert2.js",
             "./node_modules/timeago.js/dist/timeago.min.js",
