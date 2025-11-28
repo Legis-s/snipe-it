@@ -246,6 +246,7 @@ class LocationsController extends Controller
                 'locations.notes',
                 'locations.bitrix_id',
                 'locations.sklad',
+                'locations.tag_color',
             ])
             ->withCount('assignedAssets as assigned_assets_count')
             ->withCount('assets as assets_count')
