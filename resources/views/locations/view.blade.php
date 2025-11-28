@@ -112,21 +112,8 @@
                               <span class="sr-only">
                               {{ trans('general.consumables') }}
                           </span>
-                          </a>
-                      </li>
-{{--                      @if ($location->consumables->count() > 0)--}}
-{{--                          <li>--}}
-{{--                              <a href="#consumables" data-toggle="tab" data-tooltip="true" title="{{ trans('general.consumables') }}">--}}
-{{--                                  <i class="fas fa-tint" style="font-size: 17px" aria-hidden="true"></i>--}}
-{{--                                  <span class="badge">--}}
-{{--                              {{ number_format($location->consumables->count()) }}--}}
-{{--                          </span>--}}
-{{--                                  <span class="sr-only">--}}
-{{--                              {{ trans('general.consumables') }}--}}
-{{--                          </span>--}}
-{{--                              </a>--}}
-{{--                          </li>--}}
-{{--                      @endif--}}
+                              </a>
+                          </li>
                   @endcan
 
                   @can('view', \App\Models\Component::class)
@@ -156,7 +143,18 @@
                   @endif
 
 
-              @if ($location->uploads->count() > 0 )
+                  <li>
+                      <a href="#child_locations" data-toggle="tab" data-tooltip="true" title="{{ trans('general.child_locations') }}">
+                          <span class="hidden-xs hidden-sm">
+                               <i class="fa-solid fa-city fa-fw" style="font-size: 17px" aria-hidden="true"></i>
+                          <span class="sr-only">
+                            {{ trans('general.child_locations') }}
+                          </span>
+                          {!! ($location->children()->count() > 0 ) ? '<span class="badge">'.number_format($location->children()->count()).'</span>' : '' !!}
+                      </span>
+                      </a>
+                  </li>
+
               <li>
                   <a href="#files" data-toggle="tab" data-tooltip="true" title="{{ trans('general.files') }}">
 
@@ -655,10 +653,10 @@
     @endcan
 
 
-@include ('partials.bootstrap-table', [
-'exportFile' => 'locations-export',
-'search' => true
-])
+    @include ('partials.bootstrap-table', [
+    'exportFile' => 'locations-export',
+    'search' => true
+    ])
 
 
     @if ($location->coordinates!='')

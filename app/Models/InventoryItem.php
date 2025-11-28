@@ -18,10 +18,9 @@ final class InventoryItem extends SnipeModel
     protected $table = 'inventory_items';
     protected $presenter = \App\Presenters\InventoryItemPresenter::class;
     use Presentable;
-    use SoftDeletes;
     use Searchable;
 
-    protected $dates = ['deleted_at'];
+    protected $dates = ['deleted_at','checked_at'];
     protected $rules = array(
         'model' => 'required',
         'tag' => 'required',
@@ -82,9 +81,9 @@ final class InventoryItem extends SnipeModel
      * @var array
      */
     protected $searchableRelations = [
-//        'model'              => ['name', 'model_number'],
-//        'model.category'     => ['name'],
-//        'model.manufacturer' => ['name'],
+        'model'              => ['name', 'model_number'],
+        'model.category'     => ['name'],
+        'model.manufacturer' => ['name'],
     ];
 
 
@@ -106,5 +105,10 @@ final class InventoryItem extends SnipeModel
     public function status()
     {
         return $this->belongsTo(\App\Models\InventoryStatuslabel::class);
+    }
+
+    public function adminuser()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'created_by');
     }
 }

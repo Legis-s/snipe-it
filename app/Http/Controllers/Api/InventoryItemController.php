@@ -1,6 +1,6 @@
 <?php
-namespace App\Http\Controllers\Api;
 
+namespace App\Http\Controllers\Api;
 
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
@@ -8,6 +8,7 @@ use App\Http\Transformers\InventoryItemTransformer;
 use App\Models\Inventory;
 use App\Models\InventoryItem;
 use App\Models\InventoryStatuslabel;
+use App\Models\Location;
 use Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,8 +18,6 @@ use Image;
 /**
  * This class controls all actions related to inventory items for
  * the Snipe-IT Asset Management application.
- *
- * @version    v1.0
  */
 class InventoryItemController extends Controller
 {
@@ -26,9 +25,10 @@ class InventoryItemController extends Controller
     /**
      * Returns JSON listing of all inventory items
      */
-    public function index(Request $request) : JsonResponse | array
+    public function index(Request $request): JsonResponse|array
     {
-        $inventory_items = InventoryItem::with('asset','inventory','status')
+        $this->authorize('view', Location::class);
+        $inventory_items = InventoryItem::with('asset', 'inventory', 'status')
             ->select([
                 'inventory_items.id',
                 'inventory_items.notes',
@@ -47,7 +47,9 @@ class InventoryItemController extends Controller
                 'inventory_items.created_at',
                 'inventory_items.updated_at',
                 'inventory_items.successfully',
-            ]);
+            ])
+            ->with('adminuser')
+        ;
 
         if ($request->filled('inventory_id')) {
             $inventory_items->where('inventory_items.inventory_id', '=', $request->input('inventory_id'));
@@ -63,23 +65,33 @@ class InventoryItemController extends Controller
 
         $allowed_columns =
             [
-                'id','notes','name','model','category','manufacturer','serial_number','tag','checked','checked_at','status_id','created_at', 'updated_at'
+                'id',
+                'notes',
+                'name',
+                'model',
+                'category',
+                'manufacturer',
+                'serial_number',
+                'tag',
+                'checked',
+                'checked_at',
+                'status_id',
+                'created_at',
+                'updated_at'
             ];
-
 
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
         $sort = in_array($request->input('sort'), $allowed_columns) ? $request->input('sort') : 'created_at';
 
         $inventory_items->orderBy($sort, $order);
+        $total = $inventory_items->count();
         // Set the offset to the API call's offset, unless the offset is higher than the actual count of items in which
         // case we override with the actual count, so we should return 0 items.
-        $offset = (($inventory_items) && ($request->get('offset') > $inventory_items->count())) ? $inventory_items->count() : $request->get('offset', 0);
+        $offset = (($inventory_items) && ($request->get('offset') > $total)) ? $total : $request->get('offset', 0);
 
         // Check to make sure the limit is not higher than the max allowed
         ((config('app.max_results') >= $request->input('limit')) && ($request->filled('limit'))) ? $limit = $request->input('limit') : $limit = config('app.max_results');
 
-
-        $total = $inventory_items->count();
         $inventory_items = $inventory_items->skip($offset)->take($limit)->get();
 
         return (new InventoryItemTransformer)->transformInventoryItemsvsAsset($inventory_items, $total);
@@ -89,7 +101,7 @@ class InventoryItemController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($id): JsonResponse | array
+    public function show($id): JsonResponse|array
     {
         $inventory_item = InventoryItem::findOrFail($id);
         return (new InventoryItemTransformer)->transformInventoryItem($inventory_item);
@@ -100,30 +112,29 @@ class InventoryItemController extends Controller
      */
     public function update(Request $request, $id): JsonResponse
     {
-        $inventory_item = InventoryItem::with(['asset','inventory','status'])->findOrFail($id);
+        $inventory_item = InventoryItem::with(['asset', 'inventory', 'status'])->findOrFail($id);
         $inventory_item->fill($request->all());
 
-        if ($request['photo']){
-            $destinationPath = public_path().'/uploads/inventory_items/';
+        if ($request['photo']) {
+            $destinationPath = public_path() . '/uploads/inventory_items/';
 
             $file = base64_decode($inventory_item->photo);
-            $filename = 'items-'.$inventory_item->id.'-'.str_random(8).".jpg";
-            $success = file_put_contents($destinationPath.$filename, $file);
-            if ($success>0){
+            $filename = 'items-' . $inventory_item->id . '-' . str_random(8) . ".jpg";
+            $success = file_put_contents($destinationPath . $filename, $file);
+            if ($success > 0) {
                 $inventory_item->photo = $filename;
             }
         }
-
 
         if ($request->filled('status_id')) {
             $inventory_item->status_id = $request->input('status_id');
         }
 
-        if ($inventory_item->status_id){
-            if($inventory_item->status_id == 4 && str_starts_with($inventory_item->asset->asset_tag, 'it_') ) {
+        if ($inventory_item->status_id) {
+            if ($inventory_item->status_id == 4 && str_starts_with($inventory_item->asset->asset_tag, 'it_')) {
                 $inventory_item->status_id = 1;
             }
-            if($inventory_item->status_id == 1){
+            if ($inventory_item->status_id == 1) {
                 $inventory_item->successfully = true;
             }
         }
@@ -132,24 +143,24 @@ class InventoryItemController extends Controller
         $inventory_item->status()->associate($label);
 
         if ($inventory_item->save()) {
-            if ($inventory_item->checked){
+            if ($inventory_item->checked) {
                 $asset = $inventory_item->asset;
                 $asset->last_audit_date = date('Y-m-d h:i:s');
                 $asset->save();
             }
 
             /** @var Inventory $inventory */
-            $inventory  = $inventory_item->inventory;
+            $inventory = $inventory_item->inventory;
             $inventory_items = $inventory->inventory_items;
             $finished = true;
             foreach ($inventory_items as $item) {
                 /** @var InventoryItem $item */
-                if  (!$item->checked){
+                if (!$item->checked) {
                     $finished = false;
                     break;
                 }
             }
-            if ($finished){
+            if ($finished) {
                 $inventory->status = "FINISH_OK";
                 $inventory->save();
             }

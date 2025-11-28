@@ -48,10 +48,10 @@ class PurchasesTransformer
             'consumables_count' => (int)$consumables_count,
             'consumables_check_count' => (int)$check_count,
             'comment' => ($purchase->comment) ? e($purchase->comment) : null,
-            'created_by' => ($purchase->adminuser) ? [
+            'created_by' => $purchase->adminuser ? [
                 'id' => (int) $purchase->adminuser->id,
-                'name'=> e($purchase->adminuser->present()->fullName()),
-            ] : null,
+                'name'=> e($purchase->adminuser->present()->fullName),
+            ]: null,
             'created_at' => Helper::getFormattedDateObject($purchase->created_at, 'datetime'),
             'updated_at' => Helper::getFormattedDateObject($purchase->updated_at, 'datetime'),
             'bitrix_task_id' => (int)$purchase->bitrix_task_id,

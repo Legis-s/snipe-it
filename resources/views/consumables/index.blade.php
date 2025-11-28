@@ -6,16 +6,6 @@
 @parent
 @stop
 
-@section('header_right')
-  @can('create', \App\Models\Consumable::class)
-  <a href="{{ route('consumables.create') }}" {{$snipeSettings->shortcuts_enabled == 1 ? "accesskey=n" : ''}} class="btn btn-primary pull-right"> {{ trans('general.create') }}</a>
-  @endcan
-
-  @can('checkout', \App\Models\Consumable::class)
-      <a href="{{ route('consumables.bulkcheckout.show') }}" class="btn bg-maroon pull-right">{{ trans('general.bulk_checkout') }}</a>
-  @endcan
-@stop
-
 {{-- Page content --}}
 @section('content')
 
@@ -33,8 +23,12 @@
                             data-id-table="consumablesTable"
                             data-side-pagination="server"
                             data-footer-style="footerStyle"
+                            data-show-footer="true"
+                            data-sort-order="asc"
+                            data-sort-name="name"
                             data-toolbar="#toolbar"
                             id="consumablesTable"
+                            data-buttons="consumableButtons"
                             class="table table-striped snipe-table"
                             data-url="{{ route('api.consumables.index') }}"
                             data-export-options='{

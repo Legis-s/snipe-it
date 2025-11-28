@@ -72,7 +72,7 @@ return [
     'changepassword'  		=> 'Изменить пароль',
     'tag_color'  		    => 'Tag Color',
     'tag_color_help'  		=> 'If you wish to use a custom color indicator for this entry, enter a hex color code (e.g., #ffffff for white). Otherwise, you can leave this blank.',
-    'checkin'  				=> 'Привязать',
+    'checkin'  				=> 'Вернуть',
     'checkin_from'  		=> 'Возврат из',
     'checkin_note'  		=> 'Заметка о возврате',
     'checkout_note'  		=> 'Заметка о выдаче',

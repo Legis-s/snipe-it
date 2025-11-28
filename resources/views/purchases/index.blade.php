@@ -6,17 +6,6 @@
     @parent
 @stop
 
-@section('header_right')
-    @can('create', \App\Models\Purchase::class)
-        <a href="{{ route('purchases.create') }}" class="btn btn-primary pull-right">
-            {{ trans('general.create') }}</a>
-    @endcan
-    @can('delete', \App\Models\Purchase::class)
-        <a href="{{ route('purchases.delete_all_rejected') }}" class="btn btn-danger pull-right">
-            Удалить отклоненные</a>
-    @endcan
-@stop
-
 {{-- Page content --}}
 @section('content')
 
@@ -61,6 +50,7 @@
                             data-side-pagination="server"
                             data-sort-order="desc"
                             data-toolbar="#toolbar"
+                            data-buttons="purchaseButtons"
                             id="purchasesTable"
                             class="table table-striped snipe-table"
                             data-url="{{ route('api.purchases.index') }}"

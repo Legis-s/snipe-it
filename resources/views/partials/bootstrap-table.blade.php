@@ -374,6 +374,41 @@
         },
     });
 
+    @can('create', \App\Models\Purchase::class)
+        window.purchaseButtons = () => ({
+        btnAdd: {
+            text: '{{ trans('general.create') }}',
+            icon: 'fa fa-plus',
+            event () {
+                window.location.href = '{{ route('purchases.create') }}';
+            },
+            attributes: {
+                class: 'btn-info',
+                title: '{{ trans('general.create') }}',
+                @if ($snipeSettings->shortcuts_enabled == 1)
+                accesskey: 'n'
+                @endif
+            }
+        },
+
+        deleteAllRejected: {
+            text: 'Удалить отклоненные',
+            icon: 'fa-solid fa-trash',
+            event () {
+                window.location.href = '{{ route('purchases.create') }}';
+            },
+            attributes: {
+                class: 'btn-danger',
+                title: '{{ trans('purchases.delete_all_rejected') }}',
+                @if ($snipeSettings->shortcuts_enabled == 1)
+                accesskey: 'd'
+                @endif
+            }
+        },
+
+    });
+
+    @endcan
     @can('create', \App\Models\Location::class)
     // Location table buttons
     window.locationButtons = () => ({
@@ -519,6 +554,21 @@
             attributes: {
                 class: 'btn-info',
                 title: '{{ trans('general.create') }}',
+                @if ($snipeSettings->shortcuts_enabled == 1)
+                accesskey: 'n'
+                @endif
+            }
+        },
+
+        btnBulkcheckout: {
+            text:  '{{ trans('general.bulk_checkout') }}',
+            icon: 'fa fa-dolly',
+            event () {
+                window.location.href = '{{ route('consumables.bulkcheckout.show') }}';
+            },
+            attributes: {
+                class: 'btn-info',
+                title: '{{ trans('general.bulk_checkout') }}',
                 @if ($snipeSettings->shortcuts_enabled == 1)
                 accesskey: 'n'
                 @endif
@@ -1472,6 +1522,13 @@
         }
     }
 
+    // Create a linked phone number in the table list
+    function mobileFormatter(value) {
+        if (value) {
+            return  '<span style="white-space: nowrap;"><a href="tel:' + value + '" data-tooltip="true" title="{{ trans('general.call') }}"><x-icon type="mobile" /> ' + value + '</a></span>';
+        }
+    }
+
 
     function deployedLocationFormatter(row, value) {
         if ((row) && (row!=undefined)) {
@@ -1935,21 +1992,54 @@
             return full_price.toLocaleString('ru');
         }
 
+        {{--function hardwareCustomInOutFormatter(value,row) {--}}
+        {{--        var destination = "hardware";--}}
+
+        {{--        if ((row.available_actions.review == true) && (row.user_can_review == true)) {--}}
+        {{--            return '<button type="button" class="btn btn-primary btn-sm review" data-tooltip="true" title="Проверка">Проверить</button>';--}}
+        {{--        }--}}
+
+        {{--        // The user is allowed to check items out, AND the item is deployable--}}
+        {{--        if ((row.available_actions.checkout == true) && (row.user_can_checkout == true) && ((!row.asset_id) && (!row.assigned_to))) {--}}
+        {{--            return '<div class="btn-group" style="min-width:270px">' +--}}
+        {{--                '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/checkout" class="btn btn-sm bg-maroon" data-tooltip="true" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>'+--}}
+        {{--                '</div>';--}}
+        {{--            // The user is allowed to check items out, but the item is not deployable--}}
+        {{--        } else if (((row.user_can_checkout == false)) && (row.available_actions.checkout == true) && (!row.assigned_to)) {--}}
+        {{--            return '<span  data-tooltip="true" title="{{ trans('admin/hardware/general.undeployable_tooltip') }}"><a class="btn btn-sm bg-maroon disabled">{{ trans('general.checkout') }}</a></span>';--}}
+        {{--            // The user is allowed to check items in--}}
+        {{--        } else if (row.available_actions.checkin == true)  {--}}
+        {{--            if (row.assigned_to) {--}}
+        {{--                return '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkin') }}</a>';--}}
+        {{--            } else if (row.assigned_pivot_id) {--}}
+        {{--                return '<a href="{{ config('app.url') }}/' + destination + '/' + row.assigned_pivot_id + '/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkin') }}</a>';--}}
+        {{--            }--}}
+        {{--        }--}}
+        {{--}--}}
+
         function hardwareCustomInOutFormatter(value,row) {
-                var destination = "hardware";
+            const destination = "hardware";
 
-                if ((row.available_actions.review == true) && (row.user_can_review == true)) {
-                    return '<button type="button" class="btn btn-primary btn-sm review" data-tooltip="true" title="Проверка">Проверить</button>';
-                }
+            if ((row.available_actions.review == true) && (row.user_can_review == true)) {
+                return '<button type="button" class="btn btn-primary btn-sm review" data-tooltip="true" title="Проверка">Проверить</button>';
+            }
 
-                // The user is allowed to check items out, AND the item is deployable
+            // The user is allowed to check items out, AND the item is deployable
                 if ((row.available_actions.checkout == true) && (row.user_can_checkout == true) && ((!row.asset_id) && (!row.assigned_to))) {
-                    return '<div class="btn-group" style="min-width:270px">' +
-                        '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/checkout" class="btn btn-sm bg-maroon" data-tooltip="true" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>'+
-                        '</div>';
-                    // The user is allowed to check items out, but the item is not deployable
+
+                    return '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/checkout" class="btn btn-sm bg-maroon" data-tooltip="true" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>';
+
+                    // The user is allowed to check items out, but the item is not able to be checked out
                 } else if (((row.user_can_checkout == false)) && (row.available_actions.checkout == true) && (!row.assigned_to)) {
-                    return '<span  data-tooltip="true" title="{{ trans('admin/hardware/general.undeployable_tooltip') }}"><a class="btn btn-sm bg-maroon disabled">{{ trans('general.checkout') }}</a></span>';
+
+                    // We use slightly different language for assets versus other things, since they are the only
+                    // item that has a status label
+                    if (destination =='hardware') {
+                        return '<span  data-tooltip="true" title="{{ trans('admin/hardware/general.undeployable_tooltip') }}"><a class="btn btn-sm bg-maroon disabled">{{ trans('general.checkout') }}</a></span>';
+                    } else {
+                        return '<span  data-tooltip="true" title="{{ trans('general.undeployable_tooltip') }}"><a class="btn btn-sm bg-maroon disabled">{{ trans('general.checkout') }}</a></span>';
+                    }
+
                     // The user is allowed to check items in
                 } else if (row.available_actions.checkin == true)  {
                     if (row.assigned_to) {
@@ -1957,8 +2047,10 @@
                     } else if (row.assigned_pivot_id) {
                         return '<a href="{{ config('app.url') }}/' + destination + '/' + row.assigned_pivot_id + '/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkin') }}</a>';
                     }
+
                 }
         }
+
 
         function consumablesCustomInOutFormatter(value,row) {
             var destination = "consumables";

@@ -124,7 +124,7 @@
                                     <div class="col-md-6">
                                         {{ \App\Helpers\Helper::getFormattedDateObject($audit_log->created_at, 'date', false) }}
                                         @if ($audit_log->user)
-                                            (by {{ link_to_route('users.show', $audit_log->user->present()->fullname(), [$audit_log->user->id]) }}
+                                            (by {{ link_to_route('users.show', $audit_log->user->display_name, [$audit_log->user->id]) }}
                                             )
                                         @endif
 
