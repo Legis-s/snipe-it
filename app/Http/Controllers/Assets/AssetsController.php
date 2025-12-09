@@ -170,7 +170,7 @@ class AssetsController extends Controller
                 $asset->byod = request('byod', 0);
                 $asset->depreciable_cost        = Helper::ParseFloat($request->get('depreciable_cost'));
                 $asset->quality                 = intval(request('quality', 5));
-                $asset->nds
+                $asset->nds;
                 if (!empty($settings->audit_interval)) {
                     $asset->next_audit_date = Carbon::now()->addMonths((int)$settings->audit_interval)->toDateString();
                 }

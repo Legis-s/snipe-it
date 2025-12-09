@@ -201,6 +201,14 @@ class IconHelper
                 return 'fa-solid fa-lightbulb';
             case 'highlight':
                 return 'fa-solid fa-highlighter';
+            case 'purchases':
+                return 'fa-solid fa-shopping-basket';
+            case 'inventory':
+               return 'fa-solid fa-clipboard-check';
+            case 'map':
+                return 'fa-solid fa-map';
+            case 'sold':
+                return 'fa-solid fa-dollar-sign';
         }
     }
 }

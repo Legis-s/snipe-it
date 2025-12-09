@@ -1313,9 +1313,9 @@
                                     </li>
                                     @endcan
 
-                                    <li id="checkin-due-sidenav-option"{!! (request()->is('hardware?status=Sold') ? ' class="active"' : '') !!}>
-                                        <a href="{{ route('assets.checkins.due') }}">
-                                            <x-icon type="due" class="text-orange fa-usd"/>
+                                    <li id="sell-due-sidenav-option"{!! (request()->is('hardware?status=Sold') ? ' class="active"' : '') !!}>
+                                        <a href="{{ url('hardware?status=Sold') }}">
+                                            <x-icon type="sold" class="text-danger fa-fw"/>
                                             {{  trans('admin/hardware/general.sold') }}
                                         </a>
                                     </li>
@@ -1371,7 +1371,7 @@
                             </li>
                         @endcan
                        @can('view', \App\Models\Location::class)
-                             <li{!! ((request()->is('devices*') ? ' class="active"' : '') !!}>
+                             <li{!! (request()->is('devices*') ? ' class="active"' : '') !!}>
                                 <a href="{{ route('devices.index') }}">
                                     <i class="fas fa-mobile fa-fw"></i>
                                      <span> {{ trans('general.devices') }}</span>
@@ -1421,7 +1421,6 @@
                             @can('view', \App\Models\Purchase::class)
                                 <li{!! (request()->is('purchases*') ? ' class="active"' : '') !!}>
                                     <a href="{{ route('purchases.index') }}">
-{{--                                        <i class="fas fa-shopping-basket fa-fw"></i>--}}
                                         <x-icon type="purchases" class="fa-fw" />
                                         <span>{{ trans('general.purchases') }}</span>
                                     </a>
@@ -1430,7 +1429,6 @@
                             @can('view', \App\Models\Location::class)
                                 <li{!! (request()->is('inventories*') ? ' class="active"' : '') !!}>
                                     <a href="{{ route('inventories.index') }}">
-{{--                                        <i class="fas fa-clipboard-check fa-fw"></i>--}}
                                         <x-icon type="inventory" class="fa-fw" />
                                         <span>{{ trans('general.inventory') }}</span>
                                     </a>
@@ -1664,7 +1662,6 @@
                         @can('view', \App\Models\Asset::class)
                            <li{!! (request()->is('map*') ? ' class="active"' : '') !!}>
                                <a href="{{ route('map') }}">
-{{--                                   <i class="fas fa-map fa-fw"></i>--}}
                                    <x-icon type="map" class="fa-fw" />
                                    <span>{{ trans('general.map') }}</span>
                                </a>

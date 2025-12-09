@@ -91,6 +91,7 @@ class PurchasePresenter extends Presenter
                 "title" => "Сумма",
                 "visible" => true,
                 "align" => 'right',
+                "class" => "text-right",
                 "formatter" => 'priceFormatter',
             ],[
                 "field" => "delivery_cost",
@@ -100,6 +101,7 @@ class PurchasePresenter extends Presenter
                 "title" => "Доставка",
                 "visible" => true,
                 "align" => 'right',
+                "class" => "text-right",
                 "formatter" => 'priceFormatter',
             ], [
                 "field" => "status",
