@@ -247,6 +247,19 @@ class Accessory extends SnipeModel
     }
 
     /**
+     * Establishes the accessory -> users relationship
+     *
+     * @author [A. Gianotto] [<snipe@snipe.net>]
+     * @since  [v3.0]
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
+    public function users()
+    {
+        return $this->belongsToMany(\App\Models\AccessoryCheckout::class, 'accessories_checkout')
+            ->with('assignedTo');
+    }
+
+    /**
      * Establishes the accessory -> admin user relationship
      *
      * @author A. Gianotto <snipe@snipe.net>

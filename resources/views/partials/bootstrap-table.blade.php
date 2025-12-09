@@ -72,7 +72,7 @@
                 // buttonsPrefix: "btn",
                 addrbar: {{ (config('session.bs_table_addrbar') == 'true') ? 'true' : 'false'}}, // deeplink search phrases, sorting, etc
                 advancedSearch: data_with_default('advanced-search', true),
-                buttonsClass: "tableButton tableButton btn-primary hidden-print",
+                buttonsClass: "tableButton tableButton btn-theme hidden-print",
                 buttonsOrder: [
                     'columns',
                     'btnAdd',
@@ -226,7 +226,7 @@
             },
             attributes: {
                 title: '{{ trans('general.create') }}',
-                class: 'btn-info',
+                class: 'btn-warning',
                 @if ($snipeSettings->shortcuts_enabled == 1)
                 accesskey: 'n'
                 @endif
@@ -247,12 +247,13 @@
 
         btnShowAdmins: {
             text: '{{ trans('general.show_admins') }}',
-            icon: 'fa-solid fa-crown{{ (request()->input('admins') == "true") ? ' text-danger' : '' }}',
+            icon: 'fa-solid fa-crown',
             event () {
                 window.location.href = '{{ (request()->input('admins') == "true") ? route('users.index') : route('users.index', ['admins' => 'true']) }}';
             },
             attributes: {
                 title: '{{ trans('general.show_admins') }}',
+                class: '{{ (request()->input('admins') == "true") ? ' btn-selected text-danger' : '' }}'
             }
         },
 
@@ -263,7 +264,7 @@
                 window.location.href = '{{ (request()->input('status') == "deleted") ? route('users.index') : route('users.index', ['status' => 'deleted']) }}';
             },
             attributes: {
-                class: '{{ (request()->input('status') == "deleted") ? ' btn-danger' : '' }}',
+                class: '{{ (request()->input('status') == "deleted") ? ' btn-selected text-danger ' : '' }}',
                 title: '{{ (request()->input('status') == "deleted") ? trans('admin/users/table.show_current') : trans('admin/users/table.show_deleted') }}',
 
             }
@@ -282,7 +283,7 @@
                 window.location.href = '{{ route('companies.create') }}';
             },
             attributes: {
-                class: 'btn-info',
+                class: 'btn-warning',
                 title: '{{ trans('general.create') }}',
                 @if ($snipeSettings->shortcuts_enabled == 1)
                 accesskey: 'n'
@@ -304,7 +305,7 @@
                 window.location.href = '{{ route('groups.create') }}';
             },
             attributes: {
-                class: 'btn-info',
+                class: 'btn-warning',
                 title: '{{ trans('general.create') }}',
                 @if ($snipeSettings->shortcuts_enabled == 1)
                 accesskey: 'n'
@@ -327,7 +328,7 @@
             },
             attributes: {
                 title: '{{ trans('general.create') }}',
-                class: 'btn-info',
+                class: 'btn-warning',
                 @if ($snipeSettings->shortcuts_enabled == 1)
                 accesskey: 'n'
                 @endif
@@ -367,7 +368,7 @@
                 window.location.href = '{{ (request()->input('status') == "Deleted") ? route('hardware.index') : route('hardware.index', ['status' => 'Deleted']) }}';
             },
             attributes: {
-                class: '{{ (request()->input('status') == "Deleted") ? ' btn-danger' : '' }}',
+                class: '{{ (request()->input('status') == "Deleted") ? 'btn-selected text-danger' : '' }}',
                 title: '{{ (request()->input('status') == "Deleted") ? trans('general.list_all') : trans('general.deleted') }}',
 
             }
@@ -419,7 +420,7 @@
                 window.location.href = '{{ route('locations.create') }}';
             },
             attributes: {
-                class: 'btn-info',
+                class: 'btn-warning',
                 title: '{{ trans('general.create') }}',
                 @if ($snipeSettings->shortcuts_enabled == 1)
                 accesskey: 'n'
@@ -434,6 +435,7 @@
                 window.location.href = '{{ (request()->input('status') == "deleted") ? route('locations.index') : route('locations.index', ['status' => 'deleted']) }}';
             },
             attributes: {
+                class: '{{ (request()->input('status') == "deleted") ? 'btn-selected text-danger' : '' }}',
                 title: '{{ (request()->input('status') == "deleted") ? trans('admin/users/table.show_current') : trans('admin/users/table.show_deleted') }}',
 
             }
@@ -451,7 +453,7 @@
                 window.location.href = '{{ route('accessories.create') }}';
             },
             attributes: {
-                class: 'btn-info',
+                class: 'btn-warning',
                 title: '{{ trans('general.create') }}',
                 @if ($snipeSettings->shortcuts_enabled == 1)
                 accesskey: 'n'
@@ -471,7 +473,7 @@
                 window.location.href = '{{ route('depreciations.create') }}';
             },
             attributes: {
-                class: 'btn-info',
+                class: 'btn-warning',
                 title: '{{ trans('general.create') }}',
                 @if ($snipeSettings->shortcuts_enabled == 1)
                 accesskey: 'n'
@@ -491,7 +493,7 @@
                 window.location.href = '{{ route('fields.create') }}';
             },
             attributes: {
-                class: 'btn-info',
+                class: 'btn-warning',
                 title: '{{ trans('general.create') }}',
                 @if ($snipeSettings->shortcuts_enabled == 1)
                 accesskey: 'n'
@@ -512,7 +514,7 @@
                 window.location.href = '{{ route('fieldsets.create') }}';
             },
             attributes: {
-                class: 'btn-info',
+                class: 'btn-warning',
                 title: '{{ trans('general.create') }}',
                 @if ($snipeSettings->shortcuts_enabled == 1)
                 accesskey: 'n'
@@ -532,7 +534,7 @@
                 window.location.href = '{{ route('components.create') }}';
             },
             attributes: {
-                class: 'btn-info',
+                class: 'btn-warning',
                 title: '{{ trans('general.create') }}',
                 @if ($snipeSettings->shortcuts_enabled == 1)
                 accesskey: 'n'
@@ -552,7 +554,7 @@
                 window.location.href = '{{ route('consumables.create') }}';
             },
             attributes: {
-                class: 'btn-info',
+                class: 'btn-warning',
                 title: '{{ trans('general.create') }}',
                 @if ($snipeSettings->shortcuts_enabled == 1)
                 accesskey: 'n'
@@ -578,7 +580,7 @@
     @endcan
 
     @can('create', \App\Models\Manufacturer::class)
-    // Consumable table buttons
+    // Manufacturer table buttons
     window.manufacturerButtons = () => ({
         btnAdd: {
             text: '{{ trans('general.create') }}',
@@ -587,25 +589,25 @@
                 window.location.href = '{{ route('manufacturers.create') }}';
             },
             attributes: {
-                class: 'btn-info',
+                class: 'btn-warning',
                 title: '{{ trans('general.create') }}',
                 @if ($snipeSettings->shortcuts_enabled == 1)
                 accesskey: 'n'
                 @endif
             },
+        },
 
-            btnShowDeleted: {
-                text: '{{ (request()->input('status') == "Deleted") ? trans('general.list_all') : trans('general.deleted') }}',
-                icon: 'fa-solid fa-trash',
-                event () {
-                    window.location.href = '{{ (request()->input('status') == "deleted") ? route('manufacturers.index') : route('manufacturers.index', ['status' => 'deleted']) }}';
-                },
-                attributes: {
-                    class: '{{ (request()->input('status') == "Deleted") ? ' btn-danger' : '' }}',
-                    title: '{{ (request()->input('status') == "Deleted") ? trans('general.list_all') : trans('general.deleted') }}',
-
-                }
+        btnShowDeleted: {
+            text: '{{ (request()->input('status') == "Deleted") ? trans('general.list_all') : trans('general.deleted') }}',
+            icon: 'fa-solid fa-trash',
+            event () {
+                window.location.href = '{{ (request()->input('status') == "deleted") ? route('manufacturers.index') : route('manufacturers.index', ['status' => 'deleted']) }}';
             },
+            attributes: {
+                class: '{{ (request()->input('status') == "deleted") ? 'btn-selected text-danger' : '' }}',
+                title: '{{ (request()->input('status') == "deleted") ? trans('general.list_all') : trans('general.deleted') }}',
+
+            }
         },
     });
     @endcan
@@ -620,7 +622,7 @@
                 window.location.href = '{{ route('suppliers.create') }}';
             },
             attributes: {
-                class: 'btn-info',
+                class: 'btn-warning',
                 title: '{{ trans('general.create') }}',
                 @if ($snipeSettings->shortcuts_enabled == 1)
                 accesskey: 'n'
@@ -640,7 +642,7 @@
                 window.location.href = '{{ route('departments.create') }}';
             },
             attributes: {
-                class: 'btn-info',
+                class: 'btn-warning',
                 title: '{{ trans('general.create') }}',
                 @if ($snipeSettings->shortcuts_enabled == 1)
                 accesskey: 'n'
@@ -660,7 +662,7 @@
                 window.location.href = '{{ route('departments.create') }}';
             },
             attributes: {
-                class: 'btn-info',
+                class: 'btn-warning',
                 title: '{{ trans('general.create') }}',
                 @if ($snipeSettings->shortcuts_enabled == 1)
                 accesskey: 'n'
@@ -680,7 +682,7 @@
                 window.location.href = '{{ route('maintenances.create', ['asset_id' => (isset($asset)) ? $asset->id :'' ]) }}';
             },
             attributes: {
-                class: 'btn-info',
+                class: 'btn-warning',
                 title: '{{ trans('button.add_maintenance') }}',
                 @if ($snipeSettings->shortcuts_enabled == 1)
                 accesskey: 'n'
@@ -700,7 +702,27 @@
                 window.location.href = '{{ route('categories.create') }}';
             },
             attributes: {
-                class: 'btn-info',
+                class: 'btn-warning',
+                title: '{{ trans('general.create') }}',
+                @if ($snipeSettings->shortcuts_enabled == 1)
+                accesskey: 'n'
+                @endif
+            }
+        },
+    });
+    @endcan
+
+    @can('create', \App\Models\PredefinedKit::class)
+    // Custom Field table buttons
+    window.kitButtons = () => ({
+        btnAdd: {
+            text: '{{ trans('general.create') }}',
+            icon: 'fa fa-plus',
+            event () {
+                window.location.href = '{{ route('kits.create') }}';
+            },
+            attributes: {
+                class: 'btn-warning',
                 title: '{{ trans('general.create') }}',
                 @if ($snipeSettings->shortcuts_enabled == 1)
                 accesskey: 'n'
@@ -720,7 +742,7 @@
                 window.location.href = '{{ route('models.create') }}';
             },
             attributes: {
-                class: 'btn-info',
+                class: 'btn-warning',
                 title: '{{ trans('general.create') }}',
                 @if ($snipeSettings->shortcuts_enabled == 1)
                 accesskey: 'n'
@@ -734,7 +756,7 @@
                 window.location.href = '{{ (request()->input('status') == "deleted") ? route('models.index') : route('models.index', ['status' => 'deleted']) }}';
             },
             attributes: {
-                class: '{{ (request()->input('status') == "deleted") ? ' btn-danger' : '' }}',
+                class: '{{ (request()->input('status') == "deleted") ? ' btn-selected text-danger' : '' }}',
                 title: '{{ (request()->input('status') == "deleted") ? trans('general.list_all') : trans('general.deleted') }}',
 
             }
@@ -789,7 +811,7 @@
                 window.location.href = '{{ route('licenses.export', ['category_id' => (isset($category)) ? $category->id :'' ]) }}';
             },
             attributes: {
-                class: 'btn-primary',
+                class: 'btn-warning',
                 title: '{{ trans('general.export_all_to_csv') }}',
             }
         },
@@ -1119,18 +1141,18 @@
              */
 
             if ((row.available_actions) && (row.available_actions.clone === true)) {
-                actions += '<a href="{{ config('app.url') }}/' + dest + '/' + row.id + '/clone" class="actions btn btn-sm btn-info" data-tooltip="true" title="{{ trans('general.clone_item') }}"><x-icon type="clone" /><span class="sr-only">{{ trans('general.clone_item') }}</span></a>&nbsp;';
+                actions += '<a href="{{ config('app.url') }}/' + dest + '/' + row.id + '/clone" class="actions btn btn-sm btn-info" data-tooltip="true" title="{{ trans('general.clone_item') }}"><x-icon type="clone" class="fa-fw" /><span class="sr-only">{{ trans('general.clone_item') }}</span></a>&nbsp;';
             }
 
             if ((row.available_actions) && (row.available_actions.audit === true)) {
-                actions += '<a href="{{ config('app.url') }}/' + dest + '/' + row.id + '/audit" class="actions btn btn-sm btn-primary" data-tooltip="true" title="{{ trans('general.audit') }}"><x-icon type="audit" /><span class="sr-only">{{ trans('general.audit') }}</span></a>&nbsp;';
+                actions += '<a href="{{ config('app.url') }}/' + dest + '/' + row.id + '/audit" class="actions btn btn-sm btn-primary" data-tooltip="true" title="{{ trans('general.audit') }}"><x-icon type="audit" class="fa-fw" /><span class="sr-only">{{ trans('general.audit') }}</span></a>&nbsp;';
             }
 
             if ((row.available_actions) && (row.available_actions.update === true)) {
-                actions += '<a href="{{ config('app.url') }}/' + dest + '/' + row.id + '/edit" class="actions btn btn-sm btn-warning" data-tooltip="true" title="{{ trans('general.update') }}"><x-icon type="edit" /><span class="sr-only">{{ trans('general.update') }}</span></a>&nbsp;';
+                actions += '<a href="{{ config('app.url') }}/' + dest + '/' + row.id + '/edit" class="actions btn btn-sm btn-warning" data-tooltip="true" title="{{ trans('general.update') }}"><x-icon type="edit" class="fa-fw" /><span class="sr-only">{{ trans('general.update') }}</span></a>&nbsp;';
             } else {
                 if ((row.available_actions) && (row.available_actions.update != true)) {
-                    actions += '<span data-tooltip="true" title="{{ trans('general.cannot_be_edited') }}"><a class="btn btn-warning btn-sm disabled" onClick="return false;"><x-icon type="edit" /></a></span>&nbsp;';
+                    actions += '<span data-tooltip="true" title="{{ trans('general.cannot_be_edited') }}"><a class="btn btn-warning btn-sm disabled" onClick="return false;"><x-icon type="edit" class="fa-fw" /></a></span>&nbsp;';
                 }
             }
 
@@ -1151,11 +1173,11 @@
                     + ' data-toggle="modal" data-icon="fa-trash"'
                     + ' data-content="{{ trans('general.sure_to_delete') }}: ' + name_for_box + '?" '
                     + ' data-title="{{  trans('general.delete') }}" onClick="return false;">'
-                    + '<x-icon type="delete" /><span class="sr-only">{{ trans('general.delete') }}</span></a>&nbsp;';
+                    + '<x-icon type="delete" class="fa-fw" /><span class="sr-only">{{ trans('general.delete') }}</span></a>&nbsp;';
             } else {
                 // Do not show the delete button on things that are already deleted
                 if ((row.available_actions) && (row.available_actions.restore != true)) {
-                    actions += '<span data-tooltip="true" title="{{ trans('general.cannot_be_deleted') }}"><a class="btn btn-danger btn-sm delete-asset disabled" onClick="return false;"><x-icon type="delete" /><span class="sr-only">{{ trans('general.cannot_be_deleted') }}</span></a></span>&nbsp;';
+                    actions += '<span data-tooltip="true" title="{{ trans('general.cannot_be_deleted') }}"><a class="btn btn-danger btn-sm delete-asset disabled" onClick="return false;"><x-icon type="delete" class="fa-fw" /><span class="sr-only">{{ trans('general.cannot_be_deleted') }}</span></a></span>&nbsp;';
                 }
 
             }
@@ -1164,7 +1186,7 @@
             if ((row.available_actions) && (row.available_actions.restore === true)) {
                 actions += '<form style="display: inline;" method="POST" action="{{ config('app.url') }}/' + dest + '/' + row.id + '/restore"> ';
                 actions += '@csrf';
-                actions += '<button class="btn btn-sm btn-warning" data-tooltip="true" title="{{ trans('general.restore') }}"><x-icon type="restore" /><span class="sr-only">{{ trans('general.restore') }}</span></button>&nbsp;';
+                actions += '<button class="btn btn-sm btn-warning" data-tooltip="true" title="{{ trans('general.restore') }}"><x-icon type="restore" class="fa-fw" /><span class="sr-only">{{ trans('general.restore') }}</span></button>&nbsp;';
             }
 
             actions +='</nobr>';
@@ -1273,14 +1295,14 @@
 
         // check that checkin is not disabled
         if (row.user_can_checkout === false) {
-            return '<span class="btn btn-sm bg-maroon disabled" data-tooltip="true" title="{{ trans('admin/licenses/message.checkout.unavailable') }}">{{ trans('general.checkout') }}</span>';
+            return '<span class="btn btn-sm bg-maroon btn-checkout disabled" data-tooltip="true" title="{{ trans('admin/licenses/message.checkout.unavailable') }}">{{ trans('general.checkout') }}</span>';
         } else if (row.disabled === true) {
-            return '<span class="btn btn-sm bg-maroon disabled" data-tooltip="true" title="{{ trans('admin/licenses/message.checkout.license_is_inactive') }}">{{ trans('general.checkout') }}</span>';
+            return '<span class="btn btn-sm bg-maroon btn-checkout disabled" data-tooltip="true" title="{{ trans('admin/licenses/message.checkout.license_is_inactive') }}">{{ trans('general.checkout') }}</span>';
 
         } else
             // The user is allowed to check the license seat out and it's available
         if ((row.available_actions.checkout === true) && (row.user_can_checkout === true) && (row.disabled === false)) {
-            return '<a href="{{ config('app.url') }}/licenses/' + row.id + '/checkout/" class="btn btn-sm bg-maroon" data-tooltip="true" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>';
+            return '<a href="{{ config('app.url') }}/licenses/' + row.id + '/checkout/" class="btn btn-sm bg-maroon btn-checkout" data-tooltip="true" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>';
         }
     }
     // We need a special formatter for license seats, since they don't work exactly the same
@@ -1291,16 +1313,16 @@
             return '<a href="{{ config('app.url') }}/licenses/' + row.id + '/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkin') }}</a>';
         }
         if (row.disabled) {
-            return '<a href="{{ config('app.url') }}/licenses/' + row.id + '/checkin" class="btn btn-sm bg-maroon disabled" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkout') }}</a>';
+            return '<a href="{{ config('app.url') }}/licenses/' + row.id + '/checkin" class="btn btn-sm bg-maroon btn-checkout disabled" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkout') }}</a>';
         }
         // The user is allowed to check the license seat out and it's available
         if ((row.available_actions.checkout === true) && (row.user_can_checkout === true) && ((!row.assigned_asset) && (!row.assigned_user))) {
-            return '<a href="{{ config('app.url') }}/licenses/' + row.license_id + '/checkout/'+row.id+'" class="btn btn-sm bg-maroon" data-tooltip="true" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>';
+            return '<a href="{{ config('app.url') }}/licenses/' + row.license_id + '/checkout/'+row.id+'" class="btn btn-sm bg-maroon btn-checkout" data-tooltip="true" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>';
         }
 
         // The user is allowed to check the license seat in and it's available
         if ((row.available_actions.checkin === true) && ((row.assigned_asset) || (row.assigned_user))) {
-            return '<a href="{{ config('app.url') }}/licenses/' + row.id + '/checkin/" class="btn btn-sm bg-purple" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkin') }}</a>';
+            return '<a href="{{ config('app.url') }}/licenses/' + row.id + '/checkin/" class="btn btn-sm bg-purple btn-checkin" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkin') }}</a>';
         }
 
     }
@@ -1311,7 +1333,7 @@
             // The user is allowed to check items out, AND the item is deployable
             if ((row.available_actions.checkout == true) && (row.user_can_checkout == true) && ((!row.asset_id) && (!row.assigned_to))) {
 
-                    return '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/checkout" class="btn btn-sm bg-maroon" data-tooltip="true" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>';
+                    return '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/checkout" class="btn btn-sm bg-maroon btn-checkout" data-tooltip="true" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>';
 
             // The user is allowed to check items out, but the item is not able to be checked out
             } else if (((row.user_can_checkout == false)) && (row.available_actions.checkout == true) && (!row.assigned_to)) {
@@ -1319,17 +1341,17 @@
                 // We use slightly different language for assets versus other things, since they are the only
                 // item that has a status label
                 if (destination =='hardware') {
-                    return '<span  data-tooltip="true" title="{{ trans('admin/hardware/general.undeployable_tooltip') }}"><a class="btn btn-sm bg-maroon disabled">{{ trans('general.checkout') }}</a></span>';
+                    return '<span  data-tooltip="true" title="{{ trans('admin/hardware/general.undeployable_tooltip') }}"><a class="btn btn-sm bg-maroon btn-checkout disabled">{{ trans('general.checkout') }}</a></span>';
                 } else {
-                    return '<span  data-tooltip="true" title="{{ trans('general.undeployable_tooltip') }}"><a class="btn btn-sm bg-maroon disabled">{{ trans('general.checkout') }}</a></span>';
+                    return '<span  data-tooltip="true" title="{{ trans('general.undeployable_tooltip') }}"><a class="btn btn-sm bg-maroon btn-checkout disabled">{{ trans('general.checkout') }}</a></span>';
                 }
 
             // The user is allowed to check items in
             } else if (row.available_actions.checkin == true)  {
                 if (row.assigned_to) {
-                    return '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkin') }}</a>';
+                    return '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/checkin" class="btn btn-sm bg-purple btn-checkin" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkin') }}</a>';
                 } else if (row.assigned_pivot_id) {
-                    return '<a href="{{ config('app.url') }}/' + destination + '/' + row.assigned_pivot_id + '/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkin') }}</a>';
+                    return '<a href="{{ config('app.url') }}/' + destination + '/' + row.assigned_pivot_id + '/checkin" class="btn btn-sm bg-purple btn-checkin" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkin') }}</a>';
                 }
 
             }
@@ -1693,7 +1715,7 @@
     // This is users in the user accounts section for EULAs
     function downloadFormatter(value) {
         if (value) {
-            return '<a href="' + value + '" class="btn btn-sm btn-default"><x-icon type="download" /></a>';
+            return '<a href="' + value + '" class="btn btn-sm btn-theme"><x-icon type="download" /></a>';
         }
     }
 
@@ -1714,10 +1736,10 @@
                 return '';
             }
 
-            var download_button = '<a href="' + download_url + '" class="btn btn-sm btn-default" data-tooltip="true" title="{{ trans('general.download') }}"><x-icon type="download" /></a>';
-            var download_button_disabled = '<span data-tooltip="true" title="{{ trans('general.file_does_not_exist') }}"><a class="btn btn-sm btn-default disabled"><x-icon type="download" /></a></span>';
-            var inline_button = '<a href="'+ download_url +'?inline=true" class="btn btn-sm btn-default" target="_blank" data-tooltip="true" title="{{ trans('general.open_new_window') }}"><x-icon type="external-link" /></a>';
-            var inline_button_disabled = '<span data-tooltip="true" title="{{ trans('general.file_not_inlineable') }}"><a class="btn btn-sm btn-default disabled" target="_blank" data-tooltip="true" title="{{ trans('general.file_does_not_exist') }}"><x-icon type="external-link" /></a></span>';
+            var download_button = '<a href="' + download_url + '" class="btn btn-sm btn-theme" data-tooltip="true" title="{{ trans('general.download') }}"><x-icon type="download" /></a>';
+            var download_button_disabled = '<span data-tooltip="true" title="{{ trans('general.file_does_not_exist') }}"><a class="btn btn-sm btn-theme disabled"><x-icon type="download" /></a></span>';
+            var inline_button = '<a href="'+ download_url +'?inline=true" class="btn btn-sm btn-theme" target="_blank" data-tooltip="true" title="{{ trans('general.open_new_window') }}"><x-icon type="external-link" /></a>';
+            var inline_button_disabled = '<span data-tooltip="true" title="{{ trans('general.file_not_inlineable') }}"><a class="btn btn-sm btn-theme disabled" target="_blank" data-tooltip="true" title="{{ trans('general.file_does_not_exist') }}"><x-icon type="external-link" /></a></span>';
 
             if (exists_on_disk === true) {
                 if (inlinable === true) {
@@ -1815,8 +1837,8 @@
                 .replace('%NOTE%', (row.note) ? row.note : '')
                 .replace('%PANEL_CLASS%', (row.exists_on_disk === true) ? 'default' : 'danger')
                 .replace('%FILE_EMBED%', embed_code)
-                .replace('%DOWNLOAD_BUTTON%', (row.exists_on_disk === true) ? '<a href="'+ row.url +'" class="btn btn-sm btn-default"><x-icon type="download" /></a> ' : '<span class="btn btn-sm btn-default disabled" data-tooltip="true" title="{{ trans('general.file_upload_status.file_not_found') }}"><x-icon type="download" /></span>')
-                .replace('%NEW_WINDOW_BUTTON%', (row.exists_on_disk === true) ? '<a href="'+ row.url +'?inline=true" class="btn btn-sm btn-default" target="_blank"><x-icon type="external-link" /></a> ' : '<span class="btn btn-sm btn-default disabled" data-tooltip="true" title="{{ trans('general.file_upload_status.file_not_found') }}"><x-icon type="external-link"/></span>')
+                .replace('%DOWNLOAD_BUTTON%', (row.exists_on_disk === true) ? '<a href="'+ row.url +'" class="btn btn-sm btn-theme"><x-icon type="download" /></a> ' : '<span class="btn btn-sm btn-theme disabled" data-tooltip="true" title="{{ trans('general.file_upload_status.file_not_found') }}"><x-icon type="download" /></span>')
+                .replace('%NEW_WINDOW_BUTTON%', (row.exists_on_disk === true) ? '<a href="'+ row.url +'?inline=true" class="btn btn-sm btn-theme" target="_blank"><x-icon type="external-link" /></a> ' : '<span class="btn btn-sm btn-theme disabled" data-tooltip="true" title="{{ trans('general.file_upload_status.file_not_found') }}"><x-icon type="external-link"/></span>')
                 .replace('%DELETE_BUTTON%', (row.available_actions.delete === true) ?
                     '<a href="'+delete_url+'" class="delete-asset btn btn-danger btn-sm" data-icon="fa-trash" data-toggle="modal" data-content="{{ trans('general.file_upload_status.confirm_delete') }} '+ row.filename +'?" data-title="{{ trans('general.delete') }}" onClick="return false;" data-target="#dataConfirmModal"><x-icon type="delete" /><span class="sr-only">{{ trans('general.delete') }}</span></a>' :
                     '<a class="btn btn-sm btn-danger disabled" data-tooltip="true" title="{{ trans('general.file_upload_status.file_not_found') }}"><x-icon type="delete" /><span class="sr-only">{{ trans('general.delete') }}</span></a>'

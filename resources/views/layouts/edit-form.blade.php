@@ -10,13 +10,6 @@
 @parent
 @stop
 
-@section('header_right')
-<a href="{{ URL::previous() }}" class="btn btn-primary pull-right">
-    {{ trans('general.back') }}</a>
-@stop
-
-
-
 {{-- Page content --}}
 
 @section('content')
@@ -45,7 +38,7 @@
                         </div>
                         @if (isset($topSubmit) && ($topSubmit=='true'))
                         <div class="col-md-3 text-right" style="padding-right: 10px;">
-                            <button type="submit" class="btn btn-primary pull-right" name="submit">
+                            <button type="submit" class="btn btn-success pull-right" name="submit">
                                 <x-icon type="checkmark" />
                                 {{ trans('general.save') }}
                             </button>

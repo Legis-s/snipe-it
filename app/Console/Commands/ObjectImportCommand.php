@@ -56,7 +56,7 @@ class ObjectImportCommand extends Command
         $this->progressIndicator = new ProgressIndicator($this->output);
 
         $filename = $this->argument('filename');
-        $class = title_case($this->option('item-type'));
+        $class = ucfirst($this->option('item-type'));
         $classString = "App\\Importer\\{$class}Importer";
         $importer = new $classString($filename);
         $importer->setCallbacks([$this, 'log'], [$this, 'progress'], [$this, 'errorCallback'])
