@@ -8,6 +8,7 @@ enum ActionType: string
     case Update = 'update';
     case Delete = 'delete';
     case Restore = 'restore';
+    case Sell = 'sell';
 
     // Assets/Accessories/Components/Licenses/Consumables
     case Checkout = 'checkout';
