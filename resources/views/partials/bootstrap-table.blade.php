@@ -393,16 +393,16 @@
         },
 
         deleteAllRejected: {
-            text: 'Удалить отклоненные',
+            text: 'Удалить все отклоненные',
             icon: 'fa-solid fa-trash',
             event () {
-                window.location.href = '{{ route('purchases.create') }}';
+                window.location.href = '{{ route('purchases.delete_all_rejected') }}';
             },
             attributes: {
                 class: 'btn-danger',
-                title: '{{ trans('purchases.delete_all_rejected') }}',
+                title: 'Удалить все отклоненные',
                 @if ($snipeSettings->shortcuts_enabled == 1)
-                accesskey: 'd'
+                accesskey: 'a'
                 @endif
             }
         },
