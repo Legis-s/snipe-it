@@ -5,7 +5,7 @@
 ])
 
 <!-- begin non-ajaxed file listing table -->
-<div class="table-responsive">
+
     <table
             data-columns="{{ \App\Presenters\UploadedFilesPresenter::dataTableLayout() }}"
             data-cookie-id-table="{{ $object_type }}-FileUploadsTable"
@@ -28,7 +28,6 @@
 
     <x-gallery-card />
 
-</div>
 
 
 

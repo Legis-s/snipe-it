@@ -441,9 +441,6 @@
           <div class="tab-pane" id="seats">
             <div class="row">
               <div class="col-md-12">
-
-                <div class="table-responsive">
-
                   <table
                           data-columns="{{ \App\Presenters\LicensePresenter::dataTableLayoutSeats() }}"
                           data-cookie-id-table="seatsTable"
@@ -460,9 +457,6 @@
                         "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
                         }'>
                   </table>
-
-                </div>
-
               </div>
 
             </div> <!--/.row-->
@@ -471,8 +465,6 @@
           <div class="tab-pane" id="available-seats">
             <div class="row">
               <div class="col-md-12">
-                <div class="table-responsive">
-
                   <table
                           data-columns="{{ \App\Presenters\LicensePresenter::dataTableLayoutSeats() }}"
                           data-cookie-id-table="availableSeatsTable"
@@ -490,8 +482,6 @@
                         }'>
                   </table>
 
-                </div>
-
               </div>
 
             </div> <!--/.row-->
@@ -506,7 +496,7 @@
           <div class="tab-pane" id="history">
             <div class="row">
               <div class="col-md-12">
-                <div class="table-responsive">
+
                   <table
                           data-columns="{{ \App\Presenters\HistoryPresenter::dataTableLayout() }}"
                           class="table table-striped snipe-table"
@@ -521,7 +511,6 @@
                      }'
                           data-url="{{ route('api.activity.index', ['item_id' => $license->id, 'item_type' => 'license']) }}">
                   </table>
-                </div>
               </div> <!-- /.col-md-12-->
 
 

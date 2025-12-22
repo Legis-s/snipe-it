@@ -50,19 +50,23 @@
             --main-footer-bg-color: light-dark(#ffffff,#3d4144);
             --main-footer-text-color: light-dark(#605e5e, #d2d6de);
             --main-footer-top-border-color: light-dark(#d2d6de,#605e5e);
-            --main-theme-color: {{ $snipeSettings->header_color ?? '#5fa4cc' }};
-            --nav-hover-text-color: {{ $nav_link_color ?? 'light-dark(hsl(from var(--main-theme-color) h s calc(l - 10)),hsl(from var(--main-theme-color) h s calc(l - 10)))' }};
-            --nav-primary-text-color: {{ $nav_link_color ?? 'light-dark(hsl(from var(--main-theme-color) h s calc(l - 10)),hsl(from var(--main-theme-color) h s calc(l - 10)))' }};
+            --main-theme-color: {{ $snipeSettings->header_color ?? '#3c8dbc' }};
+            --nav-hover-text-color: {{ $nav_link_color ?? 'hsl(from var(--main-theme-color) h s calc(l - 10))' }};
+            --nav-primary-text-color: {{ $nav_link_color ?? '#ffffff' }};
             --search-highlight: #e9d15b;
             --sidenav-hover-color-bg: #4c4b4b;
             --sidenav-text-hover-color: #fff;
             --sidenav-text-nohover-color: #b8c7ce;
-            --text-danger: light-dark(#a94442,#dd4b39);
-            --text-help: light-dark(#605e5e,#a6a4a4);
+            --table-border-row-color: light-dark(#ecf0f5, #656464);
+            --table-border-row-top: 1px solid #ecf0f5;
+            --table-border-row: 1px solid var(--table-border-row-color);
+            --table-stripe-bg-alt: light-dark(rgba(211, 211, 211, 0.25), #323131);
+            --table-stripe-bg: light-dark(#ffffff, #494747);
+            --text-danger: light-dark(#a94442, #fa5b48);
+            --text-help: light-dark(#777676,#a6a4a4);
             --text-info: light-dark(#31708f,#2baae6);
             --text-success: light-dark(#039516,#4ced61);
             --text-warning: light-dark(#da9113,#f3a51f);
-
         }
 
         [data-theme="light"] {
@@ -86,12 +90,7 @@
             --link-hover:  hsl(from var(--link-color) h s calc(l - 10));
             --main-theme-hover: hsl(from var(--main-theme-color) h s calc(l - 10));
             --tab-bottom-border: 1px solid var(--box-header-top-border-color);
-            --table-border-row-top: 1px solid #ecf0f5;
-            --table-border-row: 1px solid #ecf0f5;
-            --table-stripe-bg-alt: rgba(211, 211, 211, 0.25);
-            --table-stripe-bg: #ffffff;
             --text-legend-help: var(--text-help);
-            --text-warning: #da9113;
 
         }
 
@@ -116,9 +115,6 @@
             --link-hover:  hsl(from var(--link-color) h s calc(l + 15));
             --main-theme-hover: hsl(from var(--main-theme-color) h s calc(l - 10));
             --tab-bottom-border: 1px solid var(--box-header-top-border-color);
-            --table-border-row: 1px solid #656464;
-            --table-stripe-bg-alt: #323131;
-            --table-stripe-bg: #494747;
             --text-legend-help: #d6d6d6;
 
         }
@@ -152,7 +148,7 @@
 
 
         .footer-links a {
-            color: light-dark(hsl(from var(--link-color) h s calc(l + 10)),hsl(from var(--link-color) h s calc(l - 32))) !important;
+            color: var(--link-color) !important;
         }
 
         h2 small {
@@ -288,8 +284,15 @@
             cursor: pointer;
         }
 
-        h1, h2, h3, h4, p {
-            color: var(--color-fg);
+        h1,
+        h2,
+        h3,
+        h4,
+        p,
+        .modal-title,
+        .modal-header h2
+        {
+            color: var(--color-fg) !important;
         }
 
         .btn-danger,
@@ -303,8 +306,7 @@
         .btn-primary:focus,
         .modal-danger,
         .modal-danger h2,
-        .modal-header h2,
-        .modal-warning h2
+        .modal-warning h2,
         .bg-maroon,
         .bg-maroon:hover,
         .bg-maroon:focus,
@@ -395,7 +397,8 @@
         .nav-tabs-custom > .nav-tabs > li:first-of-type,
         .nav-tabs-custom > .nav-tabs > li.active > a:link,
         .nav-tabs-custom > .nav-tabs > li.active > a:visited,
-        .nav-tabs-custom > .nav-tabs > li.active > a:hover
+        .nav-tabs-custom > .nav-tabs > li.active > a:hover,
+        .bootstrap-table.fullscreen
         {
 
             color: var(--color-fg);
@@ -403,6 +406,26 @@
             border-left: 1px solid transparent;
             border-right: 1px solid  transparent;
 
+        }
+
+        .panel {
+            border-color: var(--box-header-top-border-color);
+        }
+        .panel-body {
+            background-color: var(--box-bg) !important;
+        }
+
+        .panel-heading,
+        .panel-default > .panel-heading
+        {
+            color: var(--color-fg) !important;
+            background-color: var(--table-stripe-bg-alt) !important;
+            border-color: var(--box-header-top-border-color);
+        }
+
+        .panel-footer {
+            background-color: var(--box-bg) !important;
+            border-color: var(--box-header-top-border-color);
         }
 
         .nav-tabs-custom > .nav-tabs > li.active
@@ -458,9 +481,7 @@
         }
 
 
-        .small-box h3, .small-box p {
-            color: white;
-        }
+
 
         /**
         main header nav
@@ -476,7 +497,8 @@
         .dropdown-menu > li,
         .navbar,
         .navbar-nav,
-        .label-default
+        .label-default,
+        .label-default:hover
         {
             background-color: var(--main-theme-color);
             color: var(--nav-primary-text-color) !important;
@@ -498,7 +520,6 @@
             /*color: var(--nav-primary-text-color) !important;*/
 
         }
-
 
         .btn-tableButton.active.focus,
         .btn-tableButton.active:focus,
@@ -614,7 +635,7 @@
             background-color: #2c3b41;
         }
 
-        .sidebar-menu>li>.treeview-menu
+        .sidebar-menu>li>.treeview-menu,
         {
             background-color: #1e282c;
         }
@@ -644,7 +665,7 @@
         .table > tfoot > tr > th,
         .table > thead > tr > td,
         .table > tbody > tr > td,
-        .table > tfoot > tr > td,
+        .table > tfoot > tr > td
 
         {
             border-top-color: var(--box-header-bottom-border-color) !important;
@@ -652,15 +673,18 @@
         }
 
 
-
         .help-block {
-            color: var(--text-help);
+            color: var(--text-help) !important;
         }
 
         .alert-msg,
         .has-error
         {
             color: var(--text-danger) !important;
+        }
+
+        .has-error .form-control {
+            border-color: var(--text-danger);
         }
 
         .alert a {
@@ -712,6 +736,15 @@
         input[type="checkbox"]::before {
             box-shadow: inset 1em 1em hsl(from var(--main-theme-color) h s calc(l - 20)) !important;
         }
+
+
+        input[type="checkbox"],
+        input[type="radio"],
+        label.form-control
+        {
+            cursor: pointer !important;
+        }
+
 
         .callout.callout-legend {
             background-color: var(--callout-bg-color);
@@ -803,6 +836,14 @@
 
         .table > tbody + tbody {
             border-top: 0px !important;
+        }
+
+        h4#progress-text {
+            color: white !important;
+        }
+
+        .small-box h3, .small-box p {
+            color: white !important;
         }
 
     </style>
@@ -1857,9 +1898,9 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                        <h2 class="modal-title" id="dataConfirmModalLabel">
+                        <h4 class="modal-title" id="dataConfirmModalLabel">
                             <span class="modal-header-icon"></span>&nbsp;
-                        </h2>
+                        </h4>
                     </div>
                     <div class="modal-body"></div>
                     <div class="modal-footer">

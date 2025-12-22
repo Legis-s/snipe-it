@@ -163,9 +163,10 @@ return [
     'image_filetypes_help'  => 'Accepted Filetypes are jpg, webp, png, gif, svg, and avif. The maximum upload size allowed is :size.',
     'unaccepted_image_type'  => 'This image file was not readable. Accepted filetypes are jpg, webp, png, gif, and svg. The mimetype of this file is: :mimetype.',
     'import'         	    => 'Import',
+    'documentation'         => 'Open documentation in a new link',
     'import_this_file'      => 'Map fields and process this file',
     'importing'         	=> 'Importing',
-    'importing_help'        => 'The CSV should be comma-delimited and formatted with headers that match the ones in the <a href="https://snipe-it.readme.io/docs/importing" target="_new">sample CSVs in the documentation</a>.',
+    'importing_help'        => 'The CSV should be comma-delimited and formatted with headers that match the ones in the <a href="https://snipe-it.readme.io/docs/importing" target="_new">sample CSVs in the documentation <i class="fa fa-external-link"></i></a>.',
     'import-history'        => 'Import History',
     'asset_maintenance'        => 'Asset Maintenance',
     'asset_maintenance_report' => 'Asset Maintenance Report',
@@ -465,7 +466,7 @@ return [
     'backup_delete_not_allowed'     => 'Deleting backups has been disabled in the .env file. Contact support or your systems administrator.',
     'additional_files'           => 'Additional Files',
     'shitty_browser'        => 'No signature detected. If you are using an older browser, please use a more modern browser to complete your asset acceptance.',
-    'bulk_soft_delete'      =>'Also soft-delete these users. Their asset history will remain intact unless/until you purge deleted records in the Admin Settings.',
+    'bulk_soft_delete'      =>'Also soft-delete these users. Their item history will remain intact unless/until you purge deleted records in the Admin Settings.',
     'bulk_checkin_delete_success' => 'Your selected users have been deleted and their items have been checked in.',
     'bulk_checkin_success' => 'The items for the selected users have been checked in.',
     'set_to_null'           => 'Delete values for this selection|Delete values for all :selection_count selections ',
@@ -540,7 +541,8 @@ return [
     'light_mode' => 'Light Mode',
     'dark_mode' => 'Dark Mode',
     'light_dark' => 'Light/Dark Mode',
-    'system_default' => 'Use System Default',
+    'system_default' => 'Use System Settings',
+    'system_default_help' => 'This will reset your light/dark mode preferences to use the defaults set in your computer operating system preferences.',
     'theme' => 'Theme',
     'error_user_company' => 'Checkout target company and asset company do not match',
     'error_user_company_multiple' => 'One or more of the checkout target company and asset company do not match',
@@ -649,6 +651,7 @@ return [
     'upload_deleted'        => 'Upload Deleted',
     'child_locations' => 'Child Locations',
     'append' => 'Append',
+    'optional' => 'OPTIONAL',
 
 // Add form placeholders here
     'placeholders' => [

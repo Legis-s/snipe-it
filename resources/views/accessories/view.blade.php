@@ -72,7 +72,6 @@
                 <div class="tab-content">
 
                     <div class="tab-pane active" id="checkedout">
-                        <div class="table table-responsive">
                           <div class="row">
                               <div class="col-md-12">
                                 <table
@@ -89,16 +88,14 @@
                                     "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
                                     }'>
                                 </table>
-                            </div><!--col-md-9-->
-                          </div> <!-- close tab-pane div -->
-                        </div>
+                            </div><!--./col-md-12-->
+                          </div> <!-- ./row -->
                     </div>
 
                     <!-- history tab pane -->
                      <div class="tab-pane fade" id="history">
-                         <div class="table-responsive">
-                             <div class="row">
-                                 <div class="col-md-12">
+                         <div class="row">
+                             <div class="col-md-12">
                                 <table
                                         data-columns="{{ \App\Presenters\HistoryPresenter::dataTableLayout() }}"
                                         class="table table-striped snipe-table"
@@ -108,14 +105,13 @@
                                         data-side-pagination="server"
                                         data-sort-order="desc"
                                         data-export-options='{
-                       "fileName": "export-{{ str_slug($accessory->name) }}-history-{{ date('Y-m-d') }}",
-                       "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                     }'
+                                           "fileName": "export-{{ str_slug($accessory->name) }}-history-{{ date('Y-m-d') }}",
+                                           "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
+                                         }'
                                         data-url="{{ route('api.activity.index', ['item_id' => $accessory->id, 'item_type' => 'accessory']) }}">
-                                        </table>
-                                    </div> <!-- /.col-md-12-->
-                                </div> <!-- /.row-->
-                            </div><!--tab history-->
+                                    </table>
+                                </div> <!-- /.col-md-12-->
+                            </div> <!-- /.row-->
                      </div>
 
 
@@ -313,9 +309,7 @@
               </div>
           @endif
 
-</div>
 
-    <div class="col-md-3 pull-right">
 
         @can('update', \App\Models\Accessory::class)
             <div class="text-center" style="padding-top:5px;">

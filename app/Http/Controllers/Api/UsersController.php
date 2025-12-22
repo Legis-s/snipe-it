@@ -255,7 +255,7 @@ class UsersController extends Controller
         }
 
         if ($request->filled('group_id')) {
-            $users = $users->ByGroup($request->get('group_id'));
+            $users = $users->ByGroup($request->input('group_id'));
         }
 
         if ($request->filled('department_id')) {
@@ -402,11 +402,11 @@ class UsersController extends Controller
 
         if ($request->filled('search')) {
             $users = $users->where(function ($query) use ($request) {
-                $query->SimpleNameSearch($request->get('search'))
-                    ->orWhere('username', 'LIKE', '%'.$request->get('search').'%')
-                    ->orWhere('display_name', 'LIKE', '%'.$request->get('search').'%')
-                    ->orWhere('email', 'LIKE', '%'.$request->get('search').'%')
-                    ->orWhere('employee_num', 'LIKE', '%'.$request->get('search').'%');
+                $query->SimpleNameSearch($request->input('search'))
+                    ->orWhere('username', 'LIKE', '%'.$request->input('search').'%')
+                    ->orWhere('display_name', 'LIKE', '%'.$request->input('search').'%')
+                    ->orWhere('email', 'LIKE', '%'.$request->input('search').'%')
+                    ->orWhere('employee_num', 'LIKE', '%'.$request->input('search').'%');
             });
         }
 
@@ -461,7 +461,7 @@ class UsersController extends Controller
 
         // 
         if ($request->filled('password')) {
-            $user->password = bcrypt($request->get('password'));
+            $user->password = bcrypt($request->input('password'));
         } else {
             $user->password = $user->noPassword();
         }
@@ -634,21 +634,27 @@ class UsersController extends Controller
 
             $this->authorize('delete', $user);
 
-            if ($user->delete()) {
+            if (auth()->user()->can('canEditAuthFields', $user) && auth()->user()->can('editableOnDemo')) {
 
-                // Remove the user's avatar if they have one
-                if (Storage::disk('public')->exists('avatars/' . $user->avatar)) {
-                    try {
-                        Storage::disk('public')->delete('avatars/' . $user->avatar);
-                    } catch (\Exception $e) {
-                        Log::debug($e);
-                    }
+                if ($user->delete()) {
+
+                    // Remove the user's avatar if they have one
+                    // @todo This should be done on purge, not here
+//                    if (Storage::disk('public')->exists('avatars/' . $user->avatar)) {
+//                        try {
+//                            Storage::disk('public')->delete('avatars/' . $user->avatar);
+//                        } catch (\Exception $e) {
+//                            Log::debug($e);
+//                        }
+//                    }
+
+                    return response()->json(Helper::formatStandardApiResponse('success', null, trans('admin/users/message.success.delete')));
                 }
 
-                return response()->json(Helper::formatStandardApiResponse('success', null, trans('admin/users/message.success.delete')));
+                return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/users/message.error.delete')));
             }
 
-            return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/users/message.error.delete')));
+            return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/users/message.cannot_delete')));
 
         }
 
@@ -797,7 +803,7 @@ class UsersController extends Controller
 
         if ($request->filled('id')) {
             try {
-                $user = User::find($request->get('id'));
+                $user = User::find($request->input('id'));
                 $this->authorize('update', $user);
                 $user->two_factor_secret = null;
                 $user->two_factor_enrolled = 0;

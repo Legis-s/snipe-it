@@ -18,8 +18,6 @@
   <div class="col-md-12">
     <div class="box box-default">
       <div class="box-body">
-        <div class="table-responsive">
-
             <table
                 data-cookie-id-table="groupsTable"
                 data-side-pagination="server"
@@ -49,7 +47,6 @@
               </tr>
             </thead>
           </table>
-        </div>
       </div> <!--.box-body-->
     </div> <!-- /.box.box-default-->
   </div> <!-- .col-md-12-->

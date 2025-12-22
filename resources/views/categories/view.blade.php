@@ -52,7 +52,7 @@
                     <div class="tab-pane fade in active" id="items">
                         <div class="row">
                             <div class="col-md-12">
-                                <div class="table-responsive">
+
                                     @if ($category->category_type=='asset')
                                         @include('partials.asset-bulk-actions')
                                     @endif
@@ -121,7 +121,6 @@
                                             data-url="{{ route('api.'.$category_type_route.'.index',['category_id'=> $category->id]) }}">
 
                                     </table>
-                                </div>
                             </div>
                         </div>
                     </div>

@@ -137,10 +137,10 @@ class UsersController extends Controller
         // we have to invoke the form request here to handle image uploads
         app(ImageUploadRequest::class)->handleImages($user, 600, 'avatar', 'avatars', 'avatar');
 
-        if ($request->get('redirect_option') === 'back'){
+        if ($request->input('redirect_option') === 'back'){
             session()->put(['redirect_option' => 'index']);
         } else {
-            session()->put(['redirect_option' => $request->get('redirect_option')]);
+            session()->put(['redirect_option' => $request->input('redirect_option')]);
         }
 
 
@@ -338,7 +338,7 @@ class UsersController extends Controller
 
         // Handle uploaded avatar
         app(ImageUploadRequest::class)->handleImages($user, 600, 'avatar', 'avatars', 'avatar');
-        session()->put(['redirect_option' => $request->get('redirect_option')]);
+        session()->put(['redirect_option' => $request->input('redirect_option')]);
 
         if ($user->save()) {
             // Redirect to the user page
@@ -364,10 +364,13 @@ class UsersController extends Controller
         if ($user = User::find($id)) {
 
             $this->authorize('delete', $user);
+            if (auth()->user()->can('canEditAuthFields', $user) && auth()->user()->can('editableOnDemo')) {
 
-            if ($user->delete()) {
-                return redirect()->route('users.index')->with('success', trans('admin/users/message.success.delete'));
+                if ($user->delete()) {
+                    return redirect()->route('users.index')->with('success', trans('admin/users/message.success.delete'));
+                }
             }
+            return redirect()->route('users.index')->with('error', trans('admin/users/message.cannot_delete'));
         }
         return redirect()->route('users.index')->with('error', trans('admin/users/message.user_not_found'));
 

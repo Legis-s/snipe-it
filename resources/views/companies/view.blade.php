@@ -86,7 +86,6 @@
 
                     <div class="tab-pane fade in active" id="asset_tab">
                         <!-- checked out assets table -->
-                        <div class="table table-responsive">
                             @include('partials.asset-bulk-actions')
 
                             <table
@@ -107,11 +106,9 @@
                               "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
                               }'>
                             </table>
-                        </div>
                     </div><!-- /asset_tab -->
 
                     <div class="tab-pane" id="licenses_tab">
-                        <div class="table-responsive">
 
                             <table
                                     data-columns="{{ \App\Presenters\LicensePresenter::dataTableLayout() }}"
@@ -128,11 +125,9 @@
                               }'>
                             </table>
 
-                        </div>
                     </div><!-- /licenses-tab -->
 
                     <div class="tab-pane" id="accessories_tab">
-                        <div class="table-responsive">
 
                             <table
                                     data-columns="{{ \App\Presenters\AccessoryPresenter::dataTableLayout() }}"
@@ -149,11 +144,9 @@
                               }'>
                             </table>
 
-                        </div>
                     </div><!-- /accessories-tab -->
 
                     <div class="tab-pane" id="consumables_tab">
-                        <div class="table-responsive">
 
                             <table
                                     data-columns="{{ \App\Presenters\ConsumablePresenter::dataTableLayout() }}"
@@ -170,11 +163,9 @@
                               }'>
                             </table>
 
-                        </div>
                     </div><!-- /consumables-tab -->
 
                     <div class="tab-pane" id="components_tab">
-                        <div class="table-responsive">
 
                             <table
                                     data-columns="{{ \App\Presenters\ComponentPresenter::dataTableLayout() }}"
@@ -191,12 +182,10 @@
                               }'>
 
                             </table>
-                        </div>
+
                     </div><!-- /consumables-tab -->
 
                     <div class="tab-pane" id="users_tab">
-                        <div class="table-responsive">
-
                             <table
                                     data-columns="{{ \App\Presenters\UserPresenter::dataTableLayout() }}"
                                     data-cookie-id-table="usersTable"
@@ -210,9 +199,7 @@
                               "fileName": "export-companies-{{ str_slug($company->name) }}-users-{{ date('Y-m-d') }}",
                               "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
                               }'>
-
                             </table>
-                        </div>
                     </div><!-- /consumables-tab -->
 
 

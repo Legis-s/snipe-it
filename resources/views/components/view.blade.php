@@ -102,7 +102,7 @@
       <div class="tab-content">
 
         <div class="tab-pane active" id="checkedout">
-          <div class="table table-responsive">
+
 
             <table
                     data-cookie-id-table="componentsCheckedoutTable"
@@ -139,12 +139,9 @@
               </thead>
             </table>
 
-          </div>
         </div> <!-- close tab-pane div -->
 
         <div class="tab-pane" id="history">
-          <div class="table-responsive">
-
             <table
                     data-columns="{{ \App\Presenters\HistoryPresenter::dataTableLayout() }}"
                     class="table table-striped snipe-table"
@@ -161,7 +158,6 @@
                     data-cookie-id-table="componentHistory"
                     data-cookie="true">
             </table>
-          </div>
         </div><!-- /.tab-pane -->
 
 

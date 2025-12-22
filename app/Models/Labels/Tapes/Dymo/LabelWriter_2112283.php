@@ -91,16 +91,48 @@ class LabelWriter_2112283 extends LabelWriter
             $currentY += self::TITLE_SIZE + self::TITLE_MARGIN;
         }
 
-        foreach ($record->get('fields') as $field) {
-            static::writeText(
-                $pdf, (($field['label']) ? $field['label'].' ' : '') . $field['value'],
-                $currentX, $currentY,
-                'freesans', '', self::FIELD_SIZE, 'L',
-                $usableWidth, self::FIELD_SIZE, true, 0, 0.3
-            );
-            $currentY += self::FIELD_SIZE + self::FIELD_MARGIN;
+        $fields = $record->get('fields');
+        // Below rescales the size of the field box to fit, it feels like it could/should be abstracted one class above
+        // to be usable on other labels but im unsure of how to implement that, since it uses a lot of private
+        // constants.
+
+        // Figure out how tall the label fields wants to be
+        $fieldCount = count($fields);
+        $perFieldHeight = (self::LABEL_SIZE + self::LABEL_MARGIN)
+            + (self::FIELD_SIZE + self::FIELD_MARGIN);
+        $usableHeight = $pa->h
+            - self::TAG_SIZE           // bottom tag text
+            - self::BARCODE_MARGIN;    // gap between fields and 1D
+
+        $baseHeight = $fieldCount * $perFieldHeight;
+        // If it doesn't fit in the available height, scale everything down
+        $scale = 1.0;
+        if ($baseHeight > $usableHeight && $baseHeight > 0) {
+            $scale = $usableHeight / $baseHeight;
         }
 
+        $labelSize   = self::LABEL_SIZE   * $scale;
+        $labelMargin = self::LABEL_MARGIN * $scale;
+        $fieldSize   = self::FIELD_SIZE   * $scale;
+        $fieldMargin = self::FIELD_MARGIN * $scale;
+
+        foreach ($fields as $field) {
+            static::writeText(
+                $pdf, $field['label'],
+                $currentX, $currentY,
+                'freesans', '', $labelSize, 'L',
+                $usableWidth, $labelSize, true, 0
+            );
+            $currentY += $labelSize + $labelMargin;
+
+            static::writeText(
+                $pdf, $field['value'],
+                $currentX, $currentY,
+                'freemono', 'B', $fieldSize, 'L',
+                $usableWidth, $fieldSize, true, 0, 0.01
+            );
+            $currentY += $fieldSize + $fieldMargin;
+        }
         if ($record->has('barcode1d')) {
             static::write1DBarcode(
                 $pdf, $record->get('barcode1d')->content, $record->get('barcode1d')->type,

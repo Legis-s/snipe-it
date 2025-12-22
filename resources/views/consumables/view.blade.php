@@ -449,8 +449,6 @@
           </div><!--/FILES-->
 
           <div class="tab-pane" id="history">
-            <div class="table-responsive">
-
               <table
                       data-columns="{{ \App\Presenters\HistoryPresenter::dataTableLayout() }}"
                       class="table table-striped snipe-table"
@@ -463,12 +461,10 @@
                          "fileName": "export-consumable-{{  $consumable->id }}-history",
                          "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
                        }'
-
                       data-url="{{ route('api.activity.index', ['item_id' => $consumable->id, 'item_type' => 'consumable']) }}"
                       data-cookie-id-table="consumableHistory"
                       data-cookie="true">
               </table>
-            </div>
           </div><!-- /.tab-pane -->
       </div><!-- /.tab-content -->
     </div><!-- nav-tabs-custom -->

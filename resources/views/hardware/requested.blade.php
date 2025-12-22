@@ -20,9 +20,7 @@
                     <div class="row">
                         <div class="col-md-12">
 
-        <div class="table-responsive">
             <table
-                    name="requestedAssets"
                     data-toolbar="#toolbar"
                     class="table table-striped snipe-table"
                     id="requestedAssets"
@@ -129,7 +127,6 @@
 
 
                         </div>
-                    </div>
                 </div>
             </div>
         </div>

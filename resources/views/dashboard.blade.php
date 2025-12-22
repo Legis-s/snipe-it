@@ -226,7 +226,6 @@
       <div class="box-body">
         <div class="row">
           <div class="col-md-12">
-            <div class="table-responsive">
 
                 <table
                     data-cookie-id-table="dashActivityReport"
@@ -251,10 +250,6 @@
                     </tr>
                     </thead>
                 </table>
-
-
-
-            </div><!-- /.responsive -->
           </div><!-- /.col -->
           <div class="text-center col-md-12" style="padding-top: 10px;">
             <a href="{{ route('reports.activity') }}" class="btn btn-theme btn-sm" style="width: 100%">{{ trans('general.viewall') }}</a>
@@ -309,7 +304,6 @@
 				<div class="box-body">
 					<div class="row">
 						<div class="col-md-12">
-							<div class="table-responsive">
 							<table
 									data-cookie-id-table="dashCompanySummary"
 									data-height="400"
@@ -352,7 +346,6 @@
 								</tr>
 								</thead>
 							</table>
-							</div>
 						</div> <!-- /.col -->
 						<div class="text-center col-md-12" style="padding-top: 10px;">
 							<a href="{{ route('companies.index') }}" class="btn btn-theme btn-sm" style="width: 100%">{{ trans('general.viewall') }}</a>
@@ -378,7 +371,7 @@
 				<div class="box-body">
 					<div class="row">
 						<div class="col-md-12">
-							<div class="table-responsive">
+
 							<table
 									data-cookie-id-table="dashLocationSummary"
 									data-height="400"
@@ -411,7 +404,6 @@
 								</tr>
 								</thead>
 							</table>
-							</div>
 						</div> <!-- /.col -->
 						<div class="text-center col-md-12" style="padding-top: 10px;">
 							<a href="{{ route('locations.index') }}" class="btn btn-theme btn-sm" style="width: 100%">{{ trans('general.viewall') }}</a>
@@ -441,7 +433,7 @@
             <div class="box-body">
                 <div class="row">
                     <div class="col-md-12">
-                        <div class="table-responsive">
+
                         <table
                                 data-cookie-id-table="dashCategorySummary"
                                 data-height="400"
@@ -482,7 +474,7 @@
                             </tr>
                             </thead>
                         </table>
-                        </div>
+
                     </div> <!-- /.col -->
                     <div class="text-center col-md-12" style="padding-top: 10px;">
                         <a href="{{ route('categories.index') }}" class="btn btn-theme btn-sm" style="width: 100%">{{ trans('general.viewall') }}</a>

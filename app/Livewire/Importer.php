@@ -673,6 +673,13 @@ class Importer extends Component
             return;
         }
 
+        if ((auth()->user()->id != $import->created_by) && (!auth()->user()->isSuperUser())) {
+            $this->message = trans('general.generic_model_not_found', ['model' => trans('general.import')]);
+            $this->message_type = 'danger';
+
+            return;
+        }
+
         if (Storage::delete('private_uploads/imports/' . $import->file_path)) {
             $import->delete();
             $this->message = trans('admin/hardware/message.import.file_delete_success');
@@ -683,7 +690,7 @@ class Importer extends Component
             return;
         }
 
-        $this->message = trans('admin/hardware/message.import.file_delete_error');
+        $this->message = trans('general.generic_model_not_found', ['model' => trans('general.import')]);
         $this->message_type = 'danger';
     }
 

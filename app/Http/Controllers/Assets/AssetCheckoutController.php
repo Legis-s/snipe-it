@@ -89,25 +89,25 @@ class AssetCheckoutController extends Controller
             $asset = $this->updateAssetLocation($asset, $target);
 
             $checkout_at = date('Y-m-d H:i:s');
-            if (($request->filled('checkout_at')) && ($request->get('checkout_at') != date('Y-m-d'))) {
-                $checkout_at = $request->get('checkout_at');
+            if (($request->filled('checkout_at')) && ($request->input('checkout_at') != date('Y-m-d'))) {
+                $checkout_at = $request->input('checkout_at');
             }
 
             $expected_checkin = '';
             if ($request->filled('expected_checkin')) {
-                $expected_checkin = $request->get('expected_checkin');
+                $expected_checkin = $request->input('expected_checkin');
             }
 
             if ($request->filled('purchase_cost')) {
-                $asset->purchase_cost = $request->get('purchase_cost');
+                $asset->purchase_cost = $request->input('purchase_cost');
             }
 
             if ($request->filled('new_depreciable_cost')) {
-                $asset->depreciable_cost =$request->get('new_depreciable_cost');
+                $asset->depreciable_cost =$request->input('new_depreciable_cost');
             }
 
             if ($request->filled('quality')) {
-                $quality =intval( $request->get('quality'));
+                $quality =intval( $request->input('quality'));
                 if ($quality == 5) {
                     $quality = 4;
                 }
@@ -115,7 +115,7 @@ class AssetCheckoutController extends Controller
             }
 
             if ($request->filled('status_id')) {
-                $asset->status_id = $request->get('status_id');
+                $asset->status_id = $request->input('status_id');
             }
             if (is_a($target, Asset::class, true)) {
                 $asset->location_id = null;
@@ -143,24 +143,24 @@ class AssetCheckoutController extends Controller
                 }
             }
 
-            session()->put(['redirect_option' => $request->get('redirect_option'), 'checkout_to_type' => $request->get('checkout_to_type')]);
+            session()->put(['redirect_option' => $request->input('redirect_option'), 'checkout_to_type' => $request->input('checkout_to_type')]);
 
             if (is_a($target, Deal::class, true)) {
                 $asset->location_id = null;
                 $asset->rtd_location_id = null;
                 if ($request->filled('rent') && $request->get('rent')) {
-                    if ($asset->rent($target, $admin, $checkout_at, $request->get('note'), $request->get('name'))) {
+                    if ($asset->rent($target, $admin, $checkout_at, $request->get('note'), $request->input('name'))) {
                         return Helper::getRedirectOption($request, $asset->id, 'Assets')
                             ->with('success', trans('admin/hardware/message.rent.success'));
                     }
                 }else{
-                    if ($asset->sell($target, $admin, $checkout_at, $request->get('note'), $request->get('name'))) {
+                    if ($asset->sell($target, $admin, $checkout_at, $request->get('note'), $request->input('name'))) {
                         return Helper::getRedirectOption($request, $asset->id, 'Assets')
                             ->with('success', trans('admin/hardware/message.sell.success'));
                     }
                 }
             }else{
-                if ($asset->checkOut($target, $admin, $checkout_at, $expected_checkin, $request->get('note'), $request->get('name'))) {
+                if ($asset->checkOut($target, $admin, $checkout_at, $expected_checkin, $request->input('note'), $request->input('name'))) {
                     return Helper::getRedirectOption($request, $asset->id, 'Assets')
                         ->with('success', trans('admin/hardware/message.checkout.success'));
                 }

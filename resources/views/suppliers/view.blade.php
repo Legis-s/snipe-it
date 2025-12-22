@@ -129,7 +129,7 @@
           <div class="tab-pane active" id="assets">
             <h2 class="box-title">{{ trans('general.assets') }}</h2>
 
-            <div class="table table-responsive">
+
               @include('partials.asset-bulk-actions')
               <table
                       data-cookie-id-table="suppliersAssetsTable"
@@ -150,15 +150,12 @@
                               "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
                               }'>
               </table>
-
-            </div><!-- /.table-responsive -->
           </div><!-- /.tab-pane -->
 
 
 
           <div class="tab-pane" id="accessories">
             <h2 class="box-title">{{ trans('general.accessories') }}</h2>
-            <div class="table table-responsive">
               <table
                       data-columns="{{ \App\Presenters\AccessoryPresenter::dataTableLayout() }}"
                       data-cookie-id-table="accessoriesListingTable"
@@ -173,14 +170,12 @@
                               "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
                               }'>
               </table>
-            </div><!-- /.table-responsive -->
           </div><!-- /.tab-pane -->
 
 
           <div class="tab-pane" id="licenses">
             <h2 class="box-title">{{ trans('general.licenses') }}</h2>
 
-            <div class="table table-responsive">
               <table
                       data-columns="{{ \App\Presenters\LicensePresenter::dataTableLayout() }}"
                       data-cookie-id-table="licensesListingTable"
@@ -196,12 +191,11 @@
                               }'>
               </table>
 
-            </div><!-- /.table-responsive -->
           </div><!-- /.tab-pane -->
 
             <div class="tab-pane" id="components">
                 <h2 class="box-title">{{ trans('general.components') }}</h2>
-                <div class="table table-responsive">
+
                     <table
                             data-columns="{{ \App\Presenters\ComponentPresenter::dataTableLayout() }}"
                             data-cookie-id-table="componentsListingTable"
@@ -216,12 +210,11 @@
                               "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
                               }'>
                     </table>
-                </div><!-- /.table-responsive -->
             </div><!-- /.tab-pane -->
 
             <div class="tab-pane" id="consumables">
             <h2 class="box-title">{{ trans('general.consumables') }}</h2>
-            <div class="table table-responsive">
+
                 <table
                         data-columns="{{ \App\Presenters\ConsumablePresenter::dataTableLayout() }}"
                         data-cookie-id-table="consumablesListingTable"
@@ -236,13 +229,11 @@
                               "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
                               }'>
                 </table>
-            </div><!-- /.table-responsive -->
         </div><!-- /.tab-pane -->
 
 
           <div class="tab-pane" id="maintenances">
             <h2 class="box-title">{{ trans('admin/maintenances/general.maintenances') }}</h2>
-            <div class="table table-responsive">
 
               <table
                       data-columns="{{ \App\Presenters\MaintenancesPresenter::dataTableLayout() }}"
@@ -260,7 +251,6 @@
                               }'>
 
               </table>
-            </div><!-- /.table-responsive -->
           </div><!-- /.tab-pane -->
 
             <div class="tab-pane fade" id="files">
