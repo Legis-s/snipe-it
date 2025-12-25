@@ -118,17 +118,17 @@
     @parent
     <!-- Modal Актив -->
     <div class="modal fade" id="modal_asset" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-        <div class="modal-dialog  modal-dialog-centered" role="document">
+        <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                                 aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title">Добавить актив</h4>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body2">
                     <form class="form-horizontal">
 
-                        @include ('partials.forms.purchases.model-select', ['translated_name' => trans('admin/hardware/form.model'), 'fieldname' => 'model_id', 'field_req' => true])
+                        @include ('partials.forms.edit.model-select', ['translated_name' => trans('admin/hardware/form.model'), 'fieldname' => 'model_id', 'field_req' => true])
 
                         <p class="duble text-center text-bold text-danger hidden">Такая модель уже есть</p>
                         <!-- Purchase Cost -->
@@ -239,11 +239,6 @@
         </div>
     </div>
     <style>
-        .modal-body {
-            position: relative;
-            padding: 15px;
-        }
-
         .modal-body2 {
             position: relative;
             padding: 15px;
@@ -403,6 +398,7 @@
                 if ($('#consumables').val()) {
                     table_consumables.bootstrapTable('load', JSON.parse($('#consumables').val()));
                 }
+
                 $('#modal_asset').on("show.bs.modal", function (event) {
                     const modal = $(this);
                     modal.find("#model_id").removeClass("has-error");
@@ -447,6 +443,7 @@
                         });
                     });
                 });
+
                 $('#modal_consumables').on("show.bs.modal", function (event) {
                     var modal = $(this);
                     modal.find('#name').val("");
@@ -534,6 +531,7 @@
                         modal.find("#model_id").addClass("has-error");
                     }
                 });
+
                 $('#addСonsumablesButton').click(function (e) {
                     e.preventDefault();
                     var modal = $('#modal_consumables');
