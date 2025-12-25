@@ -45,7 +45,8 @@
     <div class="form-group{{ $errors->has('comment') ? ' has-error' : '' }}">
         <label for="comment" class="col-md-3 control-label">Комментарий</label>
         <div class="col-md-7 col-sm-12">
-            <textarea class="col-md-6 form-control" id="comment" aria-label="comment" name="comment" style="min-width:100%;">{{ old('notes', (isset($item) ? $item->comment : '')) }}</textarea>
+            <textarea class="col-md-6 form-control" id="comment" aria-label="comment" name="comment"
+                      style="min-width:100%;">{{ old('notes', (isset($item) ? $item->comment : '')) }}</textarea>
             {!! $errors->first('comment', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
         </div>
     </div>
@@ -60,7 +61,7 @@
 
     @include ('partials.forms.purchases.invoice_file', ['required'=>true,])
 
-    <input type="hidden" id="assets" name="assets"  required value="{{ old('assets_json', $item->assets_json) }}">
+    <input type="hidden" id="assets" name="assets" required value="{{ old('assets_json', $item->assets_json) }}">
     <input type="hidden" id="consumables" required name="consumables"
            value="{{ old('consumables_json', $item->consumables_json) }}">
 
@@ -117,92 +118,92 @@
     @parent
     <!-- Modal Актив -->
     <div class="modal fade" id="modal_asset" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-        <div class="modal-dialog" role="document">
+        <div class="modal-dialog  modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                                 aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title">Добавить актив</h4>
                 </div>
-                <div class="modal-body2">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <form class="form-horizontal">
-                                @include ('partials.forms.purchases.model-select', ['translated_name' => trans('admin/hardware/form.model'), 'fieldname' => 'model_id', 'required' => 'true'])
-                                <p class="duble text-center text-bold text-danger hidden">Такая модель уже есть</p>
-                                <!-- Purchase Cost -->
-                                <div class="form-group {{ $errors->has('purchase_cost') ? ' has-error' : '' }}">
-                                    <label for="purchase_cost" class="col-md-3 control-label">{{ trans('general.purchase_cost') }}</label>
-                                    <div class="col-md-7">
-                                        <div class="input-group col-md-8" style="padding-left: 0px;">
-                                            <input class="form-control float" type="text" name="purchase_cost" aria-label="purchase_cost" id="purchase_cost" value="{{ old('purchase_cost', Helper::formatCurrencyOutput($item->purchase_cost)) }}" />
-                                            <span class="input-group-addon">
+                <div class="modal-body">
+                    <form class="form-horizontal">
+
+                        @include ('partials.forms.purchases.model-select', ['translated_name' => trans('admin/hardware/form.model'), 'fieldname' => 'model_id', 'field_req' => true])
+
+                        <p class="duble text-center text-bold text-danger hidden">Такая модель уже есть</p>
+                        <!-- Purchase Cost -->
+                        <div class="form-group {{ $errors->has('purchase_cost') ? ' has-error' : '' }}">
+                            <label for="purchase_cost" class="col-md-3 control-label">{{ trans('general.purchase_cost') }}</label>
+                            <div class="col-md-7">
+                                <div class="input-group col-md-8" style="padding-left: 0px;">
+                                    <input class="form-control float" type="text" name="purchase_cost" aria-label="purchase_cost" id="purchase_cost"
+                                           value="{{ old('purchase_cost', Helper::formatCurrencyOutput($item->purchase_cost)) }}"/>
+                                    <span class="input-group-addon">
                 @if (isset($currency_type))
-                                                    {{ $currency_type }}
-                                                @else
-                                                    {{ $snipeSettings->default_currency }}
-                                                @endif
+                                            {{ $currency_type }}
+                                        @else
+                                            {{ $snipeSettings->default_currency }}
+                                        @endif
             </span>
-                                        </div>
-                                        <div class="col-md-4" style="padding-left: 0px;">
-                                            {!! $errors->first('purchase_cost', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
-                                        </div>
-                                    </div>
                                 </div>
-
-                                <!-- nds -->
-                                <div class="form-group {{ $errors->has('nds') ? ' has-error' : '' }}">
-                                    <label for="nds" class="col-md-3 control-label">НДС</label>
-                                    <div class="col-md-7">
-                                        <div class="input-group col-md-8" style="padding-left: 0px;">
-                                            <input class="form-control" type="number" min="0" name="nds" aria-label="nds" id="nds" value="{{  $item->nds }}" />
-                                            <span class="input-group-addon">%</span>
-                                        </div>
-                                        <div class="col-md-4" style="padding-left: 0px;">
-                                            {!! $errors->first('nds', '<span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span>') !!}
-                                        </div>
-                                    </div>
+                                <div class="col-md-4" style="padding-left: 0px;">
+                                    {!! $errors->first('purchase_cost', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                                 </div>
-
-                                <!-- Warranty -->
-                                <div class="form-group {{ $errors->has('warranty_months') ? ' has-error' : '' }}">
-                                    <label for="warranty_months" class="col-md-3 control-label">{{ trans('admin/hardware/form.warranty') }}</label>
-                                    <div class="col-md-7">
-                                        <div class="input-group col-md-8" style="padding-left: 0px;">
-                                            <input class="form-control" type="text" name="warranty_months" id="warranty_months" value="{{ old('warranty_months', $item->warranty_months) }}" maxlength="3" />
-                                            <span class="input-group-addon">{{ trans('admin/hardware/form.months') }}</span>
-                                        </div>
-                                        <div class="col-md-4" style="padding-left: 0px;">
-                                            {!! $errors->first('warranty_months', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- QTY -->
-                                <div class="form-group {{ $errors->has('qty') ? ' has-error' : '' }}">
-                                    <label for="qty" class="col-md-3 control-label">{{ trans('general.quantity') }}</label>
-                                    <div class="col-md-7">
-                                        <div class="col-md-8" style="padding-left:0px">
-                                            <input class="form-control" type="number" min="0" name="quantity" aria-label="quantity" id="quantity" value="1"/>
-                                        </div>
-                                        <div class="col-md-4" style="padding-left: 0px;">
-                                            {!! $errors->first('qty', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                @if(Auth::user()->favoriteLocation)
-                                    @include ('partials.forms.purchases.location-select-checkin', ['translated_name' =>"Ожидаемый склад", 'fieldname' => 'location_id','hide_new'=>true])
-                                @else
-                                    @include ('partials.forms.purchases.location-select', ['translated_name' =>"Ожидаемый склад", 'fieldname' => 'location_id','hide_new'=>true ])
-                                @endif
-                            </form>
+                            </div>
                         </div>
-                    </div>
+
+                        <!-- nds -->
+                        <div class="form-group {{ $errors->has('nds') ? ' has-error' : '' }}">
+                            <label for="nds" class="col-md-3 control-label">НДС</label>
+                            <div class="col-md-7">
+                                <div class="input-group col-md-8" style="padding-left: 0px;">
+                                    <input class="form-control" type="number" min="0" name="nds" aria-label="nds" id="nds" value="{{  $item->nds }}"/>
+                                    <span class="input-group-addon">%</span>
+                                </div>
+                                <div class="col-md-4" style="padding-left: 0px;">
+                                    {!! $errors->first('nds', '<span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Warranty -->
+                        <div class="form-group {{ $errors->has('warranty_months') ? ' has-error' : '' }}">
+                            <label for="warranty_months" class="col-md-3 control-label">{{ trans('admin/hardware/form.warranty') }}</label>
+                            <div class="col-md-7">
+                                <div class="input-group col-md-8" style="padding-left: 0px;">
+                                    <input class="form-control" type="text" name="warranty_months" id="warranty_months"
+                                           value="{{ old('warranty_months', $item->warranty_months) }}" maxlength="3"/>
+                                    <span class="input-group-addon">{{ trans('admin/hardware/form.months') }}</span>
+                                </div>
+                                <div class="col-md-4" style="padding-left: 0px;">
+                                    {!! $errors->first('warranty_months', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- QTY -->
+                        <div class="form-group {{ $errors->has('qty') ? ' has-error' : '' }}">
+                            <label for="qty" class="col-md-3 control-label">{{ trans('general.quantity') }}</label>
+                            <div class="col-md-7">
+                                <div class="col-md-8" style="padding-left:0px">
+                                    <input class="form-control" type="number" min="0" name="quantity" aria-label="quantity" id="quantity" value="1"/>
+                                </div>
+                                <div class="col-md-4" style="padding-left: 0px;">
+                                    {!! $errors->first('qty', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                </div>
+                            </div>
+                        </div>
+
+                        @if(Auth::user()->favoriteLocation)
+                            @include ('partials.forms.purchases.location-select-checkin', ['translated_name' =>"Ожидаемый склад", 'fieldname' => 'location_id','hide_new'=>true])
+                        @else
+                            @include ('partials.forms.purchases.location-select', ['translated_name' =>"Ожидаемый склад", 'fieldname' => 'location_id','hide_new'=>true ])
+                        @endif
+                    </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
-                    <button type="button" class="btn btn-primary" id="addAssetButton">Добавить</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">{{ trans('button.cancel') }}</button>
+                    <button type="button" class="btn btn-primary" id="addAssetButton">{{ trans('button.add') }}</button>
                 </div>
             </div>
         </div>
@@ -238,6 +239,11 @@
         </div>
     </div>
     <style>
+        .modal-body {
+            position: relative;
+            padding: 15px;
+        }
+
         .modal-body2 {
             position: relative;
             padding: 15px;
@@ -249,16 +255,17 @@
     @section('moar_scripts')
         @include ('partials.bootstrap-table')
         <script nonce="{{ csrf_token() }}">
-            var table_asset = $('#table_asset');
-            var table_consumables = $('#table_consumables');
+            const table_asset = $('#table_asset');
+            const table_consumables = $('#table_consumables');
+
 
             $(function () {
-                var baseUrl = $('meta[name="baseUrl"]').attr('content');
-                //select2 for no ajax lists activate
+                const baseUrl = $('meta[name="baseUrl"]').attr('content');
                 $('.js-data-no-ajax').each(function (i, item) {
-                    var link = $(item);
+                    const link = $(item);
                     link.select2();
                 });
+
                 $('input.float').on('input', function () {
                     this.value = this.value.replace(',', '.')
                     this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
@@ -397,7 +404,7 @@
                     table_consumables.bootstrapTable('load', JSON.parse($('#consumables').val()));
                 }
                 $('#modal_asset').on("show.bs.modal", function (event) {
-                    var modal = $(this);
+                    const modal = $(this);
                     modal.find("#model_id").removeClass("has-error");
                     modal.find("#model_select_id").val('');
                     modal.find('#model_select_id').trigger('change');
@@ -413,6 +420,8 @@
                         link.select2({
                             placeholder: '',
                             allowClear: true,
+                            debug: true,
+                            dropdownParent: modal,
                             ajax: {
 
                                 // the baseUrl includes a trailing slash
@@ -428,6 +437,7 @@
                                         search: params.term,
                                         page: params.page || 1,
                                         assetStatusType: link.data("asset-status-type"),
+                                        companyId: link.data("company-id"),
                                     };
                                     return data;
                                 },
@@ -455,6 +465,8 @@
                         link.select2({
                             placeholder: '',
                             allowClear: true,
+                            debug: true,
+                            dropdownParent: modal,
                             ajax: {
 
                                 // the baseUrl includes a trailing slash
@@ -470,6 +482,7 @@
                                         search: params.term,
                                         page: params.page || 1,
                                         assetStatusType: link.data("asset-status-type"),
+                                        companyId: link.data("company-id"),
                                     };
                                     return data;
                                 },
@@ -511,7 +524,6 @@
                                 warranty: warranty,
                                 quantity: quantity,
                             };
-                            console.log(data);
                             table_asset.bootstrapTable('append', data);
                             $('#modal_asset').modal('hide');
                             $('.duble').addClass('hidden');
@@ -628,8 +640,7 @@
                 })
 
                 function formatDatalistSafe(datalist) {
-                    // console.warn("What in the hell is going on with Select2?!?!!?!?");
-                    // console.warn($.select2);
+
                     if (datalist.loading) {
                         return $('<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Loading...');
                     }
@@ -637,7 +648,7 @@
                     var root_div = $("<div class='clearfix'>");
                     var left_pull = $("<div class='pull-left' style='padding-right: 10px;'>");
                     if (datalist.image) {
-                        var inner_div = $("<div style='width: 30px;'>");
+                        var inner_div = $("<div style='width: 20px;'>");
                         /******************************************************************
                          *
                          * We are specifically chosing empty alt-text below, because this
@@ -650,15 +661,16 @@
                          * assets or models or whatever.
                          *
                          *******************************************************************/
-                        var img = $("<img src='' style='max-height: 20px; max-width: 30px;' alt=''>");
-                        // console.warn("Img is: ");
-                        // console.dir(img);
-                        // console.warn("Strigularly, that's: ");
-                        // console.log(img);
+                        var img = $("<img src='' style='max-height: 20px; max-width: 20px;' alt=''>");
                         img.attr("src", datalist.image);
                         inner_div.append(img)
+                    } else if (datalist.tag_color) {
+                        var inner_div = $("<div style='width: 20px;'>");
+                        var icon = $('<i class="fa-solid fa-square" style="font-size: 20px;" aria-hidden="true"></i>');
+                        icon.css("color", datalist.tag_color);
+                        inner_div.append(icon)
                     } else {
-                        var inner_div = $("<div style='height: 20px; width: 30px;'></div>");
+                        var inner_div = $("<div style='height: 20px; width: 20px;'></div>");
                     }
                     left_pull.append(inner_div);
                     root_div.append(left_pull);

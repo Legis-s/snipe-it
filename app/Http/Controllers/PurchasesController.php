@@ -153,8 +153,6 @@ class PurchasesController extends Controller
             if (count($assets) > 0) {
                 $data_list .= "Активы:" . "\n";
                 foreach ($assets as &$value) {
-                    \Debugbar::info("foreach json asset");
-                    \Debugbar::info($value);
                     $model = $value["model"];
                     $model_id = $value["model_id"];
                     $purchase_cost = $value["purchase_cost"];
