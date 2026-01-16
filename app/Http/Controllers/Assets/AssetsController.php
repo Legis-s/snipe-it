@@ -401,7 +401,7 @@ class AssetsController extends Controller
 		   $asset->eol_explicit = false;
         }
         $asset->supplier_id = $request->input('supplier_id', null);
-        $asset->nds = $request->input('nds', 20);
+        $asset->nds = $request->input('nds', 22);
         $asset->expected_checkin = $request->input('expected_checkin', null);
         $asset->requestable = $request->input('requestable', 0);
         $asset->location_id = $request->input('location_id', null);

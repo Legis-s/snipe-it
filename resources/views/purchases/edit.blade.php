@@ -405,7 +405,7 @@
                     modal.find("#model_select_id").val('');
                     modal.find('#model_select_id').trigger('change');
                     modal.find('#purchase_cost').val('');
-                    modal.find('#nds').val(20);
+                    modal.find('#nds').val(22);
                     modal.find('#warranty_months').val(12);
                     modal.find('#quantity').val(1);
                     modal.find('.duble').addClass('hidden');
@@ -452,7 +452,7 @@
                     modal.find('#model_select_id').trigger('change');
                     modal.find('#model_number').val('');
                     modal.find('#purchase_cost').val('');
-                    modal.find('#nds').val(20);
+                    modal.find('#nds').val(22);
                     modal.find('#quantity').val(1);
                     modal.find('.duble').addClass('hidden');
                     modal.find('select').each(function (i, item) {
