@@ -46,7 +46,7 @@
         "jquery-ui": "^1.14.1",
         "jquery-validation": "^1.21.0",
         "jquery.iframe-transport": "^1.0.0",
-        "jspdf": "^3.0.3",
+        "jspdf": ">=4.0.0",
         "jspdf-autotable": "^5.0.2",
         "less": "^4.2.2",
         "less-loader": "^6.0",
@@ -63,5 +63,16 @@
         "tether": "^1.4.0",
         "timeago.js": "^4.0.2",
         "webpack": "^5.98.0"
+    },
+    "overrides": {
+      "pbkdf2": {
+        "sha.js": ">=2.4.12"
+      },
+      "create-hmac": {
+        "sha.js": ">=2.4.12"
+      },
+      "create-hash": {
+        "sha.js": ">=2.4.12"
+      }
     }
 }

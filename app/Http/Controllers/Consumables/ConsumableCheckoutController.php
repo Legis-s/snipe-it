@@ -80,7 +80,6 @@ class ConsumableCheckoutController extends Controller
 
         // If the quantity is not present in the request or is not a positive integer, set it to 1
         $quantity = $request->input('checkout_qty');
-
         if (!isset($quantity) || !ctype_digit((string)$quantity) || $quantity <= 0) {
             $quantity = 1;
         }
@@ -91,9 +90,23 @@ class ConsumableCheckoutController extends Controller
         }
 
 
+        $consumable->checkout_qty = $quantity;
+
+//        event(new CheckoutableCheckedOut(
+//            $consumable,
+//            $user,
+//            auth()->user(),
+//            $request->input('note'),
+//            [],
+//            $consumable->checkout_qty,
+//        ));
+//        $request->request->add(['checkout_to_type' => 'user']);
+//        $request->request->add(['assigned_user' => $user->id]);
+
         $consumable->checkOut($target, $quantity, $request->input('note'));
 
         session()->put(['redirect_option' => $request->input('redirect_option'), 'checkout_to_type' => $request->input('checkout_to_type')]);
+
 
         // Redirect to the new consumable page
         return Helper::getRedirectOption($request, $consumable->id, 'Consumables')

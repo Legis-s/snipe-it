@@ -88,9 +88,10 @@ class UserPresenter extends Presenter
                 'field' => 'display_name',
                 'searchable' => true,
                 'sortable' => true,
-                'switchable' => false,
+                'switchable' => true,
                 'title' => trans('admin/users/table.display_name'),
                 'visible' => false,
+                'formatter' => 'usersLinkFormatter',
             ], [
                 'field' => 'username',
                 'searchable' => true,
@@ -542,7 +543,7 @@ class UserPresenter extends Presenter
      */
     public function nameUrl()
     {
-        return (string) link_to_route('users.show', $this->getFullNameAttribute(), $this->id);
+        return (string) link_to_route('users.show', $this->display_name, $this->id);
     }
 
     /**

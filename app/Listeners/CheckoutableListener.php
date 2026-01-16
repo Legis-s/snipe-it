@@ -128,11 +128,18 @@ class CheckoutableListener
                         ->notify($this->getCheckoutNotification($event, $acceptance));
                 }
             } catch (ClientException $e) {
+                $status = optional($e->getResponse()->getStatusCode());
+
                 if (strpos($e->getMessage(), 'channel_not_found') !== false) {
                     Log::warning(Setting::getSettings()->webhook_selected . " notification failed: " . $e->getMessage());
                     return redirect()->back()->with('warning', ucfirst(Setting::getSettings()->webhook_selected) . trans('admin/settings/message.webhook.webhook_channel_not_found'));
                 } else {
-                    Log::error("ClientException caught during checkin notification: " . $e->getMessage());
+                    if ($status >= 500 || $status === null) {
+                        Log::error(Setting::getSettings()->webhook_selected . " notification failed: " . $e->getMessage());
+                    } else {
+                        Log::warning("ClientException caught during checkin notification: " . $e->getMessage());
+                        return redirect()->back()->with('warning', ucfirst(Setting::getSettings()->webhook_selected) . trans('admin/settings/message.webhook.webhook_fail'));
+                    }
                 }
                 return redirect()->back()->with('warning', ucfirst(Setting::getSettings()->webhook_selected) . trans('admin/settings/message.webhook.webhook_fail'));
             } catch (Exception $e) {
@@ -224,12 +231,18 @@ class CheckoutableListener
                         ->notify($this->getCheckinNotification($event));
                 }
             } catch (ClientException $e) {
+                $status = optional($e->getResponse()->getStatusCode());
+
                 if (strpos($e->getMessage(), 'channel_not_found') !== false) {
                     Log::warning(Setting::getSettings()->webhook_selected . " notification failed: " . $e->getMessage());
                     return redirect()->back()->with('warning', ucfirst(Setting::getSettings()->webhook_selected) . trans('admin/settings/message.webhook.webhook_channel_not_found'));
                 } else {
-                    Log::error("ClientException caught during checkin notification: " . $e->getMessage());
-                    return redirect()->back()->with('warning', ucfirst(Setting::getSettings()->webhook_selected) . trans('admin/settings/message.webhook.webhook_fail'));
+                    if ($status >= 500 || $status === null) {
+                        Log::error(Setting::getSettings()->webhook_selected . " notification failed: " . $e->getMessage());
+                    } else {
+                        Log::warning("ClientException caught during checkin notification: " . $e->getMessage());
+                        return redirect()->back()->with('warning', ucfirst(Setting::getSettings()->webhook_selected) . trans('admin/settings/message.webhook.webhook_fail'));
+                    }
                 }
             } catch (Exception $e) {
                 Log::warning(ucfirst(Setting::getSettings()->webhook_selected) . ' webhook notification failed:', [

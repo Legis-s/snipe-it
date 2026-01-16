@@ -169,6 +169,10 @@
             border: 1px solid hsl(from var(--btn-theme-base) h s calc(l - 15)) !important;
         }
 
+        .btn-theme:focus {
+            color: var(--nav-primary-text-color) !important;
+        }
+
 
         .dropdown-wrapper,
         .js-data-ajax,
@@ -203,34 +207,49 @@
 
         }
 
-        .input-group-addon {
-            background-color: var(--input-group-bg) !important;
-            color: var(--input-group-fg) !important;
-        }
-
         .select2-container--default.select2-container--focus .select2-selection--multiple,
         .select2-container--default .select2-search--dropdown .select2-search__field {
             border-color: hsl(from var(--main-theme-color) h s calc(l - 5)) !important;
         }
 
-        .select2-results__option[aria-selected=true] /** this handles the selected option */
+        /**
+        Multiselect maybe?
+         */
+        .select2-results__option[aria-selected=true]
         {
-            background-color: hsl(from var(--main-theme-color) h s calc(l - 5)) !important;
-            color: var(--color-fg) !important;
+            background-color: var(--main-theme-color) !important;
+            color: var(--nav-primary-text-color) !important;
         }
 
+        .select2-results__option[aria-selected=false]
+        {
+            background-color: var(--table-stripe-bg) !important;
+            /*background-color: hsl(from var(--main-theme-color) h s calc(l - 15)) !important;*/
+            /*color: var(--nav-primary-text-color) !important;*/
+            color: var(--color-fg) !important;
+        }
 
         /**
-        Highlight the select2 on hover
+        Highlight the select2 on hover when NOT the selected option
          */
-        .select2-results__option--highlighted[aria-selected=false] {
-            background-color: hsl(from var(--main-theme-color) h s calc(l + 20)) !important;
-            color: var(--color-fg) !important;
+        .select2-results__option--highlighted[aria-selected=false]
+        {
+            background-color: hsl(from var(--main-theme-color) h s calc(l - 10)) !important;
+            color: var(--nav-primary-text-color) !important;
         }
 
-        .select2-results__option--highlighted[aria-selected=true] {
-            /*background-color: hsl(from var(--main-theme-color) h s calc(l + 20)) !important;*/
-            color: var(--color-fg) !important;
+        /**
+        Highlight the select2 on hover when the selected option
+         */
+        .select2-results__option--highlighted[aria-selected=true],
+        .select2-results__option--highlighted[aria-selected=true]:hover,
+        .select2-results__option--highlighted[aria-selected=true]:link,
+        .select2-results__option--highlighted[aria-selected=true]:focus,
+        .select2-results__option--highlighted[aria-selected=true]:visited
+        {
+            background-color: hsl(from var(--main-theme-color) h s calc(l - 15)) !important;
+            /*color: var(--color-fg) !important;*/
+            color: var(--nav-primary-text-color) !important;
         }
 
         .select2-selection__choice,
@@ -238,19 +257,24 @@
         {
             background-color: var(--main-theme-color) !important;
             border-color: hsl(from var(--main-theme-color) h s calc(l - 15)) !important;
+            color: var(--nav-primary-text-color) !important;
         }
 
         .select2-selection__choice__remove {
-            color: white !important;
+            color: var(--nav-primary-text-color) !important;
         }
-
-
 
         .select2-container--default .select2-selection--multiple .select2-selection__choice
         {
             background-color: hsl(from var(--main-theme-color) h s calc(l - 5)) !important;
-            color: var(--color-fg) !important;
+            color: var(--nav-primary-text-color) !important;
             overflow-y: auto;
+        }
+
+
+        .input-group-addon {
+            background-color: var(--input-group-bg) !important;
+            color: var(--input-group-fg) !important;
         }
 
 
@@ -263,6 +287,15 @@
         textarea:focus
         {
             border-color: hsl(from var(--main-theme-color) h s calc(l - 5)) !important;
+        }
+
+        *:disabled,
+        input[readonly],
+        textarea[readonly]
+        {
+            background-color: light-dark(rgb(234, 232, 232), rgb(117, 116, 117)) !important;
+            border: 1px solid light-dark(rgb(234, 232, 232), rgb(117, 116, 117)) !important;
+            cursor: not-allowed !important;
         }
 
 
@@ -358,6 +391,22 @@
             border-right-color: var(--box-bg) !important;
         }
 
+        .table-bordered > tbody > tr > td,
+        .table-bordered > tbody > tr > th,
+        .table-bordered > tfoot > tr > td,
+        .table-bordered > tfoot > tr > th,
+        .table-bordered > thead > tr > td,
+        .table-bordered > thead > tr > td,
+        .table-bordered > thead > tr > th,
+        .table-bordered > thead > tr > th,
+        .table-bordered,
+        .well
+        {
+            border: 1px solid var(--box-header-top-border-color) !important;
+            border-left-color: var(--box-header-top-border-color) !important;
+            border-right-color: var(--box-header-top-border-color) !important;
+        }
+
         .box {
             border-top: 3px solid;
         }
@@ -398,7 +447,8 @@
         .nav-tabs-custom > .nav-tabs > li.active > a:link,
         .nav-tabs-custom > .nav-tabs > li.active > a:visited,
         .nav-tabs-custom > .nav-tabs > li.active > a:hover,
-        .bootstrap-table.fullscreen
+        .bootstrap-table.fullscreen,
+        .well
         {
 
             color: var(--color-fg);
@@ -586,7 +636,6 @@
             color: var(--nav-primary-text-color) !important;
         }
 
-
         .navbar-nav > .notifications-menu > .dropdown-menu > li.header,
         .navbar-nav > .messages-menu > .dropdown-menu > li.header,
         .navbar-nav > .tasks-menu > .dropdown-menu > li.header,
@@ -701,23 +750,23 @@
         }
 
         .text-warning {
-            color: var(--text-warning);
+            color: var(--text-warning) !important;
         }
 
         .text-info {
-            color: var(--text-info);
+            color: var(--text-info) !important;
         }
 
         .text-primary {
-            color: var(--main-theme-color);
+            color: var(--main-theme-color) !important;
         }
 
         .text-danger {
-            color: var(--text-danger);
+            color: var(--text-danger) !important;
         }
 
         .text-success {
-            color: var(--text-success);
+            color: var(--text-success) !important;
         }
 
         .dropdown-menu > .divider {
@@ -738,12 +787,6 @@
         }
 
 
-        input[type="checkbox"],
-        input[type="radio"],
-        label.form-control
-        {
-            cursor: pointer !important;
-        }
 
 
         .callout.callout-legend {
@@ -1837,16 +1880,16 @@
                          {!! trans('general.footer_credit') !!}
 
                         <a target="_blank" href="https://bsky.app/profile/snipeitapp.com" rel="noopener" data-tooltip="true" data-title="Join us on Bluesky">
-                            <i class="fa-brands fa-square-bluesky"></i>
+                            <i class="fa-brands fa-square-bluesky fa-fw"></i>
                         </a>
                         <a target="_blank" href="https://hachyderm.io/@grokability" rel="noopener" data-tooltip="true" data-title="Join us on Github">
-                            <i class="fa-brands fa-square-github"></i>
+                            <i class="fa-brands fa-square-github fa-fw"></i>
                         </a>
                         <a target="_blank" href="https://hachyderm.io/@grokability" rel="noopener" data-tooltip="true" data-title="Join us on Mastodon">
-                            <i class="fa-brands fa-mastodon"></i>
+                            <i class="fa-brands fa-mastodon fa-fw"></i>
                         </a>
                         <a target="_blank" href="https://discord.gg/yZFtShAcKk" rel="noopener" data-tooltip="true" data-title="Join us on Discord">
-                            <i class="fa-brands fa-discord"></i>
+                            <i class="fa-brands fa-discord fa-fw"></i>
                         </a>
 
                     </div>
