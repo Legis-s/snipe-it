@@ -104,9 +104,9 @@ class SyncBitrix extends Command
                     ['bitrix_id' => $value["ID"]],
                     [
                         'username' => $value["EMAIL"],
-                        'last_name' => $value["LAST_NAME"],
-                        'first_name' => $value["NAME"],
-                        'email' => $value["EMAIL"],
+                        'last_name' => $value['LAST_NAME'] ?? null,
+                        'first_name' => $value['NAME'] ?? null,
+                        'email' => $value['EMAIL'] ?? null,
                         'password' => bcrypt($value["EMAIL"]),
                         'activated' => $value["ACTIVE"],
                     ]
