@@ -117,6 +117,14 @@
                           count="{{ $location->children()->count() }}"
                           tooltip="{{ trans('general.child_locations') }}"
                   />
+                      <x-tabs.nav-item
+                              name="inventories"
+                              icon="fa-solid fa-clipboard-check fa-fw"
+                              icon_style="font-size: 17px"
+                              label="{{ trans('general.inventories') }}"
+                              count="{{ $location->inventories_count}}"
+                              tooltip="{{ trans('general.inventories') }}"
+                      />
 
                   <x-tabs.nav-item
                           name="files"
@@ -466,7 +474,7 @@
       </div>
 
       @can('update', $location)
-          @if ($location->deleted_at=='')
+            @if ($location->deleted_at=='')
               <div class="col-md-12">
                   <a href="{{ route('locations.edit', ['location' => $location->id]) }}" style="width: 100%;" class="btn btn-sm btn-warning btn-social">
                       <x-icon type="edit" />
