@@ -361,7 +361,7 @@
                           />
                       </x-slot:content>
                   </x-tabs.pane>
-                  <!-- end components tab pane -->
+                  <!-- end inventories tab pane -->
 
                   <!-- start files tab pane -->
                   <x-tabs.pane name="files">
@@ -527,13 +527,12 @@
                   </form>
             @endif
               </div>
+              @if ($location->coordinates!='')
+                  <div class="col-md-12" style="padding-top: 20px;">
+                      <div id="map" style="width: 100%; height: 300px"></div>
+                  </div>
+              @endif
     @endcan
-
-          @if ($location->coordinates!='')
-              <div class="col-md-12" style="padding-top: 20px;">
-                  <div id="map" style="width: 100%; height: 300px"></div>
-              </div>
-          @endif
 
         </x-page-column>
     </x-container>
@@ -543,34 +542,35 @@
 @can('update', Location::class)
     @section('moar_scripts')
        @include ('modals.upload-file', ['item_type' => 'locations', 'item_id' => $location->id])
+
+       @if ($location->coordinates!='')
+           <script src="https://api-maps.yandex.ru/2.1/?apikey=9aff6103-40f7-49e4-ad79-aa2a69d421d6&lang=ru_RU"
+                   type="text/javascript"/>
+           <script type="text/javascript">
+               ymaps.ready(init);
+               function init() {
+                   // Создание карты.
+                   const myMap = new ymaps.Map("map", {
+                       center: [{{$location->coordinates}}],
+                       zoom: 15,
+                       controls: ['zoomControl']
+                   });
+                   myMap.geoObjects.add(new ymaps.Placemark([{{$location->coordinates}}], {
+                       // balloonContent: 'цвет <strong>воды пляжа бонди</strong>'
+                   }, {
+                       preset: 'islands#blueCircleDotIconWithCaption',
+                   }));
+               }
+           </script>
+       @endif
+
     @endsection
 @endcan
 
 @include ('partials.bootstrap-table', [
-'exportFile' => 'locations-export',
-'search' => true
+    'exportFile' => 'locations-export',
+    'search' => true
 ])
 
-@if ($location->coordinates!='')
-    <script src="https://api-maps.yandex.ru/2.1/?apikey=9aff6103-40f7-49e4-ad79-aa2a69d421d6&lang=ru_RU"
-            type="text/javascript">
-    </script>
-    <script type="text/javascript">
-        ymaps.ready(init);
-        function init() {
-            // Создание карты.
-            var myMap = new ymaps.Map("map", {
-                center: [{{$location->coordinates}}],
-                zoom: 15,
-                controls: ['zoomControl']
-            });
-            myMap.geoObjects.add(new ymaps.Placemark([{{$location->coordinates}}], {
-                // balloonContent: 'цвет <strong>воды пляжа бонди</strong>'
-            }, {
-                preset: 'islands#blueCircleDotIconWithCaption',
-            }));
-        }
-    </script>
-@endif
 
 

@@ -375,8 +375,8 @@
         },
     });
 
-    @can('create', \App\Models\Purchase::class)
-        window.purchaseButtons = () => ({
+    window.purchaseButtons = () => ({
+        @can('create', \App\Models\Purchase::class)
         btnAdd: {
             text: '{{ trans('general.create') }}',
             icon: 'fa fa-plus',
@@ -384,14 +384,25 @@
                 window.location.href = '{{ route('purchases.create') }}';
             },
             attributes: {
-                class: 'btn-info',
                 title: '{{ trans('general.create') }}',
+                class: 'btn-warning',
                 @if ($snipeSettings->shortcuts_enabled == 1)
                 accesskey: 'n'
                 @endif
             }
         },
+        @endcan
 
+        btnExport: {
+            text: '{{ trans('admin/hardware/general.custom_export') }}',
+            icon: 'fa-solid fa-file-csv',
+            event () {
+                window.location.href = '{{ route('reports/custom') }}';
+            },
+            attributes: {
+                title: '{{ trans('admin/hardware/general.custom_export') }}',
+            }
+        },
         deleteAllRejected: {
             text: 'Удалить все отклоненные',
             icon: 'fa-solid fa-trash',
@@ -406,10 +417,52 @@
                 @endif
             }
         },
-
     });
 
-    @endcan
+    window.inventoriesButtons = () => ({
+        @can('create', \App\Models\Purchase::class)
+        btnAdd: {
+            text: '{{ trans('general.create') }}',
+            icon: 'fa fa-plus',
+            event () {
+                window.location.href = '{{ route('purchases.create') }}';
+            },
+            attributes: {
+                title: '{{ trans('general.create') }}',
+                class: 'btn-warning',
+                @if ($snipeSettings->shortcuts_enabled == 1)
+                accesskey: 'n'
+                @endif
+            }
+        },
+        @endcan
+
+        btnExport: {
+            text: '{{ trans('admin/hardware/general.custom_export') }}',
+            icon: 'fa-solid fa-file-csv',
+            event () {
+                window.location.href = '{{ route('reports/custom') }}';
+            },
+            attributes: {
+                title: '{{ trans('admin/hardware/general.custom_export') }}',
+            }
+        },
+        deleteAllRejected: {
+            text: 'Удалить все отклоненные',
+            icon: 'fa-solid fa-trash',
+            event () {
+                window.location.href = '{{ route('purchases.delete_all_rejected') }}';
+            },
+            attributes: {
+                class: 'btn-danger',
+                title: 'Удалить все отклоненные',
+                @if ($snipeSettings->shortcuts_enabled == 1)
+                accesskey: 'a'
+                @endif
+            }
+        },
+    });
+
     @can('create', \App\Models\Location::class)
     // Location table buttons
     window.locationButtons = () => ({

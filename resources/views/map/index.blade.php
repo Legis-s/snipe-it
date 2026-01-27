@@ -8,9 +8,8 @@
 
 {{-- Page content --}}
 @section('content')
-    <div class="row">
-        <div class="col-md-12">
-            <div class="box box-default">
+    <x-container>
+        <x-box.container>
                 <div class="box-header with-border">
                     <div class="box-heading">
                         <h2 class="box-title">
@@ -23,10 +22,8 @@
                 <div class="box-body">
                     <div id="map" style=" width: 100%; height: 900px"></div>
                 </div>
-            </div>
-        </div>
-    </div>
-
+        </x-box.container>
+    </x-container>
 @stop
 
 @section('moar_scripts')

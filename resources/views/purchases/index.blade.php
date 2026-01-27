@@ -8,53 +8,47 @@
 
 {{-- Page content --}}
 @section('content')
+    <x-container>
+        <x-box.container>
 
-    <div class="row">
-        <div class="col-md-12">
-            <div class="box box-default">
-                <div class="box-body">
-                    <div class="table-responsive">
-                        <div id="toolbar">
-                            @isset($users)
-                                <select id="js-select-user">
-                                    <option value="0" ></option>
-                                    @foreach($users as $user)
-                                        <option value="{{ $user->id }}">{{ $user->last_name }} {{ $user->first_name }}</option>
-                                    @endforeach
-                                </select>
-                            @endisset
-                            <select id="js-select-status">
-                                <option value="0" ></option>
-                                <option value="inventory">В процессе инвентаризации</option>
-                                <option value="in_payment">В оплате</option>
-                                <option value="review">В процессе проверки</option>
-                                <option value="finished">Завершено</option>
-                                <option value="rejected">Отклонено</option>
-                                <option value="paid">Оплачено</option>
-                                <option value="inprogress">>На согласовании</option>
-                            </select>
-                        </div>
-                        <table
-                                data-columns="{{ \App\Presenters\PurchasePresenter::dataTableLayout() }}"
-                                data-cookie-id-table="purchasesTable"
-                                data-id-table="purchasesTable"
-                                data-side-pagination="server"
-                                data-sort-order="desc"
-                                data-toolbar="#toolbar"
-                                data-buttons="purchaseButtons"
-                                id="purchasesTable"
-                                class="table table-striped snipe-table"
-                                data-url="{{ route('api.purchases.index') }}"
-                                data-export-options='{
+            <div id="toolbar">
+                @isset($users)
+                    <select id="js-select-user">
+                        <option value="0" ></option>
+                        @foreach($users as $user)
+                            <option value="{{ $user->id }}">{{ $user->last_name }} {{ $user->first_name }}</option>
+                        @endforeach
+                    </select>
+                @endisset
+                <select id="js-select-status">
+                    <option value="0" ></option>
+                    <option value="inventory">В процессе инвентаризации</option>
+                    <option value="in_payment">В оплате</option>
+                    <option value="review">В процессе проверки</option>
+                    <option value="finished">Завершено</option>
+                    <option value="rejected">Отклонено</option>
+                    <option value="paid">Оплачено</option>
+                    <option value="inprogress">>На согласовании</option>
+                </select>
+            </div>
+            <table
+                    data-columns="{{ \App\Presenters\PurchasePresenter::dataTableLayout() }}"
+                    data-cookie-id-table="purchasesTable"
+                    data-id-table="purchasesTable"
+                    data-side-pagination="server"
+                    data-sort-order="desc"
+                    data-toolbar="#toolbar"
+                    data-buttons="purchaseButtons"
+                    id="purchasesTable"
+                    class="table table-striped snipe-table"
+                    data-url="{{ route('api.purchases.index') }}"
+                    data-export-options='{
               "fileName": "export-purchases-{{ date('Y-m-d') }}",
               "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
               }'>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+            </table>
+        </x-box.container>
+    </x-container>
 
 @stop
 

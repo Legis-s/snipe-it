@@ -13,33 +13,25 @@
 @stop
 {{-- Page content --}}
 @section('content')
-
-    <div class="row">
-        <div class="col-md-12">
-            <div class="box box-default">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="box-body">
-                            <table
-                                    data-columns="{{ \App\Presenters\InventoryPresenter::dataTableLayout() }}"
-                                    data-cookie-id-table="inventoriesListTable"
-                                    data-id-table="inventoriesListTable"
-                                    data-side-pagination="server"
-                                    data-sort-order="desc"
-                                    id="inventoriesListTable"
-                                    class="table table-striped snipe-table"
-                                    data-url="{{ route('api.inventories.index') }}"
-                                    data-export-options='{
+    <x-container>
+        <x-box.container>
+            <table
+                    data-columns="{{ \App\Presenters\InventoryPresenter::dataTableLayout() }}"
+                    data-cookie-id-table="inventoriesListTable"
+                    data-id-table="inventoriesListTable"
+                    data-side-pagination="server"
+                    data-sort-order="desc"
+                    id="inventoriesListTable"
+                    data-buttons="inventoriesButtons"
+                    class="table table-striped snipe-table"
+                    data-url="{{ route('api.inventories.index') }}"
+                    data-export-options='{
               "fileName": "export-inventories-{{ date('Y-m-d') }}",
               "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
               }'>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+            </table>
+        </x-box.container>
+    </x-container>
 
 @stop
 
