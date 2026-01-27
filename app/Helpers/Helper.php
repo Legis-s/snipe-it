@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 use App\Models\Accessory;
+use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\Component;
@@ -1385,7 +1386,22 @@ class Helper
      * @return string[]
      */
     public static function SettingUrls(){
-        $settings=['#','fields.index', 'statuslabels.index', 'models.index', 'categories.index', 'manufacturers.index', 'suppliers.index', 'departments.index', 'locations.index', 'companies.index', 'depreciations.index','inventorystatuslabels.index','contracts.index','deals.index'];
+        $settings=[
+            '#',
+            'fields*',
+            'statuslabels*',
+            'models*',
+            'categories*',
+            'manufacturers*',
+            'suppliers*',
+            'departments*',
+            'locations*',
+            'companies*',
+            'depreciations*',
+            'inventorystatuslabels*',
+            'contracts*',
+            'deals*'
+        ];
 
         return $settings;
         }
@@ -1467,11 +1483,11 @@ class Helper
             return true;
             Log::debug('app locked!');
         }
-
+        
         return false;
     }
 
-
+  
     /**
      * Conversion between units of measurement
      *
@@ -1489,7 +1505,7 @@ class Helper
         $output = $value * $srcFactor / $dstFactor;
         return ($round !== false) ? round($output, $round) : $output;
     }
-
+  
     /**
      * Get conversion factor from unit of measurement to mm
      *
@@ -1590,7 +1606,6 @@ class Helper
                 'he-IL'
             ]) ? 'rtl' : 'ltr';
     }
-
 
     static public function getRedirectOption($request, $id, $table, $item_id = null) : RedirectResponse
     {
@@ -1765,18 +1780,26 @@ class Helper
         float $baseLabelSize,
         float $baseFieldSize,
         float $baseFieldMargin,
+        ?string $title            = null,
+        float $baseTitleSize      = 0.0,
+        float $baseTitleMargin    = 0.0,
         float $baseLabelPadding = 1.5,
         float $baseGap          = 1.5,
         float $maxScale         = 1.8,
         string $labelFont       = 'freesans',
+
     )  : array
     {
         $fieldCount = count($fields);
         $perFieldHeight = max($baseLabelSize, $baseFieldSize) + $baseFieldMargin;
-        $baseHeight = $fieldCount * $perFieldHeight;
+        $baseFieldsHeight = $fieldCount * $perFieldHeight;
+
+        $hasTitle = is_string($title) && trim($title) !== '';
+        $baseTitleHeight = $hasTitle ? ($baseTitleSize + $baseTitleMargin) : 0.0;
+        $baseTotalHeight = $baseTitleHeight + $baseFieldsHeight;
         $scale = 1.0;
-        if ($baseHeight > 0 && $usableHeight > 0) {
-            $scale = $usableHeight / $baseHeight;
+        if ($baseTotalHeight > 0 && $usableHeight > 0) {
+            $scale = $usableHeight / $baseTotalHeight;
         }
 
         $scale = min($scale, $maxScale);
@@ -1786,10 +1809,20 @@ class Helper
         $fieldMargin = $baseFieldMargin * $scale;
 
         $rowAdvance = max($labelSize, $fieldSize) + $fieldMargin;
+        $titleSize   = $hasTitle ? ($baseTitleSize   * $scale) : 0.0;
+        $titleMargin = $hasTitle ? ($baseTitleMargin * $scale) : 0.0;
+        $titleAdvance = $hasTitle ? ($titleSize + $titleMargin) : 0.0;
+
         $pdf->SetFont($labelFont, '', $baseLabelSize);
 
         $maxLabelWidthPerUnit = 0;
         foreach ($fields as $field) {
+            $rawLabel = $field['label'] ?? null;
+
+            // If no label, do not include it in label-column sizing
+            if (!is_string($rawLabel) || trim($rawLabel) === '') {
+                continue;
+            }
             $label = rtrim($field['label'], ':') . ':';
             $width = $pdf->GetStringWidth($label);
             $maxLabelWidthPerUnit = max($maxLabelWidthPerUnit, $width / $baseLabelSize);
@@ -1804,6 +1837,10 @@ class Helper
 
         return compact(
             'scale',
+            'hasTitle',
+            'titleSize',
+            'titleMargin',
+            'titleAdvance',
             'labelSize',
             'fieldSize',
             'fieldMargin',
