@@ -9,151 +9,47 @@
 @endsection
 
 @section('header_right')
-  <a href="{{ URL::previous() }}" class="btn btn-primary pull-right">
-    {{ trans('general.back') }}</a>
+    <i class="fa-regular fa-2x fa-square-caret-right pull-right" id="expand-info-panel-button" data-tooltip="true" title="{{ trans('button.show_hide_info') }}"></i>
 @endsection
 
 {{-- Page content --}}
 @section('content')
 
+    <x-container columns="2">
+        <x-page-column class="col-md-9 main-panel">
+            <x-tabs>
+                <x-slot:tabnav>
 
+                    <x-tabs.nav-item
+                            name="assigned"
+                            class="active"
+                            icon_type="checkedout"
+                            label="{{ trans('general.assigned') }}"
+                            count="{{ $consumable->numCheckedOut() }}"
+                    />
 
+                    <x-tabs.files-tab count="{{ $consumable->uploads()->count() }}" />
 
-  <div class="row">
-    <div class="col-md-12">
-      <div class="nav-tabs-custom">
-        <!-- Custom Tabs -->
-        <div class="nav-tabs-custom">
-          <ul class="nav nav-tabs hidden-print">
+                    <x-tabs.history-tab model="\App\Models\Consumable::class"/>
 
-            <li class="active">
-              <a href="#details" data-toggle="tab">
-            <span class="hidden-lg hidden-md">
-            <i class="fas fa-info-circle fa-2x"></i>
-            </span>
-                <span class="hidden-xs hidden-sm">{{ trans('admin/users/general.info') }}</span>
-              </a>
-            </li>
+                    @can('update', $consumable)
+                        <x-tabs.nav-item-upload />
+                    @endcan
 
-            <li>
-              <a href="#checkedout" data-toggle="tab">
-                <span class="hidden-lg hidden-md">
-                <x-icon type="users" class="fa-2x" />
-                </span>
-                    <span class="hidden-xs hidden-sm">{{ trans('general.assigned') }}
-                      {!! ($consumable->users_consumables > 0 ) ? '<span class="badge badge-secondary">'.number_format($consumable->users_consumables).'</span>' : '' !!}
-                    </span>
-                  </a>
-            </li>
+                </x-slot:tabnav>
 
+                <x-slot:tabpanes>
 
-            @can('consumables.files', $consumable)
-              <li>
-                <a href="#files" data-toggle="tab">
-                <span class="hidden-lg hidden-md">
-                  <i class="far fa-file fa-2x" aria-hidden="true"></i>
-                </span>
-                <span class="hidden-xs hidden-sm">{{ trans('general.file_uploads') }}
-                    {!! ($consumable->uploads->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($consumable->uploads->count()).'</span>' : '' !!}
-                  </span>
-                </a>
-              </li>
-            @endcan
+                    <x-tabs.pane name="assigned" class="in active">
 
-            <li>
-              <a href="#history" data-toggle="tab">
-                <span class="hidden-lg hidden-md">
-                  <i class="fas fa-history fa-2x" aria-hidden="true"></i>
-                </span>
-                <span class="hidden-xs hidden-sm">
-                  {{ trans('general.history') }}
-                </span>
-              </a>
-            </li>
+                        <x-slot:content>
+                            <x-table
+                                    :presenter="\App\Presenters\ConsumablePresenter::checkedOut()"
+                                    :api_url="route('api.consumables.show.users', $consumable->id)"
+                            />
+                        </x-slot:content>
 
-            @can('update', $consumable)
-              <li class="pull-right">
-                <a href="#" data-toggle="modal" data-target="#uploadFileModal">
-                  <x-icon type="paperclip" /> {{ trans('button.upload') }}
-                </a>
-              </li>
-            @endcan
-
-          </ul>
-        <div class="tab-content">
-          <div class="tab-pane active" id="details">
-            <div class="row">
-              <div class="info-stack-container">
-              <!-- Start button column -->
-              <div class="col-md-3 col-xs-12 col-sm-push-9 info-stack">
-
-                @if ($consumable->image!='')
-                  <div class="col-md-12 text-center" style="padding-bottom: 20px;">
-                    <a href="{{ Storage::disk('public')->url('consumables/'.e($consumable->image)) }}" data-toggle="lightbox" data-type="image">
-                      <img src="{{ Storage::disk('public')->url('consumables/'.e($consumable->image)) }}" class="img-responsive img-thumbnail" alt="{{ $consumable->name }}"></a>
-                  </div>
-                @endif
-
-                
-                @can('update', $consumable)
-                  <div class="col-md-12">
-                    <a href="{{ route('consumables.edit', $consumable->id) }}" style="margin-bottom:5px;"  class="btn btn-sm btn-block btn-social btn-warning hidden-print">
-                      <x-icon type="edit" />
-                      {{ trans('button.edit') }}
-                    </a>
-                  </div>
-                @endcan
-
-                  @can('checkout', $consumable)
-                    @if ($consumable->numRemaining() > 0)
-                      <div class="col-md-12">
-                        <a href="{{ route('consumables.checkout.show', $consumable->id) }}" style="margin-bottom:5px;" class="btn btn-sm btn-block bg-maroon btn-social hidden-print">
-                          <x-icon type="checkout" />
-                          {{ trans('general.checkout') }}
-                        </a>
-                      </div>
-                    @else
-                      <div class="col-md-12">
-                        <button style="margin-bottom:10px;" class="btn btn-block bg-maroon btn-sm btn-social hidden-print disabled">
-                          <x-icon type="checkout" />
-                          {{ trans('general.checkout') }}
-                        </button>
-                      </div>
-                    @endif
-                  @endif
-
-
-                @can('create', Consumable::class)
-
-                    <div class="col-md-12">
-                      <a href="{{ route('consumables.clone.create', $consumable->id) }}" style="margin-bottom:5px;"  class="btn btn-sm btn-block btn-info btn-social hidden-print">
-                        <x-icon type="clone" />
-                        {{ trans('button.var.clone', ['item_type' => trans('general.consumable')]) }}
-                      </a>
-                    </div>
-
-                  @endcan
-
-
-
-                  @can('delete', $consumable)
-                    <div class="col-md-12" style="padding-top: 10px; padding-bottom: 20px">
-                      @if ($consumable->deleted_at=='')
-                        <button class="btn btn-sm btn-block btn-danger btn-social hidden-print delete-asset" data-icon="fa fa-trash" data-toggle="modal" data-title="{{ trans('general.delete') }}" data-content="{{ trans('general.sure_to_delete_var', ['item' => $consumable->name]) }}" data-target="#dataConfirmModal" onClick="return false;">
-                          <x-icon type="delete" />
-                          {{ trans('general.delete') }}
-                        </button>
-                        <span class="sr-only">{{ trans('general.delete') }}</span>
-                      @endif
-                    </div>
-                  @endcan
-              </div>
-
-              <!-- End button column -->
-
-              <div class="col-md-9 col-xs-12 col-sm-pull-3 info-stack">
-
-                <div class="row-new-striped" style="margin: 0px;">
+                    </x-tabs.pane>
 
                   <div class="row row-new-striped">
                     <!-- name -->
@@ -446,29 +342,26 @@
               </div>
             </div>
 
-          </div><!--/FILES-->
+            </x-tabs>
+        </x-page-column>
 
-          <div class="tab-pane" id="history">
-              <table
-                      data-columns="{{ \App\Presenters\HistoryPresenter::dataTableLayout() }}"
-                      class="table table-striped snipe-table"
-                      id="consumableHistory"
-                      data-id-table="consumableHistory"
-                      data-side-pagination="server"
-                      data-sort-order="desc"
-                      data-sort-name="created_at"
-                      data-export-options='{
-                         "fileName": "export-consumable-{{  $consumable->id }}-history",
-                         "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                       }'
-                      data-url="{{ route('api.activity.index', ['item_id' => $consumable->id, 'item_type' => 'consumable']) }}"
-                      data-cookie-id-table="consumableHistory"
-                      data-cookie="true">
-              </table>
-          </div><!-- /.tab-pane -->
-      </div><!-- /.tab-content -->
-    </div><!-- nav-tabs-custom -->
-  </div>
+        <x-page-column class="col-md-3">
+            <x-box>
+                <x-box.info-panel :infoPanelObj="$consumable" img_path="{{ app('consumables_upload_url') }}">
+
+                    <x-slot:before_list>
+
+                        <x-button.wide-checkout :item="$consumable" :route="route('consumables.checkout.show', $consumable->id)" />
+                        <x-button.wide-edit :item="$consumable" :route="route('consumables.edit', $consumable->id)" />
+                        <x-button.wide-clone :item="$consumable" :route="route('consumables.clone.create', $consumable->id)" />
+                        <x-button.wide-delete :item="$consumable" />
+
+                    </x-slot:before_list>
+
+                </x-box.info-panel>
+            </x-box>
+        </x-page-column>
+    </x-container>
 
   @can('update', \App\Models\User::class)
     @include ('modals.upload-file', ['item_type' => 'consumable', 'item_id' => $consumable->id])
@@ -479,6 +372,5 @@
 @stop
 
 @section('moar_scripts')
-
   @include ('partials.bootstrap-table', ['simple_view' => true])
 @endsection

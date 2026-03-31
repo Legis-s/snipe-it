@@ -15,6 +15,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Watson\Validating\ValidatingTrait;
 use App\Presenters\ConsumablePresenter;
@@ -136,6 +137,13 @@ class Consumable extends SnipeModel
         $this->attributes['requestable'] = filter_var($value, FILTER_VALIDATE_BOOLEAN);
     }
 
+    public function isDeletable()
+    {
+        return Gate::allows('delete', $this)
+            && ($this->numCheckedOut() === 0)
+            && ($this->deleted_at == '');
+    }
+
     /**
      * Establishes the consumable -> admin user relationship
      *
@@ -145,7 +153,7 @@ class Consumable extends SnipeModel
      */
     public function adminuser()
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsTo(User::class, 'created_by')->withTrashed();
     }
 
     /**

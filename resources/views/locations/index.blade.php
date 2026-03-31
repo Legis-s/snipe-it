@@ -6,10 +6,12 @@
 @parent
 @stop
 
+
 @section('content')
     <x-container>
-        <x-box.container>
+        <x-box>
             @include('partials.locations-bulk-actions')
+
             <table
                     data-columns="{{ \App\Presenters\LocationPresenter::dataTableLayout() }}"
                     data-cookie-id-table="locationTable"
@@ -29,7 +31,8 @@
                       "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
                       }'>
             </table>
-        </x-box.container>
+
+        </x-box>
     </x-container>
 @stop
 

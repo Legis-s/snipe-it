@@ -9,6 +9,7 @@ use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Gate;
 use Watson\Validating\ValidatingTrait;
 use \Illuminate\Database\Eloquent\Relations\Relation;
 class Supplier extends SnipeModel
@@ -73,6 +74,18 @@ class Supplier extends SnipeModel
      */
     protected $fillable = ['name', 'address', 'address2', 'city', 'state', 'country', 'zip', 'phone', 'fax', 'email', 'contact', 'url', 'tag_color', 'notes','bitrix_id'];
 
+
+    public function isDeletable()
+    {
+        return Gate::allows('delete', $this)
+            && (($this->assets_count ?? $this->assets()->count()) === 0)
+            && (($this->licenses_count ?? $this->licenses()->count()) === 0)
+            && (($this->consumables_count ?? $this->consumables()->count()) === 0)
+            && (($this->accessories_count ?? $this->accessories()->count()) === 0)
+            && (($this->components_count ?? $this->components()->count()) === 0)
+            && (($this->maintenances_count ?? $this->maintenances()->count()) === 0)
+            && ($this->deleted_at == '');
+    }
     /**
      * Eager load counts
      *
@@ -146,7 +159,7 @@ class Supplier extends SnipeModel
      */
     public function adminuser()
     {
-        return $this->belongsTo(\App\Models\User::class, 'created_by');
+        return $this->belongsTo(\App\Models\User::class, 'created_by')->withTrashed();
     }
 
     /**

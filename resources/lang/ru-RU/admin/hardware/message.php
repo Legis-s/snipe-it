@@ -119,8 +119,8 @@ return [
 
     'requests' => [
         'error'   		=> 'Request was not successful, please try again.',
-        'success' 		=> 'Request successfully submitted.',
-        'canceled'      => 'Request successfully canceled.',
+        'success' 		=> 'Запрос успешно отправлен.',
+        'canceled'      => 'Запрос успешно отменен.',
         'cancel'        => 'Отменить запрос предмета',
     ],
 

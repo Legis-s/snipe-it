@@ -119,6 +119,9 @@ class Accessory extends SnipeModel
     }
 
 
+    public function isDeletable() {
+        return $this->checkouts_count === 0;
+    }
     /**
      * Sets the requestable attribute on the accessory
      *
@@ -268,7 +271,7 @@ class Accessory extends SnipeModel
      */
     public function adminuser()
     {
-        return $this->belongsTo(\App\Models\User::class, 'created_by');
+        return $this->belongsTo(\App\Models\User::class, 'created_by')->withTrashed();
     }
 
     /**

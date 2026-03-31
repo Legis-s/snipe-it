@@ -31,6 +31,9 @@
                 }'>
 
         </x-box.container>
+        <x-box>
+            <x-table.consumables :route="route('api.consumables.index')" />
+        </x-box>
     </x-container>
 @stop
 

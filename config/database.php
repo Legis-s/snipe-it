@@ -100,14 +100,21 @@ return [
             'dump_command_timeout' => 60 * 5, // 5 minute timeout
             'dump_using_single_transaction' => true, // perform dump using a single transaction
             'options' => (env('DB_SSL')) ? ((env('DB_SSL_IS_PAAS')) ? [
-                PDO::MYSQL_ATTR_SSL_CA                  => env('DB_SSL_CA_PATH'),   // /path/to/ca.pem
-                PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT  => env('DB_SSL_VERIFY_SERVER', false), //true/false
+                (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_CA : \PDO::MYSQL_ATTR_SSL_CA)
+                => env('DB_SSL_CA_PATH'),
+                (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_VERIFY_SERVER_CERT : \PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT)
+                => env('DB_SSL_VERIFY_SERVER', false),
             ] : [
-                PDO::MYSQL_ATTR_SSL_KEY                 => env('DB_SSL_KEY_PATH'),  // /path/to/key.pem
-                PDO::MYSQL_ATTR_SSL_CERT                => env('DB_SSL_CERT_PATH'), // /path/to/cert.pem
-                PDO::MYSQL_ATTR_SSL_CA                  => env('DB_SSL_CA_PATH'),   // /path/to/ca.pem
-                PDO::MYSQL_ATTR_SSL_CIPHER              => env('DB_SSL_CIPHER'),
-                PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT  => env('DB_SSL_VERIFY_SERVER', false), //true/false
+                (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_KEY : \PDO::MYSQL_ATTR_SSL_KEY)
+                => env('DB_SSL_KEY_PATH'),
+                (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_CERT : \PDO::MYSQL_ATTR_SSL_CERT)
+                => env('DB_SSL_CERT_PATH'),
+                (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_CA : \PDO::MYSQL_ATTR_SSL_CA)
+                => env('DB_SSL_CA_PATH'),
+                (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_CIPHER : \PDO::MYSQL_ATTR_SSL_CIPHER)
+                => env('DB_SSL_CIPHER'),
+                (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_VERIFY_SERVER_CERT : \PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT)
+                => env('DB_SSL_VERIFY_SERVER', false),
             ]) : [],
         ],
 
