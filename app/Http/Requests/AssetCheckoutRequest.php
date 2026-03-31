@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Setting;
+
 class AssetCheckoutRequest extends Request
 {
     /**
@@ -21,7 +23,7 @@ class AssetCheckoutRequest extends Request
      */
     public function rules()
     {
-        $settings = \App\Models\Setting::getSettings();
+        $settings = Setting::getSettings();
 
         $rules = [
             'assigned_user' => 'numeric|nullable|required_without_all:assigned_asset,assigned_location,assigned_deal',
@@ -36,13 +38,13 @@ class AssetCheckoutRequest extends Request
             ],
             'expected_checkin' => [
                 'nullable',
-                'date'
+                'date',
             ],
-            ];
+        ];
 
-            if($settings->require_checkinout_notes) {
-                $rules['note'] = 'required|string';
-            }
+        if ($settings->require_checkinout_notes) {
+            $rules['note'] = 'required|string';
+        }
 
         return $rules;
     }

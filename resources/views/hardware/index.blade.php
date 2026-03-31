@@ -60,10 +60,10 @@
     <x-container>
         <x-box name="assets">
             <x-table.assets :route="route('api.assets.index',
-                    array('status' => e($requestStatus),
-                    'order_number'=>e(strval($requestOrderNumber)),
-                    'company_id'=>e($requestCompanyId),
-                    'status_id'=>e($requestStatusId)))" />
+                array('status' => e($requestStatus),
+                'order_number'=>e(strval($requestOrderNumber)),
+                'company_id'=>e($requestCompanyId),
+                'status_id'=>e($requestStatusId)))"/>
         </x-box>
     </x-container>
 @stop

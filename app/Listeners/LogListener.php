@@ -2,27 +2,16 @@
 
 namespace App\Listeners;
 
-use App\Events\AccessoryCheckedIn;
-use App\Events\AccessoryCheckedOut;
-use App\Events\AssetCheckedIn;
-use App\Events\AssetCheckedOut;
 use App\Events\CheckoutableCheckedIn;
 use App\Events\CheckoutableCheckedOut;
 use App\Events\CheckoutableRent;
 use App\Events\CheckoutableSell;
 use App\Events\CheckoutAccepted;
 use App\Events\CheckoutDeclined;
-use App\Events\ComponentCheckedIn;
-use App\Events\ComponentCheckedOut;
-use App\Events\ConsumableCheckedOut;
-use App\Events\ItemAccepted;
-use App\Events\ItemDeclined;
-use App\Events\LicenseCheckedIn;
-use App\Events\LicenseCheckedOut;
-use App\Models\Actionlog;
-use App\Models\User;
-use App\Models\LicenseSeat;
 use App\Events\UserMerged;
+use App\Models\Actionlog;
+use App\Models\LicenseSeat;
+use App\Models\User;
 use Illuminate\Support\Facades\Log;
 
 class LogListener
@@ -30,9 +19,8 @@ class LogListener
     /**
      * These onBlah methods are used by the subscribe() method further down in this file.
      * This one creates an action_logs entry for the checkin
-     * @param CheckoutableCheckedIn $event
-     * @return void
      *
+     * @return void
      */
     public function onCheckoutableCheckedIn(CheckoutableCheckedIn $event)
     {
@@ -43,9 +31,7 @@ class LogListener
      * These onBlah methods are used by the subscribe() method further down in this file.
      * This one creates an action_logs entry for the checkout
      *
-     * @param CheckoutableCheckedOut $event
      * @return void
-     *
      */
     public function onCheckoutableCheckedOut(CheckoutableCheckedOut $event)
     {
@@ -94,7 +80,7 @@ class LogListener
     {
 
         Log::debug('event passed to the onCheckoutAccepted listener:');
-        $logaction = new Actionlog();
+        $logaction = new Actionlog;
         $logaction->item()->associate($event->acceptance->checkoutable);
         $logaction->target()->associate($event->acceptance->assignedTo);
         $logaction->accept_signature = $event->acceptance->signature_filename;
@@ -104,7 +90,6 @@ class LogListener
         $logaction->action_date = $event->acceptance->accepted_at;
         $logaction->quantity = $event->acceptance->qty ?? 1;
         $logaction->created_by = auth()->user()->id;
-
 
         // TODO: log the actual license seat that was checked out
         if ($event->acceptance->checkoutable instanceof LicenseSeat) {
@@ -116,7 +101,7 @@ class LogListener
 
     public function onCheckoutDeclined(CheckoutDeclined $event)
     {
-        $logaction = new Actionlog();
+        $logaction = new Actionlog;
         $logaction->item()->associate($event->acceptance->checkoutable);
         $logaction->target()->associate($event->acceptance->assignedTo);
         $logaction->accept_signature = $event->acceptance->signature_filename;
@@ -134,7 +119,6 @@ class LogListener
         $logaction->save();
     }
 
-
     public function onUserMerged(UserMerged $event)
     {
 
@@ -146,8 +130,8 @@ class LogListener
         ];
 
         // Add a record to the users being merged FROM
-        Log::debug('Users merged: '.$event->merged_from->id .' ('.$event->merged_from->username.') merged into '. $event->merged_to->id. ' ('.$event->merged_to->username.')');
-        $logaction = new Actionlog();
+        Log::debug('Users merged: '.$event->merged_from->id.' ('.$event->merged_from->username.') merged into '.$event->merged_to->id.' ('.$event->merged_to->username.')');
+        $logaction = new Actionlog;
         $logaction->item_id = $event->merged_from->id;
         $logaction->item_type = User::class;
         $logaction->target_id = $event->merged_to->id;
@@ -158,7 +142,7 @@ class LogListener
         $logaction->save();
 
         // Add a record to the users being merged TO
-        $logaction = new Actionlog();
+        $logaction = new Actionlog;
         $logaction->target_id = $event->merged_from->id;
         $logaction->target_type = User::class;
         $logaction->item_id = $event->merged_to->id;
@@ -167,7 +151,6 @@ class LogListener
         $logaction->note = trans('general.merged_log_this_user_into', $to_from_array);
         $logaction->created_by = $event->admin->id ?? null;
         $logaction->save();
-
 
     }
 
@@ -196,6 +179,4 @@ class LogListener
             );
         }
     }
-
-
 }
