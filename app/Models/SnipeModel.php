@@ -238,7 +238,7 @@ class SnipeModel extends Model
 
     public function actionlog()
     {
-        return $this->hasMany(Actionlog::class, 'target_id')->where('target_type', '=', self::class)->orderBy('created_at', 'DESC')->withTrashed();
+        return $this->hasMany(Actionlog::class, 'target_id')->where('target_type', '=', self::class);
     }
 
     /**

@@ -187,12 +187,17 @@ class Location extends SnipeModel
     {
         return $this->hasMany(Asset::class, 'location_id')
             ->whereHas(
-                'assetstatus', function ($query) {
+                'status', function ($query) {
                     $query->where('status_labels.deployable', '=', 1)
                         ->orWhere('status_labels.pending', '=', 1)
                         ->orWhere('status_labels.archived', '=', 0);
                 }
             );
+    }
+
+    public function countAllTheThings()
+    {
+        return $this->assets()->count() + $this->consumables()->count() + $this->components()->count() + $this->users()->count() + $this->assignedAccessories()->count() + $this->assignedAssets()->count() + $this->accessories()->count();
     }
 
     /**

@@ -117,16 +117,20 @@
                 </x-copy-to-clipboard>
             </x-info-element>
 
-            <x-info-element icon_type="category" icon_color="{{ $infoPanelObj->model->category->tag_color }}" title="{{ trans('general.category') }}">
-                <x-copy-to-clipboard class="pull-right" copy_what="category">{!!  $infoPanelObj->model->category->present()->nameUrl !!}</x-copy-to-clipboard>
-            </x-info-element>
-        @endif
-
-        @if ($infoPanelObj->model_number)
+            <!-- This is an asset, so look into the model for the model number -->
             <x-info-element icon_type="number" title="{{ trans('general.model_no') }}">
                 {{ trans('general.model_no') }}
                 <x-copy-to-clipboard copy_what="model_number" class="pull-right">
-                {{ $infoPanelObj->model_number }}
+                    {{ $infoPanelObj->model->model_number }}
+                </x-copy-to-clipboard>
+            </x-info-element>
+
+        @elseif ($infoPanelObj->model_number)
+            <!-- This is not an asset (with a model) so just grab it off the object -->
+            <x-info-element icon_type="number" title="{{ trans('general.model_no') }}">
+                {{ trans('general.model_no') }}
+                <x-copy-to-clipboard copy_what="model_number" class="pull-right">
+                    {{ $infoPanelObj->model_number }}
                 </x-copy-to-clipboard>
             </x-info-element>
         @endif
@@ -209,7 +213,11 @@
         @if ($infoPanelObj->order_number)
             <x-info-element icon_type="order" title="{{ trans('general.order_number') }}">
                 <x-copy-to-clipboard copy_what="order_number" class="pull-right">
-                    {{ $infoPanelObj->order_number }}
+                    @if ($infoPanelObj::class == "App\Models\Asset")
+                        <a href="{{ route('hardware.index', ['order_number' => $infoPanelObj->order_number]) }}">{{ $infoPanelObj->order_number }}</a>
+                    @else
+                        {{ $infoPanelObj->order_number }}
+                    @endif
                 </x-copy-to-clipboard>
             </x-info-element>
         @endif
@@ -348,11 +356,13 @@
             </x-info-element.url>
         </x-info-element>
 
-        <x-info-element icon_type="external-link" title="{{ trans('admin/manufacturers/table.support_url') }}">
-            <x-info-element.url>
-                {{ $infoPanelObj->support_url }}
-            </x-info-element.url>
-        </x-info-element>
+        @if ($infoPanelObj->manufacturer)
+            <x-info-element icon_type="external-link" title="{{ trans('admin/manufacturers/table.support_url') }}">
+                <x-info-element.url>
+                    {{ $infoPanelObj->present()->dynamicUrl($infoPanelObj->manufacturer->support_url) }}
+                </x-info-element.url>
+            </x-info-element>
+        @endif
 
 
         @if (($infoPanelObj->present()->displayAddress) && (config('services.google.maps_api_key')))

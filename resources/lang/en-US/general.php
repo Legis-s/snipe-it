@@ -154,7 +154,7 @@ return [
     'first_checkout' => '1<sup>st</sup> Checkout',
     'generate' => 'Generate',
     'generate_labels' => 'Generate Labels',
-    'github_markdown' => 'This field accepts <a href="https://help.github.com/articles/github-flavored-markdown/">Github flavored markdown</a>.',
+    'github_markdown' => 'This field accepts <a href="https://help.github.com/articles/github-flavored-markdown/" target="_blank">Github flavored markdown</a>.',
     'groups' => 'Groups',
     'gravatar_email' => 'Gravatar Email Address',
     'gravatar_url' => '<a href="http://gravatar.com"><small>Change your avatar at Gravatar.com</small></a>.',

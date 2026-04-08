@@ -1,10 +1,24 @@
 @props([
     'item' => null,
+    'route' => null,
+    'wide' => false,
+    'count' => 0,
+    'tooltip' => trans('admin/users/general.print_assigned'),
 ])
-@if ($item->deleted_at=='')
-    <button class="btn btn-sm btn-info" id="print_tag" data-tooltip="true" title="{!! (!$item->model ? ' '.trans('admin/hardware/general.model_invalid') : trans_choice('button.print_label', 1)) !!}">
-        <x-icon type="assets" class="fa-fw" />
-    </button>
+
+@can('view', $item)
+    @if ($count > 0)
+        <a href="{{ $route }}" class="btn btn-sm btn-primary hidden-print" data-tooltip="true" title="{{ $tooltip }}">
+             <x-icon type="print"/>
+             @if ($wide=='true')
+                {{ trans('general.print') }}
+            @endif
+        </a>
+
+        <button class="btn btn-sm btn-info" id="print_tag" data-tooltip="true" title="{!! (!$item->model ? ' '.trans('admin/hardware/general.model_invalid') : trans_choice('button.print_label', 1)) !!}">
+            <x-icon type="assets" class="fa-fw" />
+        </button>
+    @endif
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -31,10 +45,10 @@
                             }
                         });
                     }
-                } catch (error) {
+                } 3catch (error) {
                     console.log('error', error);
                 }
             });
         });
     </script>
-@endif
+@endcan

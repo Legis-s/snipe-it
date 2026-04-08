@@ -87,7 +87,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                 Api\AccessoriesController::class,
                 'history',
             ]
-        )->name('api.accessories.history');
+        )->name('api.accessories.history')->withTrashed();
 
         Route::get('{accessory}/checkedout',
             [
@@ -227,7 +227,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                 Api\ComponentsController::class,
                 'history',
             ]
-        )->name('api.components.history');
+        )->name('api.components.history')->withTrashed();
 
         Route::get('selectlist',
             [
@@ -282,7 +282,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                 Api\ConsumablesController::class,
                 'history',
             ]
-        )->name('api.consumables.history');
+        )->name('api.consumables.history')->withTrashed();
 
         Route::get('selectlist',
             [
@@ -462,7 +462,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                 Api\AssetsController::class,
                 'history',
             ]
-        )->name('api.assets.history');
+        )->name('api.assets.history')->withTrashed();
 
         Route::get('bytag/{tag}',
             [
@@ -605,7 +605,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             Api\MaintenancesController::class,
             'history',
         ]
-    )->name('api.maintenances.history');
+    )->name('api.maintenances.history')->withTrashed();
 
     Route::resource('maintenances',
         Api\MaintenancesController::class,
@@ -677,7 +677,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                 Api\LicensesController::class,
                 'history',
             ]
-        )->name('api.licenses.history');
+        )->name('api.licenses.history')->withTrashed();
 
     });
 
@@ -756,7 +756,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                 Api\LocationsController::class,
                 'history',
             ]
-        )->name('api.locations.history');
+        )->name('api.locations.history')->withTrashed();
 
         /** End assigned routes */
     });
@@ -820,7 +820,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                 Api\AssetModelsController::class,
                 'history',
             ]
-        )->name('api.models.history');
+        )->name('api.models.history')->withTrashed();
 
         Route::get('selectlist',
             [
@@ -1064,7 +1064,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                 Api\UsersController::class,
                 'history',
             ]
-        )->name('api.users.history');
+        )->name('api.users.history')->withTrashed();
 
         Route::get('selectlist',
             [

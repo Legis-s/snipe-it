@@ -92,7 +92,7 @@ class Maintenance extends SnipeModel implements ICompanyableChild
         'asset' => ['name', 'asset_tag', 'serial'],
         'asset.model' => ['name', 'model_number'],
         'asset.supplier' => ['name'],
-        'asset.assetstatus' => ['name'],
+        'asset.status' => ['name'],
         'supplier' => ['name'],
         'adminuser' => ['first_name', 'last_name', 'display_name'],
     ];

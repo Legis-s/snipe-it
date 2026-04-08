@@ -94,6 +94,14 @@ class Settings
         return $this->update(['full_multiple_companies_support' => 0]);
     }
 
+    public function enableScopedLocationsWithFullMultipleCompanySupport(): Settings
+    {
+        $this->update(['full_multiple_companies_support' => 1]);
+        $this->update(['scope_locations_fmcs' => 1]);
+
+        return $this;
+    }
+
     public function enableSlackWebhook(): Settings
     {
         return $this->update([

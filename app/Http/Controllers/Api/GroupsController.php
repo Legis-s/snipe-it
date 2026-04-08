@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Actions\Permissions\NormalizePermissionsPayloadAction;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\FilterRequest;
@@ -77,14 +78,17 @@ class GroupsController extends Controller
     {
         $this->authorize('superadmin');
         $group = new Group;
-        // Get all the available permissions
-        $permissions = json_encode(config('permissions'));
-        $groupPermissions = Helper::selectedPermissionsArray($permissions, $permissions);
+        $defaultPermissions = Helper::selectedPermissionsArray(config('permissions'), config('permissions'));
 
-        $group->name = $request->input('name');
+        $requestedPermissions = $request->has('permissions')
+            ? NormalizePermissionsPayloadAction::run($request->input('permissions'))
+            : $defaultPermissions;
+
+        $group->fill($request->only(['name', 'notes']));
         $group->created_by = auth()->id();
-        $group->notes = $request->input('notes');
-        $group->permissions = json_encode($request->input('permissions', $groupPermissions));
+        $group->permissions = json_encode(
+            Helper::selectedPermissionsArray(config('permissions'), $requestedPermissions)
+        );
 
         if ($group->save()) {
             return response()->json(Helper::formatStandardApiResponse('success', (new GroupsTransformer)->transformGroup($group), trans('admin/groups/message.success.create')));
@@ -124,9 +128,18 @@ class GroupsController extends Controller
         $this->authorize('superadmin');
         $group = Group::findOrFail($id);
 
-        $group->name = $request->input('name');
-        $group->notes = $request->input('notes');
-        $group->permissions = $request->input('permissions'); // Todo - some JSON validation stuff here
+        // Fill only the keys present in the request, so PATCH skips absent fields naturally.
+        $group->fill($request->only(['name', 'notes']));
+
+        // Preserve existing permissions when omitted from PATCH/PUT payload.
+        if ($request->has('permissions')) {
+            $group->permissions = json_encode(
+                Helper::selectedPermissionsArray(
+                    config('permissions'),
+                    NormalizePermissionsPayloadAction::run($request->input('permissions'))
+                )
+            );
+        }
 
         if ($group->save()) {
             return response()->json(Helper::formatStandardApiResponse('success', (new GroupsTransformer)->transformGroup($group), trans('admin/groups/message.success.update')));

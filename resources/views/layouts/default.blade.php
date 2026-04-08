@@ -296,21 +296,23 @@
             border-color: var(--input-border-color) !important;
         }
 
-
-
-        input[type="*"]:disabled,
-        input[type=checkbox]:disabled,
-        input[type=radio]:disabled,
+        input:disabled,
+        input[type="checkbox"]:disabled,
+        input[type="radio"]:disabled,
         input[readonly],
+        textarea[readonly],
         .select2-container--default.select2-container--disabled .select2-selection--single,
+        .select2-container--default.select2-container--disabled .select2-selection--multiple,
         .select2-container--default.select2-container--disabled .select2-selection__rendered,
-        textarea[readonly]
-        {
+        .select2-container--default.select2-container--disabled .select2-selection--multiple .select2-search--inline {
             background-color: light-dark(rgb(234, 232, 232), rgb(117, 116, 117)) !important;
             cursor: not-allowed !important;
         }
 
-
+        .select2-container--default.select2-container--disabled .select2-search__field::placeholder {
+            color: var(--text-help) !important;
+            opacity: 1 !important;
+        }
 
         input[type="search"].search-highlight {
             background-color: var(--search-highlight);
@@ -578,6 +580,7 @@
         }
 
 
+        .dropdown-menu > li > a,
         .dropdown-menu > li > a:link,
         .dropdown-menu > li > a:visited,
         .dropdown-menu > .active > a:link,
@@ -587,7 +590,7 @@
         .navbar-nav > li > a:link,
         .navbar-nav > li > a:visited
         {
-            background-color: var(--main-theme-color);
+            background-color: var(--main-theme-color) !important;
             /*background-color: rgba(0,0,0,.15);*/
             color: var(--nav-primary-text-color) !important;
             /*color: var(--nav-primary-text-color) !important;*/
@@ -1349,7 +1352,7 @@
 
 
                             <!-- User Account: style can be found in dropdown.less -->
-                            @if (Auth::check())
+                            @if (auth()->check())
                                 <li class="dropdown user user-menu">
                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                         @if (auth()->user()->present()->gravatar())
@@ -1399,18 +1402,18 @@
                                         </li>
 
                                         @can('self.profile')
-                                        @if (Auth::user()->ldap_import!='1')
-                                        <li {!! (request()->is('account/profile') ? ' class="active"' : '') !!}>
-                                            <a href="{{ route('account.password.index') }}">
-                                                <x-icon type="password" class="fa-fw" />
-                                                {{ trans('general.changepassword') }}
-                                            </a>
-                                        </li>
-                                        @endif
+                                            @if (Auth::user()->ldap_import!='1')
+                                                <li {!! (request()->is('account/profile') ? ' class="active"' : '') !!}>
+                                                    <a href="{{ route('account.password.index') }}">
+                                                        <x-icon type="password" class="fa-fw"/>
+                                                        {{ trans('general.changepassword') }}
+                                                    </a>
+                                                </li>
+                                            @endif
                                         @endcan
 
                                         <li>
-                                            <a type="button" data-theme-toggle aria-label="Dark mode" class="btn-link btn-anchor" href=""  onclick="event.preventDefault();">
+                                            <a type="button" data-theme-toggle aria-label="{{ trans('general.dark_mode') }}" class="btn-link btn-anchor" onclick="event.preventDefault();">
                                                 {{ trans('general.dark_mode') }}
                                             </a>
                                         </li>
@@ -1488,7 +1491,7 @@
                                     <x-icon type="angle-left" class="pull-right fa-fw"/>
                                 </a>
                                 <ul class="treeview-menu">
-                                    <li {!! (!request()->query('status') && (request()->is('hardware')) ? ' class="active"' : '') !!}>
+                                    <li {!! (!request()->query('status_type') && (request()->is('hardware')) ? ' class="active"' : '') !!}>
                                         <a href="{{ url('hardware') }}">
                                             <x-icon type="circle" class="text-grey fa-fw"/>
                                             {{ trans('general.list_all') }}
@@ -1511,49 +1514,53 @@
                                     @endif
 
 
-                                    <li id="deployed-sidenav-option" {!! (request()->query('status') == 'Deployed' ? ' class="active"' : '') !!}>
-                                        <a href="{{ url('hardware?status=Deployed') }}">
+                                    <li id="deployed-sidenav-option" {!! (request()->query('status_type') == 'Deployed' ? ' class="active"' : '') !!}>
+                                        <a href="{{ url('hardware?status_type=Deployed') }}">
                                             <x-icon type="circle" class="text-blue fa-fw" />
                                             {{ trans('general.deployed') }}
                                             <span class="badge">{{ (isset($total_deployed_sidebar)) ? $total_deployed_sidebar : '' }}</span>
                                         </a>
                                     </li>
-                                    <li id="rtd-sidenav-option"{!! (request()->query('status') == 'RTD' ? ' class="active"' : '') !!}>
-                                        <a href="{{ url('hardware?status=RTD') }}">
+                                    <li id="rtd-sidenav-option"{!! (request()->query('status_type') == 'RTD' ? ' class="active"' : '') !!}>
+                                        <a href="{{ url('hardware?status_type=RTD') }}">
                                             <x-icon type="circle" class="text-green fa-fw" />
                                             {{ trans('general.ready_to_deploy') }}
                                             <span class="badge">{{ (isset($total_rtd_sidebar)) ? $total_rtd_sidebar : '' }}</span>
                                         </a>
                                     </li>
-                                    <li id="pending-sidenav-option"{!! (request()->query('status') == 'Pending' ? ' class="active"' : '') !!}><a href="{{ url('hardware?status=Pending') }}">
+                                    <li id="pending-sidenav-option"{!! (request()->query('status_type') == 'Pending' ? ' class="active"' : '') !!}>
+                                        <a href="{{ url('hardware?status_type=Pending') }}">
                                             <x-icon type="circle" class="text-orange fa-fw" />
                                             {{ trans('general.pending') }}
                                             <span class="badge">{{ (isset($total_pending_sidebar)) ? $total_pending_sidebar : '' }}</span>
                                         </a>
                                     </li>
                                     <li id="undeployable-sidenav-option"{!! (request()->query('status') == 'Undeployable' ? ' class="active"' : '') !!} ><a
-                                                href="{{ url('hardware?status=Undeployable') }}">
+                                            href="{{ url('hardware?status_type=Undeployable') }}">
                                             <x-icon type="x" class="text-red fa-fw" />
                                             {{ trans('general.undeployable') }}
                                             <span class="badge">{{ (isset($total_undeployable_sidebar)) ? $total_undeployable_sidebar : '' }}</span>
                                         </a>
                                     </li>
-                                    <li id="byod-sidenav-option"{!! (request()->query('status') == 'byod' ? ' class="active"' : '') !!}><a
-                                                href="{{ url('hardware?status=byod') }}">
+                                    <li id="byod-sidenav-option"{!! (request()->query('status_type') == 'byod' ? ' class="active"' : '') !!}>
+                                        <a
+                                            href="{{ url('hardware?status_type=byod') }}">
                                             <x-icon type="x" class="text-red fa-fw" />
                                             {{ trans('general.byod') }}
                                             <span class="badge">{{ (isset($total_byod_sidebar)) ? $total_byod_sidebar : '' }}</span>
                                         </a>
                                     </li>
-                                    <li id="archived-sidenav-option"{!! (request()->query('status') == 'Archived' ? ' class="active"' : '') !!}><a
-                                                href="{{ url('hardware?status=Archived') }}">
+                                    <li id="archived-sidenav-option"{!! (request()->query('status_type') == 'Archived' ? ' class="active"' : '') !!}>
+                                        <a
+                                            href="{{ url('hardware?status_type=Archived') }}">
                                             <x-icon type="x" class="text-red fa-fw" />
                                             {{ trans('admin/hardware/general.archived') }}
                                             <span class="badge">{{ (isset($total_archived_sidebar)) ? $total_archived_sidebar : '' }}</span>
                                         </a>
                                     </li>
-                                    <li id="requestable-sidenav-option"{!! (request()->query('status') == 'Requestable' ? ' class="active"' : '') !!}><a
-                                                href="{{ url('hardware?status=Requestable') }}">
+                                    <li id="requestable-sidenav-option"{!! (request()->query('status_type') == 'Requestable' ? ' class="active"' : '') !!}>
+                                        <a
+                                            href="{{ url('hardware?status_type=Requestable') }}">
                                             <x-icon type="checkmark" class="text-blue fa-fw" />
                                             {{ trans('admin/hardware/general.requestable') }}
                                         </a>
@@ -1608,8 +1615,8 @@
                                     @endcan
 
                                     @can('create', \App\Models\Asset::class)
-                                        <li{!! (request()->query('status') == 'Deleted' ? ' class="active"' : '') !!}>
-                                            <a href="{{ url('hardware?status=Deleted') }}">
+                                        <li{!! (request()->query('status_type') == 'Deleted' ? ' class="active"' : '') !!}>
+                                            <a href="{{ url('hardware?status_type=Deleted') }}">
                                                 {{ trans('general.deleted') }}
                                             </a>
                                         </li>
@@ -2217,11 +2224,12 @@
              * Utility function to update the button text and aria-label.
              */
             function updateButton({ buttonEl, isDark }) {
-                const newCta = isDark ? '<i class="fa-regular fa-sun fa-fw"></i>  {{ trans('general.light_mode') }}' : '<i class="fa-solid fa-moon fa-fw"></i>   {{ trans('general.dark_mode') }}';
+                const newCta = isDark ? '{{ trans('general.light_mode') }}' : '{{ trans('general.dark_mode') }}';
+                const newCtaButton = isDark ? '<i class="fa-regular fa-sun fa-fw"></i> ' : '<i class="fa-solid fa-moon fa-fw"></i> ';
                 // use an aria-label if omitting text on the button
                 // and using a sun/moon icon, for example
                 buttonEl.setAttribute("aria-label", newCta);
-                buttonEl.innerHTML = newCta;
+                buttonEl.innerHTML = newCtaButton + newCta;
             }
 
             /**

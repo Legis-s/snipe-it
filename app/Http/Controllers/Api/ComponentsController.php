@@ -10,6 +10,7 @@ use App\Http\Transformers\ActionlogsTransformer;
 use App\Http\Transformers\ComponentsTransformer;
 use App\Models\Asset;
 use App\Models\Component;
+use App\Models\ComponentAssignment;
 use Carbon\Carbon;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\JsonResponse;
@@ -247,17 +248,17 @@ class ComponentsController extends Controller
      *
      * @param  int  $id
      */
-    public function getAssets(Request $request, $id): array
+    public function getAssets(Component $component, Request $request): array
     {
         $this->authorize('view', Asset::class);
 
-        $component = Component::findOrFail($id);
+        $component_checkouts = ComponentAssignment::where('component_id', $component->id)->with('adminuser')->with('assets');
 
         $offset = request('offset', 0);
         $limit = $request->input('limit', 50);
 
         if ($request->filled('search')) {
-            $assets = $component->assets()
+            $assets = $component_checkouts->assets()
                 ->where(function ($query) use ($request) {
                     $search_str = '%'.$request->input('search').'%';
                     $query->where('name', 'like', $search_str)
@@ -271,7 +272,6 @@ class ComponentsController extends Controller
             $total = $assets->count();
         } else {
             $assets = $component->assets();
-
             $total = $assets->count();
             $assets = $assets->skip($offset)->take($limit)->get();
         }
@@ -392,7 +392,11 @@ class ComponentsController extends Controller
     {
         $this->authorize('history', $component);
         $history = $component->getHistory($request);
+        $total = $component->getHistory($request)->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
+        $limit = app('api_limit_value');
+        $history = $history->skip($offset)->take($limit)->get();
 
-        return response()->json((new ActionlogsTransformer)->transformActionlogs($history, $history->count()), 200, ['Content-Type' => 'application/json;charset=utf8'], JSON_UNESCAPED_UNICODE);
+        return response()->json((new ActionlogsTransformer)->transformActionlogs($history, $total), 200, ['Content-Type' => 'application/json;charset=utf8'], JSON_UNESCAPED_UNICODE);
     }
 }

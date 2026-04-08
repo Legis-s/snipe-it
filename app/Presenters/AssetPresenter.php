@@ -3,7 +3,6 @@
 namespace App\Presenters;
 
 use App\Models\CustomField;
-use App\Models\Setting;
 use Carbon\CarbonImmutable;
 use DateTime;
 use Illuminate\Support\Facades\Storage;
@@ -93,13 +92,14 @@ class AssetPresenter extends Presenter
                 'visible' => true,
                 'formatter' => 'categoriesLinkObjFormatter',
             ], [
-                'field' => 'status_label',
+                'field' => 'status',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/hardware/table.status'),
                 'visible' => true,
                 'formatter' => 'statuslabelsLinkObjFormatter',
-            ], [
+            ],
+            [
                 'field' => 'assigned_to',
                 'searchable' => true,
                 'sortable' => true,
@@ -515,8 +515,8 @@ class AssetPresenter extends Presenter
             $imageAlt = $this->model->name;
         }
         if (! empty($imagePath)) {
-            $url = Storage::disk('public')->url(app('assets_upload_path') . e($imagePath));
-            $imagePath = '<img src="' . $url . '" height="50" width="50" alt="' . e($imageAlt) . '">';
+            $url = Storage::disk('public')->url(app('assets_upload_path').e($imagePath));
+            $imagePath = '<img src="'.$url.'" height="50" width="50" alt="'.e($imageAlt).'">';
         }
 
         return $imagePath;
@@ -536,7 +536,7 @@ class AssetPresenter extends Presenter
             $imagePath = $this->model->image;
         }
         if (! empty($imagePath)) {
-            return Storage::disk('public')->url(app('assets_upload_path') . e($imagePath));
+            return Storage::disk('public')->url(app('assets_upload_path').e($imagePath));
         }
 
         return $imagePath;
@@ -625,7 +625,7 @@ class AssetPresenter extends Presenter
             return 'deployed';
         }
 
-        return $this->model->assetstatus->getStatuslabelType();
+        return $this->model->status->getStatuslabelType();
     }
 
     /**
@@ -639,7 +639,7 @@ class AssetPresenter extends Presenter
             return trans('general.deployed');
         }
 
-        return $this->model->assetstatus->name;
+        return $this->model->status->name;
     }
 
     /**
@@ -659,14 +659,14 @@ class AssetPresenter extends Presenter
     public function fullStatusText()
     {
         // Make sure the status is valid
-        if ($this->assetstatus) {
+        if ($this->status) {
 
             // If the status is assigned to someone or something...
             if ($this->model->assigned) {
 
                 // If it's assigned and not set to the default "ready to deploy" status
-                if ($this->assetstatus->name != trans('general.ready_to_deploy')) {
-                    return trans('general.deployed').' ('.$this->model->assetstatus->name.')';
+                if ($this->status->name != trans('general.ready_to_deploy')) {
+                    return trans('general.deployed').' ('.$this->model->status->name.')';
                 }
 
                 // If it's assigned to the default "ready to deploy" status, just
@@ -676,7 +676,7 @@ class AssetPresenter extends Presenter
             }
 
             // Return just the status name
-            return $this->model->assetstatus->name;
+            return $this->model->status->name;
         }
 
         // This status doesn't seem valid - either data has been manually edited or
@@ -699,21 +699,6 @@ class AssetPresenter extends Presenter
         }
 
         return false;
-    }
-
-    /**
-     * Used to take user created URL and dynamically fill in the needed values per asset
-     *
-     * @return string
-     */
-    public function dynamicUrl($dynamic_url)
-    {
-        $url = (str_replace('{LOCALE}', Setting::getSettings()->locale, $dynamic_url));
-        $url = (str_replace('{SERIAL}', urlencode($this->model->serial), $url));
-        $url = (str_replace('{MODEL_NAME}', urlencode($this->model->model->name), $url));
-        $url = (str_replace('{MODEL_NUMBER}', urlencode($this->model->model->model_number), $url));
-
-        return $url;
     }
 
     /**

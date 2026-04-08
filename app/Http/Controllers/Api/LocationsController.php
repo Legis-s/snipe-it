@@ -315,7 +315,7 @@ class LocationsController extends Controller
     {
         $this->authorize('view', Asset::class);
         $this->authorize('view', $location);
-        $assets = Asset::where('location_id', '=', $location->id)->with('model', 'model.category', 'assetstatus', 'location', 'company', 'defaultLoc');
+        $assets = Asset::where('location_id', '=', $location->id)->with('model', 'model.category', 'status', 'location', 'company', 'defaultLoc');
         $assets = $assets->get();
 
         return (new AssetsTransformer)->transformAssets($assets, $assets->count(), $request);
@@ -325,7 +325,7 @@ class LocationsController extends Controller
     {
         $this->authorize('view', Asset::class);
         $this->authorize('view', $location);
-        $assets = Asset::where('assigned_to', '=', $location->id)->where('assigned_type', '=', Location::class)->with('model', 'model.category', 'assetstatus', 'location', 'company', 'defaultLoc');
+        $assets = Asset::where('assigned_to', '=', $location->id)->where('assigned_type', '=', Location::class)->with('model', 'model.category', 'status', 'location', 'company', 'defaultLoc');
         $assets = $assets->get();
 
         return (new AssetsTransformer)->transformAssets($assets, $assets->count(), $request);
@@ -484,7 +484,11 @@ class LocationsController extends Controller
     {
         $this->authorize('history', $location);
         $history = $location->getHistory($request);
+        $total = $location->getHistory($request)->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
+        $limit = app('api_limit_value');
+        $history = $history->skip($offset)->take($limit)->get();
 
-        return response()->json((new ActionlogsTransformer)->transformActionlogs($history, $history->count()), 200, ['Content-Type' => 'application/json;charset=utf8'], JSON_UNESCAPED_UNICODE);
+        return response()->json((new ActionlogsTransformer)->transformActionlogs($history, $total), 200, ['Content-Type' => 'application/json;charset=utf8'], JSON_UNESCAPED_UNICODE);
     }
 }

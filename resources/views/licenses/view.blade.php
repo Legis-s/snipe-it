@@ -25,12 +25,14 @@
                             count="{{ $license->assignedCount()->count() }}"
                     />
 
+                    @can('checkout', $license)
                     <x-tabs.nav-item
                             name="available"
                             icon_type="available"
                             label="{{ trans('general.available') }}"
                             count="{{ $license->availCount()->count() }}"
                     />
+                    @endcan
 
                     <x-tabs.files-tab :item="$license" count="{{ $license->uploads()->count() }}"/>
                     <x-tabs.history-tab count="{{ $license->history()->count() }}" :model="$license"/>
@@ -55,6 +57,7 @@
                     </x-tabs.pane>
 
 
+                    @can('checkout', $license)
                     <x-tabs.pane name="available">
                         <x-slot:table_header>
                             {{ trans('general.available') }}
@@ -68,6 +71,7 @@
                         />
 
                     </x-tabs.pane>
+                    @endcan
 
 
                     <!-- start history tab pane -->
@@ -78,11 +82,9 @@
 
 
                     <!-- start files tab pane -->
-                    @can('licenses.files', $license)
                     <x-tabs.pane name="files">
                         <x-table.files object_type="licenses" :object="$license" />
                     </x-tabs.pane>
-                    @endcan
                     <!-- end files tab pane -->
 
                 </x-slot:tabpanes>

@@ -97,6 +97,11 @@ abstract class SnipePermissionsPolicy
         return Gate::allows('view', $item) || $user->hasAccess('activity.view');
     }
 
+    public function journal(User $user, $item = null)
+    {
+        return Gate::allows('view', $item) || $user->hasAccess('activity.view');
+    }
+
     public function files(User $user, $item = null)
     {
         return $user->hasAccess($this->columnName().'.files');
