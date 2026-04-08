@@ -194,6 +194,18 @@
 
         @endif
 
+        @if ($infoPanelObj->nds)
+            <x-info-element icon_type="nds" title="{{ trans('general.nds') }}">
+                {{ $infoPanelObj->nds }} % -
+                @if ((isset($infoPanelObj->location)) && ($infoPanelObj->location->currency!=''))
+                    {{ $infoPanelObj->location->currency }}
+                @else
+                    {{ $snipeSettings->default_currency }}
+                @endif
+                {{ Helper::formatCurrencyOutput($infoPanelObj->purchase_cost * $infoPanelObj->nds /100) }}
+            </x-info-element>
+        @endif
+
         @if ($infoPanelObj->order_number)
             <x-info-element icon_type="order" title="{{ trans('general.order_number') }}">
                 <x-copy-to-clipboard copy_what="order_number" class="pull-right">

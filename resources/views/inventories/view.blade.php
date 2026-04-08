@@ -9,8 +9,8 @@
 {{-- Page content --}}
 @section('content')
     <x-container columns="2">
-        <x-page-column class="col-md-9">
-            <x-box.container>
+        <x-page-column class="col-md-9 main-panel">
+            <x-box>
                 <div class="table table-responsive">
                     <table
                             data-columns="{{ \App\Presenters\InventoryItemPresenter::dataTableLayout() }}"
@@ -22,15 +22,15 @@
                             class="table table-striped snipe-table"
                             data-url="{{route('api.inventory_items.index', ['inventory_id' => $inventory->id])}}"
                             data-export-options='{
-              "fileName": "export-inventory-items-{{ date('Y-m-d') }}",
+              "fileName": "export-inventories-items-{{ date('Y-m-d') }}",
               "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
               }'>
                     </table>
                 </div><!-- /.table-responsive -->
-            </x-box.container>
+            </x-box>
         </x-page-column>
         <x-page-column class="col-md-3">
-            <x-box.container>
+            <x-box>
                 @if (($inventory->status))
                     <div class="col-md-12" style="padding-bottom: 5px;">
                         @if ($inventory->status == "START")
@@ -105,16 +105,14 @@
                         <div id="map" style="width: 100%; height: 300px"></div>
                     </div>
                 @endif
-            </x-box.container>
+            </x-box>
         </x-page-column>
-
     </x-container>
-
 @stop
 
 @section('moar_scripts')
     @include ('partials.bootstrap-table', [
-    'exportFile' => 'locations-export',
+    'exportFile' => 'inventories-export',
     'search' => true
  ])
 

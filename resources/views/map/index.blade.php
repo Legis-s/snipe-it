@@ -9,7 +9,8 @@
 {{-- Page content --}}
 @section('content')
     <x-container>
-        <x-box.container>
+        <x-page-column class="col-md-12">
+            <x-box>
                 <div class="box-header with-border">
                     <div class="box-heading">
                         <h2 class="box-title">
@@ -22,7 +23,8 @@
                 <div class="box-body">
                     <div id="map" style=" width: 100%; height: 900px"></div>
                 </div>
-        </x-box.container>
+            </x-box>
+        </x-page-column>
     </x-container>
 @stop
 

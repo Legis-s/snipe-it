@@ -385,10 +385,10 @@
 
                     <x-tabs.pane name="consumables" :count="$user->consumables()->count()">
                         <table
+                            data-columns="{{ \App\Presenters\ConsumableAssignmentPresenter::dataTableLayoutUser() }}"
                             data-cookie-id-table="userConsumableTable"
                             data-id-table="userConsumableTable"
                             id="userConsumableTable"
-                            data-buttons="consumableButtons"
                             data-search="true"
                             data-side-pagination="client"
                             data-show-footer="true"
@@ -399,26 +399,6 @@
                     "fileName": "export-consumable-{{ str_slug($user->username) }}-{{ date('Y-m-d') }}",
                     "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","delete","download","icon"]
                     }'>
-{{--                            <thead>--}}
-{{--                                <tr>--}}
-{{--                                    <th class="col-md-3">{{ trans('general.name') }}</th>--}}
-{{--                                    <th class="col-md-2" data-footer-formatter="sumFormatter" data-fieldname="purchase_cost">{{ trans('general.unit_cost') }}</th>--}}
-{{--                                    <th class="col-md-2">{{ trans('general.date') }}</th>--}}
-{{--                                    <th class="col-md-5">{{ trans('general.notes') }}</th>--}}
-{{--                                </tr>--}}
-{{--                            </thead>--}}
-{{--                            <tbody>--}}
-{{--                                @foreach ($user->consumables as $consumable)--}}
-{{--                                    <tr>--}}
-{{--                                        <td>{!! $consumable->present()->nameUrl() !!}</td>--}}
-{{--                                        <td>--}}
-{{--                                            {!! Helper::formatCurrencyOutput($consumable->purchase_cost) !!}--}}
-{{--                                        </td>--}}
-{{--                                        <td>{{ Helper::getFormattedDateObject($consumable->pivot->created_at, 'datetime',  false) }}</td>--}}
-{{--                                        <td>{{ $consumable->pivot->note }}</td>--}}
-{{--                                    </tr>--}}
-{{--                                @endforeach--}}
-{{--                            </tbody>--}}
                         </table>
 
                     </x-tabs.pane>

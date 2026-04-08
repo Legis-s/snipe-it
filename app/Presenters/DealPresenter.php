@@ -121,7 +121,11 @@ class DealPresenter extends Presenter
      */
     public function nameUrl()
     {
-        return (string)link_to_route('deals.show', $this->name, $this->id);
+        if (auth()->user()->can('view', ['\App\Models\Deal', $this])) {
+            return '<a href="'.route('deals.show', $this->id).'">'.e($this->name).'</a>';
+        } else {
+            return e($this->name);
+        }
     }
 
 

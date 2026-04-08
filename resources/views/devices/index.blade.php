@@ -10,31 +10,25 @@
 @stop
 {{-- Page content --}}
 @section('content')
-    <div class="row">
-        <div class="col-md-12">
-            <div class="box box-default">
-                <div class="box-body">
-                    <div class="table-responsive">
+    <x-container>
+        <x-box>
 
-                        <table
-                                data-columns="{{ \App\Presenters\DevicePresenter::dataTableLayout() }}"
-                                data-cookie-id-table="devicesTable"
-                                data-id-table="devicesTable"
-                                data-side-pagination="server"
-                                data-sort-order="asc"
-                                id="devicesTable"
-                                class="table table-striped snipe-table"
-                                data-url="{{ route('api.devices.index') }}"
-                                data-export-options='{
-              "fileName": "export-locations-{{ date('Y-m-d') }}",
+            <table
+                    data-columns="{{ \App\Presenters\DevicePresenter::dataTableLayout() }}"
+                    data-cookie-id-table="devicesTable"
+                    data-id-table="devicesTable"
+                    data-side-pagination="server"
+                    data-sort-order="asc"
+                    id="devicesTable"
+                    class="table table-striped snipe-table"
+                    data-url="{{ route('api.devices.index') }}"
+                    data-export-options='{
+              "fileName": "export-devices-{{ date('Y-m-d') }}",
               "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
               }'>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+            </table>
+        </x-box>
+    </x-container>
 
 @stop
 

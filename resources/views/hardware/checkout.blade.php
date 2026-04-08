@@ -11,16 +11,13 @@
 @section('content')
 
     <style>
-
         .input-group {
-            padding-left: 0px !important;
+            padding-left: 0 !important;
         }
 
-        @import 'star-rating';
-
         :root {
-            --gl-star-empty: url(/img/star-empty.svg);
-            --gl-star-full: url(/img/star-full.svg);
+            --gl-star-empty: url('/img/star-empty.svg');
+            --gl-star-full: url('/img/star-full.svg');
             --gl-star-size: 32px;
         }
     </style>
@@ -211,29 +208,24 @@
                             </div>
                         @endif
 
-
-                        <!-- Stars -->
+                        <!-- stars -->
                         <div class="form-group {{ $errors->has('quality') ? ' has-error' : '' }}">
                             <label for="quality" class="col-md-3 control-label">Состояние</label>
                             <div class="col-md-9">
-                                <div class="input-group col-md-4" style="padding-left: 0px;">
-                                    <select class="star-rating" name="quality" id="quality">
-                                        @php
-                                            $quality = Request::old('quality', (isset($asset)) ? $asset->quality :null);
-                                        @endphp
-                                            <option @if (!isset($quality)) selected @endif value="">Оцените состояние</option>
-                                            <option @if ($quality == 5) selected @endif value="5">Новое запакованное</option>
-                                            <option @if ($quality == 4) selected @endif value="4">В отличном состоянии, но использовалось</option>
-                                            <option @if ($quality == 3) selected @endif value="3">Рабочее, но с небольшими следами повреждений,
-                                                небольшим загрязнением
-                                            </option>
-                                            <option @if ($quality == 2) selected @endif value="2">Частично рабочее или сильно загрязненное</option>
-                                            <option @if ($quality == 1) selected @endif value="1">Полностью не рабочее</option>
-                                    </select>
-                               </div>
-                                <div class="col-md-9" style="padding-left: 0px;">
-                                    {!! $errors->first('quality', '<span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span>') !!}
-                                </div>
+                                @php
+                                    $quality = old('quality', isset($asset) ? $asset->quality : null);
+                                @endphp
+
+                                <select class="star-rating" name="quality" id="quality">
+                                    <option value="" {{ empty($quality) ? 'selected' : '' }}>Оцените состояние</option>
+                                    <option value="5" {{ (string)$quality === '5' ? 'selected' : '' }}>Новое запакованное</option>
+                                    <option value="4" {{ (string)$quality === '4' ? 'selected' : '' }}>В отличном состоянии, но использовалось</option>
+                                    <option value="3" {{ (string)$quality === '3' ? 'selected' : '' }}>Рабочее, но с небольшими следами повреждений, небольшим загрязнением</option>
+                                    <option value="2" {{ (string)$quality === '2' ? 'selected' : '' }}>Частично рабочее или сильно загрязненное</option>
+                                    <option value="1" {{ (string)$quality === '1' ? 'selected' : '' }}>Полностью не рабочее</option>
+                                </select>
+
+                                {!! $errors->first('quality', '<span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span>') !!}
                             </div>
                         </div>
                         <!-- life Cost -->
@@ -378,82 +370,95 @@
 
     <script nonce="{{ csrf_token() }}">
         $(function () {
-            var starRatingControl = new StarRating('.star-rating', {
+            const starRatingControl = new StarRating('.star-rating', {
                 maxStars: 5,
                 tooltip: 'Оцените состояние',
                 clearable: false,
             });
-            calculeteCoast();
 
-            function calculeteCoast() {
+            calculateCost();
 
-                $buyVal = parseFloat($("#purchase_cost").val().replace(",",""));
-                $quality = parseInt($("#quality").val());
+            $("#quality").on("change input", function () {
+                calculateCost();
+            });
 
-                if ($buyVal > 0 && $quality > 0) {
-                    //quality count
-                    $quality_divider = 1;
-                    switch ($quality) {
-                        case 4:
-                            $quality_divider = 0.8
-                            break;
-                        case 3:
-                            $quality_divider = 0.50
-                            break;
-                        case 2:
-                            $quality_divider = 0.3
-                            break;
-                        case 1:
-                            $quality_divider = 0
-                            break;
-                    }
+            $("#purchase_cost").on("change input", function () {
+                calculateCost();
+            });
 
+            function calculateCost() {
+                const buyVal = parseMoney($("#purchase_cost").val());
+                const quality = parseInt($("#quality").val(), 10);
 
-                    @if (isset($asset->model) && isset($asset->model->depreciation) && isset($asset->model->depreciation->months))
-                        $lifetime = {{$asset->model->depreciation->months}};
-                    @else
-                        $lifetime = 36;
-                    @endif
-
-                            @if (isset($asset->purchase_date))
-                        $buydate = "{{$asset->purchase_date}}";
-                    $buydate = new Date($buydate.substr(0, 10));
-                    $usetime = monthDiff($buydate);
-                    if ($usetime <= 12) {
-                        $time_divider = 0;
-                    } else {
-                        $time_divider = ($lifetime - $usetime) / $lifetime;
-                        if ($time_divider < 0) {
-                            $time_divider = 0;
-                        }
-                    }
-                    @else
-                        $time_divider = 1 / 3;
-                    @endif
-
-                    // console.log(`HelcalculeteCoastlo $usetime ${$usetime}  $lifetime${$lifetime}`)
-                    $newVal = (($buyVal - ($buyVal/$lifetime) * $usetime) * $quality_divider).toFixed(2);
-                    if ($newVal<0){
-                        $newVal = 0;
-                    }
-                    $("#new_depreciable_cost").val($newVal);
+                if (!buyVal || buyVal <= 0 || !quality || quality <= 0) {
+                    $("#new_depreciable_cost").val("");
+                    return;
                 }
+
+                let qualityDivider = 1;
+
+                switch (quality) {
+                    case 5:
+                        qualityDivider = 1;
+                        break;
+                    case 4:
+                        qualityDivider = 0.8;
+                        break;
+                    case 3:
+                        qualityDivider = 0.5;
+                        break;
+                    case 2:
+                        qualityDivider = 0.3;
+                        break;
+                    case 1:
+                        qualityDivider = 0;
+                        break;
+                    default:
+                        qualityDivider = 1;
+                }
+
+                let lifetime = 36;
+                @if (isset($asset->model) && isset($asset->model->depreciation) && isset($asset->model->depreciation->months))
+                    lifetime = {{ (int)$asset->model->depreciation->months }};
+                @endif
+
+                let useTime = 12; // значение по умолчанию, если даты покупки нет
+                @if (isset($asset->purchase_date))
+                let buyDate = "{{$asset->purchase_date}}";
+                buyDate = new Date(buyDate.substr(0, 10) + "T00:00:00");
+                useTime = monthDiff(buyDate);
+                if (useTime < 0) {
+                    useTime = 0;
+                }
+                @endif
+
+                let newVal = (buyVal - (buyVal / lifetime) * useTime) * qualityDivider;
+
+                if (newVal < 0 || !isFinite(newVal)) {
+                    newVal = 0;
+                }
+
+                $("#new_depreciable_cost").val(newVal.toFixed(2));
             }
-
-            $("#quality").change(function () {
-                calculeteCoast();
-            });
-
-            $("#purchase_cost").change(function () {
-                calculeteCoast();
-            });
 
             function monthDiff(dateFrom) {
-                var dateTo = new Date();
-                return dateTo.getMonth() - dateFrom.getMonth() +
-                    (12 * (dateTo.getFullYear() - dateFrom.getFullYear()))
+                const dateTo = new Date();
+                return (
+                    (dateTo.getFullYear() - dateFrom.getFullYear()) * 12 +
+                    (dateTo.getMonth() - dateFrom.getMonth())
+                );
+            }
+
+            function parseMoney(value) {
+                if (!value) return 0;
+
+                return parseFloat(
+                    String(value)
+                        .replace(/\s/g, "")
+                        .replace(/,/g, ".")
+                        .replace(/[^\d.]/g, "")
+                ) || 0;
             }
         });
-
     </script>
 @stop

@@ -483,14 +483,14 @@
             }
         },
         deleteAllRejected: {
-            text: 'Удалить все отклоненные',
+            text: '{{ trans('general.clear_all_null') }}',
             icon: 'fa-solid fa-trash',
             event () {
-                window.location.href = '{{ route('purchases.delete_all_rejected') }}';
+                window.location.href = '{{ route('api.inventories.clearallemply') }}';
             },
             attributes: {
                 class: 'btn-danger',
-                title: 'Удалить все отклоненные',
+                title: '{{ trans('general.clear_all_null') }}',
                 @if ($snipeSettings->shortcuts_enabled == 1)
                 accesskey: 'a'
                 @endif
@@ -870,7 +870,25 @@
             }
         },
     });
+
+    window.inventoryStatusButtons = () => ({
+        btnAdd: {
+            text: '{{ trans('general.create') }}',
+            icon: 'fa fa-plus',
+            event () {
+                window.location.href = '{{ route('inventorystatuslabels.create') }}';
+            },
+            attributes: {
+                class: 'btn-info',
+                title: '{{ trans('general.create') }}',
+                @if ($snipeSettings->shortcuts_enabled == 1)
+                accesskey: 'n'
+                @endif
+            }
+        },
+    });
     @endcan
+
 
 
     // License table buttons

@@ -31,6 +31,7 @@ require('./extensions/pGenerator.jquery'); //WEIRD, but works
 window.SignaturePad = require('./signature_pad'); //ALSO WEIRD - but works
 require('jquery-validation')
 window.List = require('list.js')
+window.StarRating = require('star-rating.js')
 window.ClipboardJS = require('clipboard')
 // TODO - find everything using moment.js and kill it or upgrade it? It's huge
 // - adminLTE (UGH)
@@ -470,8 +471,12 @@ $(function () {
                 $('[name="assigned_location"]').val('').trigger('change.select2');
             }
         });
+        const stars = new StarRating('.star-rating', {
+            maxStars: 5,
+            tooltip: 'Оцените состояние',
+            clearable: false,
+        });
     });
-
 
     // ------------------------------------------------
     // Deep linking for Bootstrap tabs

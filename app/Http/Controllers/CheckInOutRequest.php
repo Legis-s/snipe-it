@@ -22,8 +22,6 @@ trait CheckInOutRequest
                 return Location::findOrFail(request('assigned_location'));
             case 'asset':
                 return Asset::findOrFail(request('assigned_asset'));
-            case 'contract':
-                return Contract::findOrFail(request('assigned_contract'));
             case 'deal':
                 return Deal::findOrFail(request('assigned_deal'));
             default:

@@ -1,7 +1,7 @@
 @extends('layouts/edit-form', [
     'createText' =>"Создать закупку" ,
     'updateText' => "Обновить закупку",
-    'topSubmit' => false,
+    'topSubmit' => true,
    'formAction' =>  route('purchases.store'),
 ])
 
@@ -410,9 +410,9 @@
                     modal.find('#quantity').val(1);
                     modal.find('.duble').addClass('hidden');
                     modal.find('select').each(function (i, item) {
-                        var link = $(item);
-                        var endpoint = link.data("endpoint");
-                        var select = link.data("select");
+                        const link = $(item);
+                        const endpoint = link.data("endpoint");
+                        const select = link.data("select");
                         link.select2({
                             placeholder: '',
                             allowClear: true,
@@ -445,7 +445,7 @@
                 });
 
                 $('#modal_consumables').on("show.bs.modal", function (event) {
-                    var modal = $(this);
+                    const modal = $(this);
                     modal.find('#name').val("");
                     modal.find("#model_id").removeClass("has-error");
                     modal.find("#model_select_id").val('');
@@ -456,9 +456,9 @@
                     modal.find('#quantity').val(1);
                     modal.find('.duble').addClass('hidden');
                     modal.find('select').each(function (i, item) {
-                        var link = $(item);
-                        var endpoint = link.data("endpoint");
-                        var select = link.data("select");
+                        const link = $(item);
+                        const endpoint = link.data("endpoint");
+                        const select = link.data("select");
                         link.select2({
                             placeholder: '',
                             allowClear: true,
@@ -492,20 +492,20 @@
 
                 $('#addAssetButton').click(function (e) {
                     e.preventDefault();
-                    var modal = $('#modal_asset');
-                    var model_id = modal.find('select[name=model_id] option').filter(':selected').val();
-                    var model_name = modal.find('select[name=model_id] option').filter(':selected').text();
-                    var location_id = modal.find('select[name=location_id] option').filter(':selected').val();
-                    var location_name = modal.find('select[name=location_id] option').filter(':selected').text();
-                    var purchase_cost = modal.find('#purchase_cost').val();
-                    var nds = modal.find('#nds').val();
-                    var warranty = modal.find('#warranty_months').val();
-                    var quantity = modal.find('#quantity').val();
-                    var table_data = table_asset.bootstrapTable('getData');
+                    const modal = $('#modal_asset');
+                    const model_id = modal.find('select[name=model_id] option').filter(':selected').val();
+                    const model_name = modal.find('select[name=model_id] option').filter(':selected').text();
+                    const location_id = modal.find('select[name=location_id] option').filter(':selected').val();
+                    const location_name = modal.find('select[name=location_id] option').filter(':selected').text();
+                    const purchase_cost = modal.find('#purchase_cost').val();
+                    const nds = modal.find('#nds').val();
+                    const warranty = modal.find('#warranty_months').val();
+                    const quantity = modal.find('#quantity').val();
+                    const table_data = table_asset.bootstrapTable('getData');
                     if (model_id > 0) {
                         var rez = true;
                         table_data.forEach(function callback(currentValue, index, array) {
-                            if (currentValue.model_id == model_id) {
+                            if (currentValue.model_id === model_id) {
                                 rez = false;
                             }
                         });
@@ -534,16 +534,16 @@
 
                 $('#addСonsumablesButton').click(function (e) {
                     e.preventDefault();
-                    var modal = $('#modal_consumables');
-                    var consumable_id = modal.find('select[name=consumable_id] option').filter(':selected').val();
-                    var consumable_name = modal.find('select[name=consumable_id] option').filter(':selected').text();
+                    const modal = $('#modal_consumables');
+                    const consumable_id = modal.find('select[name=consumable_id] option').filter(':selected').val();
+                    const consumable_name = modal.find('select[name=consumable_id] option').filter(':selected').text();
                     // var location_id = modal.find('select[name=location_id] option').filter(':selected').val();
                     // var location_name = modal.find('select[name=location_id] option').filter(':selected').text();
-                    var purchase_cost = modal.find('#purchase_cost').val();
-                    var nds = modal.find('#nds').val();
-                    var quantity = modal.find('#quantity').val();
+                    const purchase_cost = modal.find('#purchase_cost').val();
+                    const nds = modal.find('#nds').val();
+                    const quantity = modal.find('#quantity').val();
 
-                    var tabele_data = table_consumables.bootstrapTable('getData');
+                    const tabele_data = table_consumables.bootstrapTable('getData');
                     if (consumable_id > 0) {
                         var data = {
                             id: tabele_data.length + 1,
@@ -639,14 +639,15 @@
 
                 function formatDatalistSafe(datalist) {
 
+                    let inner_div;
                     if (datalist.loading) {
                         return $('<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Loading...');
                     }
 
-                    var root_div = $("<div class='clearfix'>");
-                    var left_pull = $("<div class='pull-left' style='padding-right: 10px;'>");
+                    const root_div = $("<div class='clearfix'>");
+                    const left_pull = $("<div class='pull-left' style='padding-right: 10px;'>");
                     if (datalist.image) {
-                        var inner_div = $("<div style='width: 20px;'>");
+                        inner_div = $("<div style='width: 20px;'>");
                         /******************************************************************
                          *
                          * We are specifically chosing empty alt-text below, because this
@@ -659,25 +660,25 @@
                          * assets or models or whatever.
                          *
                          *******************************************************************/
-                        var img = $("<img src='' style='max-height: 20px; max-width: 20px;' alt=''>");
+                        const img = $("<img src='' style='max-height: 20px; max-width: 20px;' alt=''>");
                         img.attr("src", datalist.image);
                         inner_div.append(img)
                     } else if (datalist.tag_color) {
-                        var inner_div = $("<div style='width: 20px;'>");
-                        var icon = $('<i class="fa-solid fa-square" style="font-size: 20px;" aria-hidden="true"></i>');
+                        inner_div = $("<div style='width: 20px;'>");
+                        const icon = $('<i class="fa-solid fa-square" style="font-size: 20px;" aria-hidden="true"></i>');
                         icon.css("color", datalist.tag_color);
                         inner_div.append(icon)
                     } else {
-                        var inner_div = $("<div style='height: 20px; width: 20px;'></div>");
+                        inner_div = $("<div style='height: 20px; width: 20px;'></div>");
                     }
                     left_pull.append(inner_div);
                     root_div.append(left_pull);
-                    var name_div = $("<div>");
+                    const name_div = $("<div>");
                     name_div.text(datalist.text);
                     root_div.append(name_div)
-                    var safe_html = root_div.get(0).outerHTML;
-                    var old_html = formatDatalist(datalist);
-                    if (safe_html != old_html) {
+                    const safe_html = root_div.get(0).outerHTML;
+                    const old_html = formatDatalist(datalist);
+                    if (safe_html !== old_html) {
                         //console.log("HTML MISMATCH: ");
                         //console.log("FormatDatalistSafe: ");
                         // console.dir(root_div.get(0));
@@ -690,7 +691,7 @@
                 }
 
                 function formatDatalist(datalist) {
-                    var loading_markup = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Loading...';
+                    const loading_markup = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Loading...';
                     if (datalist.loading) {
                         return loading_markup;
                     }

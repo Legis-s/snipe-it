@@ -127,6 +127,7 @@
                                             name="location_id"
                                             :help_text="($asset->defaultLoc) ? trans('general.checkin_to_diff_location', ['default_location' => $asset->defaultLoc->name]) : null"
                                             :selected="old('location_id')"
+                                            :hideNewButton="true"
                                         />
 
                                         <!-- Update actual location  -->

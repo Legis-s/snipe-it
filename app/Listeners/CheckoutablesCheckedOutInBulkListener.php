@@ -28,42 +28,45 @@ class CheckoutablesCheckedOutInBulkListener
     {
         $notifiableUser = $this->getNotifiableUser($event);
 
-        $shouldSendEmailToUser = $this->shouldSendCheckoutEmailToUser($notifiableUser, $event->assets);
-        $shouldSendEmailToAlertAddress = $this->shouldSendEmailToAlertAddress($event->assets);
+//        $shouldSendEmailToUser = $this->shouldSendCheckoutEmailToUser($notifiableUser, $event->assets);
+//        $shouldSendEmailToAlertAddress = $this->shouldSendEmailToAlertAddress($event->assets);
 
-        if ($shouldSendEmailToUser && $notifiableUser) {
-            try {
-                Mail::to($notifiableUser)->send(new BulkAssetCheckoutMail(
-                    $event->assets,
-                    $event->target,
-                    $event->admin,
-                    $event->checkout_at,
-                    $event->expected_checkin,
-                    $event->note,
-                ));
+        $shouldSendEmailToUser = false;
+        $shouldSendEmailToAlertAddress = false;
 
-                Log::info('BulkAssetCheckoutMail sent to checkout target');
-            } catch (Exception $e) {
-                Log::debug('Exception caught during BulkAssetCheckoutMail to target: '.$e->getMessage());
-            }
-        }
+//        if ($shouldSendEmailToUser && $notifiableUser) {
+//            try {
+//                Mail::to($notifiableUser)->send(new BulkAssetCheckoutMail(
+//                    $event->assets,
+//                    $event->target,
+//                    $event->admin,
+//                    $event->checkout_at,
+//                    $event->expected_checkin,
+//                    $event->note,
+//                ));
+//
+//                Log::info('BulkAssetCheckoutMail sent to checkout target');
+//            } catch (Exception $e) {
+//                Log::debug('Exception caught during BulkAssetCheckoutMail to target: '.$e->getMessage());
+//            }
+//        }
 
-        if ($shouldSendEmailToAlertAddress && Setting::getSettings()->admin_cc_email) {
-            try {
-                Mail::to(Setting::getSettings()->admin_cc_email)->send(new BulkAssetCheckoutMail(
-                    $event->assets,
-                    $event->target,
-                    $event->admin,
-                    $event->checkout_at,
-                    $event->expected_checkin,
-                    $event->note,
-                ));
-
-                Log::info('BulkAssetCheckoutMail sent to admin_cc_email');
-            } catch (Exception $e) {
-                Log::debug('Exception caught during BulkAssetCheckoutMail to admin_cc_email: '.$e->getMessage());
-            }
-        }
+//        if ($shouldSendEmailToAlertAddress && Setting::getSettings()->admin_cc_email) {
+//            try {
+//                Mail::to(Setting::getSettings()->admin_cc_email)->send(new BulkAssetCheckoutMail(
+//                    $event->assets,
+//                    $event->target,
+//                    $event->admin,
+//                    $event->checkout_at,
+//                    $event->expected_checkin,
+//                    $event->note,
+//                ));
+//
+//                Log::info('BulkAssetCheckoutMail sent to admin_cc_email');
+//            } catch (Exception $e) {
+//                Log::debug('Exception caught during BulkAssetCheckoutMail to admin_cc_email: '.$e->getMessage());
+//            }
+//        }
     }
 
     private function shouldSendCheckoutEmailToUser(?User $user, Collection $assets): bool

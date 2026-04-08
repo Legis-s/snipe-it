@@ -68,6 +68,7 @@ class AssetCheckoutController extends Controller
     public function store(AssetCheckoutRequest $request, $assetId): RedirectResponse
     {
 
+        \Log::info('Информация');
         try {
             // Check if the asset exists
             if (! $asset = Asset::find($assetId)) {
@@ -84,6 +85,7 @@ class AssetCheckoutController extends Controller
             $admin = auth()->user();
 
             $target = $this->determineCheckoutTarget();
+
             session()->put(['checkout_to_type' => $target]);
 
             $asset = $this->updateAssetLocation($asset, $target);

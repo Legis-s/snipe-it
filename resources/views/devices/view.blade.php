@@ -2,17 +2,13 @@
 
 {{-- Page title --}}
 @section('title')
-
-    Телефон:
-    {{ $device->number }}
-
+    {{ trans('general.device') }} - {{ $device->number }}
     @parent
 @stop
 
 {{-- Page content --}}
 @section('content')
-
-    <div class="row">
+    <x-container>
         @isset($asset)
             <div class="col-md-12">
                 <div class="box box-default">
@@ -978,7 +974,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </x-container>
 
 @stop
 

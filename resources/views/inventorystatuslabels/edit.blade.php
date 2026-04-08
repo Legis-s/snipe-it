@@ -21,29 +21,25 @@
 
 @include ('partials.forms.edit.name', ['translated_name' => trans('general.name')])
 
-
-
 <!-- Chart color -->
 <div class="form-group{{ $errors->has('color') ? ' has-error' : '' }}">
-    {{ Form::label('color', trans('admin/statuslabels/table.color'), ['class' => 'col-md-3 control-label']) }}
-    <div class="col-md-2">
-        <div class="input-group color">
-            {{ Form::text('color', old('color', $item->color), array('class' => 'form-control', 'style' => 'width: 100px;', 'maxlength'=>'10')) }}
-            <div class="input-group-addon"><i></i></div>
-        </div><!-- /.input group -->
-        {!! $errors->first('header_color', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+    <label for="color" class="col-md-3 control-label">{{ trans('admin/statuslabels/table.color') }}</label>
+    <div class="col-md-9">
+        <x-input.colorpicker :item="$item" id="color" :value="old('color', ($item->color ?? '#f4f4f4'))" name="color" id="color" />
+        {!! $errors->first('color', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
     </div>
 </div>
 
 @include ('partials.forms.edit.notes')
 
 <!-- Show in Nav -->
-<div class="form-group{{ $errors->has('success') ? ' has-error' : '' }}">
-    <label class="col-md-offset-3" style="padding-left: 15px;">
-        <input type="checkbox" value="1" name="success" id="success" class="minimal" {{ old('success', $item->success) == '1' ? ' checked="checked"' : '' }}> Успешный статус
-    </label>
+<div class="form-group{{ $errors->has('notes') ? ' has-error' : '' }}">
+    <div class="col-md-9 col-md-offset-3">
+        <label class="form-control">
+            <input type="checkbox" value="1" name="show_in_nav" id="show_in_nav" {{ old('show_in_nav', $item->show_in_nav) == '1' ? ' checked="checked"' : '' }}> {{ trans('admin/statuslabels/table.show_in_nav') }}
+        </label>
+    </div>
 </div>
-
 @stop
 
 @section('moar_scripts')

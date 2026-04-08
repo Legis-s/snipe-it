@@ -3,13 +3,14 @@
     <div class="col-md-8">
 
         <div class="btn-group" data-toggle="buttons">
-                @if ((isset($location_select)) && ($location_select!='false'))
-                    <label class="btn btn-theme{{ (session('checkout_to_type') ?: 'user') == 'user' ? ' active' : '' }}">
-                        <input name="checkout_to_type" value="user" aria-label="checkout_to_type"
-                               type="radio" {{ (session('checkout_to_type') ?: 'location') == 'location' ? 'checked' : '' }}>
-                        <x-icon type="location" />
-                        {{ trans('general.location') }}
-                    </label>
+            @if ((isset($location_select)) && ($location_select!='false'))
+                <label class="btn btn-theme{{ (session('checkout_to_type') ?: 'location') == 'location' ? ' active' : '' }}">
+                    <input name="checkout_to_type" value="location" aria-label="checkout_to_type"
+                           type="radio" {{ (session('checkout_to_type') ?: 'location') == 'location' ? 'checked' : '' }}>
+                    <x-icon type="location" />
+                    {{ trans('general.location') }}
+                </label>
+            @endif
             @if ((isset($user_select)) && ($user_select!='false'))
                 <label class="btn btn-theme{{ (session('checkout_to_type') ?: 'user') == 'user' ? ' active' : '' }}">
                     <input name="checkout_to_type" value="user" aria-label="checkout_to_type"
@@ -26,12 +27,12 @@
                 {{ trans('general.asset') }}
             </label>
             @endif
-            @if ((isset($location_select)) && ($location_select!='false'))
-                <label class="btn btn-theme{{ session('checkout_to_type') == 'location' ? ' active' : '' }}">
-                    <input name="checkout_to_type" value="location" aria-label="checkout_to_type"
-                           type="radio" {{ session('checkout_to_type') == 'location' ? 'checked' : '' }}>
-                <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
-                {{ trans('general.location') }}
+            @if ((isset($deal_select)) && ($deal_select!='false'))
+                <label class="btn btn-theme{{ session('checkout_to_type') == 'deal' ? ' active' : '' }}">
+                    <input name="checkout_to_type" value="deal" aria-label="checkout_to_type"
+                           type="radio" {{ session('checkout_to_type') == 'deal' ? 'checked' : '' }}>
+                <i class="fas fa-usd" aria-hidden="true"></i>
+                {{ trans('general.deal') }}
             </label>
             @endif
 

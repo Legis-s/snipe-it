@@ -109,6 +109,107 @@ class ConsumableAssignmentPresenter extends Presenter
         return json_encode($layout);
     }
 
+    /**
+     * Json Column Layout for bootstrap table
+     * @return string
+     */
+    public static function dataTableLayoutUser()
+    {
+        $layout = [
+            [
+                "field" => "id",
+                "searchable" => false,
+                "sortable" => true,
+                "switchable" => true,
+                "title" => trans('general.id'),
+                "visible" => false
+            ], [
+                "field" => "name",
+                "searchable" => true,
+                "sortable" => true,
+                "switchable" => true,
+                "title" => "Запись",
+                "visible" => true,
+            ], [
+                "field" => "consumable",
+                "searchable" => true,
+                "sortable" => true,
+                "switchable" => true,
+                "title" => "Расходник",
+                "visible" => true,
+                "formatter" => "consumablesLinkObjFormatter"
+            ], [
+                "field" => "quantity",
+                "searchable" => false,
+                "sortable" => true,
+                "switchable" => true,
+                "title" => "Количество",
+                "visible" => true,
+                "formatter" => "quantityItemFormatter"
+            ], [
+                "field" => "cost",
+                "searchable" => false,
+                "sortable" => true,
+                "switchable" => true,
+                "title" => "Cтоимость",
+                "visible" => true,
+            ], [
+                "field" => "contract",
+                "searchable" => false,
+                "sortable" => true,
+                "switchable" => true,
+                "title" => "Договор",
+                "visible" => false,
+                "formatter" => "contractsLinkObjFormatter"
+            ], [
+                "field" => "deal",
+                "searchable" => false,
+                "sortable" => true,
+                "switchable" => true,
+                "title" => "Сделка",
+                "visible" => false,
+                "formatter" => "dealsLinkObjFormatter"
+            ], [
+                "field" => "comment",
+                "searchable" => true,
+                "sortable" => true,
+                "visible" => false,
+                "title" => "Комментарий",
+            ], [
+                "field" => "return",
+                "searchable" => false,
+                "sortable" => false,
+                "visible" => true,
+                "title" => "Вернуть",
+                "events" => "operateEvents",
+                "formatter" => "consumablesReturnFormatter",
+            ], [
+                'field' => 'created_by',
+                'searchable' => false,
+                'sortable' => true,
+                'title' => trans('general.created_by'),
+                'visible' => true,
+                'formatter' => 'usersLinkObjFormatter',
+            ], [
+                "field" => "created_at",
+                "searchable" => false,
+                "sortable" => true,
+                "visible" => false,
+                "title" => trans('general.created_at'),
+                "formatter" => "dateDisplayFormatter"
+            ], [
+                "field" => "updated_at",
+                "searchable" => false,
+                "sortable" => true,
+                "visible" => false,
+                "title" => trans('general.updated_at'),
+                "formatter" => "dateDisplayFormatter"
+            ]
+        ];
+
+
+        return json_encode($layout);
+    }
 
     /**
      * Json Column Layout for bootstrap table

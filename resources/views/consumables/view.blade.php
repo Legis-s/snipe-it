@@ -39,10 +39,9 @@
                     <x-tabs.pane name="assigned">
 
                         <x-table
-                            :presenter="\App\Presenters\ConsumablePresenter::checkedOut()"
-                            :api_url="route('api.consumables.show.users', $consumable->id)"
+                            :presenter="\App\Presenters\ConsumableAssignmentPresenter::dataTableLayout()"
+                            :api_url="route('api.consumableassignments.index', ['consumable_id' => $consumable->id])"
                         />
-
                     </x-tabs.pane>
 
                     <x-tabs.pane name="files">

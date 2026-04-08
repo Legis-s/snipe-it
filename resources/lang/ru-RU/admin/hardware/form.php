@@ -65,4 +65,5 @@ return [
     'order_details' => 'Информация, связанная с заказом',
     'calc_eol' => 'If nulling the EOL date, use automatic EOL calculation based on the purchase date and EOL rate.',
     'bitrix_task_id' => 'Bitrix задача',
+    'quality' => 'Состояние',
 ];

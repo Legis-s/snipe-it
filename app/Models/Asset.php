@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Events\CheckoutableCheckedOut;
+use App\Events\CheckoutableRent;
+use App\Events\CheckoutableSell;
 use App\Exceptions\CheckoutNotAllowed;
 use App\Helpers\Helper;
 use App\Http\Traits\UniqueUndeletedTrait;
@@ -112,6 +114,7 @@ class Asset extends Depreciable
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
+        'nds' => 'integer',
     ];
 
     protected $rules = [
@@ -138,15 +141,16 @@ class Asset extends Depreciable
         'order_number' => ['nullable', 'string', 'max:191'],
         'notes' => ['nullable', 'string', 'max:65535'],
         'assigned_to' => ['nullable', 'integer', 'required_with:assigned_type'],
-        'assigned_type' => ['nullable', 'required_with:assigned_to', 'in:'.User::class.','.Location::class.','.Asset::class],
+        'assigned_type' => ['nullable', 'required_with:assigned_to', 'in:'.User::class.','.Location::class.','.Asset::class.','.Deal::class],
         'requestable' => ['nullable', 'boolean'],
         'assigned_user' => ['integer', 'nullable', 'exists:users,id,deleted_at,NULL'],
         'assigned_location' => ['integer', 'nullable', 'exists:locations,id,deleted_at,NULL', 'fmcs_location'],
         'assigned_asset' => ['integer', 'nullable', 'exists:assets,id,deleted_at,NULL'],
+        'assigned_deal' => ['integer', 'nullable', 'exists:deals,id,deleted_at,NULL'],
         'depreciable_cost'  => ['nullable', 'numeric', 'gte:0', 'max:9999999999999'],
         'quality'           => ['nullable', 'integer', 'between:1,5'],
         'purchase_id'       => ['nullable', 'integer'],
-        'nds'
+        'nds' => ['nullable', 'integer'],
     ];
 
     /**
@@ -2194,14 +2198,17 @@ class Asset extends Depreciable
 
     /**
      * Sell the asset out to the target
+     *
      * @author [S. Markin] [<markin@legis-s.ru>]
+     *
      * @param User $user
+     * @param User $admin
      * @param Carbon $checkout_at
+     * @param Carbon $expected_checkin
      * @param string $note
      * @param null $name
      * @return bool
-     * @since [v3.0]
-     * @return bool
+     *
      */
     public function sell($target, $admin = null, $checkout_at = null, $note = null, $name = null)
     {

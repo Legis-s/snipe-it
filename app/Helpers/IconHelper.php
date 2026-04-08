@@ -256,6 +256,8 @@ class IconHelper
                 return 'fa-solid fa-icons';
             case 'cost':
                 return 'fa-solid fa-money-bills';
+            case 'nds':
+                return 'fa-solid fa-sack-xmark';
             case 'available':
                 return 'fa-solid fa-box';
             case 'checkedout':

@@ -14,7 +14,7 @@
 {{-- Page content --}}
 @section('content')
     <x-container>
-        <x-box.container>
+        <x-box>
             <table
                     data-columns="{{ \App\Presenters\InventoryPresenter::dataTableLayout() }}"
                     data-cookie-id-table="inventoriesListTable"
@@ -30,7 +30,7 @@
               "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
               }'>
             </table>
-        </x-box.container>
+        </x-box>
     </x-container>
 
 @stop
@@ -40,9 +40,7 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            console.log("ready!");
             $("#clear_all_null").on("click", function () {
-                console.log("clear_all_null!");
                 $.ajax({
                     type: 'POST',
                     url: "{{ route('api.inventories.clearallemply') }}",
@@ -51,8 +49,6 @@
                         "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
                     },
                     success: function (data) {
-                        console.log("success!");
-                        console.log(data);
                         $("#inventoriesListTable").bootstrapTable('refresh');
                     },
                 });

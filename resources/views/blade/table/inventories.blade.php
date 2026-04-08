@@ -1,17 +1,17 @@
 @props([
-    'route' => route('api.consumables.index'),
+    'route' => route('api.inventory_items.index'),
     'name' => 'default',
-    'presenter' => \App\Presenters\ConsumablePresenter::dataTableLayout(),
+    'presenter' => \App\Presenters\InventoryItemPresenter::dataTableLayout(),
     'fixed_right_number' => 2,
     'fixed_number' => 1,
     'show_search' => true,
     'show_advanced_search' => false,
     'show_column_search' => false,
-    'table_header' => trans('general.consumables'),
+    'table_header' => trans('general.inventories'),
 ])
 
-<!-- start consumables tab pane -->
-@can('view', \App\Models\Consumable::class)
+<!-- start inventories tab pane -->
+@can('view', \App\Models\Location::class)
 
     <x-slot:table_header>
         {{ $table_header }}
@@ -26,9 +26,9 @@
         :$show_column_search
         :$show_advanced_search
         api_url="{{ $route }}"
-        export_filename="export-{{ str_slug($name) }}-consumables-{{ date('Y-m-d') }}"
+        export_filename="export-{{ str_slug($name) }}-inventory-{{ date('Y-m-d') }}"
     />
 
 
 @endcan
-<!-- end consumables tab pane -->
+<!-- end inventories tab pane -->

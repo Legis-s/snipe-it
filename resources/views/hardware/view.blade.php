@@ -57,6 +57,8 @@
             <x-tabs>
                 <x-slot:tabnav>
                     <x-tabs.details-tab/>
+                    <x-tabs.inventories-tab count="{{ $asset->inventory_items->count() }}"/>
+                    <x-tabs.consumables-tab count="0"/>
                     <x-tabs.license-tab count="{{ $asset->licenses->count() }}"/>
                     <x-tabs.component-tab count="{{ $asset->components->count() }}"/>
                     <x-tabs.asset-tab count="{{ $asset->assignedAssets()->AssetsForShow()->count() }}"/>
@@ -168,6 +170,13 @@
 
                                 <x-data-row :label="trans('admin/hardware/form.default_location')" copy_what="default_location">
                                     {!!  $asset->defaultLoc?->present()->formattedNameLink !!}
+                                </x-data-row>
+
+                                <x-data-row :label="trans('admin/hardware/form.quality')">
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        <i class="fas {{ $i <= max(0, min(5, (int) ($asset->quality ?? 0))) ? 'fa-star' : 'fa-star-o' }}"
+                                           aria-hidden="true"></i>
+                                    @endfor
                                 </x-data-row>
 
                                 @if ($asset->asset_eol_date)
@@ -313,6 +322,14 @@
 
                     </x-tabs.pane>
 
+                    <x-tabs.pane name="inventories" :count="$asset->inventory_items->count()">
+                        <x-table.inventories show_search="true" :route="route('api.inventory_items.index',  ['asset_id' => $asset->id])" :presenter="\App\Presenters\InventoryItemPresenter::dataTableLayout()"/>
+                    </x-tabs.pane>
+
+                    <x-tabs.pane name="consumables" :count="0">
+                        <x-table.consumables show_search="false" :route="route('api.consumableassignments.index', ['asset_id'=> $asset->id])" :presenter="\App\Presenters\ConsumableAssignmentPresenter::dataTableLayout()"/>
+                    </x-tabs.pane>
+
                     <x-tabs.pane name="licenses" :count="$asset->licenses->count()">
                         <x-table.licenses show_search="false" :route="route('api.assets.licenselist', $asset)" :presenter="\App\Presenters\LicensePresenter::dataTableLayoutSeatsCheckedOutToAssets()"/>
                     </x-tabs.pane>
@@ -398,6 +415,7 @@
                         <x-button.note :item="$asset" :route="route('clone/hardware', $asset->id)"/>
                         <x-button.audit :item="$asset" :route="route('asset.audit.create', $asset->id)"/>
                         <x-button.label :item="$asset" :route="route('hardware.bulkedit.show')"/>
+                        <x-button.print :item="$asset"/>
                         <x-button.delete :item="$asset"/>
                         <x-button.restore :item="$asset" :route="route('restore/hardware', ['asset' => $asset->id])"/>
                     </x-slot:buttons>
@@ -417,46 +435,6 @@
         @include ('modals.add-note', ['type' => 'asset', 'id' => $asset->id])
     @endcan
         @include ('partials.bootstrap-table')
-        <script>
-
-            $('#dataConfirmModal').on('show.bs.modal', function (event) {
-                var content = $(event.relatedTarget).data('content');
-                var title = $(event.relatedTarget).data('title');
-                $(this).find(".modal-body").text(content);
-                $(this).find(".modal-header").text(title);
-            });
-            $(function () {
-                $('#print_tag').click(function () {
-                    // console.log("test");
-                    $.ajax('http://localhost:8001/termal_print?text={{ $asset->asset_tag }}', {
-                        success: function (data, textStatus, xhr) {
-                            console.log(xhr.status);
-                            if (xhr.status === 200) {
-                                console.log(data);
-                                $.ajax({
-                                    method: "POST",
-                                    url: "{{ route('api.assets.inventory', $asset->id ) }}",
-                                    headers: {
-                                        "X-Requested-With": 'XMLHttpRequest',
-                                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                                    },
-                                    success: function (data) {
-
-                                    }
-                                });
-
-                            } else {
-                                console.log(data);
-                            }
-                        },
-                        error: function () {
-                            console.log("error");
-                        }
-                    });
-
-                });
-            });
-        </script>
     @endsection
 
 @stop

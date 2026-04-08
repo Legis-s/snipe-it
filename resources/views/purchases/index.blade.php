@@ -9,19 +9,18 @@
 {{-- Page content --}}
 @section('content')
     <x-container>
-        <x-box.container>
-
+        <x-box>
             <div id="toolbar">
                 @isset($users)
                     <select id="js-select-user">
-                        <option value="0" ></option>
+                        <option value="0"></option>
                         @foreach($users as $user)
                             <option value="{{ $user->id }}">{{ $user->last_name }} {{ $user->first_name }}</option>
                         @endforeach
                     </select>
                 @endisset
                 <select id="js-select-status">
-                    <option value="0" ></option>
+                    <option value="0"></option>
                     <option value="inventory">В процессе инвентаризации</option>
                     <option value="in_payment">В оплате</option>
                     <option value="review">В процессе проверки</option>
@@ -47,9 +46,8 @@
               "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
               }'>
             </table>
-        </x-box.container>
+        </x-box>
     </x-container>
-
 @stop
 
 @section('moar_scripts')
@@ -63,10 +61,10 @@
             $table.bootstrapTable('refreshOptions', {
                 queryParams: params => {
                     const user = $select_user.val();
-                    const status =  $select_status.val();
-                    if (parseInt(user)>0){
+                    const status = $select_status.val();
+                    if (parseInt(user) > 0) {
                         params.created_by = parseInt(user);
-                    }else{
+                    } else {
                         delete params.created_by;
                     }
                     if (status?.length > 3) {
