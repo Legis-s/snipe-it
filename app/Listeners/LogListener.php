@@ -55,7 +55,12 @@ class LogListener
      */
     public function onCheckoutableSell(CheckoutableSell $event)
     {
-        $event->checkoutable->logSell($event->note, $event->checkedOutTo, $event->checkoutable->last_checkout, $event->originalValues);
+        $event->checkoutable->logSell(
+            $event->note,
+            $event->checkedOutTo,
+            $event->checkoutable->last_checkout,
+            $event->originalValues
+        );
     }
 
     /**
@@ -68,7 +73,12 @@ class LogListener
      */
     public function onCheckoutableRent(CheckoutableRent $event)
     {
-        $event->checkoutable->logRent($event->note, $event->checkedOutTo, $event->checkoutable->last_checkout, $event->originalValues);
+        $event->checkoutable->logRent(
+            $event->note,
+            $event->checkedOutTo,
+            $event->checkoutable->last_checkout,
+            $event->originalValues
+        );
     }
 
 

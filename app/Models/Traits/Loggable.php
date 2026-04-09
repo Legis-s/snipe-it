@@ -305,8 +305,7 @@ trait Loggable
 
 
     /**
-     * @since [v3.4]
-     * @return \App\Models\Actionlog
+     * @return Actionlog
      */
     public function logSell($note, $target, $action_date = null, $originalValues = [])
     {
@@ -321,7 +320,7 @@ trait Loggable
         }
 
         if (! isset($target)) {
-            throw new \Exception('All checkout logs require a target.');
+            throw new \Exception('All sell logs require a target.');
 
             return;
         }
@@ -390,10 +389,6 @@ trait Loggable
 
 
     /**
-     * @author A. Gianotto <snipe@snipe.net>
-     *
-     * @since  [v4.0]
-     *
      * @return Actionlog
      */
     public function logRent($note, $target, $action_date = null, $originalValues = [])
@@ -477,39 +472,21 @@ trait Loggable
 
 
     /**
-     * @return \App\Models\Actionlog
+     * @return Actionlog
      */
-    public function logTag($note = null, $originalValues = [])
+    public function logTag($note, $originalValues = [])
     {
         $log = new Actionlog;
+        $fields_array = [];
+
         $log = $this->determineLogItemType($log);
+
         if (auth()->user()) {
             $log->created_by = auth()->id();
         }
-
-        if (! isset($target)) {
-            throw new \Exception('All checkout logs require a target.');
-
-            return;
-        }
-
-        if (! isset($target->id)) {
-            throw new \Exception('That target seems invalid (no target ID available).');
-
-            return;
-        }
-
-        $log->target_type = get_class($target);
-        $log->target_id = $target->id;
-
-        // Figure out what the target is
-        if ($log->target_type == Location::class) {
-            $log->location_id = $target->id;
-        } elseif ($log->target_type == Asset::class) {
-            $log->location_id = $target->location_id;
-        } else {
-            $log->location_id = $target->location_id;
-        }
+        $action_date = date('Y-m-d H:i:s');
+        $log->note = $note;
+        $log->action_date = $action_date;
 
         if (static::class == Asset::class) {
             if ($asset = Asset::find($log->item_id)) {
@@ -525,10 +502,6 @@ trait Loggable
                 }
             }
         }
-
-        $action_date = date('Y-m-d H:i:s');
-        $log->note = $note;
-        $log->action_date = $action_date;
 
         $changed = [];
         $array_to_flip = array_keys($fields_array);

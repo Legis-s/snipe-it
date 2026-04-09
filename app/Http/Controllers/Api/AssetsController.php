@@ -1534,13 +1534,15 @@ class AssetsController extends Controller
 
     /**
      * Returns JSON with information about an asset for detail view.
-     * @param int $assetId
+     * @param $id
+     * @return JsonResponse
+     * @throws \Exception
      */
     public function inventory($id) : JsonResponse
     {
 
         $this->authorize('update', Asset::class);
-        $asset = Asset::with('assetstatus')->withTrashed()->findOrFail($id);
+        $asset = Asset::with('status')->withTrashed()->findOrFail($id);
         $asset_tag = request('asset_tag');
         if ($asset) {
             $asset->unsetEventDispatcher();
@@ -1553,8 +1555,9 @@ class AssetsController extends Controller
             $asset->status_id = $status->id;
 
             if ($asset->save()) {
-                $log = $asset->logTag($note,$originalValues);
-                return (new AssetsTransformer())->transformAsset($asset);
+                $asset->logTag($note,$originalValues);
+                return response()->json((new AssetsTransformer)->transformAsset($asset));
+
             }
         }
         return response()->json(Helper::formatStandardApiResponse('error', ['asset_tag'=> e($asset->asset_tag)], 'Asset with tag '.e($asset->asset_tag).' not found'));
