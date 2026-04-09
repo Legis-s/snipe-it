@@ -22,8 +22,6 @@ class InventoriesController extends Controller
      */
     public function index(Request $request): JsonResponse | array
     {
-//        $this->authorize('view', User::class);
-
         $inventories = Inventory::with('inventory_items','location')
             ->select([
                 'inventories.id',
@@ -193,7 +191,7 @@ class InventoriesController extends Controller
                 $inventory_item->name = $asset->name;
                 $inventory_item->notes = $asset->notes;
                 if ($asset->model && $asset->model->name){
-                    $inventory_item->model = $asset->model->name;
+                    $inventory_item->setAttribute('model', $asset->model->name);
                 }
                 if ($asset->model && $asset->model->manufacturer){
                     $inventory_item->manufacturer = $asset->model->manufacturer->name;

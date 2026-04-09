@@ -1568,7 +1568,7 @@ class AssetsController extends Controller
     public function review($id) : array| JsonResponse
     {
         $this->authorize('review', Asset::class);
-        $asset = Asset::with('assetstatus')->withTrashed()->findOrFail($id);
+        $asset = Asset::with('status')->withTrashed()->findOrFail($id);
 
         $settings = Setting::getSettings();
         $dt = Carbon::now()->addMonths($settings->audit_interval)->toDateString();
@@ -1586,7 +1586,7 @@ class AssetsController extends Controller
             $asset->status_id = $status->id;
 
             if ($asset->save()) {
-                $log = $asset->logAudit($note, request('location_id'));
+                $asset->logAudit($note, request('location_id'));
 
                 return (new AssetsTransformer)->transformAsset($asset);
             }
