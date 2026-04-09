@@ -140,7 +140,7 @@ class InventoriesController extends Controller
 
 
         $assets = Asset::with('assignedTo','model',
-                'model.category', 'model.manufacturer', 'assetstatus')->select([
+                'model.category', 'model.manufacturer', 'status')->select([
             'assets.id',
             'assets.name',
             'assets.notes',
@@ -160,7 +160,7 @@ class InventoriesController extends Controller
         $assets->where('assets.location_id', '=', $location->id);
         $assets->whereNull('assets.deleted_at');
 
-        $assets->whereHas('assetstatus', function ($query) {
+        $assets->whereHas('status', function ($query) {
             $query->where('deployable', '=', 1)
                 ->where('pending', '=', 0)
                 ->where('archived', '=', 0);
@@ -213,8 +213,9 @@ class InventoriesController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param Request $request
+     * @param int $id
+     * @return JsonResponse
      */
     public function update(Request $request, $id) : JsonResponse
     {
