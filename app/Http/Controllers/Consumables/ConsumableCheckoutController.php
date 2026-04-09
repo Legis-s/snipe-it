@@ -96,27 +96,38 @@ class ConsumableCheckoutController extends Controller
         }
 
         $admin_user = auth()->user();
-        $assigned_to = e($request->input('assigned_to'));
+//        $assigned_to = e($request->input('assigned_to'));
 
         // Check if the user exists
-        if (is_null($user = User::find($assigned_to))) {
-            // Redirect to the consumable management page with error
-            return redirect()->route('consumables.checkout.show', $consumable)->with('error', trans('admin/consumables/message.checkout.user_does_not_exist'))->withInput();
-        }
+//        if (is_null($user = User::find($assigned_to))) {
+//            // Redirect to the consumable management page with error
+//            return redirect()->route('consumables.checkout.show', $consumable)->with('error', trans('admin/consumables/message.checkout.user_does_not_exist'))->withInput();
+//        }
+//        $consumable->locations()->attach($consumable->id, [
+//            'consumable_id' => $consumable->id,
+//            'created_by' => auth()->id(),
+//            'quantity' => $quantity,
+//            'comment' =>  $request->input('note'),
+//            'cost' => $consumable->purchase_cost,
+//            'type' => $type,
+//            'assigned_to' => $target->id,
+//            'assigned_type' => get_class($target),
+//        ]);
+//
+//
+//        // Update the consumable data
+//        $consumable->assigned_to = e($request->input('assigned_to'));
 
-        // Update the consumable data
-        $consumable->assigned_to = e($request->input('assigned_to'));
+//        for ($i = 0; $i < $quantity; $i++) {
+//            $consumable->users()->attach($consumable->id, [
+//                'consumable_id' => $consumable->id,
+//                'created_by' => $admin_user->id,
+//                'assigned_to' => e($request->input('assigned_to')),
+//                'note' => $request->input('note'),
+//            ]);
+//        }
 
-        for ($i = 0; $i < $quantity; $i++) {
-            $consumable->users()->attach($consumable->id, [
-                'consumable_id' => $consumable->id,
-                'created_by' => $admin_user->id,
-                'assigned_to' => e($request->input('assigned_to')),
-                'note' => $request->input('note'),
-            ]);
-        }
-
-        $consumable->checkout_qty = $quantity;
+//        $consumable->checkout_qty = $quantity;
 
 //        event(new CheckoutableCheckedOut(
 //            $consumable,
