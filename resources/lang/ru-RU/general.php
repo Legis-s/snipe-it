@@ -785,6 +785,7 @@ return [
     'device'				=> 'Устройство',
     'devices'				=> 'Устройства',
     'bitrix_id'				=> 'Bitrix Id',
+    'bitrix_task_id'				=> 'ID Задачи в Bitrix',
     'bitrix_open'				=> 'Открыть в Bitrix',
     'sklad'				=> 'Склад',
     'print_tag'				=> 'Напечатать этикетку',
