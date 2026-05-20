@@ -142,6 +142,14 @@ class ConsumableCheckoutController extends Controller
 
         $consumable->checkOut($target, $quantity, $request->input('note'));
 
+        $request->request->add(['assigned_to' => $target->id]);
+        $request->request->add(match ($request->input('checkout_to_type')) {
+            'location' => ['assigned_location' => $target->id],
+            'asset' => ['assigned_asset' => $target->id],
+            'deal' => ['assigned_deal' => $target->id],
+            default => ['assigned_user' => $target->id],
+        });
+
         session()->put(['redirect_option' => $request->input('redirect_option'), 'checkout_to_type' => $request->input('checkout_to_type')]);
 
         // Redirect to the new consumable page

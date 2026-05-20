@@ -1657,6 +1657,7 @@ class Helper
                 'user' => redirect()->route('users.show', $request->assigned_user ?? $checkedInFrom),
                 'location' => redirect()->route('locations.show', $request->assigned_location ?? $checkedInFrom),
                 'asset' => redirect()->route('hardware.show', $request->assigned_asset ?? $checkedInFrom),
+                'deal' => redirect()->route('deals.show', $request->assigned_deal ?? $checkedInFrom),
             };
         }
 
