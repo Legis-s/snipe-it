@@ -185,7 +185,11 @@ class SyncDevices extends Command
                         }
                     }
                     if ($asset->location) {
-                        $locationAs = $asset->location->name;
+                        $locationAs = sprintf(
+                            '[%s] %s',
+                            $asset->location->bitrix_id,
+                            $asset->location->name
+                        );
                         $responseupd = $client->request('POST', $mdm_url . 'private/devices/' . $phone["id"] . '/description', [
                             'headers' => $headers,
                             'body' => $locationAs
