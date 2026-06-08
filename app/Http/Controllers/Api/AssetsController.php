@@ -235,16 +235,6 @@ class AssetsController extends Controller
 
         // This is used by the sidenav, mostly
 
-        // We switched from using query scopes here because of a Laravel bug
-        // related to fulltext searches on complex queries.
-        // I am sad. :(
-        switch ($request->input('status_type')) {
-            case 'Sold':
-                $assets->join('status_labels AS status_alias', function ($join) {
-                    $join->on('status_alias.id', "=", "assets.status_id")
-                        ->where('status_alias.name', '=', "Продано");
-                });
-                break;
         // This bit here accounts for folks actually using the formerly-known-as status like we previously used in the sidenav
         // to return a list of all assets with the status *type* of Deployed, etc. The inuput field used to be "status" (which was consistent
         // with the relation rename, but it broke the sidebar. This should handle both use cases in the event that someone didn't update

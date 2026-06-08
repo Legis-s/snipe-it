@@ -2747,13 +2747,14 @@
 
     function bindBulkEditSelectionHandler() {
         /**
-        * START CUSTOM
+         * START CUSTOM
          */
-        function contractsPriceFormatter(value,row) {
+        function contractsPriceFormatter(value, row) {
             return value.toLocaleString('ru');
         }
-        function contractsFullPriceFormatter(value,row) {
-            var full_price = row.assets_sum_purchase_cost+ row.consumables_cost;
+
+        function contractsFullPriceFormatter(value, row) {
+            var full_price = row.assets_sum_purchase_cost + row.consumables_cost;
             return full_price.toLocaleString('ru');
         }
 
@@ -2781,8 +2782,9 @@
         {{--            }--}}
         {{--        }--}}
         {{--}--}}
+    }
 
-        function hardwareCustomInOutFormatter(value,row) {
+        function hardwareCustomInOutFormatter(value, row) {
             const destination = "hardware";
 
             if ((row.available_actions.review == true) && (row.user_can_review == true)) {
@@ -2790,39 +2792,39 @@
             }
 
             // The user is allowed to check items out, AND the item is deployable
-                if ((row.available_actions.checkout == true) && (row.user_can_checkout == true) && ((!row.asset_id) && (!row.assigned_to))) {
+            if ((row.available_actions.checkout == true) && (row.user_can_checkout == true) && ((!row.asset_id) && (!row.assigned_to))) {
 
-                    return '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/checkout" class="btn btn-sm bg-maroon" data-tooltip="true" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>';
+                return '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/checkout" class="btn btn-sm bg-maroon" data-tooltip="true" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>';
 
-                    // The user is allowed to check items out, but the item is not able to be checked out
-                } else if (((row.user_can_checkout == false)) && (row.available_actions.checkout == true) && (!row.assigned_to)) {
+                // The user is allowed to check items out, but the item is not able to be checked out
+            } else if (((row.user_can_checkout == false)) && (row.available_actions.checkout == true) && (!row.assigned_to)) {
 
-                    // We use slightly different language for assets versus other things, since they are the only
-                    // item that has a status label
-                    if (destination =='hardware') {
-                        return '<span  data-tooltip="true" title="{{ trans('admin/hardware/general.undeployable_tooltip') }}"><a class="btn btn-sm bg-maroon disabled">{{ trans('general.checkout') }}</a></span>';
-                    } else {
-                        return '<span  data-tooltip="true" title="{{ trans('general.undeployable_tooltip') }}"><a class="btn btn-sm bg-maroon disabled">{{ trans('general.checkout') }}</a></span>';
-                    }
-
-                    // The user is allowed to check items in
-                } else if (row.available_actions.checkin == true)  {
-                    if (row.assigned_to) {
-                        return '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkin') }}</a>';
-                    } else if (row.assigned_pivot_id) {
-                        return '<a href="{{ config('app.url') }}/' + destination + '/' + row.assigned_pivot_id + '/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkin') }}</a>';
-                    }
-
+                // We use slightly different language for assets versus other things, since they are the only
+                // item that has a status label
+                if (destination == 'hardware') {
+                    return '<span  data-tooltip="true" title="{{ trans('admin/hardware/general.undeployable_tooltip') }}"><a class="btn btn-sm bg-maroon disabled">{{ trans('general.checkout') }}</a></span>';
+                } else {
+                    return '<span  data-tooltip="true" title="{{ trans('general.undeployable_tooltip') }}"><a class="btn btn-sm bg-maroon disabled">{{ trans('general.checkout') }}</a></span>';
                 }
+
+                // The user is allowed to check items in
+            } else if (row.available_actions.checkin == true) {
+                if (row.assigned_to) {
+                    return '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkin') }}</a>';
+                } else if (row.assigned_pivot_id) {
+                    return '<a href="{{ config('app.url') }}/' + destination + '/' + row.assigned_pivot_id + '/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkin') }}</a>';
+                }
+
+            }
         }
 
 
-        function consumablesCustomInOutFormatter(value,row) {
+        function consumablesCustomInOutFormatter(value, row) {
             var destination = "consumables";
             // The user is allowed to check items out, AND the item is deployable
             if ((row.available_actions.checkout == true) && (row.user_can_checkout == true) && ((!row.asset_id) && (!row.assigned_to))) {
                 return '<div class="btn-group" style="min-width:180px">' +
-                    '<a href="{{ url('/') }}/' + destination + '/' + row.id + '/checkout" class="btn btn-sm bg-maroon" data-toggle="tooltip" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>'+
+                    '<a href="{{ url('/') }}/' + destination + '/' + row.id + '/checkout" class="btn btn-sm bg-maroon" data-toggle="tooltip" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>' +
                     '</div>';
 
                 // The user is allowed to check items out, but the item is not deployable
@@ -2830,7 +2832,7 @@
                 return '<div  data-toggle="tooltip" title="This item has a status label that is undeployable and cannot be checked out at this time."><a class="btn btn-sm bg-maroon disabled">{{ trans('general.checkout') }}</a></div>';
 
                 // The user is allowed to check items in
-            } else if (row.available_actions.checkin == true)  {
+            } else if (row.available_actions.checkin == true) {
                 if (row.assigned_to) {
                     return '<a href="{{ url('/') }}/' + destination + '/' + row.id + '/checkin" class="btn btn-sm bg-purple" data-toggle="tooltip" title="Check this item in so it is available for re-imaging, re-issue, etc.">{{ trans('general.checkin') }}</a>';
                 } else if (row.assigned_pivot_id) {
@@ -2943,9 +2945,9 @@
             }
         }
 
-        function photoDisplayFormatter(value,row) {
+        function photoDisplayFormatter(value, row) {
             if (value) {
-                return '<a href="' + value + '" data-title="'+ row.tag +'" data-toggle="lightbox" data-gallery="inv-gallery" data-lightbox="inventory"><i class="fa fa-camera fa-lg" aria-hidden="true"></i></a>';
+                return '<a href="' + value + '" data-title="' + row.tag + '" data-toggle="lightbox" data-gallery="inv-gallery" data-lightbox="inventory"><i class="fa fa-camera fa-lg" aria-hidden="true"></i></a>';
             }
         }
 
@@ -3026,7 +3028,7 @@
                 return "<a href='https://bitrix.legis-s.ru/services/lists/52/element/0/" + value + "/?list_section_id=' target='_blank'>" + value + "</a>";
             } else {
                 if (row.user) {
-                        return '<button type="button"  class="btn btn-default  btn-sm resend">Отправить заново</button>'
+                    return '<button type="button"  class="btn btn-default  btn-sm resend">Отправить заново</button>'
                 } else {
                     return ' ';
                 }
@@ -3053,6 +3055,7 @@
                 return "<a href='https://bitrix.legis-s.ru/crm/contract/details/" + value + "/' target='_blank'>" + value + "</a>";
             }
         }
+
         function bitrixIdDealFormatter(value, row) {
             if (value) {
                 return "<a href='https://bitrix.legis-s.ru/crm/deal/details/" + value + "/' target='_blank'>" + value + "</a>";
@@ -3070,6 +3073,7 @@
                 return '';
             }
         }
+
         function mdmStatusCodeFormatter(value, row) {
             switch (value) {
                 case "red":
@@ -3084,39 +3088,39 @@
         }
 
         function mdmDistanceFormatter(value, row) {
-            if (value){
-                if (value>1000){
-                    var valuekm = value/1000;
-                    return "<span class='text-danger'>"+valuekm.toFixed(1) + " км</span>";
-                }else{
-                    return value+ " м";
+            if (value) {
+                if (value > 1000) {
+                    var valuekm = value / 1000;
+                    return "<span class='text-danger'>" + valuekm.toFixed(1) + " км</span>";
+                } else {
+                    return value + " м";
                 }
-            }else{
+            } else {
                 return "";
             }
         }
 
         function yandexMapLinkFormatter(value, row) {
-            if (value){
-                var cord_array =  value.split(",");
-                return "<a href='https://yandex.ru/maps/?pt="+cord_array[1].trim()+","+cord_array[0].trim()+"&z=18&l=map' target='_blank'>"+value+"</a>";
-            }else{
+            if (value) {
+                var cord_array = value.split(",");
+                return "<a href='https://yandex.ru/maps/?pt=" + cord_array[1].trim() + "," + cord_array[0].trim() + "&z=18&l=map' target='_blank'>" + value + "</a>";
+            } else {
                 return "";
             }
         }
 
         function timeAgoFormatter(value, row) {
-            if (value){
+            if (value) {
                 format(value, 'ru');
-            }else{
+            } else {
                 return "";
             }
         }
 
         function anyDeskLinkFormatter(value, row) {
-            if (value){
-                return "<a href='anydesk:"+value.split(' ').join('')+"' >"+value+"</a>";
-            }else{
+            if (value) {
+                return "<a href='anydesk:" + value.split(' ').join('') + "' >" + value + "</a>";
+            } else {
                 return "";
             }
         }
@@ -3126,19 +3130,65 @@
          * END CUSTOM
          */
 
-    window.operateEvents = {
-        'click .print_label': function (e, value, row, index) {
-            $.ajax('http://localhost:8001/termal_print?text=' + row.asset_tag, {
-                success: function (data, textStatus, xhr) {
-                    console.log(xhr.status);
-                    if (xhr.status === 200) {
+        window.operateEvents = {
+            'click .print_label': function (e, value, row, index) {
+                $.ajax('http://localhost:8001/termal_print?text=' + row.asset_tag, {
+                    success: function (data, textStatus, xhr) {
+                        console.log(xhr.status);
+                        if (xhr.status === 200) {
+                            $.ajax({
+                                method: "POST",
+                                url: '/api/v1/hardware/' + row.id + '/inventory',
+                                headers: {
+                                    "X-Requested-With": 'XMLHttpRequest',
+                                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                                },
+                                success: function (data) {
+                                    $(".table").bootstrapTable('refresh');
+                                },
+                                error: function (data) {
+                                    console.log(data);
+                                }
+                            });
+                        } else {
+                            console.log(data);
+                        }
+                    },
+                    error: function () {
+                        console.log("error");
+                    }
+                });
+            },
+            'click .inventory': function (e, value, row, index) {
+                Swal.fire({
+                    title: "Изменить тег актива <b>" + row.asset_tag + " </b>",
+                    // text: 'Do you want to continue',
+                    icon: 'question',
+                    input: "text",
+                    inputLabel: 'Новый тег',
+                    inputAttributes: {
+                        autocapitalize: 'on'
+                    },
+                    reverseButtons: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Подтвердить',
+                    cancelButtonText: 'Отменить',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+
+                        var sendData = {
+                            asset_tag: result.value,
+                        };
+                        console.log("asset_tag: " + result.value);
                         $.ajax({
-                            method: "POST",
+                            type: 'POST',
                             url: '/api/v1/hardware/' + row.id + '/inventory',
                             headers: {
                                 "X-Requested-With": 'XMLHttpRequest',
                                 "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
                             },
+                            data: sendData,
+                            dataType: 'json',
                             success: function (data) {
                                 $(".table").bootstrapTable('refresh');
                             },
@@ -3146,220 +3196,174 @@
                                 console.log(data);
                             }
                         });
-                    } else {
-                        console.log(data);
                     }
-                },
-                error: function () {
-                    console.log("error");
-                }
-            });
-        },
-        'click .inventory': function (e, value, row, index) {
-            Swal.fire({
-                title: "Изменить тег актива <b>" + row.asset_tag + " </b>",
-                // text: 'Do you want to continue',
-                icon: 'question',
-                input: "text",
-                inputLabel: 'Новый тег',
-                inputAttributes: {
-                    autocapitalize: 'on'
-                },
-                reverseButtons: true,
-                showCancelButton: true,
-                confirmButtonText: 'Подтвердить',
-                cancelButtonText: 'Отменить',
-            }).then((result) => {
-                if (result.isConfirmed) {
+                });
+            },
+            'click .resend': function (e, value, row, index) {
+                $.ajax({
+                    url: '/api/v1/purchases/' + row.id + '/resend',
+                    {{--url: '{{ route('api.purchases.resend', ['id'=> row.id]) }}',--}}
+                    method: "POST",
+                    headers: {
+                        "X-Requested-With": 'XMLHttpRequest',
+                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function () {
+                        $(".table").bootstrapTable('refresh');
+                    }
+                });
+            },
+            'click .review': function (e, value, row, index) {
 
-                    var sendData = {
-                        asset_tag: result.value,
-                    };
-                    console.log("asset_tag: " + result.value);
-                    $.ajax({
-                        type: 'POST',
-                        url: '/api/v1/hardware/' + row.id + '/inventory',
-                        headers: {
-                            "X-Requested-With": 'XMLHttpRequest',
-                            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                        },
-                        data: sendData,
-                        dataType: 'json',
-                        success: function (data) {
-                            $(".table").bootstrapTable('refresh');
-                        },
-                        error: function (data) {
-                            console.log(data);
-                        }
-                    });
-                }
-            });
-        },
-        'click .resend': function (e, value, row, index) {
-            $.ajax({
-                url: '/api/v1/purchases/' + row.id + '/resend',
-                {{--url: '{{ route('api.purchases.resend', ['id'=> row.id]) }}',--}}
-                method: "POST",
-                headers: {
-                    "X-Requested-With": 'XMLHttpRequest',
-                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function () {
-                    $(".table").bootstrapTable('refresh');
-                }
-            });
-        },
-        'click .review': function (e, value, row, index) {
+                console.log(row);
+                $.ajax({
+                    url: '/api/v1/hardware/' + row.id + '/review',
+                    method: "POST",
+                    headers: {
+                        "X-Requested-With": 'XMLHttpRequest',
+                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function () {
+                        $(".table").bootstrapTable('refresh');
+                        $.ajax({
+                            type: 'GET',
+                            url: "/api/v1/purchases/" + row.purchase_id,
+                            headers: {
+                                "X-Requested-With": 'XMLHttpRequest',
+                                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                            },
+                            dataType: 'json',
+                            success: function (data) {
+                                var status = data.status;
+                                var result = "";
+                                switch (status) {
+                                    case "inventory":
+                                        result = '<span class="label label-warning">В процессе инвентаризации</span>';
+                                        break;
+                                    case "in_payment":
+                                        result = '<span class="label label-primary">В оплате</span>';
+                                        break;
+                                    case "review":
+                                        result = '<span class="label label-warning">В процессе проверки</span>';
+                                        break;
+                                    case "finished":
+                                        result = '<span class="label label-success">Завершено</span>';
+                                        break;
+                                    case "rejected":
+                                        result = '<span class="label label-danger">Отклонено</span>';
+                                        break;
+                                    case "paid":
+                                        result = '<span class="label label-success">Оплачено</span>';
+                                        break;
+                                    case "inprogress":
+                                        result = '<span class="label label-primary">На согласовании</span>';
+                                        break;
+                                }
+                                $('.status_label').html(result);
 
-            console.log(row);
-            $.ajax({
-                url: '/api/v1/hardware/' + row.id + '/review',
-                method: "POST",
-                headers: {
-                    "X-Requested-With": 'XMLHttpRequest',
-                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function () {
-                    $(".table").bootstrapTable('refresh');
-                    $.ajax({
-                        type: 'GET',
-                        url: "/api/v1/purchases/" + row.purchase_id,
-                        headers: {
-                            "X-Requested-With": 'XMLHttpRequest',
-                            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                        },
-                        dataType: 'json',
-                        success: function (data) {
-                            var status = data.status;
-                            var result = "";
-                            switch (status) {
-                                case "inventory":
-                                    result = '<span class="label label-warning">В процессе инвентаризации</span>';
-                                    break;
-                                case "in_payment":
-                                    result = '<span class="label label-primary">В оплате</span>';
-                                    break;
-                                case "review":
-                                    result = '<span class="label label-warning">В процессе проверки</span>';
-                                    break;
-                                case "finished":
-                                    result = '<span class="label label-success">Завершено</span>';
-                                    break;
-                                case "rejected":
-                                    result = '<span class="label label-danger">Отклонено</span>';
-                                    break;
-                                case "paid":
-                                    result = '<span class="label label-success">Оплачено</span>';
-                                    break;
-                                case "inprogress":
-                                    result = '<span class="label label-primary">На согласовании</span>';
-                                    break;
-                            }
-                            $('.status_label').html(result);
+                            },
+                        });
+                    }
+                });
+            },
+            'click .return': function (e, value, row, index) {
+                Swal.fire({
+                    title: "Вернуть - " + row.name + " " + row.assigned_to.name,
+                    // text: 'Do you want to continue',
+                    icon: 'question',
+                    input: "range",
+                    inputLabel: 'Количество',
+                    inputAttributes: {
+                        min: 1,
+                        max: row.quantity,
+                        step: 1
+                    },
+                    inputValue: 1,
+                    reverseButtons: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Подтвердить',
+                    cancelButtonText: 'Отменить',
+                }).then((result) => {
+                    if (result.isConfirmed) {
 
-                        },
-                    });
-                }
-            });
-        },
-        'click .return': function (e, value, row, index) {
-            Swal.fire({
-                title: "Вернуть - " + row.name + " " + row.assigned_to.name,
-                // text: 'Do you want to continue',
-                icon: 'question',
-                input: "range",
-                inputLabel: 'Количество',
-                inputAttributes: {
-                    min: 1,
-                    max: row.quantity,
-                    step: 1
-                },
-                inputValue: 1,
-                reverseButtons: true,
-                showCancelButton: true,
-                confirmButtonText: 'Подтвердить',
-                cancelButtonText: 'Отменить',
-            }).then((result) => {
-                if (result.isConfirmed) {
-
-                    var sendData = {
-                        quantity: result.value,
-                        nds: row.nds,
-                        purchase_cost: row.purchase_cost,
-                    };
-                    $.ajax({
-                        type: 'POST',
-                        url: "/api/v1/consumableassignments/" + row.id + "/return",
-                        headers: {
-                            "X-Requested-With": 'XMLHttpRequest',
-                            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                        },
-                        data: sendData,
-                        dataType: 'json',
-                        success: function (data) {
-                            $(".table").bootstrapTable('refresh');
-                        },
-                    });
-                }
-            });
-        },
-    };
-
-    $(function () {
-        $('#bulkEdit').click(function () {
-            var selectedIds = $('.snipe-table').bootstrapTable('getSelections');
-            $.each(selectedIds, function(key,value) {
-                $( "#bulkForm" ).append($('<input type="hidden" name="ids[' + value.id + ']" value="' + value.id + '">' ));
-            });
-
-        });
-    }
-
-    function initializeBootstrapTableSearchUi() {
-
-        // This handles the search box highlighting on both ajax and client-side
-        // bootstrap tables
-        var searchboxHighlighter = function (event) {
-
-            $('.search-input').each(function (index, element) {
-
-                if ($(element).val() != '') {
-                    $(element).addClass('search-highlight');
-                    $(element).next().children().addClass('search-highlight');
-                } else {
-                    $(element).removeClass('search-highlight');
-                    $(element).next().children().removeClass('search-highlight');
-                }
-            });
+                        var sendData = {
+                            quantity: result.value,
+                            nds: row.nds,
+                            purchase_cost: row.purchase_cost,
+                        };
+                        $.ajax({
+                            type: 'POST',
+                            url: "/api/v1/consumableassignments/" + row.id + "/return",
+                            headers: {
+                                "X-Requested-With": 'XMLHttpRequest',
+                                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                            },
+                            data: sendData,
+                            dataType: 'json',
+                            success: function (data) {
+                                $(".table").bootstrapTable('refresh');
+                            },
+                        });
+                    }
+                });
+            },
         };
 
-        $("[name='clearSearch']").click(function () {
+        $(function () {
+            $('#bulkEdit').click(function () {
+                var selectedIds = $('.snipe-table').bootstrapTable('getSelections');
+                $.each(selectedIds, function (key, value) {
+                    $("#bulkForm").append($('<input type="hidden" name="ids[' + value.id + ']" value="' + value.id + '">'));
+                });
 
-            // This hacks around a stupid issue in BS tables where the search text would get remembered for way too long even after it was cleared
-            for (storedSearch in localStorage) {
-                if (storedSearch.endsWith('.bs.table.searchText')) {
-                    localStorage.removeItem(storedSearch);
+            });
+        });
+
+        function initializeBootstrapTableSearchUi() {
+
+            // This handles the search box highlighting on both ajax and client-side
+            // bootstrap tables
+            var searchboxHighlighter = function (event) {
+
+                $('.search-input').each(function (index, element) {
+
+                    if ($(element).val() != '') {
+                        $(element).addClass('search-highlight');
+                        $(element).next().children().addClass('search-highlight');
+                    } else {
+                        $(element).removeClass('search-highlight');
+                        $(element).next().children().removeClass('search-highlight');
+                    }
+                });
+            };
+
+            $("[name='clearSearch']").click(function () {
+
+                // This hacks around a stupid issue in BS tables where the search text would get remembered for way too long even after it was cleared
+                for (storedSearch in localStorage) {
+                    if (storedSearch.endsWith('.bs.table.searchText')) {
+                        localStorage.removeItem(storedSearch);
+                    }
                 }
-            }
 
-            $('.search-input').each(function (index, element) {
-                $(element).val('');
+                $('.search-input').each(function (index, element) {
+                    $(element).val('');
+                });
             });
-        });
 
-        $('.search button[name=clearSearch]').click(searchboxHighlighter);
-        searchboxHighlighter({ name:'pageload'});
-        $('.search-input').keyup(searchboxHighlighter);
+            $('.search button[name=clearSearch]').click(searchboxHighlighter);
+            searchboxHighlighter({name: 'pageload'});
+            $('.search-input').keyup(searchboxHighlighter);
 
-        //  This is necessary to make the bootstrap tooltips work inside of the
-        // wenzhixin/bootstrap-table formatters
-        $(document).on('post-body.bs.table', '.snipe-table', function () {
-            $('[data-tooltip="true"]').tooltip({
-                container: 'body'
+            //  This is necessary to make the bootstrap tooltips work inside of the
+            // wenzhixin/bootstrap-table formatters
+            $(document).on('post-body.bs.table', '.snipe-table', function () {
+                $('[data-tooltip="true"]').tooltip({
+                    container: 'body'
+                });
             });
-        });
-    }
-    });
+        }
+
 
 </script>
     
