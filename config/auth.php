@@ -100,21 +100,14 @@ return [
             'email' => 'auth.emails.password',
             'table' => 'password_resets',
             'expire' => env('RESET_PASSWORD_LINK_EXPIRES', 900),
-            'throttle' => [
-                'max_attempts' => env('LOGIN_MAX_ATTEMPTS', 5),
-                'lockout_duration' => env('LOGIN_LOCKOUT_DURATION', 60),
-            ],
-
+            'throttle' => env('LOGIN_MAX_ATTEMPTS', 5),
         ],
 
         'invites' => [
             'provider' => 'users',
             'table' => 'password_resets',
             'expire' => env('INVITE_PASSWORD_LINK_EXPIRES', 2880),
-            'throttle' => [
-                'max_attempts' => env('LOGIN_MAX_ATTEMPTS', 5),
-                'lockout_duration' => env('LOGIN_LOCKOUT_DURATION', 60),
-            ],
+            'throttle' => env('LOGIN_MAX_ATTEMPTS', 5),
         ],
     ],
 
@@ -127,6 +120,10 @@ return [
     */
     'password_reset' => [
         'max_attempts_per_min' => env('PASSWORD_RESET_MAX_ATTEMPTS_PER_MIN', 50),
+    ],
+
+    'two_factor' => [
+        'max_attempts_per_min' => env('TWO_FACTOR_MAX_ATTEMPTS_PER_MIN', 5),
     ],
 
     /*

@@ -32,6 +32,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Mail\Mailable;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use League\Csv\EscapeFormula;
@@ -53,6 +54,31 @@ class ReportsController extends Controller
     public function __construct()
     {
         parent::__construct();
+    }
+
+    public function index(): View
+    {
+        $this->authorize('reports.view');
+        $settings = Setting::getSettings();
+
+        $audit_alert_count = Asset::DueOrOverdueForAudit($settings)->count();
+        $checkin_alert_count = Asset::DueOrOverdueForCheckin($settings)->count();
+        // CheckoutAcceptance has no company_id column; scope through the checkoutable
+        // relationship so each type's CompanyableTrait global scope is applied.
+        $pending_acceptance_count = CheckoutAcceptance::pending()
+            ->whereHasMorph('checkoutable', [Asset::class, LicenseSeat::class, Accessory::class, Component::class, Consumable::class])
+            ->count();
+        $licenses_low_count = License::withCount(['freeSeats as free_seats_count'])
+            ->get()
+            ->filter(fn ($l) => $l->free_seats_count <= 0)
+            ->count();
+
+        return view('reports/index', compact(
+            'audit_alert_count',
+            'checkin_alert_count',
+            'pending_acceptance_count',
+            'licenses_low_count',
+        ));
     }
 
     /**
@@ -79,36 +105,46 @@ class ReportsController extends Controller
      * @see ManufacturersController::getDatatable() method that generates the JSON response
      * @since [v1.0]
      */
-    public function exportAccessoryReport(): Response
+    public function exportAccessoryReport(): StreamedResponse
     {
         $this->authorize('reports.view');
-        $accessories = Accessory::orderBy('created_at', 'DESC')->get();
 
-        $rows = [];
-        $header = [
-            trans('admin/accessories/table.title'),
-            trans('admin/accessories/general.accessory_category'),
-            trans('admin/accessories/general.total'),
-            trans('admin/accessories/general.remaining'),
-        ];
-        $header = array_map('trim', $header);
-        $rows[] = implode(', ', $header);
+        $response = new StreamedResponse(function () {
+            $handle = fopen('php://output', 'w');
 
-        // Row per accessory
-        foreach ($accessories as $accessory) {
-            $row = [];
-            $row[] = e($accessory->accessory_name);
-            $row[] = e($accessory->accessory_category);
-            $row[] = e($accessory->total);
-            $row[] = e($accessory->remaining);
+            $header = [
+                trans('admin/accessories/table.title'),
+                trans('admin/accessories/general.accessory_category'),
+                trans('admin/accessories/general.total'),
+                trans('admin/accessories/general.remaining'),
+            ];
+            fputcsv($handle, $header);
 
-            $rows[] = implode(',', $row);
-        }
+            $formatter = new EscapeFormula('`');
 
-        $csv = implode("\n", $rows);
-        $response = response()->make($csv, 200);
-        $response->header('Content-Type', 'text/csv');
-        $response->header('Content-disposition', 'attachment;filename=report.csv');
+            Accessory::with('category')->orderBy('created_at', 'DESC')
+                ->chunk(500, function ($accessories) use ($handle, $formatter) {
+                    foreach ($accessories as $accessory) {
+                        $row = [
+                            $accessory->name,
+                            $accessory->category?->name,
+                            $accessory->qty,
+                            $accessory->numRemaining(),
+                        ];
+
+                        if (config('app.escape_formulas') === false) {
+                            fputcsv($handle, $row);
+                        } else {
+                            fputcsv($handle, $formatter->escapeRecord($row));
+                        }
+                    }
+                });
+
+            fclose($handle);
+        }, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="accessories-report-'.date('Y-m-d-his').'.csv"',
+        ]);
 
         return $response;
     }
@@ -251,6 +287,7 @@ class ReportsController extends Controller
 
         $response = new StreamedResponse(function () {
             Log::debug('Starting streamed response');
+            Log::debug('CSV escaping is set to: '.config('app.escape_formulas'));
 
             // Open output stream
             $handle = fopen('php://output', 'w');
@@ -286,6 +323,8 @@ class ReportsController extends Controller
                     Log::debug('Walking results: '.$executionTime);
                     $count = 0;
 
+                    $formatter = new EscapeFormula('`');
+
                     foreach ($actionlogs as $actionlog) {
                         $count++;
                         $target_name = '';
@@ -316,7 +355,15 @@ class ReportsController extends Controller
                             $actionlog->action_source,
                             $actionlog->log_meta,
                         ];
-                        fputcsv($handle, $row);
+
+                        // CSV_ESCAPE_FORMULAS is set to false in the .env
+                        if (config('app.escape_formulas') === false) {
+                            fputcsv($handle, $row);
+
+                            // CSV_ESCAPE_FORMULAS is set to true or is not set in the .env
+                        } else {
+                            fputcsv($handle, $formatter->escapeRecord($row));
+                        }
                     }
                 });
 
@@ -387,7 +434,7 @@ class ReportsController extends Controller
             $row[] = $license->remaincount();
             $row[] = $license->expiration_date;
             $row[] = $license->purchase_date;
-            $row[] = ($license->depreciation != '') ? '' : e($license->depreciation->name);
+            $row[] = ($license->depreciation != '') ? e($license->depreciation->name) : '';
             $row[] = '"'.Helper::formatCurrencyOutput($license->purchase_cost).'"';
 
             $rows[] = implode(',', $row);
@@ -797,6 +844,14 @@ class ReportsController extends Controller
                 $assets->onlyTrashed();
             }
 
+            if ($request->input('assignment_status') === 'assigned') {
+                $assets->whereNotNull('assets.assigned_to');
+            }
+
+            if ($request->input('assignment_status') === 'unassigned') {
+                $assets->whereNull('assets.assigned_to');
+            }
+
             $assets->orderBy('assets.id', 'ASC')->chunk(500, function ($assets) use ($handle, $customfields, $request) {
 
                 $executionTime = microtime(true) - $_SERVER['REQUEST_TIME_FLOAT'];
@@ -843,7 +898,7 @@ class ReportsController extends Controller
                     }
 
                     if ($request->filled('purchase_date')) {
-                        $row[] = ($asset->purchase_date) ? $asset->purchase_date : '';
+                        $row[] = ($asset->purchase_date) ? Carbon::parse($asset->purchase_date)->format('Y-m-d') : '';
                     }
 
                     if ($request->filled('purchase_cost')) {
@@ -851,7 +906,7 @@ class ReportsController extends Controller
                     }
 
                     if ($request->filled('eol')) {
-                        $row[] = ($asset->asset_eol_date != '') ? $asset->asset_eol_date : '';
+                        $row[] = ($asset->asset_eol_date != '') ? Carbon::parse($asset->asset_eol_date)->format('Y-m-d') : '';
                     }
 
                     if ($request->filled('warranty')) {
@@ -917,7 +972,7 @@ class ReportsController extends Controller
 
                     if ($request->filled('user_company')) {
                         if ($asset->checkedOutToUser()) {
-                            $row[] = ($asset->assignedto->company) ? $asset->assignedto->company->display_name : '';
+                            $row[] = ($asset->assignedto?->company) ? $asset->assignedto?->company?->display_name : '';
                         } else {
                             $row[] = ''; // Empty string if unassigned
                         }
@@ -1070,7 +1125,13 @@ class ReportsController extends Controller
                     foreach ($customfields as $customfield) {
                         $column_name = $customfield->db_column_name();
                         if ($request->filled($customfield->db_column_name())) {
-                            $row[] = $asset->$column_name;
+                            $value = $asset->$column_name;
+
+                            if (($customfield->field_encrypted == '1') && Gate::allows('assets.view.encrypted_custom_fields')) {
+                                $value = Helper::gracefulDecrypt($customfield, $value);
+                            }
+
+                            $row[] = $value;
                         }
                     }
 
@@ -1185,6 +1246,9 @@ class ReportsController extends Controller
     public function getAssetAcceptanceReport($deleted = false): View
     {
         $this->authorize('reports.view');
+
+        $this->disableDebugbar();
+
         $showDeleted = $deleted == 'deleted';
 
         $query = CheckoutAcceptance::Pending()

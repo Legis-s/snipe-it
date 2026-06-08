@@ -639,6 +639,10 @@ class Importer extends Component
                 'color code',
                 trans('general.tag_color'),
             ],
+            'checkout_class' => [
+                'checkout type',
+                'checkout class',
+            ],
         ];
 
         $this->columnOptions[''] = $this->getColumns(''); // blank mode? I don't know what this is supposed to mean
@@ -713,6 +717,12 @@ class Importer extends Component
         }
 
         $this->message = trans('general.generic_model_not_found', ['model' => trans('general.import')]);
+        $this->message_type = 'danger';
+    }
+
+    public function process(): void
+    {
+        $this->message = trans('general.token_expired');
         $this->message_type = 'danger';
     }
 

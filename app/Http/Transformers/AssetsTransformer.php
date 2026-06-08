@@ -149,7 +149,7 @@ class AssetsTransformer
 
                     $fields_array[$field->name] = [
                         'field' => e($field->db_column),
-                        'value' => e($value),
+                        'value' => ($field->element == 'markdown-textarea' && Gate::allows('assets.view.encrypted_custom_fields')) ? Helper::renderMarkdown($value) : e($value),
                         'field_format' => $field->format,
                         'element' => $field->element,
                     ];
@@ -163,7 +163,7 @@ class AssetsTransformer
 
                     $fields_array[$field->name] = [
                         'field' => e($field->db_column),
-                        'value' => e($value),
+                        'value' => ($field->element == 'markdown-textarea') ? Helper::renderMarkdown($value) : e($value),
                         'field_format' => $field->format,
                         'element' => $field->element,
                     ];
@@ -200,8 +200,8 @@ class AssetsTransformer
                         'pivot_id' => $component->pivot->id,
                         'name' => e($component->name),
                         'qty' => $component->pivot->assigned_qty,
-                        'price_cost' => $component->purchase_cost,
-                        'purchase_total' => $component->purchase_cost * $component->pivot->assigned_qty,
+                        'purchase_cost' => $component->purchase_cost,
+                        'purchase_total' => $component->calculated_purchase_cost,
                         'checkout_date' => Helper::getFormattedDateObject($component->pivot->created_at, 'datetime'),
 
                     ];
@@ -282,7 +282,7 @@ class AssetsTransformer
                         $value = Helper::getFormattedDateObject($value, 'date', false);
                     }
 
-                    $fields_array[$field->db_column] = e($value);
+                    $fields_array[$field->db_column] = ($field->element == 'markdown-textarea') ? Helper::renderMarkdown($value) : e($value);
                 }
 
                 $array['custom_fields'] = $fields_array;
@@ -396,6 +396,9 @@ class AssetsTransformer
         $permissions_array['available_actions'] = [
             'checkout' => false,
             'checkin' => Gate::allows('checkin', License::class),
+            'bulk_selectable' => [
+                'checkin' => Gate::allows('checkin', License::class),
+            ],
         ];
 
         $array += $permissions_array;

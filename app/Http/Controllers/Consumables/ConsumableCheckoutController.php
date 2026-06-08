@@ -141,6 +141,15 @@ class ConsumableCheckoutController extends Controller
 //        $request->request->add(['assigned_user' => $user->id]);
 
         $consumable->checkOut($target, $quantity, $request->input('note'));
+        event(new CheckoutableCheckedOut(
+            $consumable,
+            $user,
+            auth()->user(),
+            $request->input('note'),
+            [],
+            $consumable->checkout_qty,
+            $request->boolean('sign_in_place'),
+        ));
 
         $request->request->add(['assigned_to' => $target->id]);
         $request->request->add(match ($request->input('checkout_to_type')) {
@@ -150,7 +159,40 @@ class ConsumableCheckoutController extends Controller
             default => ['assigned_user' => $target->id],
         });
 
-        session()->put(['redirect_option' => $request->input('redirect_option'), 'checkout_to_type' => $request->input('checkout_to_type')]);
+        session()->put([
+            'redirect_option' => $request->input('redirect_option'),
+            'checkout_to_type' => $request->input('checkout_to_type'),
+            'sign_in_place' => $request->boolean('sign_in_place'),
+        ]);
+
+        // When sign_in_place is requested, redirect to the acceptance/signature page
+        // so the user can sign in person. The signature is attributed to the target user.
+        if ($request->boolean('sign_in_place')) {
+            $acceptance = CheckoutAcceptance::where('checkoutable_type', Consumable::class)
+                ->where('checkoutable_id', $consumable->id)
+                ->where('assigned_to_id', $user->id)
+                ->pending()
+                ->latest()
+                ->first();
+
+            // If requireAcceptance() is false the listener won't have created one; create it now.
+            if (! $acceptance) {
+                $acceptance = new CheckoutAcceptance;
+                $acceptance->checkoutable()->associate($consumable);
+                $acceptance->assignedTo()->associate($user);
+                $acceptance->qty = $quantity;
+                $acceptance->save();
+            }
+
+            session([
+                'sign_in_place_acceptance_id' => $acceptance->id,
+                'sign_in_place_item_id' => $consumable->id,
+                'sign_in_place_resource_type' => 'Consumables',
+            ]);
+
+            return redirect()->route('account.accept.item', $acceptance->id)
+                ->with('success', trans('admin/consumables/message.checkout.success'));
+        }
 
         // Redirect to the new consumable page
         return Helper::getRedirectOption($request, $consumable->id, 'Consumables')

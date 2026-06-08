@@ -81,27 +81,27 @@ class ConsumablesController extends Controller
         }
 
         if ($request->filled('category_id')) {
-            $consumables->where('category_id', '=', $request->input('category_id'));
+            $consumables->where('consumables.category_id', '=', $request->input('category_id'));
         }
 
         if ($request->filled('model_number')) {
-            $consumables->where('model_number', '=', $request->input('model_number'));
+            $consumables->where('consumables.model_number', '=', $request->input('model_number'));
         }
 
         if ($request->filled('manufacturer_id')) {
-            $consumables->where('manufacturer_id', '=', $request->input('manufacturer_id'));
+            $consumables->where('consumables.manufacturer_id', '=', $request->input('manufacturer_id'));
         }
 
         if ($request->filled('supplier_id')) {
-            $consumables->where('supplier_id', '=', $request->input('supplier_id'));
+            $consumables->where('consumables.supplier_id', '=', $request->input('supplier_id'));
         }
 
         if ($request->filled('location_id')) {
-            $consumables->where('location_id', '=', $request->input('location_id'));
+            $consumables->where('consumables.location_id', '=', $request->input('location_id'));
         }
 
         if ($request->filled('notes')) {
-            $consumables->where('notes', '=', $request->input('notes'));
+            $consumables->where('consumables.notes', '=', $request->input('notes'));
         }
 
         if ($request->filled('purchase_id')) {
@@ -319,34 +319,42 @@ class ConsumablesController extends Controller
             return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/consumables/message.checkout.unavailable', ['requested' => $consumable->checkout_qty, 'remaining' => $consumable->numRemaining()])));
         }
 
-        // Check if the user exists - @TODO:  this should probably be handled via validation, not here??
-        if (! $user = User::find($request->input('assigned_to'))) {
+        // Resolve the raw target first, then enforce FMCS explicitly.
+        // Scoped lookup can hide cross-company users and make failures ambiguous.
+        if (! $user = User::withoutGlobalScopes()->find($request->input('assigned_to'))) {
             // Return error message
             return response()->json(Helper::formatStandardApiResponse('error', null, 'No user found'));
+        }
+
+        if ((Setting::getSettings()->full_multiple_companies_support == '1') && (! $user->companies()->where('companies.id', $consumable->company_id)->exists())) {
+            return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.error_user_company')));
         }
 
         // Update the consumable data
         $consumable->assigned_to = $request->input('assigned_to');
 
-        for ($i = 0; $i < $consumable->checkout_qty; $i++) {
-            $consumable->users()->attach($consumable->id,
-                [
-                    'consumable_id' => $consumable->id,
-                    'created_by' => $user->id,
-                    'assigned_to' => $request->input('assigned_to'),
-                    'note' => $request->input('note'),
-                ]
-            );
-        }
+        // Keep pivot writes and checkout log/event atomic to avoid partial checkout state.
+        DB::transaction(function () use ($consumable, $request, $user): void {
+            for ($i = 0; $i < $consumable->checkout_qty; $i++) {
+                $consumable->users()->attach($consumable->id,
+                    [
+                        'consumable_id' => $consumable->id,
+                        'created_by' => $user->id,
+                        'assigned_to' => $request->input('assigned_to'),
+                        'note' => $request->input('note'),
+                    ]
+                );
+            }
 
-        event(new CheckoutableCheckedOut(
-            $consumable,
-            $user,
-            auth()->user(),
-            $request->input('note'),
-            [],
-            $consumable->checkout_qty,
-        ));
+            event(new CheckoutableCheckedOut(
+                $consumable,
+                $user,
+                auth()->user(),
+                $request->input('note'),
+                [],
+                $consumable->checkout_qty,
+            ));
+        });
 
         return response()->json(Helper::formatStandardApiResponse('success', null, trans('admin/consumables/message.checkout.success')));
 
@@ -436,6 +444,8 @@ class ConsumablesController extends Controller
      */
     public function selectlist(Request $request): array
     {
+        $this->authorize('view.selectlists');
+
         $consumables = Consumable::select([
             'consumables.id',
             'consumables.name',
@@ -464,11 +474,11 @@ class ConsumablesController extends Controller
     public function history(Request $request, Consumable $consumable): JsonResponse|array
     {
         $this->authorize('history', $consumable);
-        $history = $consumable->getHistory($request);
-        $total = $consumable->getHistory($request)->count();
+        $historyQuery = $consumable->getHistory($request);
+        $total = (clone $historyQuery)->count();
         $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
-        $history = $history->skip($offset)->take($limit)->get();
+        $history = (clone $historyQuery)->skip($offset)->take($limit)->get();
 
         return response()->json((new ActionlogsTransformer)->transformActionlogs($history, $total), 200, ['Content-Type' => 'application/json;charset=utf8'], JSON_UNESCAPED_UNICODE);
     }
