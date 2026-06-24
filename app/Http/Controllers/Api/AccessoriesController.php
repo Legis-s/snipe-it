@@ -51,11 +51,15 @@ class AccessoriesController extends Controller
                 'model_number',
                 'eol',
                 'notes',
+                'purchase_cost',
+                'purchase_date',
                 'created_at',
+                'updated_at',
                 'min_amt',
                 'company_id',
                 'notes',
                 'checkouts_count',
+                'image',
                 'order_number',
                 'qty',
                 // These are *relationships* so we wouldn't normally include them in this array,
@@ -107,7 +111,7 @@ class AccessoriesController extends Controller
         }
 
         // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $accessories->count()) ? $accessories->count() : abs($request->input('offset'));
+        $offset = ($request->input('offset') > $accessories->count()) ? $accessories->count() : app('api_offset_value');
         $limit = app('api_limit_value');
 
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
@@ -132,6 +136,9 @@ class AccessoriesController extends Controller
                 break;
             case 'created_by':
                 $accessories = $accessories->OrderByCreatedByName($order);
+                break;
+            case 'total_cost':
+                $accessories = $accessories->orderByRaw('COALESCE(purchase_cost, 0) * qty '.$order);
                 break;
             default:
                 $accessories = $accessories->orderBy($column_sort, $order);

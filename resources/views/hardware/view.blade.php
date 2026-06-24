@@ -327,11 +327,12 @@
 
 
 
-                            @if (($snipeSettings->qr_code=='1') || $snipeSettings->label2_2d_type!='none')
+                            @if ($snipeSettings->isQrEnabled())
                                 <div class="col-md-12 text-center asset-qr-img" style="padding-top: 15px;">
-                                    <img src="{{ config('app.url') }}/hardware/{{ $asset->id }}/qr_code" class="img-thumbnail" style="height: 150px; width: 150px; margin-right: 10px;" alt="QR code for {{ $asset->getDisplayNameAttribute() }}">
+                                    <img src="{{ route('qr_code/common', ['object_type' => 'hardware', 'id' => $asset->id]) }}" class="img-thumbnail" style="height: 150px; width: 150px; margin-right: 10px;" alt="QR code for {{ $asset->getDisplayNameAttribute() }}">
                                 </div>
                             @endif
+
 
                         </x-page-column>
                         <!-- end side stats  column -->
@@ -418,7 +419,9 @@
                             :table_header="trans('general.audits')"
                             :model="$asset"
                             :route="route('api.activity.index', ['item_id' => $asset->id, 'item_type' => 'asset', 'action_type' => 'audit'])"
-                            :hide_fields="['id','action_type', 'item', 'changed', 'target','quantity','changed','serial','signature_file','log_meta']"/>
+                            :hide_fields="['id','action_type', 'item', 'changed', 'target','quantity','changed','serial','signature_file','log_meta']"
+                            :extra_columns="$audit_custom_field_columns"
+                        />
                     </x-tabs.pane>
                     <!-- end audits tab pane -->
 

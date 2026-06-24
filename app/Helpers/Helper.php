@@ -14,6 +14,7 @@ use App\Models\License;
 use App\Models\Location;
 use App\Models\Setting;
 use App\Models\Statuslabel;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\RedirectResponse;
@@ -663,7 +664,7 @@ class Helper
      */
     public static function depreciationList()
     {
-        $depreciation_list = ['' => 'Do Not Depreciate'] + Depreciation::orderBy('name', 'asc')
+        $depreciation_list = ['' => trans('admin/licenses/form.no_depreciation')] + Depreciation::orderBy('name', 'asc')
             ->pluck('name', 'id')->toArray();
 
         return $depreciation_list;
@@ -1623,6 +1624,16 @@ class Helper
         $other_redirect = session('other_redirect');
         $backUrl = str_replace(["\r", "\n"], '', session()->pull('url.intended', 'home'));
 
+        // Reject any stored back-URL that points off-site. redirect()->intended() performs
+        // no host validation, and url.intended can be written from the SAML RelayState POST
+        // parameter (SamlController), which an attacker-controlled IdP could set to an
+        // off-site URL.
+        $backHost = parse_url($backUrl, PHP_URL_HOST);
+        $appHost = parse_url(config('app.url'), PHP_URL_HOST);
+        if ($backHost && $backHost !== $appHost) {
+            $backUrl = route('home');
+        }
+
         // return to previous page
         if ($redirect_option == 'back') {
             return redirect()->intended($backUrl);
@@ -1718,6 +1729,8 @@ class Helper
             return [];
         }
 
+        $floater = (bool) Setting::getSettings()->null_company_is_floater;
+
         foreach ($locations as $location) {
             // in case of an update of a single location, use the newly requested company_id
             if ($new_company_id) {
@@ -1752,26 +1765,51 @@ class Helper
                 foreach ($keywords as $keyword) {
                     if ($relation == 'many') {
                         $items = $location->{$keyword}->all();
+                        // assignedAccessories returns AccessoryCheckout records (no company_id);
+                        // resolve each to its parent Accessory so the comparison is valid.
+                        if ($keyword === 'assignedAccessories') {
+                            $items = collect($items)->map(fn ($checkout) => $checkout->accessory)->filter()->values()->all();
+                        }
                     } else {
                         $items = collect([])->push($location->$keyword);
                     }
 
                     $count = 0;
                     foreach ($items as $item) {
+                        if (! $item) {
+                            continue;
+                        }
 
-                        if ($item && $item->company_id != $location_company) {
+                        // Users belong to companies via the many-to-many pivot (company_user).
+                        // canReceiveFromCompany() returns true only when the user's pivot
+                        // contains the location's company, so !canReceiveFromCompany() is
+                        // the correct mismatch signal.
+                        if ($item instanceof User) {
+                            $isMismatch = ! $item->canReceiveFromCompany((int) $location_company);
+                        } elseif ($item->company_id == $location_company) {
+                            $isMismatch = false;
+                        } elseif (is_null($item->company_id) || is_null($location_company)) {
+                            $isMismatch = ! $floater;
+                        } else {
+                            $isMismatch = true;
+                        }
+
+                        if ($isMismatch) {
+                            if ($item instanceof User) {
+                                $itemCompanyIds = $item->companies->pluck('id')->implode(', ');
+                                $itemCompanyNames = $item->companies->pluck('name')->implode(', ');
+                            } else {
+                                $itemCompanyIds = $item->company_id ?? null;
+                                $itemCompanyNames = $item->company->name ?? null;
+                            }
 
                             $mismatched[] = [
                                 class_basename(get_class($item)),
                                 $item->id,
                                 $item->name ?? $item->asset_tag ?? $item->serial ?? $item->username,
                                 $item->assigned_type ? str_replace('App\\Models\\', '', $item->assigned_type) : null,
-                                $item->company_id ?? null,
-                                $item->company->name ?? null,
-                                //                                    $item->defaultLoc->id ?? null,
-                                //                                    $item->defaultLoc->name ?? null,
-                                //                                    $item->defaultLoc->company->id ?? null,
-                                //                                    $item->defaultLoc->company->name ?? null,
+                                $itemCompanyIds,
+                                $itemCompanyNames,
                                 $item->location->name ?? null,
                                 $item->location->company->name ?? null,
                                 $location_company ?? null,
@@ -1906,11 +1944,12 @@ class Helper
             // Convert newlines to CommonMark hard breaks for inline rendering
             $text = preg_replace('/(?<! {2})\n/', "  \n", $text);
 
-            return Str::inlineMarkdown($text, ['html_input' => 'escape']);
+            return Str::inlineMarkdown($text, ['html_input' => 'escape', 'allow_unsafe_links' => false]);
         }
 
         $html = trim(Str::markdown($text, [
             'html_input' => 'escape',
+            'allow_unsafe_links' => false,
             'renderer' => ['soft_break' => "<br>\n"],
         ]));
 

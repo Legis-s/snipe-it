@@ -22,6 +22,7 @@ use App\Http\Controllers\ManufacturersController;
 use App\Http\Controllers\ModalController;
 use App\Http\Controllers\NotesController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\QrCodeController;
 use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\ReportTemplatesController;
 use App\Http\Controllers\SettingsController;
@@ -235,6 +236,9 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
         ->name('settings.oauth.index')
         ->breadcrumbs(fn (Trail $trail) => $trail->parent('settings.index')
             ->push(trans('admin/settings/general.oauth'), route('settings.oauth.index')));
+
+    Route::post('oauth/request-filters', [SettingsController::class, 'postApiRequestFilters'])
+        ->name('settings.oauth.request_filters.save');
 
     Route::post('oauth/tokens/{token}/revoke', [SettingsController::class, 'revokePersonalAccessToken'])
         ->name('settings.oauth.tokens.revoke');
@@ -696,6 +700,14 @@ Route::group(['middleware' => 'web'], function () {
         'logout',
         [LoginController::class, 'logout']
     )->name('logout.post');
+
+    /**
+     * QR Code routes
+     */
+    Route::get('{object_type}/{id}/qr_code',
+        [QrCodeController::class, 'show']
+    )->name('qr_code/common')
+        ->where(['object_type' => 'accessories|assets|hardware|licenses|locations|models|companies|components|consumables|users']);
 
     /**
      * Uploaded files API routes

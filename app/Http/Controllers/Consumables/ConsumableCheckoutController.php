@@ -7,7 +7,7 @@ use App\Events\CheckoutableSell;
 use App\Helpers\Helper;
 use App\Http\Controllers\CheckInOutRequest;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ConsumableCheckoutRequest;
+use App\Models\CheckoutAcceptance;
 use App\Models\Consumable;
 use App\Models\Deal;
 use App\Models\User;
@@ -96,6 +96,7 @@ class ConsumableCheckoutController extends Controller
         }
 
         $admin_user = auth()->user();
+        $user = auth()->user();
 //        $assigned_to = e($request->input('assigned_to'));
 
         // Check if the user exists
@@ -126,6 +127,16 @@ class ConsumableCheckoutController extends Controller
 //                'note' => $request->input('note'),
 //            ]);
 //        }
+//        if (! $consumable->canCheckoutTo($user)) {
+//            return redirect()->back()->with('error', trans('general.error_checkout_company_mismatch', [
+//                'item' => trans('general.consumable').' "'.$consumable->name.'"',
+//                'item_company' => $consumable->company?->name ?? trans('general.unassigned'),
+//                'target' => trans('general.user').' "'.$user->username.'"',
+//            ]));
+//        }
+//
+//        // Update the consumable data
+//        $consumable->assigned_to = e($request->input('assigned_to'));
 
 //        $consumable->checkout_qty = $quantity;
 
