@@ -85,8 +85,8 @@
                                             <th>НДС</th>
                                             <th>Количество</th>
                                             <th>Принято</th>
-                                            @can('review', \App\Models\Asset::class)
-                                                <th>Принять</th>
+                                            @can('review')
+                                                <th>Действия</th>
                                             @endcan
                                             </thead>
                                         @endif
@@ -315,7 +315,7 @@
                         </div>
                     @endif
                     @if($old)
-                        @can('review', \App\Models\Asset::class)
+                        @can('review')
                             @if ($purchase->consumables_json != "[]" &&  count($purchase->consumables)==0)
                                 <div class="row">
                                     <div class="col-md-12">
@@ -365,7 +365,7 @@
 
         const table_consumables = $('#table_consumables');
         const check_consumables = $('#check_consumables');
-        const data = {!! $purchase->consumables_json !!};
+        let data = {!! $purchase->consumables_json !!};
         let can_reviewconsumable = false;
         @can('review')
             can_reviewconsumable = true;
@@ -390,6 +390,52 @@
             if ("category_id" in data[0]) {
                 old = true;
             }
+
+            function reloadConsumables(updatedConsumables) {
+                data = updatedConsumables;
+                table_consumables.bootstrapTable('load', data);
+            }
+
+            function showApiError(response, fallbackMessage) {
+                const message = response && response.responseJSON && response.responseJSON.messages
+                    ? response.responseJSON.messages
+                    : fallbackMessage;
+
+                Swal.fire({
+                    title: 'Ошибка',
+                    text: message,
+                    icon: 'error'
+                });
+            }
+
+            function syncConsumableLine(sendData, successCallback) {
+                $.ajax({
+                    type: 'POST',
+                    url: "{{ route('api.purchases.consumables_line', $purchase->id) }}",
+                    headers: {
+                        "X-Requested-With": 'XMLHttpRequest',
+                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                    },
+                    data: sendData,
+                    dataType: 'json',
+                    success: function (response) {
+                        if (response.status !== 'success') {
+                            Swal.fire({
+                                title: 'Ошибка',
+                                text: response.messages || 'Не удалось сохранить изменения расходника.',
+                                icon: 'error'
+                            });
+                            return;
+                        }
+
+                        successCallback(response);
+                    },
+                    error: function (response) {
+                        showApiError(response, 'Не удалось сохранить изменения расходника.');
+                    }
+                });
+            }
+
             if (old) {
                 table_consumables.bootstrapTable('destroy').bootstrapTable({
                     data: data,
@@ -580,19 +626,113 @@
                                 });
 
                             }
+                            ,
+                            'click .edit_consumable': function (e, value, row, index) {
+                                const reviewed = parseInt(row.reviewed || 0);
+                                Swal.fire({
+                                    title: "Изменить - " + row.consumable,
+                                    icon: 'question',
+                                    html:
+                                        '<div class="form-group text-left">' +
+                                        '<label for="swal_purchase_cost">Закупочная цена</label>' +
+                                        '<input id="swal_purchase_cost" class="swal2-input" type="number" min="0" step="0.01" value="' + row.purchase_cost + '">' +
+                                        '</div>' +
+                                        '<div class="form-group text-left">' +
+                                        '<label for="swal_nds">НДС</label>' +
+                                        '<input id="swal_nds" class="swal2-input" type="number" min="0" step="0.01" value="' + row.nds + '">' +
+                                        '</div>' +
+                                        '<div class="form-group text-left">' +
+                                        '<label for="swal_quantity">Количество</label>' +
+                                        '<input id="swal_quantity" class="swal2-input" type="number" min="' + Math.max(reviewed, 1) + '" step="1" value="' + row.quantity + '">' +
+                                        '</div>',
+                                    reverseButtons: true,
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Сохранить',
+                                    cancelButtonText: 'Отменить',
+                                    preConfirm: function () {
+                                        const purchaseCost = $('#swal_purchase_cost').val();
+                                        const nds = $('#swal_nds').val();
+                                        const quantity = parseInt($('#swal_quantity').val());
+
+                                        if (!purchaseCost || parseFloat(purchaseCost) < 0) {
+                                            Swal.showValidationMessage('Укажите корректную закупочную цену');
+                                            return false;
+                                        }
+
+                                        if (!nds || parseFloat(nds) < 0) {
+                                            Swal.showValidationMessage('Укажите корректный НДС');
+                                            return false;
+                                        }
+
+                                        if (!quantity || quantity < Math.max(reviewed, 1)) {
+                                            Swal.showValidationMessage('Количество не может быть меньше уже принятого');
+                                            return false;
+                                        }
+
+                                        return {
+                                            purchase_cost: purchaseCost,
+                                            nds: nds,
+                                            quantity: quantity
+                                        };
+                                    }
+                                }).then((result) => {
+                                    if (!result.isConfirmed) {
+                                        return;
+                                    }
+
+                                    syncConsumableLine({
+                                        action: 'update',
+                                        row_id: row.id,
+                                        purchase_cost: result.value.purchase_cost,
+                                        nds: result.value.nds,
+                                        quantity: result.value.quantity
+                                    }, function (response) {
+                                        reloadConsumables(response.payload.consumables);
+                                    });
+                                });
+                            },
+                            'click .remove_consumable': function (e, value, row, index) {
+                                Swal.fire({
+                                    title: "Удалить - " + row.consumable + "?",
+                                    text: 'Строка будет удалена из закупки.',
+                                    icon: 'warning',
+                                    reverseButtons: true,
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Удалить',
+                                    cancelButtonText: 'Отменить',
+                                }).then((result) => {
+                                    if (!result.isConfirmed) {
+                                        return;
+                                    }
+
+                                    syncConsumableLine({
+                                        action: 'delete',
+                                        row_id: row.id
+                                    }, function (response) {
+                                        reloadConsumables(response.payload.consumables);
+                                    });
+                                });
+                            }
                         },
                         formatter: function (value, row, index) {
                             var max_quantity = row.quantity;
                             if ("reviewed" in row) {
                                 max_quantity = row.quantity - row.reviewed;
                             }
-                            if (max_quantity > 0 && can_reviewconsumable) {
-                                return [
-                                    '<button type="button" class="btn btn-sm btn-primary check_consumable">Принять</button>',
-                                ].join('')
-                            } else {
-                                return "";
+                            if (!can_reviewconsumable) {
+                                return '';
                             }
+
+                            const buttons = [];
+                            if (max_quantity > 0) {
+                                buttons.push('<button type="button" class="btn btn-sm btn-primary check_consumable">Принять</button>');
+                            }
+                            buttons.push('<button type="button" class="btn btn-sm btn-default edit_consumable">Изменить</button>');
+                            if (parseInt(row.reviewed || 0) === 0) {
+                                buttons.push('<button type="button" class="btn btn-sm btn-danger remove_consumable">Удалить</button>');
+                            }
+
+                            return buttons.join(' ');
                         }
                     }
                     ]
