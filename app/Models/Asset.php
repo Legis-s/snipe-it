@@ -1542,7 +1542,7 @@ class Asset extends Depreciable
     public function scopePending($query)
     {
         // Pluck IDs then whereIn — do NOT replace with whereHas. whereHas generates a correlated EXISTS per row and causes severe slowdowns in withCount contexts.
-        $ids = Statuslabel::where('deployable', 0)->where('pending', 1)->where('archived', 0)->whereNull('deleted_at')->pluck('id');
+        $ids = Statuslabel::idsFor('pending');
 
         return $query->whereIn('assets.status_id', $ids->isEmpty() ? [0] : $ids);
     }
@@ -1595,7 +1595,7 @@ class Asset extends Depreciable
     public function scopeRTD($query)
     {
         // Pluck IDs then whereIn — do NOT replace with whereHas. whereHas generates a correlated EXISTS per row and causes severe slowdowns in withCount contexts.
-        $ids = Statuslabel::where('deployable', 1)->where('pending', 0)->where('archived', 0)->whereNull('deleted_at')->pluck('id');
+        $ids = Statuslabel::idsFor('deployable');
 
         return $query->whereNull('assets.assigned_to')
             ->whereIn('assets.status_id', $ids->isEmpty() ? [0] : $ids);
@@ -1610,7 +1610,7 @@ class Asset extends Depreciable
     public function scopeUndeployable($query)
     {
         // Pluck IDs then whereIn — do NOT replace with whereHas. whereHas generates a correlated EXISTS per row and causes severe slowdowns in withCount contexts.
-        $ids = Statuslabel::where('deployable', 0)->where('pending', 0)->where('archived', 0)->whereNull('deleted_at')->pluck('id');
+        $ids = Statuslabel::idsFor('undeployable');
 
         return $query->whereIn('assets.status_id', $ids->isEmpty() ? [0] : $ids);
     }
@@ -1624,7 +1624,7 @@ class Asset extends Depreciable
     public function scopeNotArchived($query)
     {
         // Pluck IDs then whereIn — do NOT replace with whereHas. whereHas generates a correlated EXISTS per row and causes severe slowdowns in withCount contexts.
-        $ids = Statuslabel::where('archived', 0)->whereNull('deleted_at')->pluck('id');
+        $ids = Statuslabel::idsFor('not_archived');
 
         return $query->whereIn('assets.status_id', $ids->isEmpty() ? [0] : $ids);
     }
@@ -1791,9 +1791,7 @@ class Asset extends Depreciable
     {
         // Pluck IDs then whereIn — do NOT replace with whereHas. whereHas generates a correlated EXISTS per row and causes severe slowdowns in withCount contexts.
         if (Setting::getSettings()->show_archived_in_list != 1) {
-            $validStatusIds = Statuslabel::where('archived', 0)
-                ->whereNull('deleted_at')
-                ->pluck('id');
+            $validStatusIds = Statuslabel::idsFor('not_archived');
 
             return $query->whereIn('assets.status_id', $validStatusIds->isEmpty() ? [0] : $validStatusIds);
         }
@@ -1810,7 +1808,7 @@ class Asset extends Depreciable
     public function scopeArchived($query)
     {
         // Pluck IDs then whereIn — do NOT replace with whereHas. whereHas generates a correlated EXISTS per row and causes severe slowdowns in withCount contexts.
-        $ids = Statuslabel::where('deployable', 0)->where('pending', 0)->where('archived', 1)->whereNull('deleted_at')->pluck('id');
+        $ids = Statuslabel::idsFor('archived');
 
         return $query->whereIn('assets.status_id', $ids->isEmpty() ? [0] : $ids);
     }

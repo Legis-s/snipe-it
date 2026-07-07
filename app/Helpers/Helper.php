@@ -18,6 +18,8 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -98,6 +100,29 @@ class Helper
         if ($str) {
             return $Parsedown->text(strip_tags($str));
         }
+    }
+
+    /**
+     * Slice an in-memory Collection into a LengthAwarePaginator using the
+     * page + perPage values normalized by SetPaginationDefaults middleware.
+     *
+     * Selectlist endpoints that fetch the full set up-front (so they can
+     * post-process — e.g. hierarchy indenting in Companies / Locations) need
+     * to wrap the result in a paginator before handing it to SelectlistTransformer.
+     * This helper avoids re-deriving the page math at every call site, and
+     * inherits the middleware's bounds check against config('app.max_results').
+     */
+    public static function paginateCollection(Collection $items): LengthAwarePaginator
+    {
+        $page = app('api_current_page');
+        $perPage = app('api_limit_value');
+
+        return new LengthAwarePaginator(
+            $items->forPage($page, $perPage)->values(),
+            $items->count(),
+            $perPage,
+            $page,
+        );
     }
 
     public static function parseEscapedMarkedownInline($str = null)
@@ -1783,9 +1808,11 @@ class Helper
                         // Users belong to companies via the many-to-many pivot (company_user).
                         // canReceiveFromCompany() returns true only when the user's pivot
                         // contains the location's company, so !canReceiveFromCompany() is
-                        // the correct mismatch signal.
+                        // the correct mismatch signal. Pass $location_company through as
+                        // ?int — casting null to (int) would coerce it to 0 and miss the
+                        // null-company branch inside the method.
                         if ($item instanceof User) {
-                            $isMismatch = ! $item->canReceiveFromCompany((int) $location_company);
+                            $isMismatch = ! $item->canReceiveFromCompany($location_company === null ? null : (int) $location_company);
                         } elseif ($item->company_id == $location_company) {
                             $isMismatch = false;
                         } elseif (is_null($item->company_id) || is_null($location_company)) {

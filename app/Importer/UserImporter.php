@@ -195,6 +195,15 @@ class UserImporter extends ItemImporter
 
         $this->log('No matching user, creating one');
 
+        // Floater-mode escalation guard (#19200). See User::canGrantFloaterStatus.
+        if (Auth::check() && empty($companyIds) && ! auth()->user()->canGrantFloaterStatus()) {
+            $msg = trans('admin/users/general.cannot_make_floater');
+            $this->log('Skipping '.$this->item['username'].': '.$msg);
+            $this->addErrorToBag(new User, 'company_id', $msg);
+
+            return;
+        }
+
         if (! $this->validateFmcsLocation($this->item['location_id'] ?? null, $companyIds)) {
             $msg = trans('validation.fmcs_location', [
                 'location' => Location::find($this->item['location_id'])?->name ?? $this->item['location_id'],

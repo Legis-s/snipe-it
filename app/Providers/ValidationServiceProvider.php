@@ -181,6 +181,67 @@ class ValidationServiceProvider extends ServiceProvider
             return true;
         });
 
+        // Together, these two validators enforce a one-level-deep self-
+        // referential hierarchy. They're split (rather than combined into one
+        // rule) so each failure produces a message that actually describes
+        // the cause — "the parent you picked isn't top-level" reads very
+        // differently from "this row already has children of its own."
+        //
+        // Example usage on a parent_id column self-referencing the same table:
+        //   'parent_id' => 'nullable|integer|exists:companies,id|parent_must_be_top_level:companies,id|must_have_no_children:companies,id'
+
+        // The chosen parent_id (1) must not be the row itself (no self-parent),
+        // and (2) must itself be a top-level row (its own parent_id IS NULL).
+        // Either failure means saving would create depth > 1.
+        Validator::extend('parent_must_be_top_level', function ($attribute, $value, $parameters, $validator) {
+            if (is_null($value) || $value === '') {
+                return true;
+            }
+
+            if (count($parameters) < 2) {
+                throw new \Exception('Required validator parameters: <table>,<primary key>');
+            }
+
+            $table = $parameters[0];
+            $pk = $parameters[1];
+
+            $data = $validator->getData();
+            $modelId = $data[$pk] ?? null;
+
+            if ($modelId && (int) $modelId === (int) $value) {
+                return false;
+            }
+
+            $chosenParentParentId = DB::table($table)->where($pk, $value)->value('parent_id');
+
+            return is_null($chosenParentParentId);
+        });
+
+        // If the row being saved already has children of its own, it can't be
+        // assigned a parent — doing so would push those children to depth 2.
+        // Only checked on update (a brand-new row has no children yet).
+        Validator::extend('must_have_no_children', function ($attribute, $value, $parameters, $validator) {
+            if (is_null($value) || $value === '') {
+                return true;
+            }
+
+            if (count($parameters) < 2) {
+                throw new \Exception('Required validator parameters: <table>,<primary key>');
+            }
+
+            $table = $parameters[0];
+            $pk = $parameters[1];
+
+            $data = $validator->getData();
+            $modelId = $data[$pk] ?? null;
+
+            if (! $modelId) {
+                return true;
+            }
+
+            return ! DB::table($table)->where('parent_id', $modelId)->exists();
+        });
+
         // Yo dawg. I heard you like validators.
         // This validates the custom validator regex in custom fields.
         // We're just checking that the regex won't throw an exception, not

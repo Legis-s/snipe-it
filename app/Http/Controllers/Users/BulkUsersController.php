@@ -282,6 +282,13 @@ class BulkUsersController extends Controller
             $this->update_array['company_id'] = $allowedIds[0] ?? null;
         }
 
+        // Floater-mode self-elevation guard (#19200). See User::canGrantFloaterStatus.
+        $wouldClear = $clearCompanies || ($bulkCompanyIds && empty($allowedIds));
+        if ($wouldClear && ! auth()->user()->canGrantFloaterStatus()) {
+            return redirect()->route('users.index')
+                ->with('error', trans('admin/users/general.cannot_make_floater'));
+        }
+
         // Save per-user so UserObserver::updating() fires and all field changes are written
         // to the Activity Report. A mass update() bypasses model observers entirely.
         foreach ($users as $user) {

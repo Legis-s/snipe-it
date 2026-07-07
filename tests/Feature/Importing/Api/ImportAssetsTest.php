@@ -726,4 +726,37 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
         $newAsset = Asset::where('serial', $importFileBuilder->firstRow()['serialNumber'])->sole();
         $this->assertEquals($user->id, $newAsset->assigned_to, 'Asset should be checked out to a no-company user when floater mode is on');
     }
+
+    #[Test]
+    public function asset_import_does_not_mint_a_floater_user_side_effect_for_non_superuser(): void
+    {
+        // #19200: when an asset CSV references a brand-new username, the base
+        // Importer::createOrFetchUser side-effects a new user with no company
+        // pivot. Under floater mode that previously promoted the new user to
+        // system-wide visibility — exploitable as an asset import path. The
+        // guard refuses the user creation for actors who can't grant floater
+        // status; the asset still imports, it just doesn't get checked out.
+        $this->settings->enableFloaterMode();
+
+        $company = Company::factory()->create();
+        $importer = $company->users()->save(
+            User::factory()->createAssets()->editAssets()->canImport()->create(),
+        );
+
+        $importFileBuilder = ImportFileBuilder::new([
+            'companyName' => $company->name,
+            'assigneeUsername' => 'phantom-floater-user',
+            'assigneeFullName' => 'Phantom Floater',
+            'assigneeEmail' => 'phantom@example.org',
+        ]);
+
+        $this->actingAsForApi($importer);
+        $import = Import::factory()->asset()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
+        $this->importFileResponse(['import' => $import->id])->assertOk();
+
+        $this->assertDatabaseMissing('users', ['username' => 'phantom-floater-user']);
+
+        $newAsset = Asset::where('serial', $importFileBuilder->firstRow()['serialNumber'])->sole();
+        $this->assertNull($newAsset->assigned_to, 'Asset imports but is not checked out to the rejected user');
+    }
 }

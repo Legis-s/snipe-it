@@ -572,6 +572,35 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     }
 
     /**
+     * Whether this user is allowed to save another user with no company
+     * assignment. Under floater mode, "no companies" means the target gains
+     * system-wide visibility, so the actor needs to already be at that
+     * privilege level: superusers can always grant it; floater actors
+     * (themselves uncompanied) can grant it to others without escalating —
+     * they already have the same access. The only blocked case is a
+     * *companied* non-superuser trying to elevate someone to floater, which
+     * would be a genuine escalation. When floater mode itself is off — or
+     * FMCS is off — there's no floater to grant, so the answer is yes. See
+     * #19200.
+     */
+    public function canGrantFloaterStatus(): bool
+    {
+        $settings = Setting::getSettings();
+
+        if (! $settings->full_multiple_companies_support) {
+            return true;
+        }
+        if (! $settings->null_company_is_floater) {
+            return true;
+        }
+        if ($this->isSuperUser()) {
+            return true;
+        }
+
+        return ! $this->companies()->exists();
+    }
+
+    /**
      * Checks if the user can edit their own profile
      *
      * @author A. Gianotto <snipe@snipe.net>
@@ -632,39 +661,65 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
 
     /**
      * Returns whether an FMCS company check should allow this user to receive
-     * an asset that belongs to the given company.
+     * an item that belongs to the given company (null = uncompanied item).
      *
-     * - If the user has no company associations at all: returns true (no restriction).
-     * - If the user has associations: returns true only when $companyId is among them.
+     * Mirrors the rules in CompanyableTrait::canCheckoutTo so the User-target
+     * branch behaves the same as every other companyable target:
+     *  - Both sides uncompanied → allowed (null↔null).
+     *  - Item uncompanied, user companied → only when null_company_is_floater
+     *    is on (floater mode treats null-company items as system-wide).
+     *  - Item companied, user uncompanied → only when null_company_is_floater
+     *    is on (floater users see everything).
+     *  - Both sides companied → user's pivot must contain the item's company.
      */
-    public function canReceiveFromCompany(int $companyId): bool
+    public function canReceiveFromCompany(?int $companyId): bool
     {
-        // Items with no company association are unrestricted — anyone can receive them.
-        if (! $companyId) {
-            return true;
-        }
-
         // Query the pivot directly to avoid the Company model's FMCS global scope,
         // which would restrict results to the current actor's visible companies.
         $userCompanyIds = DB::table('company_user')
             ->where('user_id', $this->id)
             ->pluck('company_id');
 
+        if (is_null($companyId)) {
+            if ((bool) Setting::getSettings()->null_company_is_floater) {
+                return true;
+            }
+
+            return $userCompanyIds->isEmpty();
+        }
+
         if ($userCompanyIds->isEmpty()) {
             return (bool) Setting::getSettings()->null_company_is_floater;
         }
 
-        return $userCompanyIds->contains($companyId);
+        if ($userCompanyIds->contains($companyId)) {
+            return true;
+        }
+
+        // Membership in a parent company implies access to its children — accept
+        // an item from a child company when the user belongs to its parent.
+        return DB::table('companies')
+            ->where('id', $companyId)
+            ->whereIn('parent_id', $userCompanyIds)
+            ->exists();
     }
 
     /**
-     * Returns all companies this user belongs to — union of the primary company_id
-     * column and the many-to-many pivot — as a deduplicated Collection.
+     * Returns all companies this user has access to — the pivot memberships plus
+     * any child companies of those memberships (one-level-deep hierarchy).
      * Used to scope FMCS dropdowns to companies the user is allowed to work with.
      */
     public function allCompanies(): Collection
     {
-        return $this->companies->unique('id')->values();
+        $direct = $this->companies->unique('id');
+
+        if ($direct->isEmpty()) {
+            return $direct->values();
+        }
+
+        $children = Company::whereIn('parent_id', $direct->pluck('id'))->get();
+
+        return $direct->concat($children)->unique('id')->values();
     }
 
     /**
@@ -841,6 +896,20 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     public function maintenances()
     {
         return $this->hasMany(Maintenance::class, 'user_id')->withTrashed();
+    }
+
+    /**
+     * Maintenances whose underlying asset was checked out to this user at the
+     * time the maintenance was opened — i.e. the polymorphic checked_out_to_*
+     * pair on the maintenances row points at this user.
+     *
+     * Distinct from maintenances() (which tracks who *created* the record)
+     * and from responsibleParty() (whoever is responsible for completion).
+     * Used by the user detail view's Maintenances tab and badge count.
+     */
+    public function assignedMaintenances()
+    {
+        return $this->morphMany(Maintenance::class, 'checked_out_to')->withTrashed();
     }
 
     /**
@@ -1512,9 +1581,14 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
      */
     public function scopeOrderCompany($query, $order)
     {
+        // The MIN(...) aggregate has to go through DB::raw, which bypasses
+        // Laravel's grammar — so the `companies` table reference inside the
+        // raw string won't get DB_PREFIX applied automatically. Same pattern
+        // as Api\AssetsController::index's natural-sort branch.
+        $prefix = DB::getTablePrefix();
         $sub = DB::table('company_user')
             ->join('companies', 'companies.id', '=', 'company_user.company_id')
-            ->select('company_user.user_id', DB::raw('MIN(companies.name) as min_company_name'))
+            ->select('company_user.user_id', DB::raw('MIN('.$prefix.'companies.name) as min_company_name'))
             ->groupBy('company_user.user_id');
 
         return $query
@@ -1555,6 +1629,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         $asset_cost = 0;
         $license_cost = 0;
         $accessory_cost = 0;
+        $maintenance_cost = 0;
         foreach ($this->assets as $asset) {
             $asset_cost += $asset->purchase_cost;
             $this->asset_cost = $asset_cost;
@@ -1567,8 +1642,15 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
             $accessory_cost += $accessory->purchase_cost;
             $this->accessory_cost = $accessory_cost;
         }
+        // Maintenances tied to this user as the polymorphic checked_out_to
+        // target. Summed across open + completed records — the user
+        // "caused" both.
+        foreach ($this->assignedMaintenances as $maintenance) {
+            $maintenance_cost += $maintenance->cost;
+        }
+        $this->maintenance_cost = $maintenance_cost;
 
-        $this->total_user_cost = ($asset_cost + $accessory_cost + $license_cost);
+        $this->total_user_cost = ($asset_cost + $accessory_cost + $license_cost + $maintenance_cost);
 
         return $this;
     }

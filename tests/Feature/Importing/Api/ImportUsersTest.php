@@ -405,9 +405,9 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
                 'email' => 'hijacked@evil.com',
             ]),
         ]);
-        $import = Import::factory()->users()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
 
         $this->actingAsForApi(User::factory()->canImport()->create());
+        $import = Import::factory()->users()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
         $this->importFileResponse(['import' => $import->id, 'import-update' => true])->assertOk();
 
         $this->assertEquals('original@example.com', $victim->refresh()->email);
@@ -427,9 +427,9 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
                 'email' => 'updated@example.com',
             ]),
         ]);
-        $import = Import::factory()->users()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
 
         $this->actingAsForApi(User::factory()->canImport()->editUsers()->create());
+        $import = Import::factory()->users()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
         $this->importFileResponse(['import' => $import->id, 'import-update' => true])->assertOk();
 
         $this->assertEquals('updated@example.com', $target->refresh()->email);

@@ -369,6 +369,9 @@
             user_add($(".status_id").val());
         });
 
+        @if (isset($cloned_model))
+        $('input[name="serials[1]"]').trigger('focus');
+        @endif
     });
 
 

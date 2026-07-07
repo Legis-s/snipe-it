@@ -4,7 +4,10 @@
 <div id="{{ $fieldname }}" class="form-group{{ $errors->has($fieldname) ? ' has-error' : '' }}">
     <label for="{{ $fieldname }}" class="col-md-3 control-label">{{ $translated_name }}</label>
     <div class="col-md-6">
-        <select class="js-data-ajax" data-endpoint="companies" data-placeholder="{{ trans('general.select_company') }}" name="{{ $fieldname }}{{ (isset($multiple) && ($multiple=='true')) ? '[]' : '' }}" style="width: 100%"{{ (isset($multiple) && ($multiple=='true')) ? " multiple='multiple'" : '' }}>
+        <select class="js-data-ajax" data-endpoint="companies" data-placeholder="{{ trans('general.select_company') }}"
+                @isset($only_top_level) data-only-top-level="{{ $only_top_level ? 'true' : '' }}" @endisset
+                @isset($exclude_id) data-exclude-id="{{ $exclude_id }}" @endisset
+                name="{{ $fieldname }}{{ (isset($multiple) && ($multiple=='true')) ? '[]' : '' }}" style="width: 100%"{{ (isset($multiple) && ($multiple=='true')) ? " multiple='multiple'" : '' }}>
             @isset ($selected)
                 @foreach ($selected as $company_id)
                     <option value="{{ $company_id }}" selected="selected" role="option" aria-selected="true">

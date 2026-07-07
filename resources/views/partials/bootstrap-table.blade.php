@@ -29,6 +29,7 @@
         var advancedSearchOperatorLabel = @json(trans('general.search_operator'));
         var advancedSearchAndText = @json(trans('general.and'));
         var advancedSearchOrText = @json(trans('general.or'));
+        var advancedSearchClearAllText = @json(trans('general.clear_all_filters'));
         var advancedSearchOperatorStorageKey = 'snipeit.bs.table.advancedSearchOperator';
 
         var normalizeAdvancedSearchOperator = function (operator) {
@@ -55,6 +56,24 @@
 
             var escapeAdvancedSearchValue = function (value) {
                 return $('<div/>').text(value == null ? '' : value).html();
+            };
+
+            // Safely decode HTML entities in a string WITHOUT parsing it as HTML.
+            // `<textarea>` innerHTML is RCDATA — the parser decodes entity
+            // references like `&lt;` but does not interpret `<tag>` as an
+            // element. Contrast with the naive `$('<div/>').html(value).text()`
+            // pattern, which parses value as HTML into a detached div — an
+            // entity-encoded payload like `&lt;img src=x onerror=alert(1)&gt;`
+            // decodes into a real <img>, and browsers fire onerror even for
+            // detached images. Using a textarea avoids that DOM instantiation
+            // entirely.
+            var decodeHtmlEntitiesSafely = function (value) {
+                if (value == null) {
+                    return '';
+                }
+                var textarea = document.createElement('textarea');
+                textarea.innerHTML = String(value);
+                return textarea.value;
             };
 
             Object.assign($.fn.bootstrapTable.locales, {
@@ -197,6 +216,17 @@
                         '" style="color:#fff;margin-left:6px;text-decoration:none;">&times;</a></span>';
                 });
 
+                // "Clear all" pill: same shortcut as opening the modal and hitting
+                // the cancel button, but done from the tags row so the user doesn't
+                // have to open the modal just to wipe every filter.
+                var safeClearAllLabel = escapeAdvancedSearchValue(advancedSearchClearAllText);
+                html += '<a href="javascript:void(0)" class="label label-danger snipe-advanced-search-tags-clear-all"' +
+                    ' title="' + safeClearAllLabel + '"' +
+                    ' aria-label="' + safeClearAllLabel + '"' +
+                    ' style="font-size: 11px; margin-right:6px; display:inline-block; margin-bottom:6px; color:#fff; text-decoration:none; cursor:pointer;">' +
+                    '<i class="fas fa-trash" aria-hidden="true" style="margin-right:4px;"></i>' + safeClearAllLabel +
+                    '</a>';
+
                 $tagContainer
                     .html(html)
                     .off('click.snipeAdvancedSearchTags')
@@ -211,6 +241,16 @@
                             _this.trigger('column-advanced-search', _this.filterColumnsPartial, _this.getAdvancedSearchOperator());
 
                             _this.renderAdvancedSearchTags();
+                        }
+                    })
+                    .on('click.snipeAdvancedSearchTags', '.snipe-advanced-search-tags-clear-all', function (e) {
+                        e.preventDefault();
+                        // Reuse cancelAdvancedSearch: it already wipes filterColumnsPartial,
+                        // resets the modal's inputs (in case the user opens it later), fires
+                        // the column-advanced-search event (so our patched updateHistoryState
+                        // strips filter[...] from the URL), and refetches via initSearch.
+                        if (typeof _this.cancelAdvancedSearch === 'function') {
+                            _this.cancelAdvancedSearch();
                         }
                     });
 
@@ -275,18 +315,26 @@
                     var column = this.columns[columnIndex];
 
                     if (!column.checkbox && column.visible && column.searchable) {
-                        var title = $('<div/>').html(column.title).text().trim();
+                        // column.title is presenter-supplied and can be entity-encoded
+                        // user input (e.g. AssetPresenter emits `e($field->name)` for
+                        // custom fields). Decode via a textarea so we get the intended
+                        // display string without ever instantiating an <img>/<script>
+                        // element, then escape when interpolating into the HTML template
+                        // — the label, name, and placeholder all get untrusted content.
+                        var title = decodeHtmlEntitiesSafely(column.title).trim();
                         var value = filterColumnsPartial[column.field] || '';
+                        var safeTitle = escapeAdvancedSearchValue(title);
+                        var safeField = escapeAdvancedSearchValue(column.field);
 
                         html.push(`
                             <div class="form-group row">
-                                <label class="col-sm-4 control-label">${title}</label>
+                                <label class="col-sm-4 control-label">${safeTitle}</label>
                                 <div class="col-sm-6">
                                     <input
                                         type="text"
                                         class="form-control ${this.constants.classes.input}"
-                                        name="${column.field}"
-                                        placeholder="${escapeAdvancedSearchValue(title)}"
+                                        name="${safeField}"
+                                        placeholder="${safeTitle}"
                                         value="${escapeAdvancedSearchValue(value)}"
                                     >
                                 </div>
@@ -480,21 +528,64 @@
             data_export_options = $(this).attr('data-export-options');
             export_options = data_export_options ? JSON.parse(data_export_options) : {};
             export_options['htmlContent'] = false; // this is already the default; but let's be explicit about it
+            // DejaVuSans is registered into jsPDF's VFS via
+            // jspdf-dejavu-fonts.js (bundled into public/js/dist/bootstrap-table.js
+            // right after jspdf.umd.min.js — see webpack.mix.js). Referencing
+            // it here is what actually swaps out the default Helvetica fallback
+            // and produces readable output for Cyrillic / Greek / Hebrew / etc.
+            // exports. Fixes #19270.
             export_options['jspdf'] = {
                 "orientation": "l",
                 "autotable": {
                         "styles": {
+                            font: 'DejaVuSans',
+                            fontStyle: 'normal',
                             overflow: 'linebreak'
                         },
                         tableWidth: 'wrap'
                 }
             };
             // tableWidth: 'wrap',
-            // the following callback method is necessary to prevent XSS vulnerabilities
-            // (this is taken from Bootstrap Tables's default wrapper around jQuery Table Export)
+            // ⚠️ SECURITY: DO NOT change the wrapping of `.text()` inside
+            //    `htmlEncodeForExport(...)` below without reading this entire
+            //    block. The bare `.text()` was the previous shape and it is
+            //    an XSS.
+            //
+            // XSS defense on export cell data. The tableExport plugin's
+            // E function (see bundled bootstrap-table.js around line 32110)
+            // pipes our return value through jQuery's .html() setter on a
+            // scratch <div> before serializing. If we return raw text that
+            // happens to look like HTML (e.g. a column titled
+            // `<img src=x onerror=alert(1)>`), that .html() call parses it
+            // and instantiates a real <img onerror=...> element, firing the
+            // payload as soon as the user clicks Export.
+            //
+            // Encoding the returned string turns any tag-shaped characters
+            // into entity refs; the downstream .html() call then treats
+            // them as text-content (browser text-decodes back to chars in a
+            // text-node, no elements created), and the final PDF/CSV output
+            // still shows the visible text the header displayed on-screen.
+            //
+            // Repro before the fix (kept as a regression pin):
+            //   1. Create a custom field named `<img src=x onerror=alert(1)>`
+            //   2. Visit the assets index (header shows the string as text)
+            //   3. Export → CSV (or PDF): alert(1) fires because tableExport
+            //      re-injects our returned text via .html() on a scratch div.
+            // If a future edit here reintroduces the bug, that exact repro
+            // will fire alert(1) again.
+            var htmlEncodeForExport = function (value) {
+                if (value == null) return '';
+                return String(value)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+            };
             export_options['onCellHtmlData'] = function (cell, rowIndex, colIndex, htmlData) {
                 if (cell.is('th')) {
-                    return cell.find('.th-inner').text()
+                    // ⚠️ MUST stay wrapped in htmlEncodeForExport(). See block above.
+                    return htmlEncodeForExport(cell.find('.th-inner').text());
                 }
                 // Convert <br> tags to newlines so that line breaks in notes and
                 // textarea fields survive HTML-stripping during export
@@ -706,6 +797,176 @@
 
             if (bootstrapTableInstance && typeof bootstrapTableInstance.renderAdvancedSearchTags === 'function') {
                 bootstrapTableInstance.renderAdvancedSearchTags();
+            }
+
+            // -----------------------------------------------------------------
+            // Advanced-search URL deeplink (prototype: assets/hardware only).
+            //
+            // - `?filter[field]=value` per-field + `?filter_operator=and|or`,
+            //   matching the API's own querystring so what the browser shows
+            //   is what the server actually receives.
+            // - Distinct from `?search=` (basic search) so both can coexist.
+            // - Opt-in via `data-advanced-search-deeplink="true"` on the table.
+            //
+            // Two interacting quirks make this non-trivial:
+            //
+            // 1. Snipe's override of applyAdvancedSearch (this file, line ~220)
+            //    is a no-op for sidePagination='server' beyond setting state
+            //    and rendering pills — it never refetches, and never fires the
+            //    `column-advanced-search` event. So a `on('column-advanced-search')`
+            //    listener won't hear anything when the user applies via the
+            //    modal on a server-side table.
+            //
+            // 2. addrbar (bootstrap-table's URL extension) owns the query
+            //    string. It re-pushes `page`/`size`/`order`/`sort`/`search`
+            //    on every onLoadSuccess. If we just replaceState() our own
+            //    `filter[...]`, the next refetch clobbers them.
+            //
+            // Fix: patch two methods on this specific plugin instance.
+            //
+            //   - applyAdvancedSearch: after Snipe's version runs, force a
+            //     refetch + fire the event on server-side. That triggers the
+            //     addrbar → updateHistoryState path, which we've also patched.
+            //
+            //   - updateHistoryState: before addrbar's push, strip any stale
+            //     `filter[...]`/`filter_operator` from its cached URLSearchParams
+            //     and re-serialize from the current filterColumnsPartial. This
+            //     handles adds, edits, and removes (empty filters remove keys).
+            // -----------------------------------------------------------------
+            if (bootstrapTableInstance && data_with_default('advanced-search-deeplink', false)) {
+                var advDeeplinkKeyPrefix = 'filter';
+                var advDeeplinkOpParam = 'filter_operator';
+                var advDeeplinkKeyRegex = new RegExp('^' + advDeeplinkKeyPrefix + '\\[(.+)\\]$');
+
+                // --- Patch updateHistoryState: emit filter[...] alongside addrbar's keys.
+                if (typeof bootstrapTableInstance.updateHistoryState === 'function') {
+                    var origUpdateHistoryState = bootstrapTableInstance.updateHistoryState;
+                    bootstrapTableInstance.updateHistoryState = function (prefix) {
+                        var params = this.searchParams;
+
+                        // Strip stale filter[...] and filter_operator so cleared
+                        // filters don't linger from a previous state.
+                        if (params) {
+                            var toDelete = [];
+                            params.forEach(function (value, key) {
+                                if (key === advDeeplinkOpParam || advDeeplinkKeyRegex.test(key)) {
+                                    toDelete.push(key);
+                                }
+                            });
+                            toDelete.forEach(function (key) { params.delete(key); });
+
+                            // Re-add from current filterColumnsPartial state.
+                            var filters = this.filterColumnsPartial || {};
+                            var count = 0;
+                            Object.keys(filters).forEach(function (field) {
+                                var val = filters[field];
+                                if (val !== undefined && val !== null && val !== '') {
+                                    params.set(advDeeplinkKeyPrefix + '[' + field + ']', val);
+                                    count++;
+                                }
+                            });
+                            if (count > 0 && typeof this.getAdvancedSearchOperator === 'function') {
+                                params.set(advDeeplinkOpParam, this.getAdvancedSearchOperator());
+                            }
+                        }
+
+                        return origUpdateHistoryState.apply(this, arguments);
+                    };
+                }
+
+                // --- Patch applyAdvancedSearch: server-side apply must refetch
+                //     + fire the event so addrbar (and any listeners) run. Also
+                //     clear the basic-search input so the two modes stay mutually
+                //     exclusive (the backend already prefers `filter` over `search`,
+                //     but leaving text in the basic input is a confusing UX and can
+                //     let a stray search word survive into the next state change).
+                if (typeof bootstrapTableInstance.applyAdvancedSearch === 'function') {
+                    var origApplyAdvancedSearch = bootstrapTableInstance.applyAdvancedSearch;
+                    bootstrapTableInstance.applyAdvancedSearch = function () {
+                        origApplyAdvancedSearch.apply(this, arguments);
+                        if (this.options.sidePagination === 'server') {
+                            // Clear basic-search state without going through
+                            // resetSearch()/onSearch() — that path would fire a
+                            // separate refetch, and would re-enter our own
+                            // onSearch override below.
+                            var utils = $.fn.bootstrapTable && $.fn.bootstrapTable.utils;
+                            if (utils && typeof utils.getSearchInput === 'function') {
+                                var $searchInput = utils.getSearchInput(this);
+                                if ($searchInput && $searchInput.length) {
+                                    $searchInput.val('');
+                                }
+                            }
+                            this.searchText = '';
+                            this.options.searchText = '';
+
+                            this.options.pageNumber = 1;
+                            this.refresh();
+                            this.trigger('column-advanced-search', this.filterColumnsPartial, this.getAdvancedSearchOperator());
+                        }
+                    };
+                }
+
+                // --- Patch onSearch: basic search clears advanced filters so the
+                //     two modes stay mutually exclusive. Runs BEFORE the plugin's
+                //     onSearch → initSearch → server refetch, so the AJAX that
+                //     ships in the same tick already has an empty filterColumnsPartial.
+                if (typeof bootstrapTableInstance.onSearch === 'function') {
+                    var origOnSearch = bootstrapTableInstance.onSearch;
+                    bootstrapTableInstance.onSearch = function (event, overwriteSearchText) {
+                        var newText = '';
+                        if (event && event.currentTarget) {
+                            newText = String($(event.currentTarget).val() || '').trim();
+                        }
+                        // Only clear filters when the user is actively typing a
+                        // non-empty search. Empty transitions (resetSearch(''), a
+                        // stray blur on an already-empty input) leave filters alone.
+                        if (
+                            newText !== ''
+                            && this.filterColumnsPartial
+                            && Object.keys(this.filterColumnsPartial).length > 0
+                        ) {
+                            this.filterColumnsPartial = {};
+                            if (typeof this.renderAdvancedSearchTags === 'function') {
+                                this.renderAdvancedSearchTags();
+                            }
+                            if (typeof this.updateAdvancedSearchButtonState === 'function') {
+                                this.updateAdvancedSearchButtonState();
+                            }
+                        }
+                        return origOnSearch.apply(this, arguments);
+                    };
+                }
+
+                // --- Read path: rehydrate from URL if filter[...] is present.
+                var initialFilters = {};
+                var initialOp = null;
+                var initialParams = new URLSearchParams(window.location.search);
+                initialParams.forEach(function (value, key) {
+                    var m = key.match(advDeeplinkKeyRegex);
+                    if (m) {
+                        initialFilters[m[1]] = value;
+                    } else if (key === advDeeplinkOpParam) {
+                        initialOp = value;
+                    }
+                });
+
+                if (Object.keys(initialFilters).length > 0) {
+                    bootstrapTableInstance.filterColumnsPartial = Object.assign({}, initialFilters);
+                    if (initialOp && typeof bootstrapTableInstance.setAdvancedSearchOperator === 'function') {
+                        bootstrapTableInstance.setAdvancedSearchOperator(initialOp);
+                    }
+
+                    // Refetch with the seeded filter. onLoadSuccess → patched
+                    // updateHistoryState → URL is re-emitted with filter[...] intact.
+                    bootstrapTableInstance.refresh();
+
+                    if (typeof bootstrapTableInstance.renderAdvancedSearchTags === 'function') {
+                        bootstrapTableInstance.renderAdvancedSearchTags();
+                    }
+                    if (typeof bootstrapTableInstance.updateAdvancedSearchButtonState === 'function') {
+                        bootstrapTableInstance.updateAdvancedSearchButtonState();
+                    }
+                }
             }
 
             // Add btn-advanced-search class to the advanced search button for styling
@@ -1119,7 +1380,7 @@
     @endcan
 
     @can('create', \App\Models\Component::class)
-    // Compoment table buttons
+    // Component table buttons
     window.componentButtons = () => ({
         btnAdd: {
             text: '{{ trans('general.create') }}',
@@ -1133,6 +1394,16 @@
                 @if ($snipeSettings->shortcuts_enabled == 1)
                 accesskey: 'n'
                 @endif
+            }
+        },
+        btnExport: {
+            text: '{{ trans('general.custom_component_report') }}',
+            icon: 'fa-solid fa-file-csv',
+            event () {
+                window.location.href = '{{ route('reports.custom.component') }}';
+            },
+            attributes: {
+                title: '{{ trans('general.custom_component_report') }}',
             }
         },
     });
@@ -2412,21 +2683,72 @@
         }
     }
 
+    // Renders a single company tag. `isInherited` is decided by the caller —
+    // it's true only when (a) we're on the companies show page (viewing context
+    // is set), (b) the row didn't get included via direct membership, and (c)
+    // THIS specific tag is the parent or a child of the viewing company. Other
+    // unrelated memberships on the same row render unmarked.
+    function renderCompanyTag(c, isInherited) {
+        var color = (c.tag_color)
+            ? '<i class="fa-solid fa-square" style="color: ' + c.tag_color + ';" aria-hidden="true"></i> '
+            : '';
+        if (isInherited) {
+            return '<a href="{{ config('app.url') }}/companies/' + c.id + '"'
+                + ' class="label label-light"'
+                + ' data-tooltip="true"'
+                + ' title="{{ trans('admin/companies/table.inherited_help') }}">'
+                + '<i class="fa-solid fa-link" aria-hidden="true"></i> '
+                + color + c.name
+                + ' <span class="sr-only">({{ trans('admin/companies/table.inherited') }})</span>'
+                + '</a>';
+        }
+        return '<a href="{{ config('app.url') }}/companies/' + c.id + '" class="label label-light">'
+            + color + c.name
+            + '</a>';
+    }
+
+    // A tag is "inherited" when (1) we're on a company show page, (2) the row
+    // didn't include the viewing company itself (i.e. the user/asset isn't a
+    // direct member), AND (3) this specific tag IS in the viewing company's
+    // hierarchy set (parent or one of the children). Tags unrelated to the
+    // hierarchy never get marked, even on otherwise-inherited rows.
+    function isCompanyTagInherited(tagId, rowCompanyIds) {
+        if (typeof window.viewingCompanyId === 'undefined' || window.viewingCompanyId === null) {
+            return false;
+        }
+        if (typeof window.viewingCompanyHierarchyIds === 'undefined' || !window.viewingCompanyHierarchyIds) {
+            return false;
+        }
+
+        var viewing = parseInt(window.viewingCompanyId, 10);
+        var tag = parseInt(tagId, 10);
+
+        // Row is direct (some company on the row matches viewing) — nothing
+        // on this row counts as inherited.
+        var rowIsDirect = rowCompanyIds.some(function (id) { return parseInt(id, 10) === viewing; });
+        if (rowIsDirect) {
+            return false;
+        }
+
+        // Only tags that are part of the hierarchy set get the badge.
+        return window.viewingCompanyHierarchyIds.some(function (id) { return parseInt(id, 10) === tag; })
+            && tag !== viewing;
+    }
+
     function companiesLinkObjFormatter(value, row) {
         if (!value) {
             return '';
         }
-        var icon = (value.tag_color) ? '<i class="fa-solid fa-square" style="color: ' + value.tag_color + ';" aria-hidden="true"></i> ' : '';
-        return '<a href="{{ config('app.url') }}/companies/' + value.id + '" class="label label-light">' + icon + value.name + '</a>';
+        return renderCompanyTag(value, isCompanyTagInherited(value.id, [value.id]));
     }
 
     function companiesArrayLinkFormatter(value, row) {
         if (!value || !value.length) {
             return '';
         }
+        var rowCompanyIds = value.map(function (c) { return c.id; });
         return value.map(function (c) {
-            var icon = (c.tag_color) ? '<i class="fa-solid fa-square" style="color: ' + c.tag_color + ';" aria-hidden="true"></i> ' : '';
-            return '<a href="{{ config('app.url') }}/companies/' + c.id + '" class="label label-light">' + icon + c.name + '</a></span>';
+            return renderCompanyTag(c, isCompanyTagInherited(c.id, rowCompanyIds));
         }).join(' ');
     }
 
@@ -2673,6 +2995,10 @@
 
     function linkNumberToUserManagedLocationsFormatter(value, row) {
         return linkToUserSectionBasedOnCount(value, row.id, 'managed-locations');
+    }
+
+    function linkNumberToUserAssignedMaintenancesFormatter(value, row) {
+        return linkToUserSectionBasedOnCount(value, row.id, 'maintenances');
     }
 
     function labelPerPageFormatter(value, row, index, field) {

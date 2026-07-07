@@ -309,7 +309,7 @@
         <x-info-panel.supplier :infoPanelObj="$infoPanelObj"/>
         <x-info-panel.manufacturer :infoPanelObj="$infoPanelObj" :manufacturer="($infoPanelObj->manufacturer ?? $infoPanelObj->model?->manufacturer)"/>
 
-        @if ((isset($infoPanelObj->parent)) && ($infoPanelObj->parent))
+        @if (($infoPanelObj instanceof \App\Models\Location) && (isset($infoPanelObj->parent)) && ($infoPanelObj->parent))
             @php
                 $locationAncestors = [];
                 $ancestorCursor = $infoPanelObj->parent;
