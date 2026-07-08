@@ -356,9 +356,9 @@
                                               {{-- selected reads from the company_user pivot only; the legacy
                                                    users.company_id scalar can lag behind (LDAP sync, pre-observer
                                                    rows, etc.) so we never fall back to it. --}}
-                                              @foreach (old('company_ids', $user->companies->pluck('id')->toArray()) as $company_id)
-                                                  <option value="{{ $company_id }}" selected="selected" role="option" aria-selected="true">
-                                                      {{ \App\Models\Company::find($company_id)?->name }}
+                                              @foreach (old('company_ids', $user->companies->pluck('id')->toArray()) as $selectedCompanyId)
+                                                  <option value="{{ $selectedCompanyId }}" selected="selected" role="option" aria-selected="true">
+                                                      {{ \App\Models\Company::find($selectedCompanyId)?->name }}
                                                   </option>
                                               @endforeach
                                           </select>

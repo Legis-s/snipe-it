@@ -45,6 +45,8 @@
 
 <body class="hold-transition login-page">
 
+    @include('partials.impersonation-banner')
+
     @if (($snipeSettings) && ($snipeSettings->logo!=''))
         <div class="text-center">
             <a href="{{ config('app.url') }}">

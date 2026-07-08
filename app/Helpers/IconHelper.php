@@ -122,6 +122,10 @@ class IconHelper
                 return 'fa-solid fa-key';
             case 'api-key':
                 return 'fas fa-user-secret';
+            case 'impersonate':
+                return 'fa-solid fa-person-walking-arrow-right';
+            case 'undo':
+                return 'fas fa-arrow-left';
             case 'nav-toggle':
                 return 'fas fa-bars';
             case 'dashboard':

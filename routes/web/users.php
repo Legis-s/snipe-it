@@ -91,6 +91,30 @@ Route::group(['prefix' => 'users', 'middleware' => ['auth']], function () {
     )->name('users.acceptance_reminder')->withTrashed();
 
     Route::post(
+        '{user}/impersonate',
+        [
+            Users\ImpersonateController::class,
+            'start',
+        ]
+    )->name('users.impersonate.start');
+
+    Route::post(
+        'impersonate/stop',
+        [
+            Users\ImpersonateController::class,
+            'stop',
+        ]
+    )->name('users.impersonate.stop');
+
+    Route::post(
+        '{user}/two-factor-reset',
+        [
+            Users\UsersController::class,
+            'twoFactorReset',
+        ]
+    )->name('users.two_factor_reset');
+
+    Route::post(
         'bulkedit',
         [
             Users\BulkUsersController::class,
