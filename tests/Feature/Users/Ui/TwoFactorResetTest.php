@@ -85,9 +85,12 @@ class TwoFactorResetTest extends TestCase
 
     public function test_button_hidden_when_site_two_factor_is_off()
     {
-        // Empty string is the CheckForTwoFactor middleware's real "off" signal —
-        // the middleware treats "0" as on-but-misconfigured and still redirects.
-        $this->settings->set(['two_factor_enabled' => '']);
+        // NULL is the only "off" signal that survives both SQLite and MySQL.
+        // The column is tinyInteger, so an empty string coerces to 0 on MySQL,
+        // and the CheckForTwoFactor middleware then treats "0" as on-but-broken
+        // and redirects (302), while on SQLite the empty string is stored as-is
+        // and the middleware short-circuits (200). Local vs CI divergence.
+        $this->settings->set(['two_factor_enabled' => null]);
 
         $actor = User::factory()->superuser()->create();
         $target = User::factory()->create([

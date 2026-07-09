@@ -177,9 +177,9 @@
     @endif
 
     @can('view', \App\Models\License::class)
-    @if ($show_user->licenses->count() > 0)
+        @if ($show_user->directlicenses->count() > 0)
         <div id="licenses-toolbar">
-            <h4>{{ trans_choice('general.countable.licenses', $show_user->licenses->count(), ['count' => $show_user->licenses->count()]) }}</h4>
+            <h4>{{ trans_choice('general.countable.licenses', $show_user->directlicenses->count(), ['count' => $show_user->directlicenses->count()]) }}</h4>
         </div>
 
         <table
@@ -372,6 +372,7 @@
     @endif
     @endcan
     @if(($indirectItemsCount ?? 0) > 0 && $settings->show_assigned_assets)
+
         <div id="indirect-assignments-toolbar">
             <h4>{{ $indirectItemsCount.' '.trans('mail.assigned_to_assets') }}</h4>
         </div>
@@ -415,7 +416,7 @@
                         $indirectAssignmentsCounter++
                     @endphp
                 @endforeach
-                @can('view', \App\Models\License::class)
+                    @can('view', \App\Models\License::class)
                 @foreach ($asset->licenses as $indirectLicense)
                     @if($indirectLicense)
                         <tr>
