@@ -17,6 +17,7 @@ class ConsumablePresenter extends Presenter
         $layout = [
             [
                 'field' => 'id',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -34,6 +35,7 @@ class ConsumablePresenter extends Presenter
             ],
             [
                 'field' => 'name',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => false,
@@ -42,6 +44,7 @@ class ConsumablePresenter extends Presenter
                 'formatter' => 'consumablesLinkFormatter',
             ], [
                 'field' => 'company',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -52,6 +55,7 @@ class ConsumablePresenter extends Presenter
 
             [
                 'field' => 'image',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -60,12 +64,14 @@ class ConsumablePresenter extends Presenter
                 'formatter' => 'imageFormatter',
             ], [
                 'field' => 'category',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('general.category'),
                 'formatter' => 'categoriesLinkObjFormatter',
             ], [
                 'field' => 'supplier',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -74,23 +80,27 @@ class ConsumablePresenter extends Presenter
                 'formatter' => 'suppliersLinkObjFormatter',
             ], [
                 'field' => 'model_number',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('general.model_no'),
             ], [
                 'field' => 'location',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('general.location'),
                 'formatter' => 'locationsLinkObjFormatter',
             ], [
                 'field' => 'item_no',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/consumables/general.item_no'),
             ], [
 
                 'field' => 'manufacturer',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('general.manufacturer'),
@@ -98,12 +108,14 @@ class ConsumablePresenter extends Presenter
                 'formatter' => 'manufacturersLinkObjFormatter',
             ], [
                 'field' => 'order_number',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('general.order_number'),
                 'visible' => true,
             ], [
                 'field' => 'purchase_date',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('general.purchase_date'),
@@ -111,6 +123,7 @@ class ConsumablePresenter extends Presenter
                 'formatter' => 'dateDisplayFormatter',
             ], [
                 'field' => 'min_amt',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('general.min_amt'),
@@ -119,6 +132,7 @@ class ConsumablePresenter extends Presenter
                 'class' => 'text-right text-padding-number-cell',
             ], [
                 'field' => 'qty',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('admin/components/general.total'),
@@ -127,6 +141,7 @@ class ConsumablePresenter extends Presenter
                 'footerFormatter' => 'qtySumFormatter',
             ], [
                 'field' => 'remaining',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('admin/components/general.remaining'),
@@ -135,14 +150,16 @@ class ConsumablePresenter extends Presenter
                 'footerFormatter' => 'qtySumFormatter',
             ], [
                 'field' => 'percent_remaining',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
-                'title' => '% ' . trans('general.remaining'),
+                'title' => '% '.trans('general.remaining'),
                 'visible' => true,
                 'formatter' => 'progressBarFormatter',
             ], [
                 'field' => 'purchase_cost',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('general.unit_cost'),
@@ -151,6 +168,7 @@ class ConsumablePresenter extends Presenter
                 'footerFormatter' => 'sumFormatter',
             ], [
                 'field' => 'total_cost',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('general.total_cost'),
@@ -158,6 +176,7 @@ class ConsumablePresenter extends Presenter
                 'class' => 'text-right text-padding-number-cell',
             ], [
                 'field' => 'notes',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'visible' => false,
@@ -165,6 +184,7 @@ class ConsumablePresenter extends Presenter
                 'formatter' => 'notesFormatter',
             ], [
                 'field' => 'created_by',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('general.created_by'),
@@ -172,6 +192,7 @@ class ConsumablePresenter extends Presenter
                 'formatter' => 'usersLinkObjFormatter',
             ], [
                 'field' => 'created_at',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'visible' => false,
@@ -179,6 +200,7 @@ class ConsumablePresenter extends Presenter
                 'formatter' => 'dateDisplayFormatter',
             ], [
                 'field' => 'updated_at',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'visible' => false,
@@ -186,6 +208,7 @@ class ConsumablePresenter extends Presenter
                 'formatter' => 'dateDisplayFormatter',
             ], [
                 'field' => 'change',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'visible' => true,
@@ -194,6 +217,7 @@ class ConsumablePresenter extends Presenter
                 'printIgnore' => true,
             ], [
                 'field' => 'actions',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => false,
@@ -214,6 +238,7 @@ class ConsumablePresenter extends Presenter
 
             [
                 'field' => 'avatar',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'title' => trans('general.image'),
@@ -222,6 +247,7 @@ class ConsumablePresenter extends Presenter
             ],
             [
                 'field' => 'user',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'title' => trans('general.name'),
@@ -230,6 +256,7 @@ class ConsumablePresenter extends Presenter
             ],
             [
                 'field' => 'created_at',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'title' => trans('general.date'),
@@ -239,6 +266,7 @@ class ConsumablePresenter extends Presenter
 
             [
                 'field' => 'note',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'title' => trans('general.notes'),
@@ -247,6 +275,7 @@ class ConsumablePresenter extends Presenter
 
             [
                 'field' => 'created_by',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'title' => trans('general.created_by'),

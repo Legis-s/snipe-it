@@ -142,7 +142,7 @@ class BulkAssetCheckoutTest extends TestCase
             function () {
                 return [
                     'type' => 'user',
-                    'target' => User::factory()->forCompany()->create(),
+                    'target' => User::factory()->create(),
                 ];
             },
         ];
@@ -151,7 +151,7 @@ class BulkAssetCheckoutTest extends TestCase
             function () {
                 return [
                     'type' => 'asset',
-                    'target' => Asset::factory()->forCompany()->create(),
+                    'target' => Asset::factory()->create(),
                 ];
             },
         ];
@@ -160,7 +160,7 @@ class BulkAssetCheckoutTest extends TestCase
             function () {
                 return [
                     'type' => 'location',
-                    'target' => Location::factory()->forCompany()->create(),
+                    'target' => Location::factory()->create(),
                 ];
             },
         ];

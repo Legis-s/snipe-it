@@ -48,13 +48,13 @@
                         <input class="form-control" type="number" name="checkout_qty" id="checkout_qty" value="{{ old('checkout_qty', 1) }}" min="1" max="{{ $accessory->numRemaining() }}" aria-label="{{ trans('general.qty') }}" />
                     </div>
                 </div>
-                {!! $errors->first('checkout_qty', '<div class="col-md-8 col-md-offset-3"><span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span></div>') !!}
+                <div class="col-md-8 col-md-offset-3"><x-form.error name="checkout_qty" /></div>
             </div>
 
             @if ($accessory->requireAcceptance() || (string) $snipeSettings->require_accept_signature === '1' || $accessory->getEula() || ($snipeSettings->webhook_endpoint != ''))
                 <div class="form-group notification-callout">
                     <div class="col-md-8 col-md-offset-3">
-                        <div class="callout callout-info">
+                        <div class="callout callout-info" role="status" aria-live="polite" aria-atomic="true">
                             @if ($accessory->requireAcceptance())
                                 <i class="far fa-envelope" aria-hidden="true"></i>
                                 {{ trans('admin/categories/general.required_acceptance') }}<br>

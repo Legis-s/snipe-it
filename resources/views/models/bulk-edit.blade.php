@@ -18,8 +18,8 @@
                 <div class="box box-default">
                     <div class="box-body">
 
-                        <div class="callout callout-warning">
-                            <i class="fas fa-exclamation-triangle"></i>
+                        <div class="callout callout-warning" role="alert" aria-live="assertive" aria-atomic="true">
+                            <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
                             {{ trans_choice('admin/models/message.bulkedit.warn', count($models), ['model_count' => count($models)]) }}
                         </div>
 
@@ -63,7 +63,7 @@
                                         class="js-fieldset-field"
                                         style="width:350px"
                                     />
-                                    {!! $errors->first('fieldset_id', '<span class="alert-msg" aria-hidden="true"><br><i class="fas fa-times"></i> :message</span>') !!}
+                                    <x-form.error name="fieldset_id" />
                                 </div>
                             </div>
 
@@ -80,7 +80,7 @@
                                         :selected="old('depreciation_id', 'NC')"
                                         style="width:350px"
                                     />
-                                    {!! $errors->first('depreciation_id', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                    <x-form.error name="depreciation_id" />
                                 </div>
                             </div>
 

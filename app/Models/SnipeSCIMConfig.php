@@ -235,8 +235,16 @@ class SCIMCompanyAttribute extends MappedTable
 
         if ($object->exists) {
             $object->companies()->sync($ids);
+            if (method_exists($object, 'syncLegacyCompanyIdMirror')) {
+                $object->syncLegacyCompanyIdMirror();
+            }
         } else {
-            $object->saved(fn () => $object->companies()->sync($ids));
+            $object->saved(function () use ($object, $ids) {
+                $object->companies()->sync($ids);
+                if (method_exists($object, 'syncLegacyCompanyIdMirror')) {
+                    $object->syncLegacyCompanyIdMirror();
+                }
+            });
         }
     }
 

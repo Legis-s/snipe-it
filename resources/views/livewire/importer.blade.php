@@ -32,9 +32,9 @@
                     <div class="errors-table">
                         <table class="table table-striped table-bordered" id="errors-table">
                             <thead>
-                            <th>{{ trans('general.item') }}</th>
-                            <th>{{ trans('admin/custom_fields/general.field') }}</th>
-                            <th>{{ trans('general.error') }}</th>
+                            <th scope="col">{{ trans('general.item') }}</th>
+                            <th scope="col">{{ trans('admin/custom_fields/general.field') }}</th>
+                            <th scope="col">{{ trans('general.error') }}</th>
                             </thead>
                             <tbody>
                             @foreach($import_errors AS $key => $actual_import_errors)

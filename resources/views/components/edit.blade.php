@@ -87,7 +87,7 @@
                         id="purchase_date"
                         :value="old('purchase_date', $item->purchase_date ? date('Y-m-d', strtotime($item->purchase_date)) : '')"
                     />
-                    {!! $errors->first('purchase_date', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                    <x-form.error name="purchase_date" />
                 </div>
             </div>
 

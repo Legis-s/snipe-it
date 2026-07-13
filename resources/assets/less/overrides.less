@@ -1449,3 +1449,22 @@ Radio toggle styles for permission settings and check/uncheck all
   text-decoration: none;
 }
 }
+
+// Respect the user's OS-level "reduce motion" preference. The Font Awesome
+// spinners (.fa-spin) and Font Awesome Animation pulses (.faa-pulse, .animated)
+// loop indefinitely, which can trigger vestibular symptoms. One-shot animations
+// (like the confetti burst on save) are left alone since they don't loop.
+@media (prefers-reduced-motion: reduce) {
+  // Catch-all for any Font Awesome Animation utility (faa-pulse, faa-spin,
+  // faa-tada, faa-shake, faa-bounce, faa-burst, faa-flash, faa-float,
+  // faa-horizontal, faa-vertical, faa-passing, faa-ring, faa-slide, etc.)
+  // regardless of whether the animation is always-on (.animated) or hover-
+  // triggered (.animated-hover:hover). Attribute selector keeps this rule
+  // safe against future FA-Animation class additions.
+  [class*="faa-"].animated,
+  [class*="faa-"].animated-hover:hover,
+  .fa-spin,
+  .fa-pulse {
+    animation: none !important;
+  }
+}

@@ -72,7 +72,7 @@
                                         value="{{ $template->name }}"
                                         required
                                     >
-                                    {!! $errors->first('name', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                    <x-form.error name="name" />
                                 </div>
                                 @if ($template->created_by == auth()->id())
                                     <div class="col-md-3">
@@ -290,8 +290,8 @@
 
                                 @if ($errors->has('purchase_start') || $errors->has('purchase_end'))
                                     <div class="col-md-9 col-lg-offset-3">
-                                        {!! $errors->first('purchase_start', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
-                                        {!! $errors->first('purchase_end', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                        <x-form.error name="purchase_start" />
+                                        <x-form.error name="purchase_end" />
                                     </div>
                                 @endif
                             </div>
@@ -307,8 +307,8 @@
 
                                 @if ($errors->has('quantity_start') || $errors->has('quantity_end'))
                                     <div class="col-md-9 col-lg-offset-3">
-                                        {!! $errors->first('quantity_start', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
-                                        {!! $errors->first('quantity_end', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                        <x-form.error name="quantity_start" />
+                                        <x-form.error name="quantity_end" />
                                     </div>
                                 @endif
                             </div>
@@ -324,8 +324,8 @@
 
                                 @if ($errors->has('min_quantity_start') || $errors->has('min_quantity_end'))
                                     <div class="col-md-9 col-lg-offset-3">
-                                        {!! $errors->first('min_quantity_start', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
-                                        {!! $errors->first('min_quantity_end', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                        <x-form.error name="min_quantity_start" />
+                                        <x-form.error name="min_quantity_end" />
                                     </div>
                                 @endif
                             </div>
@@ -341,8 +341,8 @@
 
                                 @if ($errors->has('unit_cost_start') || $errors->has('unit_cost_end'))
                                     <div class="col-md-9 col-lg-offset-3">
-                                        {!! $errors->first('unit_cost_start', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
-                                        {!! $errors->first('unit_cost_end', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                        <x-form.error name="unit_cost_start" />
+                                        <x-form.error name="unit_cost_end" />
                                     </div>
                                 @endif
                             </div>
@@ -358,8 +358,8 @@
 
                                 @if ($errors->has('checkout_date_start') || $errors->has('checkout_date_end'))
                                     <div class="col-md-9 col-lg-offset-3">
-                                        {!! $errors->first('checkout_date_start', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
-                                        {!! $errors->first('checkout_date_end', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                        <x-form.error name="checkout_date_start" />
+                                        <x-form.error name="checkout_date_end" />
                                     </div>
                                 @endif
                             </div>
@@ -375,8 +375,8 @@
 
                                 @if ($errors->has('created_start') || $errors->has('created_end'))
                                     <div class="col-md-9 col-lg-offset-3">
-                                        {!! $errors->first('created_start', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
-                                        {!! $errors->first('created_end', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                        <x-form.error name="created_start" />
+                                        <x-form.error name="created_end" />
                                     </div>
                                 @endif
                             </div>
@@ -392,8 +392,8 @@
 
                                 @if ($errors->has('last_updated_start') || $errors->has('last_updated_end'))
                                     <div class="col-md-9 col-lg-offset-3">
-                                        {!! $errors->first('last_updated_start', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
-                                        {!! $errors->first('last_updated_end', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                        <x-form.error name="last_updated_start" />
+                                        <x-form.error name="last_updated_end" />
                                     </div>
                                 @endif
                             </div>
@@ -408,7 +408,7 @@
 
                                 @if ($errors->has('last_updated_before'))
                                     <div class="col-md-9 col-lg-offset-3">
-                                        {!! $errors->first('last_updated_before', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                        <x-form.error name="last_updated_before" />
                                     </div>
                                 @endif
                             </div>
@@ -515,7 +515,7 @@
                                 value="{{ $template->name }}"
                                 required
                             >
-                            {!! $errors->first('name', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                            <x-form.error name="name" />
                         </div>
                         <button class="btn btn-primary" style="width: 100%">
                             {{ trans('admin/reports/general.save_template') }}

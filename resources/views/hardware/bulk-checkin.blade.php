@@ -70,7 +70,7 @@
                             style="width: 100%;"
                             aria-label="status_id"
                     />
-                    {!! $errors->first('status_id', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                    <x-form.error name="status_id" />
                 </div>
             </div>
 
@@ -100,7 +100,7 @@
                         <input type="text" class="form-control" placeholder="{{ trans('general.select_date') }}" name="checkin_at" id="checkin_at" value="{{ old('checkin_at') }}">
                         <span class="input-group-addon"><x-icon type="calendar" /></span>
                     </div>
-                    {!! $errors->first('checkin_at', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                    <x-form.error name="checkin_at" />
                 </div>
             </div>
 
@@ -111,7 +111,7 @@
                 </label>
                 <div class="col-md-8">
                     <textarea class="col-md-6 form-control" id="note" name="note">{{ old('note') }}</textarea>
-                    {!! $errors->first('note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                    <x-form.error name="note" />
                 </div>
             </div>
 

@@ -17,7 +17,7 @@
     </label>
     <div class="col-md-9 col-sm-12">
         <input class="form-control" type="number" min="0" max="3600" name="months" id="months" value="{{ old('months', $item->months) }}" style="width: 90px;"{!!  (\App\Helpers\Helper::checkIfRequired($item, 'months')) ? ' required' : '' !!} />
-        {!! $errors->first('months', '<span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span>') !!}
+        <x-form.error name="months" />
     </div>
 </div>
 
@@ -32,7 +32,7 @@
             <option value="amount" {{ old('depreciation_type', $item->depreciation_type) == 'amount' ? 'selected' : '' }}>{{ trans('general.depreciation_options.amount') }}</option>
             <option value="percent" {{ old('depreciation_type', $item->depreciation_type) == 'percent' ? 'selected' : '' }}>{{ trans('general.depreciation_options.percent') }}</option>
         </select>
-        {!! $errors->first('depreciation_min', '<span class="col-md-7 col-md-offset-3 alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+        <div class="col-md-7 col-md-offset-3"><x-form.error name="depreciation_min" /></div>
     </div>
 
 </div>

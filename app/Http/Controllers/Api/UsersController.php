@@ -660,6 +660,7 @@ class UsersController extends Controller
                 $filtered = Company::getIdsForCurrentUser([(int) $request->input('company_id')]);
                 if (! empty($filtered)) {
                     $user->companies()->syncWithoutDetaching($filtered);
+                    $user->syncLegacyCompanyIdMirror();
                 }
             }
 

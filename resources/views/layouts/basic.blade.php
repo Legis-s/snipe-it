@@ -55,7 +55,9 @@
         </div>
     @endif
   <!-- Content -->
-  @yield('content')
+  <main id="main">
+    @yield('content')
+  </main>
 
     <div class="text-center" style="padding-top: 100px;">
         @if (($snipeSettings) && ($snipeSettings->privacy_policy_link!=''))

@@ -26,7 +26,7 @@
             <input class="form-control" type="number" min="0" name="seats" id="seats" value="{{ old('seats', $item->seats) }}" minlength="1" required style="width: 97px;">
         </div>
     </div>
-    {!! $errors->first('seats', '<div class="col-md-8 col-md-offset-3"><span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span></div>') !!}
+    <div class="col-md-8 col-md-offset-3"><x-form.error name="seats" /></div>
 </div>
 @include ('partials.forms.edit.minimum_quantity')
 
@@ -36,7 +36,7 @@
         <label for="serial" class="col-md-3 control-label">{{ trans('admin/licenses/form.license_key') }}</label>
         <div class="col-md-7">
             <textarea class="form-control" type="text" name="serial" id="serial" rows="5"{{  (Helper::checkIfRequired($item, 'serial')) ? ' required' : '' }}>{{ old('serial', $item->serial) }}</textarea>
-            {!! $errors->first('serial', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+            <x-form.error name="serial" />
         </div>
     </div>
 @endcan
@@ -49,7 +49,7 @@
     <label for="license_name" class="col-md-3 control-label">{{ trans('admin/licenses/form.to_name') }}</label>
     <div class="col-md-7">
         <input class="form-control" type="text" name="license_name" id="license_name" value="{{ old('license_name', $item->license_name) }}" />
-        {!! $errors->first('license_name', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+        <x-form.error name="license_name" />
     </div>
 </div>
 
@@ -58,7 +58,7 @@
     <label for="license_email" class="col-md-3 control-label">{{ trans('admin/licenses/form.to_email') }}</label>
     <div class="col-md-7">
         <input class="form-control" type="email" name="license_email" id="license_email" value="{{ old('license_email', $item->license_email) }}" />
-        {!! $errors->first('license_email', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+        <x-form.error name="license_email" />
     </div>
 </div>
 
@@ -90,7 +90,7 @@
             <input type="text" class="form-control" placeholder="{{ trans('general.select_date') }}" name="expiration_date" id="expiration_date" value="{{ old('expiration_date', ($item->expiration_date) ? $item->expiration_date->format('Y-m-d') : '') }}" maxlength="10">
             <span class="input-group-addon"><x-icon type="calendar" /></span>
         </div>
-        {!! $errors->first('expiration_date', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+        <x-form.error name="expiration_date" />
     </div>
 
 </div>
@@ -104,7 +104,7 @@
             <input type="text" class="form-control" placeholder="{{ trans('general.select_date') }}" name="termination_date" id="termination_date" value="{{ old('termination_date', ($item->termination_date) ? $item->termination_date->format('Y-m-d') : '') }}" maxlength="10">
             <span class="input-group-addon"><x-icon type="calendar" /></span>
         </div>
-        {!! $errors->first('termination_date', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+        <x-form.error name="termination_date" />
     </div>
 </div>
 
@@ -114,7 +114,7 @@
     <label for="purchase_order" class="col-md-3 control-label">{{ trans('admin/licenses/form.purchase_order') }}</label>
     <div class="col-md-3 text-right">
         <input class="form-control" type="text" name="purchase_order" id="purchase_order" value="{{ old('purchase_order', $item->purchase_order) }}" maxlength="191" />
-        {!! $errors->first('purchase_order', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+        <x-form.error name="purchase_order" />
     </div>
 </div>
 

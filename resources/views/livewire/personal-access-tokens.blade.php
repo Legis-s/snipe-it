@@ -23,10 +23,10 @@
                 @if($tokens->count() > 0)
                     <thead>
                     <tr>
-                        <th class="col-md-3">{{ trans('general.name') }}</th>
-                        <th class="col-md-2">{{ trans('general.created_at') }}</th>
-                        <th class="col-md-2">{{ trans('general.expires') }}</th>
-                        <th class="col-md-2"><span class="sr-only">{{ trans('general.delete') }}</span></th>
+                        <th scope="col" class="col-md-3">{{ trans('general.name') }}</th>
+                        <th scope="col" class="col-md-2">{{ trans('general.created_at') }}</th>
+                        <th scope="col" class="col-md-2">{{ trans('general.expires') }}</th>
+                        <th scope="col" class="col-md-2"><span class="sr-only">{{ trans('general.delete') }}</span></th>
                     </tr>
                     </thead>
                     <tbody>

@@ -82,7 +82,7 @@
                         <label for="note" class="col-md-3 control-label">{{ trans('general.checkout_note') }}</label>
                         <div class="col-md-8">
                             <textarea class="col-md-6 form-control" id="notes" name="notes" rows="5">{{ old('note') }}</textarea>
-                            {!! $errors->first('note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                            <x-form.error name="note" />
                         </div>
                     </div>
                 </div>
@@ -91,7 +91,7 @@
                 @if ($license->requireAcceptance() || (string) $snipeSettings->require_accept_signature === '1' || $license->getEula() || ($snipeSettings->webhook_endpoint!=''))
                     <div class="form-group notification-callout">
                         <div class="col-md-8 col-md-offset-3">
-                            <div class="callout callout-info">
+                            <div class="callout callout-info" role="status" aria-live="polite" aria-atomic="true">
 
                                 @if ($license->requireAcceptance())
                                     <i class="far fa-envelope"></i>

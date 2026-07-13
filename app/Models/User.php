@@ -74,7 +74,6 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         'activated',
         'address',
         'city',
-        'company_id',
         'country',
         'department_id',
         'email',
@@ -111,7 +110,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     protected $casts = [
         'manager_id' => 'integer',
         'location_id' => 'integer',
-        'company_id' => 'integer',
+        'legacy_company_id' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
@@ -258,15 +257,6 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
 
     protected static function booted(): void
     {
-        // Bridge for factories/seeders that still set company_id directly: ensure
-        // that company appears in the pivot so FMCS scoping works correctly.
-        // Application code (controllers, importers) writes only to the pivot.
-        static::created(function (User $user) {
-            if ($user->company_id) {
-                $user->companies()->syncWithoutDetaching([$user->company_id]);
-            }
-        });
-
         static::forceDeleted(function (User $user) {
             CheckoutRequest::where(['user_id' => $user->id])->forceDelete();
             $user->purgeAssociatedPassportTokens();
@@ -676,9 +666,14 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
      *
      * @return Relation
      */
+    /**
+     * @deprecated Use companies() for multi-company support. This resolves via
+     * the legacy_company_id mirror, which is kept in sync with the pivot but is
+     * not authoritative and may be dropped in a future release.
+     */
     public function company()
     {
-        return $this->belongsTo(Company::class, 'company_id');
+        return $this->belongsTo(Company::class, 'legacy_company_id');
     }
 
     public function companies(): BelongsToMany
@@ -763,6 +758,8 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         $this->companies()->sync($companyIds);
         $newIds = $this->companies()->orderBy('companies.id')->pluck('companies.id')->toArray();
 
+        $this->syncLegacyCompanyIdMirror();
+
         if ($oldIds === $newIds) {
             return;
         }
@@ -787,6 +784,44 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         $logAction->created_by = auth()->id();
         $logAction->log_meta = json_encode($companyChange);
         $logAction->logaction('update');
+    }
+
+    /**
+     * Update the legacy users.company_id column so that it mirrors the
+     * company_user pivot: empty pivot writes NULL; a non-empty pivot writes
+     * the lowest-id pivot entry (arbitrary but stable).
+     *
+     * The column is a compatibility mirror maintained only for external
+     * consumers that historically read it (the API transformer, CSV export
+     * templates, SCIM schema mappings). It has NO role in FMCS scoping,
+     * checkout eligibility, or any internal application logic. Do not read
+     * it from application code.
+     *
+     * Call this after any write to the company_user pivot so the mirror
+     * stays consistent. Writes via the query builder so it doesn't trigger
+     * the User model's save events (which would recurse through
+     * UserObserver::updating and produce a spurious change log entry).
+     */
+    public function syncLegacyCompanyIdMirror(): void
+    {
+        if (! $this->exists) {
+            return;
+        }
+
+        $lowestPivotId = DB::table('company_user')
+            ->where('user_id', $this->id)
+            ->orderBy('company_id')
+            ->value('company_id');
+
+        $target = $lowestPivotId ? (int) $lowestPivotId : null;
+
+        if ((int) $this->legacy_company_id === (int) $target && ($target !== null || is_null($this->legacy_company_id))) {
+            return;
+        }
+
+        DB::table('users')->where('id', $this->id)->update(['legacy_company_id' => $target]);
+        $this->legacy_company_id = $target;
+        $this->syncOriginalAttribute('legacy_company_id');
     }
 
     /**
@@ -1281,6 +1316,28 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
      * @param  string  $query
      * @return string
      */
+    /**
+     * Verify that a resolved local user's stored username byte-exactly matches
+     * the externally-supplied identifier. The MySQL/MariaDB default collation
+     * utf8mb4_unicode_ci folds accents and case, so `WHERE username = ?` on
+     * that engine can silently route 'snípeitreport3' or 'Admin' to the row
+     * for 'snipeitreport3' or 'admin'. Federated/SSO auth flows (SAML, LDAP,
+     * REMOTE_USER, Google OAuth) must call this after their username lookup
+     * so an attacker-controlled external identifier can't authenticate as a
+     * different local account. hash_equals runs in constant time so this
+     * check doesn't leak any timing signal.
+     *
+     * Returns the user when the strings match byte-for-byte, null otherwise.
+     */
+    public static function verifyExactUsernameMatch(?self $user, string $expected): ?self
+    {
+        if ($user === null) {
+            return null;
+        }
+
+        return hash_equals((string) $user->username, $expected) ? $user : null;
+    }
+
     public static function generateEmailFromFullName($name)
     {
         $username = self::generateFormattedNameFromFullName($name, Setting::getSettings()->email_format);

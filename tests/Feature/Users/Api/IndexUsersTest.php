@@ -159,7 +159,7 @@ class IndexUsersTest extends TestCase
         $companyACaller = $companyA->users()->save(User::factory()->viewUsers()->make());
         $companyAPeer = $companyA->users()->save(User::factory()->make(['first_name' => 'PeerInA']));
         $companyBUser = $companyB->users()->save(User::factory()->make(['first_name' => 'UserInB']));
-        $floater = User::factory()->create(['company_id' => null, 'first_name' => 'FloaterUser']);
+        $floater = User::factory()->withoutCompany()->create(['first_name' => 'FloaterUser']);
 
         $this->settings->enableFloaterMode();
 

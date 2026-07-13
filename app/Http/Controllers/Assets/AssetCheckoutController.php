@@ -124,9 +124,11 @@ class AssetCheckoutController extends Controller
                 $asset->location_id = null;
             }
 
-            if ($request->boolean('set_not_requestable')) {
-                $asset->requestable = false;
-            }
+            // Two-way toggle: checked = requestable, unchecked (or absent) =
+            // not. The form pre-populates the checkbox with the asset's current
+            // state so users can flip either direction (e.g. mark "no longer
+            // requestable" during checkout because the item is now assigned).
+            $asset->requestable = $request->boolean('requestable');
 
             if (! empty($asset->licenseseats->all())) {
                 if (request('checkout_to_type') == 'user') {

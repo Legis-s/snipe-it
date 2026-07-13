@@ -56,7 +56,11 @@ trait CompanyableTrait
         }
 
         if (! $this->company_id) {
-            if (is_null($target->company_id)) {
+            $targetHasNoCompany = $target instanceof User
+                ? $target->companies()->count() === 0
+                : is_null($target->company_id);
+
+            if ($targetHasNoCompany) {
                 return true;
             }
 

@@ -52,7 +52,7 @@
                                         <p class="help-block">
                                             {{ trans('admin/settings/general.block_api_user_agents_help') }}
                                         </p>
-                                        {!! $errors->first('block_api_user_agents', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                        <x-form.error name="block_api_user_agents" />
                                     </div>
                                 </div>
 
@@ -68,7 +68,7 @@
                                             aria-describedby="blocked_api_user_agents_help"
                                             @disabled(! $blockApiUserAgents)
                                         >{{ $blockedApiUserAgents }}</textarea>
-                                        {!! $errors->first('blocked_api_user_agents', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                        <x-form.error name="blocked_api_user_agents" />
 
                                     </div>
                                     <div class="col-md-offset-3 col-md-8">
@@ -89,7 +89,7 @@
                                         <p class="help-block">
                                             {!! trans('admin/settings/general.block_blank_api_user_agents_help') !!}
                                         </p>
-                                        {!! $errors->first('block_blank_api_user_agents', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                        <x-form.error name="block_blank_api_user_agents" />
                                     </div>
                                 </div>
 

@@ -17,6 +17,7 @@ class DepartmentPresenter extends Presenter
         $layout = [
             [
                 'field' => 'checkbox',
+                'scope' => 'col',
                 'checkbox' => true,
                 'formatter' => 'checkboxEnabledFormatter',
                 'titleTooltip' => trans('general.select_all_none'),
@@ -24,6 +25,7 @@ class DepartmentPresenter extends Presenter
                 'class' => 'hidden-print',
             ], [
                 'field' => 'id',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -31,6 +33,7 @@ class DepartmentPresenter extends Presenter
                 'visible' => false,
             ], [
                 'field' => 'name',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => false,
@@ -39,6 +42,7 @@ class DepartmentPresenter extends Presenter
                 'formatter' => 'departmentsLinkFormatter',
             ], [
                 'field' => 'company',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -47,6 +51,7 @@ class DepartmentPresenter extends Presenter
                 'formatter' => 'companiesLinkObjFormatter',
             ], [
                 'field' => 'image',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -55,6 +60,7 @@ class DepartmentPresenter extends Presenter
                 'formatter' => 'imageFormatter',
             ], [
                 'field' => 'manager',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -63,6 +69,7 @@ class DepartmentPresenter extends Presenter
                 'formatter' => 'usersLinkObjFormatter',
             ], [
                 'field' => 'location',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -71,6 +78,7 @@ class DepartmentPresenter extends Presenter
                 'formatter' => 'locationsLinkObjFormatter',
             ], [
                 'field' => 'users_count',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -80,6 +88,7 @@ class DepartmentPresenter extends Presenter
                 'class' => 'css-house-user',
             ],  [
                 'field' => 'tag_color',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -88,12 +97,14 @@ class DepartmentPresenter extends Presenter
                 'formatter' => 'colorTagFormatter',
             ], [
                 'field' => 'notes',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'visible' => false,
                 'title' => trans('general.notes'),
             ], [
                 'field' => 'created_at',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -103,6 +114,7 @@ class DepartmentPresenter extends Presenter
             ],
             [
                 'field' => 'created_by',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -111,6 +123,7 @@ class DepartmentPresenter extends Presenter
                 'formatter' => 'usersLinkObjFormatter',
             ], [
                 'field' => 'actions',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => false,

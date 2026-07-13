@@ -14,7 +14,7 @@
                  style="width:100%; min-width:350px;"
                  aria-label="custom_fieldset"
              />
-            {!! $errors->first('custom_fieldset', '<span class="alert-msg" aria-hidden="true"><br><i class="fas fa-times"></i> :message</span>') !!}
+            <x-form.error name="custom_fieldset" />
         </div>
         <div class="col-md-3">
             @if ($fieldset_id)
@@ -143,7 +143,7 @@
                                         <?php
                                         $errormessage = $errors->first($field->db_column_name());
                                         if ($errormessage) {
-                                            print('<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> '.$errormessage.'</span>');
+                                            print('<span class="alert-msg" role="alert" aria-live="assertive">'.$errormessage.'</span>');
                                         }
                                         ?>
                         </div>

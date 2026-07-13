@@ -32,7 +32,7 @@
             :selected="old('label2_1d_type', $setting->label2_1d_type)"
             class="col-md-4"
         />
-        {!! $errors->first('label2_1d_type', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+        <x-form.error name="label2_1d_type" />
         <p class="help-block">
             {{ trans('admin/settings/general.label2_1d_type_help') }}.
             {!!
@@ -73,7 +73,7 @@
             :selected="old('label2_2d_type', $setting->label2_2d_type)"
             class="col-md-4"
         />
-        {!! $errors->first('label2_2d_type', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+        <x-form.error name="label2_2d_type" />
         <p class="help-block">
             {{ trans('admin/settings/general.label2_2d_type_help', ['current' => $setting->barcode_type]) }}.
             {!! trans('admin/settings/general.help_default_will_use') !!}
@@ -112,7 +112,7 @@
             <p class="help-block">{{ trans('admin/settings/general.qr_help') }}</p>
         @endif
 
-        {!! $errors->first('qr_text', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+        <x-form.error name="qr_text" />
     </div>
 </div>
 
@@ -127,7 +127,7 @@
         <span id="purgebarcodesicon"></span>
         <span id="purgebarcodesresult"></span>
         <span id="purgebarcodesstatus"></span>
-        {!! $errors->first('purgebarcodes', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+        <x-form.error name="purgebarcodes" />
         <p class="help-block">{{ trans('admin/settings/general.barcodes_help') }}</p>
     </div>
 </div>
@@ -138,7 +138,7 @@
     </div>
     <div class="col-md-9">
         <input class="form-control" style="width: 100px;" name="labels_per_page" type="text" value="{{ old('labels_per_page', $setting->labels_per_page) }}" id="labels_per_page">
-        {!! $errors->first('labels_per_page', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+        <x-form.error name="labels_per_page" />
     </div>
 </div>
 
@@ -153,7 +153,7 @@
         </div>
     </div>
     <div class="col-md-9 col-md-offset-3">
-        {!! $errors->first('labels_fontsize', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+        <x-form.error name="labels_fontsize" />
     </div>
 </div>
 
@@ -166,14 +166,14 @@
             <input class="form-control" name="labels_width" type="text" value="{{ old('labels_width', $setting->labels_width) }}" id="labels_width">
             <div class="input-group-addon">{{ trans('admin/settings/general.width_w') }}</div>
         </div>
-        {!! $errors->first('labels_width', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+        <x-form.error name="labels_width" />
     </div>
     <div class="col-md-3 text-right">
         <div class="input-group">
             <input class="form-control" name="labels_height" type="text" value="{{ old('labels_height', $setting->labels_height) }}" id="labels_height">
             <div class="input-group-addon">{{ trans('admin/settings/general.height_h') }}</div>
         </div>
-        {!! $errors->first('labels_height', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+        <x-form.error name="labels_height" />
     </div>
 </div>
 
@@ -194,8 +194,8 @@
         </div>
     </div>
     <div class="col-md-9 col-md-offset-3">
-        {!! $errors->first('labels_display_sgutter', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
-        {!! $errors->first('labels_display_bgutter', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+        <x-form.error name="labels_display_sgutter" />
+        <x-form.error name="labels_display_bgutter" />
     </div>
 </div>
 
@@ -242,8 +242,8 @@
         </div>
     </div>
     <div class="col-md-9 col-md-offset-3">
-        {!! $errors->first('labels_pagewidth', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
-        {!! $errors->first('labels_pageheight', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+        <x-form.error name="labels_pagewidth" />
+        <x-form.error name="labels_pageheight" />
     </div>
 </div>
 

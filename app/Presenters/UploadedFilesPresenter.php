@@ -18,6 +18,7 @@ class UploadedFilesPresenter extends Presenter
         $layout = [
             [
                 'field' => 'id',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -26,6 +27,7 @@ class UploadedFilesPresenter extends Presenter
             ],
             [
                 'field' => 'icon',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => false,
@@ -35,6 +37,7 @@ class UploadedFilesPresenter extends Presenter
             ],
             [
                 'field' => 'image',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
@@ -44,6 +47,7 @@ class UploadedFilesPresenter extends Presenter
             ],
             [
                 'field' => 'filename',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -53,6 +57,7 @@ class UploadedFilesPresenter extends Presenter
             ],
             [
                 'field' => 'download',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
@@ -64,6 +69,7 @@ class UploadedFilesPresenter extends Presenter
             ],
             [
                 'field' => 'note',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -72,6 +78,7 @@ class UploadedFilesPresenter extends Presenter
             ],
             [
                 'field' => 'created_by',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('general.created_by'),
@@ -80,6 +87,7 @@ class UploadedFilesPresenter extends Presenter
             ],
             [
                 'field' => 'created_at',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -88,6 +96,7 @@ class UploadedFilesPresenter extends Presenter
                 'formatter' => 'dateDisplayFormatter',
             ], [
                 'field' => 'available_actions',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => false,

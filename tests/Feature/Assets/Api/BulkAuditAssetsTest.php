@@ -213,7 +213,7 @@ class BulkAuditAssetsTest extends TestCase
         $companyA = Company::factory()->create();
         $companyB = Company::factory()->create();
 
-        $userA = User::factory()->auditAssets()->create(['company_id' => $companyA->id]);
+        $userA = User::factory()->auditAssets()->forCompany($companyA->id)->create();
         $assetA = Asset::factory()->create(['company_id' => $companyA->id, 'created_by' => $userA->id]);
         $assetB = Asset::factory()->create(['company_id' => $companyB->id]);
 

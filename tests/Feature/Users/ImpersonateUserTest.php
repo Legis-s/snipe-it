@@ -223,7 +223,7 @@ class ImpersonateUserTest extends TestCase
         $actor = User::factory()->superuser()->create();
         $actor->companies()->sync([$companyA->id]);
 
-        $target = User::factory()->create(['activated' => 1, 'company_id' => $companyB->id]);
+        $target = User::factory()->forCompany($companyB)->create(['activated' => 1]);
         $target->companies()->sync([$companyB->id]);
 
         $this->allow($actor);

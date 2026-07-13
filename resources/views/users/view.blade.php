@@ -17,7 +17,7 @@
 
         @if ($user->deleted_at!='')
             <div class="col-md-12">
-                <div class="callout callout-warning">
+                <div class="callout callout-warning" role="alert" aria-live="assertive" aria-atomic="true">
                     <x-icon type="warning"/>
                     {{ trans('admin/users/message.user_deleted_warning') }}
                 </div>
@@ -359,14 +359,14 @@
                             <thead>
                                 <tr>
                                     @can('checkin', \App\Models\License::class)
-                                    <th class="hidden-print"><input type="checkbox" id="userLicenseSelectAll"></th>
+                                    <th scope="col" class="hidden-print"><input type="checkbox" id="userLicenseSelectAll"></th>
                                     @endcan
-                                    <th>{{ trans('general.name') }}</th>
-                                    <th>{{ trans('admin/licenses/form.license_key') }}</th>
-                                    <th data-footer-formatter="sumFormatter" data-fieldname="purchase_cost">{{ trans('general.purchase_cost') }}</th>
-                                    <th>{{ trans('admin/licenses/form.purchase_order') }}</th>
-                                    <th>{{ trans('general.order_number') }}</th>
-                                    <th class="col-md-1 hidden-print">{{ trans('general.action') }}</th>
+                                    <th scope="col">{{ trans('general.name') }}</th>
+                                    <th scope="col">{{ trans('admin/licenses/form.license_key') }}</th>
+                                    <th scope="col" data-footer-formatter="sumFormatter" data-fieldname="purchase_cost">{{ trans('general.purchase_cost') }}</th>
+                                    <th scope="col">{{ trans('admin/licenses/form.purchase_order') }}</th>
+                                    <th scope="col">{{ trans('general.order_number') }}</th>
+                                    <th scope="col" class="col-md-1 hidden-print">{{ trans('general.action') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -433,12 +433,12 @@
                     }'>
                             <thead>
                                 <tr>
-                                    <th>{{ trans('general.id') }}</th>
-                                    <th>{{ trans('general.name') }}</th>
-                                    <th>{{ trans('general.date') }}</th>
-                                    <th data-fieldname="note">{{ trans('general.notes') }}</th>
-                                    <th data-footer-formatter="sumFormatter" data-fieldname="purchase_cost">{{ trans('general.unit_cost') }}</th>
-                                    <th class="hidden-print">{{ trans('general.action') }}</th>
+                                    <th scope="col">{{ trans('general.id') }}</th>
+                                    <th scope="col">{{ trans('general.name') }}</th>
+                                    <th scope="col">{{ trans('general.date') }}</th>
+                                    <th scope="col" data-fieldname="note">{{ trans('general.notes') }}</th>
+                                    <th scope="col" data-footer-formatter="sumFormatter" data-fieldname="purchase_cost">{{ trans('general.unit_cost') }}</th>
+                                    <th scope="col" class="hidden-print">{{ trans('general.action') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -547,11 +547,11 @@
                     }'>
                             <thead>
                                 <tr>
-                                    <th data-visible="true" data-field="icon" style="width: 40px;" class="hidden-xs" data-formatter="iconFormatter">{{ trans('admin/hardware/table.icon') }}</th>
-                                    <th data-visible="true" data-field="item.name">{{ trans('general.item') }}</th>
-                                    <th data-visible="true" data-field="created_at" data-sortable="true" data-formatter="dateDisplayFormatter">{{ trans('general.accepted_date') }}</th>
-                                    <th data-field="note">{{ trans('general.notes') }}</th>
-                                    <th data-field="url" data-formatter="fileDownloadButtonsFormatter">{{ trans('general.download') }}</th>
+                                    <th scope="col" data-visible="true" data-field="icon" style="width: 40px;" class="hidden-xs" data-formatter="iconFormatter">{{ trans('admin/hardware/table.icon') }}</th>
+                                    <th scope="col" data-visible="true" data-field="item.name">{{ trans('general.item') }}</th>
+                                    <th scope="col" data-visible="true" data-field="created_at" data-sortable="true" data-formatter="dateDisplayFormatter">{{ trans('general.accepted_date') }}</th>
+                                    <th scope="col" data-field="note">{{ trans('general.notes') }}</th>
+                                    <th scope="col" data-field="url" data-formatter="fileDownloadButtonsFormatter">{{ trans('general.download') }}</th>
                                 </tr>
                             </thead>
                         </table>

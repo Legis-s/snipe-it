@@ -86,7 +86,7 @@
                             <div class="col-md-7">
                                 <input class="form-control" type="text" name="name" id="name"
                                        value="{{ old('name', $asset->name) }}" tabindex="1">
-                                {!! $errors->first('name', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                <x-form.error name="name" />
                             </div>
                         </div>
 
@@ -103,26 +103,24 @@
                                     style="width: 100%;"
                                     aria-label="status_id"
                                 />
-                                {!! $errors->first('status_id', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                <x-form.error name="status_id" />
                             </div>
                         </div>
 
-                        @if ($asset->requestable)
-                            <div class="form-group">
-                                <div class="col-md-7 col-md-offset-3">
-                                    <label class="form-control" for="set_not_requestable">
-                                        <input
-                                            type="checkbox"
-                                            value="1"
-                                            name="set_not_requestable"
-                                            id="set_not_requestable"
-                                            @checked((bool) old('set_not_requestable', true))
-                                        >
-                                        {{ trans('admin/hardware/general.not_requestable') }}
-                                    </label>
-                                </div>
+                        <div class="form-group">
+                            <div class="col-md-7 col-md-offset-3">
+                                <label class="form-control" for="requestable">
+                                    <input
+                                        type="checkbox"
+                                        value="1"
+                                        name="requestable"
+                                        id="requestable"
+                                        @checked((bool) old('requestable', $asset->requestable))
+                                    />
+                                    {{ trans('admin/hardware/general.requestable') }}
+                                </label>
                             </div>
-                        @endif
+                        </div>
 
                         @include ('partials.forms.checkout-selector', ['user_select' => 'true','asset_select' => 'true', 'location_select' => 'true', 'deal_select' => 'true'])
                         @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.user'), 'fieldname' => 'assigned_user', 'style' => 'display:none;', 'hide_new' => true])
@@ -155,7 +153,7 @@
                                         placeholder="{{ trans('general.select_date') }}"
                                         required="{{ Helper::checkIfRequired($item, 'checkout_at') }}"
                                 />
-                                {!! $errors->first('checkout_at', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                <x-form.error name="checkout_at" />
                             </div>
                         </div>
 
@@ -173,7 +171,7 @@
                                         placeholder="{{ trans('general.select_date') }}"
                                         required="{{ Helper::checkIfRequired($item, 'expected_checkin') }}"
                                 />
-                                {!! $errors->first('expected_checkin', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                <x-form.error name="expected_checkin" />
                             </div>
                         </div>
 
@@ -186,7 +184,7 @@
                             <div class="col-md-8">
                                 <textarea class="col-md-6 form-control" id="note" @required($snipeSettings->require_checkinout_notes)
                                 name="note">{{ old('note', $asset->note) }}</textarea>
-                                {!! $errors->first('note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                <x-form.error name="note" />
                             </div>
                         </div>
 
@@ -201,7 +199,7 @@
                         @if ($asset->requireAcceptance() || (string) $snipeSettings->require_accept_signature === '1' || $asset->getEula() || ($snipeSettings->webhook_endpoint!=''))
                             <div class="form-group notification-callout" style="display:none;">
                                 <div class="col-md-8 col-md-offset-3">
-                                    <div class="callout callout-info">
+                                    <div class="callout callout-info" role="status" aria-live="polite" aria-atomic="true">
 
                                         @if ($asset->requireAcceptance())
                                             <x-icon type="email"/>
@@ -409,6 +407,51 @@
 
 @section('moar_scripts')
     @include('partials/assets-assigned')
+
+    <script nonce="{{ csrf_token() }}">
+        // Per-user localStorage preference for the requestable default on
+        // checkout. Namespaced by user id so a shared browser doesn't leak one
+        // user's habit into another user's default. Only takes over when the
+        // field wasn't repopulated from a validation-error redirect (old()
+        // beats the stored preference). On submit we save whatever the user
+        // actually chose, so the preference tracks their real habit.
+        const initializeCheckoutRequestablePreference = function () {
+            const storageKey = 'snipeit.checkout.requestable_default.' + @json(auth()->id() ?? 'guest');
+            const hadOldInput = @json((bool) old('requestable', false)) || @json(session()->has('_old_input.requestable'));
+            const checkbox = document.getElementById('requestable');
+            const form = checkbox ? checkbox.closest('form') : null;
+
+            if (!checkbox || !form) {
+                return;
+            }
+
+            if (!hadOldInput) {
+                let stored = null;
+                try {
+                    stored = window.localStorage.getItem(storageKey);
+                } catch (e) {
+                    // localStorage may be unavailable (private mode, disabled).
+                }
+                if (stored === '1' || stored === '0') {
+                    checkbox.checked = stored === '1';
+                }
+            }
+
+            form.addEventListener('submit', function () {
+                try {
+                    window.localStorage.setItem(storageKey, checkbox.checked ? '1' : '0');
+                } catch (e) {
+                    // Non-fatal: preference just won't persist this time.
+                }
+            });
+        };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeCheckoutRequestablePreference);
+        } else {
+            initializeCheckoutRequestablePreference();
+        }
+    </script>
 
     <script nonce="{{ csrf_token() }}">
         $(function () {

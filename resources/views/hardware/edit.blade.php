@@ -33,8 +33,8 @@
           <div class="col-md-7 col-sm-12">
 
           <input class="form-control" type="text" name="asset_tags[1]" id="asset_tag" value="{{ old('asset_tag', $item->asset_tag) }}" required>
-              {!! $errors->first('asset_tags', '<span class="alert-msg"><i class="fas fa-times"></i> :message</span>') !!}
-              {!! $errors->first('asset_tag', '<span class="alert-msg"><i class="fas fa-times"></i> :message</span>') !!}
+              <x-form.error name="asset_tags" />
+              <x-form.error name="asset_tag" />
           </div>
       @else
           <!-- we are creating a new asset - let people use more than one asset tag -->
@@ -42,8 +42,8 @@
               <input class="form-control"
                      type="text" name="asset_tags[1]" id="asset_tag"
                      value="{{ old('asset_tags.1', \App\Models\Asset::autoincrement_asset()) }}" required>
-              {!! $errors->first('asset_tags.1', '<span class="alert-msg"><i class="fas fa-times"></i> :message</span>') !!}
-              {!! $errors->first('asset_tag', '<span class="alert-msg"><i class="fas fa-times"></i> :message</span>') !!}
+              <x-form.error name="asset_tags.1" />
+              <x-form.error name="asset_tag" />
           </div>
           <div class="col-md-2 col-sm-12">
               <button class="add_field_button btn btn-sm btn-theme" name="add_field_button">
@@ -83,7 +83,7 @@
                         <input type="text" class="form-control" name="asset_tags[{{ $i }}]"
                                value="{{ old('asset_tags.'.$i) }}"
                                required>
-              {!! $errors->first('asset_tags.'.$i, '<span class="alert-msg"><i class="fas fa-times"></i> :message</span>') !!}
+              <x-form.error :name="'asset_tags.'.$i" />
                     </div>
                     <div class="col-md-2 col-sm-12">
                         <a href="#" class="remove_field btn btn-sm btn-theme"><x-icon type="minus"/></a>

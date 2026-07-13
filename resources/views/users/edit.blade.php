@@ -115,7 +115,7 @@
 
                 @if ($errors->first('username'))
                     <div class="col-md-8 col-md-offset-3">
-                        {!! $errors->first('username', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                        <x-form.error name="username" />
                     </div>
                 @endif
 
@@ -137,7 +137,7 @@
                               <span class="sr-only">{{ trans('general.toggle_password_visibility') }}</span>
                             </span>
                           </div>
-                              {!! $errors->first('password', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                              <x-form.error name="password" />
                         @else
                               <p class="form-control-static">
                               {{ trans('general.managed_ldap') }}
@@ -198,7 +198,7 @@
                                 {{ trans('admin/users/table.lock_passwords') }}
                               </p>
                         @endif
-                        {!! $errors->first('password_confirmation', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                        <x-form.error name="password_confirmation" />
                       </div>
                     </div>
                 @endif
@@ -275,7 +275,7 @@
                               </p>
                           @endif
 
-                        {!! $errors->first('email', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                        <x-form.error name="email" />
 
 
                   </div>
@@ -338,7 +338,7 @@
                                               id="display_name"
                                               value="{{ old('display_name', $user->getRawOriginal('display_name')) }}"
                                       />
-                                      {!! $errors->first('display_name', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                      <x-form.error name="display_name" />
                                   </div>
                               </div>
 
@@ -409,7 +409,7 @@
                                       @endif
                                   </div>
 
-                                  {!! $errors->first('company_ids', '<div class="col-md-8 col-md-offset-3"><span class="alert-msg"><i class="fas fa-times" aria-hidden="true"></i> :message</span></div>') !!}
+                                  <div class="col-md-8 col-md-offset-3"><x-form.error name="company_ids" /></div>
                               </div>
 
 
@@ -418,7 +418,7 @@
                                   <label class="col-md-3 control-label" for="locale">{{ trans('general.language') }}</label>
                                   <div class="col-md-6">
                                       <x-input.locale-select name="locale" :selected="old('locale', $user->locale)" />
-                                      {!! $errors->first('locale', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                      <x-form.error name="locale" />
                                   </div>
                               </div>
 
@@ -435,7 +435,7 @@
                                               id="employee_num"
                                               value="{{ old('employee_num', $user->employee_num) }}"
                                       />
-                                      {!! $errors->first('employee_num', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                      <x-form.error name="employee_num" />
                                   </div>
                               </div>
 
@@ -452,7 +452,7 @@
                                               id="jobtitle"
                                               value="{{ old('jobtitle', $user->jobtitle) }}"
                                       />
-                                      {!! $errors->first('jobtitle', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                      <x-form.error name="jobtitle" />
                                   </div>
                               </div>
 
@@ -517,7 +517,7 @@
                                   <label class="col-md-3 control-label" for="phone">{{ trans('admin/users/table.phone') }}</label>
                                   <div class="col-md-6">
                                       <input class="form-control" type="text" name="phone" id="phone" value="{{ old('phone', $user->phone) }}" maxlength="191" />
-                                      {!! $errors->first('phone', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                      <x-form.error name="phone" />
                                   </div>
                               </div>
 
@@ -526,7 +526,7 @@
                                   <label class="col-md-3 control-label" for="phone">{{ trans('admin/users/table.mobile') }}</label>
                                   <div class="col-md-6">
                                       <input class="form-control" type="text" name="mobile" id="mobile" value="{{ old('mobile', $user->mobile) }}" maxlength="191" />
-                                      {!! $errors->first('mobile', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                      <x-form.error name="mobile" />
                                   </div>
                               </div>
 
@@ -535,7 +535,7 @@
                                   <label for="website" class="col-md-3 control-label">{{ trans('general.website') }}</label>
                                   <div class="col-md-6">
                                       <input class="form-control" type="url" name="website" id="website" value="{{ old('website', $user->website) }}" maxlength="191" />
-                                      {!! $errors->first('website', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                      <x-form.error name="website" />
                                   </div>
                               </div>
 
@@ -544,7 +544,7 @@
                                   <label class="col-md-3 control-label" for="address">{{ trans('general.address') }}</label>
                                   <div class="col-md-6">
                                       <input class="form-control" type="text" name="address" id="address" value="{{ old('address', $user->address) }}" maxlength="191" />
-                                      {!! $errors->first('address', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                      <x-form.error name="address" />
                                   </div>
                               </div>
 
@@ -553,7 +553,7 @@
                                   <label class="col-md-3 control-label" for="city">{{ trans('general.city') }}</label>
                                   <div class="col-md-6">
                                       <input class="form-control" type="text" name="city" id="city" aria-label="city" value="{{ old('city', $user->city) }}" maxlength="191" />
-                                      {!! $errors->first('city', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                      <x-form.error name="city" />
                                   </div>
                               </div>
 
@@ -562,7 +562,7 @@
                                   <label class="col-md-3 control-label" for="state">{{ trans('general.state') }}</label>
                                   <div class="col-md-6">
                                       <input class="form-control" type="text" name="state" id="state" value="{{ old('state', $user->state) }}" maxlength="191" />
-                                      {!! $errors->first('state', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                      <x-form.error name="state" />
                                   </div>
                               </div>
 
@@ -577,7 +577,7 @@
                                       />
 
                                       <p class="help-block">{{ trans('general.countries_manually_entered_help') }}</p>
-                                      {!! $errors->first('country', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                      <x-form.error name="country" />
                                   </div>
                               </div>
 
@@ -586,7 +586,7 @@
                                   <label class="col-md-3 control-label" for="zip">{{ trans('general.zip') }}</label>
                                   <div class="col-md-3 text-right">
                                       <input class="form-control" type="text" name="zip" id="zip" value="{{ old('zip', $user->zip) }}" maxlength="10" />
-                                      {!! $errors->first('zip', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                      <x-form.error name="zip" />
                                   </div>
                               </div>
 
@@ -595,7 +595,7 @@
                                   <label for="notes" class="col-md-3 control-label">{{ trans('admin/users/table.notes') }}</label>
                                   <div class="col-md-6">
                                       <textarea class="form-control" rows="5" id="notes" name="notes">{{ old('notes', $user->notes) }}</textarea>
-                                      {!! $errors->first('notes', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                      <x-form.error name="notes" />
                                   </div>
                               </div>
 

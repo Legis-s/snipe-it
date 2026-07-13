@@ -19,8 +19,8 @@
 
         <div class="box-body">
 
-            <div class="callout callout-warning">
-                <i class="fas fa-exclamation-triangle"></i>
+            <div class="callout callout-warning" role="alert" aria-live="assertive" aria-atomic="true">
+                <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
                 {{ trans('admin/hardware/form.bulk_delete_warn', ['asset_count' => count($assets)]) }}
             </div>
 

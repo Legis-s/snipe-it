@@ -72,7 +72,8 @@ class ActivityReportTest extends TestCase
 
         $viewingUser = User::factory()
             ->canViewReports()
-            ->create(['company_id' => $company->id]);
+            ->forCompany($company)
+            ->create();
 
         $model = AssetModel::factory()->create();
 
@@ -109,7 +110,8 @@ class ActivityReportTest extends TestCase
 
         $viewerInCompanyB = User::factory()
             ->canViewReports()
-            ->create(['company_id' => $companyB->id]);
+            ->forCompany($companyB)
+            ->create();
 
         // Superuser uploads a file to company A's asset (log gets company_id = companyA->id)
         $this->actingAsForApi($superUser)
@@ -144,13 +146,15 @@ class ActivityReportTest extends TestCase
             ->viewUsers()
             ->viewAssets()
             ->canViewReports()
-            ->create(['company_id' => $companyA->id]);
+            ->forCompany($companyA)
+            ->create();
 
         $userInCompanyB = User::factory()
             ->viewUsers()
             ->viewAssets()
             ->canViewReports()
-            ->create(['company_id' => $companyB->id]);
+            ->forCompany($companyB)
+            ->create();
 
         Asset::factory()->count(5)->create(['company_id' => $companyA->id]);
         Asset::factory()->count(4)->create(['company_id' => $companyB->id]);

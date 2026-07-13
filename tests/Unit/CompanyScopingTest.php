@@ -200,7 +200,7 @@ class CompanyScopingTest extends TestCase
         $company = Company::factory()->create();
         $nullCompanyItem = $model::factory()->create(['company_id' => null]);
         $companyItem = $model::factory()->for($company)->create();
-        $nullCompanyUser = User::factory()->create(['company_id' => null]);
+        $nullCompanyUser = User::factory()->withoutCompany()->create();
 
         $this->settings->enableMultipleFullCompanySupport();
 
@@ -215,7 +215,7 @@ class CompanyScopingTest extends TestCase
         $company = Company::factory()->create();
         $nullCompanyItem = $model::factory()->create(['company_id' => null]);
         $companyItem = $model::factory()->for($company)->create();
-        $nullCompanyUser = User::factory()->create(['company_id' => null]);
+        $nullCompanyUser = User::factory()->withoutCompany()->create();
 
         $this->settings->enableFloaterMode();
 
@@ -236,7 +236,7 @@ class CompanyScopingTest extends TestCase
     {
         $company = Company::factory()->create();
         $companyUser = $company->users()->save(User::factory()->make());
-        $nullCompanyUser = User::factory()->create(['company_id' => null]);
+        $nullCompanyUser = User::factory()->withoutCompany()->create();
 
         $this->settings->enableFloaterMode();
 
@@ -248,7 +248,7 @@ class CompanyScopingTest extends TestCase
     {
         $company = Company::factory()->create();
         $companyUser = $company->users()->save(User::factory()->make());
-        $nullCompanyUser = User::factory()->create(['company_id' => null]);
+        $nullCompanyUser = User::factory()->withoutCompany()->create();
 
         $this->settings->enableMultipleFullCompanySupport();
 
@@ -265,8 +265,8 @@ class CompanyScopingTest extends TestCase
     {
         $company = Company::factory()->create();
         $companyUser = $company->users()->save(User::factory()->make());
-        $nullCompanyCaller = User::factory()->create(['company_id' => null]);
-        $anotherNullCompanyUser = User::factory()->create(['company_id' => null]);
+        $nullCompanyCaller = User::factory()->withoutCompany()->create();
+        $anotherNullCompanyUser = User::factory()->withoutCompany()->create();
 
         $this->settings->enableFloaterMode();
 
@@ -293,7 +293,7 @@ class CompanyScopingTest extends TestCase
         $companyACaller = $companyA->users()->save(User::factory()->make());
         $companyAPeer = $companyA->users()->save(User::factory()->make());
         $companyBUser = $companyB->users()->save(User::factory()->make());
-        $floaterUser = User::factory()->create(['company_id' => null]);
+        $floaterUser = User::factory()->withoutCompany()->create();
 
         $this->settings->enableFloaterMode();
 
@@ -327,10 +327,10 @@ class CompanyScopingTest extends TestCase
 
         $superuser = $companyA->users()->save(User::factory()->superuser()->make());
         $callerInA = $companyA->users()->save(User::factory()->make());
-        $callerFloater = User::factory()->create(['company_id' => null]);
+        $callerFloater = User::factory()->withoutCompany()->create();
         $peerInA = $companyA->users()->save(User::factory()->make());
         $userInB = $companyB->users()->save(User::factory()->make());
-        $floater = User::factory()->create(['company_id' => null]);
+        $floater = User::factory()->withoutCompany()->create();
 
         // FMCS off: everyone sees everyone regardless of caller.
         $this->settings->disableMultipleFullCompanySupport();

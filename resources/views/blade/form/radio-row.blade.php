@@ -67,14 +67,11 @@
         </div>
     @endif
 
-    @error($name)
+    @if ($errors->has($name))
         <div class="col-md-8 col-md-offset-3">
-            <span class="alert-msg" aria-hidden="true">
-                <x-icon type="x" />
-                {{ $message }}
-            </span>
+            <x-form.error :name="$name" />
         </div>
-    @enderror
+    @endif
 
     @if ($help_text)
         <div class="col-md-8 col-md-offset-3">

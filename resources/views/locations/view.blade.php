@@ -20,7 +20,7 @@
 
         @if ($location->deleted_at!='')
             <div class="col-md-12">
-                <div class="callout callout-warning">
+                <div class="callout callout-warning" role="alert" aria-live="assertive" aria-atomic="true">
                     <x-icon type="warning" />
                     {{ trans('admin/locations/message.deleted_warning') }}
                 </div>

@@ -72,7 +72,7 @@
                             style="width: 100%;"
                             aria-label="status_id"
                     />
-                    {!! $errors->first('status_id', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                    <x-form.error name="status_id" />
                 </div>
             </div>
 
@@ -92,7 +92,7 @@
                         style="width: 100%;"
                         aria-label="set_not_requestable"
                     />
-                    {!! $errors->first('set_not_requestable', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                    <x-form.error name="set_not_requestable" />
                 </div>
             </div>
 
@@ -126,7 +126,7 @@
                           <input type="text" class="form-control" placeholder="{{ trans('general.select_date') }}" name="checkout_at" id="checkout_at" value="{{ old('checkout_at') }}">
                           <span class="input-group-addon"><x-icon type="calendar" /></span>
                       </div>
-                      {!! $errors->first('checkout_at', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                      <x-form.error name="checkout_at" />
                   </div>
               </div>
 
@@ -140,7 +140,7 @@
                           <input type="text" class="form-control" placeholder="{{ trans('general.select_date') }}" name="expected_checkin" id="expected_checkin" value="{{ old('expected_checkin') }}">
                           <span class="input-group-addon"><x-icon type="calendar" /></span>
                       </div>
-                      {!! $errors->first('expected_checkin', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                      <x-form.error name="expected_checkin" />
                   </div>
               </div>
 
@@ -152,7 +152,7 @@
               </label>
             <div class="col-md-8">
               <textarea class="col-md-6 form-control" id="note" name="note">{{ old('note') }}</textarea>
-              {!! $errors->first('note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+              <x-form.error name="note" />
             </div>
           </div>
 

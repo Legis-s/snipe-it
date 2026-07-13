@@ -35,7 +35,7 @@
             />
         </div>
         <div class="col-md-12" style="padding-left: 0">
-            {!! $errors->first($name, '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+            <x-form.error :name="$name" />
             @if ($help_text)
                 <p class="help-block">{{ $help_text }}</p>
             @endif

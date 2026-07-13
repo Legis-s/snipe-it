@@ -47,7 +47,7 @@
         </div>
         <div class="col-md-7">
             <input class="form-control" name="label2_title" type="text" id="label2_title" value="{{ old('label2_title', $setting->label2_title) }}">
-            {!! $errors->first('label2_title', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+            <x-form.error name="label2_title" />
             <p class="help-block">{!! trans('admin/settings/general.label2_title_help') !!}</p>
             <p class="help-block">
                 {!! trans('admin/settings/general.label2_title_help_phold') !!}.<br />
@@ -96,7 +96,7 @@
                 :selected="old('label2_1d_type', $setting->label2_1d_type)"
                 class="col-md-4"
             />
-            {!! $errors->first('label2_1d_type', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+            <x-form.error name="label2_1d_type" />
             <p class="help-block">
                 {{ trans('admin/settings/general.label2_1d_type_help') }}.
                 {!!
@@ -129,7 +129,7 @@
                 :selected="old('label2_2d_type', $setting->label2_2d_type)"
                 class="col-md-4"
             />
-            {!! $errors->first('label2_2d_type', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+            <x-form.error name="label2_2d_type" />
             <p class="help-block">
                 {{ trans('admin/settings/general.label2_2d_type_help', ['current' => $setting->barcode_type]) }}.
                 {!! trans('admin/settings/general.help_default_will_use') !!}
@@ -143,7 +143,7 @@
         </div>
         <div class="col-md-7">
             <input class="form-control" name="label2_2d_prefix" type="text" id="label2_2d_prefix" value="{{ old('label2_2d_prefix', $setting->label2_2d_prefix) }}">
-            {!! $errors->first('label2_2d_prefix', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+            <x-form.error name="label2_2d_prefix" />
             <p class="help-block">{!! trans('admin/settings/general.label2_2d_prefix_help') !!}</p>
         </div>
     </div>
@@ -172,7 +172,7 @@
                 :selected="old('label2_2d_target', $setting->label2_2d_target)"
                 class="col-md-4"
             />
-            {!! $errors->first('label2_2d_target', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+            <x-form.error name="label2_2d_target" />
             <p class="help-block">{{ trans('admin/settings/general.label2_2d_target_help') }}</p>
         </div>
     </div>
@@ -194,7 +194,7 @@
         </div>
         <div class="col-md-9 col-md-offset-3">
             <p class="help-block">{!! trans('admin/settings/general.empty_row_count_help') !!}</p>
-            {!! $errors->first('label2_empty_row_count', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+            <x-form.error name="label2_empty_row_count" />
         </div>
     </div>
 </fieldset>
@@ -211,7 +211,7 @@
                 'customFields' => $customFields,
                 'template' => $setting->label2_template,
             ])
-            {!! $errors->first('label2_fields', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+            <x-form.error name="label2_fields" />
         </div>
     </div>
 </fieldset>

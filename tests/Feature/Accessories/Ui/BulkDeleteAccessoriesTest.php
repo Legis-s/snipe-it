@@ -94,7 +94,7 @@ class BulkDeleteAccessoriesTest extends TestCase
         [$companyA, $companyB] = Company::factory()->count(2)->create();
         $accessoryA = Accessory::factory()->for($companyA)->create();
         $accessoryB = Accessory::factory()->for($companyB)->create();
-        $userA = User::factory()->for($companyA)->deleteAccessories()->create();
+        $userA = User::factory()->forCompany($companyA)->deleteAccessories()->create();
 
         $this->actingAs($userA)
             ->post(route('accessories.bulk.delete'), [

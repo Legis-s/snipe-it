@@ -457,65 +457,65 @@
 
                     <thead>
                     <tr>
-                      <th class="col-md-1">
+                      <th scope="col" class="col-md-1">
                         #
                       </th>
-                      <th>
+                      <th scope="col">
                         {{ trans('general.image') }}
                       </th>
-                      <th data-switchable="true" data-visible="true">
+                      <th scope="col" data-switchable="true" data-visible="true">
                         {{ trans('general.category') }}
                       </th>
-                      <th data-switchable="true" data-visible="true">
+                      <th scope="col" data-switchable="true" data-visible="true">
                         {{ trans('admin/hardware/table.asset_tag') }}
                       </th>
-                      <th data-switchable="true" data-visible="false">
+                      <th scope="col" data-switchable="true" data-visible="false">
                         {{ trans('general.name') }}
                       </th>
-                      <th data-switchable="true" data-visible="false">
+                      <th scope="col" data-switchable="true" data-visible="false">
                         {{ trans('general.status') }}
                       </th>
-                      <th data-switchable="true" data-visible="true">
+                      <th scope="col" data-switchable="true" data-visible="true">
                         {{ trans('admin/hardware/table.asset_model') }}
                       </th>
-                      <th data-switchable="true" data-visible="false">
+                      <th scope="col" data-switchable="true" data-visible="false">
                         {{ trans('general.model_no') }}
                       </th>
-                      <th data-switchable="true" data-visible="true">
+                      <th scope="col" data-switchable="true" data-visible="true">
                         {{ trans('admin/hardware/table.serial') }}
                       </th>
-                        <th data-switchable="true" data-visible="true">
+                        <th scope="col" data-switchable="true" data-visible="true">
                             {{ trans('general.manufacturer') }}
                         </th>
-                      <th data-switchable="true" data-visible="false">
+                      <th scope="col" data-switchable="true" data-visible="false">
                         {{ trans('admin/hardware/form.default_location') }}
                       </th>
-                      <th data-switchable="true" data-visible="false">
+                      <th scope="col" data-switchable="true" data-visible="false">
                         {{ trans('general.location') }}
                       </th>
-                      <th  data-switchable="true" data-visible="true">
+                      <th scope="col"  data-switchable="true" data-visible="true">
                         {{ trans('admin/hardware/form.expected_checkin') }}
                       </th>
                       @can('self.view_purchase_cost')
-                        <th data-footer-formatter="sumFormatter" data-fieldname="purchase_cost">
+                        <th scope="col" data-footer-formatter="sumFormatter" data-fieldname="purchase_cost">
                           {{ trans('general.purchase_cost') }}
                         </th>
                       @endcan
-                      <th data-switchable="true" data-visible="true">
+                      <th scope="col" data-switchable="true" data-visible="true">
                         {{ trans('admin/hardware/form.eol_date') }}
                       </th>
-                      <th data-switchable="true" data-visible="false">
+                      <th scope="col" data-switchable="true" data-visible="false">
                         {{ trans('general.last_audit') }}
                       </th>
-                      <th data-switchable="true" data-visible="false">
+                      <th scope="col" data-switchable="true" data-visible="false">
                         {{ trans('general.next_audit_date') }}
                       </th>
-                    <th data-switchable="true" data-visible="false" data-formatter="trueFalseFormatter">
+                    <th scope="col" data-switchable="true" data-visible="false" data-formatter="trueFalseFormatter">
                         {{ trans('general.byod') }}
                     </th>
 
                       @foreach ($field_array as $db_column => $field_name)
-                        <th data-switchable="true" data-visible="true">{{ $field_name }}</th>
+                        <th scope="col" data-switchable="true" data-visible="true">{{ $field_name }}</th>
                       @endforeach
 
                     </tr>
@@ -635,11 +635,11 @@
 
                 <thead>
                 <tr>
-                  <th class="col-md-2">{{ trans('general.name') }}</th>
-                  <th class="col-md-4">{{ trans('admin/licenses/form.license_key') }}</th>
-                  <th class="col-md-2">{{ trans('admin/licenses/form.to_name') }}</th>
-                  <th class="col-md-2">{{ trans('admin/licenses/form.to_email') }}</th>
-                  <th class="col-md-2">{{ trans('general.category') }}</th>
+                  <th scope="col" class="col-md-2">{{ trans('general.name') }}</th>
+                  <th scope="col" class="col-md-4">{{ trans('admin/licenses/form.license_key') }}</th>
+                  <th scope="col" class="col-md-2">{{ trans('admin/licenses/form.to_name') }}</th>
+                  <th scope="col" class="col-md-2">{{ trans('admin/licenses/form.to_email') }}</th>
+                  <th scope="col" class="col-md-2">{{ trans('general.category') }}</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -701,9 +701,9 @@
 
                 <thead>
                 <tr>
-                  <th class="col-md-5">{{ trans('general.name') }}</th>
+                  <th scope="col" class="col-md-5">{{ trans('general.name') }}</th>
                   @can('self.view_purchase_cost')
-                    <th class="col-md-6" data-footer-formatter="sumFormatter" data-fieldname="purchase_cost">{{ trans('general.purchase_cost') }}</th>
+                    <th scope="col" class="col-md-6" data-footer-formatter="sumFormatter" data-fieldname="purchase_cost">{{ trans('general.purchase_cost') }}</th>
                   @endcan
                 </tr>
                 </thead>
@@ -746,12 +746,12 @@
 
                 <thead>
                 <tr>
-                  <th class="col-md-3">{{ trans('general.name') }}</th>
+                  <th scope="col" class="col-md-3">{{ trans('general.name') }}</th>
                   @can('self.view_purchase_cost')
-                    <th class="col-md-2" data-footer-formatter="sumFormatter" data-fieldname="purchase_cost">{{ trans('general.purchase_cost') }}</th>
+                    <th scope="col" class="col-md-2" data-footer-formatter="sumFormatter" data-fieldname="purchase_cost">{{ trans('general.purchase_cost') }}</th>
                   @endcan
-                  <th class="col-md-2">{{ trans('general.date') }}</th>
-                  <th class="col-md-5">{{ trans('general.notes') }}</th>
+                  <th scope="col" class="col-md-2">{{ trans('general.date') }}</th>
+                  <th scope="col" class="col-md-5">{{ trans('general.notes') }}</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -794,11 +794,11 @@
 
               <thead>
               <tr>
-                <th data-visible="true" data-field="icon" style="width: 40px;" class="hidden-xs" data-formatter="iconFormatter">{{ trans('admin/hardware/table.icon') }}</th>
-                <th data-visible="true" data-field="item.name">{{ trans('general.item') }}</th>
-                <th data-visible="true" data-field="created_at" data-sortable="true" data-formatter="dateDisplayFormatter">{{ trans('general.accepted_date') }}</th>
-                <th data-field="note">{{ trans('general.notes') }}</th>
-                <th data-field="url" data-formatter="downloadFormatter">{{ trans('general.download') }}</th>
+                <th scope="col" data-visible="true" data-field="icon" style="width: 40px;" class="hidden-xs" data-formatter="iconFormatter">{{ trans('admin/hardware/table.icon') }}</th>
+                <th scope="col" data-visible="true" data-field="item.name">{{ trans('general.item') }}</th>
+                <th scope="col" data-visible="true" data-field="created_at" data-sortable="true" data-formatter="dateDisplayFormatter">{{ trans('general.accepted_date') }}</th>
+                <th scope="col" data-field="note">{{ trans('general.notes') }}</th>
+                <th scope="col" data-field="url" data-formatter="downloadFormatter">{{ trans('general.download') }}</th>
               </tr>
               </thead>
             </table>

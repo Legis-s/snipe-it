@@ -376,11 +376,11 @@ final class Company extends SnipeModel
 
             $userCompanyIds = self::getCurrentUserCompanyIds();
 
-            // Empty pivot = unrestricted only for true legacy "no-company" users
-            // (those whose scalar company_id is also null). Users who had their
-            // pivot cleared via the API retain their scalar company_id, so they
-            // do NOT qualify for this bypass.
-            if (empty($userCompanyIds) && is_null(auth()->user()->company_id)) {
+            // Empty pivot = unrestricted (legacy no-company users). The pivot
+            // is the sole source of truth for membership now that the
+            // company_user table migration has run; the old scalar
+            // users.company_id column is not consulted here.
+            if (empty($userCompanyIds)) {
                 return true;
             }
 

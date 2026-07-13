@@ -167,6 +167,7 @@ class UserImporter extends ItemImporter
             // Sync company pivot when companies were specified in this row.
             if (! empty($companyIds)) {
                 $user->companies()->sync($companyIds);
+                $user->syncLegacyCompanyIdMirror();
             }
 
             // Update the location of any assets checked out to this user
@@ -230,6 +231,7 @@ class UserImporter extends ItemImporter
             // for that case and adds any additional companies for multi-company rows.
             if (! empty($companyIds)) {
                 $user->companies()->sync($companyIds);
+                $user->syncLegacyCompanyIdMirror();
             }
 
             if (($user->email) && ($user->activated == '1')) {

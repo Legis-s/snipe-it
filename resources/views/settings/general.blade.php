@@ -79,7 +79,7 @@
                                <div class="col-md-8">
                                    <input class="form-control" placeholder="example.com" name="email_domain" type="text" value="{{ old('email_domain', $setting->email_domain) }}" id="email_domain">
                                    <span class="help-block">{{ trans('general.email_domain_help')  }}</span>
-                                   {!! $errors->first('email_domain', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                   <x-form.error name="email_domain" />
                                </div>
                            </div>
 
@@ -96,7 +96,7 @@
                                        style="width: 100%"
                                        aria-label="email_format"
                                    />
-                                   {!! $errors->first('email_format', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                   <x-form.error name="email_format" />
                                </div>
                            </div>
 
@@ -112,7 +112,7 @@
                                        style="width: 100%"
                                        aria-label="username_format"
                                    />
-                                   {!! $errors->first('username_format', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                   <x-form.error name="username_format" />
 
                                    <p class="help-block">
                                        {{ trans('admin/settings/general.username_format_help') }}
@@ -163,7 +163,7 @@
                                            :value="old('default_eula_text', $setting->default_eula_text)"
                                            placeholder="{{ trans('admin/settings/general.default_eula_text_placeholder') }}"
                                    />
-                                   {!! $errors->first('default_eula_text', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                   <x-form.error name="default_eula_text" />
                                    <p class="help-block">{{ trans('admin/settings/general.default_eula_help_text') }}</p>
                                    <p class="help-block">{!! trans('admin/settings/general.eula_markdown') !!}</p>
                                </div>
@@ -184,7 +184,7 @@
                                <div class="col-md-8">
                                    <input class="form-control" style="max-width: 100px;" placeholder="50" maxlength="3" name="thumbnail_max_h" type="number" value="{{ old('thumbnail_max_h', ($setting->thumbnail_max_h ?? '25')) }}" id="thumbnail_max_h">
                                    <p class="help-block">{{ trans('admin/settings/general.thumbnail_max_h_help') }}</p>
-                                   {!! $errors->first('thumbnail_max_h', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                   <x-form.error name="thumbnail_max_h" />
                                </div>
                            </div>
 
@@ -226,7 +226,7 @@
                                        {{ trans('admin/settings/general.show_assigned_assets') }}
                                    </label>
                                    <p class="help-block">{{ trans('admin/settings/general.show_assigned_assets_help') }}</p>
-                                   {!! $errors->first('show_assigned_assets', '<span class="alert-msg">:message</span>') !!}
+                                   <x-form.error name="show_assigned_assets" />
                                </div>
                            </div>
 
@@ -246,12 +246,12 @@
                                <div class="col-md-8" id="mailtestrow">
                                    <a class="btn btn-default btn-sm pull-left{{ (config('mail.reply_to.address') == '') ? ' disabled': '' }}" id="mailtest" style="margin-right: 10px;">
                                        {{ trans('admin/settings/general.mail_test') }}</a>
-                                   <span id="mailtesticon"></span>
+                                   <span id="mailtesticon" role="status" aria-live="polite" aria-atomic="true"></span>
                                    <span id="mailtestresult"></span>
-                                   <span id="mailteststatus"></span>
+                                   <span id="mailteststatus" role="status" aria-live="polite" aria-atomic="true"></span>
                                </div>
                                <div class="col-md-8 col-md-offset-3">
-                                   <div id="mailteststatus-error" class="text-danger"></div>
+                                   <div id="mailteststatus-error" class="text-danger" role="alert" aria-live="assertive" aria-atomic="true"></div>
                                </div>
                                <div class="col-md-8 col-md-offset-3">
                                    <div class="help-block">
@@ -276,7 +276,7 @@
                                    <label class="form-control">
                                        <input type="checkbox" name="show_images_in_email" value="1" @checked(old('show_images_in_email', $setting->show_images_in_email)) />
                                        {{ trans('admin/settings/general.show_images_in_email') }}
-                                       {!! $errors->first('show_images_in_email', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                       <x-form.error name="show_images_in_email" />
                                    </label>
 
                                </div>
@@ -320,11 +320,11 @@
                                    @if (config('app.lock_passwords'))
 
                                        <textarea class="form-control disabled" name="login_note" placeholder="{{trans('admin/settings/general.login_note_placeholder')}}" rows="2" aria-label="login_note" readonly>{{ old('login_note', $setting->login_note) }}</textarea>
-                                       {!! $errors->first('login_note', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                       <x-form.error name="login_note" />
                                        <p class="text-warning"><i class="fas fa-lock"></i> {{ trans('general.feature_disabled') }}</p>
                                    @else
                                        <textarea class="form-control" name="login_note" aria-label="login_note" placeholder="{{trans('admin/settings/general.login_note_placeholder')}}" rows="2">{{ old('login_note', $setting->login_note) }}</textarea>
-                                       {!! $errors->first('login_note', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                       <x-form.error name="login_note" />
                                    @endif
                                    <p class="help-block">{!!  trans('admin/settings/general.login_note_help') !!}</p>
                                </div>
@@ -354,11 +354,11 @@
                                        @if (config('app.lock_passwords'))
 
                                            <textarea class="form-control disabled" name="login_note" placeholder="{{ trans('admin/settings/general.login_note_placeholder') }}" rows="2" aria-label="dashboard_message" readonly>{{ old('dashboard_message', $setting->login_note) }}</textarea>
-                                           {!! $errors->first('dashboard_message', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                           <x-form.error name="dashboard_message" />
                                            <p class="text-warning"><i class="fas fa-lock"></i> {{ trans('general.feature_disabled') }}</p>
                                        @else
                                            <textarea class="form-control" aria-label="dashboard_message" name="dashboard_message" rows="2">{{ old('login_note', $setting->dashboard_message) }}</textarea>
-                                           {!! $errors->first('dashboard_message', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                           <x-form.error name="dashboard_message" />
                                        @endif
                                        <p class="help-block">
                                            {{ trans('admin/settings/general.dashboard_message_help') }}
@@ -389,7 +389,7 @@
                                    @endif
 
                                    <span class="help-block">{{ trans('admin/settings/general.privacy_policy_link_help')  }}</span>
-                                   {!! $errors->first('privacy_policy_link', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                   <x-form.error name="privacy_policy_link" />
 
                                    @if (config('app.lock_passwords')===true)
                                        <p class="text-warning"><i class="fas fa-lock"></i> {{ trans('general.feature_disabled') }}</p>
@@ -421,7 +421,7 @@
                                        <label class="form-control">
                                            <input type="checkbox" name="unique_serial" value="1" @checked(old('unique_serial', $setting->unique_serial)) />
                                            {{ trans('admin/settings/general.unique_serial') }}
-                                           {!! $errors->first('unique_serial', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                           <x-form.error name="unique_serial" />
                                        </label>
 
                                        <p class="help-block">
@@ -441,7 +441,7 @@
                                    <p class="help-block">
                                        {{ trans('admin/settings/general.manager_view_enabled_help') }}
                                    </p>
-                                   {!! $errors->first('manager_view_enabled', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                   <x-form.error name="manager_view_enabled" />
                                </div>
                            </div>
                            <!-- /.form-group -->

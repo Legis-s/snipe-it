@@ -240,6 +240,11 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
             'updated_at',
             'phone',
             'jobtitle',
+            // The import changes the user's company via the company_user pivot.
+            // syncLegacyCompanyIdMirror() then updates the users.legacy_company_id
+            // mirror to reflect that change, so it also legitimately differs
+            // between $user (pre-import) and $updatedUser (post-import).
+            'legacy_company_id',
         ];
 
         $this->assertEquals($row['email'], $updatedUser->email);

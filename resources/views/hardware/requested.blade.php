@@ -32,14 +32,14 @@
                         }'>
                             <thead>
                                 <tr role="row">
-                                    <th class="col-md-1">{{ trans('general.image') }}</th>
-                                    <th class="col-md-2">{{ trans('general.name') }}</th>
-                                    <th class="col-md-2" data-sortable="true">{{ trans('admin/hardware/table.location') }}</th>
-                                    <th class="col-md-2" data-sortable="true">{{ trans('admin/hardware/form.expected_checkin') }}</th>
-                                    <th class="col-md-3" data-sortable="true">{{ trans('admin/hardware/table.requesting_user') }}</th>
-                                    <th class="col-md-2">{{ trans('admin/hardware/table.requested_date') }}</th>
-                                    <th class="col-md-1">{{ trans('button.actions') }}</th>
-                                    <th class="col-md-1">{{ trans('general.checkout') }}</th>
+                                    <th scope="col" class="col-md-1">{{ trans('general.image') }}</th>
+                                    <th scope="col" class="col-md-2">{{ trans('general.name') }}</th>
+                                    <th scope="col" class="col-md-2" data-sortable="true">{{ trans('admin/hardware/table.location') }}</th>
+                                    <th scope="col" class="col-md-2" data-sortable="true">{{ trans('admin/hardware/form.expected_checkin') }}</th>
+                                    <th scope="col" class="col-md-3" data-sortable="true">{{ trans('admin/hardware/table.requesting_user') }}</th>
+                                    <th scope="col" class="col-md-2">{{ trans('admin/hardware/table.requested_date') }}</th>
+                                    <th scope="col" class="col-md-1">{{ trans('button.actions') }}</th>
+                                    <th scope="col" class="col-md-1">{{ trans('general.checkout') }}</th>
                                 </tr>
                             </thead>
                             <tbody>

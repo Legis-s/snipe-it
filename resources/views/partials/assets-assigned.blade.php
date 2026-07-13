@@ -27,10 +27,10 @@
                         table_html += '<div class="col-md-12">';
                         table_html += '<table class="table table-striped">';
                         table_html += '<thead><tr>';
-                        table_html += '<th></th>';
-                        table_html += '<th>{{ trans('admin/hardware/form.name') }}</th>';
-                        table_html += '<th>{{ trans('admin/hardware/form.tag') }}</th>';
-                        table_html += '<th>{{ trans('admin/hardware/form.serial') }}</th>';
+                        table_html += '<th scope="col"></th>';
+                        table_html += '<th scope="col">{{ trans('admin/hardware/form.name') }}</th>';
+                        table_html += '<th scope="col">{{ trans('admin/hardware/form.tag') }}</th>';
+                        table_html += '<th scope="col">{{ trans('admin/hardware/form.serial') }}</th>';
                         table_html += '</tr></thead><tbody>';
 
                         $('#current_assets_content').append('');
@@ -41,7 +41,7 @@
                                 var asset = data.rows[i];
                                 table_html += '<tr>';
                                 if (asset.image != null) {
-                                    table_html += '<td class="col-md-1"><a href="' + asset.image + '" data-toggle="lightbox" data-type="image"><img src="' + asset.image + '" style="max-height: {{ $snipeSettings->thumbnail_max_h }}px; width: auto;"></a></td>';
+                                    table_html += '<td class="col-md-1"><a href="' + asset.image + '" data-toggle="lightbox" data-type="image"><img src="' + asset.image + '" style="max-height: {{ $snipeSettings->thumbnail_max_h }}px; width: auto;" alt=""></a></td>';
                                 } else {
                                     table_html += "<td></td> ";
                                 }

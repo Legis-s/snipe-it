@@ -131,7 +131,7 @@
                           </option>
                       @endif
                   </select>
-                  {!! $errors->first('responsible_party_id', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                  <x-form.error name="responsible_party_id" />
               </div>
           </div>
 
@@ -148,7 +148,7 @@
                     placeholder="{{ trans('general.select_date') }}"
                     required="{{ Helper::checkIfRequired($item, 'start_date') }}"
             />
-            {!! $errors->first('start_date', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+            <x-form.error name="start_date" />
           </div>
         </div>
 
@@ -165,7 +165,7 @@
                     placeholder="{{ trans('general.select_date') }}"
                     required="Helper::checkIfRequired($item, 'completion_date')"
             />
-            {!! $errors->first('completion_date', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+            <x-form.error name="completion_date" />
           </div>
         </div>
 
@@ -198,7 +198,7 @@
               </span>
                 </div>
                 <div class="col-md-9" style="padding-left: 0px;">
-              {!! $errors->first('cost', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+              <x-form.error name="cost" />
               <p class="help-block">{{ trans('general.purchase_cost_format_help', ['format' => $snipeSettings->digit_separator]) }}</p>
             </div>
           </div>
@@ -208,7 +208,7 @@
           <label for="url" class="col-md-3 control-label">{{ trans('general.url') }}</label>
           <div class="col-md-7">
             <input class="form-control" name="url" type="url" id="url" value="{{ old('url', $item->url) }}" placeholder="https://example.com">
-            {!! $errors->first('url', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+            <x-form.error name="url" />
           </div>
         </div>
 
@@ -223,7 +223,7 @@
           <div class="col-md-7">
             <textarea class="col-md-6 form-control" id="notes" name="notes">{{ old('notes', $item->notes) }}</textarea>
             <p class="help-block">{!! trans('general.markdown') !!}</p>
-            {!! $errors->first('notes', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+            <x-form.error name="notes" />
           </div>
         </div>
       </div> <!-- .box-body -->

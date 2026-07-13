@@ -18,7 +18,7 @@
 
         @if (!$asset->model)
             <div class="col-md-12">
-                <div class="callout callout-danger">
+                <div class="callout callout-danger" role="alert" aria-live="assertive" aria-atomic="true">
                     <p>
                         <strong>{{ trans('admin/models/message.no_association') }}</strong> {{ trans('admin/models/message.no_association_fix') }}
                     </p>
@@ -28,7 +28,7 @@
 
         @if ($asset->checkInvalidNextAuditDate())
             <div class="col-md-12">
-                <div class="callout callout-warning">
+                <div class="callout callout-warning" role="alert" aria-live="assertive" aria-atomic="true">
                     <p><strong>{{ trans('general.warning',
                         [
                             'warning' => trans('admin/hardware/message.warning_audit_date_mismatch',
@@ -45,7 +45,7 @@
 
         @if ($asset->deleted_at!='')
             <div class="col-md-12">
-                <div class="callout callout-warning">
+                <div class="callout callout-warning" role="alert" aria-live="assertive" aria-atomic="true">
                     <x-icon type="warning"/>
                     {{ trans('general.asset_deleted_warning') }}
                 </div>

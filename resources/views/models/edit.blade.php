@@ -50,7 +50,7 @@
         </div>
     </div>
     <div class="col-md-9 col-md-offset-3">
-        {!! $errors->first('eol', '<span class="alert-msg" aria-hidden="true"><br><i class="fas fa-times"></i> :message</span>') !!}
+        <x-form.error name="eol" />
     </div>
 </div>
 

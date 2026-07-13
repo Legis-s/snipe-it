@@ -33,63 +33,74 @@ class UserSeeder extends Seeder
 
         $departmentIds = Department::all()->pluck('id');
 
-        // Named admins get multiple companies — they manage assets across several organisations.
+        // Named admins get multiple companies. They manage assets across several organisations.
         foreach (['firstAdmin', 'snipeAdmin', 'testAdmin'] as $state) {
-            $user = User::factory()->{$state}()->create([
-                'company_id' => null,
+            $user = User::factory()->{$state}()->withoutCompany()->create([
                 'department_id' => $departmentIds->random(),
             ]);
             $ids = $companyIds->random(min(rand(2, 3), $companyIds->count()))->toArray();
-            User::where('id', $user->id)->update(['company_id' => $ids[0]]);
             $user->companies()->sync($ids);
+            $user->syncLegacyCompanyIdMirror();
         }
 
-        // Superusers — one company each.
+        // Superusers, one company each.
         User::factory()->count(3)->superuser()
+            ->withoutCompany()
             ->state(new Sequence(fn ($sequence) => [
-                'company_id' => $companyIds->random(),
                 'department_id' => $departmentIds->random(),
             ]))
-            ->create();
+            ->create()
+            ->each(function (User $user) use ($companyIds) {
+                $user->companies()->sync([$companyIds->random()]);
+                $user->syncLegacyCompanyIdMirror();
+            });
 
-        // Admins — one company each.
+        // Admins, one company each.
         User::factory()->count(3)->admin()
+            ->withoutCompany()
             ->state(new Sequence(fn ($sequence) => [
-                'company_id' => $companyIds->random(),
                 'department_id' => $departmentIds->random(),
             ]))
-            ->create();
+            ->create()
+            ->each(function (User $user) use ($companyIds) {
+                $user->companies()->sync([$companyIds->random()]);
+                $user->syncLegacyCompanyIdMirror();
+            });
 
-        // Regular users — three groups:
-        //   ~30 % (600)  no company
-        //   ~50 % (1 000) one company
-        //   ~20 % (400)  two or three companies
+        // Regular users, three groups:
+        //   ~30% (600) no company
+        //   ~50% (1000) one company
+        //   ~20% (400) two or three companies
 
         User::factory()->count(600)->viewAssets()
+            ->withoutCompany()
             ->state(new Sequence(fn ($sequence) => [
-                'company_id' => null,
                 'department_id' => $departmentIds->random(),
             ]))
             ->create();
 
         User::factory()->count(1000)->viewAssets()
+            ->withoutCompany()
             ->state(new Sequence(fn ($sequence) => [
-                'company_id' => $companyIds->random(),
                 'department_id' => $departmentIds->random(),
             ]))
-            ->create();
+            ->create()
+            ->each(function (User $user) use ($companyIds) {
+                $user->companies()->sync([$companyIds->random()]);
+                $user->syncLegacyCompanyIdMirror();
+            });
 
         $multiCompanyUsers = User::factory()->count(400)->viewAssets()
+            ->withoutCompany()
             ->state(new Sequence(fn ($sequence) => [
-                'company_id' => null,
                 'department_id' => $departmentIds->random(),
             ]))
             ->create();
 
         foreach ($multiCompanyUsers as $user) {
             $ids = $companyIds->random(min(rand(2, 3), $companyIds->count()))->toArray();
-            User::where('id', $user->id)->update(['company_id' => $ids[0]]);
             $user->companies()->sync($ids);
+            $user->syncLegacyCompanyIdMirror();
         }
 
         $src = public_path('/img/demo/avatars/');

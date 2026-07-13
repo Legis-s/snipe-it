@@ -66,7 +66,7 @@ class UpdateUserTest extends TestCase
         $this->settings->enableMultipleFullCompanySupport();
         $this->settings->disableFloaterMode();
 
-        $self = User::factory()->editUsers()->create(['company_id' => null]);
+        $self = User::factory()->editUsers()->withoutCompany()->create();
         $self->companies()->sync([]);
 
         $this->actingAs($self)
@@ -234,9 +234,7 @@ class UpdateUserTest extends TestCase
         $companyA = Company::factory()->create();
         $companyB = Company::factory()->create();
 
-        $user = User::factory()->create([
-            'company_id' => $companyA->id,
-        ]);
+        $user = User::factory()->forCompany($companyA)->create();
         $superUser = User::factory()->superuser()->create();
 
         $asset = Asset::factory()->create([
@@ -270,9 +268,7 @@ class UpdateUserTest extends TestCase
 
         $companyA = Company::factory()->create();
 
-        $user = User::factory()->create([
-            'company_id' => $companyA->id,
-        ]);
+        $user = User::factory()->forCompany($companyA)->create();
         $superUser = User::factory()->superuser()->create();
 
         $asset = Asset::factory()->create([
@@ -362,7 +358,7 @@ class UpdateUserTest extends TestCase
     public function test_attempting_to_update_deleted_user_is_handled_gracefully()
     {
         [$companyA, $companyB] = Company::factory()->count(2)->create();
-        $user = User::factory()->for($companyA)->create();
+        $user = User::factory()->forCompany($companyA)->create();
         Asset::factory()->assignedToUser($user)->create();
 
         $id = $user->id;

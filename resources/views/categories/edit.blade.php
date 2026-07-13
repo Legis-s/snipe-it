@@ -29,7 +29,7 @@
             style="min-width:350px"
             aria-label="category_type"
         />
-        {!! $errors->first('category_type', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+        <x-form.error name="category_type" />
     </div>
     <div class="col-md-7 col-md-offset-3">
         <p class="help-block">{!! trans('admin/categories/message.update.cannot_change_category_type') !!} </p>
@@ -58,7 +58,7 @@
                 aria-label="notes"
                 rows="5"
         />
-        {!! $errors->first('notes', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+        <x-form.error name="notes" />
     </div>
 </div>
 
@@ -95,7 +95,7 @@
             </label>
             <div class="col-md-9">
                 <x-input.colorpicker :item="$item" id="color" :value="old('color', ($item->color ?? '#f4f4f4'))" name="tag_color" id="tag_color" />
-                {!! $errors->first('tag_color', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                <x-form.error name="tag_color" />
             </div>
         </div>
     </fieldset>
