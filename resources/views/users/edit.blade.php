@@ -305,7 +305,7 @@
                   @endif
 
                   
-                  @include ('partials.forms.edit.image-upload', ['fieldname' => 'avatar', 'image_path' => app('users_upload_path')])
+                  <x-input.image-upload :item="$user" fieldname="avatar" :imagePath="app('users_upload_path')" :clonedModel="$cloned_model ?? null" />
 
 
                   <!-- begin optional disclosure arrow stuff -->
@@ -458,7 +458,7 @@
 
 
                               <!-- Manager -->
-                              @include ('partials.forms.edit.user-select', ['translated_name' => trans('admin/users/table.manager'), 'fieldname' => 'manager_id', 'exclude_id' => isset($item) ? $item->id : null])
+                              @include ('partials.forms.edit.user-select', ['translated_name' => trans('admin/users/table.manager'), 'fieldname' => 'manager_id', 'exclude_id' => $user->id ?? null])
 
                               <!--  Department -->
                               @include ('partials.forms.edit.department-select', ['translated_name' => trans('general.department'), 'fieldname' => 'department_id'])

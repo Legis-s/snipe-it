@@ -10,7 +10,9 @@
                 :disabled="$this->eulaTextDisabled"
             />
             <p class="help-block">{!! trans('admin/categories/general.eula_text_help') !!} </p>
-            <p class="help-block">{!! trans('admin/settings/general.eula_markdown') !!} </p>
+            <x-form.help name="eula_text" icon="markdown">
+                {{ trans('general.markdown') }}
+            </x-form.help>
             <x-form.error name="eula_text" />
         </div>
         @if ($this->eulaTextDisabled)

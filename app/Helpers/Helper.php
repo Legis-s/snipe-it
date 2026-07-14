@@ -1112,6 +1112,33 @@ class Helper
     }
 
     /**
+     * Return the numeric max length declared for a field in the model's
+     * validation rules (looks for `max:N`). Returns null when the model, field,
+     * or `max:` rule can't be found — callers should fall back to whatever
+     * default they want. Used by `<x-form.row>` to auto-cap text inputs to
+     * the DB column width without every callsite having to pass maxlength.
+     */
+    public static function fieldMaxLength($class, string $field): ?int
+    {
+        if (! $class) {
+            return null;
+        }
+
+        $rules = $class::rules();
+        $rule = $rules[$field] ?? null;
+        if ($rule === null) {
+            return null;
+        }
+
+        $rule_string = is_array($rule) ? implode('|', $rule) : $rule;
+        if (preg_match('/(?:^|\|)max:(\d+)/', $rule_string, $matches)) {
+            return (int) $matches[1];
+        }
+
+        return null;
+    }
+
+    /**
      * Check to see if the given key exists in the array, and trim excess white space before returning it
      *
      * @author Daniel Melzter

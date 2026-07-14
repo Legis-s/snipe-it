@@ -1,100 +1,130 @@
 @push('js')
-<script nonce="{{ csrf_token() }}">
-    $(function () {
-        $('[name="company_id"]').on('select2:select select2:clear', function (e) {
-            var companyId = $(this).val() || null;
-            var $parentSelect = $('#parent_id_location_select');
-            $parentSelect.data('company-id', companyId);
-            $parentSelect.val(null).trigger('change');
+    <script nonce="{{ csrf_token() }}">
+        $(function () {
+            $('[name="company_id"]').on('select2:select select2:clear', function (e) {
+                var companyId = $(this).val() || null;
+                var $parentSelect = $('#parent_id_location_select');
+                $parentSelect.data('company-id', companyId);
+                $parentSelect.val(null).trigger('change');
+            });
         });
-    });
-</script>
+    </script>
 @endpush
 
-@extends('layouts/edit-form', [
-    'createText' => trans('admin/locations/table.create') ,
-    'updateText' => trans('admin/locations/table.update'),
-    'topSubmit' => true,
-    'formAction' => (isset($item->id)) ? route('locations.update', ['location' => $item->id]) : route('locations.store'),
-])
-
 {{-- Page content --}}
-@section('inputFields')
-@include ('partials.forms.edit.name', ['translated_name' => trans('admin/locations/table.name')])
+@section('content')
 
-<!-- parent -->
-@include ('partials.forms.edit.location-select', ['translated_name' => trans('admin/locations/table.parent'), 'fieldname' => 'parent_id', 'exclude_id' => isset($item) ? $item->id : null, 'company_id' => isset($item) ? $item->company_id : null])
+    <x-container class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-12 col-sm-offset-0">
 
-<!-- Manager-->
-@include ('partials.forms.edit.user-select', ['translated_name' => trans('admin/users/table.manager'), 'fieldname' => 'manager_id'])
+        <x-form :$item route="{{ ($item->id) ? route('locations.update', ['location' => $item->id]) : route('locations.store') }}">
 
-<!-- Company -->
-@include ('partials.forms.edit.company-select', ['translated_name' => trans('general.company'), 'fieldname' => 'company_id'])
+            <x-box top_submit>
+                @if ($item->id)
+                    <x-slot:header>{{ $item->name }}</x-slot:header>
+                @endif
 
-@include ('partials.forms.edit.phone')
-@include ('partials.forms.edit.fax')
+                <x-input.company-select
+                    :label="trans('general.company')"
+                    name="company_id"
+                    :selected="old('company_id', $item->company_id)"
+                />
 
-<!-- Currency -->
-<div class="form-group {{ $errors->has('currency') ? ' has-error' : '' }}">
-    <label for="currency" class="col-md-3 control-label">
-        {{ trans('admin/locations/table.currency') }}
-    </label>
-    <div class="col-md-7">
-        <input class="form-control" style="width:100px" type="text" name="currency" aria-label="currency" id="currency" value="{{ old('currency', $item->currency) }}"{!!  (Helper::checkIfRequired($item, 'currency')) ? ' required' : '' !!} maxlength="3" />
-        <x-form.error name="currency" />
+                <x-form.row
+                    :label="trans('admin/locations/table.name')"
+                    :$item
+                    name="name"
+                />
 
-    </div>
-</div>
+                <x-input.location-select
+                    :label="trans('admin/locations/table.parent')"
+                    name="parent_id"
+                    :selected="old('parent_id', $item->parent_id)"
+                    :companyId="$item->company_id"
+                    id="parent_id_location_select"
+                />
 
-@include ('partials.forms.edit.address')
+                @include ('partials.forms.edit.user-select', ['translated_name' => trans('admin/users/table.manager'), 'fieldname' => 'manager_id'])
 
-<!-- LDAP Search OU -->
-@if ($snipeSettings->ldap_enabled == 1)
-    <div class="form-group {{ $errors->has('ldap_ou') ? ' has-error' : '' }}">
-        <label for="ldap_ou" class="col-md-3 control-label">
-            {{ trans('admin/locations/table.ldap_ou') }}
-        </label>
-        <div class="col-md-7">
-            <input class="form-control" type="text" name="ldap_ou" aria-label="ldap_ou" id="ldap_ou" value="{{ old('ldap_ou', $item->ldap_ou) }}"{!!  (Helper::checkIfRequired($item, 'ldap_ou')) ? ' required' : '' !!} maxlength="191" />
-            <x-form.error name="ldap_ou" />
-        </div>
-    </div>
-@endif
+                <x-form.row
+                    :label="trans('admin/suppliers/table.phone')"
+                    :$item
+                    name="phone"
+                    type="tel"
+                    input_icon="phone"
+                    input_group_addon="left"
+                />
+
+                <x-form.row
+                    :label="trans('admin/suppliers/table.fax')"
+                    :$item
+                    name="fax"
+                    type="tel"
+                    input_icon="fax"
+                    input_group_addon="left"
+                    :maxlength="34"
+                />
+
+                <x-form.row
+                    :label="trans('admin/locations/table.currency')"
+                    :$item
+                    name="currency"
+                    :maxlength="3"
+                    input_div_class="col-md-2"
+                />
+
+                <x-form.address :item="$item" />
+
+                @if ($snipeSettings->ldap_enabled == 1)
+                    <x-form.row
+                        :label="trans('admin/locations/table.ldap_ou')"
+                        :$item
+                        name="ldap_ou"
+                    />
+                @endif
+
+                <x-input.image-upload :item="$item" :imagePath="app('locations_upload_path')" :clonedModel="$cloned_model ?? null" />
+
+                <x-form.row
+                    :label="trans('general.notes')"
+                    :$item
+                    name="notes"
+                    type="textarea"
+                    :rows="5"
+                    :placeholder="trans('general.placeholders.notes')"
+                />
 
 
-@include ('partials.forms.edit.image-upload', ['image_path' => app('locations_upload_path')])
+                    <x-form.row
+                            :label="trans('admin/locations/table.name')"
+                            :$item
+                            name="name"
+                    />
 
-<div class="form-group{!! $errors->has('notes') ? ' has-error' : '' !!}">
-    <label for="notes" class="col-md-3 control-label">{{ trans('general.notes') }}</label>
-    <div class="col-md-8">
-        <x-input.textarea
-                name="notes"
-                id="notes"
-                :value="old('notes', $item->notes)"
-                placeholder="{{ trans('general.placeholders.notes') }}"
-                aria-label="notes"
-                rows="5"
-        />
-        <x-form.error name="notes" />
-    </div>
-</div>
-@include ('partials.forms.custom.location_bitrix_id')
-@include ('partials.forms.custom.location_sklad')
 
-<fieldset name="color-preferences">
-    <x-form.legend help_text="{{ trans('general.tag_color_help') }}">
-        {{ trans('general.tag_color') }}
-    </x-form.legend>
-    <!--  color -->
-    <div class="form-group {{ $errors->has('tag_color') ? 'error' : '' }}">
-        <label for="tag_color" class="col-md-3 control-label">
-            {{ trans('general.tag_color') }}
-        </label>
-        <div class="col-md-9">
-            <x-input.colorpicker :item="$item" id="color" :value="old('color', ($item->color ?? '#f4f4f4'))" name="tag_color" id="tag_color" />
-            <x-form.error name="tag_color" />
-        </div>
-    </div>
-</fieldset>
+                    <x-form.row
+                            :label="trans('admin/locations/table.name')"
+                            :$item
+                            name="name"
+                    />
+
+                    <fieldset name="color-preferences">
+                    <x-form.legend help_text="{{ trans('general.tag_color_help') }}">
+                        {{ trans('general.tag_color') }}
+                    </x-form.legend>
+                    <x-form.row
+                        :label="trans('general.tag_color')"
+                        :$item
+                        name="tag_color"
+                        type="colorpicker"
+                    />
+                </fieldset>
+                    @include ('partials.forms.custom.location_bitrix_id')
+                    @include ('partials.forms.custom.location_sklad')
+            </x-box>
+
+        </x-form>
+
+    </x-container>
+
 @stop
 

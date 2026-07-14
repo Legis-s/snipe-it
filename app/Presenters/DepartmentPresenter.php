@@ -159,7 +159,7 @@ class DepartmentPresenter extends Presenter
             return ($this->tag_color ? "<i class='fa-solid fa-fw fa-square' style='color: ".e($this->tag_color)."' aria-hidden='true'></i>" : '').'<a href="'.route('departments.show', e($this->id)).'">'.e($this->name).'</a>';
         }
 
-        return ($this->tag_color ? "<i class='fa-solid fa-fw fa-square' style='color: ".e($this->tag_color)."' aria-hidden='true'></i>" : '').$this->name;
+        return ($this->tag_color ? "<i class='fa-solid fa-fw fa-square' style='color: " . e($this->tag_color) . "' aria-hidden='true'></i>" : '') . e($this->name);
     }
 
     public function nameUrl()

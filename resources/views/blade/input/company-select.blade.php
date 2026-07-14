@@ -17,7 +17,7 @@
     ])
 >
     <label for="{{ $name }}" class="col-md-3 control-label">{{ $label }}</label>
-    <div class="col-md-6">
+    <div class="col-md-7">
         <select
             class="js-data-ajax"
             data-endpoint="companies"
@@ -50,12 +50,12 @@
 
     @if ($snipeSettings->full_multiple_companies_support == '1')
         @cannot('superadmin')
-            <div class="col-md-6 col-md-offset-3">
+            <div class="col-md-7 col-md-offset-3">
                 <p class="help-block"><x-icon type="tip" /> {{ trans('general.fmcs_company_select_note') }}</p>
             </div>
         @endcannot
         @can('superadmin')
-            <div class="col-md-6 col-md-offset-3">
+            <div class="col-md-7 col-md-offset-3">
                 <p class="help-block"><x-icon type="tip" /> {{ trans('general.fmcs_company_select_superadmin_note') }}</p>
             </div>
         @endcan

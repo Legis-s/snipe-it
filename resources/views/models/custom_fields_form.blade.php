@@ -47,7 +47,7 @@
                     <!-- Markdown Textarea -->
                     <textarea rows="6" class="col-md-6 form-control" id="{{ $field->db_column_name() }}" name="{{ $field->db_column_name() }}"{{ ($field->pivot->required=='1') ? ' required' : '' }}>{{ old($field->db_column_name(),(isset($item) ? Helper::gracefulDecrypt($field, $item->{$field->db_column_name()}) : $field->defaultValue($model->id))) }}</textarea>
                     <p class="help-block">
-                        <i class="fab fa-markdown" aria-hidden="true"></i> {{ trans('admin/custom_fields/general.markdown_supported') }}
+                        <i class="fab fa-markdown" aria-hidden="true"></i> {{ trans('general.markdown') }}
                     </p>
 
               @elseif ($field->element=='checkbox')

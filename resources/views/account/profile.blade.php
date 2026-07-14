@@ -194,7 +194,7 @@
                     @endif
 
 
-                    @include ('partials.forms.edit.image-upload', ['fieldname' => 'avatar', 'image_path' => app('users_upload_path')])
+                    <x-input.image-upload :item="$user" fieldname="avatar" :imagePath="app('users_upload_path')" />
 
 
                     <!-- Two factor opt in -->

@@ -165,7 +165,9 @@
                                    />
                                    <x-form.error name="default_eula_text" />
                                    <p class="help-block">{{ trans('admin/settings/general.default_eula_help_text') }}</p>
-                                   <p class="help-block">{!! trans('admin/settings/general.eula_markdown') !!}</p>
+                                   <x-form.help name="default_eula_text" icon="markdown">
+                                       {{ trans('general.markdown') }}
+                                   </x-form.help>
                                </div>
                            </div>
 

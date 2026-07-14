@@ -7,6 +7,7 @@
     'required' => null,
     'disabled' => false,
     'help_text' => null,
+    'help_icon' => null,
     'info_tooltip_text' => null,
     // Default input column depends on whether the row has a left-hand label.
     // With a label, the row already spends col-md-3 on the left; without one
@@ -53,6 +54,7 @@
                     :required="$really_required && $loop->first"
                     :disabled="$disabled"
                     :aria-label="$name"
+                    :aria-describedby="$help_text ? $name.'-help' : null"
                 />
                 {{ $option_label }}
             </label>
@@ -75,9 +77,7 @@
 
     @if ($help_text)
         <div class="col-md-8 col-md-offset-3">
-            <p class="help-block">
-                {!! $help_text !!}
-            </p>
+            <x-form.help :name="$name" :icon="$help_icon">{!! $help_text !!}</x-form.help>
         </div>
     @endif
 

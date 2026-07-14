@@ -111,7 +111,7 @@
 
 
 
-    @include ('partials.forms.edit.image-upload', ['image_path' => app('assets_upload_path')])
+    <x-input.image-upload :item="$item" :imagePath="app('assets_upload_path')" />
 
 
     <div id='custom_fields_content'>

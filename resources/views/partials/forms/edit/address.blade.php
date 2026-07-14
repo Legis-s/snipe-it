@@ -44,9 +44,9 @@
 </div>
 
 <div class="form-group {{ $errors->has('zip') ? ' has-error' : '' }}">
-    <label for="zip" class="col-md-3 control-label" maxlength="10">{{ trans('general.zip') }}</label>
-    <div class="col-md-7">
-        <input class="form-control" name="zip" type="text" id="zip" value="{{ old('zip', $item->zip) }}">
+    <label for="zip" class="col-md-3 control-label">{{ trans('general.zip') }}</label>
+    <div class="col-md-3">
+        <input class="form-control" name="zip" type="text" id="zip" value="{{ old('zip', $item->zip) }}" maxlength="10" aria-label="zip">
         <x-form.error name="zip" />
     </div>
 </div>

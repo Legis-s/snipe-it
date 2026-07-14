@@ -1450,6 +1450,14 @@ Radio toggle styles for permission settings and check/uncheck all
 }
 }
 
+// Spin the help-icon (life-ring) on hover/focus of the info tooltip anchor.
+// Uses Font Awesome's built-in fa-spin animation. Gated by the
+// prefers-reduced-motion rule below.
+.tooltip-spin-hover:hover i,
+.tooltip-spin-hover:focus i {
+  animation: fa-spin 2s infinite linear;
+}
+
 // Respect the user's OS-level "reduce motion" preference. The Font Awesome
 // spinners (.fa-spin) and Font Awesome Animation pulses (.faa-pulse, .animated)
 // loop indefinitely, which can trigger vestibular symptoms. One-shot animations
@@ -1463,6 +1471,8 @@ Radio toggle styles for permission settings and check/uncheck all
   // safe against future FA-Animation class additions.
   [class*="faa-"].animated,
   [class*="faa-"].animated-hover:hover,
+  .tooltip-spin-hover:hover i,
+  .tooltip-spin-hover:focus i,
   .fa-spin,
   .fa-pulse {
     animation: none !important;

@@ -8,6 +8,7 @@
     'required' => null,
     'disabled' => false,
     'help_text' => null,
+    'help_icon' => null,
     'info_tooltip_text' => null,
     // Default input column: only skip the offset when a left-hand label
     // column is being rendered (i.e. multi mode with a label). Single mode
@@ -87,6 +88,7 @@
                     :required="$really_required"
                     :disabled="$disabled"
                     :aria-label="$name"
+                    :aria-describedby="$help_text ? $name.'-help' : null"
                 />
                 {{ $label }}
             </label>
@@ -108,6 +110,7 @@
                         :checked="$is_checked($option_value)"
                         :disabled="$disabled"
                         :aria-label="$name"
+                        :aria-describedby="$help_text ? $name.'-help' : null"
                     />
                     {{ $option_label }}
                 </label>
@@ -132,9 +135,7 @@
 
     @if ($help_text)
         <div class="col-md-8 col-md-offset-3">
-            <p class="help-block">
-                {!! $help_text !!}
-            </p>
+            <x-form.help :name="$name" :icon="$help_icon">{!! $help_text !!}</x-form.help>
         </div>
     @endif
 
