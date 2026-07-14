@@ -92,19 +92,16 @@
                     :rows="5"
                     :placeholder="trans('general.placeholders.notes')"
                 />
-
-
                     <x-form.row
-                            :label="trans('admin/locations/table.name')"
+                            :label="trans('general.sklad')"
                             :$item
-                            name="name"
+                            name="sklad"
                     />
 
-
                     <x-form.row
-                            :label="trans('admin/locations/table.name')"
+                            :label="trans('general.bitrix_id')"
                             :$item
-                            name="name"
+                            name="bitrix_id"
                     />
 
                     <fieldset name="color-preferences">
@@ -118,8 +115,6 @@
                         type="colorpicker"
                     />
                 </fieldset>
-                    @include ('partials.forms.custom.location_bitrix_id')
-                    @include ('partials.forms.custom.location_sklad')
             </x-box>
 
         </x-form>
