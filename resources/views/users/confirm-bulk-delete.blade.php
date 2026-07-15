@@ -16,8 +16,8 @@
           <!-- CSRF Token -->
           {{csrf_field()}}
           <div class="col-md-12">
-            <div class="callout callout-danger">
-              <i class="fas fa-exclamation-triangle"></i>
+            <div class="callout callout-danger" role="alert" aria-live="assertive" aria-atomic="true">
+              <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
               <strong>{{ trans('admin/users/general.warning_deletion_information', array('count' => count($users))) }} </strong>
 
             </div>
@@ -25,7 +25,7 @@
 
           @if (config('app.lock_passwords'))
             <div class="col-md-12">
-              <div class="callout callout-warning">
+              <div class="callout callout-warning" role="alert" aria-live="assertive" aria-atomic="true">
                 <p>{{ trans('general.feature_disabled') }}</p>
               </div>
             </div>
@@ -60,28 +60,28 @@
                     </td>
                 </tr>
                   <tr>
-                    <th class="col-md-1">
+                    <th scope="col" class="col-md-1">
                       <!-- <input type="checkbox" id="checkAll"> -->
                       </th>
-                    <th class="col-md-3">{{ trans('general.name') }}</th>
-                    <th class="col-md-3">{{ trans('general.groups') }}</th>
-                    <th class="text-right">
+                    <th scope="col" class="col-md-3">{{ trans('general.name') }}</th>
+                    <th scope="col" class="col-md-3">{{ trans('general.groups') }}</th>
+                    <th scope="col" class="text-right">
                       <i class="fas fa-barcode fa-fw" aria-hidden="true" style="font-size: 17px;"></i>
                       <span class="sr-only">{{ trans('general.assets') }}</span>
                     </th>
-                    <th class="text-right">
+                    <th scope="col" class="text-right">
                       <i class="far fa-keyboard fa-fw" aria-hidden="true" style="font-size: 17px;"></i>
                       <span class="sr-only">{{ trans('general.accessories') }}</span>
                     </th>
-                    <th class="text-right">
+                    <th scope="col" class="text-right">
                       <i class="far fa-save fa-fw" aria-hidden="true" style="font-size: 17px;"></i>
                       <span class="sr-only">{{ trans('general.licenses') }}</span>
                     </th>
-                    <th class="text-right">
+                    <th scope="col" class="text-right">
                       <i class="fas fa-tint fa-fw" aria-hidden="true" style="font-size: 17px;"></i>
                       <span class="sr-only">{{ trans('general.consumables') }}</span>
                     </th>
-                    <th class="text-right">
+                    <th scope="col" class="text-right">
                       <i class="fas fa-paperclip fa-fw" aria-hidden="true" style="font-size: 17px;"></i>
                       <span class="sr-only">{{ trans('general.files') }}</span>
                     </th>

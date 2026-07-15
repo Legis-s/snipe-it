@@ -33,8 +33,8 @@
           <div class="col-md-7 col-sm-12">
 
           <input class="form-control" type="text" name="asset_tags[1]" id="asset_tag" value="{{ old('asset_tag', $item->asset_tag) }}" required>
-              {!! $errors->first('asset_tags', '<span class="alert-msg"><i class="fas fa-times"></i> :message</span>') !!}
-              {!! $errors->first('asset_tag', '<span class="alert-msg"><i class="fas fa-times"></i> :message</span>') !!}
+              <x-form.error name="asset_tags" />
+              <x-form.error name="asset_tag" />
           </div>
       @else
           <!-- we are creating a new asset - let people use more than one asset tag -->
@@ -42,8 +42,8 @@
               <input class="form-control"
                      type="text" name="asset_tags[1]" id="asset_tag"
                      value="{{ old('asset_tags.1', \App\Models\Asset::autoincrement_asset()) }}" required>
-              {!! $errors->first('asset_tags.1', '<span class="alert-msg"><i class="fas fa-times"></i> :message</span>') !!}
-              {!! $errors->first('asset_tag', '<span class="alert-msg"><i class="fas fa-times"></i> :message</span>') !!}
+              <x-form.error name="asset_tags.1" />
+              <x-form.error name="asset_tag" />
           </div>
           <div class="col-md-2 col-sm-12">
               <button class="add_field_button btn btn-sm btn-theme" name="add_field_button">
@@ -83,7 +83,7 @@
                         <input type="text" class="form-control" name="asset_tags[{{ $i }}]"
                                value="{{ old('asset_tags.'.$i) }}"
                                required>
-              {!! $errors->first('asset_tags.'.$i, '<span class="alert-msg"><i class="fas fa-times"></i> :message</span>') !!}
+              <x-form.error :name="'asset_tags.'.$i" />
                     </div>
                     <div class="col-md-2 col-sm-12">
                         <a href="#" class="remove_field btn btn-sm btn-theme"><x-icon type="minus"/></a>
@@ -100,9 +100,9 @@
     @include ('partials.forms.edit.status', [ 'required' => 'true'])
     @if (!$item->id)
         @include ('partials.forms.checkout-selector', ['user_select' => 'true','asset_select' => 'true', 'location_select' => 'true', 'style' => 'display:none;'])
-        @include ('partials.forms.edit.user-select', ['translated_name' => trans('admin/hardware/form.checkout_to'), 'fieldname' => 'assigned_user', 'style' => 'display:none;', 'required' => 'false'])
-        @include ('partials.forms.edit.asset-select', ['translated_name' => trans('admin/hardware/form.checkout_to'), 'fieldname' => 'assigned_asset', 'style' => 'display:none;', 'required' => 'false'])
-        @include ('partials.forms.edit.location-select', ['translated_name' => trans('admin/hardware/form.checkout_to'), 'fieldname' => 'assigned_location', 'style' => 'display:none;', 'required' => 'false'])
+        @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.user'), 'fieldname' => 'assigned_user', 'style' => 'display:none;', 'required' => 'false'])
+        @include ('partials.forms.edit.asset-select', ['translated_name' => trans('general.asset'), 'fieldname' => 'assigned_asset', 'style' => 'display:none;', 'required' => 'false'])
+        @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'assigned_location', 'style' => 'display:none;', 'required' => 'false'])
     @endif
 
     @include ('partials.forms.edit.notes')
@@ -111,7 +111,7 @@
 
 
 
-    @include ('partials.forms.edit.image-upload', ['image_path' => app('assets_upload_path')])
+    <x-input.image-upload :item="$item" :imagePath="app('assets_upload_path')" />
 
 
     <div id='custom_fields_content'>
@@ -194,7 +194,11 @@
 
                 @include ('partials.forms.edit.purchase_cost', ['currency_type' => $currency_type])
                 @include ('partials.forms.custom.depreciable_cost', ['currency_type' => $currency_type])
-                @include ('partials.forms.custom.quality')
+                <x-input.quality-select
+                    :label="trans('general.quality')"
+                    name="quality"
+                    :selected="old('quality', $item->quality)"
+                />
                 @include ('partials.forms.custom.nds')
             </div> <!-- end order details -->
         </fieldset>
@@ -284,19 +288,24 @@
                     $("#selected_status_status").fadeIn();
 
                     if (data == true) {
+                        var checkoutType = $('input[name=checkout_to_type]:checked').val() || 'user';
                         $("#assignto_selector").show();
-                        $("#assigned_user").show();
+                        $("#assigned_user").toggle(checkoutType === 'user');
+                        $("#assigned_asset").toggle(checkoutType === 'asset');
+                        $("#assigned_location").toggle(checkoutType === 'location');
 
                         $("#selected_status_status").removeClass('text-danger');
                         $("#selected_status_status").addClass('text-success');
                         $("#selected_status_status").html('<x-icon type="checkmark" /> {{ trans_choice('admin/hardware/form.asset_deployable', 1)}}');
 
-
                     } else {
                         $("#assignto_selector").hide();
+                        $("#assigned_user").hide();
+                        $("#assigned_asset").hide();
+                        $("#assigned_location").hide();
                         $("#selected_status_status").removeClass('text-success');
                         $("#selected_status_status").addClass('text-danger');
-                        $("#selected_status_status").html('<x-icon type="warning" /> {{ (($item->assigned_to!='') && ($item->assigned_type!='') && ($item->deleted_at == '')) ? trans('admin/hardware/form.asset_not_deployable_checkin') : trans('admin/hardware/form.asset_not_deployable')  }} ');
+                        $("#selected_status_status").html('<x-icon type="warning" /> {{ (($item->assigned_to!='') && ($item->assigned_type!='') && ($item->deleted_at == '')) ? trans_choice('admin/hardware/form.asset_not_deployable_checkin', 1) : trans('admin/hardware/form.asset_not_deployable')  }} ');
                     }
                 }
             });
@@ -305,15 +314,6 @@
 
 
     $(function () {
-
-        var starRatingControl = new StarRating( '.star-rating',{
-            maxStars: 5,
-            tooltip: 'Оцените состояние',
-            clearable: false,
-            // stars: function (el, item, index) {
-            //     el.innerHTML = '<svg aria-hidden="true" focusable="false" data-prefix="far" data-icon="star" class="svg-inline--fa fa-star fa-w-18" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><path fill="currentColor" d="M528.1 171.5L382 150.2 316.7 17.8c-11.7-23.6-45.6-23.9-57.4 0L194 150.2 47.9 171.5c-26.2 3.8-36.7 36.1-17.7 54.6l105.7 103-25 145.5c-4.5 26.3 23.2 46 46.4 33.7L288 439.6l130.7 68.7c23.2 12.2 50.9-7.4 46.4-33.7l-25-145.5 105.7-103c19-18.5 8.5-50.8-17.7-54.6zM388.6 312.3l23.7 138.4L288 385.4l-124.3 65.3 23.7-138.4-100.6-98 139-20.2 62.2-126 62.2 126 139 20.2-100.6 98z"></path></svg>';
-            // },
-        } );
 
         $('#scan_button').click(function() {
             console.log("test click");
@@ -364,6 +364,9 @@
             user_add($(".status_id").val());
         });
 
+        @if (isset($cloned_model))
+        $('input[name="serials[1]"]').trigger('focus');
+        @endif
     });
 
 

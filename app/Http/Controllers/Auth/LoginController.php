@@ -106,15 +106,21 @@ class LoginController extends Controller
         if ($saml->isEnabled() && ! empty($samlData)) {
 
             try {
+
                 $user = $saml->samlLogin($samlData);
                 $notValidAfter = new \Carbon\Carbon(@$samlData['assertionNotOnOrAfter']);
                 if (\Carbon::now()->greaterThanOrEqualTo($notValidAfter)) {
                     abort(400, 'Expired SAML Assertion');
                 }
-                if (SamlNonce::where('nonce', @$samlData['nonce'])->count() > 0) {
-                    abort(400, 'Assertion has already been used');
+                try {
+                    SamlNonce::create([
+                        'nonce' => $samlData['nonce'],
+                        'not_valid_after' => $notValidAfter,
+                    ]);
+                } catch (\Exception $e) {
+                    \Log::error($e);
+                    abort(400, 'Assertion has already been used.');
                 }
-                Log::debug('okay, fine, this is a new nonce then. Good for you.');
                 if (! is_null($user)) {
                     Auth::login($user);
                 } else {
@@ -128,10 +134,6 @@ class LoginController extends Controller
                     $user->last_login = \Carbon::now();
                     $user->saveQuietly();
                 }
-                $s = new SamlNonce;
-                $s->nonce = @$samlData['nonce'];
-                $s->not_valid_after = $notValidAfter;
-                $s->save();
 
             } catch (\Exception $e) {
                 Log::debug('There was an error authenticating the SAML user: '.$e->getMessage());
@@ -171,6 +173,7 @@ class LoginController extends Controller
 
         // Check if the user already exists in the database and was imported via LDAP
         $user = User::where('username', '=', $request->input('username'))->whereNull('deleted_at')->where('ldap_import', '=', 1)->where('activated', '=', '1')->first(); // FIXME - if we get more than one we should fail. and we sure about this ldap_import thing?
+        $user = User::verifyExactUsernameMatch($user, (string) $request->input('username'));
         Log::debug('Local auth lookup complete');
 
         // The user does not exist in the database. Try to get them from LDAP.
@@ -241,7 +244,9 @@ class LoginController extends Controller
 
             try {
                 $user = User::where('username', '=', $remote_user)->whereNull('deleted_at')->where('activated', '=', '1')->first();
+                $user = User::verifyExactUsernameMatch($user, (string) $remote_user);
                 Log::debug('Remote user auth lookup complete');
+
                 if (! is_null($user)) {
                     Auth::login($user, $request->input('remember'));
                 }
@@ -433,7 +438,7 @@ class LoginController extends Controller
             $user->saveQuietly();
             $request->session()->put('2fa_authed', $user->id);
 
-            return redirect()->route('home')->with('success', trans('auth/message.signin.success'));
+            return redirect()->intended()->with('success', trans('auth/message.signin.success'));
         }
 
         return redirect()->route('two-factor')->with('error', trans('auth/message.two_factor.invalid_code'));

@@ -5,12 +5,21 @@ namespace Database\Factories;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * @extends Factory<User>
  */
 class UserFactory extends Factory
 {
+    /**
+     * Set by ->forCompany() and ->withoutCompany() to suppress the default
+     * "attach a fresh Company via the pivot" behavior in configure(). Laravel
+     * factory chain calls clone the factory, and clone copies protected
+     * properties, so setting this in a chained state persists through create().
+     */
+    protected bool $skipDefaultCompanyAttach = false;
+
     /**
      * Define the model's default state.
      *
@@ -22,7 +31,6 @@ class UserFactory extends Factory
             'activated' => 1,
             'address' => $this->faker->address(),
             'city' => $this->faker->city(),
-            'company_id' => Company::factory(),
             'country' => $this->faker->country(),
             'created_by' => 1,
             'display_name' => null,
@@ -41,6 +49,94 @@ class UserFactory extends Factory
             'username' => $this->faker->unique()->username(),
             'zip' => $this->faker->postcode(),
         ];
+    }
+
+    /**
+     * By default every factory-created user is attached to a fresh Company via
+     * the company_user pivot (the authoritative source of user-company
+     * membership under FMCS). Use ->forCompany($company) to pin them to a
+     * specific company, or ->withoutCompany() to leave them unattached
+     * ("floater" users).
+     *
+     * We hook create() (not afterCreating) because chained state calls clone
+     * the factory and register additional afterCreating closures that captured
+     * $this at closure-creation time. Reading $this->skipDefaultCompanyAttach
+     * at create() time gives us the final factory's flag, which is what we
+     * want.
+     */
+    public function create($attributes = [], ?Model $parent = null)
+    {
+        $result = parent::create($attributes, $parent);
+
+        $models = $result instanceof User
+            ? [$result]
+            : $result->all();
+
+        foreach ($models as $user) {
+            // Watson\Validating hooks the saving event and silently returns
+            // false from save() when validation fails (its default is not to
+            // throw). Laravel's Factory::store() doesn't check the return
+            // value, so we can arrive here with an unpersisted user whose id
+            // is still null. Attaching a pivot row for that user would insert
+            // NULL into company_user.user_id and violate the NOT NULL. Skip.
+            if (! $user->exists) {
+                continue;
+            }
+            if ($this->skipDefaultCompanyAttach) {
+                continue;
+            }
+            if ($user->companies()->count() > 0) {
+                continue;
+            }
+            $company = Company::factory()->create();
+            $user->companies()->attach($company->id);
+            $user->syncLegacyCompanyIdMirror();
+        }
+
+        return $result;
+    }
+
+    /**
+     * Preserve the skipDefaultCompanyAttach flag across chained states.
+     * Laravel's Factory::newInstance() rebuilds the factory but does not carry
+     * arbitrary properties, so we copy the flag ourselves.
+     */
+    protected function newInstance(array $arguments = [])
+    {
+        $factory = parent::newInstance($arguments);
+        $factory->skipDefaultCompanyAttach = $this->skipDefaultCompanyAttach;
+
+        return $factory;
+    }
+
+    /**
+     * Attach the created user to a specific Company via the pivot. Accepts
+     * either a Company model or a raw company id, so tests can call
+     * ->forCompany($company) or ->forCompany($company->id) interchangeably.
+     */
+    public function forCompany(Company|int $company): static
+    {
+        $companyId = $company instanceof Company ? $company->id : $company;
+
+        $factory = $this->afterCreating(function (User $user) use ($companyId) {
+            $user->companies()->syncWithoutDetaching([$companyId]);
+            $user->syncLegacyCompanyIdMirror();
+        });
+        $factory->skipDefaultCompanyAttach = true;
+
+        return $factory;
+    }
+
+    /**
+     * Create a user with no company_user pivot rows (a "floater" under FMCS
+     * floater mode).
+     */
+    public function withoutCompany(): static
+    {
+        $factory = clone $this;
+        $factory->skipDefaultCompanyAttach = true;
+
+        return $factory;
     }
 
     public function deletedUser()
@@ -180,6 +276,11 @@ class UserFactory extends Factory
         return $this->appendPermission(['assets.view.requestable' => '1']);
     }
 
+    public function viewEncryptedCustomFields()
+    {
+        return $this->appendPermission(['assets.view.encrypted_custom_fields' => '1']);
+    }
+
     public function deleteAssetModels()
     {
         return $this->appendPermission(['models.delete' => '1']);
@@ -283,6 +384,11 @@ class UserFactory extends Factory
     public function checkoutLicenses()
     {
         return $this->appendPermission(['licenses.checkout' => '1']);
+    }
+
+    public function checkinLicenses()
+    {
+        return $this->appendPermission(['licenses.checkin' => '1']);
     }
 
     public function viewKeysLicenses()
@@ -420,6 +526,11 @@ class UserFactory extends Factory
         return $this->appendPermission(['kits.delete' => '1']);
     }
 
+    public function editPredefinedKits()
+    {
+        return $this->appendPermission(['kits.edit' => '1']);
+    }
+
     public function viewPredefinedKits()
     {
         return $this->appendPermission(['kits.view' => '1']);
@@ -438,6 +549,26 @@ class UserFactory extends Factory
     public function auditAssets()
     {
         return $this->appendPermission(['assets.audit' => '1']);
+    }
+
+    public function manageModelFiles()
+    {
+        return $this->appendPermission(['models.files' => '1']);
+    }
+
+    public function manageLocationFiles()
+    {
+        return $this->appendPermission(['locations.files' => '1']);
+    }
+
+    public function manageCompanyFiles()
+    {
+        return $this->appendPermission(['companies.files' => '1']);
+    }
+
+    public function manageSupplierFiles()
+    {
+        return $this->appendPermission(['suppliers.files' => '1']);
     }
 
     private function appendPermission(array $permission)

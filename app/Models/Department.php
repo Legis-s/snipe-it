@@ -44,7 +44,7 @@ class Department extends SnipeModel
     ];
 
     protected $rules = [
-        'name' => 'required|max:255|is_unique_across_company_and_location:departments,name',
+        'name' => 'required|string|max:255|is_unique_across_company_and_location:departments,name',
         'location_id' => 'numeric|nullable|exists:locations,id',
         'company_id' => 'numeric|nullable|exists:companies,id',
         'manager_id' => 'numeric|nullable|exists:users,id',
@@ -91,6 +91,7 @@ class Department extends SnipeModel
      */
     protected $searchableRelations = [
         'adminuser' => ['first_name', 'last_name', 'display_name'],
+        'company' => ['name'],
     ];
 
     public function isDeletable()
@@ -188,5 +189,10 @@ class Department extends SnipeModel
     public function scopeOrderCompany($query, $order)
     {
         return $query->leftJoin('companies as company_sort', 'departments.company_id', '=', 'company_sort.id')->orderBy('company_sort.name', $order);
+    }
+
+    public function scopeOrderByCreatedBy($query, $order)
+    {
+        return $query->leftJoin('users as admin_sort', 'departments.created_by', '=', 'admin_sort.id')->select('departments.*')->orderBy('admin_sort.first_name', $order)->orderBy('admin_sort.last_name', $order);
     }
 }

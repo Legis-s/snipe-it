@@ -32,23 +32,32 @@
                     <div class="errors-table">
                         <table class="table table-striped table-bordered" id="errors-table">
                             <thead>
-                            <th>{{ trans('general.item') }}</th>
-                            <th>{{ trans('admin/custom_fields/general.field') }}</th>
-                            <th>{{ trans('general.error') }}</th>
+                            <th scope="col">{{ trans('general.item') }}</th>
+                            <th scope="col">{{ trans('admin/custom_fields/general.field') }}</th>
+                            <th scope="col">{{ trans('general.error') }}</th>
                             </thead>
                             <tbody>
                             @foreach($import_errors AS $key => $actual_import_errors)
                                 @foreach($actual_import_errors AS $table => $error_bag)
-                                    @foreach($error_bag as $field => $error_list)
+                                    {{-- general messages such as "The selected file is invalid" are simple strings --}}
+                                    @if(is_string($error_bag))
                                         <tr>
-                                            <td><b>{{ $key }}</b></td>
-                                            <td><b>{{ $field }}</b></td>
-                                            <td>
-                                                <span>{{ implode(", ",$error_list) }}</span>
-                                                <br />
-                                            </td>
+                                            <td></td>
+                                            <td></td>
+                                            <td>{{ $error_bag }}</td>
                                         </tr>
-                                    @endforeach
+                                    @elseif(is_array($error_bag))
+                                        @foreach($error_bag as $field => $error_list)
+                                            <tr>
+                                                <td><b>{{ $key }}</b></td>
+                                                <td><b>{{ $field }}</b></td>
+                                                <td>
+                                                    <span>{{ implode(", ",$error_list) }}</span>
+                                                    <br />
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    @endif
                                 @endforeach
                             @endforeach
                             </tbody>
@@ -97,12 +106,36 @@
                         </div>
                         <div class="row">
                             <div class="col-md-12 table-responsive" style="padding-top: 30px;">
+
+                                @if (count($selectedIds) > 0)
+                                    <div class="row" style="padding-bottom: 10px;">
+                                        <div class="col-md-12">
+                                            <button type="button"
+                                                    class="btn btn-danger"
+                                                    data-toggle="modal"
+                                                    data-target="#bulkDeleteImportsModal">
+                                                <i class="fas fa-trash" aria-hidden="true"></i>
+                                                {{ trans('admin/hardware/message.import.bulk_delete.button', ['count' => count($selectedIds)]) }}
+                                            </button>
+                                        </div>
+                                    </div>
+                                @endif
+
                                 <table data-id-table="upload-table"
                                         data-side-pagination="client"
                                         id="upload-table"
                                         class="col-md-12 table table-striped snipe-table">
 
                                     <tr>
+                                        <th class="col-md-1">
+                                            <label class="sr-only" for="importsSelectAll">
+                                                {{ trans('admin/hardware/message.import.bulk_delete.select_all') }}
+                                            </label>
+                                            <input type="checkbox"
+                                                    id="importsSelectAll"
+                                                    wire:model.live="selectAll"
+                                                    aria-label="{{ trans('admin/hardware/message.import.bulk_delete.select_all') }}">
+                                        </th>
                                         <th>
                                             {{ trans('general.file_name') }}
                                         </th>
@@ -124,6 +157,17 @@
                                     @foreach($this->files as $currentFile)
 
                                     		<tr style="{{ ($this->activeFile && ($currentFile->id == $this->activeFile->id)) ? 'font-weight: bold' : '' }}" class="{{ ($this->activeFile && ($currentFile->id == $this->activeFile->id)) ? '' : '' }}">
+                                                <td>
+                                                    <label class="sr-only" for="import-row-{{ $currentFile->id }}">
+                                                        {{ trans('admin/hardware/message.import.bulk_delete.select_row', ['file' => $currentFile->file_path]) }}
+                                                    </label>
+                                                    <input type="checkbox"
+                                                            id="import-row-{{ $currentFile->id }}"
+                                                            wire:model.live="selectedIds"
+                                                            value="{{ $currentFile->id }}"
+                                                            @disabled(! $this->canDeleteFile($currentFile))
+                                                            aria-label="{{ trans('admin/hardware/message.import.bulk_delete.select_row', ['file' => $currentFile->file_path]) }}">
+                                                </td>
                                     			<td>
 
                                                     @if ((auth()->user()->id == $currentFile->adminuser?->id) || (auth()->user()->isSuperUser()))
@@ -171,7 +215,7 @@
 
                                             @if( $currentFile && $this->activeFile && ($currentFile->id == $this->activeFile->id))
                                                 <tr>
-                                                    <td colspan="5">
+                                                    <td colspan="6">
 
                                                         <div class="form-group">
 
@@ -245,7 +289,7 @@
                                                                     <h3>
                                                                         <i class="{{ \App\Helpers\IconHelper::icon($typeOfImport) }}">
                                                                         </i>
-                                                                        {{ trans('general.map_fields', ['item_type' => ucwords($typeOfImport)]) }}
+                                                                        {{ trans('general.map_fields', ['item_type' => $importTypes[$typeOfImport]]) }}
                                                                        </h3>
                                                                     <hr style="border-top: 1px solid lightgray">
                                                                 </div>
@@ -276,7 +320,7 @@
                                                                                     class="mappings"
                                                                                     style="min-width: 100%;"
                                                                                 >
-                                                                                    <option selected="selected" value="">Do Not Import</option>
+                                                                                    <option selected="selected" value="">{{ trans('general.importer.do_not_import') }}</option>
                                                                                     @foreach($columnOptions[$typeOfImport] as $key => $value)
                                                                                         <option
                                                                                             value="{{ $key }}"
@@ -329,6 +373,14 @@
                                             @endif
                                     @endforeach
                                 </table>
+
+                                @if ($this->files->hasPages())
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            {{ $this->files->links() }}
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -339,6 +391,45 @@
                 <p>{!!   trans('general.importing_help') !!}</p>
             </div>
 
+        </div>
+
+        {{-- Bulk delete confirmation modal. Kept as a Livewire-driven Bootstrap
+             modal (not the shared confirm-action partial, which POSTs a form)
+             so the confirm button can fire wire:click and let Livewire handle
+             the delete without a page reload. --}}
+        <div wire:ignore.self class="modal fade" id="bulkDeleteImportsModal" tabindex="-1" role="dialog" aria-labelledby="bulkDeleteImportsModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="{{ trans('button.cancel') }}">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 class="modal-title" id="bulkDeleteImportsModalLabel">
+                            {{ trans('admin/hardware/message.import.bulk_delete.confirm_title') }}
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            {{ trans('admin/hardware/message.import.bulk_delete.confirm_body', ['count' => count($selectedIds)]) }}
+                        </p>
+                        @if (count($selectedIds) > 0)
+                            <ul>
+                                @foreach ($this->files as $currentFile)
+                                    @if (in_array((string) $currentFile->id, $selectedIds, true) || in_array($currentFile->id, $selectedIds, true))
+                                        <li>{{ $currentFile->file_path }}</li>
+                                    @endif
+                                @endforeach
+                            </ul>
+                        @endif
+                    </div>
+                    <div class="modal-footer">
+                        <a href="#" class="pull-left" data-dismiss="modal">{{ trans('button.cancel') }}</a>
+                        <button type="button" class="btn btn-danger" wire:click="bulkDestroy" data-dismiss="modal">
+                            {{ trans('admin/hardware/message.import.bulk_delete.confirm_button') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
 </div>
 @script

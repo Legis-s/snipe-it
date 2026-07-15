@@ -1,5 +1,21 @@
 @push('css')
     <link rel="stylesheet" href="{{ url(mix('css/dist/bootstrap-table.css')) }}">
+
+    {{-- Bootstrap's default a:hover paints links Bootstrap-blue on hover.
+         For the advanced-search "clear all" pill and the individual
+         tag-remove pills, we want the label chip's white text to stay
+         white on hover (they already carry a colored background). --}}
+    <style>
+        .snipe-advanced-search-tags .snipe-advanced-search-tags-clear-all,
+        .snipe-advanced-search-tags .snipe-advanced-search-tags-clear-all:hover,
+        .snipe-advanced-search-tags .snipe-advanced-search-tags-clear-all:focus,
+        .snipe-advanced-search-tags .snipe-advanced-search-tag-remove,
+        .snipe-advanced-search-tags .snipe-advanced-search-tag-remove:hover,
+        .snipe-advanced-search-tags .snipe-advanced-search-tag-remove:focus {
+            color: #fff !important;
+            text-decoration: none !important;
+        }
+    </style>
 @endpush
 
 @push('js')
@@ -13,6 +29,523 @@
 <script nonce="{{ csrf_token() }}">
     $(function () {
 
+        if (!$.fn.bootstrapTable || $.fn.bootstrapTable.__snipeAdvancedSearchPatched) {
+            return;
+        }
+
+        $.fn.bootstrapTable.__snipeAdvancedSearchPatched = true;
+
+        var BootstrapTable = $.BootstrapTable;
+        var baseBootstrapTablePrototype = Object.getPrototypeOf(BootstrapTable.prototype);
+        var baseInitSearch = baseBootstrapTablePrototype.initSearch;
+        var defaultAdvancedSearchOperator = 'and';
+        var advancedSearchSearchText = @json(trans('general.search'));
+
+        var advancedSearchOperatorLabel = @json(trans('general.search_operator'));
+        var advancedSearchAndText = @json(trans('general.and'));
+        var advancedSearchOrText = @json(trans('general.or'));
+        var advancedSearchClearAllText = @json(trans('general.clear_all_filters'));
+        var advancedSearchOperatorStorageKey = 'snipeit.bs.table.advancedSearchOperator';
+
+        var normalizeAdvancedSearchOperator = function (operator) {
+            return (operator || defaultAdvancedSearchOperator).toString().toLowerCase() === 'or' ? 'or' : 'and';
+        };
+
+        // Shared teardown for the transport-error state onLoadError puts up.
+        // Called from onLoadSuccess (retry succeeded), onRefresh (user clicked
+        // the reload button), and any future entry points that should return
+        // the table to its clean baseline.
+        var clearBootstrapTableLoadError = function (instance) {
+            if (!instance || !instance.$el) {
+                return;
+            }
+            var $wrap = instance.$el.closest('.bootstrap-table');
+            $wrap.find('.table-load-error').remove();
+            $wrap.find('.fixed-table-body').show();
+            $wrap.find('.fixed-table-pagination').show();
+        };
+
+        // Both onLoadError banners (session-expired 401/419 and the generic
+        // 500-level failure) share the same DOM shape, insertion point, and
+        // cleanup rules. innerHtml must already be XSS-safe — callers HTML-
+        // encode dynamic pieces before passing them in.
+        //
+        // aria-live=polite is always emitted. role="alert" alone implies
+        // assertive, which interrupts screen readers mid-utterance; a table
+        // that failed to load doesn't warrant that. Polite queues the
+        // announcement for the next natural pause.
+        var renderBootstrapTableLoadErrorCallout = function (options) {
+            var $wrap = options.wrap;
+            $wrap.find('.table-load-error').remove();
+            $wrap.find('.fixed-table-body').hide();
+            $wrap.find('.fixed-table-pagination').hide();
+
+            // Insert below the advanced-search pill container if it's present
+            // (populated by an active filter), otherwise below the toolbar.
+            // Either way the banner ends up above .fixed-table-container.
+            var $tagContainer = $wrap.children('.snipe-advanced-search-tags');
+            var $anchor = $tagContainer.length && $tagContainer.children().length
+                ? $tagContainer
+                : $wrap.find('.fixed-table-toolbar').first();
+
+            // Marker class table-load-error MUST live on the outermost wrapper
+            // so the cleanup selector removes the whole banner in one shot.
+            // A nested layout would leave orphan outer wells behind on each
+            // re-render and stack up.
+            $anchor.after(
+                '<div class="row table-load-error" style="padding-left: 5px;right: 5px;"><div class="well well-sm "' +
+                ' role="alert" aria-live="polite"' +
+                ' style="margin: 10px; position: relative; z-index: 5; text-align: center;">' +
+                options.innerHtml +
+                '</div></div>',
+            );
+        };
+
+        var getStoredAdvancedSearchOperator = function () {
+            try {
+                var storedOperator = localStorage.getItem(advancedSearchOperatorStorageKey);
+
+                return storedOperator ? normalizeAdvancedSearchOperator(storedOperator) : null;
+            } catch (error) {
+                return null;
+            }
+        };
+
+        var storeAdvancedSearchOperator = function (operator) {
+            try {
+                localStorage.setItem(advancedSearchOperatorStorageKey, normalizeAdvancedSearchOperator(operator));
+            } catch (error) {
+                // Ignore storage errors (private mode/quota), fallback remains in-memory.
+            }
+        };
+
+            var escapeAdvancedSearchValue = function (value) {
+                return $('<div/>').text(value == null ? '' : value).html();
+            };
+
+            // Safely decode HTML entities in a string WITHOUT parsing it as HTML.
+            // `<textarea>` innerHTML is RCDATA — the parser decodes entity
+            // references like `&lt;` but does not interpret `<tag>` as an
+            // element. Contrast with the naive `$('<div/>').html(value).text()`
+            // pattern, which parses value as HTML into a detached div — an
+            // entity-encoded payload like `&lt;img src=x onerror=alert(1)&gt;`
+            // decodes into a real <img>, and browsers fire onerror even for
+            // detached images. Using a textarea avoids that DOM instantiation
+            // entirely.
+            var decodeHtmlEntitiesSafely = function (value) {
+                if (value == null) {
+                    return '';
+                }
+                var textarea = document.createElement('textarea');
+                textarea.innerHTML = String(value);
+                return textarea.value;
+            };
+
+            Object.assign($.fn.bootstrapTable.locales, {
+                formatAdvancedCloseButton: function () {
+                    return advancedSearchSearchText;
+                },
+                formatAdvancedCancelButton: function () {
+                    return $.fn.bootstrapTable.defaults.formatClearSearch();
+                },
+                formatAdvancedSearchOperator: function () {
+                    return advancedSearchOperatorLabel;
+                }
+            });
+
+            Object.assign($.fn.bootstrapTable.defaults, {
+                advancedSearchOperator: defaultAdvancedSearchOperator,
+                formatAdvancedCloseButton: $.fn.bootstrapTable.locales.formatAdvancedCloseButton,
+                formatAdvancedCancelButton: $.fn.bootstrapTable.locales.formatAdvancedCancelButton,
+                formatAdvancedSearchOperator: $.fn.bootstrapTable.locales.formatAdvancedSearchOperator
+            });
+
+            BootstrapTable.prototype.getAdvancedSearchOperator = function () {
+                var operator = this.advancedSearchOperator || this.options.advancedSearchOperator || this.$el.data('advanced-search-filter-operator') || getStoredAdvancedSearchOperator() || defaultAdvancedSearchOperator;
+
+                return normalizeAdvancedSearchOperator(operator);
+            };
+
+            BootstrapTable.prototype.setAdvancedSearchOperator = function (operator) {
+                this.advancedSearchOperator = normalizeAdvancedSearchOperator(operator);
+                this.$el.data('advanced-search-filter-operator', this.advancedSearchOperator);
+                storeAdvancedSearchOperator(this.advancedSearchOperator);
+            };
+
+            BootstrapTable.prototype.collectAdvancedSearchFormData = function () {
+                var filters = {};
+                var operator = defaultAdvancedSearchOperator;
+
+                $.each(this.$toolbarModal.find('.toolbar-model-form').serializeArray(), function (index, field) {
+                    var value = $.trim(field.value);
+
+                    if (field.name === '__advanced_search_operator') {
+                        operator = value.toLowerCase() === 'or' ? 'or' : 'and';
+
+                        return;
+                    }
+
+                    if (value !== '') {
+                        filters[field.name] = value;
+                    }
+                });
+
+                return {
+                    filters: filters,
+                    operator: operator
+                };
+            };
+
+            BootstrapTable.prototype.getAdvancedSearchFieldTitle = function (fieldName) {
+                for (var i = 0; i < this.columns.length; i++) {
+                    var column = this.columns[i];
+
+                    if (column.field === fieldName) {
+                        return $('<div/>').html(column.title || fieldName).text().trim();
+                    }
+                }
+
+                return fieldName;
+            };
+
+            BootstrapTable.prototype.getAdvancedSearchTagsContainer = function () {
+                var $tableWrapper = this.$el.closest('.bootstrap-table');
+
+                if (!$tableWrapper.length) {
+                    return $();
+                }
+
+                var $container = $tableWrapper.children('.snipe-advanced-search-tags');
+
+                if (!$container.length) {
+                    $container = $('<div class="snipe-advanced-search-tags" style="margin: 8px 0;"></div>');
+
+                    if ($tableWrapper.children('.fixed-table-container').length) {
+                        $container.insertBefore($tableWrapper.children('.fixed-table-container').first());
+                    } else {
+                        $container.insertBefore(this.$el);
+                    }
+                }
+
+                return $container;
+            };
+
+            BootstrapTable.prototype.getAdvancedSearchButton = function () {
+                var $tableWrapper = this.$el.closest('.bootstrap-table');
+
+                if (!$tableWrapper.length) {
+                    return $();
+                }
+
+                // Try to find the button by data attribute first (most reliable)
+                var $button = $tableWrapper.find('button[data-toggle="advanced-search"]').first();
+
+                // Fallback: look in toolbar by the fa-search-plus icon
+                if (!$button.length) {
+                    $button = $tableWrapper.find('button:has(.fa-search-plus)').first();
+                }
+
+                return $button;
+            };
+
+            BootstrapTable.prototype.updateAdvancedSearchButtonState = function () {
+                var hasFilters = !$.isEmptyObject(this.filterColumnsPartial);
+                var $button = this.getAdvancedSearchButton();
+
+                if ($button.length) {
+                    $button.toggleClass('active', hasFilters);
+                }
+            };
+
+            BootstrapTable.prototype.renderAdvancedSearchTags = function () {
+                var _this = this;
+                var filters = this.filterColumnsPartial;
+                var $tagContainer = this.getAdvancedSearchTagsContainer();
+
+                if ($.isEmptyObject(filters)) {
+                    $tagContainer.empty();
+                    this.updateAdvancedSearchButtonState();
+                    return;
+                }
+
+                var colMap = {};
+                this.columns.forEach(c => colMap[c.field] = c.title);
+                var op = this.getAdvancedSearchOperator();
+                var html = '<span class="label label-warning" style="font-size: 11px; margin-right:6px;display:inline-block;margin-bottom:6px;">' +
+                    advancedSearchOperatorLabel + ': ' + (op === 'or' ? advancedSearchOrText : advancedSearchAndText) + '</span>';
+
+                Object.keys(filters).forEach(f => {
+                    html += '<span class="label label-primary" style="font-size: 11px; margin-right:6px;display:inline-block;margin-bottom:6px;"><b>' +
+                        (colMap[f] || f).replace(/<[^>]*>/g, '') + ':</b> ' + escapeAdvancedSearchValue(filters[f]) +
+                        ' <a href="javascript:void(0)" class="snipe-advanced-search-tag-remove" data-field="' + f +
+                        '" style="color:#fff;margin-left:6px;text-decoration:none;">&times;</a></span>';
+                });
+
+                // "Clear all" pill: same shortcut as opening the modal and hitting
+                // the cancel button, but done from the tags row so the user doesn't
+                // have to open the modal just to wipe every filter.
+                var safeClearAllLabel = escapeAdvancedSearchValue(advancedSearchClearAllText);
+                html += '<a href="javascript:void(0)" class="label label-danger snipe-advanced-search-tags-clear-all"' +
+                    ' title="' + safeClearAllLabel + '"' +
+                    ' aria-label="' + safeClearAllLabel + '"' +
+                    ' style="font-size: 11px; margin-right:6px; display:inline-block; margin-bottom:6px; color:#fff; text-decoration:none; cursor:pointer;">' +
+                    '<i class="fas fa-trash" aria-hidden="true" style="margin-right:4px;"></i>' + safeClearAllLabel +
+                    '</a>';
+
+                $tagContainer
+                    .html(html)
+                    .off('click.snipeAdvancedSearchTags')
+                    .on('click.snipeAdvancedSearchTags', '.snipe-advanced-search-tag-remove', function (e) {
+                        e.preventDefault();
+                        var field = $(this).data('field');
+                        if (field && _this.filterColumnsPartial) {
+                            delete _this.filterColumnsPartial[field];
+                            _this.options.pageNumber = 1;
+                            _this.initSearch();
+                            _this.updatePagination();
+                            _this.trigger('column-advanced-search', _this.filterColumnsPartial, _this.getAdvancedSearchOperator());
+
+                            _this.renderAdvancedSearchTags();
+                        }
+                    })
+                    .on('click.snipeAdvancedSearchTags', '.snipe-advanced-search-tags-clear-all', function (e) {
+                        e.preventDefault();
+                        // Reuse cancelAdvancedSearch: it already wipes filterColumnsPartial,
+                        // resets the modal's inputs (in case the user opens it later), fires
+                        // the column-advanced-search event (so our patched updateHistoryState
+                        // strips filter[...] from the URL), and refetches via initSearch.
+                        if (typeof _this.cancelAdvancedSearch === 'function') {
+                            _this.cancelAdvancedSearch();
+                        }
+                    });
+
+                this.updateAdvancedSearchButtonState();
+            };
+
+            BootstrapTable.prototype.applyAdvancedSearch = function () {
+                var toolbarState = this.collectAdvancedSearchFormData();
+
+                this.filterColumnsPartial = toolbarState.filters;
+                this.setAdvancedSearchOperator(toolbarState.operator);
+
+                if (this.options.sidePagination !== 'server') {
+                    this.options.pageNumber = 1;
+                    this.initSearch();
+                    this.updatePagination();
+                    this.trigger('column-advanced-search', this.filterColumnsPartial, this.getAdvancedSearchOperator());
+                }
+
+                this.renderAdvancedSearchTags();
+                this.updateAdvancedSearchButtonState();
+
+                this.hideToolbarModal();
+            };
+
+            BootstrapTable.prototype.cancelAdvancedSearch = function () {
+                this.filterColumnsPartial = {};
+                this.options.pageNumber = 1;
+                this.initSearch();
+                this.updatePagination();
+                this.trigger('column-advanced-search', this.filterColumnsPartial, this.getAdvancedSearchOperator());
+                this.renderAdvancedSearchTags();
+                this.updateAdvancedSearchButtonState();
+                // Reset the form inputs so the fields appear empty when re-opened
+                if (this.$toolbarModal) {
+                    this.$toolbarModal.find('.toolbar-model-form')[0] && this.$toolbarModal.find('.toolbar-model-form')[0].reset();
+                    this.$toolbarModal.find('input[type="text"]').val('');
+                }
+                this.hideToolbarModal();
+            };
+
+            BootstrapTable.prototype.createToolbarForm = function () {
+                var filterColumnsPartial = this.filterColumnsPartial || {};
+                var html = [`<form class="form-horizontal toolbar-model-form" action="${this.options.actionForm}">`];
+                var operator = this.getAdvancedSearchOperator();
+
+                html.push('<div class="form-group row"><div class="col-sm-12"><p class="help-block"><i class="fa fa-solid fa-lightbulb text-info" aria-hidden="true"></i> {!! trans('general.search_tip') !!}</p></div></div>');
+
+                html.push(`
+                    <div class="form-group row">
+                        <label class="col-sm-4 control-label">${this.options.formatAdvancedSearchOperator()}</label>
+                        <div class="col-sm-6">
+                            <select class="form-control ${this.constants.classes.input}" name="__advanced_search_operator">
+                                <option value="and"${operator === 'and' ? ' selected' : ''}>${advancedSearchAndText}</option>
+                                <option value="or"${operator === 'or' ? ' selected' : ''}>${advancedSearchOrText}</option>
+                            </select>
+                        </div>
+                    </div>
+                `);
+
+                for (var columnIndex = 0; columnIndex < this.columns.length; columnIndex++) {
+                    var column = this.columns[columnIndex];
+
+                    if (!column.checkbox && column.visible && column.searchable) {
+                        // column.title is presenter-supplied and can be entity-encoded
+                        // user input (e.g. AssetPresenter emits `e($field->name)` for
+                        // custom fields). Decode via a textarea so we get the intended
+                        // display string without ever instantiating an <img>/<script>
+                        // element, then escape when interpolating into the HTML template
+                        // — the label, name, and placeholder all get untrusted content.
+                        var title = decodeHtmlEntitiesSafely(column.title).trim();
+                        var value = filterColumnsPartial[column.field] || '';
+                        var safeTitle = escapeAdvancedSearchValue(title);
+                        var safeField = escapeAdvancedSearchValue(column.field);
+
+                        html.push(`
+                            <div class="form-group row">
+                                <label class="col-sm-4 control-label">${safeTitle}</label>
+                                <div class="col-sm-6">
+                                    <input
+                                        type="text"
+                                        class="form-control ${this.constants.classes.input}"
+                                        name="${safeField}"
+                                        placeholder="${safeTitle}"
+                                        value="${escapeAdvancedSearchValue(value)}"
+                                    >
+                                </div>
+                            </div>
+                        `);
+                    }
+                }
+
+                html.push('</form>');
+
+                return html.join('');
+            };
+
+            BootstrapTable.prototype.initAdvancedSearchFooter = function () {
+                var _this = this;
+                var $footer = this.$toolbarModal.find('.toolbar-modal-footer');
+                var $templateButton = $footer.find('.toolbar-modal-close').first();
+
+                if (!this._advancedSearchFooterButtonTagName) {
+                    this._advancedSearchFooterButtonTagName = ($templateButton.prop('tagName') || $footer.find('button,a').first().prop('tagName') || 'button').toLowerCase();
+                }
+
+                if (!this._advancedSearchFooterButtonBaseClass) {
+                    var buttonClassSource = ($templateButton.attr('class') || $footer.find('button,a').first().attr('class') || '');
+
+                    this._advancedSearchFooterButtonBaseClass = buttonClassSource
+                        .replace(/\btoolbar-modal-close\b/g, '')
+                        .replace(/\btoolbar-modal-cancel\b/g, '')
+                        .replace(/\btoolbar-modal-search\b/g, '')
+                        .replace(/\bpull-left\b/g, '')
+                        .trim();
+                }
+
+                var tagName = this._advancedSearchFooterButtonTagName;
+                var baseClass = this._advancedSearchFooterButtonBaseClass;
+
+                var createFooterButton = function (text, extraClass) {
+                    var $button = $('<' + tagName + '>').addClass($.trim(baseClass + ' ' + extraClass)).html(text);
+
+                    if (tagName === 'button') {
+                        $button.attr('type', 'button');
+                    }
+
+                    if (tagName === 'a') {
+                        $button.attr('href', 'javascript:void(0)');
+                    }
+
+                    return $button;
+                };
+
+                var $cancelButton = createFooterButton(this.options.formatAdvancedCancelButton(), 'toolbar-modal-cancel');
+                var $searchButton = createFooterButton(this.options.formatAdvancedCloseButton(), 'toolbar-modal-search');
+
+                // Keep cancel on the left for clearer primary/secondary action separation.
+                $cancelButton.addClass('pull-left');
+
+                $footer.empty().append($cancelButton, $searchButton);
+
+                $cancelButton.off('click').on('click', function (event) {
+                    event.preventDefault();
+                    _this.cancelAdvancedSearch();
+                });
+
+                $searchButton.off('click').on('click', function (event) {
+                    event.preventDefault();
+                    _this.applyAdvancedSearch();
+                });
+            };
+
+            BootstrapTable.prototype.initToolbarModalBody = function () {
+                var _this = this;
+
+                this.$toolbarModal.find('.toolbar-modal-title').html(this.options.formatAdvancedSearch());
+                this.$toolbarModal.find('.toolbar-modal-body')
+                    .html(this.createToolbarForm())
+                    .off('submit', '.toolbar-model-form')
+                    .on('submit', '.toolbar-model-form', function (event) {
+                        event.preventDefault();
+                        _this.applyAdvancedSearch();
+                    });
+
+                // Let Enter keypresses reuse the same submit path so keyboard users can apply filters quickly.
+                this.$toolbarModal.find('.toolbar-model-form')
+                    .off('keydown.snipeAdvancedSearch')
+                    .on('keydown.snipeAdvancedSearch', ':input', function (event) {
+                        if (event.key !== 'Enter' || $(event.target).is('textarea')) {
+                            return;
+                        }
+
+                        event.preventDefault();
+                        $(this).closest('form').trigger('submit');
+                    });
+
+                this.initAdvancedSearchFooter();
+            };
+
+            BootstrapTable.prototype.initSearch = function () {
+                var _this = this;
+
+                baseInitSearch.apply(this, arguments);
+
+                if (!this.options.advancedSearch || this.options.sidePagination === 'server') {
+                    return;
+                }
+
+                var filters = $.isEmptyObject(this.filterColumnsPartial) ? null : this.filterColumnsPartial;
+
+                if (!filters) {
+                    return;
+                }
+
+                var operator = this.getAdvancedSearchOperator();
+
+                this.data = this.data.filter(function (item, index) {
+                    var matches = [];
+                    var matchFound = false;
+                    var allMatched = true;
+
+                    $.each(filters, function (key, value) {
+                        var searchValue = value.toLowerCase();
+                        var formattedValue = item[key];
+                        var headerIndex = _this.header.fields.indexOf(key);
+                        var isMatch;
+
+                        formattedValue = $.fn.bootstrapTable.utils.calculateObjectValue(_this.header, _this.header.formatters[headerIndex], [formattedValue, item, index], formattedValue);
+
+                        if (_this.header.formatters[headerIndex]) {
+                            formattedValue = $('<div>').html(formattedValue).text();
+                        }
+
+                        isMatch = headerIndex !== -1 && (typeof formattedValue === 'string' || typeof formattedValue === 'number') && "".concat(formattedValue).toLowerCase().includes(searchValue);
+
+                        matches.push(isMatch);
+                        matchFound = matchFound || isMatch;
+                        allMatched = allMatched && isMatch;
+                    });
+
+                    if (!matches.length) {
+                        return true;
+                    }
+
+                    return operator === 'or' ? matchFound : allMatched;
+                });
+
+                this.unsortedData = this.data.slice();
+            };
 
         var blockedFields = "searchable,sortable,switchable,title,visible,formatter,class".split(",");
 
@@ -38,10 +571,8 @@
             }
         }
 
-        // Run the function on page load
-        $(document).ready(function () {
-            resize();
-        });
+        // Run once on initial ready (already inside top-level ready block)
+        resize();
 
         // Watch for window resize events
         $(window).on('resize', function () {
@@ -57,29 +588,110 @@
 
         /** End handling the responsive tab UI on view detail pages **/
 
+        // Stamp aria-sort on the sorted column's <th> so assistive tech can
+        // announce the current sort direction. Bootstrap-table's own render
+        // draws a visual arrow but doesn't emit aria state. Called from both
+        // onSort (user clicked a header) and onPostHeader (initial paint or
+        // layout re-init), since bootstrap-table doesn't re-render the head
+        // on sort clicks.
+        var updateAriaSort = function ($tableEl, sortName, sortOrder) {
+            // scope="col" is emitted by the column presenters (see e.g.
+            // AssetPresenter::dataTableLayout). aria-sort will move upstream
+            // once we're on a bootstrap-table version that includes
+            // https://github.com/wenzhixin/bootstrap-table/pull/8005; until
+            // then we stamp it here.
+            $tableEl.find('thead th').each(function () {
+                var $th = $(this);
+                if (sortName && $th.data('field') === sortName) {
+                    $th.attr('aria-sort', sortOrder === 'desc' ? 'descending' : 'ascending');
+                } else {
+                    $th.removeAttr('aria-sort');
+                }
+            });
+        };
+
         $('.snipe-table').bootstrapTable('destroy').each(function () {
 
             data_export_options = $(this).attr('data-export-options');
             export_options = data_export_options ? JSON.parse(data_export_options) : {};
             export_options['htmlContent'] = false; // this is already the default; but let's be explicit about it
+            // DejaVuSans is registered into jsPDF's VFS via
+            // jspdf-dejavu-fonts.js (bundled into public/js/dist/bootstrap-table.js
+            // right after jspdf.umd.min.js — see webpack.mix.js). Referencing
+            // it here is what actually swaps out the default Helvetica fallback
+            // and produces readable output for Cyrillic / Greek / Hebrew / etc.
+            // exports. Fixes #19270.
             export_options['jspdf'] = {
                 "orientation": "l",
                 "autotable": {
                         "styles": {
+                            font: 'DejaVuSans',
+                            fontStyle: 'normal',
                             overflow: 'linebreak'
                         },
                         tableWidth: 'wrap'
                 }
             };
             // tableWidth: 'wrap',
-            // the following callback method is necessary to prevent XSS vulnerabilities
-            // (this is taken from Bootstrap Tables's default wrapper around jQuery Table Export)
+            // ⚠️ SECURITY: DO NOT change the wrapping of `.text()` inside
+            //    `htmlEncodeForExport(...)` below without reading this entire
+            //    block. The bare `.text()` was the previous shape and it is
+            //    an XSS.
+            //
+            // XSS defense on export cell data. The tableExport plugin's
+            // E function (see bundled bootstrap-table.js around line 32110)
+            // pipes our return value through jQuery's .html() setter on a
+            // scratch <div> before serializing. If we return raw text that
+            // happens to look like HTML (e.g. a column titled
+            // `<img src=x onerror=alert(1)>`), that .html() call parses it
+            // and instantiates a real <img onerror=...> element, firing the
+            // payload as soon as the user clicks Export.
+            //
+            // Encoding the returned string turns any tag-shaped characters
+            // into entity refs; the downstream .html() call then treats
+            // them as text-content (browser text-decodes back to chars in a
+            // text-node, no elements created), and the final PDF/CSV output
+            // still shows the visible text the header displayed on-screen.
+            //
+            // Repro before the fix (kept as a regression pin):
+            //   1. Create a custom field named `<img src=x onerror=alert(1)>`
+            //   2. Visit the assets index (header shows the string as text)
+            //   3. Export → CSV (or PDF): alert(1) fires because tableExport
+            //      re-injects our returned text via .html() on a scratch div.
+            // If a future edit here reintroduces the bug, that exact repro
+            // will fire alert(1) again.
+            var htmlEncodeForExport = function (value) {
+                if (value == null) return '';
+                return String(value)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+            };
             export_options['onCellHtmlData'] = function (cell, rowIndex, colIndex, htmlData) {
                 if (cell.is('th')) {
-                    return cell.find('.th-inner').text()
+                    // ⚠️ MUST stay wrapped in htmlEncodeForExport(). See block above.
+                    return htmlEncodeForExport(cell.find('.th-inner').text());
                 }
-                return htmlData
+                // Convert <br> tags to newlines so that line breaks in notes and
+                // textarea fields survive HTML-stripping during export
+                return htmlData.replace(/<br\s*\/?>/gi, '\n');
             }
+            // Escape double quotes in hyperlink href and display text so that
+            // Excel HYPERLINK formulas are not corrupted when values contain "
+            export_options['mso'] = {
+                xlsx: {
+                    onHyperlink: function (cell, row, col, href, cellText, formula) {
+                        var escapedHref = href.replace(/"/g, '""');
+                        var escapedText = cellText.replace(/"/g, '""');
+                        if (escapedText.length) {
+                            return '=HYPERLINK("' + escapedHref + '","' + escapedText + '")';
+                        }
+                        return '=HYPERLINK("' + escapedHref + '")';
+                    }
+                }
+            };
 
             // This allows us to override the table defaults set below using the data-dash attributes
             var table = this;
@@ -93,6 +705,17 @@
 
 
 
+            var initialAdvancedSearchOperator = getStoredAdvancedSearchOperator() || normalizeAdvancedSearchOperator(data_with_default('advanced-search-operator', defaultAdvancedSearchOperator));
+
+            $(this).data('advanced-search-filter-operator', initialAdvancedSearchOperator);
+
+            // Capture the table element for use inside bootstrap-table callbacks.
+            // bootstrap-table 1.24 invokes those callbacks with `.apply(options, args)`,
+            // so `this` inside them is the options object, not the DOM element —
+            // any $(this).find(...) call silently no-ops. The closure lets the
+            // callbacks reach the real table.
+            var $bootstrapTableEl = $(this);
+
             $(this).bootstrapTable({
 
                 ajaxOptions: {
@@ -104,11 +727,15 @@
                 // buttonsPrefix: "btn",
                 addrbar: {{ (config('session.bs_table_addrbar') == 'true') ? 'true' : 'false'}}, // deeplink search phrases, sorting, etc
                 advancedSearch: data_with_default('advanced-search', true),
+                advancedSearchOperator: initialAdvancedSearchOperator,
                 buttonsClass: "tableButton tableButton btn-theme hidden-print",
                 buttonsOrder: [
                     'columns',
                     'btnAdd',
                     'btnShowDeleted',
+                    'btnToggleCompleted',
+                    'btnDue',
+                    'btnOverdue',
                     'btnShowAdmins',
                     'btnShowExpiring',
                     'btnShowInactive',
@@ -162,10 +789,24 @@
                             newParams[i] = params[i];
                         }
                     }
+
+                    if (newParams.filter) {
+                        newParams.filter_operator = $(table).data('advanced-search-filter-operator') || data_with_default('advanced-search-operator', 'and');
+                    }
+
                     return newParams;
                 },
                 formatLoadingMessage: function () {
                     return '<h2><x-icon type="spinner" /> {{ trans('general.loading') }} </h2>';
+                },
+                formatAdvancedCloseButton: function () {
+                    return advancedSearchSearchText;
+                },
+                formatAdvancedCancelButton: function () {
+                    return $.fn.bootstrapTable.defaults.formatClearSearch();
+                },
+                formatAdvancedSearchOperator: function () {
+                    return advancedSearchOperatorLabel;
                 },
                 icons: {
                     advancedSearchIcon: 'fas fa-search-plus',
@@ -180,11 +821,114 @@
                 },
                 locale: '{{ app()->getLocale() }}',
                 exportOptions: export_options,
-                exportTypes: ['xlsx', 'excel', 'csv', 'pdf', 'json', 'xml', 'txt', 'sql', 'doc'],
+                exportTypes: ['xlsx', 'csv', 'pdf', 'json', 'xml', 'txt', 'sql', 'doc'],
                 onLoadSuccess: function () { // possible 'fixme'? this might be for contents, not for headers?
                     $('[data-tooltip="true"]').tooltip(); // Needed to attach tooltips after ajax call
+
+                    // Clear any lingering "load failed" banner + restore the table body
+                    // that onLoadError hid. Bootstrap-table appends the table instance as
+                    // the last callback arg and binds `this` to the options bag (not the
+                    // DOM), so reach for the table element via arguments rather than
+                    // $(this).
+                    var instance = arguments[arguments.length - 1];
+                    if (instance && instance.$el) {
+                        clearBootstrapTableLoadError(instance);
+                    }
+                },
+                onRefresh: function () {
+                    // Fires the moment the user clicks the toolbar's refresh button,
+                    // before the retry AJAX call is issued. Clear the callout + restore
+                    // the body/pagination up-front so that even if the retry also
+                    // errors, we're not stacking state on top of the previous error.
+                    // If the retry succeeds, onLoadSuccess is a no-op reassertion.
+                    // If the retry errors, onLoadError re-hides the body and re-shows
+                    // the callout with the new status.
+                    var instance = arguments[arguments.length - 1];
+                    if (instance && instance.$el) {
+                        clearBootstrapTableLoadError(instance);
+                    }
+                },
+                onLoadError: function (status, jqXHR) {
+                    // Fires on any real transport-level failure (500, 502, 504, network
+                    // error, 419 CSRF expiry, 401 unauthenticated, etc). Snipe's API
+                    // convention is to return {status: "error"} at HTTP 200 for
+                    // validation/business errors, so anything reaching this callback
+                    // is a genuine "the request itself failed" case that would
+                    // otherwise render as an empty "No matching records found", a
+                    // silent, misleading empty-state.
+                    //
+                    // Blade's JSON directive below is what makes each translation
+                    // string safe to embed in this JS context. It produces a
+                    // properly quoted JS string literal that handles any characters
+                    // the translation might contain (quotes, backslashes, newlines,
+                    // unicode). Every dynamic value from the server response is then
+                    // HTML-encoded via jQuery's .text().html() idiom before we
+                    // concat it into the callout markup, so a poisoned
+                    // responseJSON.message cannot inject script tags or event handlers.
+                    //
+                    // `this` inside bootstrap-table event callbacks is the options
+                    // bag, not the DOM element. The library appends the table
+                    // instance as the trailing callback arg, so we reach the
+                    // wrapper via arguments[last].$el.
+                    var instance = arguments[arguments.length - 1];
+                    if (!instance || !instance.$el) {
+                        return;
+                    }
+                    var $wrap = instance.$el.closest('.bootstrap-table');
+
+                    // 401 / 419 mean the user's session died; show the session-
+                    // expired message and reload so the login redirect can take over.
+                    if (jqXHR && (jqXHR.status === 401 || jqXHR.status === 419)) {
+                        renderBootstrapTableLoadErrorCallout({
+                            wrap: $wrap,
+                            innerHtml:
+                                '<i class="fa fa-exclamation-triangle text-warning" aria-hidden="true" style="margin-right: 6px;"></i>' +
+                                $('<div/>').text(@json(trans('table.load_error_session_expired'))).html(),
+                        });
+                        window.setTimeout(function () {
+                            window.location.reload();
+                        }, 1500);
+                        return;
+                    }
+
+                    // Deliberately do NOT surface the raw server response body /
+                    // statusText / responseJSON.message. On PHP fatals, Laravel's
+                    // debug renderer can leak PDO DSN strings (with hostnames), file
+                    // paths from the stack trace, and other environment detail that
+                    // shouldn't reach a browser. The HTTP status alone is enough
+                    // signal for the user to know something's wrong and enough
+                    // signal for an admin to correlate in the app log.
+                    var httpStatus = (jqXHR && jqXHR.status) || status || '?';
+
+                    renderBootstrapTableLoadErrorCallout({
+                        wrap: $wrap,
+                        innerHtml:
+                            '<div style="font-size: 1.35em;">' +
+                            '<i class="fa fa-exclamation-triangle text-warning" aria-hidden="true" style="margin-right: 6px;"></i>' +
+                            '<strong>' + $('<div/>').text(@json(trans('table.load_error_title'))).html() + '</strong>' +
+                            '</div>' +
+                            '<div style="margin-top: 8px;">' +
+                            $('<div/>').text(@json(trans('table.load_error_body'))).html() +
+                            ' <code>' + $('<div/>').text(@json(trans('table.load_error_http_status'))).html() + ': ' +
+                            $('<div/>').text(httpStatus).html() + '</code>' +
+                            '</div>',
+                    });
+                },
+                onSort: function (sortName, sortOrder) {
+                    // User-triggered sort: bootstrap-table re-renders the body
+                    // (client-side sort) or re-queries the server, but does
+                    // NOT re-render the <thead>, so onPostHeader won't fire
+                    // and aria-sort would go stale. Update the header directly.
+                    updateAriaSort($bootstrapTableEl, sortName, sortOrder);
                 },
                 onPostHeader: function () {
+                    // Initial header render (and any layout re-init) — reflect
+                    // whatever sort state the table booted with, so a table
+                    // configured with data-sort-name/data-sort-order announces
+                    // correctly on first paint too.
+                    var options = $bootstrapTableEl.bootstrapTable('getOptions');
+                    updateAriaSort($bootstrapTableEl, options && options.sortName, options && options.sortOrder);
+
                     var lookup = {};
                     var lookup_initialized = false;
                     var ths = $('th');
@@ -246,7 +990,205 @@
 
             });
 
+            var bootstrapTableInstance = $(this).data('bootstrap.table');
+
+            if (bootstrapTableInstance && typeof bootstrapTableInstance.renderAdvancedSearchTags === 'function') {
+                bootstrapTableInstance.renderAdvancedSearchTags();
+            }
+
+            // -----------------------------------------------------------------
+            // Advanced-search URL deeplink (prototype: assets/hardware only).
+            //
+            // - `?filter[field]=value` per-field + `?filter_operator=and|or`,
+            //   matching the API's own querystring so what the browser shows
+            //   is what the server actually receives.
+            // - Distinct from `?search=` (basic search) so both can coexist.
+            // - Opt-in via `data-advanced-search-deeplink="true"` on the table.
+            //
+            // Two interacting quirks make this non-trivial:
+            //
+            // 1. Snipe's override of applyAdvancedSearch (this file, line ~220)
+            //    is a no-op for sidePagination='server' beyond setting state
+            //    and rendering pills — it never refetches, and never fires the
+            //    `column-advanced-search` event. So a `on('column-advanced-search')`
+            //    listener won't hear anything when the user applies via the
+            //    modal on a server-side table.
+            //
+            // 2. addrbar (bootstrap-table's URL extension) owns the query
+            //    string. It re-pushes `page`/`size`/`order`/`sort`/`search`
+            //    on every onLoadSuccess. If we just replaceState() our own
+            //    `filter[...]`, the next refetch clobbers them.
+            //
+            // Fix: patch two methods on this specific plugin instance.
+            //
+            //   - applyAdvancedSearch: after Snipe's version runs, force a
+            //     refetch + fire the event on server-side. That triggers the
+            //     addrbar → updateHistoryState path, which we've also patched.
+            //
+            //   - updateHistoryState: before addrbar's push, strip any stale
+            //     `filter[...]`/`filter_operator` from its cached URLSearchParams
+            //     and re-serialize from the current filterColumnsPartial. This
+            //     handles adds, edits, and removes (empty filters remove keys).
+            // -----------------------------------------------------------------
+            if (bootstrapTableInstance && data_with_default('advanced-search-deeplink', false)) {
+                var advDeeplinkKeyPrefix = 'filter';
+                var advDeeplinkOpParam = 'filter_operator';
+                var advDeeplinkKeyRegex = new RegExp('^' + advDeeplinkKeyPrefix + '\\[(.+)\\]$');
+
+                // --- Patch updateHistoryState: emit filter[...] alongside addrbar's keys.
+                if (typeof bootstrapTableInstance.updateHistoryState === 'function') {
+                    var origUpdateHistoryState = bootstrapTableInstance.updateHistoryState;
+                    bootstrapTableInstance.updateHistoryState = function (prefix) {
+                        var params = this.searchParams;
+
+                        // Strip stale filter[...] and filter_operator so cleared
+                        // filters don't linger from a previous state.
+                        if (params) {
+                            var toDelete = [];
+                            params.forEach(function (value, key) {
+                                if (key === advDeeplinkOpParam || advDeeplinkKeyRegex.test(key)) {
+                                    toDelete.push(key);
+                                }
+                            });
+                            toDelete.forEach(function (key) { params.delete(key); });
+
+                            // Re-add from current filterColumnsPartial state.
+                            var filters = this.filterColumnsPartial || {};
+                            var count = 0;
+                            Object.keys(filters).forEach(function (field) {
+                                var val = filters[field];
+                                if (val !== undefined && val !== null && val !== '') {
+                                    params.set(advDeeplinkKeyPrefix + '[' + field + ']', val);
+                                    count++;
+                                }
+                            });
+                            if (count > 0 && typeof this.getAdvancedSearchOperator === 'function') {
+                                params.set(advDeeplinkOpParam, this.getAdvancedSearchOperator());
+                            }
+                        }
+
+                        return origUpdateHistoryState.apply(this, arguments);
+                    };
+                }
+
+                // --- Patch applyAdvancedSearch: server-side apply must refetch
+                //     + fire the event so addrbar (and any listeners) run. Also
+                //     clear the basic-search input so the two modes stay mutually
+                //     exclusive (the backend already prefers `filter` over `search`,
+                //     but leaving text in the basic input is a confusing UX and can
+                //     let a stray search word survive into the next state change).
+                if (typeof bootstrapTableInstance.applyAdvancedSearch === 'function') {
+                    var origApplyAdvancedSearch = bootstrapTableInstance.applyAdvancedSearch;
+                    bootstrapTableInstance.applyAdvancedSearch = function () {
+                        origApplyAdvancedSearch.apply(this, arguments);
+                        if (this.options.sidePagination === 'server') {
+                            // Clear basic-search state without going through
+                            // resetSearch()/onSearch() — that path would fire a
+                            // separate refetch, and would re-enter our own
+                            // onSearch override below.
+                            var utils = $.fn.bootstrapTable && $.fn.bootstrapTable.utils;
+                            if (utils && typeof utils.getSearchInput === 'function') {
+                                var $searchInput = utils.getSearchInput(this);
+                                if ($searchInput && $searchInput.length) {
+                                    $searchInput.val('');
+                                }
+                            }
+                            this.searchText = '';
+                            this.options.searchText = '';
+
+                            this.options.pageNumber = 1;
+                            this.refresh();
+                            this.trigger('column-advanced-search', this.filterColumnsPartial, this.getAdvancedSearchOperator());
+                        }
+                    };
+                }
+
+                // --- Patch onSearch: basic search clears advanced filters so the
+                //     two modes stay mutually exclusive. Runs BEFORE the plugin's
+                //     onSearch → initSearch → server refetch, so the AJAX that
+                //     ships in the same tick already has an empty filterColumnsPartial.
+                if (typeof bootstrapTableInstance.onSearch === 'function') {
+                    var origOnSearch = bootstrapTableInstance.onSearch;
+                    bootstrapTableInstance.onSearch = function (event, overwriteSearchText) {
+                        var newText = '';
+                        if (event && event.currentTarget) {
+                            newText = String($(event.currentTarget).val() || '').trim();
+                        }
+                        // Only clear filters when the user is actively typing a
+                        // non-empty search. Empty transitions (resetSearch(''), a
+                        // stray blur on an already-empty input) leave filters alone.
+                        if (
+                            newText !== ''
+                            && this.filterColumnsPartial
+                            && Object.keys(this.filterColumnsPartial).length > 0
+                        ) {
+                            this.filterColumnsPartial = {};
+                            if (typeof this.renderAdvancedSearchTags === 'function') {
+                                this.renderAdvancedSearchTags();
+                            }
+                            if (typeof this.updateAdvancedSearchButtonState === 'function') {
+                                this.updateAdvancedSearchButtonState();
+                            }
+                        }
+                        return origOnSearch.apply(this, arguments);
+                    };
+                }
+
+                // --- Read path: rehydrate from URL if filter[...] is present.
+                var initialFilters = {};
+                var initialOp = null;
+                var initialParams = new URLSearchParams(window.location.search);
+                initialParams.forEach(function (value, key) {
+                    var m = key.match(advDeeplinkKeyRegex);
+                    if (m) {
+                        initialFilters[m[1]] = value;
+                    } else if (key === advDeeplinkOpParam) {
+                        initialOp = value;
+                    }
+                });
+
+                if (Object.keys(initialFilters).length > 0) {
+                    bootstrapTableInstance.filterColumnsPartial = Object.assign({}, initialFilters);
+                    if (initialOp && typeof bootstrapTableInstance.setAdvancedSearchOperator === 'function') {
+                        bootstrapTableInstance.setAdvancedSearchOperator(initialOp);
+                    }
+
+                    // Refetch with the seeded filter. onLoadSuccess → patched
+                    // updateHistoryState → URL is re-emitted with filter[...] intact.
+                    bootstrapTableInstance.refresh();
+
+                    if (typeof bootstrapTableInstance.renderAdvancedSearchTags === 'function') {
+                        bootstrapTableInstance.renderAdvancedSearchTags();
+                    }
+                    if (typeof bootstrapTableInstance.updateAdvancedSearchButtonState === 'function') {
+                        bootstrapTableInstance.updateAdvancedSearchButtonState();
+                    }
+                }
+            }
+
+            // Add btn-advanced-search class to the advanced search button for styling
+            if (bootstrapTableInstance) {
+                // Use a small delay to ensure toolbar is fully rendered
+                setTimeout(function () {
+                    var $advancedSearchBtn = bootstrapTableInstance.getAdvancedSearchButton();
+                    if ($advancedSearchBtn.length) {
+                        $advancedSearchBtn.addClass('btn-advanced-search');
+
+                        // Add data attribute if not present
+                        if (!$advancedSearchBtn.attr('data-toggle')) {
+                            $advancedSearchBtn.attr('data-toggle', 'advanced-search');
+                        }
+
+                        // Initialize button state
+                        bootstrapTableInstance.updateAdvancedSearchButtonState();
+                    }
+                }, 50);
+            }
+
         });
+
+        bindBulkEditSelectionHandler();
+        initializeBootstrapTableSearchUi();
     });
 
 
@@ -303,6 +1245,28 @@
                 title: '{{ (request()->input('status') == "deleted") ? trans('admin/users/table.show_current') : trans('admin/users/table.show_deleted') }}',
 
             }
+        },
+
+    }); // end user table buttons
+
+    // Oauth table buttons
+    window.oauthButtons = () => ({
+
+        btnAdd: {
+            text: '{{ (request()->input('status') == "deleted") ? trans('admin/users/table.show_current') : trans('admin/users/table.show_deleted') }}',
+            icon: 'fa fa-plus',
+            attributes: {
+                event() {
+                    wire:click = "$dispatch('openModal')"
+                    onclick = "$('#modal-create-client').modal('show');"
+                },
+
+                title: '{{ trans('general.create') }}',
+                class: 'btn-warning',
+                @if ($snipeSettings->shortcuts_enabled == 1)
+                accesskey: 'n'
+                @endif
+            },
         },
 
     }); // end user table buttons
@@ -455,23 +1419,6 @@
     });
 
     window.inventoriesButtons = () => ({
-        @can('create', \App\Models\Purchase::class)
-        btnAdd: {
-            text: '{{ trans('general.create') }}',
-            icon: 'fa fa-plus',
-            event () {
-                window.location.href = '{{ route('purchases.create') }}';
-            },
-            attributes: {
-                title: '{{ trans('general.create') }}',
-                class: 'btn-warning',
-                @if ($snipeSettings->shortcuts_enabled == 1)
-                accesskey: 'n'
-                @endif
-            }
-        },
-        @endcan
-
         btnExport: {
             text: '{{ trans('admin/hardware/general.custom_export') }}',
             icon: 'fa-solid fa-file-csv',
@@ -613,7 +1560,7 @@
     @endcan
 
     @can('create', \App\Models\Component::class)
-    // Compoment table buttons
+    // Component table buttons
     window.componentButtons = () => ({
         btnAdd: {
             text: '{{ trans('general.create') }}',
@@ -627,6 +1574,16 @@
                 @if ($snipeSettings->shortcuts_enabled == 1)
                 accesskey: 'n'
                 @endif
+            }
+        },
+        btnExport: {
+            text: '{{ trans('general.custom_component_report') }}',
+            icon: 'fa-solid fa-file-csv',
+            event () {
+                window.location.href = '{{ route('reports.custom.component') }}';
+            },
+            attributes: {
+                title: '{{ trans('general.custom_component_report') }}',
             }
         },
     });
@@ -777,6 +1734,44 @@
                 @endif
             }
         },
+        btnToggleCompleted: {
+            text: '{{ request()->input('completed', 'false') === 'true' ? trans('admin/maintenances/general.show_active') : trans('admin/maintenances/general.show_completed') }}',
+            icon: 'fa-regular fa-square-check',
+            event() {
+                var isShowingCompleted = '{{ request()->input('completed', 'false') }}' === 'true';
+                window.location.href = '{{ route('maintenances.index') }}?completed=' + (isShowingCompleted ? 'false' : 'true');
+            },
+            attributes: {
+                class: '{{ request()->input('completed', 'false') === 'true' ? 'btn-selected' : '' }}',
+                title: '{{ request()->input('completed', 'false') === 'true' ? trans('admin/maintenances/general.show_active') : trans('admin/maintenances/general.show_completed') }}',
+            },
+        },
+
+        btnDue: {
+            text: '{{ trans('admin/maintenances/general.due') }}',
+            icon: 'fa-regular fa-clock',
+            event() {
+                var isActive = '{{ request()->input('upcoming_status') }}' === 'due';
+                window.location.href = '{{ route('maintenances.index') }}' + (isActive ? '' : '?upcoming_status=due');
+            },
+            attributes: {
+                class: '{{ request()->input('upcoming_status') === 'due' ? 'btn-selected' : '' }}',
+                title: '{{ trans('admin/maintenances/general.due') }}',
+            },
+        },
+
+        btnOverdue: {
+            text: '{{ trans('admin/maintenances/general.overdue') }}',
+            icon: 'fa-solid fa-triangle-exclamation',
+            event() {
+                var isActive = '{{ request()->input('upcoming_status') }}' === 'overdue';
+                window.location.href = '{{ route('maintenances.index') }}' + (isActive ? '' : '?upcoming_status=overdue');
+            },
+            attributes: {
+                class: '{{ request()->input('upcoming_status') === 'overdue' ? 'btn-selected' : '' }}',
+                title: '{{ trans('admin/maintenances/general.overdue') }}',
+            },
+        },
     });
     @endcan
 
@@ -890,7 +1885,6 @@
     @endcan
 
 
-
     // License table buttons
     window.licenseButtons = () => ({
         @can('create', \App\Models\License::class)
@@ -960,33 +1954,92 @@
     }
 
 
+    // Use document.getElementById and DOM/jQuery element constructors throughout this block
+    // rather than jQuery selector parsing or HTML string concatenation. The countId value
+    // originates from a data attribute that may contain stored user input (e.g. a manufacturer
+    // or supplier name), and jQuery decodes HTML entities in data attributes before returning
+    // them to JS. Concatenating a decoded attacker-controlled value into an HTML string passed
+    // to .after() would allow stored XSS; setting it via DOM APIs treats it as plain text.
+    function updateSelectedCount(table) {
+        var countId = $(table).data('selected-count-id');
+        if (!countId) return;
+        var rawCountId = countId.charAt(0) === '#' ? countId.substring(1) : countId;
+        if (!rawCountId) return;
+        var el = document.getElementById(rawCountId);
+        if (!el) return;
+        var count = $(table).bootstrapTable('getSelections').length;
+        $(el).find('.badge').text(count);
+        if (count > 0) {
+            $(el).show();
+        } else {
+            $(el).hide();
+        }
+    }
+
+    $('.snipe-table').on('post-body.bs.table', function () {
+        var countId = $(this).data('selected-count-id');
+        if (!countId) return;
+        var rawCountId = countId.charAt(0) === '#' ? countId.substring(1) : countId;
+        if (!rawCountId) return;
+        var $paginationDetail = $(this).closest('.bootstrap-table')
+            .find('.fixed-table-pagination').first()
+            .find('.pagination-detail');
+        if ($paginationDetail.length && !document.getElementById(rawCountId)) {
+            var $selectedCount = $('<span/>', {
+                id: rawCountId,
+                style: 'display:none; float:left; margin-top:10px; margin-bottom:10px; margin-left:10px; line-height:34px;'
+            });
+            $selectedCount.append(document.createTextNode('— '));
+            $selectedCount.append($('<span/>', { 'class': 'badge', text: '0' }));
+            $selectedCount.append(document.createTextNode(' {{ trans('general.selected') }}'));
+            $paginationDetail.after($selectedCount);
+        }
+        updateSelectedCount(this);
+    });
+
     // These methods dynamically add/remove hidden input values in the bulk actions form
     $('.snipe-table').on('check.bs.table .btSelectItem', function (row, $element) {
         var buttonName =  $(this).data('bulk-button-id');
         var tableId =  $(this).data('id-table');
 
         $(buttonName).removeAttr('disabled');
-        $(buttonName).after('<input id="' + tableId + '_checkbox_' + $element.id + '" type="hidden" name="ids[]" value="' + $element.id + '">');
+        $(buttonName).after($('<input/>', {
+            id: tableId + '_checkbox_' + $element.id,
+            type: 'hidden',
+            name: 'ids[]',
+            value: $element.id
+        }));
+        updateSelectedCount(this);
     });
 
     $('.snipe-table').on('check-all.bs.table', function (event, rowsAfter) {
 
         var buttonName =  $(this).data('bulk-button-id');
-        $(buttonName).removeAttr('disabled');
         var tableId =  $(this).data('id-table');
 
         for (var i in rowsAfter) {
             // Do not select things that were already selected
-            if($('#'+ tableId + '_checkbox_' + rowsAfter[i].id).length == 0) {
-                $(buttonName).after('<input id="' + tableId + '_checkbox_' + rowsAfter[i].id + '" type="hidden" name="ids[]" value="' + rowsAfter[i].id + '">');
+            if (!document.getElementById(tableId + '_checkbox_' + rowsAfter[i].id)) {
+                $(buttonName).after($('<input/>', {
+                    id: tableId + '_checkbox_' + rowsAfter[i].id,
+                    type: 'hidden',
+                    name: 'ids[]',
+                    value: rowsAfter[i].id
+                }));
             }
         }
+
+        if ($(this).bootstrapTable('getSelections').length > 0) {
+            $(buttonName).removeAttr('disabled');
+        }
+        updateSelectedCount(this);
     });
 
 
     $('.snipe-table').on('uncheck.bs.table .btSelectItem', function (row, $element) {
         var tableId =  $(this).data('id-table');
         $( "#" + tableId + "_checkbox_" + $element.id).remove();
+        updateSelectedCount(this);
     });
 
 
@@ -1009,6 +2062,7 @@
         for (var i in rowsBefore) {
             $('#' + tableId + "_checkbox_" + rowsBefore[i].id).remove();
         }
+        updateSelectedCount(this);
 
     });
 
@@ -1046,7 +2100,6 @@
            domnode.elements.order.value = order;
        }
     });
-
 
 
     // This specifies the footer columns that should have special styles associated
@@ -1329,43 +2382,63 @@
 
         if ((value) && (value.type)) {
 
-            if (value.type == 'asset') {
+            if (value.type === 'asset') {
                 item_destination = 'hardware';
                 item_icon = 'fas fa-barcode';
-            } else if (value.type == 'accessory') {
+            }
+            else if (value.type === 'accessory') {
                 item_destination = 'accessories';
                 item_icon = 'far fa-keyboard';
-            } else if (value.type == 'component') {
+            }
+            else if (value.type === 'component') {
                 item_destination = 'components';
                 item_icon = 'far fa-hdd';
-            } else if (value.type == 'consumable') {
+            }
+            else if (value.type === 'consumable') {
                 item_destination = 'consumables';
                 item_icon = 'fas fa-tint';
-            } else if (value.type == 'license') {
+            }
+            else if (value.type === 'license') {
                 item_destination = 'licenses';
                 item_icon = 'far fa-save';
-            } else if (value.type == 'user') {
+            }
+            else if (value.type === 'user') {
                 item_destination = 'users';
                 item_icon = 'fas fa-user';
-            } else if (value.type == 'location') {
+            }
+            else if (value.type === 'location') {
                 item_destination = 'locations'
                 item_icon = 'fas fa-map-marker-alt';
-            } else if (value.type == 'maintenance') {
+            }
+            else if (value.type === 'maintenance') {
                 item_destination = 'maintenances'
                 item_icon = 'fa-solid fa-screwdriver-wrench';
-            } else if (value.type == 'model') {
+            }
+            else if (value.type === 'model') {
                 item_destination = 'models'
-                item_icon = '';
-            } else if (value.type == 'purchase') {
+                item_icon = 'fa-solid fa-boxes-stacked';
+            }
+            else if (value.type === 'supplier') {
+                item_destination = 'suppliers';
+                item_icon = 'fa-solid fa-store';
+            }
+            else if (value.type === 'department') {
+                item_destination = 'departments';
+                item_icon = 'fa-solid fa-building-user';
+            }
+            else if (value.type === 'company') {
+                item_destination = 'companies';
+                item_icon = 'fa-regular fa-building';
+            }else if (value.type === 'purchase') {
                 item_destination = 'purchases'
                 item_icon = 'fas fa-shopping-basket';
-            } else if (value.type == 'contract') {
+            } else if (value.type === 'contract') {
                 item_destination = 'contracts'
                 item_icon = 'fas fa-file';
-            } else if (value.type == 'sale') {
+            } else if (value.type === 'sale') {
                 item_destination = 'sales'
                 item_icon = 'fas fa-usd';
-            } else if (value.type == 'deal') {
+            } else if (value.type === 'deal') {
                 item_destination = 'deals'
                 item_icon = 'fas fa-usd';
             }
@@ -1410,29 +2483,23 @@
     // However since different bulk actions have different requirements, we have to walk through the available_actions object
     // to determine whether to disable it
     function checkboxEnabledFormatter (value, row) {
-
-        // add some stuff to get the value of the select2 option here?
-
-        if ((row.available_actions) && (row.available_actions.bulk_selectable) && (row.available_actions.bulk_selectable.delete !== true)) {
-            return {
-                disabled:true,
-                //checked: false, <-- not sure this will work the way we want?
+        if (row.available_actions && row.available_actions.bulk_selectable) {
+            var values = Object.values(row.available_actions.bulk_selectable);
+            if (values.length > 0 && !values.some(function (v) { return v === true; })) {
+                return { disabled: true };
             }
         }
     }
 
     function licenseInOutFormatter(value, row) {
+        var user_can_checkout = row.available_actions && row.available_actions.user_can_checkout;
 
-        // check that checkin is not disabled
-        if (row.user_can_checkout === false) {
-            return '<span class="btn btn-sm bg-maroon btn-checkout disabled" data-tooltip="true" title="{{ trans('admin/licenses/message.checkout.unavailable') }}">{{ trans('general.checkout') }}</span>';
-        } else if (row.disabled === true) {
+        if (row.disabled === true) {
             return '<span class="btn btn-sm bg-maroon btn-checkout disabled" data-tooltip="true" title="{{ trans('admin/licenses/message.checkout.license_is_inactive') }}">{{ trans('general.checkout') }}</span>';
-
-        } else
-            // The user is allowed to check the license seat out and it's available
-        if ((row.available_actions.checkout === true) && (row.user_can_checkout === true) && (row.disabled === false)) {
-            return '<a href="{{ config('app.url') }}/licenses/' + row.id + '/checkout/" class="btn btn-sm bg-maroon btn-checkout" data-tooltip="true" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>';
+        } else if ((row.available_actions.checkout === true) && (user_can_checkout === true) && (row.disabled === false)) {
+            return '<a href="{{ config('app.url') }}/licenses/' + row.id + '/checkout" class="btn btn-sm bg-maroon btn-checkout" data-tooltip="true" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>';
+        } else if (row.available_actions.checkout === true) {
+            return '<span class="btn btn-sm bg-maroon btn-checkout disabled" data-tooltip="true" title="{{ trans('admin/licenses/message.checkout.unavailable') }}">{{ trans('general.checkout') }}</span>';
         }
     }
     // We need a special formatter for license seats, since they don't work exactly the same
@@ -1452,7 +2519,7 @@
 
         // The user is allowed to check the license seat in and it's available
         if ((row.available_actions.checkin === true) && ((row.assigned_asset) || (row.assigned_user))) {
-            return '<a href="{{ config('app.url') }}/licenses/' + row.id + '/checkin/" class="btn btn-sm bg-purple btn-checkin" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkin') }}</a>';
+            return '<a href="{{ config('app.url') }}/licenses/' + row.id + '/checkin" class="btn btn-sm bg-purple btn-checkin" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkin') }}</a>';
         }
 
     }
@@ -1584,6 +2651,13 @@
                         return '<a href="mailto:' + row.custom_fields[field_column_plain].value + '" style="white-space: nowrap" data-tooltip="true" title="{{ trans('general.send_email') }}"><x-icon type="email" /> ' + row.custom_fields[field_column_plain].value + '</a>';
                     }
                 }
+                // Convert newlines to <br> for textarea fields so they render in
+                // the table; export will convert <br> back to \n via onCellHtmlData
+                if (row.custom_fields[field_column_plain].element === 'textarea') {
+                    var val = row.custom_fields[field_column_plain].value;
+                    return val ? val.replace(/(?:\r\n|\r|\n)/g, '<br>') : '';
+                }
+
                 return row.custom_fields[field_column_plain].value;
 
             }
@@ -1612,7 +2686,7 @@
         if (value) {
             var groups = '';
             for (var index in value.rows) {
-                groups += '<a href="{{ config('app.url') }}/admin/groups/' + value.rows[index].id + '" class="label label-default">' + value.rows[index].name + '</a> ';
+                groups += '<a href="{{ config('app.url') }}/admin/groups/' + value.rows[index].id + '" class="label label-light">' + value.rows[index].name + '</a> ';
             }
             return groups;
         }
@@ -1656,8 +2730,8 @@
     function minAmtFormatter(row, value) {
 
         if ((row) && (row!=undefined)) {
-            
-            if (value.remaining <= value.min_amt) {
+
+            if (value.remaining < value.min_amt) {
                 return  '<span class="text-danger text-bold" data-tooltip="true" title="{{ trans('admin/licenses/general.below_threshold_short') }}"><x-icon type="warning" class="text-yellow" /> ' + value.min_amt + '</span>';
             }
             return value.min_amt
@@ -1789,6 +2863,75 @@
         }
     }
 
+    // Renders a single company tag. `isInherited` is decided by the caller —
+    // it's true only when (a) we're on the companies show page (viewing context
+    // is set), (b) the row didn't get included via direct membership, and (c)
+    // THIS specific tag is the parent or a child of the viewing company. Other
+    // unrelated memberships on the same row render unmarked.
+    function renderCompanyTag(c, isInherited) {
+        var color = (c.tag_color)
+            ? '<i class="fa-solid fa-square" style="color: ' + c.tag_color + ';" aria-hidden="true"></i> '
+            : '';
+        if (isInherited) {
+            return '<a href="{{ config('app.url') }}/companies/' + c.id + '"'
+                + ' class="label label-light"'
+                + ' data-tooltip="true"'
+                + ' title="{{ trans('admin/companies/table.inherited_help') }}">'
+                + '<i class="fa-solid fa-link" aria-hidden="true"></i> '
+                + color + c.name
+                + ' <span class="sr-only">({{ trans('admin/companies/table.inherited') }})</span>'
+                + '</a>';
+        }
+        return '<a href="{{ config('app.url') }}/companies/' + c.id + '" class="label label-light">'
+            + color + c.name
+            + '</a>';
+    }
+
+    // A tag is "inherited" when (1) we're on a company show page, (2) the row
+    // didn't include the viewing company itself (i.e. the user/asset isn't a
+    // direct member), AND (3) this specific tag IS in the viewing company's
+    // hierarchy set (parent or one of the children). Tags unrelated to the
+    // hierarchy never get marked, even on otherwise-inherited rows.
+    function isCompanyTagInherited(tagId, rowCompanyIds) {
+        if (typeof window.viewingCompanyId === 'undefined' || window.viewingCompanyId === null) {
+            return false;
+        }
+        if (typeof window.viewingCompanyHierarchyIds === 'undefined' || !window.viewingCompanyHierarchyIds) {
+            return false;
+        }
+
+        var viewing = parseInt(window.viewingCompanyId, 10);
+        var tag = parseInt(tagId, 10);
+
+        // Row is direct (some company on the row matches viewing) — nothing
+        // on this row counts as inherited.
+        var rowIsDirect = rowCompanyIds.some(function (id) { return parseInt(id, 10) === viewing; });
+        if (rowIsDirect) {
+            return false;
+        }
+
+        // Only tags that are part of the hierarchy set get the badge.
+        return window.viewingCompanyHierarchyIds.some(function (id) { return parseInt(id, 10) === tag; })
+            && tag !== viewing;
+    }
+
+    function companiesLinkObjFormatter(value, row) {
+        if (!value) {
+            return '';
+        }
+        return renderCompanyTag(value, isCompanyTagInherited(value.id, [value.id]));
+    }
+
+    function companiesArrayLinkFormatter(value, row) {
+        if (!value || !value.length) {
+            return '';
+        }
+        var rowCompanyIds = value.map(function (c) { return c.id; });
+        return value.map(function (c) {
+            return renderCompanyTag(c, isCompanyTagInherited(c.id, rowCompanyIds));
+        }).join(' ');
+    }
+
     function locationCompanyObjFilterFormatter(value, row) {
         if (value) {
             return '<a href="{{ url('/') }}/locations/?company_id=' + row.company.id + '">' + row.company.name + '</a>';
@@ -1890,7 +3033,7 @@
         if ((value) && (value.url) && (value.inlineable)) {
 
             if (value.mediatype == 'image') {
-                return '<a href="' + value.url + '" data-toggle="lightbox" data-type="image"><img src="' + value.url + '" style="max-height: {{ $snipeSettings->thumbnail_max_h }}px; width: auto;" class="img-responsive" alt=""></a>';
+                return '<a href="' + value.url + '?inline=true" data-toggle="lightbox" data-type="image"><img src="' + value.url + '" style="max-height: {{ $snipeSettings->thumbnail_max_h }}px; width: auto;" class="img-responsive" alt=""></a>';
             } else if (value.mediatype == 'video') {
                 return '<a href="' + value.url + '?inline=true" data-toggle="lightbox" data-type="video"><video style="max-height: {{ $snipeSettings->thumbnail_max_h }}px; width: auto;" class="img-responsive"><source src="' + value.url + '?inline=true"></video></a>';
             } else if (value.mediatype == 'audio') {
@@ -2034,6 +3177,10 @@
         return linkToUserSectionBasedOnCount(value, row.id, 'managed-locations');
     }
 
+    function linkNumberToUserAssignedMaintenancesFormatter(value, row) {
+        return linkToUserSectionBasedOnCount(value, row.id, 'maintenances');
+    }
+
     function labelPerPageFormatter(value, row, index, field) {
         if (row) {
             if (!row.hasOwnProperty('sheet_info')) { return 1; }
@@ -2133,14 +3280,16 @@
         return value
     }
 
+    function bindBulkEditSelectionHandler() {
         /**
-        * START CUSTOM
+         * START CUSTOM
          */
-        function contractsPriceFormatter(value,row) {
+        function contractsPriceFormatter(value, row) {
             return value.toLocaleString('ru');
         }
-        function contractsFullPriceFormatter(value,row) {
-            var full_price = row.assets_sum_purchase_cost+ row.consumables_cost;
+
+        function contractsFullPriceFormatter(value, row) {
+            var full_price = row.assets_sum_purchase_cost + row.consumables_cost;
             return full_price.toLocaleString('ru');
         }
 
@@ -2168,8 +3317,9 @@
         {{--            }--}}
         {{--        }--}}
         {{--}--}}
+    }
 
-        function hardwareCustomInOutFormatter(value,row) {
+        function hardwareCustomInOutFormatter(value, row) {
             const destination = "hardware";
 
             if ((row.available_actions.review == true) && (row.user_can_review == true)) {
@@ -2177,39 +3327,39 @@
             }
 
             // The user is allowed to check items out, AND the item is deployable
-                if ((row.available_actions.checkout == true) && (row.user_can_checkout == true) && ((!row.asset_id) && (!row.assigned_to))) {
+            if ((row.available_actions.checkout == true) && (row.user_can_checkout == true) && ((!row.asset_id) && (!row.assigned_to))) {
 
-                    return '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/checkout" class="btn btn-sm bg-maroon" data-tooltip="true" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>';
+                return '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/checkout" class="btn btn-sm bg-maroon" data-tooltip="true" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>';
 
-                    // The user is allowed to check items out, but the item is not able to be checked out
-                } else if (((row.user_can_checkout == false)) && (row.available_actions.checkout == true) && (!row.assigned_to)) {
+                // The user is allowed to check items out, but the item is not able to be checked out
+            } else if (((row.user_can_checkout == false)) && (row.available_actions.checkout == true) && (!row.assigned_to)) {
 
-                    // We use slightly different language for assets versus other things, since they are the only
-                    // item that has a status label
-                    if (destination =='hardware') {
-                        return '<span  data-tooltip="true" title="{{ trans('admin/hardware/general.undeployable_tooltip') }}"><a class="btn btn-sm bg-maroon disabled">{{ trans('general.checkout') }}</a></span>';
-                    } else {
-                        return '<span  data-tooltip="true" title="{{ trans('general.undeployable_tooltip') }}"><a class="btn btn-sm bg-maroon disabled">{{ trans('general.checkout') }}</a></span>';
-                    }
-
-                    // The user is allowed to check items in
-                } else if (row.available_actions.checkin == true)  {
-                    if (row.assigned_to) {
-                        return '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkin') }}</a>';
-                    } else if (row.assigned_pivot_id) {
-                        return '<a href="{{ config('app.url') }}/' + destination + '/' + row.assigned_pivot_id + '/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkin') }}</a>';
-                    }
-
+                // We use slightly different language for assets versus other things, since they are the only
+                // item that has a status label
+                if (destination == 'hardware') {
+                    return '<span  data-tooltip="true" title="{{ trans('admin/hardware/general.undeployable_tooltip') }}"><a class="btn btn-sm bg-maroon disabled">{{ trans('general.checkout') }}</a></span>';
+                } else {
+                    return '<span  data-tooltip="true" title="{{ trans('general.undeployable_tooltip') }}"><a class="btn btn-sm bg-maroon disabled">{{ trans('general.checkout') }}</a></span>';
                 }
+
+                // The user is allowed to check items in
+            } else if (row.available_actions.checkin == true) {
+                if (row.assigned_to) {
+                    return '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkin') }}</a>';
+                } else if (row.assigned_pivot_id) {
+                    return '<a href="{{ config('app.url') }}/' + destination + '/' + row.assigned_pivot_id + '/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkin') }}</a>';
+                }
+
+            }
         }
 
 
-        function consumablesCustomInOutFormatter(value,row) {
+        function consumablesCustomInOutFormatter(value, row) {
             var destination = "consumables";
             // The user is allowed to check items out, AND the item is deployable
             if ((row.available_actions.checkout == true) && (row.user_can_checkout == true) && ((!row.asset_id) && (!row.assigned_to))) {
                 return '<div class="btn-group" style="min-width:180px">' +
-                    '<a href="{{ url('/') }}/' + destination + '/' + row.id + '/checkout" class="btn btn-sm bg-maroon" data-toggle="tooltip" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>'+
+                    '<a href="{{ url('/') }}/' + destination + '/' + row.id + '/checkout" class="btn btn-sm bg-maroon" data-toggle="tooltip" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>' +
                     '</div>';
 
                 // The user is allowed to check items out, but the item is not deployable
@@ -2217,7 +3367,7 @@
                 return '<div  data-toggle="tooltip" title="This item has a status label that is undeployable and cannot be checked out at this time."><a class="btn btn-sm bg-maroon disabled">{{ trans('general.checkout') }}</a></div>';
 
                 // The user is allowed to check items in
-            } else if (row.available_actions.checkin == true)  {
+            } else if (row.available_actions.checkin == true) {
                 if (row.assigned_to) {
                     return '<a href="{{ url('/') }}/' + destination + '/' + row.id + '/checkin" class="btn btn-sm bg-purple" data-toggle="tooltip" title="Check this item in so it is available for re-imaging, re-issue, etc.">{{ trans('general.checkin') }}</a>';
                 } else if (row.assigned_pivot_id) {
@@ -2330,9 +3480,9 @@
             }
         }
 
-        function photoDisplayFormatter(value,row) {
+        function photoDisplayFormatter(value, row) {
             if (value) {
-                return '<a href="' + value + '" data-title="'+ row.tag +'" data-toggle="lightbox" data-gallery="inv-gallery" data-lightbox="inventory"><i class="fa fa-camera fa-lg" aria-hidden="true"></i></a>';
+                return '<a href="' + value + '" data-title="' + row.tag + '" data-toggle="lightbox" data-gallery="inv-gallery" data-lightbox="inventory"><i class="fa fa-camera fa-lg" aria-hidden="true"></i></a>';
             }
         }
 
@@ -2413,7 +3563,7 @@
                 return "<a href='https://bitrix.legis-s.ru/services/lists/52/element/0/" + value + "/?list_section_id=' target='_blank'>" + value + "</a>";
             } else {
                 if (row.user) {
-                        return '<button type="button"  class="btn btn-default  btn-sm resend">Отправить заново</button>'
+                    return '<button type="button"  class="btn btn-default  btn-sm resend">Отправить заново</button>'
                 } else {
                     return ' ';
                 }
@@ -2440,6 +3590,7 @@
                 return "<a href='https://bitrix.legis-s.ru/crm/contract/details/" + value + "/' target='_blank'>" + value + "</a>";
             }
         }
+
         function bitrixIdDealFormatter(value, row) {
             if (value) {
                 return "<a href='https://bitrix.legis-s.ru/crm/deal/details/" + value + "/' target='_blank'>" + value + "</a>";
@@ -2457,6 +3608,7 @@
                 return '';
             }
         }
+
         function mdmStatusCodeFormatter(value, row) {
             switch (value) {
                 case "red":
@@ -2471,39 +3623,39 @@
         }
 
         function mdmDistanceFormatter(value, row) {
-            if (value){
-                if (value>1000){
-                    var valuekm = value/1000;
-                    return "<span class='text-danger'>"+valuekm.toFixed(1) + " км</span>";
-                }else{
-                    return value+ " м";
+            if (value) {
+                if (value > 1000) {
+                    var valuekm = value / 1000;
+                    return "<span class='text-danger'>" + valuekm.toFixed(1) + " км</span>";
+                } else {
+                    return value + " м";
                 }
-            }else{
+            } else {
                 return "";
             }
         }
 
         function yandexMapLinkFormatter(value, row) {
-            if (value){
-                var cord_array =  value.split(",");
-                return "<a href='https://yandex.ru/maps/?pt="+cord_array[1].trim()+","+cord_array[0].trim()+"&z=18&l=map' target='_blank'>"+value+"</a>";
-            }else{
+            if (value) {
+                var cord_array = value.split(",");
+                return "<a href='https://yandex.ru/maps/?pt=" + cord_array[1].trim() + "," + cord_array[0].trim() + "&z=18&l=map' target='_blank'>" + value + "</a>";
+            } else {
                 return "";
             }
         }
 
         function timeAgoFormatter(value, row) {
-            if (value){
+            if (value) {
                 format(value, 'ru');
-            }else{
+            } else {
                 return "";
             }
         }
 
         function anyDeskLinkFormatter(value, row) {
-            if (value){
-                return "<a href='anydesk:"+value.split(' ').join('')+"' >"+value+"</a>";
-            }else{
+            if (value) {
+                return "<a href='anydesk:" + value.split(' ').join('') + "' >" + value + "</a>";
+            } else {
                 return "";
             }
         }
@@ -2513,19 +3665,65 @@
          * END CUSTOM
          */
 
-    window.operateEvents = {
-        'click .print_label': function (e, value, row, index) {
-            $.ajax('http://localhost:8001/termal_print?text=' + row.asset_tag, {
-                success: function (data, textStatus, xhr) {
-                    console.log(xhr.status);
-                    if (xhr.status === 200) {
+        window.operateEvents = {
+            'click .print_label': function (e, value, row, index) {
+                $.ajax('http://localhost:8001/termal_print?text=' + row.asset_tag, {
+                    success: function (data, textStatus, xhr) {
+                        console.log(xhr.status);
+                        if (xhr.status === 200) {
+                            $.ajax({
+                                method: "POST",
+                                url: '/api/v1/hardware/' + row.id + '/inventory',
+                                headers: {
+                                    "X-Requested-With": 'XMLHttpRequest',
+                                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                                },
+                                success: function (data) {
+                                    $(".table").bootstrapTable('refresh');
+                                },
+                                error: function (data) {
+                                    console.log(data);
+                                }
+                            });
+                        } else {
+                            console.log(data);
+                        }
+                    },
+                    error: function () {
+                        console.log("error");
+                    }
+                });
+            },
+            'click .inventory': function (e, value, row, index) {
+                Swal.fire({
+                    title: "Изменить тег актива <b>" + row.asset_tag + " </b>",
+                    // text: 'Do you want to continue',
+                    icon: 'question',
+                    input: "text",
+                    inputLabel: 'Новый тег',
+                    inputAttributes: {
+                        autocapitalize: 'on'
+                    },
+                    reverseButtons: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Подтвердить',
+                    cancelButtonText: 'Отменить',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+
+                        var sendData = {
+                            asset_tag: result.value,
+                        };
+                        console.log("asset_tag: " + result.value);
                         $.ajax({
-                            method: "POST",
+                            type: 'POST',
                             url: '/api/v1/hardware/' + row.id + '/inventory',
                             headers: {
                                 "X-Requested-With": 'XMLHttpRequest',
                                 "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
                             },
+                            data: sendData,
+                            dataType: 'json',
                             success: function (data) {
                                 $(".table").bootstrapTable('refresh');
                             },
@@ -2533,221 +3731,174 @@
                                 console.log(data);
                             }
                         });
-                    } else {
-                        console.log(data);
                     }
-                },
-                error: function () {
-                    console.log("error");
-                }
-            });
-        },
-        'click .inventory': function (e, value, row, index) {
-            Swal.fire({
-                title: "Изменить тег актива <b>" + row.asset_tag + " </b>",
-                // text: 'Do you want to continue',
-                icon: 'question',
-                input: "text",
-                inputLabel: 'Новый тег',
-                inputAttributes: {
-                    autocapitalize: 'on'
-                },
-                reverseButtons: true,
-                showCancelButton: true,
-                confirmButtonText: 'Подтвердить',
-                cancelButtonText: 'Отменить',
-            }).then((result) => {
-                if (result.isConfirmed) {
+                });
+            },
+            'click .resend': function (e, value, row, index) {
+                $.ajax({
+                    url: '/api/v1/purchases/' + row.id + '/resend',
+                    {{--url: '{{ route('api.purchases.resend', ['id'=> row.id]) }}',--}}
+                    method: "POST",
+                    headers: {
+                        "X-Requested-With": 'XMLHttpRequest',
+                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function () {
+                        $(".table").bootstrapTable('refresh');
+                    }
+                });
+            },
+            'click .review': function (e, value, row, index) {
 
-                    var sendData = {
-                        asset_tag: result.value,
-                    };
-                    console.log("asset_tag: " + result.value);
-                    $.ajax({
-                        type: 'POST',
-                        url: '/api/v1/hardware/' + row.id + '/inventory',
-                        headers: {
-                            "X-Requested-With": 'XMLHttpRequest',
-                            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                        },
-                        data: sendData,
-                        dataType: 'json',
-                        success: function (data) {
-                            $(".table").bootstrapTable('refresh');
-                        },
-                        error: function (data) {
-                            console.log(data);
-                        }
-                    });
-                }
-            });
-        },
-        'click .resend': function (e, value, row, index) {
-            $.ajax({
-                url: '/api/v1/purchases/' + row.id + '/resend',
-                {{--url: '{{ route('api.purchases.resend', ['id'=> row.id]) }}',--}}
-                method: "POST",
-                headers: {
-                    "X-Requested-With": 'XMLHttpRequest',
-                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function () {
-                    $(".table").bootstrapTable('refresh');
-                }
-            });
-        },
-        'click .review': function (e, value, row, index) {
+                console.log(row);
+                $.ajax({
+                    url: '/api/v1/hardware/' + row.id + '/review',
+                    method: "POST",
+                    headers: {
+                        "X-Requested-With": 'XMLHttpRequest',
+                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function () {
+                        $(".table").bootstrapTable('refresh');
+                        $.ajax({
+                            type: 'GET',
+                            url: "/api/v1/purchases/" + row.purchase_id,
+                            headers: {
+                                "X-Requested-With": 'XMLHttpRequest',
+                                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                            },
+                            dataType: 'json',
+                            success: function (data) {
+                                var status = data.status;
+                                var result = "";
+                                switch (status) {
+                                    case "inventory":
+                                        result = '<span class="label label-warning">В процессе инвентаризации</span>';
+                                        break;
+                                    case "in_payment":
+                                        result = '<span class="label label-primary">В оплате</span>';
+                                        break;
+                                    case "review":
+                                        result = '<span class="label label-warning">В процессе проверки</span>';
+                                        break;
+                                    case "finished":
+                                        result = '<span class="label label-success">Завершено</span>';
+                                        break;
+                                    case "rejected":
+                                        result = '<span class="label label-danger">Отклонено</span>';
+                                        break;
+                                    case "paid":
+                                        result = '<span class="label label-success">Оплачено</span>';
+                                        break;
+                                    case "inprogress":
+                                        result = '<span class="label label-primary">На согласовании</span>';
+                                        break;
+                                }
+                                $('.status_label').html(result);
 
-            console.log(row);
-            $.ajax({
-                url: '/api/v1/hardware/' + row.id + '/review',
-                method: "POST",
-                headers: {
-                    "X-Requested-With": 'XMLHttpRequest',
-                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function () {
-                    $(".table").bootstrapTable('refresh');
-                    $.ajax({
-                        type: 'GET',
-                        url: "/api/v1/purchases/" + row.purchase_id,
-                        headers: {
-                            "X-Requested-With": 'XMLHttpRequest',
-                            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                        },
-                        dataType: 'json',
-                        success: function (data) {
-                            var status = data.status;
-                            var result = "";
-                            switch (status) {
-                                case "inventory":
-                                    result = '<span class="label label-warning">В процессе инвентаризации</span>';
-                                    break;
-                                case "in_payment":
-                                    result = '<span class="label label-primary">В оплате</span>';
-                                    break;
-                                case "review":
-                                    result = '<span class="label label-warning">В процессе проверки</span>';
-                                    break;
-                                case "finished":
-                                    result = '<span class="label label-success">Завершено</span>';
-                                    break;
-                                case "rejected":
-                                    result = '<span class="label label-danger">Отклонено</span>';
-                                    break;
-                                case "paid":
-                                    result = '<span class="label label-success">Оплачено</span>';
-                                    break;
-                                case "inprogress":
-                                    result = '<span class="label label-primary">На согласовании</span>';
-                                    break;
-                            }
-                            $('.status_label').html(result);
+                            },
+                        });
+                    }
+                });
+            },
+            'click .return': function (e, value, row, index) {
+                Swal.fire({
+                    title: "Вернуть - " + row.name + " " + row.assigned_to.name,
+                    // text: 'Do you want to continue',
+                    icon: 'question',
+                    input: "range",
+                    inputLabel: 'Количество',
+                    inputAttributes: {
+                        min: 1,
+                        max: row.quantity,
+                        step: 1
+                    },
+                    inputValue: 1,
+                    reverseButtons: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Подтвердить',
+                    cancelButtonText: 'Отменить',
+                }).then((result) => {
+                    if (result.isConfirmed) {
 
-                        },
-                    });
-                }
-            });
-        },
-        'click .return': function (e, value, row, index) {
-            Swal.fire({
-                title: "Вернуть - " + row.name + " " + row.assigned_to.name,
-                // text: 'Do you want to continue',
-                icon: 'question',
-                input: "range",
-                inputLabel: 'Количество',
-                inputAttributes: {
-                    min: 1,
-                    max: row.quantity,
-                    step: 1
-                },
-                inputValue: 1,
-                reverseButtons: true,
-                showCancelButton: true,
-                confirmButtonText: 'Подтвердить',
-                cancelButtonText: 'Отменить',
-            }).then((result) => {
-                if (result.isConfirmed) {
-
-                    var sendData = {
-                        quantity: result.value,
-                        nds: row.nds,
-                        purchase_cost: row.purchase_cost,
-                    };
-                    $.ajax({
-                        type: 'POST',
-                        url: "/api/v1/consumableassignments/" + row.id + "/return",
-                        headers: {
-                            "X-Requested-With": 'XMLHttpRequest',
-                            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                        },
-                        data: sendData,
-                        dataType: 'json',
-                        success: function (data) {
-                            $(".table").bootstrapTable('refresh');
-                        },
-                    });
-                }
-            });
-        },
-    };
-
-    $(function () {
-        $('#bulkEdit').click(function () {
-            var selectedIds = $('.snipe-table').bootstrapTable('getSelections');
-            $.each(selectedIds, function(key,value) {
-                $( "#bulkForm" ).append($('<input type="hidden" name="ids[' + value.id + ']" value="' + value.id + '">' ));
-            });
-
-        });
-    });
-
-    $(function() {
-
-        // This handles the search box highlighting on both ajax and client-side
-        // bootstrap tables
-        var searchboxHighlighter = function (event) {
-
-            $('.search-input').each(function (index, element) {
-
-                if ($(element).val() != '') {
-                    $(element).addClass('search-highlight');
-                    $(element).next().children().addClass('search-highlight');
-                } else {
-                    $(element).removeClass('search-highlight');
-                    $(element).next().children().removeClass('search-highlight');
-                }
-            });
+                        var sendData = {
+                            quantity: result.value,
+                            nds: row.nds,
+                            purchase_cost: row.purchase_cost,
+                        };
+                        $.ajax({
+                            type: 'POST',
+                            url: "/api/v1/consumableassignments/" + row.id + "/return",
+                            headers: {
+                                "X-Requested-With": 'XMLHttpRequest',
+                                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+                            },
+                            data: sendData,
+                            dataType: 'json',
+                            success: function (data) {
+                                $(".table").bootstrapTable('refresh');
+                            },
+                        });
+                    }
+                });
+            },
         };
 
-        $("[name='clearSearch']").click(function () {
+        $(function () {
+            $('#bulkEdit').click(function () {
+                var selectedIds = $('.snipe-table').bootstrapTable('getSelections');
+                $.each(selectedIds, function (key, value) {
+                    $("#bulkForm").append($('<input type="hidden" name="ids[' + value.id + ']" value="' + value.id + '">'));
+                });
 
-            // This hacks around a stupid issue in BS tables where the search text would get remembered for way too long even after it was cleared
-            for (storedSearch in localStorage) {
-                if (storedSearch.endsWith('.bs.table.searchText')) {
-                    localStorage.removeItem(storedSearch);
+            });
+        });
+
+        function initializeBootstrapTableSearchUi() {
+
+            // This handles the search box highlighting on both ajax and client-side
+            // bootstrap tables
+            var searchboxHighlighter = function (event) {
+
+                $('.search-input').each(function (index, element) {
+
+                    if ($(element).val() != '') {
+                        $(element).addClass('search-highlight');
+                        $(element).next().children().addClass('search-highlight');
+                    } else {
+                        $(element).removeClass('search-highlight');
+                        $(element).next().children().removeClass('search-highlight');
+                    }
+                });
+            };
+
+            $("[name='clearSearch']").click(function () {
+
+                // This hacks around a stupid issue in BS tables where the search text would get remembered for way too long even after it was cleared
+                for (storedSearch in localStorage) {
+                    if (storedSearch.endsWith('.bs.table.searchText')) {
+                        localStorage.removeItem(storedSearch);
+                    }
                 }
-            }
 
-            $('.search-input').each(function (index, element) {
-                $(element).val('');
-            });
-        });
-
-        $('.search button[name=clearSearch]').click(searchboxHighlighter);
-        searchboxHighlighter({ name:'pageload'});
-        $('.search-input').keyup(searchboxHighlighter);
-
-        //  This is necessary to make the bootstrap tooltips work inside of the
-        // wenzhixin/bootstrap-table formatters
-        $('#table').on('post-body.bs.table', function () {
-            $('[data-tooltip="true"]').tooltip({
-                container: 'body'
+                $('.search-input').each(function (index, element) {
+                    $(element).val('');
+                });
             });
 
+            $('.search button[name=clearSearch]').click(searchboxHighlighter);
+            searchboxHighlighter({name: 'pageload'});
+            $('.search-input').keyup(searchboxHighlighter);
 
-        });
-    });
+            //  This is necessary to make the bootstrap tooltips work inside of the
+            // wenzhixin/bootstrap-table formatters
+            $(document).on('post-body.bs.table', '.snipe-table', function () {
+                $('[data-tooltip="true"]').tooltip({
+                    container: 'body'
+                });
+            });
+        }
+
 
 </script>
     

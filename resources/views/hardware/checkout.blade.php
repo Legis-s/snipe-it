@@ -1,6 +1,5 @@
 @extends('layouts/default')
 
-{{-- Выдать актив --}}
 {{-- Page title --}}
 @section('title')
     {{ trans('admin/hardware/general.checkout') }}
@@ -11,14 +10,9 @@
 @section('content')
 
     <style>
-        .input-group {
-            padding-left: 0 !important;
-        }
 
-        :root {
-            --gl-star-empty: url('/img/star-empty.svg');
-            --gl-star-full: url('/img/star-full.svg');
-            --gl-star-size: 32px;
+        .input-group {
+            padding-left: 0px !important;
         }
     </style>
 
@@ -83,10 +77,10 @@
                                 {{ trans('admin/hardware/form.name') }}
                             </label>
 
-                            <div class="col-md-8">
+                            <div class="col-md-7">
                                 <input class="form-control" type="text" name="name" id="name"
                                        value="{{ old('name', $asset->name) }}" tabindex="1">
-                                {!! $errors->first('name', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                <x-form.error name="name" />
                             </div>
                         </div>
 
@@ -103,7 +97,22 @@
                                     style="width: 100%;"
                                     aria-label="status_id"
                                 />
-                                {!! $errors->first('status_id', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                <x-form.error name="status_id" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-md-7 col-md-offset-3">
+                                <label class="form-control" for="requestable">
+                                    <input
+                                        type="checkbox"
+                                        value="1"
+                                        name="requestable"
+                                        id="requestable"
+                                        @checked((bool) old('requestable', $asset->requestable))
+                                    />
+                                    {{ trans('admin/hardware/general.requestable') }}
+                                </label>
                             </div>
                         </div>
 
@@ -138,7 +147,7 @@
                                         placeholder="{{ trans('general.select_date') }}"
                                         required="{{ Helper::checkIfRequired($item, 'checkout_at') }}"
                                 />
-                                {!! $errors->first('checkout_at', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                <x-form.error name="checkout_at" />
                             </div>
                         </div>
 
@@ -151,11 +160,12 @@
                             <div class="col-md-8">
                                 <x-input.datepicker
                                         name="expected_checkin"
+                                        col_size_class="col-md-7"
                                         :value="old('expected_checkin', $item->expected_checkin)"
                                         placeholder="{{ trans('general.select_date') }}"
                                         required="{{ Helper::checkIfRequired($item, 'expected_checkin') }}"
                                 />
-                                {!! $errors->first('expected_checkin', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                <x-form.error name="expected_checkin" />
                             </div>
                         </div>
 
@@ -168,7 +178,7 @@
                             <div class="col-md-8">
                                 <textarea class="col-md-6 form-control" id="note" @required($snipeSettings->require_checkinout_notes)
                                 name="note">{{ old('note', $asset->note) }}</textarea>
-                                {!! $errors->first('note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                <x-form.error name="note" />
                             </div>
                         </div>
 
@@ -180,21 +190,32 @@
 
 
 
-                        @if ($asset->requireAcceptance() || $asset->getEula() || ($snipeSettings->webhook_endpoint!=''))
-                            <div class="row">
-                            <div class="notification-callout">
+                        @if ($asset->requireAcceptance() || (string) $snipeSettings->require_accept_signature === '1' || $asset->getEula() || ($snipeSettings->webhook_endpoint!=''))
+                            <div class="form-group notification-callout" style="display:none;">
                                 <div class="col-md-8 col-md-offset-3">
-                                    <div class="callout callout-info">
+                                    <div class="callout callout-info" role="status" aria-live="polite" aria-atomic="true">
 
                                         @if ($asset->requireAcceptance())
-                                            <x-icon type="email" />
+                                            <x-icon type="email"/>
                                             {{ trans('admin/categories/general.required_acceptance') }}
                                             <br>
                                         @endif
 
+                                        @if ((string) $snipeSettings->require_accept_signature === '1')
+                                            <x-icon type="edit"/>
+                                            {{ trans('admin/categories/general.required_signature') }}
+                                            <br>
+                                        @endif
+
                                         @if ($asset->getEula())
-                                            <x-icon type="email" />
+                                            <x-icon type="email"/>
                                             {{ trans('admin/categories/general.required_eula') }}
+                                            <br>
+                                        @endif
+
+                                        @if (($asset->model?->category) && ($asset->model->category->checkin_email))
+                                            <x-icon type="email"/>
+                                            {{ trans('admin/categories/general.checkin_email_notification') }}
                                             <br>
                                         @endif
 
@@ -204,30 +225,28 @@
                                         @endif
                                     </div>
                                 </div>
-                            </div>
+
+                                <!-- Sign in place checkbox -->
+                                @if ($asset->requireAcceptance() || (string) $snipeSettings->require_accept_signature === '1')
+                                <div id="sign_in_place_div" class="col-md-7 col-md-offset-3">
+                                    <label class="form-control">
+                                        <input type="checkbox" value="1" name="sign_in_place" @checked(old('sign_in_place', session('sign_in_place', false))) aria-label="sign_in_place">
+                                        {{ trans('general.sign_in_place') }}
+                                    </label>
+                                    <p class="help-block">
+                                        {{ trans('general.sign_in_place_help') }}
+                                    </p>
+                                </div>
+                                @endif
                             </div>
                         @endif
 
-                        <!-- stars -->
-                        <div class="form-group {{ $errors->has('quality') ? ' has-error' : '' }}">
-                            <label for="quality" class="col-md-3 control-label">Состояние</label>
-                            <div class="col-md-9">
-                                @php
-                                    $quality = old('quality', isset($asset) ? $asset->quality : null);
-                                @endphp
+                        <x-input.quality-select
+                                :label="trans('general.quality')"
+                                name="quality"
+                                :selected="old('quality', $asset->quality)"
+                        />
 
-                                <select class="star-rating" name="quality" id="quality">
-                                    <option value="" {{ empty($quality) ? 'selected' : '' }}>Оцените состояние</option>
-                                    <option value="5" {{ (string)$quality === '5' ? 'selected' : '' }}>Новое запакованное</option>
-                                    <option value="4" {{ (string)$quality === '4' ? 'selected' : '' }}>В отличном состоянии, но использовалось</option>
-                                    <option value="3" {{ (string)$quality === '3' ? 'selected' : '' }}>Рабочее, но с небольшими следами повреждений, небольшим загрязнением</option>
-                                    <option value="2" {{ (string)$quality === '2' ? 'selected' : '' }}>Частично рабочее или сильно загрязненное</option>
-                                    <option value="1" {{ (string)$quality === '1' ? 'selected' : '' }}>Полностью не рабочее</option>
-                                </select>
-
-                                {!! $errors->first('quality', '<span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span>') !!}
-                            </div>
-                        </div>
                         <!-- life Cost -->
                         <div class="form-group">
                             <label for="life" class="col-md-3 control-label">Срок эксплуатации (прошло/рассчетный)</label>
@@ -327,10 +346,10 @@
                                 </div>
 
                                 <div class="col-md-9" style="padding-left: 0px;">
-                                    {{--                                    {!! $errors->first('new_depreciable_cost', '<span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span>') !!}--}}
                                 </div>
                             </div>
                         </div>
+
 
                     </div> <!--/.box-body-->
 
@@ -342,7 +361,6 @@
                                 'index' => trans('admin/hardware/form.redirect_to_all', ['type' => trans('general.assets')]),
                                 'item' => trans('admin/hardware/form.redirect_to_type', ['type' => trans('general.asset')]),
                                 'target' => trans('admin/hardware/form.redirect_to_checked_out_to'),
-
                                ]"
                     />
 
@@ -369,96 +387,49 @@
     @include('partials/assets-assigned')
 
     <script nonce="{{ csrf_token() }}">
-        $(function () {
-            const starRatingControl = new StarRating('.star-rating', {
-                maxStars: 5,
-                tooltip: 'Оцените состояние',
-                clearable: false,
-            });
+        // Per-user localStorage preference for the requestable default on
+        // checkout. Namespaced by user id so a shared browser doesn't leak one
+        // user's habit into another user's default. Only takes over when the
+        // field wasn't repopulated from a validation-error redirect (old()
+        // beats the stored preference). On submit we save whatever the user
+        // actually chose, so the preference tracks their real habit.
+        const initializeCheckoutRequestablePreference = function () {
+            const storageKey = 'snipeit.checkout.requestable_default.' + @json(auth()->id() ?? 'guest');
+            const hadOldInput = @json((bool) old('requestable', false)) || @json(session()->has('_old_input.requestable'));
+            const checkbox = document.getElementById('requestable');
+            const form = checkbox ? checkbox.closest('form') : null;
 
-            calculateCost();
-
-            $("#quality").on("change input", function () {
-                calculateCost();
-            });
-
-            $("#purchase_cost").on("change input", function () {
-                calculateCost();
-            });
-
-            function calculateCost() {
-                const buyVal = parseMoney($("#purchase_cost").val());
-                const quality = parseInt($("#quality").val(), 10);
-
-                if (!buyVal || buyVal <= 0 || !quality || quality <= 0) {
-                    $("#new_depreciable_cost").val("");
-                    return;
-                }
-
-                let qualityDivider = 1;
-
-                switch (quality) {
-                    case 5:
-                        qualityDivider = 1;
-                        break;
-                    case 4:
-                        qualityDivider = 0.8;
-                        break;
-                    case 3:
-                        qualityDivider = 0.5;
-                        break;
-                    case 2:
-                        qualityDivider = 0.3;
-                        break;
-                    case 1:
-                        qualityDivider = 0;
-                        break;
-                    default:
-                        qualityDivider = 1;
-                }
-
-                let lifetime = 36;
-                @if (isset($asset->model) && isset($asset->model->depreciation) && isset($asset->model->depreciation->months))
-                    lifetime = {{ (int)$asset->model->depreciation->months }};
-                @endif
-
-                let useTime = 12; // значение по умолчанию, если даты покупки нет
-                @if (isset($asset->purchase_date))
-                let buyDate = "{{$asset->purchase_date}}";
-                buyDate = new Date(buyDate.substr(0, 10) + "T00:00:00");
-                useTime = monthDiff(buyDate);
-                if (useTime < 0) {
-                    useTime = 0;
-                }
-                @endif
-
-                let newVal = (buyVal - (buyVal / lifetime) * useTime) * qualityDivider;
-
-                if (newVal < 0 || !isFinite(newVal)) {
-                    newVal = 0;
-                }
-
-                $("#new_depreciable_cost").val(newVal.toFixed(2));
+            if (!checkbox || !form) {
+                return;
             }
 
-            function monthDiff(dateFrom) {
-                const dateTo = new Date();
-                return (
-                    (dateTo.getFullYear() - dateFrom.getFullYear()) * 12 +
-                    (dateTo.getMonth() - dateFrom.getMonth())
-                );
+            if (!hadOldInput) {
+                let stored = null;
+                try {
+                    stored = window.localStorage.getItem(storageKey);
+                } catch (e) {
+                    // localStorage may be unavailable (private mode, disabled).
+                }
+                if (stored === '1' || stored === '0') {
+                    checkbox.checked = stored === '1';
+                }
             }
 
-            function parseMoney(value) {
-                if (!value) return 0;
+            form.addEventListener('submit', function () {
+                try {
+                    window.localStorage.setItem(storageKey, checkbox.checked ? '1' : '0');
+                } catch (e) {
+                    // Non-fatal: preference just won't persist this time.
+                }
+            });
+        };
 
-                return parseFloat(
-                    String(value)
-                        .replace(/\s/g, "")
-                        .replace(/,/g, ".")
-                        .replace(/[^\d.]/g, "")
-                ) || 0;
-            }
-        });
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeCheckoutRequestablePreference);
+        } else {
+            initializeCheckoutRequestablePreference();
+        }
     </script>
+
+    @include('partials.hardware-depreciable-cost-calculator')
 @stop

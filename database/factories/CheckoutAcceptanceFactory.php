@@ -48,10 +48,10 @@ class CheckoutAcceptanceFactory extends Factory
             }
 
             if ($acceptance->checkoutable instanceof Asset && $acceptance->assignedTo instanceof User) {
-                $acceptance->checkoutable->update([
-                    'assigned_to' => $acceptance->assigned_to_id,
-                    'assigned_type' => get_class($acceptance->assignedTo),
-                ]);
+                $asset = $acceptance->checkoutable;
+                $asset->assigned_to = $acceptance->assigned_to_id;
+                $asset->assigned_type = get_class($acceptance->assignedTo);
+                $asset->save();
             }
         });
     }
@@ -103,7 +103,7 @@ class CheckoutAcceptanceFactory extends Factory
         $acceptance->checkoutable->assetlog()->create([
             'action_type' => 'checkout',
             'target_id' => $acceptance->assigned_to_id,
-            'target_type' => get_class($acceptance->assignedTo),
+            'target_type' => User::class,
             'item_id' => $acceptance->checkoutable_id,
             'item_type' => $acceptance->checkoutable_type,
         ]);

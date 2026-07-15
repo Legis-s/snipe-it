@@ -213,6 +213,93 @@ class PurchasesController extends Controller
         return response()->json(Helper::formatStandardApiResponse('error', null, $purchase->getErrors()));
     }
 
+    /**
+     * Update or delete one not-yet-fully-reviewed consumable line in purchase JSON.
+     */
+    public function update_consumables_line(Request $request, $purchaseId = null): JsonResponse
+    {
+        $this->authorize('review');
+
+        $purchase = Purchase::findOrFail($purchaseId);
+        $consumables = json_decode($purchase->consumables_json ?: '[]', true);
+
+        if (!is_array($consumables)) {
+            return response()->json(Helper::formatStandardApiResponse('error', null, 'Некорректный список расходников.'));
+        }
+
+        $rowId = $request->input('row_id');
+        $action = $request->input('action', 'update');
+        $found = false;
+
+        foreach ($consumables as $index => &$consumable) {
+            if (($consumable['id'] ?? null) != $rowId) {
+                continue;
+            }
+
+            $found = true;
+            $reviewed = (int)($consumable['reviewed'] ?? 0);
+
+            if ($action === 'delete') {
+                if ($reviewed > 0) {
+                    return response()->json(Helper::formatStandardApiResponse('error', null, 'Нельзя удалить строку, по которой уже есть принятые расходники.'));
+                }
+
+                unset($consumables[$index]);
+                break;
+            }
+
+            $quantity = (int)$request->input('quantity');
+            $purchaseCost = Helper::ParseFloat($request->input('purchase_cost'));
+            $nds = Helper::ParseFloat($request->input('nds', 0));
+
+            if ($quantity < 1) {
+                return response()->json(Helper::formatStandardApiResponse('error', null, 'Количество должно быть больше нуля.'));
+            }
+
+            if ($quantity < $reviewed) {
+                return response()->json(Helper::formatStandardApiResponse('error', null, 'Количество не может быть меньше уже принятого.'));
+            }
+
+            if ($purchaseCost < 0 || $nds < 0) {
+                return response()->json(Helper::formatStandardApiResponse('error', null, 'Цена и НДС не могут быть отрицательными.'));
+            }
+
+            $consumable['quantity'] = $quantity;
+            $consumable['purchase_cost'] = $purchaseCost;
+            $consumable['nds'] = $nds;
+            break;
+        }
+        unset($consumable);
+
+        if (!$found) {
+            return response()->json(Helper::formatStandardApiResponse('error', null, 'Строка расходника не найдена.'));
+        }
+
+        $consumables = array_values($consumables);
+        foreach ($consumables as $index => &$consumable) {
+            $consumable['id'] = $index + 1;
+        }
+        unset($consumable);
+
+        $purchase->consumables_json = json_encode($consumables, JSON_UNESCAPED_UNICODE);
+        $purchase->checkStatus();
+
+        if ($purchase->save()) {
+            return response()->json(
+                Helper::formatStandardApiResponse(
+                    'success',
+                    [
+                        'purchase' => (new PurchasesTransformer)->transformPurchase($purchase),
+                        'consumables' => $consumables,
+                    ],
+                    trans('admin/consumables/message.update.success')
+                )
+            );
+        }
+
+        return response()->json(Helper::formatStandardApiResponse('error', null, $purchase->getErrors()));
+    }
+
 
     /**
      * Display a listing of the resource.

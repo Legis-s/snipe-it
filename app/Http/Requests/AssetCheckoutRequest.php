@@ -40,6 +40,7 @@ class AssetCheckoutRequest extends Request
                 'nullable',
                 'date',
             ],
+            'requestable' => 'nullable|boolean',
         ];
 
         if ($settings->require_checkinout_notes) {

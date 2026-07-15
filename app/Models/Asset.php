@@ -37,7 +37,7 @@ class Asset extends Depreciable
 {
     protected $presenter = AssetPresenter::class;
 
-    protected $with = ['model', 'adminuser', 'location', 'company'];
+    // protected $with = ['model', 'adminuser', 'location', 'company'];
 
     use CompanyableTrait;
     use HasFactory;
@@ -140,7 +140,7 @@ class Asset extends Depreciable
         'order_number' => ['nullable', 'string', 'max:191'],
         'notes' => ['nullable', 'string', 'max:65535'],
         'assigned_to' => ['nullable', 'integer', 'required_with:assigned_type'],
-        'assigned_type' => ['nullable', 'required_with:assigned_to', 'in:'.User::class.','.Location::class.','.Asset::class.','.Deal::class],
+        'assigned_type' => ['nullable', 'required_with:assigned_to', 'in:'.User::class.','.Location::class.','.Asset::class.','.Contract::class.','.Deal::class],
         'requestable' => ['nullable', 'boolean'],
         'assigned_user' => ['integer', 'nullable', 'exists:users,id,deleted_at,NULL'],
         'assigned_location' => ['integer', 'nullable', 'exists:locations,id,deleted_at,NULL', 'fmcs_location'],
@@ -159,8 +159,6 @@ class Asset extends Depreciable
      */
     protected $fillable = [
         'asset_tag',
-        'assigned_to',
-        'assigned_type',
         'company_id',
         'image',
         'location_id',
@@ -246,6 +244,8 @@ class Asset extends Depreciable
     protected $searchableRelationAliases = [
         'status_label' => 'status',
         'assigned_to' => 'assignedTo',
+        'model_number' => 'model',
+        'rtd_location' => 'defaultLoc',
     ];
 
     protected static function booted(): void
@@ -503,17 +503,20 @@ class Asset extends Depreciable
 
     public function availableForCheckIn()
     {
-
-        // This asset is currently assigned to anyone and is not deleted...
-        if (($this->assigned_to != '') && ($this->status) && ($this->status->archived == '0')
-            && ($this->status->deployable == '1')
-        ) {
-            return true;
-
+        if ($this->assigned_to == '') {
+            return false;
         }
 
-        return false;
+        // Deleted assets that are still checked out should always allow checkin
+        if ($this->deleted_at != '') {
+            return true;
+        }
+
+        return $this->status
+            && ($this->status->archived == '0')
+            && ($this->status->deployable == '1');
     }
+
 
     public function availableForReview()
     {
@@ -523,7 +526,6 @@ class Asset extends Depreciable
         }
         return false;
     }
-
 
     /**
      * Checks the asset out to the target
@@ -544,7 +546,7 @@ class Asset extends Depreciable
      *
      * @return bool
      */
-    public function checkOut($target, $admin = null, $checkout_at = null, $expected_checkin = null, $note = null, $name = null, $location = null)
+    public function checkOut($target, $admin = null, $checkout_at = null, $expected_checkin = null, $note = null, $name = null, $location = null, bool $signInPlace = false)
     {
         if (! $target) {
             return false;
@@ -588,7 +590,7 @@ class Asset extends Depreciable
             } else {
                 $checkedOutBy = auth()->user();
             }
-            event(new CheckoutableCheckedOut($this, $target, $checkedOutBy, $note, $originalValues));
+            event(new CheckoutableCheckedOut($this, $target, $checkedOutBy, $note, $originalValues, 1, $signInPlace));
 
             $this->increment('checkout_counter', 1);
 
@@ -794,8 +796,24 @@ class Asset extends Depreciable
      */
     public function assignedAccessories()
     {
-        return $this->morphMany(AccessoryCheckout::class, 'assigned', 'assigned_type', 'assigned_to');
+        return $this->morphMany(AccessoryCheckout::class, 'assigned', 'assigned_type', 'assigned_to')->with('accessory');
     }
+
+    public function accessories()
+    {
+        return $this->hasManyThrough(
+            Accessory::class,
+            AccessoryCheckout::class,
+            'assigned_to',
+            'id',
+            'id',
+            'accessory_id'
+        )->where('assigned_type', self::class);
+    }
+
+    // {
+    //     return $this->morphMany(AccessoryCheckout::class, 'assigned', 'assigned_type', 'assigned_to')->withTrashed();
+    // }
 
     /**
      * Get the asset's location based on the assigned user
@@ -1281,12 +1299,44 @@ class Asset extends Depreciable
 
     public function getComponentCost()
     {
-        $cost = 0;
-        foreach ($this->components as $component) {
-            $cost += $component->pivot->assigned_qty * $component->purchase_cost;
+        return (float) $this->components->sum('calculated_purchase_cost');
+    }
+
+    /**
+     * Return EOL progress percentage (0-100), based on elapsed months since
+     * purchase date over the configured EOL window.
+     */
+    public function eolProgressPercent(): float
+    {
+        if (! $this->purchase_date || ! $this->asset_eol_date) {
+            return 0.0;
         }
 
-        return $cost;
+        return $this->calculateProgressPercent(
+            start: Carbon::parse($this->purchase_date),
+            end: Carbon::parse($this->asset_eol_date),
+        );
+    }
+
+    /**
+     * Return warranty progress percentage (0-100), based on elapsed months
+     * since purchase date over the warranty window.
+     */
+    public function warrantyProgressPercent(): float
+    {
+        if (! $this->purchase_date || ! $this->warranty_expires) {
+            return 0.0;
+        }
+
+        return $this->calculateProgressPercent(
+            start: Carbon::parse($this->purchase_date),
+            end: $this->warranty_expires,
+        );
+    }
+
+    public function getAccessoryCost()
+    {
+        return (float) $this->accessories()->sum('purchase_cost');
     }
 
     /**
@@ -1491,13 +1541,10 @@ class Asset extends Depreciable
      */
     public function scopePending($query)
     {
-        return $query->whereHas(
-            'status', function ($query) {
-                $query->where('deployable', '=', 0)
-                    ->where('pending', '=', 1)
-                    ->where('archived', '=', 0);
-            }
-        );
+        // Pluck IDs then whereIn — do NOT replace with whereHas. whereHas generates a correlated EXISTS per row and causes severe slowdowns in withCount contexts.
+        $ids = Statuslabel::idsFor('pending');
+
+        return $query->whereIn('assets.status_id', $ids->isEmpty() ? [0] : $ids);
     }
 
     /**
@@ -1547,14 +1594,11 @@ class Asset extends Depreciable
      */
     public function scopeRTD($query)
     {
+        // Pluck IDs then whereIn — do NOT replace with whereHas. whereHas generates a correlated EXISTS per row and causes severe slowdowns in withCount contexts.
+        $ids = Statuslabel::idsFor('deployable');
+
         return $query->whereNull('assets.assigned_to')
-            ->whereHas(
-                'status', function ($query) {
-                    $query->where('deployable', '=', 1)
-                        ->where('pending', '=', 0)
-                        ->where('archived', '=', 0);
-                }
-            );
+            ->whereIn('assets.status_id', $ids->isEmpty() ? [0] : $ids);
     }
 
     /**
@@ -1565,13 +1609,10 @@ class Asset extends Depreciable
      */
     public function scopeUndeployable($query)
     {
-        return $query->whereHas(
-            'status', function ($query) {
-                $query->where('deployable', '=', 0)
-                    ->where('pending', '=', 0)
-                    ->where('archived', '=', 0);
-            }
-        );
+        // Pluck IDs then whereIn — do NOT replace with whereHas. whereHas generates a correlated EXISTS per row and causes severe slowdowns in withCount contexts.
+        $ids = Statuslabel::idsFor('undeployable');
+
+        return $query->whereIn('assets.status_id', $ids->isEmpty() ? [0] : $ids);
     }
 
     /**
@@ -1582,11 +1623,10 @@ class Asset extends Depreciable
      */
     public function scopeNotArchived($query)
     {
-        return $query->whereHas(
-            'status', function ($query) {
-                $query->where('archived', '=', 0);
-            }
-        );
+        // Pluck IDs then whereIn — do NOT replace with whereHas. whereHas generates a correlated EXISTS per row and causes severe slowdowns in withCount contexts.
+        $ids = Statuslabel::idsFor('not_archived');
+
+        return $query->whereIn('assets.status_id', $ids->isEmpty() ? [0] : $ids);
     }
 
     /**
@@ -1749,17 +1789,14 @@ class Asset extends Depreciable
      */
     public function scopeAssetsForShow($query)
     {
-
+        // Pluck IDs then whereIn — do NOT replace with whereHas. whereHas generates a correlated EXISTS per row and causes severe slowdowns in withCount contexts.
         if (Setting::getSettings()->show_archived_in_list != 1) {
-            return $query->whereHas(
-                'status', function ($query) {
-                    $query->where('archived', '=', 0);
-                }
-            );
-        } else {
-            return $query;
+            $validStatusIds = Statuslabel::idsFor('not_archived');
+
+            return $query->whereIn('assets.status_id', $validStatusIds->isEmpty() ? [0] : $validStatusIds);
         }
 
+        return $query;
     }
 
     /**
@@ -1770,13 +1807,10 @@ class Asset extends Depreciable
      */
     public function scopeArchived($query)
     {
-        return $query->whereHas(
-            'status', function ($query) {
-                $query->where('deployable', '=', 0)
-                    ->where('pending', '=', 0)
-                    ->where('archived', '=', 1);
-            }
-        );
+        // Pluck IDs then whereIn — do NOT replace with whereHas. whereHas generates a correlated EXISTS per row and causes severe slowdowns in withCount contexts.
+        $ids = Statuslabel::idsFor('archived');
+
+        return $query->whereIn('assets.status_id', $ids->isEmpty() ? [0] : $ids);
     }
 
     /**
@@ -2178,6 +2212,18 @@ class Asset extends Depreciable
         return $query->join('models', 'assets.model_id', '=', 'models.id')
             ->join('depreciations', 'models.depreciation_id', '=', 'depreciations.id')->where('models.depreciation_id', '=', $search);
 
+    }
+
+    /**
+     * Determines if the asset has an orphaned assignment where the assigned target no longer exists.
+     * This occurs when:
+     * 1. assigned_to is set but assigned_type is missing/null
+     * 2. assigned_to and assigned_type are both set, but the relationship cannot be resolved (target was hard-deleted)
+     */
+    public function hasOrphanedAssignment(): bool
+    {
+        return ($this->assigned_to && ! $this->assigned_type)
+            || ($this->assigned_to && $this->assigned_type && ! $this->assignedTo);
     }
 
     public function inventory_items()

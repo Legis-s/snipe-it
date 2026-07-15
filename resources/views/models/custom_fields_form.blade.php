@@ -16,11 +16,16 @@
 
 
       <label for="{{ $field->db_column_name() }}" class="col-md-3 control-label">
+
+          @if ($field->field_encrypted)
+              <i class="fas fa-lock" data-tooltip="true" data-placement="top" title="{{ trans('admin/custom_fields/general.value_encrypted') }}"></i>
+          @endif
+
           {{ $field->name }}
 
       </label>
 
-      <div class="col-md-7 col-sm-12">
+        <div class="col-md-8 col-sm-12">
 
           @if ($field->element!='text')
 
@@ -36,7 +41,14 @@
 
               @elseif ($field->element=='textarea')
                   <!-- Textarea -->
-                  <textarea class="col-md-6 form-control" id="{{ $field->db_column_name() }}" name="{{ $field->db_column_name() }}"{{ ($field->pivot->required=='1') ? ' required' : '' }}>{{ old($field->db_column_name(),(isset($item) ? Helper::gracefulDecrypt($field, $item->{$field->db_column_name()}) : $field->defaultValue($model->id))) }}</textarea>
+                    <textarea rows="6" class="col-md-6 form-control" id="{{ $field->db_column_name() }}" name="{{ $field->db_column_name() }}"{{ ($field->pivot->required=='1') ? ' required' : '' }}>{{ old($field->db_column_name(),(isset($item) ? Helper::gracefulDecrypt($field, $item->{$field->db_column_name()}) : $field->defaultValue($model->id))) }}</textarea>
+
+                @elseif ($field->element=='markdown-textarea')
+                    <!-- Markdown Textarea -->
+                    <textarea rows="6" class="col-md-6 form-control" id="{{ $field->db_column_name() }}" name="{{ $field->db_column_name() }}"{{ ($field->pivot->required=='1') ? ' required' : '' }}>{{ old($field->db_column_name(),(isset($item) ? Helper::gracefulDecrypt($field, $item->{$field->db_column_name()}) : $field->defaultValue($model->id))) }}</textarea>
+                    <p class="help-block">
+                        <i class="fab fa-markdown" aria-hidden="true"></i> {{ trans('general.markdown') }}
+                    </p>
 
               @elseif ($field->element=='checkbox')
                   <!-- Checkbox -->
@@ -84,24 +96,30 @@
 
           @endif
 
-              @if ($field->help_text!='')
-              <p class="help-block">{{ $field->help_text }}</p>
+              @if (count(\App\Presenters\CustomFieldPresenter::visibilityIconsArray($field)) > 0)
+                  @if ($field->help_text != '')
+                      <p class="help-block">
+                          {{ $field->help_text }}
+                          <br>{!! \App\Presenters\CustomFieldPresenter::visibilityIcons($field) !!}
+                      </p>
+                  @else
+                      <div class="help-block">
+                          {!! \App\Presenters\CustomFieldPresenter::visibilityIcons($field) !!}
+                      </div>
+                  @endif
+              @elseif ($field->help_text != '')
+                  <p class="help-block">{{ $field->help_text }}</p>
               @endif
 
                   <?php
                   $errormessage = $errors->first($field->db_column_name());
                   if ($errormessage) {
                       $errormessage = preg_replace('/ snipeit /', '', $errormessage);
-                      print('<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> '.$errormessage.'</span>');
+                      print('<span class="alert-msg" role="alert" aria-live="assertive">'.$errormessage.'</span>');
                   }
                   ?>
       </div>
 
-        @if ($field->field_encrypted)
-        <div class="col-md-1 col-sm-1 text-left">
-            <i class="fas fa-lock" data-tooltip="true" data-placement="top" title="{{ trans('admin/custom_fields/general.value_encrypted') }}"></i>
-        </div>
-        @endif
 
     </div>
             @endif

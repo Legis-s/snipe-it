@@ -24,9 +24,13 @@
     data-toolbar="#{{ Illuminate\Support\Str::camel($name) }}Toolbar"
     data-bulk-button-id="#{{ Illuminate\Support\Str::camel($name) }}Button"
     data-bulk-form-id="#{{ Illuminate\Support\Str::camel($name) }}Form"
+    data-selected-count-id="#{{ Illuminate\Support\Str::camel($name) }}SelectedCount"
     id="{{ $name }}ListingTable"
     data-show-columns-search="{{ $show_column_search }}"
     data-show-advanced-search="{{ $show_advanced_search }}"
+    {{-- Deeplinking piggybacks on advanced search: if a page opts a table into
+         the modal-driven advanced search, it also gets shareable ?filter[...] URLs. --}}
+    data-advanced-search-deeplink="{{ filter_var($show_advanced_search, FILTER_VALIDATE_BOOLEAN) ? 'true' : 'false' }}"
     data-search="{{ $show_search }}"
     data-footer-style="footerStyle"
     data-show-footer="true"

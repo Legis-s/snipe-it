@@ -20,6 +20,7 @@ class UserPresenter extends Presenter
         $layout = [
             [
                 'field' => 'checkbox',
+                'scope' => 'col',
                 'checkbox' => true,
                 'titleTooltip' => trans('general.select_all_none'),
                 'printIgnore' => true,
@@ -27,6 +28,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'id',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -35,6 +37,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'username',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => false,
@@ -44,6 +47,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'avatar',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
@@ -53,6 +57,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'name',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/users/table.name'),
@@ -60,6 +65,7 @@ class UserPresenter extends Presenter
                 'formatter' => 'usersLinkFormatter',
             ], [
                 'field' => 'first_name',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('general.first_name'),
@@ -76,6 +82,7 @@ class UserPresenter extends Presenter
 
             [
                 'field' => 'last_name',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('general.last_name'),
@@ -84,6 +91,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'display_name',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -92,16 +100,18 @@ class UserPresenter extends Presenter
                 'formatter' => 'usersLinkFormatter',
             ],
             [
-                'field' => 'company',
+                'field' => 'companies',
+                'scope' => 'col',
                 'searchable' => true,
-                'sortable' => true,
+                'sortable' => false,
                 'switchable' => true,
-                'title' => trans('admin/companies/table.title'),
+                'title' => trans('general.companies'),
                 'visible' => false,
-                'formatter' => 'companiesLinkObjFormatter',
+                'formatter' => 'companiesArrayLinkFormatter',
             ],
             [
                 'field' => 'employee_num',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -110,6 +120,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'jobtitle',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -119,6 +130,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'vip',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -128,6 +140,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'remote',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -137,6 +150,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'email',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -146,6 +160,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'phone',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -155,6 +170,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'mobile',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -164,6 +180,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'website',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -173,6 +190,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'address',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -181,6 +199,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'city',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -189,6 +208,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'state',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -197,6 +217,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'country',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -205,6 +226,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'zip',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -214,6 +236,7 @@ class UserPresenter extends Presenter
 
             [
                 'field' => 'locale',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -222,6 +245,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'department',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -231,6 +255,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'department_manager',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -240,6 +265,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'location',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -258,6 +284,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'manager',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/users/table.manager'),
@@ -266,6 +293,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'assets_count',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -277,6 +305,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'licenses_count',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -287,6 +316,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'consumables_count',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -297,6 +327,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'accessories_count',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -307,6 +338,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'manages_users_count',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -317,6 +349,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'manages_locations_count',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -326,7 +359,19 @@ class UserPresenter extends Presenter
                 'formatter' => 'linkNumberToUserManagedLocationsFormatter',
             ],
             [
+                'field' => 'assigned_maintenances_count',
+                'scope' => 'col',
+                'searchable' => false,
+                'sortable' => true,
+                'switchable' => true,
+                'class' => 'css-maintenances',
+                'title' => trans('general.maintenances'),
+                'visible' => false,
+                'formatter' => 'linkNumberToUserAssignedMaintenancesFormatter',
+            ],
+            [
                 'field' => 'notes',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -335,6 +380,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'groups',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => true,
@@ -344,6 +390,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'ldap_import',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -353,6 +400,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'two_factor_enrolled',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -362,6 +410,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'two_factor_optin',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -371,6 +420,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'activated',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -380,6 +430,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'autoassign_licenses',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -389,6 +440,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'created_by',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'title' => trans('general.created_by'),
@@ -397,6 +449,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'created_at',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -405,6 +458,7 @@ class UserPresenter extends Presenter
                 'formatter' => 'dateDisplayFormatter',
             ], [
                 'field' => 'updated_at',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -414,6 +468,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'start_date',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -423,6 +478,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'end_date',
+                'scope' => 'col',
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
@@ -432,6 +488,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'last_login',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => true,
                 'switchable' => true,
@@ -441,6 +498,7 @@ class UserPresenter extends Presenter
             ],
             [
                 'field' => 'actions',
+                'scope' => 'col',
                 'searchable' => false,
                 'sortable' => false,
                 'switchable' => false,
@@ -544,7 +602,7 @@ class UserPresenter extends Presenter
     public function nameUrl()
     {
         if (auth()->user()->can('view', ['\App\Models\User', $this])) {
-            return '<a href="'.route('users.show', $this->id).'">'.e($this->display_name).'</a>';
+            return '<a title="'.e($this->display_name).'" href="'.route('users.show', $this->id).'">'.e($this->display_name).'</a>';
         } else {
             return e($this->display_name);
         }

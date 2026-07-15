@@ -37,7 +37,7 @@
                                 <input type="text" class="form-control" name="asset_tag" id="asset_tag" value="{{ old('asset_tag') }}" required>
 
                             </div>
-                            {!! $errors->first('asset_tag', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                            <x-form.error name="asset_tag" />
                         </div>
                     </div>
 
@@ -54,7 +54,7 @@
                                 style="width:100%"
                                 aria-label="status_id"
                             />
-                            {!! $errors->first('status_id', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                            <x-form.error name="status_id" />
                         </div>
                     </div>
 
@@ -66,11 +66,19 @@
                             <label for="note" class="col-md-3 control-label">{{ trans('admin/hardware/form.notes') }}</label>
                             <div class="col-md-8">
                                 <textarea class="col-md-6 form-control" id="note" name="note">{{ old('note') }}</textarea>
-                                {!! $errors->first('note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                <x-form.error name="note" />
                             </div>
                         </div>
 
-
+                        <!-- Clear Name -->
+                        <div class="form-group">
+                            <div class="col-sm-offset-3 col-md-9">
+                                <label class="form-control">
+                                    <input type="checkbox" value="1" name="clear_name">
+                                    <span>{{ trans('general.clear_name') }}</span>
+                                </label>
+                            </div>
+                        </div>
 
                 </div> <!--/.box-body-->
                 <div class="box-footer">
@@ -97,11 +105,11 @@
                     <table id="checkedin" class="table table-striped snipe-table">
                         <thead>
                         <tr>
-                            <th>{{ trans('general.asset_tag') }}</th>
-                            <th>{{ trans('general.asset_model') }}</th>
-                            <th>{{ trans('general.model_no') }}</th>
-                            <th>{{ trans('general.quickscan_checkin_status') }}</th>
-                            <th></th>
+                            <th scope="col">{{ trans('general.asset_tag') }}</th>
+                            <th scope="col">{{ trans('general.asset_model') }}</th>
+                            <th scope="col">{{ trans('general.model_no') }}</th>
+                            <th scope="col">{{ trans('general.quickscan_checkin_status') }}</th>
+                            <th scope="col"></th>
                         </tr>
                         <tr id="checkin-loader" style="display: none;">
                             <td colspan="3">

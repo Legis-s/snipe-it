@@ -10,7 +10,7 @@
 @stop
 
 @section('header_right')
-    <i class="fa-regular fa-2x fa-square-caret-right pull-right" id="expand-info-panel-button" data-tooltip="true" title="{{ trans('button.show_hide_info') }}"></i>
+    <x-button.info-panel-toggle/>
 @endsection
 
 
@@ -20,7 +20,7 @@
 
         @if ($location->deleted_at!='')
             <div class="col-md-12">
-                <div class="callout callout-warning">
+                <div class="callout callout-warning" role="alert" aria-live="assertive" aria-atomic="true">
                     <x-icon type="warning" />
                     {{ trans('admin/locations/message.deleted_warning') }}
                 </div>
@@ -239,7 +239,7 @@
         <x-page-column class="col-md-3">
 
             <x-box class="side-box expanded">
-                <x-info-panel :infoPanelObj="$location" img_path="{{ app('locations_upload_url') }}">
+                <x-info-panel :infoPanelObj="$location" img_path="{{ app('locations_upload_url') }}" :qr_code_url="route('qr_code/common', ['object_type' => 'locations', 'id' => $location->id])">
 
                     <x-slot:buttons>
                         <x-button.edit :item="$location" :route="route('locations.edit', $location->id)" />

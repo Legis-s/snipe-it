@@ -37,6 +37,9 @@ return [
         'confirm' => '¿Está seguro de que desea eliminar esta licencia?',
         'error' => 'Hubo un problema al eliminar la licencia. Por favor, inténtelo de nuevo.',
         'success' => 'La licencia se ha eliminado correctamente.',
+        'bulk_success' => 'Las licencias seleccionadas fueron eliminadas correctamente.',
+        'partial_success' => 'Licencia eliminada correctamente. Ve abajo para más informacion. | :count licencias eliminadas correctamente. Ve abajo para más información.',
+        'bulk_checkout_warning' => ':license_name has seats that are currently checked out and cannot be deleted. Please check in all seats before deleting.',
     ],
 
     'checkout' => [

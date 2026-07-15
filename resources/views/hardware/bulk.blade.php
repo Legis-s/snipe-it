@@ -27,8 +27,8 @@
       <div class="box box-default">
         <div class="box-body">
 
-          <div class="callout callout-warning">
-            <i class="fas fa-exclamation-triangle"></i> {{ trans_choice('admin/hardware/form.bulk_update_warn', count($assets), ['asset_count' => count($assets)]) }}
+          <div class="callout callout-warning" role="alert" aria-live="assertive" aria-atomic="true">
+            <i class="fas fa-exclamation-triangle" aria-hidden="true"></i> {{ trans_choice('admin/hardware/form.bulk_update_warn', count($assets), ['asset_count' => count($assets)]) }}
 
             @if (count($models) > 0)
               {{ trans_choice('admin/hardware/form.bulk_update_with_custom_field', count($models), ['asset_model_count' => count($models)]) }}
@@ -41,15 +41,14 @@
               {{ trans('admin/hardware/form.name') }}
             </label>
             <div class="col-md-4">
-                <input type="text" class="form-control" name="name" id="name" value="{{ old('name') }}" maxlength="100" style="width:100%">
-              {!! $errors->first('name', '<span class="alert-msg" aria-hidden="true">
-                <i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                <input type="text" class="form-control" name="name" id="name" value="{{ old('name') }}" maxlength="191" style="width:100%">
+              <x-form.error name="name" />
             </div>
             <div class="col-md-5">
-              <label class="form-control">
-                <input type="checkbox" name="null_name" value="1">
-                {{ trans_choice('general.set_to_null', count($assets), ['selection_count' => count($assets)]) }}
-              </label>
+              <x-form.checkbox-inline
+                  name="null_name"
+                  :label="trans_choice('general.set_to_null', count($assets), ['selection_count' => count($assets)])"
+              />
             </div>
           </div>
 
@@ -64,13 +63,13 @@
                         value="{{ old('purchase_date') }}"
                         placeholder="{{ trans('general.select_date') }}"
                     />
-                    {!! $errors->first('purchase_date', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                    <x-form.error name="purchase_date" />
                 </div>
                 <div class="col-md-5">
-                    <label class="form-control">
-                        <input type="checkbox" name="null_purchase_date" value="1">
-                        {{ trans_choice('general.set_to_null', count($assets),['selection_count' => count($assets)]) }}
-                    </label>
+                    <x-form.checkbox-inline
+                        name="null_purchase_date"
+                        :label="trans_choice('general.set_to_null', count($assets), ['selection_count' => count($assets)])"
+                    />
                 </div>
             </div>
 
@@ -84,13 +83,13 @@
                         value="{{ old('expected_checkin') }}"
                         placeholder="{{ trans('general.select_date') }}"
                     />
-                    {!! $errors->first('expected_checkin', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                    <x-form.error name="expected_checkin" />
                 </div>
                 <div class="col-md-5">
-                    <label class="form-control">
-                        <input type="checkbox" name="null_expected_checkin" value="1">
-                        {{ trans_choice('general.set_to_null', count($assets),['selection_count' => count($assets)]) }}
-                    </label>
+                    <x-form.checkbox-inline
+                        name="null_expected_checkin_date"
+                        :label="trans_choice('general.set_to_null', count($assets), ['selection_count' => count($assets)])"
+                    />
                 </div>
             </div>
 
@@ -104,13 +103,13 @@
                         value="{{ old('asset_eol_date') }}"
                         placeholder="{{ trans('general.select_date') }}"
                     />
-                    {!! $errors->first('asset_eol_date', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                    <x-form.error name="asset_eol_date" />
                 </div>
                 <div class="col-md-5">
-                    <label class="form-control">
-                        <input type="checkbox" name="null_asset_eol_date" value="1">
-                        {{ trans_choice('general.set_to_null', count($assets),['selection_count' => count($assets)]) }}
-                    </label>
+                    <x-form.checkbox-inline
+                        name="null_asset_eol_date"
+                        :label="trans_choice('general.set_to_null', count($assets), ['selection_count' => count($assets)])"
+                    />
                 </div>
             </div>
 
@@ -139,8 +138,8 @@
                   aria-label="status_id"
               />
               <p class="help-block">{{ trans('general.status_compatibility') }}</p>
-                <p id="selected_status_status" style="display:none;"></p>
-              {!! $errors->first('status_id', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                <p id="selected_status_status" role="status" aria-live="polite" aria-atomic="true" style="display:none;"></p>
+              <x-form.error name="status_id" />
             </div>
           </div>
 
@@ -177,8 +176,8 @@
             </label>
             <div class="input-group col-md-3">
               <span class="input-group-addon">{{ $snipeSettings->default_currency }}</span>
-                <input type="text" class="form-control"  maxlength="10" placeholder="{{ trans('admin/hardware/form.cost') }}" name="purchase_cost" id="purchase_cost" value="{{ old('purchase_cost') }}">
-                {!! $errors->first('purchase_cost', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                <input type="text" class="form-control" pattern="^\d+([.,]\d+)?$" maxlength="10" placeholder="{{ trans('admin/hardware/form.cost') }}" name="purchase_cost" id="purchase_cost" value="{{ old('purchase_cost') }}">
+                <x-form.error name="purchase_cost" />
             </div>
           </div>
 
@@ -194,7 +193,7 @@
             </label>
             <div class="col-md-7">
               <input class="form-control" type="text" maxlength="200" name="order_number" id="order_number" value="{{ old('order_number') }}" />
-              {!! $errors->first('order_number', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+              <x-form.error name="order_number" />
             </div>
           </div>
 
@@ -207,7 +206,7 @@
               <div class="input-group">
                 <input class="col-md-3 form-control" maxlength="4" type="text" name="warranty_months" id="warranty_months" value="{{ old('warranty_months') }}" />
                 <span class="input-group-addon">{{ trans('admin/hardware/form.months') }}</span>
-                {!! $errors->first('warranty_months', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                <x-form.error name="warranty_months" />
               </div>
             </div>
           </div>
@@ -222,13 +221,13 @@
                         value="{{ old('next_audit_date') }}"
                         placeholder="{{ trans('general.select_date') }}"
                     />
-                    {!! $errors->first('next_audit_date', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                    <x-form.error name="next_audit_date" />
                 </div>
                 <div class="col-md-5">
-                    <label class="form-control">
-                        <input type="checkbox" name="null_next_audit_date" value="1">
-                        {{ trans_choice('general.set_to_null', count($assets),['selection_count' => count($assets)]) }}
-                    </label>
+                    <x-form.checkbox-inline
+                        name="null_next_audit_date"
+                        :label="trans_choice('general.set_to_null', count($assets), ['selection_count' => count($assets)])"
+                    />
                 </div>
                 <div class="col-md-8 col-md-offset-3">
                     <p class="help-block">{!! trans('general.next_audit_date_help') !!}</p>

@@ -45,6 +45,8 @@
 
 <body class="hold-transition login-page">
 
+    @include('partials.impersonation-banner')
+
     @if (($snipeSettings) && ($snipeSettings->logo!=''))
         <div class="text-center">
             <a href="{{ config('app.url') }}">
@@ -53,7 +55,9 @@
         </div>
     @endif
   <!-- Content -->
-  @yield('content')
+  <main id="main">
+    @yield('content')
+  </main>
 
     <div class="text-center" style="padding-top: 100px;">
         @if (($snipeSettings) && ($snipeSettings->privacy_policy_link!=''))
@@ -63,7 +67,6 @@
 
     {{-- Javascript files --}}
     <script src="{{ url(mix('js/dist/all.js')) }}" nonce="{{ csrf_token() }}"></script>
-
 
     @stack('js')
 </body>

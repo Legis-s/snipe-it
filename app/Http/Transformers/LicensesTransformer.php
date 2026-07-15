@@ -21,9 +21,12 @@ class LicensesTransformer
 
     public function transformLicense(License $license)
     {
+        $unreassignable = $license->reassignable ? 0 : (int) ($license->unreassignable_seats_count ?? License::unReassignableCount($license));
+
         $array = [
             'id' => (int) $license->id,
             'name' => e($license->name),
+            'qr_code_url' => route('qr_code/common', ['object_type' => 'licenses', 'id' => $license->id]),
             'company' => ($license->company) ? ['id' => (int) $license->company->id, 'name' => e($license->company->name)] : null,
             'manufacturer' => ($license->manufacturer) ? [
                 'id' => (int) $license->manufacturer->id,
@@ -41,7 +44,7 @@ class LicensesTransformer
             'purchase_cost_numeric' => $license->purchase_cost,
             'notes' => Helper::parseEscapedMarkedownInline($license->notes),
             'seats' => (int) $license->seats,
-            'free_seats_count' => (int) $license->free_seats_count - License::unReassignableCount($license),
+            'free_seats_count' => (int) $license->free_seats_count - $unreassignable,
             'remaining' => (int) $license->free_seats_count,
             'percent_remaining' => round($license->percentRemaining()),
             'min_amt' => ($license->min_amt) ? (int) ($license->min_amt) : null,
@@ -66,7 +69,6 @@ class LicensesTransformer
             'created_at' => Helper::getFormattedDateObject($license->created_at, 'datetime'),
             'updated_at' => Helper::getFormattedDateObject($license->updated_at, 'datetime'),
             'deleted_at' => Helper::getFormattedDateObject($license->deleted_at, 'datetime'),
-            'user_can_checkout' => (bool) ($license->free_seats_count > 0),
             'disabled' => $license->isInactive(),
         ];
 
@@ -75,7 +77,11 @@ class LicensesTransformer
             'checkin' => Gate::allows('checkin', License::class),
             'clone' => Gate::allows('create', License::class),
             'update' => Gate::allows('update', License::class),
-            'delete' => (Gate::allows('delete', License::class) && ($license->free_seats_count == $license->seats)) ? true : false,
+            'delete' => $license->isDeletable(),
+            'user_can_checkout' => (bool) (($license->free_seats_count - $unreassignable) > 0),
+            'bulk_selectable' => [
+                'delete' => $license->isDeletable(),
+            ],
         ];
 
         $array += $permissions_array;

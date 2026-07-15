@@ -150,7 +150,7 @@
                         <div class="box-footer text-right">
                             @if (config('app.lock_passwords')===true)
                                 <div class="col-md-12">
-                                    <div class="callout callout-info">
+                                    <div class="callout callout-info" role="status" aria-live="polite" aria-atomic="true">
                                         {{ trans('general.feature_disabled') }}
                                     </div>
                                 </div>

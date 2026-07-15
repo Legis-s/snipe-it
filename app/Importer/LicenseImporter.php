@@ -88,8 +88,12 @@ class LicenseImporter extends ItemImporter
 
         // This sets an attribute on the Loggable trait for the action log
         $license->setImported(true);
-        if ($license->save()) {
-            $this->log('License '.$this->item['name'].' with serial number '.$this->item['serial'].' was created');
+
+        // For new licenses we need to save, for existing ones update() already saved
+        $licenseWasSaved = $editingLicense || $license->save();
+
+        if ($licenseWasSaved) {
+            $this->log('License '.$this->item['name'].' with serial number '.$this->item['serial'].' was created or updated');
 
             // Lets try to checkout seats if the fields exist and we have seats.
             if ($license->seats > 0) {
@@ -102,16 +106,32 @@ class LicenseImporter extends ItemImporter
                 }
 
                 if ($checkout_target) {
-                    $targetLicense->assigned_to = $checkout_target->id;
-                    $targetLicense->created_by = auth()->id();
-                    if ($asset) {
-                        $targetLicense->asset_id = $asset->id;
+                    if (! $license->canCheckoutTo($checkout_target)) {
+                        $this->log(trans('general.error_checkout_company_mismatch', [
+                            'item' => trans('general.license').' "'.$license->name.'"',
+                            'item_company' => $license->company?->name ?? trans('general.unassigned'),
+                            'target' => ($checkout_target->name ?? $checkout_target->username ?? $checkout_target->id),
+                        ]));
+                    } else {
+                        $targetLicense->assigned_to = $checkout_target->id;
+                        $targetLicense->created_by = auth()->id();
+                        if ($asset) {
+                            $targetLicense->asset_id = $asset->id;
+                        }
+                        $targetLicense->save();
                     }
-                    $targetLicense->save();
                 } elseif ($asset) {
-                    $targetLicense->created_by = auth()->id();
-                    $targetLicense->asset_id = $asset->id;
-                    $targetLicense->save();
+                    if (! $license->canCheckoutTo($asset)) {
+                        $this->log(trans('general.error_checkout_company_mismatch', [
+                            'item' => trans('general.license').' "'.$license->name.'"',
+                            'item_company' => $license->company?->name ?? trans('general.unassigned'),
+                            'target' => trans('general.asset').' "'.$asset->display_name.'"',
+                        ]));
+                    } else {
+                        $targetLicense->created_by = auth()->id();
+                        $targetLicense->asset_id = $asset->id;
+                        $targetLicense->save();
+                    }
                 }
             }
 

@@ -44,6 +44,7 @@
 
         :root {
             color-scheme: light dark;
+            --color-bg: light-dark(#ecf0f5, #222222);
             --btn-theme-hover-text-color: {{ $nav_link_color ?? 'light-dark(hsl(from var(--main-theme-color) h s calc(l - 10)),hsl(from var(--main-theme-color) h s calc(l - 10)))' }};
             --btn-theme-hover: {{ $nav_link_color ?? 'light-dark(hsl(from var(--main-theme-color) h s calc(l - 10)),hsl(from var(--main-theme-color) h s calc(l - 10)))' }};
             --btn-theme-text-color: {{ $nav_link_color ?? 'light-dark(hsl(from var(--main-theme-color) h s calc(l + 10)),hsl(from var(--main-theme-color) h s calc(l - 10)))' }};
@@ -69,6 +70,10 @@
             --text-success: light-dark(#039516,#4ced61);
             --text-warning: light-dark(#da9113,#f3a51f);
             --input-border-color: light-dark(#d2d6de,#656464);
+            --default-label-link-bg: var(--color-bg);
+            --default-label-link-text: light-dark({{ $link_light_color ?? '#296282' }}, {{ $link_dark_color ?? '#5fa4cc' }});
+            --default-label-link-border: 1px solid light-dark(#b8c7ce, #494747);
+
         }
 
         [data-theme="light"] {
@@ -84,7 +89,6 @@
             --btn-theme-hover: var(--main-theme-hover);
             --callout-bg-color: var(--box-header-bottom-border-color);
             --callout-left-border: var(--box-header-top-border-color);
-            --color-bg: #ecf0f5;
             --header-color: #000000;
             --input-group-bg: hsl(from var(--box-bg) h s calc(l - 5));
             --input-group-fg: hsl(from var(--input-group-bg) h s calc(l - 50));
@@ -109,7 +113,6 @@
             --btn-theme-hover: var(--main-theme-hover);
             --callout-bg-color: var(--box-header-top-border-color);
             --callout-left-border: #323131;
-            --color-bg: #222222;
             --header-color: #ffffff;
             --input-group-bg: hsl(from var(--box-bg) h s calc(l + 10));
             --input-group-fg: hsl(from var(--input-group-bg) h s calc(l + 50));
@@ -231,6 +234,18 @@
         }
 
         /**
+        Safari ignores option[selected] styling on plain <select multiple> until
+        the user interacts with the list, so pre-selected options render with
+        the browser's default light highlight. Force a lighter background on the
+        whole select in dark mode so pre-selected items stay readable.
+         */
+        [data-theme="dark"] select[multiple],
+        [data-theme="dark"] select[multiple] option {
+            background-color: #d2d6de !important;
+            color: #373636 !important;
+        }
+
+        /**
         Multiselect maybe?
          */
         .select2-results__option[aria-selected=true]
@@ -301,6 +316,7 @@
         input[type="radio"]:disabled,
         input[readonly],
         textarea[readonly],
+        textarea:disabled,
         .select2-container--default.select2-container--disabled .select2-selection--single,
         .select2-container--default.select2-container--disabled .select2-selection--multiple,
         .select2-container--default.select2-container--disabled .select2-selection__rendered,
@@ -579,6 +595,21 @@
             color: var(--nav-primary-text-color) !important;
         }
 
+        .label-light {
+            background-color: var(--default-label-link-bg) !important;
+            color: var(--color-fg) !important;
+            font-size: 12px !important;
+            font-weight: normal !important;
+            line-height: 25px;
+            margin-left: 0px;
+            padding-left: 3px;
+
+        }
+
+        a.label-light,
+        a.label-light:hover {
+            color: var(--link-color) !important;
+        }
 
         .dropdown-menu > li > a,
         .dropdown-menu > li > a:link,
@@ -1215,7 +1246,7 @@
                             </li>
 
                             @can('index', \App\Models\Asset::class)
-                                <li aria-hidden="true"{!! (request()->is('hardware*') ? ' class="active"' : '') !!}>
+                                <li aria-hidden="true"{!! (request()->is('hardware*') ? ' class="active" aria-current="page"' : '') !!}>
                                     <a href="{{ url('hardware') }}" {{$snipeSettings->shortcuts_enabled == 1 ? "accesskey=1" : ''}} tabindex="-1" data-tooltip="true" data-placement="bottom" data-title="{{ trans('general.assets') }}">
                                         <x-icon type="assets" class="fa-fw" />
                                         <span class="sr-only">{{ trans('general.assets') }}</span>
@@ -1223,7 +1254,7 @@
                                 </li>
                             @endcan
                             @can('view', \App\Models\License::class)
-                                <li aria-hidden="true"{!! (request()->is('licenses*') ? ' class="active"' : '') !!}>
+                                <li aria-hidden="true"{!! (request()->is('licenses*') ? ' class="active" aria-current="page"' : '') !!}>
                                     <a href="{{ route('licenses.index') }}" {{$snipeSettings->shortcuts_enabled == 1 ? "accesskey=2" : ''}} tabindex="-1" data-tooltip="true" data-placement="bottom" data-title="{{ trans('general.licenses') }}">
                                         <x-icon type="licenses" class="fa-fw" />
                                         <span class="sr-only">{{ trans('general.licenses') }}</span>
@@ -1231,7 +1262,7 @@
                                 </li>
                             @endcan
                             @can('index', \App\Models\Accessory::class)
-                                <li aria-hidden="true"{!! (request()->is('accessories*') ? ' class="active"' : '') !!}>
+                                <li aria-hidden="true"{!! (request()->is('accessories*') ? ' class="active" aria-current="page"' : '') !!}>
                                     <a href="{{ route('accessories.index') }}" {{$snipeSettings->shortcuts_enabled == 1 ? "accesskey=3" : ''}} tabindex="-1" data-tooltip="true" data-placement="bottom" data-title="{{ trans('general.accessories') }}">
                                         <x-icon type="accessories" class="fa-fw" />
                                         <span class="sr-only">{{ trans('general.accessories') }}</span>
@@ -1239,7 +1270,7 @@
                                 </li>
                             @endcan
                             @can('index', \App\Models\Consumable::class)
-                                <li aria-hidden="true"{!! (request()->is('consumables*') ? ' class="active"' : '') !!}>
+                                <li aria-hidden="true"{!! (request()->is('consumables*') ? ' class="active" aria-current="page"' : '') !!}>
                                     <a href="{{ url('consumables') }}" {{$snipeSettings->shortcuts_enabled == 1 ? "accesskey=4" : ''}} tabindex="-1" data-tooltip="true" data-placement="bottom" data-title="{{ trans('general.consumables') }}">
                                         <x-icon type="consumables" class="fa-fw" />
                                         <span class="sr-only">{{ trans('general.consumables') }}</span>
@@ -1247,7 +1278,7 @@
                                 </li>
                             @endcan
                             @can('view', \App\Models\Component::class)
-                                <li aria-hidden="true"{!! (request()->is('components*') ? ' class="active"' : '') !!}>
+                                <li aria-hidden="true"{!! (request()->is('components*') ? ' class="active" aria-current="page"' : '') !!}>
                                     <a href="{{ route('components.index') }}" {{$snipeSettings->shortcuts_enabled == 1 ? "accesskey=5" : ''}} tabindex="-1" data-tooltip="true" data-placement="bottom" data-title="{{ trans('general.components') }}">
                                         <x-icon type="components" class="fa-fw" />
                                         <span class="sr-only">{{ trans('general.components') }}</span>
@@ -1256,7 +1287,7 @@
                             @endcan
 
                             @can('index', \App\Models\User::class)
-                                <li aria-hidden="true"{!! (request()->is('users*') ? ' class="active"' : '') !!}>
+                                <li aria-hidden="true"{!! (request()->is('users*') ? ' class="active" aria-current="page"' : '') !!}>
                                     <a href="{{ route('users.index') }}" {{$snipeSettings->shortcuts_enabled == 1 ? "accesskey=6" : ''}} tabindex="-1" data-tooltip="true" data-placement="bottom" data-title="{{ trans('general.users') }}">
                                         <x-icon type="users" class="fa-fw" />
                                         <span class="sr-only">{{ trans('general.users') }}</span>
@@ -1286,13 +1317,13 @@
 
                             @can('admin')
                                 <li class="dropdown user-menu" aria-hidden="true">
-                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" tabindex="-1">
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" tabindex="-1" aria-haspopup="true" aria-expanded="false">
                                         {{ trans('general.create') }}
                                         <strong class="caret"></strong>
                                     </a>
                                     <ul class="dropdown-menu">
                                         @can('create', \App\Models\Asset::class)
-                                            <li{!! (request()->is('hardware/create') ? ' class="active"' : '') !!}>
+                                            <li{!! (request()->is('hardware/create') ? ' class="active" aria-current="page"' : '') !!}>
                                                 <a href="{{ route('hardware.create') }}" tabindex="-1">
                                                     <x-icon type="assets" class="fa-fw" />
                                                     {{ trans('general.asset') }}
@@ -1300,7 +1331,7 @@
                                             </li>
                                         @endcan
                                         @can('create', \App\Models\License::class)
-                                            <li{!! (request()->is('licenses/create') ? ' class="active"' : '') !!}>
+                                            <li{!! (request()->is('licenses/create') ? ' class="active" aria-current="page"' : '') !!}>
                                                 <a href="{{ route('licenses.create') }}" tabindex="-1">
                                                     <x-icon type="licenses" class="fa-fw" />
                                                     {{ trans('general.license') }}
@@ -1352,9 +1383,10 @@
 
 
                             <!-- User Account: style can be found in dropdown.less -->
-                            @if (auth()->check())
+                            @auth
                                 <li class="dropdown user user-menu">
-                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                         @if (auth()->user()->present()->gravatar())
                                             <img src="{{ Auth::user()->present()->gravatar() }}" class="user-image"
                                                  alt="">
@@ -1367,26 +1399,31 @@
                                             <strong class="caret"></strong>
                                         </span>
                                     </a>
+
+
                                     <ul class="dropdown-menu">
-                                        <!-- User image -->
+
+                                        <!-- User assets -->
                                         @can('self.profile')
-                                        <li {!! (request()->is('account/view-assets') ? ' class="active"' : '') !!}>
+                                        <li {!! (request()->is('account/view-assets') ? ' class="active" aria-current="page"' : '') !!}>
                                             <a href="{{ route('view-assets') }}">
                                                 <x-icon type="checkmark" class="fa-fw" />
                                                 {{ trans('general.viewassets') }}
                                             </a>
                                         </li>
+                                        @endcan
 
 
                                         @can('viewRequestable', \App\Models\Asset::class)
-                                            <li {!! (request()->is('account/requested') ? ' class="active"' : '') !!}>
+                                            <li {!! (request()->is('account/requested') ? ' class="active" aria-current="page"' : '') !!}>
                                                 <a href="{{ route('account.requested') }}">
                                                     <x-icon type="requested" class="fa-fw" />
                                                     {{ trans('general.requested_assets_menu') }}
                                                 </a></li>
                                         @endcan
 
-                                        <li {!! (request()->is('account/accept') ? ' class="active"' : '') !!}>
+                                        @can('self.profile')
+                                        <li {!! (request()->is('account/accept') ? ' class="active" aria-current="page"' : '') !!}>
                                             <a href="{{ route('account.accept') }}">
                                                 <x-icon type="checkmark" class="fa-fw" />
                                                 {{ trans('general.accept_assets_menu') }}
@@ -1394,7 +1431,7 @@
                                         </li>
 
                                         @endcan
-                                        <li {!! (request()->is('account/password') ? ' class="active"' : '') !!}>
+                                        <li {!! (request()->is('account/profile') ? ' class="active" aria-current="page"' : '') !!}>
                                             <a href="{{ route('profile') }}">
                                                 <x-icon type="user" class="fa-fw" />
                                                 {{ trans('general.editprofile') }}
@@ -1403,7 +1440,7 @@
 
                                         @can('self.profile')
                                             @if (Auth::user()->ldap_import!='1')
-                                                <li {!! (request()->is('account/profile') ? ' class="active"' : '') !!}>
+                                                <li {!! (request()->is('account/password') ? ' class="active" aria-current="page"' : '') !!}>
                                                     <a href="{{ route('account.password.index') }}">
                                                         <x-icon type="password" class="fa-fw"/>
                                                         {{ trans('general.changepassword') }}
@@ -1419,13 +1456,14 @@
                                         </li>
 
                                         @can('self.api')
-                                            <li {!! (request()->is('account/api') ? ' class="active"' : '') !!}>
+                                            <li {!! (request()->is('account/api') ? ' class="active" aria-current="page"' : '') !!}>
                                                 <a href="{{ route('user.api') }}">
                                                     <x-icon type="api-key" class="fa-fw" />
                                                      {{ trans('general.manage_api_keys') }}
                                                 </a>
                                             </li>
                                         @endcan
+                                        
                                         <li class="divider"></li>
                                         @impersonating($guard = null)
                                         <li>
@@ -1451,7 +1489,7 @@
                                         </li>
                                     </ul>
                                 </li>
-                            @endif
+                            @endauth
 
 
                             @can('superadmin')
@@ -1476,7 +1514,7 @@
                     <!-- sidebar menu: : style can be found in sidebar.less -->
                     <ul class="sidebar-menu" data-widget="tree" {{ \App\Helpers\Helper::determineLanguageDirection() == 'rtl' ? 'style="margin-right:12px' : '' }}>
                         @can('admin')
-                            <li {!! (\request()->route()->getName()=='home' ? ' class="active"' : '') !!} class="firstnav">
+                            <li {!! (\request()->route()->getName()=='home' ? ' class="active" aria-current="page"' : '') !!} class="firstnav">
                                 <a href="{{ route('home') }}">
                                     <x-icon type="dashboard" class="fa-fw" />
                                     <span>{{ trans('general.dashboard') }}</span>
@@ -1491,7 +1529,7 @@
                                     <x-icon type="angle-left" class="pull-right fa-fw"/>
                                 </a>
                                 <ul class="treeview-menu">
-                                    <li {!! (!request()->query('status_type') && (request()->is('hardware')) ? ' class="active"' : '') !!}>
+                                    <li {!! (!request()->query('status_type') && (request()->is('hardware')) ? ' class="active" aria-current="page"' : '') !!}>
                                         <a href="{{ url('hardware') }}">
                                             <x-icon type="circle" class="text-grey fa-fw"/>
                                             {{ trans('general.list_all') }}
@@ -1504,7 +1542,7 @@
                                     <?php $status_navs = \App\Models\Statuslabel::where('show_in_nav', '=', 1)->withCount('assets as asset_count')->get(); ?>
                                     @if (count($status_navs) > 0)
                                         @foreach ($status_navs as $status_nav)
-                                            <li{!! (request()->is('statuslabels/'.$status_nav->id) ? ' class="active"' : '') !!}>
+                                            <li{!! (request()->is('statuslabels/'.$status_nav->id) ? ' class="active" aria-current="page"' : '') !!}>
                                                 <a href="{{ route('statuslabels.show', ['statuslabel' => $status_nav->id]) }}">
                                                     <i class="fas fa-circle text-grey fa-fw"
                                                        aria-hidden="true"{!!  ($status_nav->color!='' ? ' style="color: '.e($status_nav->color).'"' : '') !!}></i>
@@ -1514,35 +1552,35 @@
                                     @endif
 
 
-                                    <li id="deployed-sidenav-option" {!! (request()->query('status_type') == 'Deployed' ? ' class="active"' : '') !!}>
+                                    <li id="deployed-sidenav-option" {!! (request()->query('status_type') == 'Deployed' ? ' class="active" aria-current="page"' : '') !!}>
                                         <a href="{{ url('hardware?status_type=Deployed') }}">
                                             <x-icon type="circle" class="text-blue fa-fw" />
                                             {{ trans('general.deployed') }}
                                             <span class="badge">{{ (isset($total_deployed_sidebar)) ? $total_deployed_sidebar : '' }}</span>
                                         </a>
                                     </li>
-                                    <li id="rtd-sidenav-option"{!! (request()->query('status_type') == 'RTD' ? ' class="active"' : '') !!}>
+                                    <li id="rtd-sidenav-option"{!! (request()->query('status_type') == 'RTD' ? ' class="active" aria-current="page"' : '') !!}>
                                         <a href="{{ url('hardware?status_type=RTD') }}">
                                             <x-icon type="circle" class="text-green fa-fw" />
                                             {{ trans('general.ready_to_deploy') }}
                                             <span class="badge">{{ (isset($total_rtd_sidebar)) ? $total_rtd_sidebar : '' }}</span>
                                         </a>
                                     </li>
-                                    <li id="pending-sidenav-option"{!! (request()->query('status_type') == 'Pending' ? ' class="active"' : '') !!}>
+                                    <li id="pending-sidenav-option"{!! (request()->query('status_type') == 'Pending' ? ' class="active" aria-current="page"' : '') !!}>
                                         <a href="{{ url('hardware?status_type=Pending') }}">
                                             <x-icon type="circle" class="text-orange fa-fw" />
                                             {{ trans('general.pending') }}
                                             <span class="badge">{{ (isset($total_pending_sidebar)) ? $total_pending_sidebar : '' }}</span>
                                         </a>
                                     </li>
-                                    <li id="undeployable-sidenav-option"{!! (request()->query('status') == 'Undeployable' ? ' class="active"' : '') !!} ><a
+                                    <li id="undeployable-sidenav-option"{!! (request()->query('status') == 'Undeployable' ? ' class="active" aria-current="page"' : '') !!} ><a
                                             href="{{ url('hardware?status_type=Undeployable') }}">
                                             <x-icon type="x" class="text-red fa-fw" />
                                             {{ trans('general.undeployable') }}
                                             <span class="badge">{{ (isset($total_undeployable_sidebar)) ? $total_undeployable_sidebar : '' }}</span>
                                         </a>
                                     </li>
-                                    <li id="byod-sidenav-option"{!! (request()->query('status_type') == 'byod' ? ' class="active"' : '') !!}>
+                                    <li id="byod-sidenav-option"{!! (request()->query('status_type') == 'byod' ? ' class="active" aria-current="page"' : '') !!}>
                                         <a
                                             href="{{ url('hardware?status_type=byod') }}">
                                             <x-icon type="x" class="text-red fa-fw" />
@@ -1550,7 +1588,7 @@
                                             <span class="badge">{{ (isset($total_byod_sidebar)) ? $total_byod_sidebar : '' }}</span>
                                         </a>
                                     </li>
-                                    <li id="archived-sidenav-option"{!! (request()->query('status_type') == 'Archived' ? ' class="active"' : '') !!}>
+                                    <li id="archived-sidenav-option"{!! (request()->query('status_type') == 'Archived' ? ' class="active" aria-current="page"' : '') !!}>
                                         <a
                                             href="{{ url('hardware?status_type=Archived') }}">
                                             <x-icon type="x" class="text-red fa-fw" />
@@ -1558,7 +1596,7 @@
                                             <span class="badge">{{ (isset($total_archived_sidebar)) ? $total_archived_sidebar : '' }}</span>
                                         </a>
                                     </li>
-                                    <li id="requestable-sidenav-option"{!! (request()->query('status_type') == 'Requestable' ? ' class="active"' : '') !!}>
+                                    <li id="requestable-sidenav-option"{!! (request()->query('status_type') == 'Requestable' ? ' class="active" aria-current="page"' : '') !!}>
                                         <a
                                             href="{{ url('hardware?status_type=Requestable') }}">
                                             <x-icon type="checkmark" class="text-blue fa-fw" />
@@ -1567,7 +1605,7 @@
                                     </li>
 
                                     @can('audit', \App\Models\Asset::class)
-                                        <li id="audit-due-sidenav-option"{!! (request()->is('hardware/audit/due') ? ' class="active"' : '') !!}>
+                                        <li id="audit-due-sidenav-option"{!! (request()->is('hardware/audit/due') ? ' class="active" aria-current="page"' : '') !!}>
                                             <a href="{{ route('assets.audit.due') }}">
                                                 <x-icon type="audit" class="text-yellow fa-fw"/>
                                                 {{ trans('general.audit_due') }}
@@ -1577,7 +1615,7 @@
                                     @endcan
 
                                     @can('checkin', \App\Models\Asset::class)
-                                    <li id="checkin-due-sidenav-option"{!! (request()->is('hardware/checkins/due') ? ' class="active"' : '') !!}>
+                                    <li id="checkin-due-sidenav-option"{!! (request()->is('hardware/checkins/due') ? ' class="active" aria-current="page"' : '') !!}>
                                         <a href="{{ route('assets.checkins.due') }}">
                                             <x-icon type="due" class="text-orange fa-fw"/>
                                             {{ trans('general.checkin_due') }}
@@ -1595,7 +1633,7 @@
 
                                     <li class="divider">&nbsp;</li>
                                     @can('checkin', \App\Models\Asset::class)
-                                        <li{!! (request()->is('hardware/quickscancheckin') ? ' class="active"' : '') !!}>
+                                        <li{!! (request()->is('hardware/quickscancheckin') ? ' class="active" aria-current="page"' : '') !!}>
                                             <a href="{{ route('hardware/quickscancheckin') }}">
                                                 {{ trans('general.quickscan_checkin') }}
                                             </a>
@@ -1603,43 +1641,45 @@
                                     @endcan
 
                                     @can('checkout', \App\Models\Asset::class)
-                                        <li{!! (request()->is('hardware/bulkcheckout') ? ' class="active"' : '') !!}>
+                                        <li{!! (request()->is('hardware/bulkcheckout') ? ' class="active" aria-current="page"' : '') !!}>
                                             <a href="{{ route('hardware.bulkcheckout.show') }}">
                                                 {{ trans('general.bulk_checkout') }}
                                             </a>
                                         </li>
-                                        <li{!! (request()->is('hardware/requested') ? ' class="active"' : '') !!}>
+                                        <li{!! (request()->is('hardware/requested') ? ' class="active" aria-current="page"' : '') !!}>
                                             <a href="{{ route('assets.requested') }}">
                                                 {{ trans('general.requested') }}</a>
                                         </li>
                                     @endcan
 
                                     @can('create', \App\Models\Asset::class)
-                                        <li{!! (request()->query('status_type') == 'Deleted' ? ' class="active"' : '') !!}>
+                                        <li{!! (request()->query('status_type') == 'Deleted' ? ' class="active" aria-current="page"' : '') !!}>
                                             <a href="{{ url('hardware?status_type=Deleted') }}">
                                                 {{ trans('general.deleted') }}
                                             </a>
                                         </li>
-                                        <li {!! (request()->is('maintenances') ? ' class="active"' : '') !!}>
+                                        <li {!! (request()->is('maintenances') ? ' class="active" aria-current="page"' : '') !!}>
                                             <a href="{{ route('maintenances.index') }}">
                                                 {{ trans('general.maintenances') }}
                                             </a>
                                         </li>
                                     @endcan
-                                    @can('admin')
-                                        <li id="import-history-sidenav-option" {!! (request()->is('hardware/history') ? ' class="active"' : '') !!}>
-                                            <a href="{{ url('hardware/history') }}">
-                                                {{ trans('general.import-history') }}
-                                            </a>
-                                        </li>
-                                    @endcan
                                     @can('audit', \App\Models\Asset::class)
-                                        <li id="bulk-audit-sidenav-option" {!! (request()->is('hardware/bulkaudit') ? ' class="active"' : '') !!}>
+                                        <li id="bulk-audit-sidenav-option" {!! (request()->is('hardware/bulkaudit') ? ' class="active" aria-current="page"' : '') !!}>
                                             <a href="{{ route('assets.bulkaudit') }}">
                                                 {{ trans('general.bulkaudit') }}
                                             </a>
                                         </li>
                                     @endcan
+
+                                    @can('admin')
+                                        <li id="import-history-sidenav-option" {!! (request()->is('hardware/history') ? ' class="active" aria-current="page"' : '') !!}>
+                                            <a href="{{ url('hardware/history') }}">
+                                                {{ trans('general.import-history') }}
+                                            </a>
+                                        </li>
+                                    @endcan
+
                                 </ul>
                             </li>
                         @endcan
@@ -1652,7 +1692,7 @@
                              </li>
                         @endcan
                         @can('view', \App\Models\License::class)
-                            <li{!! (request()->is('licenses*') ? ' class="active"' : '') !!}>
+                            <li{!! (request()->is('licenses*') ? ' class="active" aria-current="page"' : '') !!}>
                                 <a href="{{ route('licenses.index') }}">
                                     <x-icon type="licenses" class="fa-fw"/>
                                     <span>{{ trans('general.licenses') }}</span>
@@ -1660,7 +1700,7 @@
                             </li>
                         @endcan
                         @can('index', \App\Models\Accessory::class)
-                            <li id="accessories-sidenav-option"{!! (request()->is('accessories*') ? ' class="active"' : '') !!}>
+                            <li id="accessories-sidenav-option"{!! (request()->is('accessories*') ? ' class="active" aria-current="page"' : '') !!}>
                                 <a href="{{ route('accessories.index') }}">
                                     <x-icon type="accessories" class="fa-fw" />
                                     <span>{{ trans('general.accessories') }}</span>
@@ -1668,7 +1708,7 @@
                             </li>
                         @endcan
                         @can('view', \App\Models\Consumable::class)
-                            <li id="consumables-sidenav-option"{!! (request()->is('consumables*') ? ' class="active"' : '') !!}>
+                            <li id="consumables-sidenav-option"{!! (request()->is('consumables*') ? ' class="active" aria-current="page"' : '') !!}>
                                 <a href="{{ url('consumables') }}">
                                     <x-icon type="consumables" class="fa-fw" />
                                     <span>{{ trans('general.consumables') }}</span>
@@ -1676,7 +1716,7 @@
                             </li>
                         @endcan
                         @can('view', \App\Models\Component::class)
-                            <li id="components-sidenav-option"{!! (request()->is('components*') ? ' class="active"' : '') !!}>
+                            <li id="components-sidenav-option"{!! (request()->is('components*') ? ' class="active" aria-current="page"' : '') !!}>
                                 <a href="{{ route('components.index') }}">
                                     <x-icon type="components" class="fa-fw" />
                                     <span>{{ trans('general.components') }}</span>
@@ -1684,7 +1724,7 @@
                             </li>
                         @endcan
                         @can('view', \App\Models\PredefinedKit::class)
-                            <li id="kits-sidenav-option"{!! (request()->is('kits') ? ' class="active"' : '') !!}>
+                            <li id="kits-sidenav-option"{!! (request()->is('kits') ? ' class="active" aria-current="page"' : '') !!}>
                                 <a href="{{ route('kits.index') }}">
                                     <x-icon type="kits" class="fa-fw" />
                                     <span>{{ trans('general.kits') }}</span>
@@ -1716,7 +1756,7 @@
                                     </a>
 
                                     <ul class="treeview-menu">
-                                        <li {!! ((request()->is('users')  && (request()->input() == null)) ? ' class="active"' : '') !!} id="users-sidenav-list-all">
+                                        <li {!! ((request()->is('users')  && (request()->input() == null)) ? ' class="active" aria-current="page"' : '') !!} id="users-sidenav-list-all">
                                             <a href="{{ route('users.index') }}">
                                                 <x-icon type="circle" class="text-grey fa-fw fa-fw"/>
                                                 {{ trans('general.list_all') }}
@@ -1756,7 +1796,7 @@
                                 </li>
                         @endcan
                         @can('import')
-                            <li id="import-sidenav-option"{!! (request()->is('import*') ? ' class="active"' : '') !!}>
+                            <li id="import-sidenav-option"{!! (request()->is('import*') ? ' class="active" aria-current="page"' : '') !!}>
                                 <a href="{{ route('imports.index') }}">
                                     <x-icon type="import" class="fa-fw" />
                                     <span>{{ trans('general.import') }}</span>
@@ -1774,7 +1814,7 @@
 
                                 <ul class="treeview-menu">
                                     @if(Gate::allows('view', App\Models\CustomField::class) || Gate::allows('view', App\Models\CustomFieldset::class))
-                                        <li {!! (request()->is('fields*') ? ' class="active"' : '') !!}>
+                                        <li {!! (request()->is('fields*') ? ' class="active" aria-current="page"' : '') !!}>
                                             <a href="{{ route('fields.index') }}">
                                                 {{ trans('admin/custom_fields/general.custom_fields') }}
                                             </a>
@@ -1782,7 +1822,7 @@
                                     @endif
 
                                     @can('view', \App\Models\Statuslabel::class)
-                                        <li {!! (request()->is('statuslabels*') ? ' class="active"' : '') !!}>
+                                        <li {!! (request()->is('statuslabels*') ? ' class="active" aria-current="page"' : '') !!}>
                                             <a href="{{ route('statuslabels.index') }}">
                                                 {{ trans('general.status_labels') }}
                                             </a>
@@ -1790,7 +1830,7 @@
                                     @endcan
 
                                     @can('view', \App\Models\AssetModel::class)
-                                        <li {{!! (request()->is('models*') ? ' class="active"' : '') !!}}>
+                                        <li {{!! (request()->is('models*') ? ' class="active" aria-current="page"' : '') !!}}>
                                             <a href="{{ route('models.index') }}">
                                                 {{ trans('general.asset_models') }}
                                             </a>
@@ -1798,7 +1838,7 @@
                                     @endcan
 
                                     @can('view', \App\Models\Category::class)
-                                        <li {{!! (request()->is('categories*') ? ' class="active"' : '') !!}}>
+                                        <li {{!! (request()->is('categories*') ? ' class="active" aria-current="page"' : '') !!}}>
                                             <a href="{{ route('categories.index') }}">
                                                 {{ trans('general.categories') }}
                                             </a>
@@ -1806,7 +1846,7 @@
                                     @endcan
 
                                     @can('view', \App\Models\Manufacturer::class)
-                                        <li {{!! (request()->is('manufacturers*') ? ' class="active"' : '') !!}}>
+                                        <li {{!! (request()->is('manufacturers*') ? ' class="active" aria-current="page"' : '') !!}}>
                                             <a href="{{ route('manufacturers.index') }}">
                                                 {{ trans('general.manufacturers') }}
                                             </a>
@@ -1814,7 +1854,7 @@
                                     @endcan
 
                                     @can('view', \App\Models\Supplier::class)
-                                        <li {{!! (request()->is('suppliers*') ? ' class="active"' : '') !!}}>
+                                        <li {{!! (request()->is('suppliers*') ? ' class="active" aria-current="page"' : '') !!}}>
                                             <a href="{{ route('suppliers.index') }}">
                                                 {{ trans('general.suppliers') }}
                                             </a>
@@ -1822,7 +1862,7 @@
                                     @endcan
 
                                     @can('view', \App\Models\Department::class)
-                                        <li {{!! (request()->is('departments*') ? ' class="active"' : '') !!}}>
+                                        <li {{!! (request()->is('departments*') ? ' class="active" aria-current="page"' : '') !!}}>
                                             <a href="{{ route('departments.index') }}">
                                                 {{ trans('general.departments') }}
                                             </a>
@@ -1830,7 +1870,7 @@
                                     @endcan
 
                                     @can('view', \App\Models\Location::class)
-                                        <li {{!! (request()->is('locations*') ? ' class="active"' : '') !!}}>
+                                        <li {{!! (request()->is('locations*') ? ' class="active" aria-current="page"' : '') !!}}>
                                             <a href="{{ route('locations.index') }}">
                                                 {{ trans('general.locations') }}
                                             </a>
@@ -1838,7 +1878,7 @@
                                     @endcan
 
                                     @can('view', \App\Models\Company::class)
-                                        <li {{!! (request()->is('companies*') ? ' class="active"' : '') !!}}>
+                                        <li {{!! (request()->is('companies*') ? ' class="active" aria-current="page"' : '') !!}}>
                                             <a href="{{ route('companies.index') }}">
                                                 {{ trans('general.companies') }}
                                             </a>
@@ -1846,7 +1886,7 @@
                                     @endcan
 
                                     @can('view', \App\Models\Depreciation::class)
-                                        <li  {{!! (request()->is('depreciations*') ? ' class="active"' : '') !!}}>
+                                        <li  {{!! (request()->is('depreciations*') ? ' class="active" aria-current="page"' : '') !!}}>
                                             <a href="{{ route('depreciations.index') }}">
                                                 {{ trans('general.depreciation') }}
                                             </a>
@@ -1882,6 +1922,7 @@
 
                         @can('reports.view')
                             <li class="treeview{{ (request()->is('reports*') ? ' active' : '') }}">
+
                                 <a href="#" class="dropdown-toggle">
                                     <x-icon type="reports" class="fa-fw" />
                                     <span>{{ trans('general.reports') }}</span>
@@ -1889,41 +1930,51 @@
                                 </a>
 
                                 <ul class="treeview-menu">
-                                    <li {{!! (request()->is('reports/activity') ? ' class="active"' : '') !!}}>
+                                    <li {{!! (request()->is('reports') ? ' class="active" aria-current="page"' : '') !!}}>
+                                        <a href="{{ route('reports.index') }}">
+                                            {{ trans('general.list_all') }}
+                                        </a>
+                                    </li>
+                                    <li {{!! (request()->is('reports/activity') ? ' class="active" aria-current="page"' : '') !!}}>
                                         <a href="{{ route('reports.activity') }}">
                                             {{ trans('general.activity_report') }}
                                         </a>
                                     </li>
-                                    <li {{!! (request()->is('reports/custom') ? ' class="active"' : '') !!}}>
+                                    <li {{!! (request()->is('reports/custom') ? ' class="active" aria-current="page"' : '') !!}}>
                                         <a href="{{ url('reports/custom') }}">
                                             {{ trans('general.custom_report') }}
                                         </a>
                                     </li>
-                                    <li {{!! (request()->is('reports/audit') ? ' class="active"' : '') !!}}>
+                                    <li {{!! (request()->is('reports.custom.component') ? ' class="active" aria-current="page"' : '') !!}}>
+                                        <a href="{{ route('reports.custom.component') }}">
+                                            {{ trans('general.custom_component_report') }}
+                                        </a>
+                                    </li>
+                                    <li {{!! (request()->is('reports/audit') ? ' class="active" aria-current="page"' : '') !!}}>
                                         <a href="{{ route('reports.audit') }}">
                                             {{ trans('general.audit_report') }}</a>
                                     </li>
-                                    <li {{!! (request()->is('reports/depreciation') ? ' class="active"' : '') !!}}>
+                                    <li {{!! (request()->is('reports/depreciation') ? ' class="active" aria-current="page"' : '') !!}}>
                                         <a href="{{ url('reports/depreciation') }}">
                                             {{ trans('general.depreciation_report') }}
                                         </a>
                                     </li>
-                                    <li {{!! (request()->is('reports/licenses') ? ' class="active"' : '') !!}}>
+                                    <li {{!! (request()->is('reports/licenses') ? ' class="active" aria-current="page"' : '') !!}}>
                                         <a href="{{ url('reports/licenses') }}">
                                             {{ trans('general.license_report') }}
                                         </a>
                                     </li>
-                                    <li {{!! (request()->is('ui.reports.maintenances') ? ' class="active"' : '') !!}}>
+                                    <li {{!! (request()->is('ui.reports.maintenances') ? ' class="active" aria-current="page"' : '') !!}}>
                                         <a href="{{ route('ui.reports.maintenances') }}">
                                             {{ trans('general.asset_maintenance_report') }}
                                         </a>
                                     </li>
-                                    <li {{!! (request()->is('reports/unaccepted_assets') ? ' class="active"' : '') !!}}>
+                                    <li {{!! (request()->is('reports/unaccepted_assets') ? ' class="active" aria-current="page"' : '') !!}}>
                                         <a href="{{ url('reports/unaccepted_assets') }}">
                                             {{ trans('general.unaccepted_asset_report') }}
                                         </a>
                                     </li>
-                                    <li  {{!! (request()->is('reports/accessories') ? ' class="active"' : '') !!}}>
+                                    <li  {{!! (request()->is('reports/accessories') ? ' class="active" aria-current="page"' : '') !!}}>
                                         <a href="{{ url('reports/accessories') }}">
                                             {{ trans('general.accessory_report') }}
                                         </a>
@@ -1942,7 +1993,7 @@
                         @endcan
 
                         @can('viewRequestable', \App\Models\Asset::class)
-                            <li{!! (request()->is('account/requestable-assets') ? ' class="active"' : '') !!}>
+                            <li{!! (request()->is('account/requestable-assets') ? ' class="active" aria-current="page"' : '') !!}>
                                 <a href="{{ route('requestable-assets') }}">
                                     <x-icon type="requestable" class="fa-fw" />
                                     <span>{{ trans('general.requestable_items') }}</span>
@@ -1959,6 +2010,8 @@
             <!-- Content Wrapper. Contains page content -->
 
             <div class="content-wrapper" role="main" id="setting-list">
+
+                @include('partials.impersonation-banner')
 
                 @if ($debug_in_production)
                     <div class="row" style="margin-bottom: 0px; background-color: red; color: white; font-size: 15px;">
@@ -2043,13 +2096,13 @@
                     <div class="row">
                         @if (config('app.lock_passwords'))
                             <div class="col-md-12">
-                                <div class="callout callout-info">
+                                <div class="callout callout-info" role="status" aria-live="polite" aria-atomic="true">
                                     {{ trans('general.some_features_disabled') }}
                                 </div>
                             </div>
                         @endif
 
-                        @include('notifications')
+                        <x-notifications />
                     </div>
 
 
@@ -2358,6 +2411,15 @@
                 errorClass: 'alert-msg',
                 errorElement: 'div',
                 errorPlacement: function(error, element) {
+                    // Screen readers only announce inserted error text when the
+                    // error element carries role=alert (aria-live=assertive is
+                    // implied, but set explicitly for older AT compatibility).
+                    // The X icon is applied via the .alert-msg::before CSS rule
+                    // (see resources/assets/less/app.less); prepending it here
+                    // would be wiped on re-validation, when jQuery Validate
+                    // calls label.html(msg) on the existing element.
+                    error.attr('role', 'alert');
+                    error.attr('aria-live', 'assertive');
 
                     if ($(element).hasClass('select2') || $(element).hasClass('js-data-ajax')) {
                         // If the element is a select2 then append the error to the parent div
@@ -2401,11 +2463,23 @@
                 email: "{{ trans('validation.generic.email') }}"
             });
 
+            $.validator.addMethod('pattern', function(value, element, param) {
+                if (this.optional(element)) {
+                    return true;
+                }
+                if (typeof param === 'string') {
+                    param = new RegExp('^(?:' + param + ')$');
+                }
+                return param.test(value);
+            }, '{{ trans('validation.generic.invalid_value_in_field') }}');
+
 
             function showHideEncValue(e) {
                 // Use element id to find the text element to hide / show
                 var targetElement = e.id+"-to-show";
                 var hiddenElement = e.id+"-to-hide";
+                var targetEl = document.getElementById(targetElement);
+                var isMarkdown = targetEl && targetEl.dataset.markdown;
                 var audio = new Audio('{{ config('app.url') }}/sounds/lock.mp3');
                 if($(e).hasClass('fa-lock')) {
                     @if ((isset($user)) && ($user->enable_sounds))
@@ -2413,7 +2487,11 @@
                     @endif
                     $(e).removeClass('fa-lock').addClass('fa-unlock');
                     // Show the encrypted custom value and hide the element with asterisks
-                    document.getElementById(targetElement).style.fontSize = "100%";
+                    if (isMarkdown) {
+                        targetEl.style.display = "block";
+                    } else {
+                        targetEl.style.fontSize = "100%";
+                    }
                     document.getElementById(hiddenElement).style.display = "none";
 
                 } else {
@@ -2422,7 +2500,12 @@
                     @endif
                     $(e).removeClass('fa-unlock').addClass('fa-lock');
                     // ClipboardJS can't copy display:none elements so use a trick to hide the value
-                    document.getElementById(targetElement).style.fontSize = "0px";
+                    if (isMarkdown) {
+                        targetEl.style.display = "none";
+                    } else {
+                        // ClipboardJS can't copy display:none elements so use a trick to hide the value
+                        targetEl.style.fontSize = "0px";
+                    }
                     document.getElementById(hiddenElement).style.display = "";
 
                  }
@@ -2544,23 +2627,34 @@
 
                 // Function to add original value to elements
                 function addValue($element) {
-                    // Get original value of the element
-                    var originalValue = $element.text().trim();
+                    var originalHtml = $element.html().trim();
+                    var originalText = $element.text().trim();
+                    var hasHtmlContent = originalHtml !== '' && originalHtml !== originalText;
 
-                    // Show asterisks only for not empty values
-                    if (originalValue !== '') {
-                        // This is necessary to avoid loop because value is generated dynamically
-                        if (originalValue !== '' && originalValue !== asterisks) $element.attr('value', originalValue);
+                    // Show asterisks only for non-empty values
+                    if (originalText !== '') {
+                        var asterisks = '*'.repeat(11);
+                        // Avoid reprocessing already-asterisked elements
+                        if (originalText !== asterisks) {
+                            if (hasHtmlContent) {
+                                $element.data('encrypted-html', originalHtml);
+                            }
+                            $element.attr('value', originalText);
+                        }
 
-                        // Hide the original value and show asterisks of the same length
-                        var asterisks = '*'.repeat(originalValue.length);
+                        // Hide the original value and show a fixed-length asterisk placeholder
                         $element.text(asterisks);
 
-                        // Add click event to show original text
+                        // Add click event to show original value
                         $element.click(function() {
                             var $this = $(this);
                             if ($this.text().trim() === asterisks) {
-                                $this.text($this.attr('value'));
+                                var savedHtml = $this.data('encrypted-html');
+                                if (savedHtml) {
+                                    $this.html(savedHtml);
+                                } else {
+                                    $this.text($this.attr('value'));
+                                }
                             } else {
                                 $this.text(asterisks);
                             }

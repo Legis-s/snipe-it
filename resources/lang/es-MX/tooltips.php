@@ -3,22 +3,22 @@
 return [
 
     'disabled_assoc' => [
-        'accessory' => 'This accessory cannot be deleted because it still has items, users, or locations associated with it',
-        'asset' => 'This asset cannot be deleted because it still has items associated with it',
-        'category' => 'This category cannot be deleted because it still has items associated with it',
-        'company' => 'This company cannot be deleted because it still has items or users associated with it',
-        'component' => 'This component cannot be deleted because it still has items associated with it',
-        'custom_field' => 'This custom field cannot be deleted because it is still associated with at least one fieldset',
-        'department' => 'This department cannot be deleted because it still has users associated with it',
-        'location' => 'This location cannot be deleted because it still has items or users associated with it',
-        'manufacturer' => 'This manufacturer cannot be deleted because it still has items associated with it',
-        'supplier' => 'This supplier cannot be deleted because it still has items associated with it',
-        'user' => 'This user cannot be deleted because it still has items associated with it',
-        'user_self' => 'You cannot delete yourself',
+        'accessory' => 'Este accesorio no puede ser eliminado porque todavía tiene asociados artículos, usuarios o ubicaciones',
+        'asset' => 'Este activo no puede ser eliminado porque todavía tiene artículos asociados',
+        'category' => 'Esta categoría no puede ser eliminada porque todavía tiene artículos asociados',
+        'company' => 'Esta compañía no puede ser eliminada porque todavía tiene asociados artículos o usuarios',
+        'component' => 'Este componente no puede ser eliminado porque todavía tiene artículos asociados',
+        'custom_field' => 'Este campo personalizado no puede ser eliminado porque todavía está asociado con al menos un conjunto de campos',
+        'department' => 'Este departamento no puede ser eliminado porque todavía tiene usuarios asociados',
+        'location' => 'Esta ubicación no puede ser eliminada porque todavía tiene artículos asociados',
+        'manufacturer' => 'Este fabricante no puede ser eliminado porque todavía tiene artículos asociados',
+        'supplier' => 'Este proveedor no puede ser eliminado porque todavía tiene artículos asociados',
+        'user' => 'Este usuario no puede ser eliminado porque todavía tiene artículos asociados',
+        'user_self' => 'No puedes eliminarte a ti mismo',
     ],
 
     'checkin_all' => [
-        'user' => 'Checkin all items for this user and optionally delete them. You will be able to confirm this on the next page.',
+        'user' => 'Devuelve todos los artículos de este usuario y opcionalmente eliminalo. Podrás confirmarlo en la siguiente página.',
     ],
 
 ];

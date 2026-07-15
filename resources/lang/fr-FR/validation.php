@@ -51,7 +51,7 @@ return [
     'doesnt_end_with' => 'The :attribute field must not end with one of the following: :values.',
     'doesnt_start_with' => 'The :attribute field must not start with one of the following: :values.',
     'email' => 'The :attribute field must be a valid email address.',
-    'ends_with' => 'The :attribute field must end with one of the following: :values.',
+    'ends_with' => '',
     'enum' => 'L\'attribut ":attribute" est invalide.',
     'exists' => 'L\'attribut ":attribute" est invalide.',
     'extensions' => 'The :attribute field must have one of the following extensions: :values.',
@@ -173,6 +173,7 @@ return [
     'url' => 'Le champ :attribute doit être une URL valide.',
     'ulid' => 'The :attribute field must be a valid ULID.',
     'uuid' => 'The :attribute field must be a valid UUID.',
+    'valid_css_color' => 'The :attribute field must be a valid CSS color (hex, rgb, rgba, hsl, or hsla).',
     'fmcs_location' => 'Full multiple company support and location scoping is enabled in the Admin Settings, and the selected location and selected company are not compatible.',
     'is_unique_across_company_and_location' => 'The :attribute must be unique within the selected company and location.',
 

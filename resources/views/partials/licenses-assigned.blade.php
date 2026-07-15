@@ -27,8 +27,8 @@
                         table_html += '<div class="col-md-12">';
                         table_html += '<table class="table table-striped">';
                         table_html += '<thead><tr>';
-                        table_html += '<th>{{ trans('admin/licenses/form.name') }}</th>';
-                        table_html += '<th>{{ trans('admin/licenses/form.license_key') }}</th>';
+                        table_html += '<th scope="col">{{ trans('admin/licenses/form.name') }}</th>';
+                        table_html += '<th scope="col">{{ trans('admin/licenses/form.license_key') }}</th>';
                         table_html += '</tr></thead><tbody>';
 
                         $('#current_license_content').append('');

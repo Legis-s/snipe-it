@@ -13,7 +13,7 @@
 @stop
 
 @section('header_right')
-    <i class="fa-regular fa-2x fa-square-caret-right pull-right" id="expand-info-panel-button"></i>
+    <x-button.info-panel-toggle/>
 @endsection
 
 {{-- Page content --}}
@@ -66,7 +66,7 @@
 
         <x-page-column class="col-md-3">
             <x-box class="side-box expanded">
-                <x-info-panel :infoPanelObj="$accessory" img_path="{{ app('accessories_upload_url') }}">
+                <x-info-panel :infoPanelObj="$accessory" img_path="{{ app('accessories_upload_url') }}" :qr_code_url="route('qr_code/common', ['object_type' => 'accessories', 'id' => $accessory->id])">
                     <x-slot:buttons>
                         <x-button.edit :item="$accessory" :route="route('accessories.edit', $accessory->id)"/>
                         <x-button.clone :item="$accessory" :route="route('clone/accessories', $accessory->id)"/>

@@ -21,11 +21,15 @@ class HelperTest extends TestCase
 
     public function test_parse_currency_method()
     {
-        $this->settings->set(['default_currency' => 'USD']);
+        $this->settings->set(['default_currency' => 'USD', 'digit_separator' => '1,234.56']);
         $this->assertSame(12.34, Helper::ParseCurrency('USD 12.34'));
+        $this->assertSame(8888.0, Helper::ParseCurrency('8,888.00'));   // US thousands comma
+        $this->assertSame(8888.0, Helper::ParseCurrency('8888.00'));    // US plain
 
         $this->settings->set(['digit_separator' => '1.234,56']);
         $this->assertSame(12.34, Helper::ParseCurrency('12,34'));
+        $this->assertSame(8888.0, Helper::ParseCurrency('8.888,00'));   // EU thousands dot
+        $this->assertSame(8888.0, Helper::ParseCurrency('8888,00'));    // EU plain
     }
 
     public function test_get_redirect_option_method()
@@ -54,6 +58,14 @@ class HelperTest extends TestCase
                 'redirect_option' => 'target',
                 'table' => 'Assets',
                 'route' => route('hardware.show', 101),
+            ],
+            'Option target: redirect back to contract assigned to ' => [
+                'request' => (object) ['assigned_contract' => 202],
+                'id' => 4,
+                'checkout_to_type' => 'contract',
+                'redirect_option' => 'target',
+                'table' => 'Assets',
+                'route' => route('contracts.show', 202),
             ],
             'Option item: redirect back to asset ' => [
                 'request' => (object) ['assigned_asset' => null],

@@ -35,6 +35,12 @@ return [
         'assets_do_not_exist_or_are_invalid' => 'Selected assets cannot be updated.',
     ],
 
+    'bulk_update' => [
+        'success' => 'Asset updated successfully.|:count assets were updated successfully.',
+        'partial' => ':success asset(s) updated successfully, :failed failed. See the results array for details.',
+        'error' => 'No assets were updated. See the results array for details.',
+    ],
+
     'restore' => [
         'error' => 'Asset was not restored, please try again',
         'success' => 'Asset restored successfully.',
@@ -71,6 +77,16 @@ return [
         'header_row_has_malformed_characters' => 'One or more attributes in the header row contain malformed UTF-8 characters',
         'content_row_has_malformed_characters' => 'One or more attributes in the first row of content contain malformed UTF-8 characters',
         'transliterate_failure' => 'Transliteration from :encoding to UTF-8 failed due to invalid characters in input',
+        'bulk_delete' => [
+            'button' => 'Delete Selected (:count)',
+            'confirm_title' => 'Delete selected import files?',
+            'confirm_body' => 'You are about to permanently delete :count import file(s). This cannot be undone.',
+            'confirm_button' => 'Delete',
+            'success' => 'Import file deleted successfully.|:count import files were deleted successfully.',
+            'skipped' => ':count file(s) were skipped because you do not have permission to delete them.',
+            'select_all' => 'Select all files on this page',
+            'select_row' => 'Select :file for bulk delete',
+        ],
     ],
 
     'delete' => [
@@ -94,11 +110,20 @@ return [
         'success' => 'Asset checked out successfully.|Assets checked out successfully.',
     ],
 
+    'multi-checkin' => [
+        'error' => 'Asset was not checked in, please try again|Assets were not checked in, please try again',
+        'success' => 'Asset checked in successfully.|Assets checked in successfully.',
+        'no_assets_selected' => 'You must select at least one asset from the list',
+    ],
+
     'checkin' => [
         'error' => 'Asset was not checked in, please try again',
         'success' => 'Asset checked in successfully.',
         'user_does_not_exist' => 'That user is invalid. Please try again.',
         'already_checked_in' => 'That asset is already checked in.',
+        'force_checkin_orphaned_success' => 'Invalid assignment cleared successfully.',
+        'force_checkin_not_orphaned' => 'Item is not in an invalid assignment state.',
+        'force_checkin_error' => 'Could not clear invalid assignment.',
 
     ],
 

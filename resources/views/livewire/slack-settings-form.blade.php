@@ -92,7 +92,7 @@
                             </div>
                             <div class="col-md-9 required">
                                     <input type="url" wire:model.change.live="webhook_endpoint" class="form-control" placeholder="{{$webhook_placeholder}}" value="{{old('webhook_endpoint', $webhook_endpoint)}}"{{ Helper::isDemoMode() ? ' disabled' : ''}}>
-                                {!! $errors->first('webhook_endpoint', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                <x-form.error name="webhook_endpoint" />
                             </div>
                         </div>
 
@@ -110,7 +110,7 @@
                                 <div class="col-md-9 required">
                                         <input type="text" wire:model.change.live="webhook_channel" class="form-control" placeholder="#IT-Ops" value="{{ old('webhook_channel', $webhook_channel) }}"{{ Helper::isDemoMode() ? ' disabled' : ''}}>
 
-                                    {!! $errors->first('webhook_channel', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                    <x-form.error name="webhook_channel" />
                                 </div>
                             </div>
                         @endif
@@ -127,7 +127,7 @@
                                 </div>
                                 <div class="col-md-9">
                                         <input type="text" wire:model.change.live="webhook_botname" class='form-control' placeholder="Snipe-Bot" {{ old('webhook_botname', $webhook_botname)}}{{ Helper::isDemoMode() ? ' disabled' : ''}}>
-                                    {!! $errors->first('webhook_botname', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                                    <x-form.error name="webhook_botname" />
                                 </div><!--col-md-10-->
                             </div>
                         @endif

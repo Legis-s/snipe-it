@@ -78,6 +78,7 @@ class IconHelper
             case 'angle-right':
                 return 'fas fa-angle-right';
             case 'warning':
+            case 'alert':
                 return 'fas fa-exclamation-triangle';
             case 'kits':
                 return 'fas fa-object-group';
@@ -121,11 +122,16 @@ class IconHelper
                 return 'fa-solid fa-key';
             case 'api-key':
                 return 'fas fa-user-secret';
+            case 'impersonate':
+                return 'fa-solid fa-person-walking-arrow-right';
+            case 'undo':
+                return 'fas fa-arrow-left';
             case 'nav-toggle':
                 return 'fas fa-bars';
             case 'dashboard':
                 return 'fas fa-tachometer-alt';
             case 'info-circle':
+            case 'info':
                 return 'fas fa-info-circle';
             case 'caret-right':
                 return 'fa fa-caret-right';
@@ -156,6 +162,7 @@ class IconHelper
             case 'remote':
                 return 'fa-solid fa-house-laptop';
             case 'more-info':
+            case 'help':
             case 'support':
                 return 'far fa-life-ring';
             case 'plus':
@@ -178,6 +185,8 @@ class IconHelper
                 return 'fas fa-map-marker-alt';
             case 'location':
                 return 'fas fa-map-marker-alt';
+            case 'markdown':
+                return 'fab fa-markdown';
             case 'superadmin':
             case 'admin':
                 return 'fas fa-crown';

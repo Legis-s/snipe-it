@@ -15,7 +15,7 @@
 
                     <form action="{{ route('manufacturers.seed') }}" method="POST">
                       {{ csrf_field() }}
-                    <div class="callout callout-info">
+                    <div class="callout callout-info" role="status" aria-live="polite" aria-atomic="true">
                       <p>
                           {{ trans('general.seeding.manufacturers.prompt') }}
                         <button class="btn btn-sm btn-theme hidden-print" rel="noopener">

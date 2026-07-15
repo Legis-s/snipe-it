@@ -24,7 +24,7 @@
         </label>
         <div class="col-md-5 required">
             <input class="form-control" type="password" name="current_password" id="current_password" required {{ (config('app.lock_passwords') ? ' disabled' : '') }}>
-            {!! $errors->first('current_password', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+            <x-form.error name="current_password" />
             @if (config('app.lock_passwords')===true)
                 <p class="text-warning"><i class="fas fa-lock"></i> {{ trans('general.feature_disabled') }}</p>
             @endif
@@ -35,7 +35,7 @@
         <label for="password" class="col-md-3 control-label">{{ trans('general.new_password') }}</label>
         <div class="col-md-5 required">
             <input class="form-control" type="password" name="password" id="password" required {{ (config('app.lock_passwords') ? ' disabled' : '') }}>
-            {!! $errors->first('password', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+            <x-form.error name="password" />
             @if (config('app.lock_passwords')===true)
                 <p class="text-warning"><i class="fas fa-lock"></i> {{ trans('general.feature_disabled') }}</p>
             @endif
@@ -47,7 +47,7 @@
         <label for="password_confirmation" class="col-md-3 control-label">{{ trans('general.new_password') }}</label>
         <div class="col-md-5 required">
             <input class="form-control" type="password" name="password_confirmation" id="password_confirmation"  {{ (config('app.lock_passwords') ? ' disabled' : '') }} aria-label="password_confirmation">
-            {!! $errors->first('password_confirmation', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+            <x-form.error name="password_confirmation" />
             @if (config('app.lock_passwords')===true)
                 <p class="text-warning"><i class="fas fa-lock"></i> {{ trans('general.feature_disabled') }}</p>
             @endif

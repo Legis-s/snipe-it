@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ActionType;
 use App\Helpers\Helper;
 use App\Helpers\StorageHelper;
 use App\Http\Requests\ImageUploadRequest;
@@ -11,12 +12,14 @@ use App\Http\Requests\StoreLdapSettings;
 use App\Http\Requests\StoreLocalizationSettings;
 use App\Http\Requests\StoreNotificationSettings;
 use App\Http\Requests\StoreSecuritySettings;
+use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\CustomField;
 use App\Models\Group;
 use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\MailTest;
+use App\Rules\CssColor;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -51,7 +54,23 @@ class SettingsController extends Controller
     {
         $settings = Setting::getSettings();
 
-        return view('settings/index', compact('settings'));
+        $impersonationUsernames = (array) config('app.user_impersonation_usernames');
+        if (empty($impersonationUsernames)) {
+            $impersonators = collect();
+            $missingImpersonationUsernames = [];
+        } else {
+            $impersonators = User::withTrashed()
+                ->whereIn(DB::raw('LOWER(username)'), array_map('mb_strtolower', $impersonationUsernames))
+                ->orderBy('username')
+                ->get();
+            $foundLower = $impersonators->map(fn ($u) => mb_strtolower((string) $u->username))->all();
+            $missingImpersonationUsernames = array_values(array_filter(
+                $impersonationUsernames,
+                fn ($name) => ! in_array(mb_strtolower($name), $foundLower, true)
+            ));
+        }
+
+        return view('settings/index', compact('settings', 'impersonators', 'missingImpersonationUsernames'));
     }
 
     /**
@@ -90,10 +109,12 @@ class SettingsController extends Controller
         $old_locations_fmcs = $setting->scope_locations_fmcs;
         $setting->full_multiple_companies_support = $request->input('full_multiple_companies_support', '0');
         $setting->scope_locations_fmcs = $request->input('scope_locations_fmcs', '0');
+        $setting->null_company_is_floater = $request->input('null_company_is_floater', '0');
 
-        // Backward compatibility for locations makes no sense without FullMultipleCompanySupport
+        // These options make no sense without FullMultipleCompanySupport
         if (! $setting->full_multiple_companies_support) {
             $setting->scope_locations_fmcs = '0';
+            $setting->null_company_is_floater = '0';
         }
 
         // check for inconsistencies when activating scoped locations
@@ -186,6 +207,13 @@ class SettingsController extends Controller
             if ($request->has('site_name')) {
                 $request->validate(['site_name' => 'required']);
             }
+
+            $request->validate([
+                'header_color' => ['nullable', new CssColor],
+                'link_light_color' => ['nullable', new CssColor],
+                'link_dark_color' => ['nullable', new CssColor],
+                'nav_link_color' => ['nullable', new CssColor],
+            ]);
 
             $setting->header_color = $request->input('header_color', '#3c8dbc');
             $setting->link_light_color = $request->input('link_light_color', '#296282');
@@ -870,6 +898,11 @@ class SettingsController extends Controller
     public function downloadFile($filename = null): RedirectResponse|BinaryFileResponse
     {
         $path = 'app/backups';
+        $filename = basename((string) $filename);
+
+        if ($this->hasInvalidBackupFilename($filename)) {
+            return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.backup.file_not_found'));
+        }
 
         if (! config('app.lock_passwords')) {
             if (Storage::exists($path.'/'.$filename)) {
@@ -895,6 +928,12 @@ class SettingsController extends Controller
      */
     public function deleteFile($filename = null): RedirectResponse
     {
+        $filename = basename((string) $filename);
+
+        if ($this->hasInvalidBackupFilename($filename)) {
+            return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.backup.file_not_found'));
+        }
+
         if (config('app.allow_backup_delete') == 'true') {
 
             if (! config('app.lock_passwords')) {
@@ -969,6 +1008,11 @@ class SettingsController extends Controller
      */
     public function postRestore(Request $request, $filename = null): RedirectResponse
     {
+        $filename = basename((string) $filename);
+
+        if ($this->hasInvalidBackupFilename($filename)) {
+            return redirect()->route('settings.backups.index')->with('error', trans('admin/settings/message.backup.file_not_found'));
+        }
 
         if (! config('app.lock_passwords')) {
             $path = 'app/backups';
@@ -1118,7 +1162,130 @@ class SettingsController extends Controller
      */
     public function api(): View
     {
-        return view('settings.api');
+        $personalAccessTokenCount = DB::table('oauth_access_tokens')
+            ->join('oauth_clients', 'oauth_access_tokens.client_id', '=', 'oauth_clients.id')
+            ->where('oauth_clients.personal_access_client', true)
+            ->count();
+
+        $setting = Setting::getSettings();
+        $blockApiUserAgents = (bool) old('block_api_user_agents', $setting?->block_api_user_agents);
+        $blockedApiUserAgents = old(
+            'blocked_api_user_agents',
+            $setting?->blocked_api_user_agents ?? implode("\n", Setting::DEFAULT_BLOCKED_API_USER_AGENTS),
+        );
+        $blockBlankApiUserAgents = (bool) old('block_blank_api_user_agents', $setting?->block_blank_api_user_agents);
+
+        return view('settings.api', [
+            'personalAccessTokenCount' => $personalAccessTokenCount,
+            'setting' => $setting,
+            'blockApiUserAgents' => $blockApiUserAgents,
+            'blockedApiUserAgents' => $blockedApiUserAgents,
+            'blockBlankApiUserAgents' => $blockBlankApiUserAgents,
+        ]);
+    }
+
+    /**
+     * Persist the API request-filter settings (User-Agent allow/block list)
+     * from the API settings page.
+     */
+    public function postApiRequestFilters(Request $request): RedirectResponse
+    {
+        if (is_null($setting = Setting::getSettings())) {
+            return redirect()->to('admin')->with('error', trans('admin/settings/message.update.error'));
+        }
+
+        // Check we're not on the public demo, and redirect without saving if we are.
+        // Otherwise this could mess with the demo API explorer
+        if (config('app.lock_passwords')) {
+            return redirect()
+                ->to(route('settings.oauth.index').'#api-request-filters')
+                ->with('error', trans('general.feature_disabled'));
+        }
+
+        $setting->block_api_user_agents = $request->boolean('block_api_user_agents');
+        $blockedUserAgents = trim((string) $request->input('blocked_api_user_agents', ''));
+        $setting->blocked_api_user_agents = $blockedUserAgents === '' ? null : $blockedUserAgents;
+        $setting->block_blank_api_user_agents = $request->boolean('block_blank_api_user_agents');
+
+        if ($setting->save()) {
+            return redirect()
+                ->to(route('settings.oauth.index').'#api-request-filters')
+                ->with('success', trans('admin/settings/message.update.success'));
+        }
+
+        return redirect()->back()->withInput()->withErrors($setting->getErrors());
+    }
+
+    /**
+     * Revoke a personal access token from the admin OAuth settings page.
+     */
+    public function revokePersonalAccessToken(string $token): RedirectResponse
+    {
+        $tokenRow = DB::table('oauth_access_tokens')
+            ->join('oauth_clients', 'oauth_access_tokens.client_id', '=', 'oauth_clients.id')
+            ->where('oauth_access_tokens.id', $token)
+            ->where('oauth_clients.personal_access_client', true)
+            ->select(['oauth_access_tokens.id', 'oauth_access_tokens.user_id'])
+            ->first();
+
+        if ($tokenRow === null) {
+            return redirect()
+                ->to(route('settings.oauth.index').'#personal-access-tokens')
+                ->with('error', trans('admin/settings/message.oauth.token_not_found'));
+        }
+
+        DB::table('oauth_access_tokens')
+            ->where('id', $tokenRow->id)
+            ->update(['revoked' => true]);
+
+        $logaction = new Actionlog;
+        $logaction->item_type = User::class;
+        $logaction->item_id = $tokenRow->user_id;
+        $logaction->target_type = User::class;
+        $logaction->target_id = $tokenRow->user_id;
+        $logaction->created_by = auth()->id();
+        // $logaction->note = 'Token ID: ' . $tokenRow->id;
+        $logaction->logaction(ActionType::TokenRevoked);
+
+        return redirect()
+            ->to(route('settings.oauth.index').'#personal-access-tokens')
+            ->with('success', trans('admin/settings/message.oauth.token_revoked'));
+    }
+
+    /**
+     * Unrevoke a personal access token from the admin OAuth settings page.
+     */
+    public function unrevokePersonalAccessToken(string $token): RedirectResponse
+    {
+        $tokenRow = DB::table('oauth_access_tokens')
+            ->join('oauth_clients', 'oauth_access_tokens.client_id', '=', 'oauth_clients.id')
+            ->where('oauth_access_tokens.id', $token)
+            ->where('oauth_clients.personal_access_client', true)
+            ->select(['oauth_access_tokens.id', 'oauth_access_tokens.user_id'])
+            ->first();
+
+        if ($tokenRow === null) {
+            return redirect()
+                ->to(route('settings.oauth.index').'#personal-access-tokens')
+                ->with('error', trans('admin/settings/message.oauth.token_not_found'));
+        }
+
+        DB::table('oauth_access_tokens')
+            ->where('id', $tokenRow->id)
+            ->update(['revoked' => false]);
+
+        $logaction = new Actionlog;
+        $logaction->item_type = User::class;
+        $logaction->item_id = $tokenRow->user_id;
+        $logaction->target_type = User::class;
+        $logaction->target_id = $tokenRow->user_id;
+        $logaction->created_by = auth()->id();
+        // $logaction->note = 'Token ID: ' . $tokenRow->id;
+        $logaction->logaction(ActionType::TokenUnrevoked);
+
+        return redirect()
+            ->to(route('settings.oauth.index').'#personal-access-tokens')
+            ->with('success', trans('admin/settings/message.oauth.token_unrevoked'));
     }
 
     /**
@@ -1154,5 +1321,63 @@ class SettingsController extends Controller
     public function getLoginAttempts(): View
     {
         return view('settings.logins');
+    }
+
+    /**
+     * Revoke an OAuth client from the admin OAuth settings page.
+     */
+    public function revokeOAuthClient(string $client): RedirectResponse
+    {
+        $oauthClient = DB::table('oauth_clients')
+            ->where('id', $client)
+            ->first();
+
+        if ($oauthClient === null) {
+            return redirect()
+                ->to(route('settings.oauth.index').'#oauth-clients')
+                ->with('error', trans('admin/settings/message.oauth.client_not_found'));
+        }
+
+        DB::table('oauth_clients')
+            ->where('id', $client)
+            ->update(['revoked' => true]);
+
+        return redirect()
+            ->to(route('settings.oauth.index').'#oauth-clients')
+            ->with('success', trans('admin/settings/message.oauth.client_revoked'));
+    }
+
+    /**
+     * Unrevoke an OAuth client from the admin OAuth settings page.
+     */
+    public function unrevokeOAuthClient(string $client): RedirectResponse
+    {
+        $oauthClient = DB::table('oauth_clients')
+            ->where('id', $client)
+            ->first();
+
+        if ($oauthClient === null) {
+            return redirect()
+                ->to(route('settings.oauth.index').'#oauth-clients')
+                ->with('error', trans('admin/settings/message.oauth.client_not_found'));
+        }
+
+        DB::table('oauth_clients')
+            ->where('id', $client)
+            ->update(['revoked' => false]);
+
+        return redirect()
+            ->to(route('settings.oauth.index').'#oauth-clients')
+            ->with('success', trans('admin/settings/message.oauth.client_unrevoked'));
+    }
+
+    private function hasInvalidBackupFilename(string $filename): bool
+    {
+        if ($filename === '' || $filename === '.' || $filename === '..') {
+            return true;
+        }
+
+        // Reject path separators in case a crafted value survives route decoding.
+        return str_contains($filename, '/') || str_contains($filename, '\\');
     }
 }

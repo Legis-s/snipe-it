@@ -9,6 +9,7 @@ use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\StoreDepartmentRequest;
 use App\Http\Transformers\DepartmentsTransformer;
 use App\Http\Transformers\SelectlistTransformer;
+use App\Models\Company;
 use App\Models\Department;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -26,7 +27,7 @@ class DepartmentsController extends Controller
     public function index(FilterRequest $request): JsonResponse|array
     {
         $this->authorize('view', Department::class);
-        $allowed_columns = ['id', 'name', 'image', 'users_count', 'notes', 'tag_color'];
+        $allowed_columns = ['id', 'name', 'image', 'users_count', 'notes', 'tag_color', 'created_at'];
 
         $departments = Department::select(
             [
@@ -50,27 +51,29 @@ class DepartmentsController extends Controller
         }
 
         if ($request->filled('name')) {
-            $departments->where('name', '=', $request->input('name'));
+            $departments->where('departments.name', '=', $request->input('name'));
         }
 
         if ($request->filled('company_id')) {
-            $departments->where('company_id', '=', $request->input('company_id'));
+            $departments->where('departments.company_id', '=', $request->input('company_id'));
         }
 
         if ($request->filled('manager_id')) {
-            $departments->where('manager_id', '=', $request->input('manager_id'));
+            $departments->where('departments.manager_id', '=', $request->input('manager_id'));
         }
 
         if ($request->filled('location_id')) {
-            $departments->where('location_id', '=', $request->input('location_id'));
+            $departments->where('departments.location_id', '=', $request->input('location_id'));
         }
 
         if ($request->filled('tag_color')) {
-            $departments->where('tag_color', '=', $request->input('departments.tag_color'));
+            $departments->where('departments.tag_color', '=', $request->input('tag_color'));
         }
 
+        $total = $departments->count();
+
         // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $departments->count()) ? $departments->count() : app('api_offset_value');
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
 
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
@@ -86,12 +89,13 @@ class DepartmentsController extends Controller
             case 'company':
                 $departments->OrderCompany($order);
                 break;
+            case 'created_by':
+                $departments->OrderByCreatedBy($order);
+                break;
             default:
                 $departments->orderBy($sort, $order);
                 break;
         }
-
-        $total = $departments->count();
         $departments = $departments->skip($offset)->take($limit)->get();
 
         return (new DepartmentsTransformer)->transformDepartments($departments, $total);
@@ -111,6 +115,7 @@ class DepartmentsController extends Controller
     {
         $department = new Department;
         $department->fill($request->validated());
+        $department->company_id = Company::getIdForCurrentUser($request->input('company_id'));
         $department = $request->handleImages($department);
 
         $department->created_by = auth()->id();
@@ -155,6 +160,7 @@ class DepartmentsController extends Controller
         $this->authorize('update', Department::class);
         $department = Department::findOrFail($id);
         $department->fill($request->all());
+        $department->company_id = Company::getIdForCurrentUser($request->input('company_id'));
         $department = $request->handleImages($department);
 
         if ($department->save()) {

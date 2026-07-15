@@ -154,4 +154,26 @@ class CustomFieldFactory extends Factory
             ];
         });
     }
+
+    public function testMarkdownTextarea()
+    {
+        return $this->state(function () {
+            return [
+                'name' => 'Notes',
+                'help_text' => 'Additional notes about this asset. Markdown is supported.',
+                'element' => 'markdown-textarea',
+            ];
+        });
+    }
+
+    public function xss()
+    {
+        return $this->state(function () {
+            return [
+                'name' => '<img src=x onerror=alert(1)>',
+                'help_text' => 'This is an intentional XSS seeded field so we can easily check for BS tables slips in escaping.',
+                'show_in_requestable_list' => '0',
+            ];
+        });
+    }
 }

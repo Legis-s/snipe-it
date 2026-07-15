@@ -2,25 +2,21 @@
 
 namespace App\Http\Controllers\Consumables;
 
-use App\Events\CheckoutableCheckedOut;
-use App\Events\CheckoutableSell;
+use App\Actions\Acceptances\CreateCheckoutAcceptanceAction;
 use App\Helpers\Helper;
-use App\Http\Controllers\CheckInOutRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ConsumableCheckoutRequest;
+use App\Http\Traits\CheckInOutTrait;
+use App\Models\CheckoutAcceptance;
 use App\Models\Consumable;
-use App\Models\Deal;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use App\Models\ConsumableAssignment;
-use Illuminate\Support\Facades\Input;
 
 class ConsumableCheckoutController extends Controller
 {
-    use CheckInOutRequest;
+    use CheckInOutTrait;
 
     /**
      * Return a view to checkout a consumable to a user.
@@ -83,6 +79,7 @@ class ConsumableCheckoutController extends Controller
 
         $this->authorize('checkout', $consumable);
         $target = $this->determineCheckoutTarget();
+        $signInPlace = $request->boolean('sign_in_place') && $target instanceof User;
 
         // If the quantity is not present in the request or is not a positive integer, set it to 1
         $quantity = $request->input('checkout_qty');
@@ -95,7 +92,6 @@ class ConsumableCheckoutController extends Controller
             return redirect()->route('consumables.index')->with('error', trans('admin/consumables/message.checkout.unavailable', ['requested' => $quantity, 'remaining' => $consumable->numRemaining()]));
         }
 
-        $admin_user = auth()->user();
 //        $assigned_to = e($request->input('assigned_to'));
 
         // Check if the user exists
@@ -126,6 +122,16 @@ class ConsumableCheckoutController extends Controller
 //                'note' => $request->input('note'),
 //            ]);
 //        }
+//        if (! $consumable->canCheckoutTo($user)) {
+//            return redirect()->back()->with('error', trans('general.error_checkout_company_mismatch', [
+//                'item' => trans('general.consumable').' "'.$consumable->name.'"',
+//                'item_company' => $consumable->company?->name ?? trans('general.unassigned'),
+//                'target' => trans('general.user').' "'.$user->username.'"',
+//            ]));
+//        }
+//
+//        // Update the consumable data
+//        $consumable->assigned_to = e($request->input('assigned_to'));
 
 //        $consumable->checkout_qty = $quantity;
 
@@ -140,7 +146,12 @@ class ConsumableCheckoutController extends Controller
 //        $request->request->add(['checkout_to_type' => 'user']);
 //        $request->request->add(['assigned_user' => $user->id]);
 
-        $consumable->checkOut($target, $quantity, $request->input('note'));
+        $consumable->checkOut(
+            $target,
+            $quantity,
+            $request->input('note'),
+            $signInPlace,
+        );
 
         $request->request->add(['assigned_to' => $target->id]);
         $request->request->add(match ($request->input('checkout_to_type')) {
@@ -150,7 +161,36 @@ class ConsumableCheckoutController extends Controller
             default => ['assigned_user' => $target->id],
         });
 
-        session()->put(['redirect_option' => $request->input('redirect_option'), 'checkout_to_type' => $request->input('checkout_to_type')]);
+        session()->put([
+            'redirect_option' => $request->input('redirect_option'),
+            'checkout_to_type' => $request->input('checkout_to_type'),
+            'sign_in_place' => $signInPlace,
+        ]);
+
+        // When sign_in_place is requested, redirect to the acceptance/signature page
+        // so the user can sign in person. The signature is attributed to the target user.
+        if ($signInPlace) {
+            $acceptance = CheckoutAcceptance::where('checkoutable_type', Consumable::class)
+                ->where('checkoutable_id', $consumable->id)
+                ->where('assigned_to_id', $target->id)
+                ->pending()
+                ->latest()
+                ->first();
+
+            // If requireAcceptance() is false the listener won't have created one; create it now.
+            if (! $acceptance) {
+                $acceptance = CreateCheckoutAcceptanceAction::run($consumable, $target, $quantity);
+            }
+
+            session([
+                'sign_in_place_acceptance_id' => $acceptance->id,
+                'sign_in_place_item_id' => $consumable->id,
+                'sign_in_place_resource_type' => 'Consumables',
+            ]);
+
+            return redirect()->route('account.accept.item', $acceptance->id)
+                ->with('success', trans('admin/consumables/message.checkout.success'));
+        }
 
         // Redirect to the new consumable page
         return Helper::getRedirectOption($request, $consumable->id, 'Consumables')

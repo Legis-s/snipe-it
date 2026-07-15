@@ -14,9 +14,12 @@ use App\Models\License;
 use App\Models\Location;
 use App\Models\Setting;
 use App\Models\Statuslabel;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -97,6 +100,29 @@ class Helper
         if ($str) {
             return $Parsedown->text(strip_tags($str));
         }
+    }
+
+    /**
+     * Slice an in-memory Collection into a LengthAwarePaginator using the
+     * page + perPage values normalized by SetPaginationDefaults middleware.
+     *
+     * Selectlist endpoints that fetch the full set up-front (so they can
+     * post-process — e.g. hierarchy indenting in Companies / Locations) need
+     * to wrap the result in a paginator before handing it to SelectlistTransformer.
+     * This helper avoids re-deriving the page math at every call site, and
+     * inherits the middleware's bounds check against config('app.max_results').
+     */
+    public static function paginateCollection(Collection $items): LengthAwarePaginator
+    {
+        $page = app('api_current_page');
+        $perPage = app('api_limit_value');
+
+        return new LengthAwarePaginator(
+            $items->forPage($page, $perPage)->values(),
+            $items->count(),
+            $perPage,
+            $page,
+        );
     }
 
     public static function parseEscapedMarkedownInline($str = null)
@@ -663,7 +689,7 @@ class Helper
      */
     public static function depreciationList()
     {
-        $depreciation_list = ['' => 'Do Not Depreciate'] + Depreciation::orderBy('name', 'asc')
+        $depreciation_list = ['' => trans('admin/licenses/form.no_depreciation')] + Depreciation::orderBy('name', 'asc')
             ->pluck('name', 'id')->toArray();
 
         return $depreciation_list;
@@ -824,7 +850,7 @@ class Helper
 
         foreach ($consumables as $consumable) {
             $avail = $consumable->numRemaining();
-            if ($avail <= ($consumable->min_amt) + $alert_threshold) {
+            if ($avail < ($consumable->min_amt) + $alert_threshold) {
                 if ($consumable->qty > 0) {
                     $percent = number_format((($avail / $consumable->qty) * 100), 0);
                 } else {
@@ -843,7 +869,7 @@ class Helper
 
         foreach ($accessories as $accessory) {
             $avail = $accessory->qty - $accessory->checkouts_count;
-            if ($avail <= ($accessory->min_amt) + $alert_threshold) {
+            if ($avail < ($accessory->min_amt) + $alert_threshold) {
                 if ($accessory->qty > 0) {
                     $percent = number_format((($avail / $accessory->qty) * 100), 0);
                 } else {
@@ -862,7 +888,7 @@ class Helper
 
         foreach ($components as $component) {
             $avail = $component->numRemaining();
-            if ($avail <= ($component->min_amt) + $alert_threshold) {
+            if ($avail < ($component->min_amt) + $alert_threshold) {
                 if ($component->qty > 0) {
                     $percent = number_format((($avail / $component->qty) * 100), 0);
                 } else {
@@ -885,7 +911,7 @@ class Helper
             $total_owned = $asset_model->assets_count; // requires the withCount() clause in the initial query!
             $avail = $asset_model->available_assets_count; // requires the withCount() clause in the initial query!
 
-            if ($avail <= ($asset_model->min_amt) + $alert_threshold) {
+            if ($avail < ($asset_model->min_amt) + $alert_threshold) {
                 if ($avail > 0) {
                     $percent = number_format((($avail / $total_owned) * 100), 0);
                 } else {
@@ -903,7 +929,7 @@ class Helper
 
         foreach ($licenses as $license) {
             $avail = $license->remaincount();
-            if ($avail <= ($license->min_amt) + $alert_threshold) {
+            if ($avail < ($license->min_amt) + $alert_threshold) {
                 if ($avail > 0) {
                     $percent = number_format((($avail / $license->min_amt) * 100), 0);
                 } else {
@@ -1083,6 +1109,33 @@ class Helper
         }
 
         return false;
+    }
+
+    /**
+     * Return the numeric max length declared for a field in the model's
+     * validation rules (looks for `max:N`). Returns null when the model, field,
+     * or `max:` rule can't be found — callers should fall back to whatever
+     * default they want. Used by `<x-form.row>` to auto-cap text inputs to
+     * the DB column width without every callsite having to pass maxlength.
+     */
+    public static function fieldMaxLength($class, string $field): ?int
+    {
+        if (! $class) {
+            return null;
+        }
+
+        $rules = $class::rules();
+        $rule = $rules[$field] ?? null;
+        if ($rule === null) {
+            return null;
+        }
+
+        $rule_string = is_array($rule) ? implode('|', $rule) : $rule;
+        if (preg_match('/(?:^|\|)max:(\d+)/', $rule_string, $matches)) {
+            return (int) $matches[1];
+        }
+
+        return null;
     }
 
     /**
@@ -1268,6 +1321,7 @@ class Helper
         $allowedExtensionMap = [
             // Images
             'jpg' => 'far fa-image',
+            'jfif' => 'far fa-image',
             'jpeg' => 'far fa-image',
             'gif' => 'far fa-image',
             'png' => 'far fa-image',
@@ -1620,7 +1674,17 @@ class Helper
         $checkout_to_type = session('checkout_to_type') ?? null;
         $checkedInFrom = session('checkedInFrom');
         $other_redirect = session('other_redirect');
-        $backUrl = session()->pull('url.intended', 'home');
+        $backUrl = str_replace(["\r", "\n"], '', session()->pull('url.intended', 'home'));
+
+        // Reject any stored back-URL that points off-site. redirect()->intended() performs
+        // no host validation, and url.intended can be written from the SAML RelayState POST
+        // parameter (SamlController), which an attacker-controlled IdP could set to an
+        // off-site URL.
+        $backHost = parse_url($backUrl, PHP_URL_HOST);
+        $appHost = parse_url(config('app.url'), PHP_URL_HOST);
+        if ($backHost && $backHost !== $appHost) {
+            $backUrl = route('home');
+        }
 
         // return to previous page
         if ($redirect_option == 'back') {
@@ -1653,11 +1717,28 @@ class Helper
 
         // return to assignment target
         if ($redirect_option == 'target') {
+            $userId = $request->assigned_user ?? $checkedInFrom;
+            $locationId = $request->assigned_location ?? $checkedInFrom;
+            $assetId = $request->assigned_asset ?? $checkedInFrom;
+            $contractId = $request->assigned_contract ?? $checkedInFrom;
+            $dealId = $request->assigned_deal ?? $checkedInFrom;
+
             return match ($checkout_to_type) {
-                'user' => redirect()->route('users.show', $request->assigned_user ?? $checkedInFrom),
-                'location' => redirect()->route('locations.show', $request->assigned_location ?? $checkedInFrom),
-                'asset' => redirect()->route('hardware.show', $request->assigned_asset ?? $checkedInFrom),
-                'deal' => redirect()->route('deals.show', $request->assigned_deal ?? $checkedInFrom),
+                'user' => $userId
+                    ? redirect()->route('users.show', $userId)
+                    : redirect()->route('users.index'),
+                'location' => $locationId
+                    ? redirect()->route('locations.show', $locationId)
+                    : redirect()->route('locations.index'),
+                'asset' => $assetId
+                    ? redirect()->route('hardware.show', $assetId)
+                    : redirect()->route('hardware.index'),
+                'contract' => $contractId
+                    ? redirect()->route('contracts.show', $contractId)
+                    : redirect()->route('contracts.index'),
+                'deal' => $dealId
+                    ? redirect()->route('deals.show', $assetId)
+                    : redirect()->route('deals.index'),
             };
         }
 
@@ -1704,6 +1785,8 @@ class Helper
             return [];
         }
 
+        $floater = (bool) Setting::getSettings()->null_company_is_floater;
+
         foreach ($locations as $location) {
             // in case of an update of a single location, use the newly requested company_id
             if ($new_company_id) {
@@ -1738,26 +1821,53 @@ class Helper
                 foreach ($keywords as $keyword) {
                     if ($relation == 'many') {
                         $items = $location->{$keyword}->all();
+                        // assignedAccessories returns AccessoryCheckout records (no company_id);
+                        // resolve each to its parent Accessory so the comparison is valid.
+                        if ($keyword === 'assignedAccessories') {
+                            $items = collect($items)->map(fn ($checkout) => $checkout->accessory)->filter()->values()->all();
+                        }
                     } else {
                         $items = collect([])->push($location->$keyword);
                     }
 
                     $count = 0;
                     foreach ($items as $item) {
+                        if (! $item) {
+                            continue;
+                        }
 
-                        if ($item && $item->company_id != $location_company) {
+                        // Users belong to companies via the many-to-many pivot (company_user).
+                        // canReceiveFromCompany() returns true only when the user's pivot
+                        // contains the location's company, so !canReceiveFromCompany() is
+                        // the correct mismatch signal. Pass $location_company through as
+                        // ?int — casting null to (int) would coerce it to 0 and miss the
+                        // null-company branch inside the method.
+                        if ($item instanceof User) {
+                            $isMismatch = ! $item->canReceiveFromCompany($location_company === null ? null : (int) $location_company);
+                        } elseif ($item->company_id == $location_company) {
+                            $isMismatch = false;
+                        } elseif (is_null($item->company_id) || is_null($location_company)) {
+                            $isMismatch = ! $floater;
+                        } else {
+                            $isMismatch = true;
+                        }
+
+                        if ($isMismatch) {
+                            if ($item instanceof User) {
+                                $itemCompanyIds = $item->companies->pluck('id')->implode(', ');
+                                $itemCompanyNames = $item->companies->pluck('name')->implode(', ');
+                            } else {
+                                $itemCompanyIds = $item->company_id ?? null;
+                                $itemCompanyNames = $item->company->name ?? null;
+                            }
 
                             $mismatched[] = [
                                 class_basename(get_class($item)),
                                 $item->id,
                                 $item->name ?? $item->asset_tag ?? $item->serial ?? $item->username,
                                 $item->assigned_type ? str_replace('App\\Models\\', '', $item->assigned_type) : null,
-                                $item->company_id ?? null,
-                                $item->company->name ?? null,
-                                //                                    $item->defaultLoc->id ?? null,
-                                //                                    $item->defaultLoc->name ?? null,
-                                //                                    $item->defaultLoc->company->id ?? null,
-                                //                                    $item->defaultLoc->company->name ?? null,
+                                $itemCompanyIds,
+                                $itemCompanyNames,
                                 $item->location->name ?? null,
                                 $item->location->company->name ?? null,
                                 $location_company ?? null,
@@ -1870,5 +1980,44 @@ class Helper
 
         return 'App\\Models\\'.ucwords($model);
 
+    }
+
+    /**
+     * Render a markdown-textarea value as HTML.
+     *
+     * Soft line breaks (single newlines) are rendered as <br> so that line
+     * breaks typed in the textarea are preserved in the output.
+     *
+     * When $inline is true, block-level elements are suppressed and hard
+     * breaks are pre-processed manually — used for the encrypted reveal span
+     * where block HTML cannot be placed inside a font-size-toggled <span>.
+     */
+    public static function renderMarkdown(?string $text, bool $inline = false): string
+    {
+        if (empty($text)) {
+            return '';
+        }
+
+        if ($inline) {
+            // Convert newlines to CommonMark hard breaks for inline rendering
+            $text = preg_replace('/(?<! {2})\n/', "  \n", $text);
+
+            return Str::inlineMarkdown($text, ['html_input' => 'escape', 'allow_unsafe_links' => false]);
+        }
+
+        $html = trim(Str::markdown($text, [
+            'html_input' => 'escape',
+            'allow_unsafe_links' => false,
+            'renderer' => ['soft_break' => "<br>\n"],
+        ]));
+
+        // If the entire output is a single <p> block, unwrap it so the content
+        // renders inline-ish without the <p> adding unwanted top spacing in the
+        // compact detail-view layout.
+        if (str_starts_with($html, '<p>') && str_ends_with($html, '</p>') && substr_count($html, '<p>') === 1) {
+            return substr($html, 3, -4);
+        }
+
+        return $html;
     }
 }

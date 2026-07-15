@@ -66,22 +66,22 @@
 
                                 <thead>
                                     <tr>
-                                        <th class="col-md-1" data-field="image" data-formatter="imageFormatter" data-sortable="true">{{ trans('general.image') }}</th>
-                                        <th class="col-md-2" data-field="asset_tag" data-sortable="true" >{{ trans('general.asset_tag') }}</th>
-                                        <th class="col-md-2" data-field="model" data-sortable="true">{{ trans('admin/hardware/table.asset_model') }}</th>
-                                        <th class="col-md-2" data-field="model_number" data-sortable="true">{{ trans('admin/models/table.modelnumber') }}</th>
-                                        <th class="col-md-2" data-field="name" data-sortable="true">{{ trans('admin/hardware/form.name') }}</th>
-                                        <th class="col-md-3" data-field="serial" data-sortable="true">{{ trans('admin/hardware/table.serial') }}</th>
-                                        <th class="col-md-2" data-field="location" data-sortable="true">{{ trans('admin/hardware/table.location') }}</th>
-                                        <th class="col-md-2" data-field="status" data-sortable="true">{{ trans('admin/hardware/table.status') }}</th>
-                                        <th class="col-md-2" data-field="expected_checkin" data-formatter="dateDisplayFormatter" data-sortable="true">{{ trans('admin/hardware/form.expected_checkin') }}</th>
+                                        <th scope="col" class="col-md-1" data-field="image" data-formatter="imageFormatter" data-sortable="true">{{ trans('general.image') }}</th>
+                                        <th scope="col" class="col-md-2" data-field="asset_tag" data-sortable="true" >{{ trans('general.asset_tag') }}</th>
+                                        <th scope="col" class="col-md-2" data-field="model" data-sortable="true">{{ trans('admin/hardware/table.asset_model') }}</th>
+                                        <th scope="col" class="col-md-2" data-field="model_number" data-sortable="true">{{ trans('admin/models/table.modelnumber') }}</th>
+                                        <th scope="col" class="col-md-2" data-field="name" data-sortable="true">{{ trans('admin/hardware/form.name') }}</th>
+                                        <th scope="col" class="col-md-3" data-field="serial" data-sortable="true">{{ trans('admin/hardware/table.serial') }}</th>
+                                        <th scope="col" class="col-md-2" data-field="location" data-sortable="true">{{ trans('admin/hardware/table.location') }}</th>
+                                        <th scope="col" class="col-md-2" data-field="status" data-sortable="true">{{ trans('admin/hardware/table.status') }}</th>
+                                        <th scope="col" class="col-md-2" data-field="expected_checkin" data-formatter="dateDisplayFormatter" data-sortable="true">{{ trans('admin/hardware/form.expected_checkin') }}</th>
 
                                         @foreach(\App\Models\CustomField::get() as $field)
                                             @if (($field->field_encrypted=='0') && ($field->show_in_requestable_list=='1'))
-                                                <th class="col-md-2" data-field="custom_fields.{{ $field->db_column }}" data-sortable="true">{{ $field->name }}</th>
+                                                <th scope="col" class="col-md-2" data-field="custom_fields.{{ $field->db_column }}" data-sortable="true">{{ $field->name }}</th>
                                             @endif
                                         @endforeach
-                                        <th class="col-md-1" data-formatter="assetRequestActionsFormatter" data-field="actions" data-sortable="false">{{ trans('table.actions') }}</th>
+                                        <th scope="col" class="col-md-1" data-formatter="assetRequestActionsFormatter" data-field="actions" data-sortable="false">{{ trans('table.actions') }}</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -102,11 +102,11 @@
                                         data-cookie-id-table="requestableAssets">
                                 <thead>
                                     <tr role="row">
-                                        <th class="col-md-1" data-sortable="true">{{ trans('general.image') }}</th>
-                                        <th class="col-md-6" data-sortable="true">{{ trans('admin/hardware/table.asset_model') }}</th>
-                                        <th class="col-md-3" data-sortable="true">{{ trans('admin/accessories/general.remaining') }}</th>
+                                        <th scope="col" class="col-md-1" data-sortable="true">{{ trans('general.image') }}</th>
+                                        <th scope="col" class="col-md-6" data-sortable="true">{{ trans('admin/hardware/table.asset_model') }}</th>
+                                        <th scope="col" class="col-md-3" data-sortable="true">{{ trans('admin/accessories/general.remaining') }}</th>
 
-                                        <th class="col-md-2 actions" data-sortable="false">{{ trans('table.actions') }}</th>
+                                        <th scope="col" class="col-md-2 actions" data-sortable="false">{{ trans('table.actions') }}</th>
                                     </tr>
                                 </thead>
 
@@ -118,7 +118,7 @@
 
                                                     @if (($requestableModel->image) && ($requestableModel->getImageUrl()))
                                                         <a href="{{ $requestableModel->getImageUrl() }}" data-toggle="lightbox" data-type="image">
-                                                            <img src="{{ $requestableModel->getImageUrl() }}" style="max-height: {{ $snipeSettings->thumbnail_max_h }}px; width: auto;" class="img-responsive">
+                                                            <img src="{{ $requestableModel->getImageUrl() }}" style="max-height: {{ $snipeSettings->thumbnail_max_h }}px; width: auto;" class="img-responsive" alt="">
                                                         </a>
                                                     @endif
 

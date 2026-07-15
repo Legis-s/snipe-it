@@ -1,6 +1,5 @@
 @extends('layouts/default')
 
-{{-- Вернуть актив на склад --}}
 {{-- Page title --}}
 @section('title')
     {{ trans('admin/hardware/general.checkin') }}
@@ -13,11 +12,6 @@
 
         .input-group {
             padding-left: 0px !important;
-        }
-        :root {
-            --gl-star-empty: url(/img/star-empty.svg);
-            --gl-star-full: url(/img/star-full.svg);
-            --gl-star-size: 32px;
         }
     </style>
 
@@ -101,7 +95,7 @@
                                             <div class="col-md-8">
                                                 <input class="form-control" type="text" name="name" aria-label="name"
                                                        id="name" value="{{ old('name', $asset->name) }}"/>
-                                                {!! $errors->first('name', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                                <x-form.error name="name" />
                                             </div>
                                         </div>
 
@@ -115,10 +109,30 @@
                                                     name="status_id"
                                                     id="modal-statuslabel_types"
                                                     :options="$statusLabel_list"
+                                                    :selected="old('status_id')"
                                                     style="width: 100%"
                                                     aria-label="status_id"
                                                 />
-                                                {!! $errors->first('status_id', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                                <x-form.error name="status_id" />
+                                            </div>
+                                        </div>
+
+                                        <div
+                                            class="form-group"
+                                            id="requestable-wrapper"
+                                            @if (! $show_requestable_toggle) style="display: none;" @endif
+                                        >
+                                            <div class="col-md-9 col-md-offset-3">
+                                                <label class="form-control" for="requestable">
+                                                    <input
+                                                        type="checkbox"
+                                                        value="1"
+                                                        name="requestable"
+                                                        id="requestable"
+                                                        @checked((bool) old('requestable', $asset->requestable))
+                                                    />
+                                                    {{ trans('admin/hardware/general.requestable') }}
+                                                </label>
                                             </div>
                                         </div>
 
@@ -127,22 +141,17 @@
                                             name="location_id"
                                             :help_text="($asset->defaultLoc) ? trans('general.checkin_to_diff_location', ['default_location' => $asset->defaultLoc->name]) : null"
                                             :selected="old('location_id')"
-                                            :hideNewButton="true"
                                         />
 
                                         <!-- Update actual location  -->
-                                        <div class="form-group">
-                                            <div class="col-md-9 col-md-offset-3">
-                                                <label class="form-control">
-                                                    <input name="update_default_location" type="radio" value="1" checked="checked" aria-label="update_default_location" />
-                                                    {{ trans('admin/hardware/form.asset_location') }}
-                                                </label>
-                                                <label class="form-control">
-                                                    <input name="update_default_location" type="radio" value="0" aria-label="update_default_location" />
-                                                    {{ trans('admin/hardware/form.asset_location_update_default_current') }}
-                                                </label>
-                                            </div>
-                                        </div> <!--/form-group-->
+                                        <x-form.radio-row
+                                            name="update_default_location"
+                                            selected="1"
+                                            :options="[
+                                                '1' => trans('admin/hardware/form.asset_location'),
+                                                '0' => trans('admin/hardware/form.asset_location_update_default_current'),
+                                            ]"
+                                        /> <!--/form-group-->
 
                                         <!-- Checkout/Checkin Date -->
                                         <div class="form-group{{ $errors->has('checkin_at') ? ' has-error' : '' }}">
@@ -162,7 +171,7 @@
                                                             <x-icon type="calendar" />
                                                         </span>
                                                     </div>
-                                                    {!! $errors->first('checkin_at', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                                    <x-form.error name="checkin_at" />
                                                 </div>
                                             </div>
                                         </div>
@@ -175,7 +184,7 @@
                                             <div class="col-md-8">
                                                 <textarea class="col-md-6 form-control" id="note" @required($snipeSettings->require_checkinout_notes)
                                                 name="note">{{ old('note', $asset->note) }}</textarea>
-                                                {!! $errors->first('note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                                <x-form.error name="note" />
                                             </div>
                                         </div>
 
@@ -186,31 +195,11 @@
                                                 'show_custom_fields_type' => 'checkin'
                                         ])
 
-                                        <!-- quality Cost -->
-                                        <div class="form-group {{ $errors->has('quality') ? ' has-error' : '' }}">
-                                            <label for="quality" class="col-md-3 control-label">Состояние</label>
-                                            <div class="col-md-9">
-                                                <div class="input-group col-md-4" style="padding-left: 0px;">
-                                                    <select class="star-rating" name="quality" id="quality">
-                                                        @php
-                                                            $quality = Request::old('quality', (isset($asset)) ? $asset->quality :null);
-                                                        @endphp
-                                                        <option @if (!isset($quality)) selected @endif value="">Оцените состояние</option>
-                                                        <option @if ($quality == 5) selected @endif value="5">Новое запакованное</option>
-                                                        <option @if ($quality == 4) selected @endif value="4">В отличном состоянии, но использовалось</option>
-                                                        <option @if ($quality == 3) selected @endif value="3">Рабочее, но с небольшими следами повреждений,
-                                                            небольшим загрязнением
-                                                        </option>
-                                                        <option @if ($quality == 2) selected @endif value="2">Частично рабочее или сильно загрязненное</option>
-                                                        <option @if ($quality == 1) selected @endif value="1">Полностью не рабочее</option>
-                                                    </select>
-                                                    {{--            <input class="form-control" type="text" name="quality" aria-label="quality" id="quality" value="{{ Input::old('depreciable_cost', \App\Helpers\Helper::formatCurrencyOutput($item->depreciable_cost)) }}" />--}}
-                                                </div>
-                                                <div class="col-md-9" style="padding-left: 0px;">
-                                                    {!! $errors->first('quality', '<span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span>') !!}
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <x-input.quality-select
+                                            :label="trans('general.quality')"
+                                            name="quality"
+                                            :selected="old('quality', $asset->quality)"
+                                        />
 
                                         <!-- life Cost -->
                                         <div class="form-group">
@@ -323,8 +312,6 @@
                                                 </div>
                                             </div>
                                         </div>
-
-
                     </div> <!--/.box-body-->
                 </div> <!--/.box-body-->
 
@@ -346,86 +333,88 @@
 
 @stop
 
-
-
 @section('moar_scripts')
     <script nonce="{{ csrf_token() }}">
-        $(function () {
-            var starRatingControl = new StarRating('.star-rating', {
-                maxStars: 5,
-                tooltip: 'Оцените состояние',
-                clearable: false,
-            });
-            calculeteCoast();
+        const initializeRequestableToggle = function () {
+            const deployableStatusIds = @json($deployable_status_ids);
+            const statusSelect = document.getElementById('modal-statuslabel_types')
+                ?? document.querySelector('select[name="status_id"]');
+            const requestableWrapper = document.getElementById('requestable-wrapper');
 
-            function calculeteCoast() {
+            if (!statusSelect || !requestableWrapper) {
+                return;
+            }
 
-                $buyVal = parseFloat($("#purchase_cost").val().replace(",",""));
-                $quality = parseInt($("#quality").val());
+            // Preserve the checkbox state when hiding: the server only applies the
+            // checkbox value when the selected status is deployable, so a hidden
+            // wrapper never lets us accidentally clear the asset's requestable
+            // flag. Users who bounce the status between deployable and non-
+            // deployable keep their original tick when they land back on a
+            // deployable status.
+            const toggleRequestable = function () {
+                const selectedStatusValue = statusSelect.value;
+                const selectedStatusId = Number.parseInt(selectedStatusValue, 10);
+                const isDeployable = selectedStatusValue !== ''
+                    && Number.isInteger(selectedStatusId)
+                    && deployableStatusIds.includes(selectedStatusId);
 
-                if ($buyVal > 0 && $quality > 0) {
-                    //quality count
-                    $quality_divider = 1;
-                    switch ($quality) {
-                        case 4:
-                            $quality_divider = 0.8
-                            break;
-                        case 3:
-                            $quality_divider = 0.50
-                            break;
-                        case 2:
-                            $quality_divider = 0.3
-                            break;
-                        case 1:
-                            $quality_divider = 0
-                            break;
-                    }
+                requestableWrapper.style.display = isDeployable ? '' : 'none';
+            };
 
+            statusSelect.addEventListener('change', toggleRequestable);
 
-                    @if (isset($asset->model) && isset($asset->model->depreciation) && isset($asset->model->depreciation->months))
-                        $lifetime = {{$asset->model->depreciation->months}};
-                    @else
-                        $lifetime = 36;
-                    @endif
+            if (window.jQuery) {
+                window.jQuery(statusSelect).on('select2:select select2:clear', toggleRequestable);
+            }
 
-                            @if (isset($asset->purchase_date))
-                        $buydate = "{{$asset->purchase_date}}";
-                    $buydate = new Date($buydate.substr(0, 10));
-                    $usetime = monthDiff($buydate);
-                    if ($usetime <= 12) {
-                        $time_divider = 0;
-                    } else {
-                        $time_divider = ($lifetime - $usetime) / $lifetime;
-                        if ($time_divider < 0) {
-                            $time_divider = 0;
-                        }
-                    }
-                    @else
-                        $time_divider = 1 / 3;
-                    @endif
+            toggleRequestable();
+        };
 
-                    // console.log(`HelcalculeteCoastlo $usetime ${$usetime}  $lifetime${$lifetime}`)
-                    $newVal = (($buyVal - ($buyVal/$lifetime) * $usetime) * $quality_divider).toFixed(2);
-                    if ($newVal<0){
-                        $newVal = 0;
-                    }
-                    $("#new_depreciable_cost").val($newVal);
+        // Per-user localStorage preference for the requestable default on
+        // checkin. Namespaced by user id so a shared browser session doesn't
+        // leak one user's habit into another user's default. Only takes over
+        // when the field wasn't repopulated from a validation-error redirect
+        // (old() beats the stored preference). On submit we save whatever the
+        // user actually chose, so the preference tracks their real habit.
+        const initializeRequestablePreference = function () {
+            const storageKey = 'snipeit.checkin.requestable_default.' + @json(auth()->id() ?? 'guest');
+            const hadOldInput = @json((bool) old('requestable', false)) || @json(session()->has('_old_input.requestable'));
+            const checkbox = document.getElementById('requestable');
+            const form = checkbox ? checkbox.closest('form') : null;
+
+            if (!checkbox || !form) {
+                return;
+            }
+
+            if (!hadOldInput) {
+                let stored = null;
+                try {
+                    stored = window.localStorage.getItem(storageKey);
+                } catch (e) {
+                    // localStorage may be unavailable (private mode, disabled).
+                }
+                if (stored === '1' || stored === '0') {
+                    checkbox.checked = stored === '1';
                 }
             }
 
-            $("#quality").change(function () {
-                calculeteCoast();
+            form.addEventListener('submit', function () {
+                try {
+                    window.localStorage.setItem(storageKey, checkbox.checked ? '1' : '0');
+                } catch (e) {
+                    // Non-fatal: preference just won't persist this time.
+                }
             });
+        };
 
-            $("#purchase_cost").change(function () {
-                calculeteCoast();
-            });
-
-            function monthDiff(dateFrom) {
-                var dateTo = new Date();
-                return dateTo.getMonth() - dateFrom.getMonth() +
-                    (12 * (dateTo.getFullYear() - dateFrom.getFullYear()))
-            }
-        });
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeRequestableToggle);
+            document.addEventListener('DOMContentLoaded', initializeRequestablePreference);
+        } else {
+            initializeRequestableToggle();
+            initializeRequestablePreference();
+        }
     </script>
+
+    @include('partials.hardware-depreciable-cost-calculator')
 @stop

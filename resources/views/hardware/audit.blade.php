@@ -67,7 +67,7 @@
                         @endif
 
                         <!-- Locations -->
-                    @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'location_id'])
+                    @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'location_id', 'company_id' => $asset->company_id])
 
                     <!-- Update location -->
                         <div class="form-group">
@@ -110,7 +110,7 @@
                                     <input type="text" class="form-control" placeholder="{{ trans('general.next_audit_date') }}" name="next_audit_date" id="next_audit_date" value="{{ old('next_audit_date', $next_audit_date) }}">
                                     <span class="input-group-addon"><x-icon type="calendar" /></span>
                                 </div>
-                                {!! $errors->first('next_audit_date', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                <x-form.error name="next_audit_date" />
                                  <p class="help-block">{!! trans('general.next_audit_date_help') !!}</p>
                             </div>
                         </div>
@@ -123,12 +123,12 @@
                             </label>
                             <div class="col-md-8">
                                 <textarea class="col-md-6 form-control" id="note" name="note">{{ old('note', $asset->note) }}</textarea>
-                                {!! $errors->first('note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                <x-form.error name="note" />
                             </div>
                         </div>
 
                         <!-- Audit Image -->
-                        @include ('partials.forms.edit.image-upload', ['help_text' => trans('general.audit_images_help')])
+                        <x-input.image-upload :helpText="trans('general.audit_images_help')" />
 
                         <!-- Custom fields -->
                         @include("models/custom_fields_form", [

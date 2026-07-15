@@ -9,7 +9,7 @@
 @endsection
 
 @section('header_right')
-    <i class="fa-regular fa-2x fa-square-caret-right pull-right" id="expand-info-panel-button" data-tooltip="true" title="{{ trans('button.show_hide_info') }}"></i>
+    <x-button.info-panel-toggle/>
 @endsection
 
 {{-- Page content --}}
@@ -61,7 +61,7 @@
 
         <x-page-column class="col-md-3">
             <x-box class="side-box expanded">
-                <x-info-panel :infoPanelObj="$consumable" img_path="{{ app('consumables_upload_url') }}">
+                <x-info-panel :infoPanelObj="$consumable" img_path="{{ app('consumables_upload_url') }}" :qr_code_url="route('qr_code/common', ['object_type' => 'consumables', 'id' => $consumable->id])">
 
                     <x-slot:buttons>
                         <x-button.edit :item="$consumable" :route="route('consumables.edit', $consumable->id)"/>

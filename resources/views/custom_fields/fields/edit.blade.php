@@ -10,10 +10,6 @@
 @parent
 @stop
 
-@section('content')
-
-
-
 {{-- Page content --}}
 @section('content')
 
@@ -43,7 +39,7 @@
             </label>
             <div class="col-md-8 required">
                 <input class="form-control" aria-label="name" name="name" type="text" required value="{{ old('name', $field->name) }}">
-                {!! $errors->first('name', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                <x-form.error name="name" />
             </div>
           </div>
 
@@ -63,11 +59,12 @@
                     'text' => trans('admin/custom_fields/general.types.text'),
                     'listbox' => trans('admin/custom_fields/general.types.listbox'),
                     'textarea' => trans('admin/custom_fields/general.types.textarea'),
+                    'markdown-textarea' => trans('admin/custom_fields/general.types.markdown-textarea'),
                     'checkbox' => trans('admin/custom_fields/general.types.checkbox'),
                     'radio' => trans('admin/custom_fields/general.types.radio'),
                 ]"
             />
-            {!! $errors->first('element', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+            <x-form.error name="element" />
 
             </div>
           </div>
@@ -85,7 +82,7 @@
                     rows="4"
                     aria-label="field_values"
                 />
-              {!! $errors->first('field_values', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+              <x-form.error name="field_values" />
               <p class="help-block">{{ trans('admin/custom_fields/general.field_values_help') }}</p>
             </div>
           </div>
@@ -110,7 +107,7 @@
                     style="width:100%"
                     aria-label="format"
                 />
-              {!! $errors->first('format', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+              <x-form.error name="format" />
             </div>
           </div>
           <!-- Custom Format -->
@@ -122,7 +119,7 @@
                 <input class="form-control" id="custom_format" aria-label="custom_format" maxlength="191" placeholder="regex:/^[0-9]{15}$/" name="custom_format" type="text" value="{{ old('custom_format', (($field->format!='') && (stripos($field->format,'regex')===0)) ? $field->format : '') }}">
                 <p class="help-block">{!! trans('admin/custom_fields/general.field_custom_format_help') !!}</p>
 
-              {!! $errors->first('custom_format', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+              <x-form.error name="custom_format" />
 
             </div>
           </div>
@@ -135,7 +132,7 @@
               <div class="col-md-8">
                   <input class="form-control" aria-label="help_text" name="help_text" type="text" value=" {{ old('help_text', $field->help_text) }}">
                   <p class="help-block">{{ trans('admin/custom_fields/general.help_text_description') }}</p>
-                  {!! $errors->first('help_text', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                  <x-form.error name="help_text" />
               </div>
           </div>
 
@@ -163,7 +160,7 @@
                   </label>
               </div>
               <div class="col-md-9 col-md-offset-3" id="encrypt_warning" style="display:none;">
-                  <div class="callout callout-danger">
+                  <div class="callout callout-danger" role="alert" aria-live="assertive" aria-atomic="true">
                       <p><x-icon type="warning" /> {{ trans('admin/custom_fields/general.encrypt_field_help') }}</p>
                   </div>
               </div>
@@ -260,7 +257,7 @@
           <div class="col-md-4">
 
               <h4>{{ trans('admin/custom_fields/general.fieldsets') }}</h4>
-              {!! $errors->first('associate_fieldsets', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+              <x-form.error name="associate_fieldsets" />
 
               <label class="form-control">
                   <input type="checkbox" id="checkAll">
@@ -289,7 +286,7 @@
                                      value="{{ $fieldset->id }}"
                                     {{ $checked }}>
                               {{ $fieldset->name }}
-                              {!! $errors->first('associate_fieldsets.'.$fieldset->id, '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                              <x-form.error :name="'associate_fieldsets.'.$fieldset->id" />
 
                           </label>
 
@@ -347,7 +344,7 @@
         // and don't display encryption option for checkbox or radio
         $(".field_element").change(function(){
             $(this).find("option:selected").each(function(){
-                if (($(this).attr("value")!="text") && ($(this).attr("value")!="textarea")){
+                if (($(this).attr("value") != "text") && ($(this).attr("value") != "textarea") && ($(this).attr("value") != "markdown-textarea")) {
                     $("#field_values_text").show();
                 if ($(this).attr("value") == "checkbox" || $(this).attr("value") == "radio") {
                     $("#encryption_section").hide();

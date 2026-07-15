@@ -64,6 +64,7 @@ return [
         'text' => 'Text Box',
         'listbox' => 'List Box',
         'textarea' => 'Textarea (multi-line)',
+        'markdown-textarea' => 'Markdown Textarea',
         'checkbox' => 'Checkbox',
         'radio' => 'Radio Buttons',
     ],

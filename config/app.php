@@ -12,7 +12,6 @@ use App\Providers\RouteServiceProvider;
 use App\Providers\SamlServiceProvider;
 use App\Providers\SettingsServiceProvider;
 use App\Providers\SnipeTranslationServiceProvider;
-use Elibyy\TCPDF\Facades\TCPDF;
 use Illuminate\Auth\AuthServiceProvider;
 use Illuminate\Auth\Passwords\PasswordResetServiceProvider;
 use Illuminate\Broadcasting\BroadcastServiceProvider;
@@ -234,6 +233,41 @@ return [
     'allow_iframing' => env('ALLOW_IFRAMING', false),
 
     /*
+   |--------------------------------------------------------------------------
+   | ALLOW INTERNAL WEBHOOK TARGETS
+   |--------------------------------------------------------------------------
+   |
+   | By default the webhook endpoint validator refuses URLs that resolve to
+   | loopback, link-local, RFC-1918, or otherwise-non-public IPs. This
+   | prevents a super-admin (or someone who has taken over a super-admin
+   | account) from turning the outbound notification path into an SSRF
+   | primitive against internal services or cloud metadata endpoints.
+   |
+   | Some operators legitimately run their own webhook receiver on the same
+   | private network as Snipe-IT (self-hosted Mattermost, Rocket.Chat, an
+   | internal ChatOps bot, etc.). Setting this to true re-enables outbound
+   | requests to those addresses. Scheme restrictions (http/https only) are
+   | still enforced. Leave this off unless you know you need it.
+   |
+   */
+    'webhook_allow_internal_targets' => env('WEBHOOK_ALLOW_INTERNAL_TARGETS', false),
+
+    /*
+   |--------------------------------------------------------------------------
+   | LOG AUTHED USER HEADER
+   |--------------------------------------------------------------------------
+   |
+   | This is an additional header that can be enabled to include the authenticated user's ID
+   | in the response headers of each request. This can be useful for debugging and auditing purposes,
+   | but it may also expose sensitive information if not used carefully.
+   | It should normally be set to false unless you have a specific need for it and
+   | understand the security implications.
+   |
+   */
+
+    'authorized_user_header' => env('INCLUDE_AUTHED_USER_HEADER', false),
+
+    /*
     |--------------------------------------------------------------------------
     | ENABLE HTTP Strict Transport Security (HSTS)
     |--------------------------------------------------------------------------
@@ -325,6 +359,41 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Superuser Impersonation
+    |--------------------------------------------------------------------------
+    |
+    | Comma-separated list of usernames allowed to impersonate other users.
+    | Users in this list must ALSO be superusers. Empty or unset means the
+    | feature is completely off. Wrap usernames that contain commas in double
+    | quotes. Example: ALLOW_USER_IMPERSONATION=admin,"jane, doe"
+    |
+    */
+
+    'user_impersonation_usernames' => (function () {
+        $raw = env('ALLOW_USER_IMPERSONATION', '');
+
+        // Reject anything that isn't a string. env() converts literal "true"/"false"/"null"/etc.
+        // to PHP bool/null, which would otherwise stringify to garbage tokens.
+        if (! is_string($raw) || trim($raw) === '') {
+            return [];
+        }
+
+        $usernames = [];
+        $seen = [];
+        foreach (str_getcsv($raw, ',', '"', '\\') as $token) {
+            $token = trim((string) $token);
+            $lower = mb_strtolower($token);
+            if ($token !== '' && ! isset($seen[$lower])) {
+                $usernames[] = $token;
+                $seen[$lower] = true;
+            }
+        }
+
+        return $usernames;
+    })(),
+
+    /*
+    |--------------------------------------------------------------------------
     | Minimum PHP version
     |--------------------------------------------------------------------------
     |
@@ -385,8 +454,6 @@ return [
         DumbPasswordServiceProvider::class,
         Eduardokum\LaravelMailAutoEmbed\ServiceProvider::class,
         SocialiteServiceProvider::class,
-        Elibyy\TCPDF\ServiceProvider::class,
-
         /*
         * Application Service Providers...
         */
@@ -442,7 +509,6 @@ return [
         'Mail' => Mail::class,
         'Notification' => Notification::class,
         'Password' => Password::class,
-        'PDF' => TCPDF::class,
         'Queue' => Queue::class,
         'Redirect' => Redirect::class,
         'Redis' => Redis::class,

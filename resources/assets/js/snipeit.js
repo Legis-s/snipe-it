@@ -31,7 +31,6 @@ require('./extensions/pGenerator.jquery'); //WEIRD, but works
 window.SignaturePad = require('./signature_pad'); //ALSO WEIRD - but works
 require('jquery-validation')
 window.List = require('list.js')
-window.StarRating = require('star-rating.js')
 window.ClipboardJS = require('clipboard')
 // TODO - find everything using moment.js and kill it or upgrade it? It's huge
 // - adminLTE (UGH)
@@ -150,8 +149,8 @@ $(function () {
         // deleteForm is the ID of the modal form itself
         $('#deleteForm').attr('action', href);
         $dataConfirmModal.find('.modal-header-icon').addClass(headericon);
-        $dataConfirmModal.find('.modal-title').text(title).prepend('<i class="fa ' + headericon + '"></i> ');
-        $dataConfirmModal.find('.modal-body').text(message);
+        $dataConfirmModal.find('.modal-title').text('').text(title).prepend('<i class="fa ' + headericon + '"></i> ');
+        $dataConfirmModal.find('.modal-body').text('').text(message);
         $dataConfirmModal.attr('action', href);
 
         // Fire the modal
@@ -211,7 +210,13 @@ $(function () {
                         search: params.term,
                         page: params.page || 1,
                         statusType: link.data("asset-status-type"),
-                        companyId: link.data("company-id"),
+                        companyId: link.data("company-ids") || link.data("company-id"),
+                        excludeId: link.data("exclude-id"),
+                        // When true, the companies selectlist marks child companies
+                        // (those with a parent of their own) as disabled — used by
+                        // the parent-company picker so users can't choose options
+                        // that would fail the parent_must_be_top_level validator.
+                        onlyTopLevel: link.data("only-top-level"),
                     };
                     return data;
                 },
@@ -417,7 +422,13 @@ $(function () {
     // This handles the radio button selectors for the checkout-to-foo options
     // on asset checkout and also on asset edit
     $(function() {
-        $('input[name=checkout_to_type]').on("change",function () {
+        var checkoutToTypeInputs = $('input[name=checkout_to_type]');
+
+        if (!checkoutToTypeInputs.length) {
+            return;
+        }
+
+        function syncCheckoutToTypeUi(resetSelections) {
             var assignto_type = $('input[name=checkout_to_type]:checked').val();
             var userid = $('#assigned_user option:selected').val();
 
@@ -426,57 +437,63 @@ $(function () {
                 $('#assigned_asset').show();
                 $('#assigned_user').hide();
                 $('#assigned_location').hide();
-                $('#assigned_deal').hide();
-                $('#rent_box').hide();
                 $('.notification-callout').fadeOut();
 
-                $('[name="assigned_location"]').val('').trigger('change.select2');
-                $('[name="assigned_user"]').val('').trigger('change.select2');
-
+                if (resetSelections) {
+                    $('[name="assigned_location"]').val('').trigger('change.select2');
+                    $('[name="assigned_user"]').val('').trigger('change.select2');
+                }
             } else if (assignto_type == 'location') {
                 $('#current_assets_box').fadeOut();
                 $('#assigned_asset').hide();
                 $('#assigned_user').hide();
                 $('#assigned_location').show();
-                $('#assigned_deal').hide();
-                $('#rent_box').hide();
                 $('.notification-callout').fadeOut();
 
-                $('[name="assigned_asset"]').val('').trigger('change.select2');
-                $('[name="assigned_user"]').val('').trigger('change.select2');
-            } else if (assignto_type == 'deal') {
-                $('#current_assets_box').fadeOut();
-                $('#assigned_asset').hide();
-                $('#assigned_user').hide();
-                $('#assigned_location').hide();
-                $('#assigned_deal').show();
-                $('#rent_box').show();
-                $('.notification-callout').fadeOut();
-
-                $('[name="assigned_asset"]').val('').trigger('change.select2');
-                $('[name="assigned_user"]').val('').trigger('change.select2');
-            } else  {
-
+                if (resetSelections) {
+                    $('[name="assigned_asset"]').val('').trigger('change.select2');
+                    $('[name="assigned_user"]').val('').trigger('change.select2');
+                }
+            } else {
                 $('#assigned_asset').hide();
                 $('#assigned_user').show();
                 $('#assigned_location').hide();
                 if (userid) {
                     $('#current_assets_box').fadeIn();
                 }
-                $('#assigned_deal').hide();
-                $('#rent_box').hide();
                 $('.notification-callout').fadeIn();
 
-                $('[name="assigned_asset"]').val('').trigger('change.select2');
-                $('[name="assigned_location"]').val('').trigger('change.select2');
+                if (resetSelections) {
+                    $('[name="assigned_asset"]').val('').trigger('change.select2');
+                    $('[name="assigned_location"]').val('').trigger('change.select2');
+                }
             }
+        }
+
+        checkoutToTypeInputs.on('change', function () {
+            syncCheckoutToTypeUi(true);
         });
-        const stars = new StarRating('.star-rating', {
-            maxStars: 5,
-            tooltip: 'Оцените состояние',
-            clearable: false,
-        });
+
+        // Expose so pages that reveal #assignto_selector later (asset edit's
+        // user_add() flow, etc.) can trigger the sync once the selector is
+        // visible. Standalone checkout pages don't need to call this — the
+        // initial-render block below handles them.
+        window.snipeitSyncCheckoutToTypeUi = syncCheckoutToTypeUi;
+
+        // Apply the current radio selection on initial render unless the page
+        // has explicitly hidden the selector via an inline style="display:none"
+        // (asset create/edit start that way and reveal it from user_add() after
+        // a deployability AJAX call). Using getAttribute('style') instead of
+        // jQuery's :visible avoids false negatives on pages like the standalone
+        // /hardware/{id}/checkout, where the selector is visible from the start
+        // but :visible can transiently return false during select2 boot — that
+        // was what hid the acceptance-options callout until a radio was toggled.
+        var selectorStyle = ($('#assignto_selector').attr('style') || '').toLowerCase();
+        if (selectorStyle.indexOf('display:none') === -1 && selectorStyle.indexOf('display: none') === -1) {
+            syncCheckoutToTypeUi(false);
+        }
     });
+
 
     // ------------------------------------------------
     // Deep linking for Bootstrap tabs
@@ -601,6 +618,18 @@ function htmlEntities(str) {
     
 })(jQuery);
 
+$(document).ready(function () {
+    $(".toggle-password").click(function () {
+        $(this).toggleClass("fa-eye fa-eye-slash");
+        var input = $($(this).attr("data-toggle"));
+        if (input.attr("type") === "password") {
+            input.attr("type", "text");
+        } else {
+            input.attr("type", "password");
+        }
+    });
+});
+
 
 
 /**
@@ -621,6 +650,11 @@ document.addEventListener('livewire:init', () => {
         if(!event.target.name || !target.data('livewire-component')) {
             console.error("You need to set both name (which should match a Livewire property) and data-livewire-component on your Livewire-ed select2 elements!")
             console.error("For data-livewire-component, you probably want to use $this->getId() or {{ $this->getId() }}, as appropriate")
+            return false
+        }
+        // PHP property names cannot start with a digit — skip bare numeric names (e.g. "0") that would cause a 500
+        if (/^\d+$/.test(event.target.name)) {
+            console.error("Livewire select2: name attribute '" + event.target.name + "' is not a valid Livewire property name — skipping")
             return false
         }
         Livewire.find(target.data('livewire-component')).set(event.target.name, this.options[this.selectedIndex].value)

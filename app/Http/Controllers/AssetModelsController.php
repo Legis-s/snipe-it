@@ -290,6 +290,11 @@ class AssetModelsController extends Controller
         $this->authorize('create', AssetModel::class);
 
         $cloned_model = clone $model;
+        // Preserve the source model's id BEFORE we blank the working copy — the
+        // fieldset picker Livewire component uses model_id to look up the source
+        // model's fieldset and default values, so the clone form arrives with
+        // the same fieldset preselected. Regression: #19286.
+        $source_model_id = $model->id;
         $model->id = null;
         $model->deleted_at = null;
 
@@ -297,7 +302,7 @@ class AssetModelsController extends Controller
         return view('models/edit')
             ->with('depreciation_list', Helper::depreciationList())
             ->with('item', $model)
-            ->with('model_id', $model->id)
+            ->with('model_id', $source_model_id)
             ->with('cloned_model', $cloned_model);
     }
 

@@ -188,6 +188,13 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             ]
         )->name('api.purchases.consumables_check');
 
+        Route::post('{purchase}/consumables_line',
+            [
+                Api\PurchasesController::class,
+                'update_consumables_line'
+            ]
+        )->name('api.purchases.consumables_line');
+
 
         Route::post('{purchase}/in_payment',
             [

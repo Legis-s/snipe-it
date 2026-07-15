@@ -29,7 +29,7 @@
 
                       @if (!config('app.lock_passwords'))
                           <x-input.locale-select name="locale" :selected="old('locale', $user->locale)"/>
-                          {!! $errors->first('locale', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                          <x-form.error name="locale" />
                       @else
                           <p class="help-block">{{ trans('general.feature_disabled') }}</p>
                       @endif
@@ -42,17 +42,17 @@
                   <label for="nav_link_color" class="col-md-3 control-label">{{ trans('admin/settings/general.nav_link_color') }}</label>
                   <div class="col-md-9">
                       <x-input.colorpicker :item="$user" placeholder="#ffffff" div_id="nav-link-color" id="nav-link-color" :value="old('nav_link_color', ($user->nav_link_color ?? '#ffffff'))" name="nav_link_color" />
-                      {!! $errors->first('nav_link_color', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                      <x-form.error name="nav_link_color" />
                       <p class="help-block">{{ trans('admin/settings/general.nav_link_color_help') }}</p>
                   </div>
               </div>
 
               <!-- Light Link color -->
-              <div class="form-group {{ $errors->has('link_dark_color') ? 'error' : '' }}">
+              <div class="form-group {{ $errors->has('link_light_color') ? 'error' : '' }}">
                   <label for="link_light_color" class="col-md-3 control-label">{{ trans('admin/settings/general.link_light_color') }}</label>
                   <div class="col-md-9">
-                      <x-input.colorpicker :item="$user" id="link_light_color" placeholder="{{ $link_dark_color }}" :value="old('link_light_color', ($user->link_dark_color ?? $link_dark_color))" name="link_light_color" />
-                      {!! $errors->first('link_light_color', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                      <x-input.colorpicker :item="$user" id="link_light_color" placeholder="{{ $link_light_color }}" :value="old('link_light_color', ($user->link_light_color ?? $link_light_color))" name="link_light_color" />
+                      <x-form.error name="link_light_color" />
                       <p class="help-block">{{ trans('admin/settings/general.link_light_color_help') }}</p>
                   </div>
               </div>
@@ -62,7 +62,7 @@
                   <label for="link_dark_color" class="col-md-3 control-label">{{ trans('admin/settings/general.link_dark_color') }}</label>
                   <div class="col-md-9">
                       <x-input.colorpicker :item="$user" id="link_dark_color" placeholder="{{ $link_light_color }}" :value="old('link_dark_color', $link_light_color)" name="link_dark_color" />
-                      {!! $errors->first('link_dark_color', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                      <x-form.error name="link_dark_color" />
                       <p class="help-block">{{ trans('admin/settings/general.link_dark_color_help') }}</p>
                   </div>
               </div>
@@ -84,23 +84,17 @@
               </div>
 
 
-              <div class="form-group">
-                  <div class="col-md-9 col-md-offset-3">
-                      <label class="form-control">
-                          <input type="checkbox" id="enable_sounds" name="enable_sounds" value="1" {{ old('enable_sounds', $user->enable_sounds) ? 'checked' : '' }}>
-                          {{ trans('account/general.enable_sounds') }}
-                      </label>
-                  </div>
-              </div>
+              <x-form.checkbox-row
+                  name="enable_sounds"
+                  :label="trans('account/general.enable_sounds')"
+                  :item="$user"
+              />
 
-              <div class="form-group">
-                  <div class="col-md-9 col-md-offset-3">
-                      <label class="form-control">
-                          <input type="checkbox" name="enable_confetti" id="enable_confetti" value="1" {{ old('enable_confetti', $user->enable_confetti) ? 'checked' : '' }}>
-                          {{ trans('account/general.enable_confetti') }}
-                      </label>
-                  </div>
-              </div>
+              <x-form.checkbox-row
+                  name="enable_confetti"
+                  :label="trans('account/general.enable_confetti')"
+                  :item="$user"
+              />
 
 
 
@@ -119,7 +113,7 @@
                       </label>
                       <div class="col-md-8 required">
                         <input class="form-control" type="text" name="first_name" id="first_name" value="{{ old('first_name', $user->first_name) }}" required />
-                        {!! $errors->first('first_name', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                        <x-form.error name="first_name" />
                       </div>
                     </div>
 
@@ -130,7 +124,7 @@
                       </label>
                       <div class="col-md-8 required">
                         <input class="form-control" type="text" name="last_name" id="last_name" value="{{ old('last_name', $user->last_name) }}" />
-                        {!! $errors->first('last_name', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                        <x-form.error name="last_name" />
                       </div>
                     </div>
 
@@ -146,7 +140,7 @@
                       <label class="col-md-3 control-label" for="phone">{{ trans('admin/users/table.phone') }}</label>
                       <div class="col-md-4">
                         <input class="form-control" type="text" name="phone" id="phone" value="{{ old('phone', $user->phone) }}" />
-                        {!! $errors->first('phone', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                        <x-form.error name="phone" />
                       </div>
                     </div>
 
@@ -155,7 +149,7 @@
                       <label for="website" class="col-md-3 control-label">{{ trans('general.website') }}</label>
                       <div class="col-md-8">
                         <input class="form-control" type="text" name="website" id="website" value="{{ old('website', $user->website) }}" />
-                        {!! $errors->first('website', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                        <x-form.error name="website" />
                       </div>
                     </div>
 
@@ -169,15 +163,15 @@
                             <input type="checkbox" name="image_delete" id="image_delete" value="1" @checked(old('image_delete')) aria-label="image_delete">
                             {{ trans('general.image_delete') }}
                           </label>
-                          {!! $errors->first('image_delete', '<span class="alert-msg">:message</span>') !!}
+                          <x-form.error name="image_delete" />
                           @endif
                         </div>
                       </div>
 
                       <div class="form-group">
                         <div class="col-md-9 col-md-offset-3">
-                          <img src="{{ (($user->isAvatarExternal()) ? $user->avatar : Storage::disk('public')->url(app('users_upload_path').e($user->avatar))) }}" class="img-responsive">
-                          {!! $errors->first('image_delete', '<span class="alert-msg">:message</span>') !!}
+                          <img src="{{ (($user->isAvatarExternal()) ? $user->avatar : Storage::disk('public')->url(app('users_upload_path').e($user->avatar))) }}" class="img-responsive" alt="{{ $user->display_name }} avatar image">
+                          <x-form.error name="image_delete" />
                         </div>
                       </div>
 
@@ -189,7 +183,7 @@
                         </label>
                         <div class="col-md-8">
                           <input class="form-control" type="text" name="gravatar" id="gravatar" value="{{ old('gravatar', $user->gravatar) }}" />
-                          {!! $errors->first('gravatar', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                          <x-form.error name="gravatar" />
                           <p style="padding-top: 3px;">
                             <img src="//secure.gravatar.com/avatar/{{ md5(strtolower(trim($user->gravatar))) }}" width="30" height="30" alt="{{ $user->display_name }} avatar image">
                             {!! trans('general.gravatar_url') !!}
@@ -200,7 +194,7 @@
                     @endif
 
 
-                    @include ('partials.forms.edit.image-upload', ['fieldname' => 'avatar', 'image_path' => app('users_upload_path')])
+                    <x-input.image-upload :item="$user" fieldname="avatar" :imagePath="app('users_upload_path')" />
 
 
                     <!-- Two factor opt in -->

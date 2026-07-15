@@ -21,13 +21,13 @@
                 @endisset
                 <select id="js-select-status">
                     <option value="0"></option>
-                    <option value="inventory">В процессе инвентаризации</option>
-                    <option value="in_payment">В оплате</option>
-                    <option value="review">В процессе проверки</option>
-                    <option value="finished">Завершено</option>
-                    <option value="rejected">Отклонено</option>
-                    <option value="paid">Оплачено</option>
-                    <option value="inprogress">>На согласовании</option>
+                    <option value="inventory">{{ trans('general.purchase_statuses.inventory') }}</option>
+                    <option value="in_payment">{{ trans('general.purchase_statuses.in_payment') }}</option>
+                    <option value="review">{{ trans('general.purchase_statuses.review') }}</option>
+                    <option value="finished">{{ trans('general.purchase_statuses.finished') }}</option>
+                    <option value="rejected">{{ trans('general.purchase_statuses.rejected') }}</option>
+                    <option value="paid">{{ trans('general.purchase_statuses.paid') }}</option>
+                    <option value="inprogress">{{ trans('general.purchase_statuses.inprogress') }}</option>
                 </select>
             </div>
             <table
@@ -79,7 +79,7 @@
             })
 
             $select_user.select2({
-                placeholder: 'Выберите пользователя',
+                placeholder: {{ Illuminate\Support\Js::from(trans('general.select_user')) }},
                 allowClear: true,
                 width: "200px"
             }).on('select2:select', function (e) {
@@ -88,7 +88,7 @@
                 $table.bootstrapTable('refresh');
             });
             $select_status.select2({
-                placeholder: 'Выберите статус',
+                placeholder: {{ Illuminate\Support\Js::from(trans('general.select_statuslabel')) }},
                 allowClear: true,
                 width: "200px"
             }).on('select2:select', function (e) {
@@ -99,4 +99,3 @@
         });
     </script>
 @stop
-
