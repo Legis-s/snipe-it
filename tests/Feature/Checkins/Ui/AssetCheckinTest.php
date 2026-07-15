@@ -7,6 +7,7 @@ use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\CheckoutAcceptance;
 use App\Models\Company;
+use App\Models\Contract;
 use App\Models\LicenseSeat;
 use App\Models\Location;
 use App\Models\Statuslabel;
@@ -416,6 +417,25 @@ class AssetCheckinTest extends TestCase
             ->assertStatus(302)
             ->assertSessionHasNoErrors()
             ->assertRedirect(route('hardware.show', $asset));
+    }
+
+    public function test_asset_assigned_to_contract_can_be_checked_in(): void
+    {
+        $contract = Contract::create(['name' => 'Checkin contract']);
+        $asset = Asset::factory()->create([
+            'assigned_to' => $contract->id,
+            'assigned_type' => Contract::class,
+        ]);
+
+        $this->actingAs(User::factory()->checkinAssets()->create())
+            ->post(route('hardware.checkin.store', $asset), [
+                'redirect_option' => 'target',
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('contracts.show', $contract));
+
+        $this->assertNull($asset->fresh()->assigned_to);
+        $this->assertNull($asset->fresh()->assigned_type);
     }
 
     public function test_deleted_checked_out_asset_checkin_page_renders()

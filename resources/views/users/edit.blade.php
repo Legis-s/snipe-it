@@ -714,7 +714,7 @@
                                   {!! $errors->first('new_bitrix_token', '<span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span>') !!}
                               </div>
                           </div>
-                          @include('partials.forms.custom.location_bitrix_id')
+                          @include('partials.forms.custom.bitrix_id')
 
                       </div>
                   </div>

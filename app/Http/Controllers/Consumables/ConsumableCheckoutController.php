@@ -3,25 +3,20 @@
 namespace App\Http\Controllers\Consumables;
 
 use App\Actions\Acceptances\CreateCheckoutAcceptanceAction;
-use App\Events\CheckoutableCheckedOut;
-use App\Events\CheckoutableSell;
 use App\Helpers\Helper;
-use App\Http\Controllers\CheckInOutRequest;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ConsumableCheckoutRequest;
+use App\Http\Traits\CheckInOutTrait;
 use App\Models\CheckoutAcceptance;
 use App\Models\Consumable;
-use App\Models\Deal;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use App\Models\ConsumableAssignment;
-use Illuminate\Support\Facades\Input;
 
 class ConsumableCheckoutController extends Controller
 {
-    use CheckInOutRequest;
+    use CheckInOutTrait;
 
     /**
      * Return a view to checkout a consumable to a user.
@@ -84,6 +79,7 @@ class ConsumableCheckoutController extends Controller
 
         $this->authorize('checkout', $consumable);
         $target = $this->determineCheckoutTarget();
+        $signInPlace = $request->boolean('sign_in_place') && $target instanceof User;
 
         // If the quantity is not present in the request or is not a positive integer, set it to 1
         $quantity = $request->input('checkout_qty');
@@ -96,8 +92,6 @@ class ConsumableCheckoutController extends Controller
             return redirect()->route('consumables.index')->with('error', trans('admin/consumables/message.checkout.unavailable', ['requested' => $quantity, 'remaining' => $consumable->numRemaining()]));
         }
 
-        $admin_user = auth()->user();
-        $user = auth()->user();
 //        $assigned_to = e($request->input('assigned_to'));
 
         // Check if the user exists
@@ -152,16 +146,12 @@ class ConsumableCheckoutController extends Controller
 //        $request->request->add(['checkout_to_type' => 'user']);
 //        $request->request->add(['assigned_user' => $user->id]);
 
-        $consumable->checkOut($target, $quantity, $request->input('note'));
-        event(new CheckoutableCheckedOut(
-            $consumable,
-            $user,
-            auth()->user(),
+        $consumable->checkOut(
+            $target,
+            $quantity,
             $request->input('note'),
-            [],
-            $consumable->checkout_qty,
-            $request->boolean('sign_in_place'),
-        ));
+            $signInPlace,
+        );
 
         $request->request->add(['assigned_to' => $target->id]);
         $request->request->add(match ($request->input('checkout_to_type')) {
@@ -174,22 +164,22 @@ class ConsumableCheckoutController extends Controller
         session()->put([
             'redirect_option' => $request->input('redirect_option'),
             'checkout_to_type' => $request->input('checkout_to_type'),
-            'sign_in_place' => $request->boolean('sign_in_place'),
+            'sign_in_place' => $signInPlace,
         ]);
 
         // When sign_in_place is requested, redirect to the acceptance/signature page
         // so the user can sign in person. The signature is attributed to the target user.
-        if ($request->boolean('sign_in_place')) {
+        if ($signInPlace) {
             $acceptance = CheckoutAcceptance::where('checkoutable_type', Consumable::class)
                 ->where('checkoutable_id', $consumable->id)
-                ->where('assigned_to_id', $user->id)
+                ->where('assigned_to_id', $target->id)
                 ->pending()
                 ->latest()
                 ->first();
 
             // If requireAcceptance() is false the listener won't have created one; create it now.
             if (! $acceptance) {
-                $acceptance = CreateCheckoutAcceptanceAction::run($consumable, $user, $quantity);
+                $acceptance = CreateCheckoutAcceptanceAction::run($consumable, $target, $quantity);
             }
 
             session([

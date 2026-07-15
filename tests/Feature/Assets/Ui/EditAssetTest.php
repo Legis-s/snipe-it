@@ -5,10 +5,12 @@ namespace Tests\Feature\Assets\Ui;
 use App\Events\CheckoutableCheckedIn;
 use App\Models\Asset;
 use App\Models\AssetModel;
+use App\Models\Contract;
 use App\Models\Location;
 use App\Models\StatusLabel;
 use App\Models\User;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
 
@@ -66,6 +68,33 @@ class EditAssetTest extends TestCase
             ->assertRedirect(route('hardware.show', $asset));
 
         $this->assertDatabaseHas('assets', ['asset_tag' => 'New Asset Tag']);
+    }
+
+    public function test_asset_assigned_to_contract_can_be_edited(): void
+    {
+        $asset = Asset::factory()->create();
+
+        DB::table('assets')->where('id', $asset->id)->update([
+            'assigned_to' => 1,
+            'assigned_type' => Contract::class,
+        ]);
+
+        $this->actingAs(User::factory()->viewAssets()->editAssets()->create())
+            ->put(route('hardware.update', $asset), [
+                'redirect_option' => 'item',
+                'name' => 'Contract asset',
+                'asset_tags' => $asset->asset_tag,
+                'status_id' => $asset->status_id,
+                'model_id' => $asset->model_id,
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('hardware.show', $asset));
+
+        $this->assertDatabaseHas('assets', [
+            'id' => $asset->id,
+            'name' => 'Contract asset',
+            'assigned_type' => Contract::class,
+        ]);
     }
 
     public function test_new_checkin_is_logged_if_status_changed_to_undeployable()

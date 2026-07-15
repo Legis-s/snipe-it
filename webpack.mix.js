@@ -66,6 +66,7 @@ mix
  */
 mix
     .copy('./node_modules/chart.js/dist/Chart.min.js', 'public/js/dist')
+    .copy('./node_modules/star-rating.js/dist/star-rating.min.js', 'public/js/dist')
 
 // Combine main SnipeIT JS files
 mix

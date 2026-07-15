@@ -35,7 +35,7 @@ Route::group(
         Route::get('quickscancheckin', [AssetsController::class, 'quickScanCheckin'])
             ->name('hardware/quickscancheckin')
             ->breadcrumbs(fn (Trail $trail) => $trail->parent('hardware.index')
-                ->push('Quickscan Checkin', route('hardware/quickscancheckin'))
+                ->push(trans('admin/hardware/general.quickscancheckin'), route('hardware/quickscancheckin'))
             );
 
         Route::get('requested', [AssetsController::class, 'getRequestedIndex'])

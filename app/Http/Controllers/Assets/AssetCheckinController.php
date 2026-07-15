@@ -9,6 +9,7 @@ use App\Http\Requests\AssetCheckinRequest;
 use App\Http\Traits\MigratesLegacyAssetLocations;
 use App\Models\Asset;
 use App\Models\CheckoutAcceptance;
+use App\Models\Contract;
 use App\Models\LicenseSeat;
 use App\Models\Location;
 use App\Models\Statuslabel;
@@ -55,6 +56,7 @@ class AssetCheckinController extends Controller
         $target_option = match ($asset->assigned_type) {
             'App\Models\Asset' => trans('admin/hardware/form.redirect_to_type', ['type' => trans('general.asset_previous')]),
             'App\Models\Location' => trans('admin/hardware/form.redirect_to_type', ['type' => trans('general.location')]),
+            Contract::class => trans('admin/hardware/form.redirect_to_type', ['type' => trans('general.contract')]),
             default => trans('admin/hardware/form.redirect_to_type', ['type' => trans('general.user')]),
         };
 
@@ -105,6 +107,7 @@ class AssetCheckinController extends Controller
             'App\Models\User' => 'user',
             'App\Models\Location' => 'location',
             'App\Models\Asset' => 'asset',
+            Contract::class => 'contract',
             'App\Models\Deal' => 'deal',
         });
 

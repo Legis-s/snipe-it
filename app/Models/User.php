@@ -1690,13 +1690,6 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     }
 
     /**
-     * @return bool
-     */
-    public function canImpersonate()
-    {
-        return $this->isSuperUser();
-    }
-    /**
      * Get the preferred locale for the user.
      *
      * This uses the HasLocalePreference contract to determine the user's preferred locale,

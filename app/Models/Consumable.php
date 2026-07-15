@@ -537,11 +537,14 @@ class Consumable extends SnipeModel
     /**
      * Checks the Consumable out to the target
      */
-    public function checkOut($target, $quantity = null, $note = null): bool
+    public function checkOut($target, $quantity = 1, $note = null, bool $signInPlace = false): bool
     {
         if (! $target) {
             return false;
         }
+
+        $quantity = (int) $quantity;
+        $this->checkout_qty = $quantity;
 
         $type = ConsumableAssignment::ISSUED;
         if (is_a($target, Deal::class, true)) {
@@ -562,7 +565,7 @@ class Consumable extends SnipeModel
         if (is_a($target, Deal::class, true)) {
             event(new CheckoutableSell($this, $target, auth()->user(), $note));
         }else{
-            event(new CheckoutableCheckedOut($this, $target, auth()->user(), $note));
+            event(new CheckoutableCheckedOut($this, $target, auth()->user(), $note, [], $quantity, $signInPlace));
         }
         return true;
     }

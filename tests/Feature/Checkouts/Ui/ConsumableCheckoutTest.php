@@ -158,7 +158,8 @@ class ConsumableCheckoutTest extends TestCase
         $this->actingAs($admin)
             ->from(route('components.index'))
             ->post(route('consumables.checkout.store', $consumable), [
-                'assigned_to' => $user->id,
+                'checkout_to_type' => 'user',
+                'assigned_user' => $user->id,
                 'redirect_option' => 'target',
                 'checkout_qty' => 2,
             ]);
@@ -172,6 +173,12 @@ class ConsumableCheckoutTest extends TestCase
             'quantity' => 2,
             'created_by' => $admin->id,
         ]);
+
+        $this->assertSame(1, Actionlog::query()
+            ->where('action_type', 'checkout')
+            ->where('item_id', $consumable->id)
+            ->where('item_type', Consumable::class)
+            ->count());
     }
 
     public function test_consumable_checkout_page_post_redirects_to_signature_page_when_sign_in_place_is_checked()
@@ -182,7 +189,8 @@ class ConsumableCheckoutTest extends TestCase
         $response = $this->actingAs(User::factory()->admin()->create())
             ->from(route('consumables.checkout.show', $consumable))
             ->post(route('consumables.checkout.store', $consumable), [
-                'assigned_to' => $targetUser->id,
+                'checkout_to_type' => 'user',
+                'assigned_user' => $targetUser->id,
                 'redirect_option' => 'index',
                 'checkout_qty' => 2,
                 'sign_in_place' => 1,
@@ -212,7 +220,8 @@ class ConsumableCheckoutTest extends TestCase
         $response = $this->actingAs(User::factory()->admin()->create())
             ->from(route('consumables.checkout.show', $consumable))
             ->post(route('consumables.checkout.store', $consumable), [
-                'assigned_to' => $targetUser->id,
+                'checkout_to_type' => 'user',
+                'assigned_user' => $targetUser->id,
                 'redirect_option' => 'index',
                 'checkout_qty' => 2,
                 'sign_in_place' => 1,
@@ -241,7 +250,8 @@ class ConsumableCheckoutTest extends TestCase
 
         $response = $this->actingAs(User::factory()->admin()->create())
             ->post(route('consumables.checkout.store', $consumable), [
-                'assigned_to' => $targetUser->id,
+                'checkout_to_type' => 'user',
+                'assigned_user' => $targetUser->id,
                 'redirect_option' => 'index',
                 'checkout_qty' => 1,
                 'sign_in_place' => 1,

@@ -59,6 +59,14 @@ class HelperTest extends TestCase
                 'table' => 'Assets',
                 'route' => route('hardware.show', 101),
             ],
+            'Option target: redirect back to contract assigned to ' => [
+                'request' => (object) ['assigned_contract' => 202],
+                'id' => 4,
+                'checkout_to_type' => 'contract',
+                'redirect_option' => 'target',
+                'table' => 'Assets',
+                'route' => route('contracts.show', 202),
+            ],
             'Option item: redirect back to asset ' => [
                 'request' => (object) ['assigned_asset' => null],
                 'id' => 999,

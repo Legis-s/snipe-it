@@ -1720,6 +1720,7 @@ class Helper
             $userId = $request->assigned_user ?? $checkedInFrom;
             $locationId = $request->assigned_location ?? $checkedInFrom;
             $assetId = $request->assigned_asset ?? $checkedInFrom;
+            $contractId = $request->assigned_contract ?? $checkedInFrom;
             $dealId = $request->assigned_deal ?? $checkedInFrom;
 
             return match ($checkout_to_type) {
@@ -1732,6 +1733,9 @@ class Helper
                 'asset' => $assetId
                     ? redirect()->route('hardware.show', $assetId)
                     : redirect()->route('hardware.index'),
+                'contract' => $contractId
+                    ? redirect()->route('contracts.show', $contractId)
+                    : redirect()->route('contracts.index'),
                 'deal' => $dealId
                     ? redirect()->route('deals.show', $assetId)
                     : redirect()->route('deals.index'),

@@ -1419,23 +1419,6 @@
     });
 
     window.inventoriesButtons = () => ({
-        @can('create', \App\Models\Purchase::class)
-        btnAdd: {
-            text: '{{ trans('general.create') }}',
-            icon: 'fa fa-plus',
-            event () {
-                window.location.href = '{{ route('purchases.create') }}';
-            },
-            attributes: {
-                title: '{{ trans('general.create') }}',
-                class: 'btn-warning',
-                @if ($snipeSettings->shortcuts_enabled == 1)
-                accesskey: 'n'
-                @endif
-            }
-        },
-        @endcan
-
         btnExport: {
             text: '{{ trans('admin/hardware/general.custom_export') }}',
             icon: 'fa-solid fa-file-csv',
