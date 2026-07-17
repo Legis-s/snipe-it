@@ -3,6 +3,9 @@
 @php
     $purchaseAssets = $purchase->assets;
     $purchaseConsumables = $purchase->consumables;
+    $purchaseAssetTags = $purchaseAssets
+        ->filter(fn ($asset) => filled($asset->asset_tag))
+        ->mapWithKeys(fn ($asset) => [(string) $asset->id => $asset->asset_tag]);
     $consumableRows = json_decode($purchase->consumables_json ?: '[]', true);
     $consumableRows = is_array($consumableRows) ? $consumableRows : [];
     $hasConsumableRows = count($consumableRows) > 0;
@@ -42,7 +45,7 @@
                         <div class="row">
                             <div class="col-md-12">
 
-                                @include('partials.asset-bulk-actions')
+                                @include('partials.asset-bulk-actions', ['thermal_print' => true])
 
                                 <table
                                         data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayout() }}"
@@ -347,9 +350,15 @@
             const $consumablesTable = $('#table_consumables');
             const $acceptedConsumablesTable = $('#consumableAssignmentTable');
             const $checkConsumables = $('#check_consumables');
+            const $assetsBulkForm = $('#assetsBulkForm');
+            const $bulkAssetEditButton = $('#bulkAssetEditButton');
+            const $bulkAction = $assetsBulkForm.find('[name="bulk_actions"]');
             const canReviewConsumables = {{ Illuminate\Support\Js::from(auth()->user()->can('review')) }};
             const isLegacyPurchase = {{ Illuminate\Support\Js::from((bool) $old) }};
             const purchaseId = {{ Illuminate\Support\Js::from($purchase->id) }};
+            const purchaseAssetTags = {{ Illuminate\Support\Js::from($purchaseAssetTags) }};
+            const thermalPrintUrl = 'http://localhost:8001/termal_print?text=';
+            const thermalPrintDelay = 2000;
             const endpoints = {
                 check: {{ Illuminate\Support\Js::from(route('api.purchases.consumables_check', $purchase->id)) }},
                 line: {{ Illuminate\Support\Js::from(route('api.purchases.consumables_line', $purchase->id)) }},
@@ -392,6 +401,83 @@
                 reviewed: {{ Illuminate\Support\Js::from(trans('general.reviewed')) }}
             };
             let consumables = {{ Illuminate\Support\Js::from($consumableRows) }};
+
+            function bulkPrintAssetTags() {
+                let currentIndex = 0;
+                let failedRequests = 0;
+                const selectedAssetIds = $assetsBulkForm.find('input[name="ids[]"]').map(function () {
+                    return String($(this).val());
+                }).get();
+                const assetTags = selectedAssetIds
+                    .map(function (assetId) {
+                        return purchaseAssetTags[assetId];
+                    })
+                    .filter(function (assetTag) {
+                        return assetTag;
+                    });
+                const skippedAssets = selectedAssetIds.length - assetTags.length;
+                const total = assetTags.length;
+                const originalButtonText = $bulkAssetEditButton.text();
+
+                function finishPrinting() {
+                    $bulkAssetEditButton.prop('disabled', false).text(originalButtonText);
+                    $bulkAction.prop('disabled', false);
+
+                    if (failedRequests > 0 || skippedAssets > 0) {
+                        const messages = [];
+                        if (failedRequests > 0) {
+                            messages.push('Не удалось отправить на печать: ' + failedRequests + ' из ' + total + '.');
+                        }
+                        if (skippedAssets > 0) {
+                            messages.push('Пропущено без инвентарного номера: ' + skippedAssets + '.');
+                        }
+
+                        Swal.fire({
+                            title: labels.error,
+                            text: messages.join(' '),
+                            icon: failedRequests > 0 ? 'error' : 'warning'
+                        });
+                    }
+                }
+
+                function printNextTag() {
+                    if (currentIndex >= total) {
+                        finishPrinting();
+                        return;
+                    }
+
+                    const assetTag = assetTags[currentIndex];
+                    currentIndex += 1;
+                    $bulkAssetEditButton.text('Печать ' + currentIndex + ' из ' + total);
+
+                    $.ajax({
+                        method: 'GET',
+                        url: thermalPrintUrl + encodeURIComponent(assetTag),
+                        timeout: 5000
+                    }).fail(function () {
+                        failedRequests += 1;
+                    }).always(function () {
+                        if (currentIndex < total) {
+                            window.setTimeout(printNextTag, thermalPrintDelay);
+                        } else {
+                            finishPrinting();
+                        }
+                    });
+                }
+
+                if (total === 0) {
+                    Swal.fire({
+                        title: labels.error,
+                        text: 'У выбранных активов нет инвентарных номеров.',
+                        icon: 'warning'
+                    });
+                    return;
+                }
+
+                $bulkAssetEditButton.prop('disabled', true);
+                $bulkAction.prop('disabled', true);
+                printNextTag();
+            }
 
             function apiRequest(method, url, requestData) {
                 return $.ajax({
@@ -700,6 +786,15 @@
                         $checkConsumables.prop('disabled', false);
                         showApiError(response, labels.unableReviewConsumables);
                     });
+            });
+
+            $assetsBulkForm.on('submit', function (event) {
+                if ($bulkAction.val() !== 'thermal_print') {
+                    return;
+                }
+
+                event.preventDefault();
+                bulkPrintAssetTags();
             });
 
             if ($consumablesTable.length) {
