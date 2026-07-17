@@ -758,18 +758,13 @@ class BulkAssetsController extends Controller
                     if ($request->boolean('set_not_requestable')) {
                         $asset->requestable = false;
                     }
-                    if (is_a($target, Deal::class, true)) {
-                        $asset->location_id = null;
-                        $asset->rtd_location_id = null;
-                        if ($request->filled('rent') && $request->get('rent')) {
-                            $checkout_success = $asset->rent($target, $admin, $checkout_at,  e($request->get('note'), $request->get('name')));
-                        }else{
-                            $checkout_success = $asset->sell($target, $admin, $checkout_at, e($request->get('note'), $request->get('name')));
-                        }
-                    }else{
+                    if ($target instanceof Deal) {
+                        $checkout_success = $request->boolean('rent')
+                            ? $asset->rent($target, $admin, $checkout_at, e($request->input('note')), $asset->name)
+                            : $asset->sell($target, $admin, $checkout_at, e($request->input('note')), $asset->name);
+                    } else {
                         $checkout_success = $asset->checkOut($target, $admin, $checkout_at, $expected_checkin, e($request->input('note')), $asset->name, null);
                     }
-                    $checkout_success = $asset->checkOut($target, $admin, $checkout_at, $expected_checkin, e($request->input('note')), $asset->name, null);
 
                     // TODO - I think this logic is duplicated in the checkOut method?
                     if ($target->location_id != '') {

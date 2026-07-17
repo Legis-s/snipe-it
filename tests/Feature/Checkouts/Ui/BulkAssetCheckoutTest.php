@@ -6,7 +6,9 @@ use App\Mail\BulkAssetCheckoutMail;
 use App\Mail\CheckoutAssetMail;
 use App\Models\Asset;
 use App\Models\Company;
+use App\Models\Deal;
 use App\Models\Location;
+use App\Models\Statuslabel;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -71,6 +73,36 @@ class BulkAssetCheckoutTest extends TestCase
         Mail::assertNotSent(CheckoutAssetMail::class);
         Mail::assertSent(BulkAssetCheckoutMail::class, function (BulkAssetCheckoutMail $mail) {
             return $mail->hasTo('someone@example.com');
+        });
+    }
+
+    public function test_bulk_selling_assets_to_deal_creates_only_sell_action_logs()
+    {
+        Statuslabel::factory()->create(['name' => 'Продано']);
+        $assets = Asset::factory()->count(2)->create();
+        $deal = Deal::create(['name' => 'Test deal']);
+
+        $this->actingAs(User::factory()->checkoutAssets()->create())
+            ->post(route('hardware.bulkcheckout.store'), [
+                'selected_assets' => $assets->pluck('id')->all(),
+                'checkout_to_type' => 'deal',
+                'assigned_deal' => $deal->id,
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertSessionHas('success');
+
+        $assets->each(function (Asset $asset) use ($deal) {
+            $asset->refresh();
+
+            $this->assertTrue($asset->assignedTo()->is($deal));
+            $this->assertSame(
+                ['sell'],
+                $asset->assetlog()
+                    ->whereIn('action_type', ['checkout', 'update', 'sell'])
+                    ->reorder('id')
+                    ->pluck('action_type')
+                    ->all()
+            );
         });
     }
 
