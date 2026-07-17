@@ -2,6 +2,7 @@
 
 namespace App\Models\Traits;
 
+use App\Enums\ActionType;
 use App\Exceptions\MissingLogTarget;
 use App\Models\Actionlog;
 use App\Models\Asset;
@@ -532,7 +533,7 @@ trait Loggable
             $log->log_meta = json_encode($changed);
         }
 
-        $log->logaction('rented');
+        $log->logaction(ActionType::Rent);
 
         return $log;
     }

@@ -3,6 +3,7 @@
 namespace Tests\Unit\Listeners;
 
 use App\Events\CheckoutableCheckedOut;
+use App\Events\CheckoutableRent;
 use App\Listeners\LogListener;
 use App\Models\Asset;
 use App\Models\User;
@@ -34,6 +35,32 @@ class LogListenerTest extends TestCase
             'item_id' => $asset->id,
             'item_type' => Asset::class,
             'note' => 'A simple note...',
+        ]);
+    }
+
+    public function test_logs_entry_on_checkoutable_rented()
+    {
+        $asset = Asset::factory()->create();
+        $checkedOutTo = User::factory()->create();
+        $checkedOutBy = User::factory()->create();
+
+        $this->actingAs($checkedOutBy);
+
+        (new LogListener)->onCheckoutableRent(new CheckoutableRent(
+            $asset,
+            $checkedOutTo,
+            $checkedOutBy,
+            'Rental note...',
+        ));
+
+        $this->assertDatabaseHas('action_logs', [
+            'action_type' => 'rented',
+            'created_by' => $checkedOutBy->id,
+            'target_id' => $checkedOutTo->id,
+            'target_type' => User::class,
+            'item_id' => $asset->id,
+            'item_type' => Asset::class,
+            'note' => 'Rental note...',
         ]);
     }
 }

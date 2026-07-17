@@ -7,6 +7,7 @@ use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\CheckoutAcceptance;
 use App\Models\Company;
+use App\Models\Deal;
 use App\Models\LicenseSeat;
 use App\Models\Location;
 use App\Models\Statuslabel;
@@ -209,6 +210,34 @@ class AssetCheckoutTest extends TestCase
         $this->actingAs(User::factory()->superuser()->create())
             ->get(route('hardware.checkout.create', Asset::factory()->create()))
             ->assertOk();
+    }
+
+    public function test_selling_asset_to_deal_creates_only_sell_action_log()
+    {
+        Statuslabel::factory()->create(['name' => 'Продано']);
+        $asset = Asset::factory()->create();
+        $deal = Deal::create(['name' => 'Test deal']);
+
+        $this->actingAs(User::factory()->checkoutAssets()->create())
+            ->post(route('hardware.checkout.store', $asset), [
+                'checkout_to_type' => 'deal',
+                'assigned_deal' => $deal->id,
+                'name' => $asset->name,
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertSessionHas('success');
+
+        $asset->refresh();
+
+        $this->assertTrue($asset->assignedTo()->is($deal));
+        $this->assertSame(
+            ['sell'],
+            $asset->assetlog()
+                ->whereIn('action_type', ['checkout', 'update', 'sell'])
+                ->reorder('id')
+                ->pluck('action_type')
+                ->all()
+        );
     }
 
     /**

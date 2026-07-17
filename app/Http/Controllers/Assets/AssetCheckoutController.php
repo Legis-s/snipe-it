@@ -162,28 +162,18 @@ class AssetCheckoutController extends Controller
                 'sign_in_place' => $request->boolean('sign_in_place'),
             ]);
 
-            if ($asset->checkOut($target, $admin, $checkout_at, $expected_checkin, $request->input('note'), $request->input('name'), null, $request->boolean('sign_in_place'))) {
+            if ($target instanceof Deal) {
+                $checkoutSuccess = $request->boolean('rent')
+                    ? $asset->rent($target, $admin, $checkout_at, $request->input('note'), $request->input('name'))
+                    : $asset->sell($target, $admin, $checkout_at, $request->input('note'), $request->input('name'));
 
-                if (is_a($target, Deal::class, true)) {
-                    $asset->location_id = null;
-                    $asset->rtd_location_id = null;
-                    if ($request->filled('rent') && $request->get('rent')) {
-                        if ($asset->rent($target, $admin, $checkout_at, $request->get('note'), $request->input('name'))) {
-                            return Helper::getRedirectOption($request, $asset->id, 'Assets')
-                                ->with('success', trans('admin/hardware/message.rent.success'));
-                        }
-                    }else{
-                        if ($asset->sell($target, $admin, $checkout_at, $request->get('note'), $request->input('name'))) {
-                            return Helper::getRedirectOption($request, $asset->id, 'Assets')
-                                ->with('success', trans('admin/hardware/message.sell.success'));
-                        }
-                    }
-                }else{
-                    if ($asset->checkOut($target, $admin, $checkout_at, $expected_checkin, $request->input('note'), $request->input('name'))) {
-                        return Helper::getRedirectOption($request, $asset->id, 'Assets')
-                            ->with('success', trans('admin/hardware/message.checkout.success'));
-                    }
+                if ($checkoutSuccess) {
+                    $message = $request->boolean('rent') ? 'rent.success' : 'sell.success';
+
+                    return Helper::getRedirectOption($request, $asset->id, 'Assets')
+                        ->with('success', trans('admin/hardware/message.'.$message));
                 }
+            } elseif ($asset->checkOut($target, $admin, $checkout_at, $expected_checkin, $request->input('note'), $request->input('name'), null, $request->boolean('sign_in_place'))) {
 
                 // When sign_in_place is requested and the target is a user, redirect to the
                 // acceptance/signature page so the user can sign in person. The signature is

@@ -430,42 +430,64 @@ $(function () {
 
         function syncCheckoutToTypeUi(resetSelections) {
             var assignto_type = $('input[name=checkout_to_type]:checked').val();
-            var userid = $('#assigned_user option:selected').val();
+            var locationid = $('#assigned_location option:selected').val();
 
             if (assignto_type == 'asset') {
                 $('#current_assets_box').fadeOut();
                 $('#assigned_asset').show();
                 $('#assigned_user').hide();
                 $('#assigned_location').hide();
+                $('#assigned_deal').hide();
+                $('#rent_box').hide();
                 $('.notification-callout').fadeOut();
 
                 if (resetSelections) {
                     $('[name="assigned_location"]').val('').trigger('change.select2');
                     $('[name="assigned_user"]').val('').trigger('change.select2');
+                    $('[name="assigned_deal"]').val('').trigger('change.select2');
                 }
-            } else if (assignto_type == 'location') {
+            } else if (assignto_type == 'user') {
+                $('#current_assets_box').fadeOut();
+                $('#assigned_asset').hide();
+                $('#assigned_user').show();
+                $('#assigned_location').hide();
+                $('#assigned_deal').hide();
+                $('#rent_box').hide();
+                $('.notification-callout').fadeOut();
+                if (resetSelections) {
+                    $('[name="assigned_asset"]').val('').trigger('change.select2');
+                    $('[name="assigned_location"]').val('').trigger('change.select2');
+                    $('[name="assigned_deal"]').val('').trigger('change.select2');
+                }
+            } else if (assignto_type == 'deal') {
                 $('#current_assets_box').fadeOut();
                 $('#assigned_asset').hide();
                 $('#assigned_user').hide();
-                $('#assigned_location').show();
+                $('#assigned_location').hide();
+                $('#assigned_deal').show();
+                $('#rent_box').show();
                 $('.notification-callout').fadeOut();
 
                 if (resetSelections) {
                     $('[name="assigned_asset"]').val('').trigger('change.select2');
                     $('[name="assigned_user"]').val('').trigger('change.select2');
+                    $('[name="assigned_location"]').val('').trigger('change.select2');
                 }
             } else {
                 $('#assigned_asset').hide();
-                $('#assigned_user').show();
-                $('#assigned_location').hide();
-                if (userid) {
+                $('#assigned_user').hide();
+                $('#assigned_location').show();
+                if (locationid) {
                     $('#current_assets_box').fadeIn();
                 }
+                $('#assigned_deal').hide();
+                $('#rent_box').hide();
                 $('.notification-callout').fadeIn();
 
                 if (resetSelections) {
                     $('[name="assigned_asset"]').val('').trigger('change.select2');
-                    $('[name="assigned_location"]').val('').trigger('change.select2');
+                    $('[name="assigned_user"]').val('').trigger('change.select2');
+                    $('[name="assigned_deal"]').val('').trigger('change.select2');
                 }
             }
         }

@@ -156,6 +156,6 @@ class CheckoutablesCheckedOutInBulkListener
             return $target->manager;
         }
 
-        return $target;
+        return $target instanceof User ? $target : null;
     }
 }

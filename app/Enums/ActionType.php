@@ -10,7 +10,7 @@ enum ActionType: string
     case Delete = 'delete';
     case Restore = 'restore';
     case Sell = 'sell';
-    case Rent = 'rent';
+    case Rent = 'rented';
     case Tag = 'tag';
 
     // Assets/Accessories/Components/Licenses/Consumables
