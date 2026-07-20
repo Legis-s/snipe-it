@@ -456,25 +456,21 @@ class Location extends SnipeModel
 
     /**
      * Establishes the assigned inventories -> location assignment relationship
-
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     * @return Relation
      */
     public function inventories()
     {
-        return $this->hasMany(\App\Models\Inventory::class);
+        return $this->hasMany(Inventory::class);
     }
 
 
     /**
      * Establishes the assignedConsumables -> location assignment relationship
-     *
-     * @author A. Gianotto <snipe@snipe.net>
-     * @since [v3.0]
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     * @return Relation
      */
     public function assignedConsumables()
     {
-        return $this->morphMany(\App\Models\ConsumableAssignment::class, 'assigned', 'assigned_type', 'assigned_to');
+        return $this->morphMany(ConsumableAssignment::class, 'assigned', 'assigned_type', 'assigned_to');
     }
 
 }

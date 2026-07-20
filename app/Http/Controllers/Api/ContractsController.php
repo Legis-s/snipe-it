@@ -10,6 +10,7 @@ use App\Models\ConsumableAssignment;
 use App\Models\Contract;
 use App\Models\Statuslabel;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Helpers\Helper;
@@ -25,12 +26,8 @@ class ContractsController extends Controller
 {
     /**
      * Display a listing of the resource.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v4.0]
-     * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request): array
     {
         $this->authorize('view', Location::class);
         $allowed_columns = [
@@ -52,9 +49,7 @@ class ContractsController extends Controller
             'contracts.updated_at',
         ])->withSum('assets as assets_sum', 'purchase_cost')
             ->withCount('assets as assets_count')
-            ->withCount('assets_no_docs as assets_no_docs_count')
             ->withCount('consumable as consumable_count')
-            ->withCount('consumable_no_docs as consumable_no_docs_count')
             ->addSelect(['consumables_cost' => ConsumableAssignment::query()
                 ->whereColumn('contract_id', 'contracts.id')
                 ->selectRaw('sum(quantity * cost) as consumables_cost')
@@ -67,13 +62,6 @@ class ContractsController extends Controller
         if ($request->filled('sum_error') && $request->input('sum_error') == 1 ) {
             $contracts = $contracts->havingRaw('assets_sum + consumables_cost > contracts.summ');
         }
-        if ($request->filled('only_assets') && $request->input('only_assets') == 1 ) {
-            $contracts = $contracts->having('assets_no_docs_count','>',0);
-        }
-        if ($request->filled('only_consumables') && $request->input('only_consumables') == 1 ) {
-            $contracts = $contracts->having('consumable_no_docs_count','>',0);
-        }
-
 
         // Set the offset to the API call's offset, unless the offset is higher than the actual count of items in which
         // case we override with the actual count, so we should return 0 items.
@@ -106,13 +94,8 @@ class ContractsController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v4.0]
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($id): array
     {
         $this->authorize('view', Contract::class);
         $contract = Contract::with('')
@@ -128,7 +111,7 @@ class ContractsController extends Controller
                 'contracts.updated_at',
             ])
         ->findOrFail($id);
-        return (new ContractsTransformer)->transformContracts($contract);
+        return (new ContractsTransformer)->transformContract($contract);
     }
 
 
@@ -157,12 +140,10 @@ class ContractsController extends Controller
      * Recursion still sucks, but I guess he doesn't have to get in the
      * sea... this time.
      *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v4.0.16]
      * @see \App\Http\Transformers\SelectlistTransformer
      *
      */
-    public function selectlist(Request $request)
+    public function selectlist(Request $request): array
     {
 
         $contracts = Contract::select([
@@ -200,7 +181,6 @@ class ContractsController extends Controller
         $paginated_results =  new LengthAwarePaginator($contracts->forPage($page, 500), $contracts->count(), 500, $page, []);
 
         return (new SelectlistTransformer)->transformSelectlist($paginated_results);
-
     }
 
 }

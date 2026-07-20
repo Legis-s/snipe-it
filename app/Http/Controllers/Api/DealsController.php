@@ -30,8 +30,8 @@ class DealsController extends Controller
     {
         $this->authorize('view', Location::class);
         $allowed_columns = [
-            'id', 'name', 'address', 'created_at', 'updated_at', 'manager_id',
-            'assigned_assets_count', 'users_count', 'assets_count', 'currency'
+            'id', 'name', 'number', 'created_at', 'assets_count', 'consumable_count',
+            'assets_sum_purchase_cost', 'consumables_sum_purchase_cost', 'summ', 'bitrix_id'
         ];
 
         $deals = Deal::select([
@@ -46,40 +46,44 @@ class DealsController extends Controller
             'deals.summ',
             'deals.created_at',
             'deals.updated_at',
-        ]);
+        ])->withSum('assignedAssets as assets_sum_purchase_cost', 'purchase_cost')
+            ->withCount('assignedAssets as assets_count')
+            ->withCount('assignedConsumables as consumable_count')
+            ->addSelect(['consumables_sum_purchase_cost' => ConsumableAssignment::query()
+                ->whereColumn('assigned_to', 'deals.id')
+                ->where('assigned_type', Deal::class)
+                ->selectRaw('sum(quantity * cost)')
+            ]);
 
-        if ($request->filled('search')) {
-            $deals = $deals->TextSearch($request->input('search'));
+
+        if ($request->filled('filter') || $request->filled('search')) {
+            $deals->TextSearch($request->input('filter') ? $request->input('filter') : $request->input('search'));
         }
+
         if ($request->filled('sum_error') && $request->input('sum_error') == 1) {
-            $deals = $deals->havingRaw('assets_sum + consumables_cost > contracts.summ');
+            $deals->havingRaw(
+                'COALESCE(assets_sum_purchase_cost, 0) + COALESCE(consumables_sum_purchase_cost, 0) > deals.summ'
+            );
         }
 
-        // Set the offset to the API call's offset, unless the offset is higher than the actual count of items in which
-        // case we override with the actual count, so we should return 0 items.
-        $offset = (($deals) && ($request->get('offset') > $deals->count())) ? $deals->count() : $request->get('offset', 0);
-
-        // Check to make sure the limit is not higher than the max allowed
-        ((config('app.max_results') >= $request->input('limit')) && ($request->filled('limit'))) ? $limit = $request->input('limit') : $limit = config('app.max_results');
+        $limit = app('api_limit_value');
 
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
         $sort = in_array($request->input('sort'), $allowed_columns) ? $request->input('sort') : 'created_at';
 
         switch ($request->input('sort')) {
-            case 'parent':
-                $deals->OrderParent($order);
-                break;
-            case 'manager':
-                $deals->OrderManager($order);
+            case 'company':
+                $deals->OrderCompany($order);
                 break;
             default:
                 $deals->orderBy($sort, $order);
                 break;
         }
 
-
         $total = $deals->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $deals = $deals->skip($offset)->take($limit)->get();
+
         return (new DealsTransformer)->transformDeals($deals, $total);
     }
 
@@ -88,10 +92,8 @@ class DealsController extends Controller
      * Display the specified resource.
      *
      * @param int $id
-     * @since [v4.0]
-     * @author [A. Gianotto] [<snipe@snipe.net>]
      */
-    public function show($id): JsonResponse | array
+    public function show(int $id): JsonResponse | array
     {
         $this->authorize('view', Deal::class);
         $deal = Deal::with('')
@@ -135,12 +137,10 @@ class DealsController extends Controller
      * Recursion still sucks, but I guess he doesn't have to get in the
      * sea... this time.
      *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v4.0.16]
      * @see \App\Http\Transformers\SelectlistTransformer
      *
      */
-    public function selectlist(Request $request)
+    public function selectlist(Request $request): array
     {
 
         $deals = Deal::select([
@@ -168,14 +168,11 @@ class DealsController extends Controller
                 $name_str .= "[" . e($deal->number) . '] ';
             }
             $name_str .= e($deal->name);
-
-//            preg_replace('/&quot;/', '"', $name_str);
             $deal->use_text = preg_replace('/&quot;/', '"', $name_str);;
         }
 
         $paginated_results = new LengthAwarePaginator($deals->forPage($page, 500), $deals->count(), 500, $page, []);
 
         return (new SelectlistTransformer)->transformSelectlist($paginated_results);
-
     }
 }
