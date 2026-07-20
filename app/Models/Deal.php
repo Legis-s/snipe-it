@@ -6,34 +6,41 @@ namespace App\Models;
 
 use App\Http\Traits\UniqueUndeletedTrait;
 use App\Models\Traits\Searchable;
+use App\Presenters\DealPresenter;
 use App\Presenters\Presentable;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Watson\Validating\ValidatingTrait;
 
 class Deal extends SnipeModel
 {
-    protected $presenter = \App\Presenters\DealPresenter::class;
     use Presentable;
+    use ValidatingTrait;
+    use UniqueUndeletedTrait;
+    use Searchable;
+    use SoftDeletes;
 
+    protected $presenter = DealPresenter::class;
 
-    protected $dates = ['deleted_at'];
     protected $table = 'deals';
+
     protected $rules = array(
         'name' => 'required|min:2|max:255',
     );
 
+    protected $dates = [
+        'deleted_at'
+    ];
+
 
     /**
-     * Whether the model should inject it's identifier to the unique
+     * Whether the model should inject its identifier to the unique
      * validation rules before attempting validation. If this property
      * is not set in the model it will default to true.
      *
-     * @var boolean
+     * @var bool
      */
     protected $injectUniqueIdentifier = true;
-    use ValidatingTrait;
-    use UniqueUndeletedTrait;
-
 
     /**
      * The attributes that are mass assignable.
@@ -53,14 +60,16 @@ class Deal extends SnipeModel
     ];
 
 
-    use Searchable;
-
     /**
      * The attributes that should be included when searching the model.
      *
      * @var array
      */
-    protected $searchableAttributes = ['name', 'number', 'type',];
+    protected $searchableAttributes = [
+        'name',
+        'number',
+        'type',
+    ];
 
 
     public function getTypeText()
@@ -79,29 +88,32 @@ class Deal extends SnipeModel
 
     public function assets()
     {
-        return $this->hasMany(\App\Models\Asset::class, 'deal_id');
+        return $this->hasMany(Asset::class, 'deal_id');
     }
 
     public function consumable()
     {
-        return $this->hasMany(\App\Models\ConsumableAssignment::class, 'deal_id');
+        return $this->hasMany(ConsumableAssignment::class, 'deal_id');
     }
 
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
-     */
+     * Establishes the asset -> deal assignment relationship
+     * @return Relation
+    */
     public function assignedAssets()
     {
-        return $this->morphMany(\App\Models\Asset::class, 'assigned', 'assigned_type', 'assigned_to')->withTrashed();
+//        return $this->morphMany(\App\Models\Asset::class, 'assigned', 'assigned_type', 'assigned_to')->withTrashed();
+        return $this->morphMany(Asset::class, 'assigned', 'assigned_type', 'assigned_to')->AssetsForShow()->withTrashed();
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\Relation
-     */
+     * Establishes the consumable -> deal assignment relationship
+     * @return Relation
+    */
     public function assignedConsumables()
     {
-        return $this->morphMany(\App\Models\ConsumableAssignment::class, 'assigned', 'assigned_type', 'assigned_to');
+        return $this->morphMany(ConsumableAssignment::class, 'assigned', 'assigned_type', 'assigned_to');
     }
 
 }

@@ -2300,23 +2300,18 @@
             /**
              *  START CUSTOM
              */
-
             if ((row.available_actions) && (row.available_actions.print_label === true)) {
                 actions += '<span class="btn btn-sm btn-warning print_label" data-tooltip="true" title="Print label"><i class="fas fa-barcode" style="color: white" aria-hidden="true"></i><span class="sr-only">Print label</span></span>&nbsp;';
             }
-
             if ((row.available_actions) && (row.available_actions.inventory === true)) {
                 actions += '<span class="btn btn-sm btn-warning inventory" data-tooltip="true" title="Inventory Item"><i class="fas fa-key" style="color: white" aria-hidden="true"></i><span class="sr-only">Inventory</span></span>&nbsp;';
             }
-
             if ((row.available_actions) && (row.available_actions.impersonate === true)) {
                 actions += '<a href="{{ url('/') }}/impersonate/take/' + row.id + '/" class="btn btn-sm btn-danger" data-tooltip="true" title="Impersonate"><i class="fas fa-unlock" aria-hidden="true"></i><span class="sr-only">impersonate</span></a>&nbsp;';
             }
-
             /**
              *  END CUSTOM
              */
-
 
             if ((row.available_actions) && (row.available_actions.clone === true)) {
                 actions += '<a href="{{ config('app.url') }}/' + dest + '/' + row.id + '/clone" class="actions btn btn-sm btn-info hidden-print" data-tooltip="true" title="{{ trans('general.clone_item') }}"><x-icon type="clone" class="fa-fw" /><span class="sr-only">{{ trans('general.clone_item') }}</span></a>&nbsp;';
@@ -2431,16 +2426,16 @@
                 item_icon = 'fa-regular fa-building';
             }else if (value.type === 'purchase') {
                 item_destination = 'purchases'
-                item_icon = 'fas fa-shopping-basket';
+                item_icon = 'fa-solid fa-shopping-basket';
             } else if (value.type === 'contract') {
                 item_destination = 'contracts'
-                item_icon = 'fas fa-file';
+                item_icon = 'fa-solid fa-file';
             } else if (value.type === 'sale') {
                 item_destination = 'sales'
-                item_icon = 'fas fa-usd';
+                item_icon = 'fa-solid fa-usd';
             } else if (value.type === 'deal') {
                 item_destination = 'deals'
-                item_icon = 'fas fa-usd';
+                item_icon = 'fa-solid fa-usd';
             }
 
             // display the username if it's checked out to a user, but don't do it if the username's there already
@@ -3280,390 +3275,361 @@
         return value
     }
 
-    function bindBulkEditSelectionHandler() {
-        /**
-         * START CUSTOM
-         */
-        function contractsPriceFormatter(value, row) {
-            return value.toLocaleString('ru');
-        }
+    /**
+     * START CUSTOM
+     */
 
-        function contractsFullPriceFormatter(value, row) {
-            var full_price = row.assets_sum_purchase_cost + row.consumables_cost;
-            return full_price.toLocaleString('ru');
-        }
-
-        {{--function hardwareCustomInOutFormatter(value,row) {--}}
-        {{--        var destination = "hardware";--}}
-
-        {{--        if ((row.available_actions.review == true) && (row.user_can_review == true)) {--}}
-        {{--            return '<button type="button" class="btn btn-primary btn-sm review" data-tooltip="true" title="Проверка">Проверить</button>';--}}
-        {{--        }--}}
-
-        {{--        // The user is allowed to check items out, AND the item is deployable--}}
-        {{--        if ((row.available_actions.checkout == true) && (row.user_can_checkout == true) && ((!row.asset_id) && (!row.assigned_to))) {--}}
-        {{--            return '<div class="btn-group" style="min-width:270px">' +--}}
-        {{--                '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/checkout" class="btn btn-sm bg-maroon" data-tooltip="true" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>'+--}}
-        {{--                '</div>';--}}
-        {{--            // The user is allowed to check items out, but the item is not deployable--}}
-        {{--        } else if (((row.user_can_checkout == false)) && (row.available_actions.checkout == true) && (!row.assigned_to)) {--}}
-        {{--            return '<span  data-tooltip="true" title="{{ trans('admin/hardware/general.undeployable_tooltip') }}"><a class="btn btn-sm bg-maroon disabled">{{ trans('general.checkout') }}</a></span>';--}}
-        {{--            // The user is allowed to check items in--}}
-        {{--        } else if (row.available_actions.checkin == true)  {--}}
-        {{--            if (row.assigned_to) {--}}
-        {{--                return '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkin') }}</a>';--}}
-        {{--            } else if (row.assigned_pivot_id) {--}}
-        {{--                return '<a href="{{ config('app.url') }}/' + destination + '/' + row.assigned_pivot_id + '/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkin') }}</a>';--}}
-        {{--            }--}}
-        {{--        }--}}
-        {{--}--}}
+    function dealsPriceFormatter(value, row) {
+        return value.toLocaleString('ru');
+    }
+    function dealsFullPriceFormatter(value, row) {
+        return (row.assets_sum_purchase_cost + row.consumables_sum_purchase_cost).toLocaleString('ru');
     }
 
-        function hardwareCustomInOutFormatter(value, row) {
-            const destination = "hardware";
+    function contractsPriceFormatter(value, row) {
+        return value.toLocaleString('ru');
+    }
 
-            if ((row.available_actions.review == true) && (row.user_can_review == true)) {
-                return '<button type="button" class="btn btn-primary btn-sm review" data-tooltip="true" title="Проверка">Проверить</button>';
-            }
+    function contractsFullPriceFormatter(value, row) {
+        var full_price = row.assets_sum_purchase_cost + row.consumables_cost;
+        return full_price.toLocaleString('ru');
+    }
 
-            // The user is allowed to check items out, AND the item is deployable
-            if ((row.available_actions.checkout == true) && (row.user_can_checkout == true) && ((!row.asset_id) && (!row.assigned_to))) {
 
-                return '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/checkout" class="btn btn-sm bg-maroon" data-tooltip="true" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>';
+    function hardwareCustomInOutFormatter(value, row) {
+        const destination = "hardware";
 
-                // The user is allowed to check items out, but the item is not able to be checked out
-            } else if (((row.user_can_checkout == false)) && (row.available_actions.checkout == true) && (!row.assigned_to)) {
-
-                // We use slightly different language for assets versus other things, since they are the only
-                // item that has a status label
-                if (destination == 'hardware') {
-                    return '<span  data-tooltip="true" title="{{ trans('admin/hardware/general.undeployable_tooltip') }}"><a class="btn btn-sm bg-maroon disabled">{{ trans('general.checkout') }}</a></span>';
-                } else {
-                    return '<span  data-tooltip="true" title="{{ trans('general.undeployable_tooltip') }}"><a class="btn btn-sm bg-maroon disabled">{{ trans('general.checkout') }}</a></span>';
-                }
-
-                // The user is allowed to check items in
-            } else if (row.available_actions.checkin == true) {
-                if (row.assigned_to) {
-                    return '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkin') }}</a>';
-                } else if (row.assigned_pivot_id) {
-                    return '<a href="{{ config('app.url') }}/' + destination + '/' + row.assigned_pivot_id + '/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkin') }}</a>';
-                }
-
-            }
+        if ((row.available_actions.review == true) && (row.user_can_review == true)) {
+            return '<button type="button" class="btn btn-primary btn-sm review" data-tooltip="true" title="Проверка">Проверить</button>';
         }
 
+        // The user is allowed to check items out, AND the item is deployable
+        if ((row.available_actions.checkout == true) && (row.user_can_checkout == true) && ((!row.asset_id) && (!row.assigned_to))) {
+            return '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/checkout" class="btn btn-sm bg-maroon" data-tooltip="true" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>';
 
-        function consumablesCustomInOutFormatter(value, row) {
-            var destination = "consumables";
-            // The user is allowed to check items out, AND the item is deployable
-            if ((row.available_actions.checkout == true) && (row.user_can_checkout == true) && ((!row.asset_id) && (!row.assigned_to))) {
-                return '<div class="btn-group" style="min-width:180px">' +
-                    '<a href="{{ url('/') }}/' + destination + '/' + row.id + '/checkout" class="btn btn-sm bg-maroon" data-toggle="tooltip" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>' +
-                    '</div>';
-
-                // The user is allowed to check items out, but the item is not deployable
-            } else if (((row.user_can_checkout == false)) && (row.available_actions.checkout == true) && (!row.assigned_to)) {
-                return '<div  data-toggle="tooltip" title="This item has a status label that is undeployable and cannot be checked out at this time."><a class="btn btn-sm bg-maroon disabled">{{ trans('general.checkout') }}</a></div>';
-
-                // The user is allowed to check items in
-            } else if (row.available_actions.checkin == true) {
-                if (row.assigned_to) {
-                    return '<a href="{{ url('/') }}/' + destination + '/' + row.id + '/checkin" class="btn btn-sm bg-purple" data-toggle="tooltip" title="Check this item in so it is available for re-imaging, re-issue, etc.">{{ trans('general.checkin') }}</a>';
-                } else if (row.assigned_pivot_id) {
-                    return '<a href="{{ url('/') }}/' + destination + '/' + row.assigned_pivot_id + '/checkin" class="btn btn-sm bg-purple" data-toggle="tooltip" title="Check this item in so it is available for re-imaging, re-issue, etc.">{{ trans('general.checkin') }}</a>';
-                }
-
-            }
-        }
-
-        // This just prints out the item type in the activity report
-        function quantityItemFormatter(value, row) {
-            if ((row) && (row.type)) {
-                switch (row.type) {
-                    case "purchase":
-                        return "<span class='text-success'  style='font-size: 130%; font-weight: bold'> +" + value + "</span>";
-                    case "issued":
-                        return "<span class='text-danger' style='font-size: 130%; font-weight: bold'> -" + value + "</span>";
-                    case "converted":
-                        return "<span class='text-success' style='font-size: 130%; font-weight: bold'> +" + value + "</span>";
-                    case "sold":
-                        return "<span class='text-danger' style='font-size: 130%; font-weight: bold'> -" + value + "</span>";
-                    case "manually":
-                        return "<span class='text-success' style='font-size: 130%; font-weight: bold'> +" + value + "</span>";
-                    case "collected":
-                        return "<span class='text-success' style='font-size: 130%; font-weight: bold'> +" + value + "</span>";
-                }
-            }
-        }
-
-        function inventoryStatusFormatter(value, row) {
-            if ((row.status)) {
-                $label = "label-default";
-                switch (row.status) {
-                    case 'START':
-                        $label = "label-info";
-                        break;
-                    case 'FINISH_OK':
-                        $label = "label-success";
-                        break;
-                    case 'FINISH_BAD':
-                        $label = "label-danger";
-                        break;
-                }
-                return '<span class="label ' + $label + '">' + row.status_text + '</span>';
-            }
-
-        }
-
-        function purchaseStatusFormatter(value, row) {
-            if (value) {
-                switch (value) {
-                    case "inventory":
-                        return '<span class="label label-warning">В процессе инвентаризации</span>';
-                        break;
-                    case "in_payment":
-                        return '<span class="label label-primary">В оплате</span>';
-                        break;
-                    case "review":
-                        return '<span class="label label-warning">В процессе проверки</span>';
-                        break;
-                    case "finished":
-                        return '<span class="label label-success">Завершено</span>';
-                        break;
-                    case "rejected":
-                        return '<span class="label label-danger">Отклонено</span>';
-                        break;
-                    case "paid":
-                        return '<span class="label label-success">Оплачено</span>';
-                        break;
-                    case "inprogress":
-                        return '<span class="label label-primary">На согласовании</span>';
-                        break;
-                }
+            // The user is allowed to check items out, but the item is not able to be checked out
+        } else if (((row.user_can_checkout == false)) && (row.available_actions.checkout == true) && (!row.assigned_to)) {
+            // We use slightly different language for assets versus other things, since they are the only
+            // item that has a status label
+            if (destination == 'hardware') {
+                return '<span  data-tooltip="true" title="{{ trans('admin/hardware/general.undeployable_tooltip') }}"><a class="btn btn-sm bg-maroon disabled">{{ trans('general.checkout') }}</a></span>';
             } else {
-                return 'error';
-            }
-        }
-
-        function inventoryCountFormatter(value, row) {
-            if (row.total >= 0 && row.checked >= 0) {
-                var destination = 'inventories';
-                if (row.total == row.checked) {
-                    return '<a href="{{ url('/') }}/' + destination + '/' + row.id + '" style="color: green"> ' + row.checked + '/' + row.total + '</a>';
-                } else {
-                    return '<a href="{{ url('/') }}/' + destination + '/' + row.id + '"> ' + row.checked + '/' + row.total + '</a>';
-                }
+                return '<span  data-tooltip="true" title="{{ trans('general.undeployable_tooltip') }}"><a class="btn btn-sm bg-maroon disabled">{{ trans('general.checkout') }}</a></span>';
             }
 
-        }
-
-        function inventorySuccessfullyFormatter(value, row) {
-            if (row.total >= 0 && row.successfully >= 0) {
-                var destination = 'inventories';
-                if (row.total == row.successfully) {
-                    return '<a href="{{ url('/') }}/' + destination + '/' + row.id + '" style="color: green"> ' + row.successfully + '/' + row.total + '</a>';
-                } else {
-                    return '<a href="{{ url('/') }}/' + destination + '/' + row.id + '"> ' + row.successfully + '/' + row.total + '</a>';
-                }
-            }
-
-        }
-
-        function inventoriesResultFormatter(value, row) {
-            if (row.total >= 0 && row.checked >= 0) {
-                if (row.total == row.checked) {
-                    return '<a href="#" style="color: green"> ' + row.checked + '/' + row.total + '</a>';
-                } else {
-                    return '<a href="#"> ' + row.checked + '/' + row.total + '</a>';
-                }
+            // The user is allowed to check items in
+        } else if (row.available_actions.checkin == true) {
+            if (row.assigned_to) {
+                return '<a href="{{ config('app.url') }}/' + destination + '/' + row.id + '/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkin') }}</a>';
+            } else if (row.assigned_pivot_id) {
+                return '<a href="{{ config('app.url') }}/' + destination + '/' + row.assigned_pivot_id + '/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkin') }}</a>';
             }
         }
+    }
 
-        function photoDisplayFormatter(value, row) {
-            if (value) {
-                return '<a href="' + value + '" data-title="' + row.tag + '" data-toggle="lightbox" data-gallery="inv-gallery" data-lightbox="inventory"><i class="fa fa-camera fa-lg" aria-hidden="true"></i></a>';
+
+    function consumablesCustomInOutFormatter(value, row) {
+        var destination = "consumables";
+        // The user is allowed to check items out, AND the item is deployable
+        if ((row.available_actions.checkout == true) && (row.user_can_checkout == true) && ((!row.asset_id) && (!row.assigned_to))) {
+            return '<div class="btn-group" style="min-width:180px">' +
+                '<a href="{{ url('/') }}/' + destination + '/' + row.id + '/checkout" class="btn btn-sm bg-maroon" data-toggle="tooltip" title="{{ trans('general.checkout_tooltip') }}">{{ trans('general.checkout') }}</a>' +
+                '</div>';
+            // The user is allowed to check items out, but the item is not deployable
+        } else if (((row.user_can_checkout == false)) && (row.available_actions.checkout == true) && (!row.assigned_to)) {
+            return '<div  data-toggle="tooltip" title="This item has a status label that is undeployable and cannot be checked out at this time."><a class="btn btn-sm bg-maroon disabled">{{ trans('general.checkout') }}</a></div>';
+            // The user is allowed to check items in
+        } else if (row.available_actions.checkin == true) {
+            if (row.assigned_to) {
+                return '<a href="{{ url('/') }}/' + destination + '/' + row.id + '/checkin" class="btn btn-sm bg-purple" data-toggle="tooltip" title="Check this item in so it is available for re-imaging, re-issue, etc.">{{ trans('general.checkin') }}</a>';
+            } else if (row.assigned_pivot_id) {
+                return '<a href="{{ url('/') }}/' + destination + '/' + row.assigned_pivot_id + '/checkin" class="btn btn-sm bg-purple" data-toggle="tooltip" title="Check this item in so it is available for re-imaging, re-issue, etc.">{{ trans('general.checkin') }}</a>';
             }
         }
+    }
 
-        function statusInventoryItemFormatter(value) {
-            if (value) {
-                return '<span class="label label-default" style="background-color:' + value.color + '; color:white">' + value.name + '</span>';
+    // This just prints out the item type in the activity report
+    function quantityItemFormatter(value, row) {
+        if ((row) && (row.type)) {
+            switch (row.type) {
+                case "purchase":
+                    return "<span class='text-success'  style='font-size: 130%; font-weight: bold'> +" + value + "</span>";
+                case "issued":
+                    return "<span class='text-danger' style='font-size: 130%; font-weight: bold'> -" + value + "</span>";
+                case "converted":
+                    return "<span class='text-success' style='font-size: 130%; font-weight: bold'> +" + value + "</span>";
+                case "sold":
+                    return "<span class='text-danger' style='font-size: 130%; font-weight: bold'> -" + value + "</span>";
+                case "manually":
+                    return "<span class='text-success' style='font-size: 130%; font-weight: bold'> +" + value + "</span>";
+                case "collected":
+                    return "<span class='text-success' style='font-size: 130%; font-weight: bold'> +" + value + "</span>";
             }
         }
+    }
+     function inventoryStatusFormatter(value, row) {
+         if ((row.status)) {
+             $label = "label-default";
+             switch (row.status) {
+                 case 'START':
+                     $label = "label-info";
+                     break;
+                 case 'FINISH_OK':
+                     $label = "label-success";
+                     break;
+                 case 'FINISH_BAD':
+                     $label = "label-danger";
+                     break;
+             }
+             return '<span class="label ' + $label + '">' + row.status_text + '</span>';
+         }
+     }
 
-        function bitrixIdLocationFormatter(value, row) {
-            if (value) {
-                return '<a href="https://bitrix.legis-s.ru/crm/object/details/' + value + '/"   target="_blank" >' + value + '</a>';
-            }
-        }
-
-        function bitrixNewIdLocationFormatter(value, row) {
-            if (value) {
-                return '<a href="https://bitrix.legis-s.ru/crm/type/1032/details/' + value + '/"   target="_blank" >' + value + '</a>';
-            }
-        }
-
-        function fileFormatter(value) {
-            if (value) {
-                return '<a href="' + value + '" class="btn btn-default btn-sm" target="_blank"><i class="fas fa-download"> Скачать</i></a>'
-            }
-        }
-
-        function assetsCountFormatter(value, row) {
-            if (row.assets_count_ok > 0) {
-                return row.assets_count_ok + "/" + value;
-            } else {
-                return value;
-            }
-        }
-
-        function consumablesCountFormatter(value, row) {
-            if (row.consumables_count_real > 0) {
-                return row.consumables_count_real + "/" + value;
-            } else {
-                return value;
-            }
-        }
-
-        function lifetimeFormatter(value, row) {
-            if (row.model && row.model.lifetime) {
-                return row.model.lifetime
-            } else if (row.category && row.category.lifetime) {
-
-            } else {
-                return "";
-            }
-        }
-
-        function qualityFormatter(value, row) {
+    function purchaseStatusFormatter(value, row) {
+        if (value) {
             switch (value) {
-                case 1:
-                    return '<i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star-o" aria-hidden="true"></i><i class="fa fa-star-o" aria-hidden="true"></i><i class="fa fa-star-o" aria-hidden="true"></i><i class="fa fa-star-o" aria-hidden="true"></i>';
+                case "inventory":
+                    return '<span class="label label-warning">В процессе инвентаризации</span>';
                     break;
-                case 2:
-                    return '<i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star-o" aria-hidden="true"></i><i class="fa fa-star-o" aria-hidden="true"></i><i class="fa fa-star-o" aria-hidden="true"></i>';
+                case "in_payment":
+                    return '<span class="label label-primary">В оплате</span>';
                     break;
-                case 3:
-                    return '<i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star-o" aria-hidden="true"></i><i class="fa fa-star-o" aria-hidden="true"></i>';
+                case "review":
+                    return '<span class="label label-warning">В процессе проверки</span>';
                     break;
-                case 4:
-                    return '<i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star-o" aria-hidden="true"></i>';
+                case "finished":
+                    return '<span class="label label-success">Завершено</span>';
                     break;
-                case 5:
-                    return '<i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>';
+                case "rejected":
+                    return '<span class="label label-danger">Отклонено</span>';
                     break;
-                default:
-                    return '<i class="fa fa-star-o" aria-hidden="true"></i><i class="fa fa-star-o" aria-hidden="true"></i><i class="fa fa-star-o" aria-hidden="true"></i><i class="fa fa-star-o" aria-hidden="true"></i><i class="fa fa-star-o" aria-hidden="true"></i>';
+                case "paid":
+                    return '<span class="label label-success">Оплачено</span>';
+                    break;
+                case "inprogress":
+                    return '<span class="label label-primary">На согласовании</span>';
+                    break;
             }
+        } else {
+            return 'error';
         }
+    }
 
-        function bitrixIdFormatter(value, row) {
-            if (value) {
-                return "<a href='https://bitrix.legis-s.ru/services/lists/52/element/0/" + value + "/?list_section_id=' target='_blank'>" + value + "</a>";
+    function inventoryCountFormatter(value, row) {
+        if (row.total >= 0 && row.checked >= 0) {
+            var destination = 'inventories';
+            if (row.total == row.checked) {
+                return '<a href="{{ url('/') }}/' + destination + '/' + row.id + '" style="color: green"> ' + row.checked + '/' + row.total + '</a>';
             } else {
-                if (row.user) {
-                    return '<button type="button"  class="btn btn-default  btn-sm resend">Отправить заново</button>'
-                } else {
-                    return ' ';
-                }
+                return '<a href="{{ url('/') }}/' + destination + '/' + row.id + '"> ' + row.checked + '/' + row.total + '</a>';
             }
         }
+    }
 
-        function bitrixTaskIdFormatter(value, row) {
-            if (value > 0) {
-                return "<a href='https://bitrix.legis-s.ru/company/personal/user/1/tasks/task/view/" + value + "/' target='_blank'>" + value + "</a>";
+    function inventorySuccessfullyFormatter(value, row) {
+        if (row.total >= 0 && row.successfully >= 0) {
+            var destination = 'inventories';
+            if (row.total == row.successfully) {
+                return '<a href="{{ url('/') }}/' + destination + '/' + row.id + '" style="color: green"> ' + row.successfully + '/' + row.total + '</a>';
+            } else {
+                return '<a href="{{ url('/') }}/' + destination + '/' + row.id + '"> ' + row.successfully + '/' + row.total + '</a>';
+            }
+        }
+    }
+
+    function inventoriesResultFormatter(value, row) {
+        if (row.total >= 0 && row.checked >= 0) {
+            if (row.total == row.checked) {
+                return '<a href="#" style="color: green"> ' + row.checked + '/' + row.total + '</a>';
+            } else {
+                return '<a href="#"> ' + row.checked + '/' + row.total + '</a>';
+            }
+        }
+    }
+
+    function photoDisplayFormatter(value, row) {
+        if (value) {
+            return '<a href="' + value + '" data-title="' + row.tag + '" data-toggle="lightbox" data-gallery="inv-gallery" data-lightbox="inventory"><i class="fa fa-camera fa-lg" aria-hidden="true"></i></a>';
+        }
+    }
+
+    function statusInventoryItemFormatter(value) {
+        if (value) {
+            return '<span class="label label-default" style="background-color:' + value.color + '; color:white">' + value.name + '</span>';
+        }
+    }
+
+    function bitrixIdLocationFormatter(value, row) {
+        if (value) {
+            return '<a href="https://bitrix.legis-s.ru/crm/object/details/' + value + '/"   target="_blank" >' + value + '</a>';
+        }
+    }
+
+    function bitrixNewIdLocationFormatter(value, row) {
+        if (value) {
+            return '<a href="https://bitrix.legis-s.ru/crm/type/1032/details/' + value + '/"   target="_blank" >' + value + '</a>';
+        }
+    }
+
+    function fileFormatter(value) {
+        if (value) {
+            return '<a href="' + value + '" class="btn btn-default btn-sm" target="_blank"><i class="fas fa-download"> Скачать</i></a>'
+        }
+    }
+
+    function assetsCountFormatter(value, row) {
+        if (row.assets_count_ok > 0) {
+            return row.assets_count_ok + "/" + value;
+        } else {
+            return value;
+        }
+    }
+
+    function consumablesCountFormatter(value, row) {
+        if (row.consumables_count_real > 0) {
+            return row.consumables_count_real + "/" + value;
+        } else {
+            return value;
+        }
+    }
+
+    function lifetimeFormatter(value, row) {
+        if (row.model && row.model.lifetime) {
+            return row.model.lifetime
+        } else if (row.category && row.category.lifetime) {
+        } else {
+            return "";
+        }
+    }
+
+    function qualityFormatter(value, row) {
+        switch (value) {
+            case 1:
+                return '<i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star-o" aria-hidden="true"></i><i class="fa fa-star-o" aria-hidden="true"></i><i class="fa fa-star-o" aria-hidden="true"></i><i class="fa fa-star-o" aria-hidden="true"></i>';
+                break;
+            case 2:
+                return '<i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star-o" aria-hidden="true"></i><i class="fa fa-star-o" aria-hidden="true"></i><i class="fa fa-star-o" aria-hidden="true"></i>';
+                break;
+            case 3:
+                return '<i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star-o" aria-hidden="true"></i><i class="fa fa-star-o" aria-hidden="true"></i>';
+                break;
+            case 4:
+                return '<i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star-o" aria-hidden="true"></i>';
+                break;
+            case 5:
+                return '<i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i>';
+                break;
+            default:
+                return '<i class="fa fa-star-o" aria-hidden="true"></i><i class="fa fa-star-o" aria-hidden="true"></i><i class="fa fa-star-o" aria-hidden="true"></i><i class="fa fa-star-o" aria-hidden="true"></i><i class="fa fa-star-o" aria-hidden="true"></i>';
+        }
+    }
+
+    function bitrixIdFormatter(value, row) {
+        if (value) {
+            return "<a href='https://bitrix.legis-s.ru/services/lists/52/element/0/" + value + "/?list_section_id=' target='_blank'>" + value + "</a>";
+        } else {
+            if (row.user) {
+                return '<button type="button"  class="btn btn-default  btn-sm resend">Отправить заново</button>'
             } else {
                 return ' ';
             }
         }
+    }
 
-        function priceFormatter(value, row) {
-            if (row.currency && value) {
-                return "<span style='font-size: 120%; font-weight: bold;' class='text-primary'>" + value + " " + row.currency + "</span>";
+    function bitrixTaskIdFormatter(value, row) {
+        if (value > 0) {
+            return "<a href='https://bitrix.legis-s.ru/company/personal/user/1/tasks/task/view/" + value + "/' target='_blank'>" + value + "</a>";
+        } else {
+            return ' ';
+        }
+    }
+
+    function priceFormatter(value, row) {
+        if (row.currency && value) {
+            return "<span style='font-size: 120%; font-weight: bold;' class='text-primary'>" + value + " " + row.currency + "</span>";
+        } else {
+        }
+    }
+
+    function bitrixIdContractFormatter(value, row) {
+        if (value) {
+            return "<a href='https://bitrix.legis-s.ru/crm/contract/details/" + value + "/' target='_blank'>" + value + "</a>";
+        }
+    }
+
+    function bitrixIdDealFormatter(value, row) {
+        if (value) {
+            return "<a href='https://bitrix.legis-s.ru/crm/deal/details/" + value + "/' target='_blank'>" + value + "</a>";
+        }
+    }
+
+    function bulkListRemoveFormatter(value, row) {
+        return "<button type='button' class='btn btn-danger  btn-sm bulk-clear'>Убрать</button>"
+    }
+
+    function consumablesReturnFormatter(value, row) {
+        if (row.can_return == true && row.quantity != 0) {
+            return '<button class="btn btn-sm bg-maroon return" data-tooltip="true" title="Вернуть">Вернуть</button>';
+        } else {
+            return '';
+        }
+    }
+
+    function mdmStatusCodeFormatter(value, row) {
+        switch (value) {
+            case "red":
+                return '<i class="fas fa-circle text-danger"></i>'
+            case "yellow":
+                return '<i class="fas fa-circle text-warning"></i>'
+            case "green":
+                return '<i class="fas fa-circle text-success"></i>'
+            default:
+                return value
+        }
+    }
+
+    function mdmDistanceFormatter(value, row) {
+        if (value) {
+            if (value > 1000) {
+                var valuekm = value / 1000;
+                return "<span class='text-danger'>" + valuekm.toFixed(1) + " км</span>";
             } else {
+                return value + " м";
             }
+        } else {
+            return "";
         }
+    }
 
-        function bitrixIdContractFormatter(value, row) {
-            if (value) {
-                return "<a href='https://bitrix.legis-s.ru/crm/contract/details/" + value + "/' target='_blank'>" + value + "</a>";
-            }
+    function yandexMapLinkFormatter(value, row) {
+        if (value) {
+            var cord_array = value.split(",");
+            return "<a href='https://yandex.ru/maps/?pt=" + cord_array[1].trim() + "," + cord_array[0].trim() + "&z=18&l=map' target='_blank'>" + value + "</a>";
+        } else {
+            return "";
         }
+    }
 
-        function bitrixIdDealFormatter(value, row) {
-            if (value) {
-                return "<a href='https://bitrix.legis-s.ru/crm/deal/details/" + value + "/' target='_blank'>" + value + "</a>";
-            }
+    function timeAgoFormatter(value, row) {
+        if (value) {
+            format(value, 'ru');
+        } else {
+            return "";
         }
+    }
 
-        function bulkListRemoveFormatter(value, row) {
-            return "<button type='button' class='btn btn-danger  btn-sm bulk-clear'>Убрать</button>"
+    function anyDeskLinkFormatter(value, row) {
+        if (value) {
+            return "<a href='anydesk:" + value.split(' ').join('') + "' >" + value + "</a>";
+        } else {
+            return "";
         }
-
-        function consumablesReturnFormatter(value, row) {
-            if (row.can_return == true && row.quantity != 0) {
-                return '<button class="btn btn-sm bg-maroon return" data-tooltip="true" title="Вернуть">Вернуть</button>';
-            } else {
-                return '';
-            }
-        }
-
-        function mdmStatusCodeFormatter(value, row) {
-            switch (value) {
-                case "red":
-                    return '<i class="fas fa-circle text-danger"></i>'
-                case "yellow":
-                    return '<i class="fas fa-circle text-warning"></i>'
-                case "green":
-                    return '<i class="fas fa-circle text-success"></i>'
-                default:
-                    return value
-            }
-        }
-
-        function mdmDistanceFormatter(value, row) {
-            if (value) {
-                if (value > 1000) {
-                    var valuekm = value / 1000;
-                    return "<span class='text-danger'>" + valuekm.toFixed(1) + " км</span>";
-                } else {
-                    return value + " м";
-                }
-            } else {
-                return "";
-            }
-        }
-
-        function yandexMapLinkFormatter(value, row) {
-            if (value) {
-                var cord_array = value.split(",");
-                return "<a href='https://yandex.ru/maps/?pt=" + cord_array[1].trim() + "," + cord_array[0].trim() + "&z=18&l=map' target='_blank'>" + value + "</a>";
-            } else {
-                return "";
-            }
-        }
-
-        function timeAgoFormatter(value, row) {
-            if (value) {
-                format(value, 'ru');
-            } else {
-                return "";
-            }
-        }
-
-        function anyDeskLinkFormatter(value, row) {
-            if (value) {
-                return "<a href='anydesk:" + value.split(' ').join('') + "' >" + value + "</a>";
-            } else {
-                return "";
-            }
-        }
+    }
 
 
-        /**
-         * END CUSTOM
-         */
+    /**
+     * END CUSTOM
+     */
 
         window.operateEvents = {
             'click .print_label': function (e, value, row, index) {
