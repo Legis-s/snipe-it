@@ -59,9 +59,9 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="col-md-12">
-                    <div class="alert alert-danger">
+                    <x-alert type="danger">
                         {{ trans('admin/settings/general.ldap_extension_warning') }}
-                    </div>
+                    </x-alert>
                 </div>
             </div>
         </div>

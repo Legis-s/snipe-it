@@ -304,7 +304,156 @@
             overflow-y: auto;
         }
 
+        /*
+        eonasdan bootstrap-datetimepicker widget: match the app's theme color
+        for selected/today cells and follow light/dark mode for the popup
+        chrome. Ships with Bootstrap's stock #337ab7 which looks off next to
+        AdminLTE.
 
+        - All toolbar buttons: .bootstrap-datetimepicker-widget li.picker-switch a[data-action]
+        - Individual buttons: a[data-action="today"], a[data-action="clear"], a[data-action="close"]                                                                                                                       - -
+        - The <td> cell each button sits in: .bootstrap-datetimepicker-widget li.picker-switch td
+        - The icon <span> inside the anchor: .bootstrap-datetimepicker-widget li.picker-switch a[data-action] > span
+        */
+        .bootstrap-datetimepicker-widget {
+            z-index: 1030 !important;
+            background-color: var(--box-bg) !important;
+            color: var(--color-fg) !important;
+        }
+
+        /* Widget border in the theme color so the popup edge visually
+           matches other themed boxes in the app. */
+        .bootstrap-datetimepicker-widget.dropdown-menu {
+            border: 1px solid var(--main-theme-color) !important;
+        }
+
+        /* The connecting caret between the input and the popup is drawn
+           with two triangles: :before is the outer border outline (7px),
+           :after is the inner fill (6px, sits inside the :before). Match
+           the widget's own theme-color border on the outer triangle, and
+           the widget's background on the inner. */
+        .bootstrap-datetimepicker-widget.dropdown-menu.bottom:before {
+            border-bottom-color: var(--main-theme-color) !important;
+        }
+
+        .bootstrap-datetimepicker-widget.dropdown-menu.bottom:after {
+            border-bottom-color: var(--box-bg) !important;
+        }
+
+        .bootstrap-datetimepicker-widget.dropdown-menu.top:before {
+            border-top-color: var(--main-theme-color) !important;
+        }
+
+        .bootstrap-datetimepicker-widget.dropdown-menu.top:after {
+            border-top-color: var(--box-bg) !important;
+        }
+
+        /* Side-by-side (date + time) mode ships at 38em, not wide enough
+           once the format includes seconds. Bump up to give the time cells
+           room. */
+        .bootstrap-datetimepicker-widget.dropdown-menu.timepicker-sbs {
+            width: 42em !important;
+        }
+
+        /* Compact (non-sideBySide) mode. Library default is 19em, which is
+           too narrow for the time-picker view — hour/minute/second cells
+           are 54px each and the increment/decrement arrow buttons add width
+           on top of that, so under ~300px the time view gets clipped. Sizing
+           to fit the widest child (the time view) also gives the calendar
+           view plenty of room. */
+        .bootstrap-datetimepicker-widget.dropdown-menu:not(.timepicker-sbs) {
+            min-width: 320px;
+        }
+
+        .bootstrap-datetimepicker-widget table td.active,
+        .bootstrap-datetimepicker-widget table td.active:hover,
+        .bootstrap-datetimepicker-widget table td span.active,
+        .bootstrap-datetimepicker-widget table td span.active:hover {
+            background-color: var(--main-theme-color) !important;
+            color: var(--nav-primary-text-color) !important;
+            text-shadow: none !important;
+        }
+        .bootstrap-datetimepicker-widget table td.today:before {
+            border-bottom-color: var(--main-theme-color) !important;
+        }
+
+        /* Cell hover: theme color background + white text — same shape as
+           "active" so contrast is guaranteed in both light and dark mode. */
+        .bootstrap-datetimepicker-widget table td:hover,
+        .bootstrap-datetimepicker-widget table td span:hover,
+        .bootstrap-datetimepicker-widget table thead tr:first-child th:hover {
+            background-color: var(--main-theme-color) !important;
+            color: var(--nav-primary-text-color) !important;
+        }
+
+        /* Time-picker text (compact mode). Bootstrap's .btn base color is
+           #333 which is invisible on the dark box-bg in dark mode; force
+           these text elements to inherit the widget's --color-fg instead
+           so they read in both themes.
+             - .timepicker-hour / -minute / -second : the big clickable digits
+             - .separator                            : the colon between them
+             - .timepicker-picker .btn               : the up/down arrow buttons
+             - .timepicker-picker .btn span          : the FA icon inside those
+             - .timepicker-hours / -minutes / -seconds .btn : the expanded grid
+               of pickable hour/minute/second numbers when you click a digit  */
+        .bootstrap-datetimepicker-widget .timepicker-hour,
+        .bootstrap-datetimepicker-widget .timepicker-minute,
+        .bootstrap-datetimepicker-widget .timepicker-second,
+        .bootstrap-datetimepicker-widget .separator,
+        .bootstrap-datetimepicker-widget .timepicker-picker .btn,
+        .bootstrap-datetimepicker-widget .timepicker-picker .btn span,
+        .bootstrap-datetimepicker-widget .timepicker-hours td,
+        .bootstrap-datetimepicker-widget .timepicker-minutes td,
+        .bootstrap-datetimepicker-widget .timepicker-seconds td {
+            color: var(--color-fg) !important;
+        }
+
+        /* The empty <td class="separator"> cells above and below the ":"
+           are pure spacers, but were rendering visible "lines" around the
+           colon. Force their background to match the popup so they blend
+           into the widget in both light and dark mode.
+
+           Also kill the ::before / ::after pseudo-elements — the app's own
+           .separator class elsewhere in the codebase draws horizontal grey
+           border-bottom lines via those pseudos (for section dividers), and
+           class-name collides with the library's timepicker separator td. */
+        .bootstrap-datetimepicker-widget .separator {
+            background-color: var(--box-bg) !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+        .bootstrap-datetimepicker-widget .separator::before,
+        .bootstrap-datetimepicker-widget .separator::after {
+            display: none !important;
+            content: none !important;
+            border: none !important;
+        }
+        /* Same treatment for the increment/decrement arrow buttons — no
+           border/box-shadow/focus outline so the time-picker column doesn't
+           get sub-lines between each button. */
+        .bootstrap-datetimepicker-widget .timepicker-picker .btn {
+            background-color: var(--box-bg) !important;
+            border: none !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+        .bootstrap-datetimepicker-widget .timepicker-picker .btn:focus,
+        .bootstrap-datetimepicker-widget .timepicker-picker .btn:active {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+
+
+        /* Button hover — matches the whole <a> element */
+        .bootstrap-datetimepicker-widget li.picker-switch a[data-action]:hover,
+        .bootstrap-datetimepicker-widget li.picker-switch td:hover {
+            background-color: transparent !important;
+            border-radius: 0 !important;
+
+        }
+
+        
         .input-group-addon {
             background-color: var(--input-group-bg) !important;
             color: var(--input-group-fg) !important;
@@ -320,6 +469,7 @@
         .select2-container--default.select2-container--disabled .select2-selection--single,
         .select2-container--default.select2-container--disabled .select2-selection--multiple,
         .select2-container--default.select2-container--disabled .select2-selection__rendered,
+        .select2-results__option[aria-disabled=true],
         .select2-container--default.select2-container--disabled .select2-selection--multiple .select2-search--inline {
             background-color: light-dark(rgb(234, 232, 232), rgb(117, 116, 117)) !important;
             cursor: not-allowed !important;
@@ -799,7 +949,15 @@
             border-color: var(--text-danger);
         }
 
-        .alert a {
+        .alert a,
+        .callout.callout-warning,
+        .callout.callout-danger,
+        .callout.callout-success,
+        .callout.callout-info,
+        .alert.alert-warning,
+        .alert.alert-danger,
+        .alert.alert-info,
+        .alert.alert-success {
             color: white !important;
         }
 
@@ -882,29 +1040,13 @@
             color: var(--color-fg) !important;
         }
 
-        .datepicker.dropdown-menu th, .datepicker.datepicker-inline th,
-        .datepicker.dropdown-menu td,
-        .datepicker.datepicker-inline td
 
-        {
-            color: var(--color-fg);
-            border-color: var(--color-fg);
-            background-color: var(--box-bg) !important;
-        }
-
-        .datepicker.dropdown-menu th:hover,
-        .datepicker.datepicker-inline th:hover,
-        .datepicker.dropdown-menu td:hover,
-        .datepicker.datepicker-inline td:hover,
-        .datepicker table tr td span:hover,
-        .datepicker table tr td span.focused,
         .logo:hover
         {
             background-color: var(--main-theme-color) !important;
             color: var(--nav-primary-text-color) !important;
         }
 
-        .datepicker.dropdown-menu,
         .modal-content,
         .popover.help-popover,
         .popover.help-popover .popover-content,
@@ -917,31 +1059,6 @@
             color: var(--color-fg) !important;
         }
 
-        /** this handles the arrows for the datepicker widget **/
-
-        /** arrow on the bottom - bg color **/
-        .datepicker-dropdown.datepicker-orient-top:after {
-            border-top: 6px solid var(--box-bg);
-        }
-
-        /** arrow on the bottom - border color **/
-        .datepicker-dropdown.datepicker-orient-top:before {
-            border-top: 6px solid var(--color-bg);
-        }
-
-        /** arrow on the top - bg color **/
-        .datepicker-dropdown:after {
-            border-bottom: 6px solid var(--box-bg);
-        }
-
-        /** arrow on the top - border color **/
-        .datepicker-dropdown:before {
-            border-bottom: 7px solid var(--color-bg);
-        }
-
-        /** end handling arrows for the datepicker widget **/
-
-
         .treeview-menu > li {
             background-color: #2c3b41;
             color: var(--sidenav-text-nohover-color) !important;
@@ -953,7 +1070,6 @@
         {
             color: white !important;
             background-color: var(--sidenav-hover-color-bg) !important;
-            /*color: var(--sidenav-text-hover-color) !important;*/
         }
 
         .sidebar-toggle.btn,
@@ -2096,9 +2212,9 @@
                     <div class="row">
                         @if (config('app.lock_passwords'))
                             <div class="col-md-12">
-                                <div class="callout callout-info" role="status" aria-live="polite" aria-atomic="true">
+                                <x-callout type="info" role="status">
                                     {{ trans('general.some_features_disabled') }}
-                                </div>
+                                </x-callout>
                             </div>
                         @endif
 
@@ -2333,69 +2449,6 @@
 
 
 
-            $.fn.datepicker.dates['{{ app()->getLocale() }}'] = {
-                days: [
-                    "{{ trans('datepicker.days.sunday') }}",
-                    "{{ trans('datepicker.days.monday') }}",
-                    "{{ trans('datepicker.days.tuesday') }}",
-                    "{{ trans('datepicker.days.wednesday') }}",
-                    "{{ trans('datepicker.days.thursday') }}",
-                    "{{ trans('datepicker.days.friday') }}",
-                    "{{ trans('datepicker.days.saturday') }}"
-                ],
-                daysShort: [
-                    "{{ trans('datepicker.short_days.sunday') }}",
-                    "{{ trans('datepicker.short_days.monday') }}",
-                    "{{ trans('datepicker.short_days.tuesday') }}",
-                    "{{ trans('datepicker.short_days.wednesday') }}",
-                    "{{ trans('datepicker.short_days.thursday') }}",
-                    "{{ trans('datepicker.short_days.friday') }}",
-                    "{{ trans('datepicker.short_days.saturday') }}"
-                ],
-                daysMin: [
-                    "{{ trans('datepicker.min_days.sunday') }}",
-                    "{{ trans('datepicker.min_days.monday') }}",
-                    "{{ trans('datepicker.min_days.tuesday') }}",
-                    "{{ trans('datepicker.min_days.wednesday') }}",
-                    "{{ trans('datepicker.min_days.thursday') }}",
-                    "{{ trans('datepicker.min_days.friday') }}",
-                    "{{ trans('datepicker.min_days.saturday') }}"
-                ],
-                months: [
-                    "{{ trans('datepicker.months.january') }}",
-                    "{{ trans('datepicker.months.february') }}",
-                    "{{ trans('datepicker.months.march') }}",
-                    "{{ trans('datepicker.months.april') }}",
-                    "{{ trans('datepicker.months.may') }}",
-                    "{{ trans('datepicker.months.june') }}",
-                    "{{ trans('datepicker.months.july') }}",
-                    "{{ trans('datepicker.months.august') }}",
-                    "{{ trans('datepicker.months.september') }}",
-                    "{{ trans('datepicker.months.october') }}",
-                    "{{ trans('datepicker.months.november') }}",
-                    "{{ trans('datepicker.months.december') }}",
-                ],
-                monthsShort:  [
-                    "{{ trans('datepicker.months_short.january') }}",
-                    "{{ trans('datepicker.months_short.february') }}",
-                    "{{ trans('datepicker.months_short.march') }}",
-                    "{{ trans('datepicker.months_short.april') }}",
-                    "{{ trans('datepicker.months_short.may') }}",
-                    "{{ trans('datepicker.months_short.june') }}",
-                    "{{ trans('datepicker.months_short.july') }}",
-                    "{{ trans('datepicker.months_short.august') }}",
-                    "{{ trans('datepicker.months_short.september') }}",
-                    "{{ trans('datepicker.months_short.october') }}",
-                    "{{ trans('datepicker.months_short.november') }}",
-                    "{{ trans('datepicker.months_short.december') }}",
-                ],
-                today: "{{ trans('datepicker.today') }}",
-                clear: "{{ trans('datepicker.clear') }}",
-                format: "yyyy-mm-dd",
-                weekStart: {{ $snipeSettings->week_start ?? 0 }},
-            };
-
-
             var clipboard = new ClipboardJS('.js-copy-link');
 
             clipboard.on('success', function(e) {
@@ -2406,7 +2459,13 @@
 
 
             // Reference: https://jqueryvalidation.org/validate/
-            var validator = $('#create-form').validate({
+            //
+            // Two form-ids get the same validator: `create-form` is the default
+            // id emitted by the form blade component, and `checkout_form` is
+            // the anti-double-submit id used by the six checkout flows. Both
+            // need the same error styling + select2 error placement, so we
+            // init in a loop instead of duplicating the options block.
+            var snipeValidatorOptions = {
                 ignore: 'input[type=hidden]',
                 errorClass: 'alert-msg',
                 errorElement: 'div',
@@ -2434,28 +2493,27 @@
 
                 },
                 highlight: function(inputElement) {
-
-                    // We have to go two levels up if it's an input group
-                    if ($(inputElement).parent().hasClass('input-group')) {
-                        $(inputElement).parent().parent().parent().addClass('has-error');
-                    } else {
-                        $(inputElement).parent().addClass('has-error');
-                        $(inputElement).closest('.help-block').remove();
-                    }
-
+                    // Put the error-state class on the enclosing .form-group
+                    // so both the input AND its <label class="control-label">
+                    // get Bootstrap 3's has-error decoration (the label goes
+                    // red via .has-error .control-label). .closest() walks up
+                    // regardless of nesting, so this works for plain inputs,
+                    // input-groups (input + addon), and select2-wrapped selects
+                    // without a per-shape branch.
+                    var $group = $(inputElement).closest('.form-group');
+                    $group.addClass('has-error');
+                    // Blow away any inline help block that would collide with
+                    // the newly-inserted error text.
+                    $group.find('.help-block').remove();
                 },
-                onfocusout: function(element) {
-                    // We have to go two levels up if it's an input group
-                    if ($(element).parent().hasClass('input-group')) {
-                        $(element).parent().parent().parent().removeClass('has-error');
-                        return $(element).valid();
-                    } else {
-                        $(element).parent().removeClass('has-error');
-                        return $(element).valid();
-                    }
-
+                unhighlight: function(inputElement) {
+                    $(inputElement).closest('.form-group').removeClass('has-error');
                 },
 
+            };
+
+            $('#create-form, #checkout_form').each(function () {
+                $(this).validate(snipeValidatorOptions);
             });
 
             $.extend($.validator.messages, {
@@ -2472,6 +2530,59 @@
                 }
                 return param.test(value);
             }, '{{ trans('validation.generic.invalid_value_in_field') }}');
+
+            // Generic radio-toggles-required-select handler. Any form pattern
+            // where a radio group hides/shows sibling <select>s (checkout-to
+            // type in checkout forms today; any future similar toggle) can
+            // opt in by giving the radios a `data-required-select` attribute
+            // whose value is a CSS selector for the field the checked radio
+            // should mark required. Radios that don't set the attribute are
+            // ignored; selects that only appear as data-required-select
+            // targets get their required attribute cleared when a different
+            // radio in the same group is chosen. Runs once on ready + on
+            // every change so page-refresh state and interactive toggles
+            // both stay in sync.
+            //
+            // The visibility check is critical for asset create/edit, where
+            // the checkout-selector partial is rendered hidden and only
+            // revealed after a deployable status is picked. Without it, the
+            // browser tries to enforce required on an invisible select and
+            // silently blocks the save.
+            var applyRadioRequiredSelects = function () {
+                // Group opted-in radios by name, collecting the list of CSS
+                // selectors each group can point at. Reading via .attr()
+                // rather than .data() because .data() caches on first access
+                // and can miss late-changing values in select2 / Bootstrap
+                // data-toggle="buttons" environments. Only VISIBLE radios
+                // count — a hidden checkout-selector on asset create/edit
+                // is inert and shouldn't be pinning required on anything.
+                var groups = {};
+                $('input[type=radio][data-required-select]:visible').each(function () {
+                    var name = this.name;
+                    var target = this.getAttribute('data-required-select');
+                    if (!name || !target) return;
+                    if (!groups[name]) groups[name] = [];
+                    if (groups[name].indexOf(target) === -1) groups[name].push(target);
+                });
+
+                // For each group, pin required on the currently-checked
+                // radio's target and clear it from every sibling target.
+                // If the target select itself is hidden (e.g., the "user"
+                // form-group is display:none because a non-deployable status
+                // was picked), don't set required on it — the browser would
+                // block form submit on an invisible element.
+                Object.keys(groups).forEach(function (name) {
+                    var $checked = $('input[name="' + name + '"]:checked');
+                    var checkedTarget = $checked.length ? $checked[0].getAttribute('data-required-select') : null;
+                    groups[name].forEach(function (selector) {
+                        var $target = $(selector);
+                        var shouldBeRequired = selector === checkedTarget && $target.is(':visible');
+                        $target.prop('required', shouldBeRequired);
+                    });
+                });
+            };
+            $(document).on('change', 'input[type=radio][data-required-select]', applyRadioRequiredSelects);
+            $(document).ready(applyRadioRequiredSelects);
 
 
             function showHideEncValue(e) {
@@ -2611,12 +2722,26 @@
                 event.preventDefault();
                 $(this).ekkoLightbox();
             });
-            //This prevents multi-click checkouts for accessories, components, consumables
+            // Anti-double-click on checkout forms. The old implementation did
+            //   event.preventDefault(); $btn.prop('disabled', true); this.submit();
+            // which submitted the form NATIVELY (without re-firing the submit
+            // event), bypassing jQuery Validate entirely — hence any JS
+            // validation error was visible for a single frame before the form
+            // shipped straight to the server.
+            //
+            // New shape: let the normal submit lifecycle run, and only disable
+            // the button when the submit has not been cancelled by a prior
+            // handler (jQuery Validate calls event.preventDefault() when the
+            // form is invalid, so we skip the disable in that case and the
+            // operator can fix + retry). jQuery Validate is bound at .validate()
+            // time (line ~2390 above) which runs before this ready() callback,
+            // so its handler is registered — and fires — first.
             $(document).ready(function () {
-                $('#checkout_form').submit(function (event) {
-                    event.preventDefault();
+                $('#checkout_form').on('submit', function (event) {
+                    if (event.isDefaultPrevented()) {
+                        return;
+                    }
                     $('#submit_button').prop('disabled', true);
-                    this.submit();
                 });
             });
 

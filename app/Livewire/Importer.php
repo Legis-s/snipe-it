@@ -313,7 +313,10 @@ class Importer extends Component
             'order_number' => trans('general.order_number'),
             'purchase_cost' => trans('general.purchase_cost'),
             'purchase_date' => trans('general.purchase_date'),
-            'qty' => trans('general.qty'),
+            // Internal key MUST be 'quantity' to match ItemImporter::handle(),
+            // which does findCsvMatch($row, 'quantity'). A previous rename to
+            // 'qty' silently broke consumable/component imports (issue #19312).
+            'quantity' => trans('general.qty'),
             'supplier' => trans('general.supplier'),
         ];
 
@@ -329,7 +332,8 @@ class Importer extends Component
             'order_number' => trans('general.order_number'),
             'purchase_cost' => trans('general.purchase_cost'),
             'purchase_date' => trans('general.purchase_date'),
-            'qty' => trans('general.qty'),
+            // Internal key MUST be 'quantity' (see consumables_fields note above).
+            'quantity' => trans('general.qty'),
             'serial' => trans('general.serial_number'),
             'supplier' => trans('general.supplier'),
         ];
@@ -606,8 +610,9 @@ class Importer extends Component
                 'Warranty',
                 'Warranty Months',
             ],
-            'qty' => [
+            'quantity' => [
                 'QTY',
+                'Qty',
                 'Quantity',
             ],
             'zip' => [

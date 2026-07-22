@@ -4,25 +4,28 @@
 
         <div class="btn-group" data-toggle="buttons">
             @if ((isset($location_select)) && ($location_select!='false'))
-                <label class="btn btn-theme{{ (session('checkout_to_type') ?: 'location') == 'location' ? ' active' : '' }}">
+                <label class="btn btn-theme @if(session('checkout_to_type') == 'location') active @endif">
                     <input name="checkout_to_type" value="location" aria-label="checkout_to_type"
-                           type="radio" {{ (session('checkout_to_type') ?: 'location') == 'location' ? 'checked' : '' }}>
-                    <x-icon type="location" />
+                           type="radio" data-required-select="#assigned_location_location_select"
+                            @checked(session('checkout_to_type') == 'location')>
+                    <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
                     {{ trans('general.location') }}
                 </label>
             @endif
             @if ((isset($user_select)) && ($user_select!='false'))
-                <label class="btn btn-theme{{ (session('checkout_to_type') ?: 'user') == 'user' ? ' active' : '' }}">
+                <label class="btn btn-theme @if((session('checkout_to_type') ?: 'user') == 'user') active @endif">
                     <input name="checkout_to_type" value="user" aria-label="checkout_to_type"
-                           type="radio" {{ (session('checkout_to_type') ?: 'user') == 'user' ? 'checked' : '' }}>
+                           type="radio" data-required-select="#assigned_user_select"
+                           @checked((session('checkout_to_type') ?: 'user') == 'user')>
                 <x-icon type="user" />
                 {{ trans('general.user') }}
             </label>
             @endif
             @if ((isset($asset_select)) && ($asset_select!='false'))
-                <label class="btn btn-theme{{ session('checkout_to_type') == 'asset' ? ' active' : '' }}">
+                <label class="btn btn-theme @if(session('checkout_to_type') == 'asset') active @endif">
                     <input name="checkout_to_type" value="asset" aria-label="checkout_to_type"
-                           type="radio" {{ session('checkout_to_type') == 'asset' ? 'checked': '' }}>
+                           type="radio" data-required-select="#assigned_asset_select"
+                           @checked(session('checkout_to_type') == 'asset')>
                 <i class="fas fa-barcode" aria-hidden="true"></i>
                 {{ trans('general.asset') }}
             </label>

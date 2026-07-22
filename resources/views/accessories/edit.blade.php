@@ -75,17 +75,10 @@
             <x-form.row
                 :label="trans('general.purchase_date')"
                 name="purchase_date"
+                type="datepicker"
+                :item="$item"
                 input_div_class="col-md-4"
-            >
-                <x-slot:input>
-                    <x-input.datepicker
-                        name="purchase_date"
-                        id="purchase_date"
-                        :value="old('purchase_date', $item->purchase_date ? date('Y-m-d', strtotime($item->purchase_date)) : '')"
-                        :placeholder="trans('general.select_date')"
-                    />
-                </x-slot:input>
-            </x-form.row>
+            />
 
             <x-input.purchase-cost
                 :label="trans('general.unit_cost')"
@@ -105,6 +98,12 @@
             />
 
             <x-input.image-upload :item="$item" :imagePath="app('accessories_upload_path')" :clonedModel="$cloned_model ?? null" />
+
+            <x-form.checkbox-row
+                name="requestable"
+                :label="trans('admin/accessories/general.requestable')"
+                :item="$item"
+            />
 
             <x-slot:customfooter>
                 <x-redirect_submit_options

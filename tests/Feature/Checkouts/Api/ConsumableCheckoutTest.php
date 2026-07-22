@@ -90,6 +90,36 @@ class ConsumableCheckoutTest extends TestCase
         });
     }
 
+    public function test_pivot_row_created_by_is_the_actor_not_the_target()
+    {
+        // Regression: previously the pivot's created_by was set to $user->id
+        // (the checkout target), so audit surfaces that read consumables_users
+        // (e.g. "who checked this consumable out to me") would show the target
+        // as their own creator. The action_logs stream separately recorded the
+        // correct actor, which is why the pivot bug survived.
+        $consumable = Consumable::factory()->create();
+        $actor = User::factory()->checkoutConsumables()->create();
+        $target = User::factory()->create();
+
+        $this->actingAsForApi($actor)
+            ->postJson(route('api.consumables.checkout', $consumable), [
+                'assigned_to' => $target->id,
+                'note' => 'created_by attribution regression',
+            ]);
+
+        $this->assertDatabaseHas('consumables_users', [
+            'consumable_id' => $consumable->id,
+            'assigned_to' => $target->id,
+            'created_by' => $actor->id,
+        ]);
+
+        $this->assertDatabaseMissing('consumables_users', [
+            'consumable_id' => $consumable->id,
+            'assigned_to' => $target->id,
+            'created_by' => $target->id,
+        ]);
+    }
+
     public function test_action_log_created_upon_checkout()
     {
         $consumable = Consumable::factory()->create();

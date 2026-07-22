@@ -327,8 +327,16 @@ class ConsumablesController extends Controller
 
         // Resolve the raw target first, then enforce FMCS explicitly.
         // Scoped lookup can hide cross-company users and make failures ambiguous.
-        if (! $user = User::withoutGlobalScopes()->find($request->input('assigned_to'))) {
-            // Return error message
+        $user = User::withoutGlobalScopes()->find($request->input('assigned_to'));
+
+        // withoutGlobalScopes bypasses SoftDeletes so we can tell "no such
+        // user" from "user in another company" for FMCS messaging. Trashed
+        // users must not be treated as valid checkout targets.
+        if ($user && ! empty($user->deleted_at)) {
+            $user = null;
+        }
+
+        if (! $user) {
             return response()->json(Helper::formatStandardApiResponse('error', null, 'No user found'));
         }
 
@@ -345,7 +353,11 @@ class ConsumablesController extends Controller
                 $consumable->users()->attach($consumable->id,
                     [
                         'consumable_id' => $consumable->id,
-                        'created_by' => $user->id,
+                        // The pivot's created_by is the operator recording the
+                        // checkout, not the checkout target. Sibling paths
+                        // (web ConsumableCheckoutController, web + API
+                        // ComponentCheckoutController) all key off auth()->id().
+                        'created_by' => auth()->id(),
                         'assigned_to' => $request->input('assigned_to'),
                         'note' => $request->input('note'),
                     ]

@@ -92,6 +92,8 @@ class Department extends SnipeModel
     protected $searchableRelations = [
         'adminuser' => ['first_name', 'last_name', 'display_name'],
         'company' => ['name'],
+        'location' => ['name'],
+        'manager' => ['first_name', 'last_name', 'display_name'],
     ];
 
     public function isDeletable()

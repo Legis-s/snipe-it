@@ -749,9 +749,13 @@ class UsersController extends Controller
                 $assets = $assets->InModelList($model_ids);
             }
 
-            $assets = $assets->get();
+            $total = $assets->count();
+            $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
+            $limit = app('api_limit_value');
 
-            return (new AssetsTransformer)->transformAssets($assets, $assets->count(), $request);
+            $assets = $assets->skip($offset)->take($limit)->get();
+
+            return (new AssetsTransformer)->transformAssets($assets, $total, $request);
         }
 
         return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/users/message.user_not_found', compact('id'))));
@@ -814,15 +818,22 @@ class UsersController extends Controller
      *
      * @param  $userId
      */
-    public function accessories($id): array
+    public function accessories(Request $request, $id): array
     {
         $this->authorize('view', User::class);
         $user = User::findOrFail($id);
         $this->authorize('view', $user);
         $this->authorize('view', Accessory::class);
-        $accessories = $user->accessories;
 
-        return (new AccessoriesTransformer)->transformAccessories($accessories, $accessories->count());
+        $accessories = $user->accessories();
+
+        $total = $accessories->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
+        $limit = app('api_limit_value');
+
+        $accessories = $accessories->skip($offset)->take($limit)->get();
+
+        return (new AccessoriesTransformer)->transformAccessories($accessories, $total);
     }
 
     /**
@@ -834,15 +845,21 @@ class UsersController extends Controller
      *
      * @param  $userId
      */
-    public function licenses($id): JsonResponse|array
+    public function licenses(Request $request, $id): JsonResponse|array
     {
         $this->authorize('view', User::class);
         $this->authorize('view', License::class);
 
         if ($user = User::where('id', $id)->withTrashed()->first()) {
-            $licenses = $user->licenses()->get();
+            $licenses = $user->licenses();
 
-            return (new LicensesTransformer)->transformLicenses($licenses, $licenses->count());
+            $total = $licenses->count();
+            $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
+            $limit = app('api_limit_value');
+
+            $licenses = $licenses->skip($offset)->take($limit)->get();
+
+            return (new LicensesTransformer)->transformLicenses($licenses, $total);
         }
 
         return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/users/message.user_not_found', compact('id'))));
@@ -917,14 +934,20 @@ class UsersController extends Controller
      *
      * @author [Godfrey Martinez] [<gmartinez@grokability.com>]
      */
-    public function eulas(User $user, ActionlogsTransformer $transformer)
+    public function eulas(Request $request, User $user, ActionlogsTransformer $transformer)
     {
         $this->authorize('view', $user);
 
-        $eulas = $user->eulas;
+        $eulas = $user->eulas();
+
+        $total = $eulas->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
+        $limit = app('api_limit_value');
+
+        $eulas = $eulas->skip($offset)->take($limit)->get();
 
         return response()->json(
-            $transformer->transformActionlogs($eulas, $eulas->count())
+            $transformer->transformActionlogs($eulas, $total)
         );
     }
 

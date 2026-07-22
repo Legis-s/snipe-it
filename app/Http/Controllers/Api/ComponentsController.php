@@ -326,6 +326,13 @@ class ComponentsController extends Controller
             // Scoped lookup can hide cross-company records and lead to partial writes.
             $asset = Asset::withoutGlobalScopes()->find($request->input('assigned_to'));
 
+            // withoutGlobalScopes bypasses SoftDeletes so we can distinguish
+            // "no such asset" from "in another company" for FMCS messaging.
+            // Trashed assets must not be treated as valid checkout targets.
+            if ($asset && ! empty($asset->deleted_at)) {
+                $asset = null;
+            }
+
             if (! $asset) {
                 return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/hardware/message.does_not_exist')));
             }

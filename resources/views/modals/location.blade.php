@@ -7,8 +7,8 @@
         </div>
         <div class="modal-body">
             <form class="form-horizontal" action="{{ route('api.locations.store') }}" onsubmit="return false">
-                    <div class="alert alert-danger" id="modal_error_msg" style="display:none">
-                </div>
+                    <x-alert type="danger" id="modal_error_msg" style="display:none">
+                </x-alert>
 
                 <div class="dynamic-form-row">
                     <label for="modal-name" class="col-md-3 col-xs-12 control-label">{{ trans('general.name') }}:</label>

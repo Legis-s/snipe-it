@@ -62,6 +62,22 @@ class SnipeRootComplex extends Complex
             $path = Parser::parse($key);
 
             if ($path->isNotEmpty()) {
+                // Path::isNotEmpty() returns true when EITHER the
+                // attribute-path OR the value-path is populated. A body
+                // key that's only a value-path filter expression (e.g.
+                // `emails[type eq "work"]`) makes it past this check
+                // but has getAttributePath() === null, which the
+                // library's shiftAttributePathAttributes() will null-
+                // deref on. Route-level replace/add here only
+                // dispatches by simple attribute name — a filter-key at
+                // this layer is a misconfigured SCIM client that we
+                // can't honor, and this will return a 400 so the user knows
+                // the misconfiguration is on their end, versus the previous 500,
+                // which made it look like it was on our end.
+                if ($path->getAttributePath() === null) {
+                    throw new SCIMException('Cannot route SCIM key with no attribute path: '.$key, 400);
+                }
+
                 $attributeNames = $path->getAttributePathAttributes();
                 $schema = $path->getAttributePath()?->path?->schema;
                 $path = $path->shiftAttributePathAttributes();
@@ -123,6 +139,17 @@ class SnipeRootComplex extends Complex
             } else {
                 $path = Parser::parse($key);
                 if ($path->isNotEmpty()) {
+                    // See the matching guard in add() — isNotEmpty() lets
+                    // a value-path-only key through (e.g. emails[type eq
+                    // "work"]) but shiftAttributePathAttributes() null-
+                    // derefs on getAttributePath() when it's not present.
+                    // Trace: null-deref on Path.php:79 seen in the
+                    // wild for misconfigured SCIM clients sending
+                    // filter-key bodies to PUT /Users/{id}.
+                    if ($path->getAttributePath() === null) {
+                        throw new SCIMException('Cannot route SCIM key with no attribute path: '.$key, 400);
+                    }
+
                     $attributeNames = $path->getAttributePathAttributes();
                     $path = $path->shiftAttributePathAttributes();
                     $subNode = $this->getSubNode($attributeNames[0] ?? $path->getAttributePath()?->path?->schema);
@@ -377,9 +404,10 @@ class SnipeSCIMConfig
                     {
                         protected function doRead(&$object, $attributes = [])
                         {
-                            if (!$object->email) {
+                            if (! $object->email) {
                                 return null;
                             }
+
                             return [
                                 'value' => $object->email,
                                 'type' => 'work', // TODO - is this how we always have done it?
@@ -504,9 +532,9 @@ class SnipeSCIMConfig
                                 $address['primary'] = true;
                             }
                             if ($address) {
-                                return [(object) $address]; //cast-to-object forces "squiggly-brackets" in JSON
+                                return [(object) $address]; // cast-to-object forces "squiggly-brackets" in JSON
                             } else {
-                                return null; //this should remove the addresses block entirely
+                                return null; // this should remove the addresses block entirely
                             }
                         }
 

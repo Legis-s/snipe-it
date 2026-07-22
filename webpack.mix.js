@@ -18,7 +18,7 @@ mix
       "./node_modules/bootstrap/dist/css/bootstrap.css",
       "./node_modules/@fortawesome/fontawesome-free/css/all.css",
       "./public/css/build/AdminLTE.css",
-      "./node_modules/bootstrap-datepicker/dist/css/bootstrap-datepicker.standalone.css",
+      "./node_modules/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css",
       "./node_modules/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.css",
       "./node_modules/blueimp-file-upload/css/jquery.fileupload.css",
       "./node_modules/blueimp-file-upload/css/jquery.fileupload-ui.css",

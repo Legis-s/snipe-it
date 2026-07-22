@@ -94,6 +94,7 @@ return [
     'component' => 'Component',
     'components' => 'Components',
     'complete' => 'Complete',
+    'completed' => 'completed',
     'consumable' => 'Consumable',
     'consumables' => 'Consumables',
     'country' => 'Country',
@@ -312,6 +313,7 @@ return [
     'select_supplier' => 'Select a Supplier',
     'select_user' => 'Select a User',
     'select_date' => 'Select Date (YYYY-MM-DD)',
+    'select_datetime' => 'Select Date and Time (YYYY-MM-DD HH:MM:SS)',
     'select_statuslabel' => 'Select Status',
     'select_company' => 'Select Company',
     'select_asset' => 'Select Asset',
@@ -670,10 +672,11 @@ return [
             'success' => ':object_type successfully deleted|Successfully deleted :count :object_type',
             'error' => 'Could not delete :object_type',
             'nothing_selected' => 'No :object_type selected - nothing to do',
+            'nothing_deletable' => 'None of the selected :object_type can be deleted.',
             'partial' => 'Deleted :success_count :object_type, but :error_count :object_type could not be deleted',
         ],
     ],
-    'no_requestable' => 'There are no requestable assets or asset models.',
+    'no_requestable' => 'There are no requestable assets, asset models, or accessories.',
 
     'countable' => [
         'accessories' => ':count Accessory|:count Accessories',
@@ -720,6 +723,8 @@ return [
     'optional' => 'OPTIONAL',
     'audit_by_field' => 'Audit by Field',
     'audit_by_field_help' => 'Auditing by scanning serial numbers is only an available option if serial numbers are required to be unique in the Admin Settings.',
+    'checkin_by_field' => 'Check in by Field',
+    'checkin_by_field_help' => 'Checking in by scanning serial numbers is only an available option if serial numbers are required to be unique in the Admin Settings.',
     'audit_key' => 'Asset',
 
     // Add form placeholders here

@@ -395,7 +395,7 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
             'category', 'manufacturer_id', 'name', 'tag', 'model_id',
             'model_number', 'purchase_date', 'purchase_cost', 'warranty_months', 'supplier_id',
             'location_id', 'company_id', 'serial', 'assigned_to', 'status_id', 'rtd_location_id',
-            'last_checkout', 'requestable', 'updated_at', 'checkout_counter', 'assigned_type',
+            'last_checkout', 'updated_at', 'checkout_counter', 'assigned_type',
         ];
 
         $this->assertEquals($row['assigneeFullName'], "{$assignee->first_name} {$assignee->last_name}");
@@ -419,13 +419,52 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
         $this->assertEquals(1, $updatedAsset->checkout_counter);
         $this->assertEquals(User::class, $updatedAsset->assigned_type);
 
-        // RequestAble is always updated regardless of initial value.
-        // $this->assertEquals($asset->requestable, $updatedAsset->requestable);
+        // The import file has no requestable column, so the flag should be untouched.
+        $this->assertEquals($asset->requestable, $updatedAsset->requestable);
 
         $this->assertEquals(
             Arr::except($asset->attributesToArray(), $updatedAttributes),
             Arr::except($updatedAsset->attributesToArray(), $updatedAttributes),
         );
+    }
+
+    #[Test]
+    public function update_mode_preserves_boolean_flags_when_columns_are_not_in_file(): void
+    {
+        $asset = Asset::factory()->create(['requestable' => 1, 'byod' => 1])->refresh();
+
+        // The default import file has no "Requestable" or "BYOD" columns, so an
+        // update import should leave both flags alone.
+        $importFileBuilder = ImportFileBuilder::times(1)->replace(['tag' => $asset->asset_tag]);
+        $import = Import::factory()->asset()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
+
+        $this->actingAsForApi(User::factory()->superuser()->create());
+        $this->importFileResponse(['import' => $import->id, 'import-update' => true])->assertOk();
+
+        $asset->refresh();
+        $this->assertEquals(1, $asset->requestable, 'Update import without a requestable column should not reset the requestable flag.');
+        $this->assertEquals(1, $asset->byod, 'Update import without a byod column should not reset the byod flag.');
+    }
+
+    #[Test]
+    public function update_mode_can_clear_boolean_flags_when_explicitly_false(): void
+    {
+        $asset = Asset::factory()->create(['requestable' => 1, 'byod' => 1])->refresh();
+
+        $row = ImportFileBuilder::new()->definition();
+        $row['tag'] = $asset->asset_tag;
+        $row['Requestable'] = 'FALSE';
+        $row['BYOD'] = 'FALSE';
+
+        $importFileBuilder = new ImportFileBuilder([$row]);
+        $import = Import::factory()->asset()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
+
+        $this->actingAsForApi(User::factory()->superuser()->create());
+        $this->importFileResponse(['import' => $import->id, 'import-update' => true])->assertOk();
+
+        $asset->refresh();
+        $this->assertEquals(0, $asset->requestable, 'Update import with requestable=FALSE should clear the requestable flag.');
+        $this->assertEquals(0, $asset->byod, 'Update import with byod=FALSE should clear the byod flag.');
     }
 
     #[Test]
