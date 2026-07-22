@@ -50,6 +50,18 @@
     </x-container>
 @stop
 
+@push('css')
+    <style>
+        #purchasesTable .purchase-name-cell,
+        #purchasesTable .purchase-name-cell span,
+        #purchasesTable .purchase-name-cell a {
+            white-space: normal !important;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+    </style>
+@endpush
+
 @section('moar_scripts')
     @include ('partials.bootstrap-table', ['exportFile' => 'purchases-export', 'search' => true])
     <script nonce="{{ csrf_token() }}">
