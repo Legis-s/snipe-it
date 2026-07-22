@@ -27,13 +27,13 @@
       <div class="box box-default">
         <div class="box-body">
 
-          <div class="callout callout-warning" role="alert" aria-live="assertive" aria-atomic="true">
-            <i class="fas fa-exclamation-triangle" aria-hidden="true"></i> {{ trans_choice('admin/hardware/form.bulk_update_warn', count($assets), ['asset_count' => count($assets)]) }}
+          <x-callout type="warning" icon="warning" live="assertive">
+            {{ trans_choice('admin/hardware/form.bulk_update_warn', count($assets), ['asset_count' => count($assets)]) }}
 
             @if (count($models) > 0)
               {{ trans_choice('admin/hardware/form.bulk_update_with_custom_field', count($models), ['asset_model_count' => count($models)]) }}
             @endif
-          </div>
+          </x-callout>
 
           <!-- Name -->
           <div class="form-group {{ $errors->has('name') ? ' has-error' : '' }}">
@@ -78,10 +78,10 @@
             <div class="form-group{{ $errors->has('expected_checkin') ? ' has-error' : '' }}">
                 <label for="expected_checkin" class="col-md-3 control-label">{{ trans('admin/hardware/form.expected_checkin') }}</label>
                 <div class="col-md-4">
-                    <x-input.datepicker
+                    <x-input.datetimepicker
                         name="expected_checkin"
                         value="{{ old('expected_checkin') }}"
-                        placeholder="{{ trans('general.select_date') }}"
+                        :default_now="false"
                     />
                     <x-form.error name="expected_checkin" />
                 </div>

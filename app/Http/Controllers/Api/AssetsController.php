@@ -1278,6 +1278,14 @@ class AssetsController extends Controller
             $error_payload['target_type'] = 'user';
         }
 
+        // withoutGlobalScopes above bypasses the SoftDeletes scope so we
+        // can distinguish "target not found" from "target in another company"
+        // for FMCS error messaging. Trashed targets must not be treated as
+        // valid checkout destinations though, so exclude them here.
+        if (isset($target) && ! empty($target->deleted_at)) {
+            $target = null;
+        }
+
         if ($request->filled('status_id')) {
             $asset->status_id = $request->input('status_id');
         }
@@ -1456,18 +1464,56 @@ class AssetsController extends Controller
     public function checkinByTag(Request $request, $tag = null): JsonResponse
     {
         $this->authorize('checkin', Asset::class);
-        if ($tag == null && null !== ($request->input('asset_tag'))) {
-            $tag = $request->input('asset_tag');
-        }
-        $asset = Asset::where('asset_tag', $tag)->first();
+
+        $asset = $this->resolveCheckinAssetFromBody($request, $tag);
 
         if ($asset) {
             return $this->checkin($request, $asset->id);
         }
 
+        $displayKey = $tag
+            ?? $request->input('checkin_key')
+            ?? $request->input('asset_tag');
+
         return response()->json(Helper::formatStandardApiResponse('error', [
-            'asset' => e($tag),
-        ], 'Asset with tag '.e($tag).' not found'));
+            'asset' => e($displayKey),
+        ], 'Asset with tag '.e($displayKey).' not found'));
+    }
+
+    /**
+     * Body-based asset lookup for the quickscan-checkin path. Mirrors the
+     * audit-side resolveAuditAssetFromBody: prefer checkin_key +
+     * checkin_by_field (serial gated on unique_serial), fall back to the
+     * legacy `asset_tag` field, otherwise return null. The URL-bound tag
+     * path still wins when the caller uses the /bytag/{tag}/checkin route.
+     */
+    private function resolveCheckinAssetFromBody(Request $request, ?string $tag): ?Asset
+    {
+        if ($tag !== null) {
+            return Asset::where('asset_tag', $tag)->first();
+        }
+
+        $settings = Setting::getSettings();
+        $checkin_by_field = $request->input('checkin_by_field', 'asset_tag');
+        $checkin_key = $request->input('checkin_key', null);
+
+        if ($settings->unique_serial == '1' && $checkin_by_field === 'serial' && $checkin_key) {
+            return Asset::where('serial', '=', trim($checkin_key))->first();
+        }
+
+        if ($checkin_by_field === 'asset_tag' && $checkin_key) {
+            return Asset::where('asset_tag', '=', trim($checkin_key))->first();
+        }
+
+        // Legacy body-based lookup: kept so callers that still send
+        // `asset_tag` (e.g. the pre-serial quickscan-checkin blade, third-
+        // party integrations built against the older API shape) continue
+        // to work without change.
+        if ($request->filled('asset_tag')) {
+            return Asset::where('asset_tag', '=', $request->input('asset_tag'))->first();
+        }
+
+        return null;
     }
 
     /**

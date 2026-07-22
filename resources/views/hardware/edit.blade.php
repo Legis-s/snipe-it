@@ -100,7 +100,12 @@
     @include ('partials.forms.edit.status', [ 'required' => 'true'])
     @if (!$item->id)
         @include ('partials.forms.checkout-selector', ['user_select' => 'true','asset_select' => 'true', 'location_select' => 'true', 'style' => 'display:none;'])
-        @include ('partials.forms.edit.user-select', ['translated_name' => trans('general.user'), 'fieldname' => 'assigned_user', 'style' => 'display:none;', 'required' => 'false'])
+        <x-input.user-select
+            :label="trans('general.user')"
+            name="assigned_user"
+            :selected="old('assigned_user')"
+            style="display:none;"
+        />
         @include ('partials.forms.edit.asset-select', ['translated_name' => trans('general.asset'), 'fieldname' => 'assigned_asset', 'style' => 'display:none;', 'required' => 'false'])
         @include ('partials.forms.edit.location-select', ['translated_name' => trans('general.location'), 'fieldname' => 'assigned_location', 'style' => 'display:none;', 'required' => 'false'])
     @endif
@@ -148,7 +153,14 @@
             <div id="optional_details" class="col-md-12" style="display:none">
                 @include ('partials.forms.edit.name', ['translated_name' => trans('admin/hardware/form.name')])
                 @include ('partials.forms.edit.warranty')
-                @include ('partials.forms.edit.datepicker', ['translated_name' => trans('admin/hardware/form.expected_checkin'),'fieldname' => 'expected_checkin'])
+                <x-form.row
+                    :label="trans('admin/hardware/form.expected_checkin')"
+                    name="expected_checkin"
+                    type="datetimepicker"
+                    :item="$item"
+                    :default_now="false"
+                    input_div_class="input-group col-md-5"
+                />
                 @include ('partials.forms.edit.datepicker', ['translated_name' => trans('general.next_audit_date'),'fieldname' => 'next_audit_date', 'help_text' => trans('general.next_audit_date_help')])
                 <!-- byod checkbox -->
                 <div class="form-group byod">
@@ -245,6 +257,11 @@
                 success: function (data) {
                     $('#custom_fields_content').html(data);
                     $('#custom_fields_content select').select2(); //enable select2 on any custom fields that are select-boxes
+                    // Re-init eonasdan datetimepickers on any DATE/DATETIME
+                    // custom fields that came with the new HTML. Without
+                    // this, the pickers would just be plain text inputs
+                    // until page reload.
+                    window.snipeitInitDatetimepickers('#custom_fields_content');
                     //now re-populate the custom fields based on the previously saved values
                     $('#custom_fields_content').find('input,select,textarea').each(function (index,elem) {
                         if(transformed_oldvals[elem.name]) {
@@ -365,7 +382,11 @@
         });
 
         @if (isset($cloned_model))
-        $('input[name="serials[1]"]').trigger('focus');
+            @if ($snipeSettings->auto_increment_assets == '1')
+                $('input[name="serials[1]"]').trigger('focus');
+            @else
+                $('#asset_tag').trigger('focus');
+            @endif
         @endif
     });
 

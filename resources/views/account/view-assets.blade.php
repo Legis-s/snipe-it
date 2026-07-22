@@ -13,15 +13,13 @@
         @if ($acceptanceQuantity = \App\Models\CheckoutAcceptance::forUser(Auth::user())->pending()->sum('qty'))
           <div class="row">
             <div class="col-md-12">
-              <div class="alert alert alert-warning fade in">
-                <i class="fas fa-exclamation-triangle faa-pulse animated"></i>
-
+              <x-alert type="warning" icon="warning">
                 <strong>
                   <a href="{{ route('account.accept') }}" style="color: white;">
                     {{ trans_choice('general.unaccepted_profile_warning', $acceptanceQuantity, ['count' => $acceptanceQuantity]) }}
                   </a>
-                  </strong>
-              </div>
+                </strong>
+              </x-alert>
             </div>
           </div>
         @endif

@@ -20,4 +20,13 @@ class ConsumableIndexTest extends TestCase
             ->get(route('consumables.index'))
             ->assertOk();
     }
+
+    public function test_consumables_list_includes_table_buttons()
+    {
+        $this->actingAs(User::factory()->superuser()->create())
+            ->get(route('consumables.index'))
+            ->assertOk()
+            ->assertSee('data-buttons="consumableButtons"', false)
+            ->assertSee('window.consumableButtons', false);
+    }
 }

@@ -16,14 +16,12 @@
     <div class="col-md-12">
 
 
-        @if (($assets->count() < 1) && ($models->count() < 1))
+        @if (($assets->count() < 1) && ($models->count() < 1) && ($accessories->count() < 1))
 
             <div class="col-md-12">
-                <div class="alert alert-info fade in">
-                    <i class="fas fa-info-circle faa-pulse animated"></i>
-                    <strong>{{ trans('general.notification_info') }}: </strong>
+                <x-alert type="info" icon="info" :title="trans('general.notification_info')">
                     {{ trans('general.no_requestable') }}
-                </div>
+                </x-alert>
             </div>
 
         @else
@@ -40,7 +38,14 @@
                 <li>
                     <a href="#models" data-toggle="tab" title="{{ trans('general.asset_models') }}">{{ trans('general.asset_models') }}
                         <span class="badge badge-secondary"> {{ $models->count()}}</span>
-                    </a>                   
+                    </a>
+                </li>
+                @endif
+                @if ($accessories->count() > 0)
+                <li>
+                    <a href="#accessories" data-toggle="tab" title="{{ trans('general.accessories') }}">{{ trans('general.accessories') }}
+                        <span class="badge badge-secondary"> {{ $accessories->count()}}</span>
+                    </a>
                 </li>
                 @endif
             </ul>
@@ -151,6 +156,67 @@
                                 </tbody>
                             </table>
 
+                        </div>
+                    </div>
+                </div>
+                @endif
+
+                @if ($accessories->count() > 0)
+                <div class="tab-pane fade in {{ (($assets->count() == 0) && ($models->count() == 0)) ? 'active' : '' }}" id="accessories">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table
+                                    class="table table-striped snipe-table"
+                                    id="requestableAccessoriesTable"
+                                    data-cookie-id-table="requestableAccessories">
+                                <thead>
+                                    <tr role="row">
+                                        <th class="col-md-1" data-sortable="true">{{ trans('general.image') }}</th>
+                                        <th class="col-md-5" data-sortable="true">{{ trans('admin/accessories/general.accessory_name') }}</th>
+                                        <th class="col-md-2" data-sortable="true">{{ trans('admin/hardware/table.location') }}</th>
+                                        <th class="col-md-2" data-sortable="true">{{ trans('admin/accessories/general.remaining') }}</th>
+                                        <th class="col-md-2 actions" data-sortable="false">{{ trans('table.actions') }}</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    @foreach($accessories as $requestableAccessory)
+                                        <tr>
+                                            <td>
+                                                @if (($requestableAccessory->image) && ($requestableAccessory->getImageUrl()))
+                                                    <a href="{{ $requestableAccessory->getImageUrl() }}" data-toggle="lightbox" data-type="image">
+                                                        <img src="{{ $requestableAccessory->getImageUrl() }}" style="max-height: {{ $snipeSettings->thumbnail_max_h }}px; width: auto;" class="img-responsive">
+                                                    </a>
+                                                @endif
+                                            </td>
+
+                                            <td>
+                                                @can('view', \App\Models\Accessory::class)
+                                                    <a href="{{ route('accessories.show', ['accessory' => $requestableAccessory->id]) }}">{{ $requestableAccessory->name }}</a>
+                                                @else
+                                                    {{ $requestableAccessory->name }}
+                                                @endcan
+                                            </td>
+
+                                            <td>{{ $requestableAccessory->location->name ?? '' }}</td>
+
+                                            <td>{{ $requestableAccessory->numRemaining() }}</td>
+
+                                            <td>
+                                                <form action="{{ route('account/request-item', ['itemType' => 'accessory', 'itemId' => $requestableAccessory->id]) }}" method="POST" accept-charset="utf-8">
+                                                    {{ csrf_field() }}
+                                                    <input type="text" style="width: 70px; margin-right: 10px;" class="form-control pull-left" name="request-quantity" value="1" placeholder="{{ trans('general.qty') }}">
+                                                    @if ($requestableAccessory->isRequestedBy(Auth::user()))
+                                                        <input class="btn btn-danger btn-sm" type="submit" value="{{ trans('button.cancel') }}">
+                                                    @else
+                                                        <input class="btn btn-primary btn-sm" type="submit" value="{{ trans('button.request') }}">
+                                                    @endif
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>

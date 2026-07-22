@@ -208,6 +208,8 @@ class IconHelper
                 return 'fas fa-list-ol';
             case 'labels':
                 return 'fas fa-tags';
+            case 'signature':
+                return 'fa-solid fa-signature';
             case 'ldap':
                 return 'fas fa-sitemap';
             case 'google':

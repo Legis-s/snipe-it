@@ -543,4 +543,47 @@ class AssetCheckoutTest extends TestCase
 
         $response->assertSessionHas('sign_in_place', true);
     }
+
+    /**
+     * Regression: AssetCheckoutController::store used to call
+     *   session()->put(['checkout_to_type' => $target]);
+     * with $target being the resolved Eloquent model (User/Asset/Location),
+     * not the string 'user'/'asset'/'location'. Every subsequent read of
+     * session('checkout_to_type') then compared an Eloquent instance to a
+     * string literal in the checkout-selector partial, which silently
+     * failed — no radio was rendered `checked`, no target select got
+     * `required`, and jQuery Validate had nothing to block on.
+     *
+     * @see \App\Http\Controllers\Assets\AssetCheckoutController::store
+     */
+    #[DataProvider('checkoutTargetTypesProvider')]
+    public function test_asset_checkout_stores_target_type_as_string_in_session(string $type)
+    {
+        [$field, $target] = match ($type) {
+            'user' => ['assigned_user', User::factory()->create()->id],
+            'asset' => ['assigned_asset', Asset::factory()->create()->id],
+            'location' => ['assigned_location', Location::factory()->create()->id],
+        };
+        $asset = Asset::factory()->create();
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->post(route('hardware.checkout.store', $asset), [
+                'checkout_to_type' => $type,
+                $field => $target,
+            ])
+            ->assertSessionHasNoErrors();
+
+        $stored = session('checkout_to_type');
+        $this->assertIsString($stored, 'checkout_to_type must be a string, not an Eloquent model');
+        $this->assertSame($type, $stored);
+    }
+
+    public static function checkoutTargetTypesProvider(): array
+    {
+        return [
+            'user target' => ['user'],
+            'asset target' => ['asset'],
+            'location target' => ['location'],
+        ];
+    }
 }

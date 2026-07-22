@@ -2,6 +2,7 @@
     'route' => route('api.consumables.index'),
     'name' => 'default',
     'presenter' => \App\Presenters\ConsumablePresenter::dataTableLayout(),
+    'buttons' => null,
     'fixed_right_number' => 2,
     'fixed_number' => 1,
     'show_search' => true,
@@ -20,6 +21,7 @@
 
     <x-table
         :$presenter
+        :$buttons
         :$fixed_right_number
         :$fixed_number
         :$show_search

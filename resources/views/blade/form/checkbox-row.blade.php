@@ -10,6 +10,11 @@
     'help_text' => null,
     'help_icon' => null,
     'info_tooltip_text' => null,
+    // Explicit checked-state override. When passed (non-null), it wins over
+    // the old-input / $item fallback below. Needed for contexts (like
+    // Livewire) where the source of truth is neither the session's old input
+    // nor a bound Eloquent model but a live component property.
+    'checked' => null,
     // Default input column: only skip the offset when a left-hand label
     // column is being rendered (i.e. multi mode with a label). Single mode
     // never has a left label; multi mode without a label lays out the same
@@ -35,9 +40,13 @@
     $is_redisplay = session()->hasOldInput();
 
     if (! $is_multi) {
-        $single_checked = $is_redisplay
-            ? (bool) old($name)
-            : (bool) ($item?->{$name} ?? false);
+        // Explicit :checked wins over any implicit source. Otherwise fall
+        // back to old input on redisplay, then to the bound $item attribute.
+        $single_checked = $checked !== null
+            ? (bool) $checked
+            : ($is_redisplay
+                ? (bool) old($name)
+                : (bool) ($item?->{$name} ?? false));
 
         // Helper::checkIfRequired dereferences $item statically via $item::rules(),
         // so it needs a real class/object. Fall back to false when no model was
@@ -73,11 +82,15 @@
     $errors_class = $errors->has($name) ? ' has-error' : '';
 @endphp
 
-<div {{ $attributes->merge(['class' => 'form-group'.$errors_class]) }}>
+<div class="form-group{{ $errors_class }}">
 
     @if (! $is_multi)
 
-        {{-- Single checkbox: no left-hand label column; label wraps the input. --}}
+        {{-- Single checkbox: no left-hand label column; label wraps the input.
+             $attributes are forwarded to the input itself (not the wrapper)
+             so `wire:model.live=...` from Livewire callers binds the actual
+             checkbox and not an inert div. Wrapper-level class/style props
+             would be silently dropped here; no current caller uses them. --}}
         <div class="{{ $input_div_class }}">
             <label class="form-control">
                 <x-input.checkbox
@@ -89,6 +102,7 @@
                     :disabled="$disabled"
                     :aria-label="$name"
                     :aria-describedby="$help_text ? $name.'-help' : null"
+                    {{ $attributes }}
                 />
                 {{ $label }}
             </label>

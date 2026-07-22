@@ -1302,14 +1302,14 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
         Route::put('models/{model_id}',
             [
                 Api\PredefinedKitsController::class,
-                'updateModels',
+                'updateModel',
             ]
         )->name('api.kits.models.update');
 
         Route::delete('models/{model_id}',
             [
                 Api\PredefinedKitsController::class,
-                'detachModels',
+                'detachModel',
             ]
         )->name('api.kits.models.destroy');
 

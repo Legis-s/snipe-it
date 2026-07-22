@@ -26,12 +26,16 @@ class AssetCheckoutRequest extends Request
         $settings = Setting::getSettings();
 
         $rules = [
-            'assigned_user' => 'numeric|nullable|required_without_all:assigned_asset,assigned_location,assigned_deal',
-            'assigned_asset' => 'numeric|nullable|required_without_all:assigned_user,assigned_location,assigned_deal',
-            'assigned_location' => 'numeric|nullable|required_without_all:assigned_user,assigned_asset,assigned_deal',
-            'assigned_deal' => 'numeric|nullable|required_without_all:assigned_user,assigned_asset,assigned_location',
-            'status_id'             => 'exists:status_labels,id,deployable,1',
-            'checkout_to_type'      => 'required|in:asset,location,user,deal',
+            // exists_undeleted rejects soft-deleted checkout targets so the
+            // controllers below cannot bind live inventory to trashed users,
+            // assets, or locations. Applied at request-validation time so a
+            // bad request bounces with 422 before any controller mutation.
+            'assigned_user' => 'numeric|nullable|required_without_all:assigned_asset,assigned_location,assigned_deal|exists_undeleted:users,id',
+            'assigned_asset' => 'numeric|nullable|required_without_all:assigned_user,assigned_location,assigned_deal|exists_undeleted:assets,id',
+            'assigned_location' => 'numeric|nullable|required_without_all:assigned_user,assigned_asset,assigned_deal|exists_undeleted:locations,id',
+            'assigned_deal' => 'numeric|nullable|required_without_all:assigned_user,assigned_asset,assigned_location|exists_undeleted:deals,id',
+            'status_id' => 'nullable|exists:status_labels,id,deployable,1',
+            'checkout_to_type' => 'required|in:asset,location,user,deal',
             'checkout_at' => [
                 'nullable',
                 'date',

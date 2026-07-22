@@ -16,12 +16,12 @@
     <form class="form-horizontal" role="form" wire:submit="submit">
         {{csrf_field()}}
         @if (session()->has('warning'))
-            <div class="alert alert-warning">
+            <x-alert type="warning">
                 {!! session('warning') !!}
                 @php
                     session()->forget('warning'); // Clear the session flash immediately
                 @endphp
-            </div>
+            </x-alert>
         @endif
         <div class="row">
 
@@ -48,14 +48,14 @@
                     <div class="col-md-12" style="border-top: 0px;">
 
                         @if(session()->has('success'))
-                            <div class="alert alert-success fade in">
+                            <x-alert type="success">
                                 {{session('success')}}
-                            </div>
+                            </x-alert>
                         @endif
                         @if(session()->has('error'))
-                            <div class="alert alert-danger fade in">
+                            <x-alert type="danger">
                                 {{session('error')}}
-                            </div>
+                            </x-alert>
                         @endif
 
                         <div class="form-group">

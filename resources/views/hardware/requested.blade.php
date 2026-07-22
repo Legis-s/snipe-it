@@ -53,6 +53,8 @@
                                             <a href="{{ $request->requestable->getImageUrl() }}" data-toggle="lightbox" data-type="image"><img src="{{ $request->requestable->getImageUrl() }}" style="max-height: {{ $snipeSettings->thumbnail_max_h }}px; width: auto;" class="img-responsive" alt="{{ $request->requestable->name }}"></a>
                                         @elseif (($request->itemType() == "asset_model") && ($request->requestable))
                                             <a href="{{ Storage::disk('public')->url(app('models_upload_path') . $request->requestable->image) }}" data-toggle="lightbox" data-type="image"><img src="{{ Storage::disk('public')->url(app('models_upload_path') . $request->requestable->image) }}" style="max-height: {{ $snipeSettings->thumbnail_max_h }}px; width: auto;" class="img-responsive" alt="{{ $request->requestable->name }}"></a>
+                                        @elseif (($request->itemType() == "accessory") && ($request->requestable) && ($request->requestable->getImageUrl()))
+                                            <a href="{{ $request->requestable->getImageUrl() }}" data-toggle="lightbox" data-type="image"><img src="{{ $request->requestable->getImageUrl() }}" style="max-height: {{ $snipeSettings->thumbnail_max_h }}px; width: auto;" class="img-responsive" alt="{{ $request->requestable->name }}"></a>
                                         @endif
                                         </td>
                                         <td>
@@ -63,6 +65,10 @@
                                                 </a>
                                             @elseif ($request->itemType() == "asset_model")
                                                 <a href="{{ config('app.url') }}/models/{{ $request->requestable->id }}">
+                                                    {{ $request->name() }}
+                                                </a>
+                                            @elseif ($request->itemType() == "accessory")
+                                                <a href="{{ config('app.url') }}/accessories/{{ $request->requestable->id }}">
                                                     {{ $request->name() }}
                                                 </a>
                                             @endif
@@ -111,6 +117,8 @@
                                                 @else
                                                     <a href="{{ config('app.url') }}/hardware/{{ $request->requestable->id }}/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkin') }}</a>
                                                 @endif
+                                            @elseif ($request->itemType() == "accessory")
+                                                <a href="{{ config('app.url') }}/accessories/{{ $request->requestable->id }}/checkout" class="btn btn-sm bg-maroon" data-tooltip="true" title="{{ trans('general.checkout_user_tooltip') }}">{{ trans('general.checkout') }}</a>
                                             @endif
                                         </td>
 

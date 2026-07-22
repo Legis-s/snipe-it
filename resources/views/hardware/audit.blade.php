@@ -106,10 +106,13 @@
                                 {{ trans('general.next_audit_date') }}
                             </label>
                             <div class="col-md-8">
-                                <div class="input-group date col-md-5" data-provide="datepicker" data-date-format="yyyy-mm-dd" data-date-clear-btn="true">
-                                    <input type="text" class="form-control" placeholder="{{ trans('general.next_audit_date') }}" name="next_audit_date" id="next_audit_date" value="{{ old('next_audit_date', $next_audit_date) }}">
-                                    <span class="input-group-addon"><x-icon type="calendar" /></span>
-                                </div>
+                                <x-input.datepicker
+                                    id="next_audit_date"
+                                    name="next_audit_date"
+                                    :value="old('next_audit_date', $next_audit_date)"
+                                    :placeholder="trans('general.next_audit_date')"
+                                    col_size_class="col-md-5"
+                                />
                                 <x-form.error name="next_audit_date" />
                                  <p class="help-block">{!! trans('general.next_audit_date_help') !!}</p>
                             </div>

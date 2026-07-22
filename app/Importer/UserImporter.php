@@ -90,7 +90,9 @@ class UserImporter extends ItemImporter
         $this->item['state'] = trim($this->findCsvMatch($row, 'state'));
         $this->item['country'] = trim($this->findCsvMatch($row, 'country'));
         $this->item['start_date'] = trim($this->findCsvMatch($row, 'start_date'));
+        $this->item['start_date'] = $this->parseOrNullDate('start_date');
         $this->item['end_date'] = trim($this->findCsvMatch($row, 'end_date'));
+        $this->item['end_date'] = $this->parseOrNullDate('end_date');
         $this->item['zip'] = trim($this->findCsvMatch($row, 'zip'));
         $this->item['activated'] = ($this->fetchHumanBoolean(trim($this->findCsvMatch($row, 'activated'))) == 1) ? '1' : 0;
         $this->item['employee_num'] = trim($this->findCsvMatch($row, 'employee_num'));
@@ -99,8 +101,6 @@ class UserImporter extends ItemImporter
         $this->item['remote'] = ($this->fetchHumanBoolean(trim($this->findCsvMatch($row, 'remote'))) == 1) ? '1' : 0;
         $this->item['vip'] = ($this->fetchHumanBoolean(trim($this->findCsvMatch($row, 'vip'))) == 1) ? '1' : 0;
         $this->item['autoassign_licenses'] = ($this->fetchHumanBoolean(trim($this->findCsvMatch($row, 'autoassign_licenses'))) == 1) ? '1' : 0;
-
-        $this->handleEmptyStringsForDates();
 
         $user_department = trim($this->findCsvMatch($row, 'department'));
         if ($this->shouldUpdateField($user_department)) {
@@ -333,16 +333,5 @@ class UserImporter extends ItemImporter
         }
 
         return in_array($location->company_id, $companyIds);
-    }
-
-    private function handleEmptyStringsForDates(): void
-    {
-        if ($this->item['start_date'] === '') {
-            $this->item['start_date'] = null;
-        }
-
-        if ($this->item['end_date'] === '') {
-            $this->item['end_date'] = null;
-        }
     }
 }

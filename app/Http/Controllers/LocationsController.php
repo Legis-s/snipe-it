@@ -256,13 +256,11 @@ class LocationsController extends Controller
 
         if ($location->isDeletable()) {
 
-            if ($location->image) {
-                try {
-                    Storage::disk('public')->delete('locations/'.$location->image);
-                } catch (\Exception $e) {
-                    Log::error($e);
-                }
-            }
+            // Note: the image file is deliberately preserved across this
+            // soft-delete. Snipe-IT's `snipeit:purge` command permanently
+            // removes it later when the row is force-deleted. Keeping
+            // the file here means a restored soft-deleted row still has
+            // its image.
             $location->delete();
 
             return redirect()->to(route('locations.index'))->with('success', trans('admin/locations/message.delete.success'));
@@ -436,11 +434,16 @@ class LocationsController extends Controller
                 }
             }
 
+            if ($valid_count === 0) {
+                return redirect()->route('locations.index')
+                    ->with('error', trans('general.bulk.delete.nothing_deletable', ['object_type' => trans_choice('general.location_plural', 2)]));
+            }
+
             return view('locations/bulk-delete', compact('locations'))->with('valid_count', $valid_count);
         }
 
-        return redirect()->route('models.index')
-            ->with('error', 'You must select at least one model to edit.');
+        return redirect()->route('locations.index')
+            ->with('error', trans('general.bulk.delete.nothing_selected', ['object_type' => trans_choice('general.location_plural', 2)]));
     }
 
     /**

@@ -84,6 +84,34 @@ class ValidationServiceProvider extends ServiceProvider
         });
 
         /**
+         * Exists if undeleted
+         *
+         * Validates that a value points at a row that exists AND is not
+         * soft-deleted. Companion to unique_undeleted, used to gate places
+         * where an ID from user input is looked up (checkout targets, etc.).
+         *
+         * Laravel's built-in `exists` rule runs on the raw DB table and does
+         * not filter soft-deleted rows unless the caller adds a `whereNull`
+         * chain by hand. This custom rule bakes that in.
+         *
+         * $parameters[0] is the TABLE NAME to query
+         * $parameters[1] is the COLUMN to match against (defaults to id)
+         *
+         * Usage: `exists_undeleted:users,id`
+         */
+        Validator::extend('exists_undeleted', function ($attribute, $value, $parameters, $validator) {
+            if (count($parameters) < 1) {
+                return false;
+            }
+            $column = $parameters[1] ?? 'id';
+
+            return DB::table($parameters[0])
+                ->where($column, '=', $value)
+                ->whereNull('deleted_at')
+                ->exists();
+        });
+
+        /**
          * Unique if undeleted for two columns
          *
          * Same as unique_undeleted but taking the combination of two columns as unique constrain.

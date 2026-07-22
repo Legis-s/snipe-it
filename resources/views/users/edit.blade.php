@@ -458,7 +458,12 @@
 
 
                               <!-- Manager -->
-                              @include ('partials.forms.edit.user-select', ['translated_name' => trans('admin/users/table.manager'), 'fieldname' => 'manager_id', 'exclude_id' => $user->id ?? null])
+                              <x-input.user-select
+                                  :label="trans('admin/users/table.manager')"
+                                  name="manager_id"
+                                  :selected="old('manager_id', $user->manager_id)"
+                                  :excludeId="$user->id ?? null"
+                              />
 
                               <!--  Department -->
                               @include ('partials.forms.edit.department-select', ['translated_name' => trans('general.department'), 'fieldname' => 'department_id'])
@@ -732,20 +737,17 @@
               <x-form.legend help_text="{{ trans('permissions.use_groups') }}"/>
 
               @if (auth()->user()->isAdmin() && !auth()->user()->isSuperUser())
-                  <p class="alert alert-info">
-                      <x-icon type="info"/>
+                  <x-alert type="info" icon="info">
                       {{ trans('admin/users/general.superadmin_permission_warning') }}
-                  </p>
+                  </x-alert>
               @elseif (!auth()->user()->isAdmin() && !auth()->user()->isSuperUser() && auth()->id() === $user->id)
-                  <p class="alert alert-danger">
-                      <x-icon type="alert"/>
+                  <x-alert type="danger" icon="warning">
                       {{ trans('admin/users/general.self_permission_warning') }}
-                  </p>
+                  </x-alert>
               @elseif (!auth()->user()->isAdmin() && !auth()->user()->isSuperUser() && auth()->id() !== $user->id)
-                  <p class="alert alert-danger">
-                      <x-icon type="warning"/>
+                  <x-alert type="danger" icon="warning">
                       {{ trans('admin/users/general.admin_permission_warning') }}
-                  </p>
+                  </x-alert>
               @endif
 
               @if (auth()->user()->isSuperUser() || auth()->user()->isAdmin() || (auth()->id() !== $user->id && !$user->isSuperUser()))

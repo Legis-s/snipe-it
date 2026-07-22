@@ -16,7 +16,7 @@
                 <input type="hidden" name="id" value="{{$id}}"/>
 
                 <div class="modal-body">
-                    <div class="alert alert-danger" id="modal_error_msg" style="display:none"></div>
+                    <x-alert type="danger" id="modal_error_msg" style="display:none"></x-alert>
 
                     <div class="row">
                         <div class="col-md-12">

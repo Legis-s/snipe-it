@@ -9,14 +9,14 @@
 {{-- alert --}}
 @if($message != '')
     <div class="col-md-12" class="{{ $message_type }}">
-        <div class="alert alert-{{ $this->message_type }}">
+        <x-alert :type="$this->message_type">
             <button type="button" class="close" wire:click="$set('message','')">&times;</button>
             @if($message_type == 'success')
                 <i class="fas fa-check faa-pulse animated" aria-hidden="true"></i>
             @endif
             <strong>{{-- title --}} </strong>
             {{ $message }}
-        </div>
+        </x-alert>
     </div>
 @endif
 
@@ -24,10 +24,9 @@
           <div class="col-md-12">
             <div class="box box-default">
                 <div class="box-body">
-                    <div class="alert alert-warning">
-
-                        <i class="fa fa-warning info" aria-hidden="true"></i> <strong>{{ trans('general.warning', ['warning'=> trans('general.errors_importing')]) }}</strong>
-                    </div>
+                    <x-alert type="warning" icon="warning">
+                        <strong>{{ trans('general.warning', ['warning'=> trans('general.errors_importing')]) }}</strong>
+                    </x-alert>
 
                     <div class="errors-table">
                         <table class="table table-striped table-bordered" id="errors-table">

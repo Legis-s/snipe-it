@@ -17,10 +17,9 @@
 
         @if ($model->deleted_at!='')
             <div class="col-md-12">
-                <div class="callout callout-warning" role="alert" aria-live="assertive" aria-atomic="true">
-                    <x-icon type="warning" />
+                <x-callout type="warning" icon="warning" live="assertive">
                     {{ trans('admin/models/general.deleted') }}
-                </div>
+                </x-callout>
             </div>
         @endif
 

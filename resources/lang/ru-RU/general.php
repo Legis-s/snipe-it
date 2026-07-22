@@ -300,6 +300,7 @@ return [
     'select_manufacturer' => 'Выберите производителя',
     'select_model' => 'Выберите модель',
     'select_deal' => 'Выберите сделку',
+    'select_consumable' => 'Выберите расходник',
     'select_supplier' => 'Выберите поставщика',
     'select_user' => 'Выберите пользователя',
     'select_date' => 'Выберите дату (ГГГГ-ММ-ДД)',

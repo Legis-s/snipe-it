@@ -10,7 +10,10 @@
 @section('content')
     <x-container>
         <x-box>
-            <x-table.consumables :route="route('api.consumables.index')" />
+            <x-table.consumables
+                :route="route('api.consumables.index')"
+                buttons="consumableButtons"
+            />
         </x-box>
     </x-container>
 @stop

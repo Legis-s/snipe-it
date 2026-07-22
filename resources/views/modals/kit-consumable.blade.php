@@ -9,8 +9,8 @@
         <div class="modal-body">
             <form class="form-horizontal" action="{{ route('api.kits.consumables.store', $kitId) }}" onsubmit="return false">
                 {{ csrf_field() }}
-                <div class="alert alert-danger" id="modal_error_msg" style="display:none">
-                </div>
+                <x-alert type="danger" id="modal_error_msg" style="display:none">
+                </x-alert>
 
                 <div class="dynamic-form-row">
                     <label for="modal-consumable_id" class="col-md-4 col-xs-12 control-label">{{ trans('general.consumable') }}:</label>

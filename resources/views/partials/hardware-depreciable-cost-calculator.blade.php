@@ -3,6 +3,7 @@
         const $purchaseCost = $("#purchase_cost");
         const $quality = $("#quality");
         const $newDepreciableCost = $("#new_depreciable_cost");
+        const persistedPurchaseCost = Number(@json((float) ($asset->purchase_cost ?? 0)));
 
         if (!$purchaseCost.length || !$quality.length || !$newDepreciableCost.length) {
             return;
@@ -25,7 +26,9 @@
         const defaultUseTime = 12;
 
         const calculateCost = function () {
-            const purchaseCost = parseMoney($purchaseCost.val());
+            const purchaseCost = $purchaseCost.is(":disabled")
+                ? persistedPurchaseCost
+                : parseMoney($purchaseCost.val());
             const quality = Number.parseInt($quality.val(), 10);
             const qualityMultiplier = qualityMultipliers[quality];
 
@@ -56,12 +59,23 @@
         }
 
         function parseMoney(value) {
-            return Number.parseFloat(
-                String(value || "")
-                    .replace(/\s/g, "")
-                    .replace(/,/g, ".")
-                    .replace(/[^\d.]/g, "")
-            ) || 0;
+            let normalized = String(value || "")
+                .replace(/[\s']/g, "")
+                .replace(/[^\d,.-]/g, "");
+            const lastComma = normalized.lastIndexOf(",");
+            const lastDot = normalized.lastIndexOf(".");
+
+            if (lastComma !== -1 && lastDot !== -1) {
+                const decimalSeparator = lastComma > lastDot ? "," : ".";
+                const thousandsSeparator = decimalSeparator === "," ? "." : ",";
+
+                normalized = normalized.split(thousandsSeparator).join("");
+                normalized = normalized.replace(decimalSeparator, ".");
+            } else if (lastComma !== -1) {
+                normalized = normalized.replace(",", ".");
+            }
+
+            return Number.parseFloat(normalized) || 0;
         }
     });
 </script>

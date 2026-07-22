@@ -147,9 +147,13 @@ class DepartmentPresenter extends Presenter
     {
         if (auth()->user()->can('view', ['\App\Models\Department', $this])) {
             return '<a href="'.route('departments.show', $this->id).'">'.e($this->display_name).'</a>';
-        } else {
-            return $this->display_name;
         }
+
+        // Escape the fallback too. Current callers pipe this into Slack/webhook
+        // payloads where XSS does not apply, but a future caller rendering it
+        // into a Blade {!! !!} context would reintroduce the same class of bug
+        // fixed in formattedNameLink (FD-56438).
+        return e($this->display_name);
     }
 
     public function formattedNameLink()
@@ -159,7 +163,7 @@ class DepartmentPresenter extends Presenter
             return ($this->tag_color ? "<i class='fa-solid fa-fw fa-square' style='color: ".e($this->tag_color)."' aria-hidden='true'></i>" : '').'<a href="'.route('departments.show', e($this->id)).'">'.e($this->name).'</a>';
         }
 
-        return ($this->tag_color ? "<i class='fa-solid fa-fw fa-square' style='color: " . e($this->tag_color) . "' aria-hidden='true'></i>" : '') . e($this->name);
+        return ($this->tag_color ? "<i class='fa-solid fa-fw fa-square' style='color: ".e($this->tag_color)."' aria-hidden='true'></i>" : '').e($this->name);
     }
 
     public function nameUrl()
