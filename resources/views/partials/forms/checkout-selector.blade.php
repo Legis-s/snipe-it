@@ -33,7 +33,8 @@
             @if ((isset($deal_select)) && ($deal_select!='false'))
                 <label class="btn btn-theme{{ session('checkout_to_type') == 'deal' ? ' active' : '' }}">
                     <input name="checkout_to_type" value="deal" aria-label="checkout_to_type"
-                           type="radio" {{ session('checkout_to_type') == 'deal' ? 'checked' : '' }}>
+                           type="radio" data-required-select="#assigned_deal_deal_select"
+                           @checked(session('checkout_to_type') == 'deal')>
                 <i class="fas fa-usd" aria-hidden="true"></i>
                 {{ trans('general.deal') }}
             </label>
