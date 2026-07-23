@@ -209,7 +209,9 @@ class AssetCheckoutTest extends TestCase
     {
         $this->actingAs(User::factory()->superuser()->create())
             ->get(route('hardware.checkout.create', Asset::factory()->create()))
-            ->assertOk();
+            ->assertOk()
+            ->assertSee('value="deal"', false)
+            ->assertSee('data-required-select="#assigned_deal_deal_select"', false);
     }
 
     public function test_selling_asset_to_deal_creates_only_sell_action_log()
