@@ -27,6 +27,7 @@ class PurchasePresenter extends Presenter
                 "switchable" => true,
                 "title" => "Название",
                 "visible" => true,
+                "class" => "purchase-name-cell",
                 "formatter" => "purchasesLinkFormatter"
             ],[
                 "field" => "supplier",

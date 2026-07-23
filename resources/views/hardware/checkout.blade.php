@@ -73,7 +73,7 @@
                         :item="$asset"
                     />
 
-                    @include ('partials.forms.checkout-selector', ['user_select' => 'true', 'asset_select' => 'true', 'location_select' => 'true'])
+                    @include ('partials.forms.checkout-selector', ['user_select' => 'true', 'asset_select' => 'true', 'location_select' => 'true', 'deal_select' => 'true'])
                     <x-input.user-select
                         :label="trans('general.user')"
                         name="assigned_user"
