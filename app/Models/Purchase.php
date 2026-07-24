@@ -131,9 +131,10 @@ class Purchase extends SnipeModel
 
     public function getInvoiceFile()
     {
-        if ($this->invoice_file && !empty($this->invoice_file)) {
-            return url('/') . '/uploads/purchases/' . $this->invoice_file;
+        if ($this->exists && $this->invoice_file && ! empty($this->invoice_file)) {
+            return route('purchases.invoice.download', $this);
         }
+
         return false;
     }
 

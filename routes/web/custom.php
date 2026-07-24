@@ -55,6 +55,11 @@ Route::group(['middleware' => 'auth'], function () {
         [PurchasesController::class, 'getClone']
     )->name('clone/purchases');
 
+    Route::get(
+        'purchases/{purchase}/invoice-file',
+        [PurchasesController::class, 'downloadInvoice']
+    )->name('purchases.invoice.download');
+
     Route::post(
         'purchases/recognize-invoice',
         [PurchasesController::class, 'recognizeInvoice']

@@ -22,7 +22,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class PurchasesController extends Controller
 {
@@ -74,6 +76,26 @@ class PurchasesController extends Controller
         }
 
         return redirect()->route('purchases.index')->with('error', trans('admin/locations/message.does_not_exist'));
+    }
+
+    public function downloadInvoice(Purchase $purchase): BinaryFileResponse
+    {
+        $this->authorize('view', Asset::class);
+
+        $filename = basename((string) $purchase->invoice_file);
+        $path = public_path('uploads/purchases/'.$filename);
+
+        if ($filename === '' || ! is_file($path) || ! is_readable($path)) {
+            Log::warning('Purchase invoice file is missing or unreadable', [
+                'purchase_id' => $purchase->id,
+                'invoice_file' => $purchase->invoice_file,
+                'expected_path' => $path,
+            ]);
+
+            abort(404, 'Файл счёта отсутствует на сервере.');
+        }
+
+        return response()->download($path, $filename);
     }
 
 

@@ -5,8 +5,9 @@ namespace App\Http\Requests;
 use App\Helpers\Helper;
 use App\Http\Requests\Request;
 use App\Models\SnipeModel;
-use enshrined\svgSanitize\Sanitizer;
-use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
+use RuntimeException;
 
 class FileUploadRequest extends Request
 {
@@ -27,9 +28,10 @@ class FileUploadRequest extends Request
      */
     public function rules()
     {
-        $max_file_size = Helper::file_upload_max_size();
+        $maxFileSizeKb = (int) ceil(Helper::file_upload_max_size() / 1024);
+
         return [
-            'file.*' => 'required|mimes:png,gif,jpg,svg,jpeg,doc,docx,pdf,txt,zip,rar,xls,lic|max:'.$max_file_size,
+            'invoice_file' => 'required|file|mimes:png,gif,jpg,svg,jpeg,doc,docx,pdf,txt,zip,rar,xls,xlsx,rtf,lic|max:'.$maxFileSizeKb,
         ];
     }
 
@@ -57,21 +59,20 @@ class FileUploadRequest extends Request
 
         if ($this->hasFile('invoice_file')) {
 
-            if (!is_dir($path)) {
-                \Log::debug($path.' does not exist');
-                mkdir($path);
-            }
+            File::ensureDirectoryExists($path, 0755, true);
             $file = $this->file('invoice_file');
-            $filename = $file->getClientOriginalName();
-            $ext = $file->getClientOriginalExtension();
-            $file_name = 'file_'.$filename.'-'.str_random(6).'.'.$ext;
+            $extension = strtolower($file->getClientOriginalExtension());
+            $basename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            $safeName = Str::slug($basename) ?: 'invoice';
+            $file_name = 'file_'.$safeName.'-'.Str::random(8).'.'.$extension;
             \Log::debug('File name will be: '.$file_name);
 
             \Log::debug('Trying to upload to: '.$path.'/'.$file_name);
 
-//            $file->store($path.'/'.$file_name);
-            $cleanSVG = file_get_contents($file->getRealPath());
-            file_put_contents($path.'/'.$file_name, $cleanSVG);
+            $file->move($path, $file_name);
+            if (! is_file($path.'/'.$file_name)) {
+                throw new RuntimeException('Не удалось сохранить файл счёта на сервере.');
+            }
 
             // Remove Current image if exists
             if (($item->invoice_file) && (file_exists($path.'/'.$item->invoice_file))) {
