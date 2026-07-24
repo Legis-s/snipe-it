@@ -3840,7 +3840,7 @@
             },
         };
 
-        $(function () {
+        function bindBulkEditSelectionHandler() {
             $('#bulkEdit').click(function () {
                 var selectedIds = $('.snipe-table').bootstrapTable('getSelections');
                 $.each(selectedIds, function (key, value) {
@@ -3848,7 +3848,7 @@
                 });
 
             });
-        });
+        }
 
         function initializeBootstrapTableSearchUi() {
 

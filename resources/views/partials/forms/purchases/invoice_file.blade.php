@@ -11,14 +11,18 @@
                    accept="image/*, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/pdf, application/x-pdf, application/x-bzpdf, application/x-gzpdf, image/jpeg, application/rtf, application/x-rtf, text/rtf, text/richtext"
                    style="display:none; max-width: 90%" aria-label="invoice_file" aria-hidden="true">
         </label>
+        <button type="button" class="btn btn-default" id="recognizeInvoiceButton" disabled>
+            <i class="fas fa-magic" aria-hidden="true"></i>
+            Распознать через AI
+        </button>
         <span class='label label-default' id="uploadFile-info"></span>
 
         <p class="help-block"
            id="uploadFile-status">{{ trans('general.document_filetypes_help', ['size' => Helper::file_upload_max_size_readable()]) }} {{ $help_text ?? '' }}</p>
+        <p id="invoiceRecognitionResult" class="alert hidden" role="status" aria-live="polite"></p>
 
         {!! $errors->first('invoice_file', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
     </div>
 </div>
-
 
 
