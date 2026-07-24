@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\FileUploadRequest;
+use App\Http\Requests\RecognizePurchaseInvoiceRequest;
 use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\Location;
@@ -10,14 +11,18 @@ use App\Models\Purchase;
 use App\Models\Statuslabel;
 use App\Models\Supplier;
 use App\Models\User;
+use App\Services\PurchaseInvoiceMapper;
+use App\Services\TimewebInvoiceRecognizer;
 use Carbon\Carbon;
 use DateTime;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 class PurchasesController extends Controller
 {
@@ -82,6 +87,28 @@ class PurchasesController extends Controller
         return view('purchases/edit')
             ->with('item', new Purchase);
 //            ->with('depreciation_list', Helper::depreciationList());
+    }
+
+    public function recognizeInvoice(
+        RecognizePurchaseInvoiceRequest $request,
+        TimewebInvoiceRecognizer $recognizer,
+        PurchaseInvoiceMapper $mapper
+    ): JsonResponse {
+        $this->authorize('create', Purchase::class);
+
+        try {
+            $recognized = $recognizer->recognize($request->file('invoice_file'));
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $mapper->map($recognized),
+            ]);
+        } catch (RuntimeException $exception) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $exception->getMessage(),
+            ], 422);
+        }
     }
 
     /**

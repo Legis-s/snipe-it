@@ -252,6 +252,7 @@
                 const tableConsumables = $('#table_consumables');
                 const baseUrl = $('meta[name="baseUrl"]').attr('content');
                 const csrfToken = $('meta[name="csrf-token"]').attr('content');
+                const recognizeInvoiceUrl = {{ Illuminate\Support\Js::from(route('purchases.recognize-invoice')) }};
                 const labels = {
                     delete: {{ Illuminate\Support\Js::from(trans('button.delete')) }},
                     loading: {{ Illuminate\Support\Js::from(trans('general.loading')) }},
@@ -400,6 +401,93 @@
                     });
                 }
 
+                function mergeRecognizedRows(table, newRows, key) {
+                    const rows = table.bootstrapTable('getData').slice();
+
+                    newRows.forEach(function (newRow) {
+                        const existing = rows.find(function (row) {
+                            return String(row[key]) === String(newRow[key]);
+                        });
+
+                        if (existing) {
+                            existing.quantity = Number(existing.quantity || 0) + Number(newRow.quantity || 0);
+                            return;
+                        }
+
+                        rows.push(newRow);
+                    });
+
+                    table.bootstrapTable('load', rows.map(function (row, index) {
+                        return Object.assign({}, row, { id: index + 1 });
+                    }));
+                }
+
+                function setSelect2Value(selector, option) {
+                    if (!option || !option.id) {
+                        return;
+                    }
+
+                    const select = $(selector);
+                    if (select.find('option[value="' + option.id + '"]').length === 0) {
+                        select.append(new Option(option.text, option.id, true, true));
+                    }
+                    select.val(String(option.id)).trigger('change');
+                }
+
+                function showRecognitionResult(message, isError, isWarning) {
+                    $('#invoiceRecognitionResult')
+                        .removeClass('hidden alert-success alert-warning alert-danger')
+                        .addClass(isError ? 'alert-danger' : (isWarning ? 'alert-warning' : 'alert-success'))
+                        .text(message);
+                }
+
+                function applyRecognizedInvoice(data) {
+                    if (data.invoice_number) {
+                        $('#invoice_number').val(data.invoice_number);
+                    }
+                    if (Number(data.final_price) > 0) {
+                        $('#final_price').val(data.final_price);
+                    }
+                    $('#delivery_cost').val(data.delivery_cost || 0);
+                    if (data.comment) {
+                        $('#comment').val(data.comment);
+                    }
+
+                    setSelect2Value('select[name="supplier_id"]', data.supplier);
+                    setSelect2Value('select[name="legal_person_id"]', data.legal_person);
+                    mergeRecognizedRows(tableAsset, data.assets || [], 'model_id');
+                    mergeRecognizedRows(tableConsumables, data.consumables || [], 'consumable_id');
+
+                    const assets = tableAsset.bootstrapTable('getData');
+                    const consumables = tableConsumables.bootstrapTable('getData');
+                    $('#assets').val(JSON.stringify(assets));
+                    $('#consumables').val(JSON.stringify(consumables));
+
+                    const unmatched = data.unmatched || [];
+                    let message = 'Распознано: активов ' + (data.assets || []).length
+                        + ', расходников ' + (data.consumables || []).length + '.';
+
+                    if (unmatched.length > 0) {
+                        const names = unmatched.slice(0, 5).map(function (item) {
+                            const label = item.name || item.model_number;
+                            const candidate = (item.candidates || [])[0];
+
+                            if (!candidate) {
+                                return label + ' (создать новую запись)';
+                            }
+
+                            return label + ' (возможно: ' + candidate.text + ')';
+                        }).filter(Boolean);
+                        message += ' Требуют проверки: ' + names.join(', ');
+                        if (unmatched.length > names.length) {
+                            message += ' и ещё ' + (unmatched.length - names.length) + '.';
+                        }
+                        message += ' Добавьте или выберите их вручную перед сохранением.';
+                    }
+
+                    showRecognitionResult(message, false, unmatched.length > 0);
+                }
+
                 function validateRequired(selector) {
                     const field = $(selector).first();
                     const valid = String(field.val() || '').trim().length > 0;
@@ -414,6 +502,53 @@
                         .replace(',', '.')
                         .replace(/[^0-9.]/g, '')
                         .replace(/(\..*)\./g, '$1');
+                });
+
+                $('#uploadFile').on('change', function () {
+                    $('#recognizeInvoiceButton').prop('disabled', !this.files.length);
+                    $('#invoiceRecognitionResult').addClass('hidden');
+                });
+
+                $('#recognizeInvoiceButton').on('click', function () {
+                    const button = $(this);
+                    const upload = $('#uploadFile').get(0);
+
+                    if (!upload || !upload.files.length) {
+                        showRecognitionResult('Сначала выберите файл счёта.', true, false);
+                        return;
+                    }
+
+                    const formData = new FormData();
+                    formData.append('invoice_file', upload.files[0]);
+                    button.prop('disabled', true);
+                    button.find('i').removeClass('fa-magic').addClass('fa-spinner fa-spin');
+                    showRecognitionResult('Счёт распознаётся...', false, false);
+
+                    $.ajax({
+                        url: recognizeInvoiceUrl,
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        data: formData,
+                        processData: false,
+                        contentType: false
+                    }).done(function (response) {
+                        applyRecognizedInvoice(response.data);
+                    }).fail(function (response) {
+                        const payload = response.responseJSON || {};
+                        let message = payload.message || 'Не удалось распознать счёт.';
+
+                        if (payload.errors && payload.errors.invoice_file) {
+                            message = payload.errors.invoice_file[0];
+                        }
+
+                        showRecognitionResult(message, true, false);
+                    }).always(function () {
+                        button.prop('disabled', false);
+                        button.find('i').removeClass('fa-spinner fa-spin').addClass('fa-magic');
+                    });
                 });
 
                 initializeTable(tableAsset, '#toolbar_asset', [

@@ -14,6 +14,8 @@ trait CreatesApplication
      */
     public function createApplication()
     {
+        putenv('APP_CONFIG_CACHE='.__DIR__.'/../bootstrap/cache/config.testing.php');
+
         $app = require __DIR__.'/../bootstrap/app.php';
 
         $app->make(Kernel::class)->bootstrap();

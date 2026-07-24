@@ -36,6 +36,7 @@ abstract class TestCase extends BaseTestCase
 
         parent::setUp();
 
+        $this->guardAgainstNonTestDatabase();
         $this->registerCustomMacros();
 
         $this->withoutMiddleware($this->globallyDisabledMiddleware);
@@ -60,6 +61,18 @@ abstract class TestCase extends BaseTestCase
         if (! file_exists(realpath(__DIR__.'/../').'/.env.testing')) {
             throw new RuntimeException(
                 '.env.testing file does not exist. Aborting to avoid wiping your local database.'
+            );
+        }
+    }
+
+    private function guardAgainstNonTestDatabase(): void
+    {
+        $connection = (string) config('database.default');
+        $database = (string) config("database.connections.{$connection}.database");
+
+        if (! str_ends_with($database, '_test')) {
+            throw new RuntimeException(
+                "Refusing to run tests against database '{$database}'. The database name must end with _test."
             );
         }
     }

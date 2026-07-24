@@ -69,5 +69,10 @@ return [
         'password' => env('MDM_PASSWORD'),
     ],
 
+    'timeweb_ai' => [
+        'url' => env('OPEN_AI_URL'),
+        'agent_id' => env('ACCESS_ID'),
+        'token' => env('OPEN_AI_TOKEN'),
+    ],
 
 ];

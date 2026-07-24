@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
 class PriceUpd extends Migration
@@ -13,7 +11,7 @@ class PriceUpd extends Migration
      */
     public function up()
     {
-        DB::statement(DB::raw('ALTER TABLE `purchases` CHANGE COLUMN `final_price` `final_price` double(14,2) NOT NULL;'));
+        DB::statement('ALTER TABLE `purchases` CHANGE COLUMN `final_price` `final_price` double(14,2) NOT NULL;');
     }
 
     /**
@@ -23,6 +21,6 @@ class PriceUpd extends Migration
      */
     public function down()
     {
-        DB::statement(DB::raw('ALTER TABLE `purchases` CHANGE COLUMN `final_price` `final_price` double (8,2) NOT NULL;'));
+        DB::statement('ALTER TABLE `purchases` CHANGE COLUMN `final_price` `final_price` double (8,2) NOT NULL;');
     }
 }
