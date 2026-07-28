@@ -23,12 +23,14 @@ class PurchaseInvoiceMapper
                 continue;
             }
 
+            $item = $this->normalizeInventoryItem($item);
             $type = ($item['type'] ?? '') === 'consumable' ? 'consumable' : 'asset';
             $query = $type === 'consumable'
                 ? Consumable::query()
                 : AssetModel::query();
             $match = $this->findExactItem($query, $item);
             $candidates = [];
+            $needsReview = false;
 
             if (! $match) {
                 $candidates = $this->findCandidates($query, $item);
@@ -36,7 +38,7 @@ class PurchaseInvoiceMapper
             }
 
             if (! $match) {
-                $unmatched[] = [
+                $unmatchedItem = [
                     'name' => trim((string) ($item['name'] ?? '')),
                     'model_number' => trim((string) ($item['model_number'] ?? '')),
                     'type' => $type,
@@ -44,15 +46,71 @@ class PurchaseInvoiceMapper
                     'unit_price' => $this->number($item['unit_price'] ?? 0),
                     'candidates' => $candidates,
                 ];
+                $unmatchedItem['will_create'] = $candidates === []
+                    && ($unmatchedItem['name'] !== '' || $unmatchedItem['model_number'] !== '');
+                $unmatched[] = $unmatchedItem;
+                $newItemKey = hash('sha256', implode('|', [
+                    $type,
+                    $this->normalize($unmatchedItem['model_number']),
+                    $this->normalize($unmatchedItem['name']),
+                ]));
 
-                continue;
+                if (! $unmatchedItem['will_create']) {
+                    $suggestedCandidate = $candidates[0] ?? null;
+                    $match = $suggestedCandidate
+                        ? (clone $query)->find($suggestedCandidate['id'])
+                        : null;
+                    $needsReview = (bool) $match;
+                }
+
+                if (! $needsReview && $unmatchedItem['will_create']) {
+                    $newRow = [
+                        'purchase_cost' => $unmatchedItem['unit_price'],
+                        'nds' => $this->number($item['vat_percent'] ?? 0),
+                        'quantity' => $unmatchedItem['quantity'],
+                        'create_new' => true,
+                        'match_status' => 'new',
+                        'new_item_key' => $newItemKey,
+                        'new_item_name' => $unmatchedItem['name'],
+                        'new_item_model_number' => $unmatchedItem['model_number'],
+                    ];
+                    $displayName = $this->newItemDisplayName($unmatchedItem);
+
+                    if ($type === 'consumable') {
+                        $consumables[] = array_merge($newRow, [
+                            'consumable_id' => null,
+                            'consumable' => $displayName,
+                            'check' => false,
+                            'status' => trans('general.purchase_statuses.inprogress'),
+                        ]);
+                    } else {
+                        $assets[] = array_merge($newRow, [
+                            'model_id' => null,
+                            'model' => $displayName,
+                            'location_id' => null,
+                            'location' => '',
+                            'warranty' => max(0, (int) ($item['warranty_months'] ?? 0)),
+                        ]);
+                    }
+
+                    continue;
+                }
+
+                if (! $needsReview) {
+                    continue;
+                }
             }
 
             $row = [
                 'purchase_cost' => $this->number($item['unit_price'] ?? 0),
                 'nds' => $this->number($item['vat_percent'] ?? 0),
                 'quantity' => max(1, (int) ($item['quantity'] ?? 1)),
+                'match_status' => $needsReview ? 'review' : 'matched',
             ];
+            if ($needsReview) {
+                $row['new_item_key'] = $newItemKey;
+                $row['candidates'] = $candidates;
+            }
 
             if ($type === 'consumable') {
                 $consumables[] = array_merge($row, [
@@ -202,14 +260,75 @@ class PurchaseInvoiceMapper
 
     private function displayName(Model $item): string
     {
-        $name = trim((string) $item->name);
+        $name = $this->cleanInventoryName((string) $item->name);
         $modelNumber = trim((string) $item->model_number);
+        if ($this->isMissingModelNumber($modelNumber)) {
+            $modelNumber = '';
+        }
 
         if ($modelNumber !== '' && ! str_contains($this->normalize($name), $this->normalize($modelNumber))) {
             return $name !== '' ? "{$name} ({$modelNumber})" : $modelNumber;
         }
 
         return $name !== '' ? $name : '#'.$item->getKey();
+    }
+
+    private function newItemDisplayName(array $item): string
+    {
+        $name = $item['name'] !== '' ? $item['name'] : $item['model_number'];
+        $modelNumber = $item['model_number'];
+
+        if ($modelNumber !== '' && ! str_contains($this->normalize($name), $this->normalize($modelNumber))) {
+            $name .= ' ('.$modelNumber.')';
+        }
+
+        return $name.' — будет создано';
+    }
+
+    private function normalizeInventoryItem(array $item): array
+    {
+        $name = trim((string) ($item['name'] ?? ''));
+        $packageSize = $this->packageSize($name);
+        $quantity = max(1, (int) ($item['quantity'] ?? 1));
+        $unitPrice = $this->number($item['unit_price'] ?? 0);
+        $modelNumber = trim((string) ($item['model_number'] ?? ''));
+
+        $item['name'] = $this->cleanInventoryName($name);
+        $item['model_number'] = $this->isMissingModelNumber($modelNumber) ? '' : $modelNumber;
+
+        if ($packageSize > 1) {
+            $item['quantity'] = $quantity * $packageSize;
+            $item['unit_price'] = round($unitPrice / $packageSize, 2);
+        }
+
+        return $item;
+    }
+
+    private function packageSize(string $name): int
+    {
+        if (! preg_match_all('/(\d{1,5})\s*шт\.?/ui', $name, $matches)) {
+            return 1;
+        }
+
+        return max(1, (int) end($matches[1]));
+    }
+
+    private function cleanInventoryName(string $name): string
+    {
+        $name = preg_replace('/\s*\(\s*б\s*\/\s*н\s*\)\s*/ui', ' ', trim($name)) ?? $name;
+        $name = preg_replace(
+            '/,?\s*(?:(?:в\s+)?упак(?:овке)?\.?\s*)?\d{1,5}\s*шт\.?(?:\s*(?:в\s+)?упак(?:овке)?\.?)?/ui',
+            ' ',
+            $name
+        ) ?? $name;
+        $name = str_replace(['( )', '()'], ' ', $name);
+
+        return trim(preg_replace('/\s+/u', ' ', $name) ?? $name, " \t\n\r\0\x0B,;");
+    }
+
+    private function isMissingModelNumber(string $modelNumber): bool
+    {
+        return (bool) preg_match('/^б\s*\/\s*н\.?$/ui', trim($modelNumber));
     }
 
     private function searchTerms(string $value): array

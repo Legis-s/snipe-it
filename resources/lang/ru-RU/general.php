@@ -814,7 +814,7 @@ return [
     'sklad'				=> 'Склад',
     'print_tag'				=> 'Напечатать этикетку',
     'depreciable_cost'				=> 'Остаточная стоимость',
-    'document_filetypes_help'  => 'Допустимые типы файлов - pdf, rtf, jpeg, doc, docx, xlxs. Максимальный размер файла :size.',
+    'document_filetypes_help'  => 'Допустимые типы файлов - pdf, rtf, jpeg, doc, docx, xlsx. Максимальный размер файла :size. Для распознавания через AI подходят файлы PDF, PNG, JPG, JPEG и WEBP размером не более 5 МБ.',
     'invoicetypes' => 'Типы счетов',
     'tag' => "Наклейка",
     'clear_all_null' => "Очистить пустые",

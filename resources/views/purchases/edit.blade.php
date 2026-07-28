@@ -5,6 +5,20 @@
     'formAction' => route('purchases.store'),
 ])
 
+@push('css')
+    <style>
+        #table_asset tbody tr.purchase-item-new > td,
+        #table_consumables tbody tr.purchase-item-new > td {
+            background-color: #e8f5e9 !important;
+        }
+
+        #table_asset tbody tr.purchase-item-review > td,
+        #table_consumables tbody tr.purchase-item-review > td {
+            background-color: #fff3cd !important;
+        }
+    </style>
+@endpush
+
 
 {{-- Page content --}}
 @section('inputFields')
@@ -83,7 +97,7 @@
                         <th>{{ trans('general.purchase_cost') }}</th>
                         <th>{{ trans('general.nds') }}</th>
                         <th>{{ trans('general.quantity') }}</th>
-                        <th>{{ trans('button.delete') }}</th>
+                        <th>{{ trans('button.actions') }}</th>
                     </tr>
                     </thead>
                 </table>
@@ -107,7 +121,7 @@
                         <th>{{ trans('general.purchase_cost') }}</th>
                         <th>{{ trans('general.nds') }}</th>
                         <th>{{ trans('general.quantity') }}</th>
-                        <th>{{ trans('button.delete') }}</th>
+                        <th>{{ trans('button.actions') }}</th>
                     </tr>
                     </thead>
                 </table>
@@ -241,6 +255,104 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="modal_purchase_item_edit" tabindex="-1" role="dialog"
+         aria-labelledby="modalPurchaseItemEditTitle">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="{{ trans('general.close') }}">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="modalPurchaseItemEditTitle"></h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal">
+                        <div class="ai-new-item-fields hidden">
+                            <div class="form-group">
+                                <label for="edit_item_name" class="col-md-3 control-label">{{ trans('general.item_name') }}</label>
+                                <div class="col-md-7">
+                                    <input type="text" class="form-control" id="edit_item_name" maxlength="255">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit_model_number" class="col-md-3 control-label">{{ trans('general.model_no') }}</label>
+                                <div class="col-md-7">
+                                    <input type="text" class="form-control" id="edit_model_number" maxlength="255">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_purchase_cost" class="col-md-3 control-label">{{ trans('general.purchase_cost') }}</label>
+                            <div class="col-md-7">
+                                <input type="number" class="form-control" id="edit_purchase_cost" min="0" step="0.01">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_nds" class="col-md-3 control-label">{{ trans('general.nds') }}</label>
+                            <div class="col-md-7">
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="edit_nds" min="0" step="1">
+                                    <span class="input-group-addon">%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_quantity" class="col-md-3 control-label">{{ trans('general.quantity') }}</label>
+                            <div class="col-md-7">
+                                <input type="number" class="form-control" id="edit_quantity" min="1" step="1">
+                            </div>
+                        </div>
+                        <div class="asset-edit-fields hidden">
+                            <div class="form-group">
+                                <label for="edit_model_id" class="col-md-3 control-label">{{ trans('admin/hardware/form.model') }}</label>
+                                <div class="col-md-7">
+                                    <select data-endpoint="models"
+                                            data-placeholder="{{ trans('general.select_model') }}"
+                                            id="edit_model_id" style="width: 100%">
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit_warranty" class="col-md-3 control-label">{{ trans('admin/hardware/form.warranty') }}</label>
+                                <div class="col-md-7">
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="edit_warranty" min="0" max="999" step="1">
+                                        <span class="input-group-addon">{{ trans('admin/hardware/form.months') }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit_location_id" class="col-md-3 control-label">{{ trans('general.sklad') }}</label>
+                                <div class="col-md-7">
+                                    <select data-endpoint="locations"
+                                            data-placeholder="{{ trans('general.select_location') }}"
+                                            id="edit_location_id" style="width: 100%">
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="consumable-edit-fields hidden">
+                            <div class="form-group">
+                                <label for="edit_consumable_id" class="col-md-3 control-label">{{ trans('general.model_no') }}</label>
+                                <div class="col-md-7">
+                                    <select data-endpoint="consumables"
+                                            data-placeholder="{{ trans('general.select_consumable') }}"
+                                            id="edit_consumable_id" style="width: 100%">
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="edit-item-error text-center text-bold text-danger hidden"></p>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">{{ trans('button.cancel') }}</button>
+                    <button type="button" class="btn btn-primary" id="savePurchaseItemButton">{{ trans('general.save') }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @stop
 
 @if (!$item->id)
@@ -253,8 +365,12 @@
                 const baseUrl = $('meta[name="baseUrl"]').attr('content');
                 const csrfToken = $('meta[name="csrf-token"]').attr('content');
                 const recognizeInvoiceUrl = {{ Illuminate\Support\Js::from(route('purchases.recognize-invoice')) }};
+                const editItemModal = $('#modal_purchase_item_edit');
+                let editingItem = null;
                 const labels = {
+                    actions: {{ Illuminate\Support\Js::from(trans('button.actions')) }},
                     delete: {{ Illuminate\Support\Js::from(trans('button.delete')) }},
+                    edit: {{ Illuminate\Support\Js::from(trans('button.edit')) }},
                     loading: {{ Illuminate\Support\Js::from(trans('general.loading')) }},
                     model: {{ Illuminate\Support\Js::from(trans('general.model_no')) }},
                     location: {{ Illuminate\Support\Js::from(trans('general.sklad')) }},
@@ -275,36 +391,264 @@
                     table.bootstrapTable('load', rows);
                 }
 
-                function removeColumn(table) {
+                function itemActionsColumn(table, itemType) {
                     return {
-                        title: labels.delete,
+                        title: labels.actions,
                         align: 'center',
                         valign: 'middle',
                         events: {
+                            'click .edit': function (event, value, row) {
+                                openItemEditor(table, itemType, row);
+                            },
                             'click .remove': function (event, value, row) {
                                 table.bootstrapTable('remove', { field: 'id', values: [row.id] });
                                 reindexTable(table);
                             }
                         },
                         formatter: function () {
-                            return $('<button>', {
+                            const editButton = $('<button>', {
+                                type: 'button',
+                                class: 'btn btn-link btn-sm edit',
+                                title: labels.edit,
+                                'aria-label': labels.edit
+                            }).append('<i class="fas fa-pencil-alt" aria-hidden="true"></i>');
+                            const removeButton = $('<button>', {
                                 type: 'button',
                                 class: 'btn btn-link btn-sm remove text-danger',
                                 title: labels.delete,
                                 'aria-label': labels.delete
-                            }).append('<i class="fas fa-times fa-lg" aria-hidden="true"></i>')[0].outerHTML;
+                            }).append('<i class="fas fa-times fa-lg" aria-hidden="true"></i>');
+
+                            return $('<div>').append(editButton, removeButton).html();
                         }
                     };
                 }
 
-                function initializeTable(table, toolbar, columns) {
+                function purchaseItemRowStyle(row) {
+                    if (row.match_status === 'review') {
+                        return { classes: 'purchase-item-review' };
+                    }
+                    if (row.match_status === 'new' || row.create_new) {
+                        return { classes: 'purchase-item-new' };
+                    }
+
+                    return {};
+                }
+
+                function initializeTable(table, toolbar, columns, itemType) {
                     table.bootstrapTable('destroy').bootstrapTable({
                         locale: 'ru',
                         data: [],
                         search: true,
                         toolbar,
-                        columns: columns.concat(removeColumn(table))
+                        rowStyle: purchaseItemRowStyle,
+                        columns: columns.concat(itemActionsColumn(table, itemType))
                     });
+                }
+
+                function setEditorError(message) {
+                    editItemModal.find('.edit-item-error')
+                        .text(message || '')
+                        .toggleClass('hidden', !message);
+                }
+
+                function openItemEditor(table, itemType, row) {
+                    editingItem = {
+                        table: table,
+                        itemType: itemType,
+                        rowId: row.id,
+                        wasCreateNew: Boolean(row.create_new)
+                    };
+
+                    initializeModalSelects(editItemModal);
+                    setEditorError('');
+                    editItemModal.find('#modalPurchaseItemEditTitle')
+                        .text(itemType === 'asset' ? 'Редактировать актив' : 'Редактировать расходный материал');
+                    editItemModal.find('.asset-edit-fields').toggleClass('hidden', itemType !== 'asset');
+                    editItemModal.find('.consumable-edit-fields').toggleClass('hidden', itemType !== 'consumable');
+                    editItemModal.find('#edit_item_name').val(row.new_item_name || '');
+                    editItemModal.find('#edit_model_number').val(row.new_item_model_number || '');
+                    editItemModal.find('#edit_purchase_cost').val(row.purchase_cost);
+                    editItemModal.find('#edit_nds').val(row.nds);
+                    editItemModal.find('#edit_quantity').val(row.quantity);
+                    editItemModal.find('#edit_warranty').val(row.warranty || 0);
+
+                    const modelSelect = editItemModal.find('#edit_model_id');
+                    modelSelect.empty();
+                    if (row.model_id) {
+                        modelSelect.append(new Option(
+                            row.model || String(row.model_id),
+                            row.model_id,
+                            true,
+                            true
+                        ));
+                    }
+                    modelSelect.val(row.model_id || null).trigger('change');
+
+                    const consumableSelect = editItemModal.find('#edit_consumable_id');
+                    consumableSelect.empty();
+                    if (row.consumable_id) {
+                        consumableSelect.append(new Option(
+                            row.consumable || String(row.consumable_id),
+                            row.consumable_id,
+                            true,
+                            true
+                        ));
+                    }
+                    consumableSelect.val(row.consumable_id || null).trigger('change');
+
+                    const locationSelect = editItemModal.find('#edit_location_id');
+                    locationSelect.empty();
+                    if (row.location_id) {
+                        locationSelect.append(new Option(
+                            row.location || String(row.location_id),
+                            row.location_id,
+                            true,
+                            true
+                        ));
+                    }
+                    locationSelect.val(row.location_id || null).trigger('change');
+                    updateNewItemFieldsVisibility();
+                    editItemModal.modal('show');
+                }
+
+                function updateNewItemFieldsVisibility() {
+                    const showNewItemFields = editingItem
+                        && editingItem.wasCreateNew
+                        && (
+                            (editingItem.itemType === 'asset' && !editItemModal.find('#edit_model_id').val())
+                            || (editingItem.itemType === 'consumable' && !editItemModal.find('#edit_consumable_id').val())
+                        );
+
+                    editItemModal.find('.ai-new-item-fields').toggleClass('hidden', !showNewItemFields);
+                }
+
+                function newItemDisplayName(row) {
+                    const name = String(row.new_item_name || '').trim();
+                    const modelNumber = String(row.new_item_model_number || '').trim();
+                    let displayName = name || modelNumber;
+
+                    if (name && modelNumber && !name.toLocaleLowerCase().includes(modelNumber.toLocaleLowerCase())) {
+                        displayName += ' (' + modelNumber + ')';
+                    }
+
+                    return displayName + ' — будет создано';
+                }
+
+                function editorValues(itemType, row) {
+                    const purchaseCost = Number(editItemModal.find('#edit_purchase_cost').val());
+                    const nds = Number(editItemModal.find('#edit_nds').val());
+                    const quantity = Number(editItemModal.find('#edit_quantity').val());
+                    const warranty = Number(editItemModal.find('#edit_warranty').val());
+
+                    if (!Number.isFinite(purchaseCost) || purchaseCost < 0) {
+                        setEditorError('Укажите корректную закупочную цену.');
+                        return null;
+                    }
+                    if (!Number.isInteger(nds) || nds < 0) {
+                        setEditorError('Укажите НДС целым неотрицательным числом.');
+                        return null;
+                    }
+                    if (!Number.isInteger(quantity) || quantity < 1) {
+                        setEditorError('Количество должно быть целым числом больше нуля.');
+                        return null;
+                    }
+                    if (itemType === 'asset' && (!Number.isInteger(warranty) || warranty < 0 || warranty > 999)) {
+                        setEditorError('Гарантия должна быть целым числом от 0 до 999 месяцев.');
+                        return null;
+                    }
+
+                    const updated = Object.assign({}, row, {
+                        purchase_cost: purchaseCost,
+                        nds: nds,
+                        quantity: quantity
+                    });
+
+                    if (itemType === 'asset') {
+                        const model = editItemModal.find('#edit_model_id option:selected');
+                        const modelId = model.val();
+
+                        if (modelId) {
+                            const confirmingSuggestion = row.match_status === 'review'
+                                && String(row.model_id) === String(modelId);
+                            const duplicate = !confirmingSuggestion
+                                && editingItem.table.bootstrapTable('getData').some(function (otherRow) {
+                                    return String(otherRow.id) !== String(editingItem.rowId)
+                                        && String(otherRow.model_id) === String(modelId);
+                                });
+                            if (duplicate) {
+                                setEditorError('Эта модель уже добавлена в закупку.');
+                                return null;
+                            }
+
+                            updated.model_id = modelId;
+                            updated.model = model.text();
+                            updated.create_new = false;
+                            updated.match_status = 'matched';
+                        } else if (editingItem.wasCreateNew) {
+                            updated.model_id = null;
+                            updated.create_new = true;
+                            updated.match_status = 'new';
+                        } else {
+                            setEditorError('Выберите модель актива.');
+                            return null;
+                        }
+                    }
+
+                    if (itemType === 'consumable') {
+                        const consumable = editItemModal.find('#edit_consumable_id option:selected');
+                        const consumableId = consumable.val();
+
+                        if (consumableId) {
+                            const confirmingSuggestion = row.match_status === 'review'
+                                && String(row.consumable_id) === String(consumableId);
+                            const duplicate = !confirmingSuggestion
+                                && editingItem.table.bootstrapTable('getData').some(function (otherRow) {
+                                    return String(otherRow.id) !== String(editingItem.rowId)
+                                        && String(otherRow.consumable_id) === String(consumableId);
+                                });
+                            if (duplicate) {
+                                setEditorError('Этот расходный материал уже добавлен в закупку.');
+                                return null;
+                            }
+
+                            updated.consumable_id = consumableId;
+                            updated.consumable = consumable.text();
+                            updated.create_new = false;
+                            updated.match_status = 'matched';
+                        } else if (editingItem.wasCreateNew) {
+                            updated.consumable_id = null;
+                            updated.create_new = true;
+                            updated.match_status = 'new';
+                        } else {
+                            setEditorError('Выберите расходный материал.');
+                            return null;
+                        }
+                    }
+
+                    if (updated.create_new) {
+                        updated.new_item_name = String(editItemModal.find('#edit_item_name').val() || '').trim();
+                        updated.new_item_model_number = String(editItemModal.find('#edit_model_number').val() || '').trim();
+                        if (!updated.new_item_name && !updated.new_item_model_number) {
+                            setEditorError('Укажите название или артикул новой позиции.');
+                            return null;
+                        }
+
+                        if (itemType === 'asset') {
+                            updated.model = newItemDisplayName(updated);
+                        } else {
+                            updated.consumable = newItemDisplayName(updated);
+                        }
+                    }
+
+                    if (itemType === 'asset') {
+                        const location = editItemModal.find('#edit_location_id option:selected');
+                        updated.warranty = warranty;
+                        updated.location_id = location.val() || null;
+                        updated.location = location.val() ? location.text() : '';
+                    }
+
+                    return updated;
                 }
 
                 function loadStoredRows(table, inputSelector) {
@@ -401,16 +745,30 @@
                     });
                 }
 
+                function recognizedRowKey(row, key) {
+                    if (row.match_status === 'review') {
+                        return 'review:' + String(row.new_item_key || '');
+                    }
+                    if (row[key] !== null && row[key] !== undefined && String(row[key]) !== '') {
+                        return 'existing:' + String(row[key]);
+                    }
+
+                    return 'new:' + String(row.new_item_key || '');
+                }
+
                 function mergeRecognizedRows(table, newRows, key) {
                     const rows = table.bootstrapTable('getData').slice();
 
                     newRows.forEach(function (newRow) {
                         const existing = rows.find(function (row) {
-                            return String(row[key]) === String(newRow[key]);
+                            return recognizedRowKey(row, key) === recognizedRowKey(newRow, key);
                         });
 
                         if (existing) {
                             existing.quantity = Number(existing.quantity || 0) + Number(newRow.quantity || 0);
+                            if (newRow.match_status === 'review') {
+                                existing.match_status = 'review';
+                            }
                             return;
                         }
 
@@ -463,29 +821,25 @@
                     $('#assets').val(JSON.stringify(assets));
                     $('#consumables').val(JSON.stringify(consumables));
 
-                    const unmatched = data.unmatched || [];
-                    let message = 'Распознано: активов ' + (data.assets || []).length
-                        + ', расходников ' + (data.consumables || []).length + '.';
+                    const recognizedRows = (data.assets || []).concat(data.consumables || []);
+                    const newRows = recognizedRows.filter(function (item) {
+                        return item.match_status === 'new' || item.create_new;
+                    });
+                    const reviewRows = recognizedRows.filter(function (item) {
+                        return item.match_status === 'review';
+                    });
+                    const matchedInSystem = recognizedRows.filter(function (item) {
+                        return item.match_status !== 'review'
+                            && item.match_status !== 'new'
+                            && !item.create_new;
+                    });
+                    let message = 'Найдено в счёте: ' + recognizedRows.length + ' позиций.'
+                        + ' Сопоставлено с моделями в системе: ' + matchedInSystem.length + '.'
+                        + ' Новых моделей: ' + newRows.length + '.'
+                        + ' Требуют внимания: ' + reviewRows.length + '.'
+                        + ' Все позиции добавлены в таблицы.';
 
-                    if (unmatched.length > 0) {
-                        const names = unmatched.slice(0, 5).map(function (item) {
-                            const label = item.name || item.model_number;
-                            const candidate = (item.candidates || [])[0];
-
-                            if (!candidate) {
-                                return label + ' (создать новую запись)';
-                            }
-
-                            return label + ' (возможно: ' + candidate.text + ')';
-                        }).filter(Boolean);
-                        message += ' Требуют проверки: ' + names.join(', ');
-                        if (unmatched.length > names.length) {
-                            message += ' и ещё ' + (unmatched.length - names.length) + '.';
-                        }
-                        message += ' Добавьте или выберите их вручную перед сохранением.';
-                    }
-
-                    showRecognitionResult(message, false, unmatched.length > 0);
+                    showRecognitionResult(message, false, reviewRows.length > 0);
                 }
 
                 function validateRequired(selector) {
@@ -558,14 +912,14 @@
                     tableColumn('purchase_cost', labels.purchaseCost),
                     tableColumn('nds', labels.nds),
                     tableColumn('quantity', labels.quantity)
-                ]);
+                ], 'asset');
                 initializeTable(tableConsumables, '#toolbar_consumables', [
                     tableColumn('id', '#', 'left'),
                     tableColumn('consumable', labels.model, 'left'),
                     tableColumn('purchase_cost', labels.purchaseCost),
                     tableColumn('nds', labels.nds),
                     tableColumn('quantity', labels.quantity)
-                ]);
+                ], 'consumable');
 
                 loadStoredRows(tableAsset, '#assets');
                 loadStoredRows(tableConsumables, '#consumables');
@@ -578,6 +932,42 @@
 
                 $('#modal_consumables').on('show.bs.modal', function () {
                     resetModal($(this), 'consumable_id');
+                });
+
+                editItemModal.on('change', '#edit_model_id, #edit_consumable_id', function () {
+                    updateNewItemFieldsVisibility();
+                    setEditorError('');
+                });
+
+                $('#savePurchaseItemButton').on('click', function () {
+                    if (!editingItem) {
+                        return;
+                    }
+
+                    const rows = editingItem.table.bootstrapTable('getData');
+                    const index = rows.findIndex(function (row) {
+                        return String(row.id) === String(editingItem.rowId);
+                    });
+                    if (index < 0) {
+                        setEditorError('Строка больше не существует.');
+                        return;
+                    }
+
+                    const updated = editorValues(editingItem.itemType, rows[index]);
+                    if (!updated) {
+                        return;
+                    }
+
+                    editingItem.table.bootstrapTable('updateRow', {
+                        index: index,
+                        row: updated
+                    });
+                    editItemModal.modal('hide');
+                });
+
+                editItemModal.on('hidden.bs.modal', function () {
+                    editingItem = null;
+                    setEditorError('');
                 });
 
                 $('#addAssetButton').on('click', function () {

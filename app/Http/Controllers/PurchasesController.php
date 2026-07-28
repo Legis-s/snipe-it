@@ -12,6 +12,7 @@ use App\Models\Statuslabel;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Services\PurchaseInvoiceMapper;
+use App\Services\PurchaseInvoiceItemResolver;
 use App\Services\TimewebInvoiceRecognizer;
 use Carbon\Carbon;
 use DateTime;
@@ -137,14 +138,32 @@ class PurchasesController extends Controller
      * Validates and stores a new purchase.
      * @see PurchasesController::getCreate() method that makes the form
      */
-    public function store(FileUploadRequest $request): RedirectResponse
+    public function store(
+        FileUploadRequest $request,
+        PurchaseInvoiceItemResolver $itemResolver
+    ): RedirectResponse
     {
         $this->authorize('create', Purchase::class);
 
         $data_list = "";
+        $assets = [];
+        if ($request->filled('assets')) {
+            $assets = json_decode($request->input('assets'), true);
+        }
+        $assets = is_array($assets) ? $assets : [];
+
         $consumables = [];
         if ($request->filled('consumables')) {
             $consumables = json_decode($request->input('consumables'), true);
+        }
+        $consumables = is_array($consumables) ? $consumables : [];
+
+        try {
+            [$assets, $consumables] = DB::transaction(
+                fn () => $itemResolver->resolve($assets, $consumables)
+            );
+        } catch (RuntimeException $exception) {
+            return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
         if (count($consumables) > 0) {
@@ -184,16 +203,11 @@ class PurchasesController extends Controller
         $purchase->invoice_type_id = $request->input('invoice_type_id');
         $purchase->comment = $request->input('comment');
         $purchase->consumables_json = $consumables;
-        $purchase->assets_json = $request->input('assets');
+        $purchase->assets_json = json_encode($assets, JSON_UNESCAPED_UNICODE);
         $purchase->delivery_cost = $request->input('delivery_cost');
         $purchase->created_by = auth()->id();
         $purchase->currency = "руб";
         $purchase->setStatusInprogress();
-
-        $assets = [];
-        if ($request->filled('assets')) {
-            $assets = json_decode($request->input('assets'), true);
-        }
 
         $purchase = $request->handleFile($purchase, public_path() . '/uploads/purchases');
 
