@@ -118,12 +118,19 @@ class RecognizePurchaseInvoiceTest extends TestCase
             ->assertJsonPath('data.assets.0.model_id', (string) $assetModel->id)
             ->assertJsonPath('data.assets.0.model', 'Тестовый ноутбук (NB-100)')
             ->assertJsonPath('data.assets.0.warranty', 24)
+            ->assertJsonPath('data.assets.0.match_status', 'matched')
             ->assertJsonPath('data.consumables.0.consumable_id', (string) $consumable->id)
             ->assertJsonPath('data.consumables.0.quantity', 2)
+            ->assertJsonPath('data.consumables.0.match_status', 'matched')
+            ->assertJsonPath('data.assets.1.create_new', true)
+            ->assertJsonPath('data.assets.1.match_status', 'new')
+            ->assertJsonPath('data.assets.1.new_item_model_number', 'UNKNOWN-1')
             ->assertJsonPath('data.unmatched.0.model_number', 'UNKNOWN-1');
+
+        $this->assertDatabaseMissing('models', ['model_number' => 'UNKNOWN-1']);
     }
 
-    public function test_ambiguous_partial_name_match_is_only_returned_as_candidate(): void
+    public function test_ambiguous_partial_name_match_prefills_best_candidate_for_review(): void
     {
         $assetModel = AssetModel::factory()->create([
             'name' => 'Ноутбук Lenovo ThinkPad E14',
@@ -151,9 +158,106 @@ class RecognizePurchaseInvoiceTest extends TestCase
                 'invoice_file' => UploadedFile::fake()->image('invoice.jpg'),
             ])
             ->assertOk()
-            ->assertJsonCount(0, 'data.assets')
+            ->assertJsonCount(1, 'data.assets')
+            ->assertJsonPath('data.assets.0.model_id', (string) $assetModel->id)
+            ->assertJsonPath('data.assets.0.match_status', 'review')
+            ->assertJsonPath('data.unmatched.0.will_create', false)
             ->assertJsonPath('data.unmatched.0.candidates.0.id', (string) $assetModel->id)
             ->assertJsonPath('data.unmatched.0.candidates.0.text', 'Ноутбук Lenovo ThinkPad E14 (21E3007XRT)');
+    }
+
+    public function test_ambiguous_consumable_match_prefills_best_candidate_for_review(): void
+    {
+        Consumable::factory()->create([
+            'name' => 'Коннектор RJ-45 8P8C UTP Cat 5e',
+            'model_number' => 'RJ45-CAT5E',
+        ]);
+        Consumable::factory()->create([
+            'name' => 'Коннектор RJ-45 8P8C UTP Cat 6',
+            'model_number' => 'RJ45-CAT6',
+        ]);
+
+        $recognizer = Mockery::mock(TimewebInvoiceRecognizer::class);
+        $recognizer->shouldReceive('recognize')->once()->andReturn([
+            'items' => [[
+                'type' => 'consumable',
+                'name' => 'Коннектор RJ-45 8P8C UTP',
+                'model_number' => '',
+                'quantity' => 100,
+                'unit_price' => 5,
+            ]],
+        ]);
+        $this->app->instance(TimewebInvoiceRecognizer::class, $recognizer);
+
+        $response = $this->actingAs(User::factory()->superuser()->create())
+            ->postJson(route('purchases.recognize-invoice'), [
+                'invoice_file' => UploadedFile::fake()->image('invoice.jpg'),
+            ])
+            ->assertOk()
+            ->assertJsonCount(1, 'data.consumables')
+            ->assertJsonPath('data.consumables.0.match_status', 'review')
+            ->assertJsonPath('data.consumables.0.quantity', 100)
+            ->assertJsonPath('data.unmatched.0.will_create', false);
+
+        $this->assertSame(
+            $response->json('data.unmatched.0.candidates.0.id'),
+            $response->json('data.consumables.0.consumable_id')
+        );
+    }
+
+    public function test_packaged_consumable_is_converted_to_individual_inventory_units(): void
+    {
+        $recognizer = Mockery::mock(TimewebInvoiceRecognizer::class);
+        $recognizer->shouldReceive('recognize')->once()->andReturn([
+            'items' => [
+                [
+                    'type' => 'consumable',
+                    'name' => 'Аквафор Комплект модулей сменных фильтрующих А5 (3 шт.) (б/н)',
+                    'model_number' => 'б/н',
+                    'quantity' => 1,
+                    'unit_price' => 1022,
+                    'vat_percent' => 22,
+                ],
+                [
+                    'type' => 'consumable',
+                    'name' => 'WAGO Соединительная клемма, 40 шт. (б/н)',
+                    'model_number' => 'б/н',
+                    'quantity' => 2,
+                    'unit_price' => 2404,
+                    'vat_percent' => 22,
+                ],
+                [
+                    'type' => 'consumable',
+                    'name' => 'Коннектор RJ-45, 100 шт. в упак.',
+                    'model_number' => '',
+                    'quantity' => 1,
+                    'unit_price' => 592,
+                    'vat_percent' => 22,
+                ],
+            ],
+        ]);
+        $this->app->instance(TimewebInvoiceRecognizer::class, $recognizer);
+
+        $this->actingAs(User::factory()->superuser()->create())
+            ->postJson(route('purchases.recognize-invoice'), [
+                'invoice_file' => UploadedFile::fake()->image('invoice.jpg'),
+            ])
+            ->assertOk()
+            ->assertJsonPath('data.final_price', 6422)
+            ->assertJsonPath('data.consumables.0.consumable', 'Аквафор Комплект модулей сменных фильтрующих А5 — будет создано')
+            ->assertJsonPath('data.consumables.0.new_item_name', 'Аквафор Комплект модулей сменных фильтрующих А5')
+            ->assertJsonPath('data.consumables.0.new_item_model_number', '')
+            ->assertJsonPath('data.consumables.0.quantity', 3)
+            ->assertJsonPath('data.consumables.0.purchase_cost', 340.67)
+            ->assertJsonPath('data.consumables.0.nds', 22)
+            ->assertJsonPath('data.unmatched.0.quantity', 3)
+            ->assertJsonPath('data.unmatched.0.unit_price', 340.67)
+            ->assertJsonPath('data.consumables.1.new_item_name', 'WAGO Соединительная клемма')
+            ->assertJsonPath('data.consumables.1.quantity', 80)
+            ->assertJsonPath('data.consumables.1.purchase_cost', 60.1)
+            ->assertJsonPath('data.consumables.2.new_item_name', 'Коннектор RJ-45')
+            ->assertJsonPath('data.consumables.2.quantity', 100)
+            ->assertJsonPath('data.consumables.2.purchase_cost', 5.92);
     }
 
     public function test_unique_high_confidence_catalog_matches_are_filled_automatically(): void

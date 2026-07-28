@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Consumables;
 
 use App\Actions\Acceptances\CreateCheckoutAcceptanceAction;
+use App\Events\CheckoutableCheckedOut;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ConsumableCheckoutRequest;
@@ -13,6 +14,7 @@ use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 
 class ConsumableCheckoutController extends Controller
 {

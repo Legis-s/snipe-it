@@ -42,8 +42,35 @@ $(function () {
 
       $('#createModal').load(link.attr('href'),function () {
 
-          // this sets the focus to be the name field
-          $('#modal-name').focus();
+          // Focus the first visible, non-hidden input regardless of
+          // which modal partial was loaded (user, company, category,
+          // etc. all differ on which id the "first" field has). The
+          // legacy `#modal-name` selector worked for some modals and
+          // silently missed for others. A generic first-input selector
+          // covers every partial without per-modal code.
+          $('#createModal').find('input:visible:not([type=hidden])').first().focus();
+
+          // Wire up the password generator button when the loaded
+          // modal is one that includes it (user create). Relocated here
+          // from an inline <script> block in modals/user.blade.php as
+          // part of the Vite migration prep to remove per-partial
+          // inline JS. The setTimeout the inline version used to defer
+          // this is no longer needed because we're inside .load()'s
+          // completion callback, which fires AFTER the DOM is ready.
+          if ($('#modal-genPassword').length && $('#modal-password').length) {
+              $('#modal-genPassword').pGenerator({
+                  'bind': 'click',
+                  'passwordElement': '#modal-password',
+                  'passwordLength': 16,
+                  'uppercase': true,
+                  'lowercase': true,
+                  'numbers': true,
+                  'specialChars': true,
+                  'onPasswordGenerated': function () {
+                      $('#modal-password_confirmation').val($('#modal-password').val());
+                  }
+              });
+          }
 
         //do we need to re-select2 this, after load? Probably.
         $('#createModal').find('select.select2').select2();
@@ -107,17 +134,15 @@ $(function () {
   });
 
   $('#createModal').on('click','#modal-save', function () {
-    var modalForm = $('#createModal .modal-body form');
-
     $.ajax({
         type: 'POST',
-        url: modalForm.attr('action'),
+        url: $('.modal-body form').attr('action'),
         headers: {
             "X-Requested-With": 'XMLHttpRequest',
             "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
         },
 
-        data: modalForm.serialize(),
+        data: $('.modal-body form').serialize(),
         success: function (result) {
 
             if(result.status == "error") {

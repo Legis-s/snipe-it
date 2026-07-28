@@ -1493,7 +1493,9 @@
                             @endcan
 
                             @can('admin')
-                                <x-alert-menu />
+                                @if ($snipeSettings->show_alerts_in_menu == '1')
+                                    <livewire:alert-menu/>
+                                @endif
                             @endcan
 
 
@@ -1784,14 +1786,6 @@
                                         <li id="bulk-audit-sidenav-option" {!! (request()->is('hardware/bulkaudit') ? ' class="active" aria-current="page"' : '') !!}>
                                             <a href="{{ route('assets.bulkaudit') }}">
                                                 {{ trans('general.bulkaudit') }}
-                                            </a>
-                                        </li>
-                                    @endcan
-
-                                    @can('admin')
-                                        <li id="import-history-sidenav-option" {!! (request()->is('hardware/history') ? ' class="active" aria-current="page"' : '') !!}>
-                                            <a href="{{ url('hardware/history') }}">
-                                                {{ trans('general.import-history') }}
                                             </a>
                                         </li>
                                     @endcan
@@ -2512,7 +2506,7 @@
 
             };
 
-            $('#create-form, #checkout_form').each(function () {
+            $('#create-form, #checkout_form, #userForm').each(function () {
                 $(this).validate(snipeValidatorOptions);
             });
 
