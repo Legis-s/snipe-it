@@ -46,7 +46,7 @@ class Department extends SnipeModel
     protected $rules = [
         'name' => 'required|string|max:255|is_unique_across_company_and_location:departments,name',
         'location_id' => 'numeric|nullable|exists:locations,id',
-        'company_id' => 'numeric|nullable|exists:companies,id',
+        'company_id' => 'numeric|nullable|exists:companies,id|fmcs_company',
         'manager_id' => 'numeric|nullable|exists:users,id',
         'phone' => 'string|max:255|nullable',
         'fax' => 'string|max:255|nullable',

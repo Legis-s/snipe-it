@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4f7e8d85bd402478c03c3fc4e94f549b",
+    "content-hash": "b07733bef3a84d79cc91c9bad1892299",
     "packages": [
         {
             "name": "alek13/slack",
@@ -74,16 +74,16 @@
         },
         {
             "name": "arietimmerman/laravel-scim-server",
-            "version": "dev-scimv2_with_logging",
+            "version": "dev-main",
             "source": {
                 "type": "git",
                 "url": "https://github.com/grokability/laravel-scim-server.git",
-                "reference": "5ddb8188dd50e2bdb6f8133b9b7f0a0b54b83148"
+                "reference": "b80e62dd1f0e58f64d0ca48585d1a44c47c4a5ad"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/grokability/laravel-scim-server/zipball/5ddb8188dd50e2bdb6f8133b9b7f0a0b54b83148",
-                "reference": "5ddb8188dd50e2bdb6f8133b9b7f0a0b54b83148",
+                "url": "https://api.github.com/repos/grokability/laravel-scim-server/zipball/b80e62dd1f0e58f64d0ca48585d1a44c47c4a5ad",
+                "reference": "b80e62dd1f0e58f64d0ca48585d1a44c47c4a5ad",
                 "shasum": ""
             },
             "require": {
@@ -99,6 +99,7 @@
                 "laravel/legacy-factories": "*",
                 "orchestra/testbench": "^6.0|^7.0|^8.0|^9.0|^10.0"
             },
+            "default-branch": true,
             "type": "library",
             "extra": {
                 "laravel": {
@@ -131,9 +132,9 @@
             ],
             "description": "Laravel Package for creating a SCIM server",
             "support": {
-                "source": "https://github.com/grokability/laravel-scim-server/tree/scimv2_with_logging"
+                "source": "https://github.com/grokability/laravel-scim-server/tree/main"
             },
-            "time": "2026-05-14T09:39:34+00:00"
+            "time": "2026-07-23T12:32:29+00:00"
         },
         {
             "name": "aws/aws-crt-php",
@@ -2413,73 +2414,6 @@
                 "source": "https://github.com/javiereguiluz/EasySlugger/tree/v1.0.0"
             },
             "time": "2015-04-12T19:57:10+00:00"
-        },
-        {
-            "name": "lab404/laravel-impersonate",
-            "version": "1.7.8",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/404labfr/laravel-impersonate.git",
-                "reference": "0008a39da8914cc946b6a5ed211230708ee736b3"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/404labfr/laravel-impersonate/zipball/0008a39da8914cc946b6a5ed211230708ee736b3",
-                "reference": "0008a39da8914cc946b6a5ed211230708ee736b3",
-                "shasum": ""
-            },
-            "require": {
-                "laravel/framework": "^6.0 | ^7.0 | ^8.0 | ^9.0 | ^10.0 | ^11.0 | ^12.0 | ^13.0",
-                "php": "^7.2 | ^8.0"
-            },
-            "require-dev": {
-                "mockery/mockery": "^1.3.3",
-                "orchestra/testbench": "^4.0 | ^5.0 | ^6.0 | ^7.0 | ^8.0 | ^9.0 | ^10.0 | ^11.0",
-                "phpunit/phpunit": "^7.5 | ^8.0 | ^9.0 | ^10.0 | ^11.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "Lab404\\Impersonate\\ImpersonateServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "files": [
-                    "src/helpers.php"
-                ],
-                "psr-4": {
-                    "Lab404\\Impersonate\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Marceau Casals",
-                    "email": "marceau@casals.fr"
-                }
-            ],
-            "description": "Laravel Impersonate is a plugin that allows to you to authenticate as your users.",
-            "keywords": [
-                "auth",
-                "impersonate",
-                "impersonation",
-                "laravel",
-                "laravel-package",
-                "laravel-plugin",
-                "package",
-                "plugin",
-                "user"
-            ],
-            "support": {
-                "issues": "https://github.com/404labfr/laravel-impersonate/issues",
-                "source": "https://github.com/404labfr/laravel-impersonate/tree/1.7.8"
-            },
-            "time": "2026-03-17T15:24:14+00:00"
         },
         {
             "name": "laravel-notification-channels/google-chat",
@@ -7628,57 +7562,6 @@
                 }
             ],
             "time": "2025-08-13T04:42:22+00:00"
-        },
-        {
-            "name": "smalot/pdfparser",
-            "version": "v2.12.5",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/smalot/pdfparser.git",
-                "reference": "2cfa0d92bd557875c9f52a75fde0e8392302a354"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/smalot/pdfparser/zipball/2cfa0d92bd557875c9f52a75fde0e8392302a354",
-                "reference": "2cfa0d92bd557875c9f52a75fde0e8392302a354",
-                "shasum": ""
-            },
-            "require": {
-                "ext-iconv": "*",
-                "ext-zlib": "*",
-                "php": ">=7.1",
-                "symfony/polyfill-mbstring": "^1.18"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "Smalot\\PdfParser\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "LGPL-3.0"
-            ],
-            "authors": [
-                {
-                    "name": "Sebastien MALOT",
-                    "email": "sebastien@malot.fr"
-                }
-            ],
-            "description": "Pdf parser library. Can read and extract information from pdf file.",
-            "homepage": "https://www.pdfparser.org",
-            "keywords": [
-                "extract",
-                "parse",
-                "parser",
-                "pdf",
-                "text"
-            ],
-            "support": {
-                "issues": "https://github.com/smalot/pdfparser/issues",
-                "source": "https://github.com/smalot/pdfparser/tree/v2.12.5"
-            },
-            "time": "2026-04-17T11:37:58+00:00"
         },
         {
             "name": "spatie/backtrace",

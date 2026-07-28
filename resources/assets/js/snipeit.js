@@ -684,14 +684,21 @@ function htmlEntities(str) {
 })(jQuery);
 
 $(document).ready(function () {
-    $(".toggle-password").click(function () {
-        $(this).toggleClass("fa-eye fa-eye-slash");
-        var input = $($(this).attr("data-toggle"));
-        if (input.attr("type") === "password") {
-            input.attr("type", "text");
-        } else {
-            input.attr("type", "password");
-        }
+    // Password-reveal eye. data-toggle is a jQuery selector — usually one
+    // input id, but a multi-selector like "#password, #password_confirm"
+    // lets a single click flip every matched input at once (the confirm
+    // field on the user create/edit form uses this so revealing the
+    // password reveals its confirmation too). Every .toggle-password
+    // sharing the same data-toggle string flips its icon together so the
+    // eye state doesn't visually drift between the two addons.
+    $(document).on('click', '.toggle-password', function () {
+        var toggleTarget = $(this).attr('data-toggle');
+        var $inputs = $(toggleTarget);
+        var reveal = $inputs.first().attr('type') === 'password';
+        $inputs.attr('type', reveal ? 'text' : 'password');
+        var $eyes = $('.toggle-password[data-toggle="' + toggleTarget + '"]');
+        $eyes.toggleClass('fa-eye', ! reveal);
+        $eyes.toggleClass('fa-eye-slash', reveal);
     });
 
     // Auto-init eonasdan datetimepickers. bootstrap-datepicker has a native
@@ -1117,6 +1124,113 @@ $(function () {
         var scope = $master.data('check-scope');
         var $container = scope ? $(scope) : $master.closest('form, table');
         $container.find('input[type="checkbox"]').not($master).not(':disabled').prop('checked', $master.prop('checked'));
+    });
+
+    // When the "This user can login" (activated) checkbox is off, the
+    // password + confirmation fields are functionally useless because
+    // login is gated by the activated flag. Hide the whole form-group
+    // (or dynamic-form-row in the modal) so the form doesn't show
+    // fields the user can't meaningfully fill in, and also drop the
+    // HTML `required` attribute so the browser doesn't block submission.
+    // The server side already skips the password rule for this case
+    // via SaveUserRequest::rules(), and the controller stores
+    // User::noPassword() raw so no Hash::check can ever match.
+    // Applies to both the main users/edit create form and the
+    // users/modal form since they share the input names.
+    var syncPasswordFields = function ($checkbox) {
+        var $form = $checkbox.closest('form');
+        var $passwords = $form.find(
+            'input[name="password"], input[name="password_confirmation"]'
+        );
+        var visible = $checkbox.is(':checked');
+        $passwords.prop('required', visible);
+        $passwords.each(function () {
+            var $wrap = $(this).closest('.form-group, .dynamic-form-row');
+            if (visible) {
+                $wrap.show();
+            } else {
+                $wrap.hide();
+            }
+        });
+    };
+
+    // Sensitive fields (username, email, password) ship with a
+    // `readonly` + onfocus-removes-readonly anti-autofill trick to
+    // stop password managers from prefilling or overwriting the
+    // operator's own login credentials on user-create forms. The
+    // side-effect is that HTML5 `required` constraint validation is
+    // SILENTLY skipped for readonly inputs, so hitting submit without
+    // ever focusing a required field lets the empty form through the
+    // browser check entirely.
+    //
+    // On submit-button click we strip `readonly` from any
+    // required+readonly input inside the form. The browser then runs
+    // its normal constraint check (all fields participating) and
+    // shows the "please fill in this field" popup on empties. Autofill
+    // was already prevented at page load, so removing readonly at
+    // click time doesn't reopen that hole.
+    $(document).on('click', 'button[type="submit"], input[type="submit"]', function () {
+        var $form = $(this).closest('form');
+        if (! $form.length) {
+            return;
+        }
+        $form.find('input[required][readonly]').each(function () {
+            this.removeAttribute('readonly');
+        });
+    });
+    $('input[name="activated"][type="checkbox"]').each(function () {
+        syncPasswordFields($(this));
+    });
+    $(document).on('change', 'input[name="activated"][type="checkbox"]', function () {
+        syncPasswordFields($(this));
+    });
+
+    // Generic "typing into input A enables checkbox B" pattern. Server
+    // marks the input with data-toggles-checkbox="{selector-of-target}".
+    // Threshold is 6 chars, which matches the legacy user-create
+    // behaviour of only enabling the send-welcome checkbox once the
+    // email is plausibly valid. Server omits the data-attribute when
+    // the enable-side should never fire (e.g. app.lock_passwords is on)
+    // so the target stays permanently disabled.
+    $(document).on('keyup', 'input[data-toggles-checkbox]', function () {
+        var $target = $($(this).data('toggles-checkbox'));
+        if (! $target.length) {
+            return;
+        }
+        if (this.value.length > 5) {
+            $target.prop('disabled', false);
+            $target.closest('.form-control').removeClass('form-control--disabled');
+        } else {
+            $target.prop('disabled', true).prop('checked', false);
+            $target.closest('.form-control').addClass('form-control--disabled');
+        }
+    });
+
+    // Bootstrap tooltips on any element carrying .tooltip-base.
+    // Attaching to body avoids clipping inside overflow-hidden panels.
+    $('.tooltip-base').tooltip({ container: 'body' });
+
+    // Password generator button. Server puts the desired length on the
+    // button as data-password-length (typically pwd_secure_min + 9) so
+    // this JS doesn't have to know about app settings. Falls back to 16
+    // if the attribute is missing.
+    $('a[id="genPassword"], button[id="genPassword"]').each(function () {
+        var $btn = $(this);
+        if (typeof $btn.pGenerator !== 'function' || ! $('#password').length) {
+            return;
+        }
+        $btn.pGenerator({
+            bind: 'click',
+            passwordElement: '#password',
+            passwordLength: parseInt($btn.data('password-length') || '16', 10),
+            uppercase: true,
+            lowercase: true,
+            numbers: true,
+            specialChars: true,
+            onPasswordGenerated: function () {
+                $('#password_confirm').val($('#password').val());
+            },
+        });
     });
 
     // A <select data-gates-submit> disables the submit button(s) in its
