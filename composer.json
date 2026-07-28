@@ -134,6 +134,9 @@
     "sort-packages": true,
     "optimize-autoloader": true,
     "discard-changes": true,
+    "platform": {
+      "php": "8.2.0"
+    },
     "process-timeout": 3000,
     "allow-plugins": {
       "dealerdirect/phpcodesniffer-composer-installer": true
