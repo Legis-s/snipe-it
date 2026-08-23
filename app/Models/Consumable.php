@@ -172,15 +172,11 @@ class Consumable extends SnipeModel
 
     public function percentRemaining()
     {
-        if ($this->consumables_users_count == 0) {
-            return 100;
-        }
-
         if (($this->qty == '') || ($this->qty == 0)) {
             return 0;
         }
 
-        return ($this->qty - $this->consumables_users_count) / $this->qty * 100;
+        return max(0, $this->numRemaining()) / $this->qty * 100;
     }
 
     /**
@@ -342,14 +338,9 @@ class Consumable extends SnipeModel
      */
     public function numCheckedOut() : int
     {
-        $consumables = ConsumableAssignment::where('consumable_id', $this->id)
-            ->whereIn("type",["sold", "issued"])
-            ->get();
-        $checked_out = 0 ;
-        foreach ($consumables as &$consumable) {
-            $checked_out += $consumable->quantity;
-        }
-        return $checked_out;
+        return (int) ConsumableAssignment::where('consumable_id', $this->id)
+            ->whereIn('type', [ConsumableAssignment::SOLD, ConsumableAssignment::ISSUED])
+            ->sum('quantity');
     }
 
     /**

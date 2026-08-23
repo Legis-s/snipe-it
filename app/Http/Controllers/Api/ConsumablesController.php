@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Events\CheckoutableCheckedOut;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\FilterRequest;
@@ -16,9 +15,11 @@ use App\Models\Company;
 use App\Models\Consumable;
 use App\Models\ConsumableAssignment;
 use App\Models\Purchase;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ConsumablesController extends Controller
 {
@@ -302,7 +303,7 @@ class ConsumablesController extends Controller
     public function checkout(Request $request, $id): JsonResponse
     {
         // Check if the consumable exists
-        if (! $consumable = Consumable::with('users')->find($id)) {
+        if (! $consumable = Consumable::find($id)) {
             return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/consumables/message.does_not_exist')));
         }
 
@@ -310,19 +311,9 @@ class ConsumablesController extends Controller
 
         $consumable->checkout_qty = $request->input('checkout_qty', 1);
 
-        // Make sure there is at least one available to checkout
-        if ($consumable->numRemaining() <= 0) {
-            return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/consumables/message.checkout.unavailable')));
-        }
-
         // Make sure there is a valid category
         if (! $consumable->category) {
             return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.invalid_item_category_single', ['type' => trans('general.consumable')])));
-        }
-
-        // Make sure there is at least one available to checkout
-        if ($consumable->numRemaining() <= 0 || $consumable->checkout_qty > $consumable->numRemaining()) {
-            return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/consumables/message.checkout.unavailable', ['requested' => $consumable->checkout_qty, 'remaining' => $consumable->numRemaining()])));
         }
 
         // Resolve the raw target first, then enforce FMCS explicitly.
@@ -347,15 +338,8 @@ class ConsumablesController extends Controller
         // Update the consumable data
         $consumable->assigned_to = $request->input('assigned_to');
 
-        // Concurrency guard. The unlocked numRemaining() check above is
-        // advisory only — two simultaneous checkout requests can both read
-        // "1 remaining", both pass the check, both attach a pivot row, and
-        // land the register at -1. Re-fetch the parent row under
-        // lockForUpdate INSIDE the transaction, re-check availability
-        // against the locked snapshot, and only then write. Any concurrent
-        // checkout blocks on the row lock until this transaction commits.
-        // Mirrors the pattern already used by License checkout (which locks
-        // LicenseSeat rows).
+        // Lock the inventory row and check the assignment ledger in the same
+        // transaction that records the checkout, preventing over-allocation.
         $errorResponse = null;
 
         DB::transaction(function () use ($consumable, $request, $user, &$errorResponse): void {
@@ -370,29 +354,11 @@ class ConsumablesController extends Controller
                 return;
             }
 
-            for ($i = 0; $i < $consumable->checkout_qty; $i++) {
-                $consumable->users()->attach($consumable->id,
-                    [
-                        'consumable_id' => $consumable->id,
-                        // The pivot's created_by is the operator recording the
-                        // checkout, not the checkout target. Sibling paths
-                        // (web ConsumableCheckoutController, web + API
-                        // ComponentCheckoutController) all key off auth()->id().
-                        'created_by' => auth()->id(),
-                        'assigned_to' => $request->input('assigned_to'),
-                        'note' => $request->input('note'),
-                    ]
-                );
-            }
-
-            event(new CheckoutableCheckedOut(
-                $consumable,
+            $locked->checkOut(
                 $user,
-                auth()->user(),
-                $request->input('note'),
-                [],
                 $consumable->checkout_qty,
-            ));
+                $request->input('note'),
+            );
         });
 
         if ($errorResponse) {

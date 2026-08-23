@@ -6,6 +6,7 @@ use App\Mail\CheckoutConsumableMail;
 use App\Models\Actionlog;
 use App\Models\CheckoutAcceptance;
 use App\Models\Consumable;
+use App\Models\ConsumableAssignment;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
@@ -258,5 +259,65 @@ class ConsumableCheckoutTest extends TestCase
             ]);
 
         $response->assertSessionHas('sign_in_place', true);
+    }
+
+    public function test_checkout_rechecks_assignment_quantities_before_issuing(): void
+    {
+        $actor = User::factory()->admin()->create();
+        $target = User::factory()->create();
+        $consumable = Consumable::factory()->create(['qty' => 3]);
+
+        $assignment = new ConsumableAssignment([
+            'consumable_id' => $consumable->id,
+            'assigned_to' => $target->id,
+            'assigned_type' => User::class,
+            'quantity' => 2,
+            'type' => ConsumableAssignment::ISSUED,
+        ]);
+        $assignment->created_by = $actor->id;
+        $assignment->save();
+
+        $this->actingAs($actor)
+            ->from(route('consumables.checkout.show', $consumable))
+            ->post(route('consumables.checkout.store', $consumable), [
+                'checkout_to_type' => 'user',
+                'assigned_user' => $target->id,
+                'checkout_qty' => 2,
+            ])
+            ->assertRedirect(route('consumables.checkout.show', $consumable))
+            ->assertSessionHas('error', trans('admin/consumables/message.checkout.unavailable', [
+                'requested' => 2,
+                'remaining' => 1,
+            ]));
+
+        $this->assertSame(1, $consumable->fresh()->numRemaining());
+        $this->assertSame(1, $consumable->consumableAssignments()->count());
+    }
+
+    public function test_checkout_writes_to_the_assignment_ledger(): void
+    {
+        $actor = User::factory()->admin()->create();
+        $target = User::factory()->create();
+        $consumable = Consumable::factory()->create(['qty' => 2]);
+
+        $this->actingAs($actor)
+            ->post(route('consumables.checkout.store', $consumable), [
+                'checkout_to_type' => 'user',
+                'assigned_user' => $target->id,
+                'checkout_qty' => 2,
+                'redirect_option' => 'index',
+            ])
+            ->assertRedirect(route('consumables.index'))
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseHas('consumables_locations', [
+            'consumable_id' => $consumable->id,
+            'assigned_to' => $target->id,
+            'assigned_type' => User::class,
+            'quantity' => 2,
+            'type' => ConsumableAssignment::ISSUED,
+            'created_by' => $actor->id,
+        ]);
+        $this->assertSame(0, $consumable->fresh()->numRemaining());
     }
 }

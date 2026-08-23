@@ -15,6 +15,7 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ConsumableCheckoutController extends Controller
 {
@@ -89,11 +90,6 @@ class ConsumableCheckoutController extends Controller
             $quantity = 1;
         }
 
-        // Make sure there is at least one available to checkout
-        if ($consumable->numRemaining() <= 0 || $quantity > $consumable->numRemaining()) {
-            return redirect()->route('consumables.index')->with('error', trans('admin/consumables/message.checkout.unavailable', ['requested' => $quantity, 'remaining' => $consumable->numRemaining()]));
-        }
-
 //        $assigned_to = e($request->input('assigned_to'));
 
         // Check if the user exists
@@ -148,12 +144,30 @@ class ConsumableCheckoutController extends Controller
 //        $request->request->add(['checkout_to_type' => 'user']);
 //        $request->request->add(['assigned_user' => $user->id]);
 
-        $consumable->checkOut(
-            $target,
-            $quantity,
-            $request->input('note'),
-            $signInPlace,
-        );
+        $remaining = null;
+
+        DB::transaction(function () use ($consumable, $target, $quantity, $request, $signInPlace, &$remaining): void {
+            $locked = Consumable::whereKey($consumable->id)->lockForUpdate()->first();
+            $remaining = $locked?->numRemaining() ?? 0;
+
+            if ($remaining < $quantity) {
+                return;
+            }
+
+            $locked->checkOut(
+                $target,
+                $quantity,
+                $request->input('note'),
+                $signInPlace,
+            );
+        });
+
+        if ($remaining < $quantity) {
+            return redirect()->back()->withInput()->with('error', trans('admin/consumables/message.checkout.unavailable', [
+                'requested' => $quantity,
+                'remaining' => $remaining,
+            ]));
+        }
 
         $request->request->add(['assigned_to' => $target->id]);
         $request->request->add(match ($request->input('checkout_to_type')) {
