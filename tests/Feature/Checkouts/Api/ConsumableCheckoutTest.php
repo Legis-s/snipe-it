@@ -6,6 +6,7 @@ use App\Mail\CheckoutConsumableMail;
 use App\Models\Actionlog;
 use App\Models\Company;
 use App\Models\Consumable;
+use App\Models\ConsumableAssignment;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
@@ -264,6 +265,31 @@ class ConsumableCheckoutTest extends TestCase
 
         // The pre-drained row is the only pivot; no second row got added.
         $this->assertSame(1, $consumable->users()->count(), 'A second pivot row would mean the register went negative');
+        $this->assertSame(0, $consumable->fresh()->numRemaining());
+    }
+
+    public function test_api_checkout_writes_to_the_assignment_ledger(): void
+    {
+        $actor = User::factory()->checkoutConsumables()->create();
+        $target = User::factory()->create();
+        $consumable = Consumable::factory()->create(['qty' => 2]);
+
+        $this->actingAsForApi($actor)
+            ->postJson(route('api.consumables.checkout', $consumable), [
+                'assigned_to' => $target->id,
+                'checkout_qty' => 2,
+            ])
+            ->assertOk()
+            ->assertStatusMessageIs('success');
+
+        $this->assertDatabaseHas('consumables_locations', [
+            'consumable_id' => $consumable->id,
+            'assigned_to' => $target->id,
+            'assigned_type' => User::class,
+            'quantity' => 2,
+            'type' => ConsumableAssignment::ISSUED,
+            'created_by' => $actor->id,
+        ]);
         $this->assertSame(0, $consumable->fresh()->numRemaining());
     }
 }
