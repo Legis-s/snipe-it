@@ -126,7 +126,7 @@
                                 name="activated"
                                 :label="trans('admin/users/general.activated_help_text')"
                                 :item="$user"
-                                :help_text="trans('admin/users/general.activated_password_required_help')"
+                                :help_text="$user->id ? null : trans('admin/users/general.activated_password_required_help')"
                                 help_icon="tip"
                             />
                         @endif
@@ -165,7 +165,7 @@
                                         @if ((! Gate::allows('canEditAuthFields', $user)) || ((! Gate::allows('editableOnDemo')) && ($user->id)))
                                             <input type="password" name="password" class="form-control form-control--disabled" id="password" value="" maxlength="500" autocomplete="off" disabled>
                                         @else
-                                            <input type="password" name="password" class="form-control" id="password" value="" maxlength="500" autocomplete="off" onfocus="this.removeAttribute('readonly');" readonly {{ ((Helper::checkIfRequired($user, 'password')) && (! $user->id)) ? ' required' : '' }}>
+                                            <input type="password" name="password" class="form-control" id="password" value="" maxlength="500" autocomplete="off" data-required-when-active="{{ $user->id ? 'false' : 'true' }}" onfocus="this.removeAttribute('readonly');" readonly {{ ((Helper::checkIfRequired($user, 'password')) && (! $user->id)) ? ' required' : '' }}>
                                         @endif
                                         <span class="input-group-addon">
                                             {{-- jQuery's multi-selector: this eye toggles the visibility of
@@ -202,7 +202,7 @@
                                         @if ((! Gate::allows('canEditAuthFields', $user)) || ((! Gate::allows('editableOnDemo')) && ($user->id)))
                                             <input type="password" name="password_confirmation" id="password_confirm" class="form-control form-control--disabled" value="" maxlength="500" autocomplete="off" aria-label="password_confirmation" disabled>
                                         @else
-                                            <input type="password" name="password_confirmation" id="password_confirm" class="form-control" value="" maxlength="500" autocomplete="off" aria-label="password_confirmation" {{ (! $user->id) ? ' required' : '' }} onfocus="this.removeAttribute('readonly');" readonly>
+                                            <input type="password" name="password_confirmation" id="password_confirm" class="form-control" value="" maxlength="500" autocomplete="off" aria-label="password_confirmation" data-required-when-active="{{ $user->id ? 'false' : 'true' }}" {{ (! $user->id) ? ' required' : '' }} onfocus="this.removeAttribute('readonly');" readonly>
                                         @endif
                                         <span class="input-group-addon">
                                             {{-- Shares the same multi-selector data-toggle as the password

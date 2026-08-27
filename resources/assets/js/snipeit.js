@@ -1143,8 +1143,9 @@ $(function () {
             'input[name="password"], input[name="password_confirmation"]'
         );
         var visible = $checkbox.is(':checked');
-        $passwords.prop('required', visible);
         $passwords.each(function () {
+            var requiredWhenActive = this.getAttribute('data-required-when-active') !== 'false';
+            $(this).prop('required', visible && requiredWhenActive);
             var $wrap = $(this).closest('.form-group, .dynamic-form-row');
             if (visible) {
                 $wrap.show();
