@@ -43,5 +43,8 @@ return [
     'favorite_location'     => 'Основной склад',
     'bitrix_token'          => 'Ключ Bitrix',
     'bitrix_token_new'          => 'Новый ключ Bitrix',
-    'bitrix_id'          => 'Bitrix ID'
+    'bitrix_token_configured'   => 'Ключ уже настроен. Оставьте поле пустым, чтобы сохранить его.',
+    'bitrix_token_clear'        => 'Удалить сохранённый ключ Bitrix',
+    'bitrix_token_invalid'      => 'Ключ Bitrix отсутствует или повреждён. Обновите его в профиле пользователя.',
+    'bitrix_id'                 => 'Bitrix ID'
 ];

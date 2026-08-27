@@ -83,7 +83,7 @@ class UsersController extends Controller
         }
 
         $permissions = config('permissions');
-        $userPermissions = Helper::selectedPermissionsArray($permissions, $request->old('permissions', []));
+        $userPermissions = Helper::selectedPermissionsArray($permissions, $request->old('permission', []));
         $permissions = $this->filterDisplayable($permissions);
 
         $user = new User;
@@ -149,6 +149,7 @@ class UsersController extends Controller
         $user->start_date = $request->input('start_date', null);
         $user->end_date = $request->input('end_date', null);
         $user->autoassign_licenses = $request->input('autoassign_licenses', 0);
+        $user->bitrix_id = $request->input('bitrix_id', null);
 
         $user->permissions = json_encode(PreserveUnauthorizedPrivilegedPermissionsAction::run(
             requestedPermissions: NormalizePermissionsPayloadAction::run($request->input('permission')),
@@ -156,7 +157,7 @@ class UsersController extends Controller
         ));
 
         if ($request->filled('new_bitrix_token')) {
-            $user->bitrix_token = Crypt::encryptString($request->input('new_bitrix_token'));
+            $user->setBitrixToken($request->input('new_bitrix_token'));
         }
 
         // we have to invoke the form request here to handle image uploads
@@ -312,11 +313,11 @@ class UsersController extends Controller
         // Set this here so that we can overwrite it later if the user is an admin or superadmin
         $user->activated = $request->input('activated', auth()->user()->is($user) ? 1 : $user->activated);
 
-
         if ($request->filled('new_bitrix_token')) {
-            $user->bitrix_token = Crypt::encryptString($request->input('new_bitrix_token'));
+            $user->setBitrixToken($request->input('new_bitrix_token'));
+        } elseif ($request->boolean('clear_bitrix_token')) {
+            $user->bitrix_token = null;
         }
-
 
         // Update the location of any assets checked out to this user
         Asset::where('assigned_type', User::class)

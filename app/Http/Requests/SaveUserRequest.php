@@ -40,6 +40,10 @@ class SaveUserRequest extends FormRequest
             'company_ids' => 'nullable|array',
             'company_ids.*' => 'integer|exists:companies,id',
             'location_id' => 'nullable|integer|exists:locations,id|fmcs_location',
+            'bitrix_id' => 'nullable|integer|min:1|max:2147483647',
+            'bitrix_token' => 'nullable|string|max:2048',
+            'new_bitrix_token' => 'nullable|string|max:2048',
+            'clear_bitrix_token' => 'nullable|boolean',
         ];
 
         switch ($this->method()) {

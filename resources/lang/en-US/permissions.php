@@ -453,6 +453,28 @@ return [
         'name' => 'Create Depreciation Records',
     ],
 
+    'review' => [
+        'name' => 'Review',
+        'note' => 'Grants access to review and approve operations.',
+    ],
+    'reportsview' => [
+        'name' => 'View Reports',
+    ],
+    'assetssell' => [
+        'name' => 'Sell Assets',
+        'note' => 'Allows the user to sell assets.',
+    ],
+    'purchases' => [
+        'name' => 'Purchases',
+        'note' => 'Grants access to the Purchases section of the application.',
+    ],
+    'purchasesview' => [
+        'name' => 'View Purchases',
+    ],
+    'purchasescreate' => [
+        'name' => 'Create Purchases',
+    ],
+
     'grant_all' => 'Grant all permissions for :area',
     'deny_all' => 'Deny all permissions for :area',
     'inherit_all' => 'Inherit all permissions for :area from permission groups',

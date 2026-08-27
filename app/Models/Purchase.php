@@ -9,7 +9,6 @@ use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
 use DateTime;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Crypt;
 use Watson\Validating\ValidatingTrait;
 
 class Purchase extends SnipeModel
@@ -273,14 +272,13 @@ class Purchase extends SnipeModel
             $user = $asset->user_verified;
             $this->user_verified_id = $user->id;
             $this->save();
-            if ($user && $user->bitrix_token && $user->bitrix_id && $this->bitrix_task_id) {
+            $raw_bitrix_token = $user?->decryptedBitrixToken();
+            if ($raw_bitrix_token && $user->bitrix_id && $this->bitrix_task_id) {
                 $params1 = [
                     'query' => [
                         'taskId' => $this->bitrix_task_id
                     ]
                 ];
-                $raw_bitrix_token = Crypt::decryptString($user->bitrix_token);
-
                 $client->request('POST', env('BITRIX_URL') . 'rest/' . $user->bitrix_id . '/' . $raw_bitrix_token . '/tasks.task.complete/', $params1);
                 $params2 = [
                     'query' => [

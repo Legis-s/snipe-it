@@ -15,6 +15,7 @@ use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -26,6 +27,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
@@ -57,6 +59,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         'persist_code',
         'two_factor_secret',
         'activation_code',
+        'bitrix_token',
     ];
 
     protected $table = 'users';
@@ -103,9 +106,26 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         'autoassign_licenses',
         'website',
         'bitrix_id',
-        'bitrix_token',
         'favorite_location_id',
     ];
+
+    public function setBitrixToken(string $token): void
+    {
+        $this->bitrix_token = Crypt::encryptString($token);
+    }
+
+    public function decryptedBitrixToken(): ?string
+    {
+        if (! $this->bitrix_token) {
+            return null;
+        }
+
+        try {
+            return Crypt::decryptString($this->bitrix_token);
+        } catch (DecryptException) {
+            return null;
+        }
+    }
 
     protected $casts = [
         'manager_id' => 'integer',
