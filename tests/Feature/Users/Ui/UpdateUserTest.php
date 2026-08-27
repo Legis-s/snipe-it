@@ -25,6 +25,49 @@ class UpdateUserTest extends TestCase
             ->assertOk();
     }
 
+    public function test_existing_user_password_fields_are_not_required(): void
+    {
+        $user = User::factory()->create(['activated' => true]);
+        $response = $this->actingAs(User::factory()->superuser()->create())
+            ->get(route('users.edit', $user))
+            ->assertOk();
+
+        $response->assertDontSee(trans('admin/users/general.activated_password_required_help'));
+
+        $document = new \DOMDocument;
+        @$document->loadHTML($response->getContent());
+        $xpath = new \DOMXPath($document);
+
+        foreach (['password', 'password_confirmation'] as $field) {
+            $input = $xpath->query('//input[@name="'.$field.'"]')->item(0);
+            $this->assertNotNull($input);
+            $this->assertFalse($input->hasAttribute('required'), "{$field} must be optional when editing a user");
+            $this->assertSame('false', $input->getAttribute('data-required-when-active'));
+        }
+    }
+
+    public function test_empty_password_fields_do_not_block_update_or_change_password(): void
+    {
+        $user = User::factory()->create([
+            'activated' => true,
+            'password' => bcrypt('ExistingPassword_123!'),
+        ]);
+
+        $this->actingAs(User::factory()->superuser()->create())
+            ->put(route('users.update', $user), [
+                'first_name' => 'Updated Name',
+                'username' => $user->username,
+                'activated' => true,
+                'password' => '',
+                'password_confirmation' => '',
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect();
+
+        $this->assertSame('Updated Name', $user->refresh()->first_name);
+        $this->assertTrue(Hash::check('ExistingPassword_123!', $user->password));
+    }
+
     public function test_edit_form_does_not_leak_company_id_into_location_select()
     {
         // Regression: the company_ids <select> looped with `@foreach (... as $company_id)`,
