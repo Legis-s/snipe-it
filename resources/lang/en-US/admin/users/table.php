@@ -40,4 +40,10 @@ return [
     'username_note' => '(This is used for Active Directory binding only, not for login.)',
     'cloneuser' => 'Clone User',
     'viewusers' => 'View Users',
+    'bitrix_token' => 'Bitrix key',
+    'bitrix_token_new' => 'New Bitrix key',
+    'bitrix_token_configured' => 'A key is already configured. Leave this empty to keep it.',
+    'bitrix_token_clear' => 'Remove the saved Bitrix key',
+    'bitrix_token_invalid' => 'The Bitrix key is missing or invalid. Update it in the user profile.',
+    'bitrix_id' => 'Bitrix ID',
 ];

@@ -483,8 +483,13 @@ class UsersController extends Controller
 
         $authenticatedUser = auth()->user();
         $user = new User;
-        $user->fill($request->all());
+        $user->fill($request->except(['bitrix_token', 'new_bitrix_token', 'clear_bitrix_token']));
         $user->created_by = auth()->id();
+
+        $bitrixToken = $request->input('new_bitrix_token', $request->input('bitrix_token'));
+        if (is_string($bitrixToken) && $bitrixToken !== '') {
+            $user->setBitrixToken($bitrixToken);
+        }
 
         if ($request->has('permissions')) {
             $user->permissions = json_encode(PreserveUnauthorizedPrivilegedPermissionsAction::run(
@@ -587,7 +592,14 @@ class UsersController extends Controller
         }
 
         // Pull out sensitive fields that require extra permission
-        $user->fill($request->except(['password', 'username', 'email', 'activated', 'permissions', 'activation_code', 'remember_token', 'two_factor_secret', 'two_factor_enrolled', 'two_factor_optin']));
+        $user->fill($request->except(['password', 'username', 'email', 'activated', 'permissions', 'activation_code', 'remember_token', 'two_factor_secret', 'two_factor_enrolled', 'two_factor_optin', 'bitrix_token', 'new_bitrix_token', 'clear_bitrix_token']));
+
+        $bitrixToken = $request->input('new_bitrix_token', $request->input('bitrix_token'));
+        if (is_string($bitrixToken) && $bitrixToken !== '') {
+            $user->setBitrixToken($bitrixToken);
+        } elseif ($request->boolean('clear_bitrix_token')) {
+            $user->bitrix_token = null;
+        }
 
         if (auth()->user()->can('canEditAuthFields', $user) && auth()->user()->can('editableOnDemo')) {
 

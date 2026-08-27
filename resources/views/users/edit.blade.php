@@ -556,21 +556,28 @@
 
                               <!-- Bitrix key -->
                               <x-form.row
-                                      :label="trans('admin/users/table.notes')"
-                                      name="notes"
-                                      type="textarea"
+                                      :label="trans('admin/users/table.bitrix_token_new')"
+                                      name="new_bitrix_token"
+                                      type="password"
                                       :item="$user"
-                                      :rows="5"
+                                      :help_text="$user->bitrix_token ? trans('admin/users/table.bitrix_token_configured') : null"
                               />
 
                               <!-- Bitrix id -->
                               <x-form.row
-                                      :label="trans('admin/users/table.notes')"
-                                      name="notes"
-                                      type="textarea"
+                                      :label="trans('admin/users/table.bitrix_id')"
+                                      name="bitrix_id"
+                                      type="number"
                                       :item="$user"
-                                      :rows="5"
                               />
+
+                              @if ($user->exists && $user->bitrix_token)
+                                  <x-form.checkbox-row
+                                      name="clear_bitrix_token"
+                                      :label="trans('admin/users/table.bitrix_token_clear')"
+                                      :item="$user"
+                                  />
+                              @endif
 
                               @if ($snipeSettings->two_factor_enabled!='')
                                   @if ($snipeSettings->two_factor_enabled=='1')
@@ -681,4 +688,3 @@
         </x-form>
     </x-container>
 @stop
-

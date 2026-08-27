@@ -16,12 +16,10 @@ use App\Services\PurchaseInvoiceItemResolver;
 use App\Services\TimewebInvoiceRecognizer;
 use Carbon\Carbon;
 use DateTime;
-use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
@@ -304,18 +302,12 @@ class PurchasesController extends Controller
             $purchase->save();
 
 //            \Debugbar::info("send bitrix");
-            if ($user->bitrix_token && $user->bitrix_id) {
-                try {
-//                    \Debugbar::info("raw_bitrix_token");
-                    $raw_bitrix_token = Crypt::decryptString($user->bitrix_token);
-                    $response = $client->request('POST',  env('BITRIX_URL').'rest/' . $user->bitrix_id . '/' . $raw_bitrix_token . '/lists.element.add.json/', $params);
-
-                } catch (DecryptException $e) {
-                    return redirect()->back()->withInput()->with('error', 'Ключ битрикс неверный замените ');
-                }
-            } else {
-                return redirect()->back()->withInput()->with('error', 'Для совершения закупок заполните ключ битрикс');
+            $raw_bitrix_token = $user->decryptedBitrixToken();
+            if (! $raw_bitrix_token || ! $user->bitrix_id) {
+                return redirect()->back()->withInput()->with('error', trans('admin/users/table.bitrix_token_invalid'));
             }
+
+            $response = $client->request('POST', env('BITRIX_URL').'rest/'.$user->bitrix_id.'/'.$raw_bitrix_token.'/lists.element.add.json/', $params);
             $response = $response->getBody()->getContents();
 
             $purchase->bitrix_result = $response;

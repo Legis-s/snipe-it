@@ -13,7 +13,6 @@ use App\Http\Transformers\PurchasesTransformer;
 use App\Helpers\Helper;
 use App\Models\Purchase;
 use Illuminate\Database\Eloquent\Builder;
-use Crypt;
 
 class PurchasesController extends Controller
 {
@@ -392,12 +391,15 @@ class PurchasesController extends Controller
         /** @var \GuzzleHttp\Client $client */
         $client = new \GuzzleHttp\Client();
         $user = auth::user();
-        if ($user->bitrix_token && $user->bitrix_id) {
-            $raw_bitrix_token = Crypt::decryptString($user->bitrix_token);
-            $response = $client->request('POST', env('BITRIX_URL') . 'rest/' . $user->bitrix_id . '/' . $raw_bitrix_token . '/lists.element.add.json/', $params);
-        } else {
-            return response()->json(Helper::formatStandardApiResponse('error', null, $purchase->getErrors()));
+        $raw_bitrix_token = $user->decryptedBitrixToken();
+        if (! $raw_bitrix_token || ! $user->bitrix_id) {
+            return response()->json(
+                Helper::formatStandardApiResponse('error', null, trans('admin/users/table.bitrix_token_invalid')),
+                422
+            );
         }
+
+        $response = $client->request('POST', env('BITRIX_URL').'rest/'.$user->bitrix_id.'/'.$raw_bitrix_token.'/lists.element.add.json/', $params);
 
         $response = $response->getBody()->getContents();
         $bitrix_result = json_decode($response, true);
