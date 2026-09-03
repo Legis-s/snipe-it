@@ -17,8 +17,10 @@
         'rejected' => ['danger', trans('general.purchase_statuses.rejected')],
         'paid' => ['success', trans('general.purchase_statuses.paid')],
         'inprogress' => ['primary', trans('general.purchase_statuses.inprogress')],
+        'error' => ['danger', trans('general.purchase_statuses.error')],
     ];
-    $currentStatus = $purchaseStatuses[$purchase->status] ?? ['default', $purchase->status];
+    $displayStatus = $purchase->statusForDisplay();
+    $currentStatus = $purchaseStatuses[$displayStatus] ?? ['default', $displayStatus];
 @endphp
 
 {{-- Page title --}}
@@ -209,18 +211,22 @@
                             </div>
                         </div>
                     @endif
-                    @if ($purchase->bitrix_id)
-                        <div class="row">
-                            <div class="col-md-4">
-                                <strong>
-                                    {{ trans('general.bitrix_id') }}
-                                </strong>
-                            </div>
-                            <div class="col-md-8">
-                                <a href='https://bitrix.legis-s.ru/services/lists/52/element/0/{{ $purchase->bitrix_id }}/?list_section_id='>{{ $purchase->bitrix_id }}</a>
-                            </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <strong>
+                                {{ trans('general.bitrix_id') }}
+                            </strong>
                         </div>
-                    @endif
+                        <div class="col-md-8">
+                            @if ($purchase->bitrix_id)
+                                <a href='https://bitrix.legis-s.ru/services/lists/52/element/0/{{ $purchase->bitrix_id }}/?list_section_id='>{{ $purchase->bitrix_id }}</a>
+                            @else
+                                <button type="button" class="btn btn-default btn-sm" id="resend-to-bitrix">
+                                    {{ trans('general.resend_to_bitrix') }}
+                                </button>
+                            @endif
+                        </div>
+                    </div>
                     @if ($purchase->final_price)
                         <div class="row">
                             <div class="col-md-4">
@@ -364,7 +370,8 @@
                 line: {{ Illuminate\Support\Js::from(route('api.purchases.consumables_line', $purchase->id)) }},
                 purchase: {{ Illuminate\Support\Js::from(route('api.purchases.show', $purchase->id)) }},
                 review: {{ Illuminate\Support\Js::from(url('/api/v1/consumables')) }},
-                consumables: {{ Illuminate\Support\Js::from(url('/consumables')) }}
+                consumables: {{ Illuminate\Support\Js::from(url('/consumables')) }},
+                resend: {{ Illuminate\Support\Js::from(route('api.purchases.resend', $purchase->id)) }}
             };
             const requestHeaders = {
                 'X-Requested-With': 'XMLHttpRequest',
@@ -401,6 +408,24 @@
                 reviewed: {{ Illuminate\Support\Js::from(trans('general.reviewed')) }}
             };
             let consumables = {{ Illuminate\Support\Js::from($consumableRows) }};
+
+            $('#resend-to-bitrix').on('click', function () {
+                const $button = $(this);
+                $button.prop('disabled', true);
+
+                apiRequest('POST', endpoints.resend)
+                    .done(function (response) {
+                        if (responseSucceeded(response, labels.unableUpdatePurchaseStatus)) {
+                            window.location.reload();
+                        }
+                    })
+                    .fail(function (response) {
+                        showApiError(response, labels.unableUpdatePurchaseStatus);
+                    })
+                    .always(function () {
+                        $button.prop('disabled', false);
+                    });
+            });
 
             function bulkPrintAssetTags() {
                 let currentIndex = 0;

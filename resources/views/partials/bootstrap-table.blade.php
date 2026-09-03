@@ -3439,6 +3439,9 @@
                 case "inprogress":
                     return '<span class="label label-primary">На согласовании</span>';
                     break;
+                case "error":
+                    return '<span class="label label-danger">Ошибка</span>';
+                    break;
             }
         } else {
             return 'error';
@@ -3558,11 +3561,7 @@
         if (value) {
             return "<a href='https://bitrix.legis-s.ru/services/lists/52/element/0/" + value + "/?list_section_id=' target='_blank'>" + value + "</a>";
         } else {
-            if (row.user) {
-                return '<button type="button"  class="btn btn-default  btn-sm resend">Отправить заново</button>'
-            } else {
-                return ' ';
-            }
+            return '<button type="button" class="btn btn-default btn-sm resend">Отправить заново</button>';
         }
     }
 
@@ -3741,6 +3740,12 @@
                     },
                     success: function () {
                         $(".table").bootstrapTable('refresh');
+                    },
+                    error: function (response) {
+                        var message = response.responseJSON && response.responseJSON.messages
+                            ? response.responseJSON.messages
+                            : 'Не удалось повторно отправить закупку в Bitrix.';
+                        Swal.fire({title: 'Ошибка', text: message, icon: 'error'});
                     }
                 });
             },

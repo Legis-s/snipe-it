@@ -13,6 +13,8 @@ use App\Http\Transformers\PurchasesTransformer;
 use App\Helpers\Helper;
 use App\Models\Purchase;
 use Illuminate\Database\Eloquent\Builder;
+use RuntimeException;
+use Throwable;
 
 class PurchasesController extends Controller
 {
@@ -384,33 +386,68 @@ class PurchasesController extends Controller
         $this->authorize('view', Purchase::class);
         $purchase = Purchase::findOrFail($purchaseId);
 
+        if ($purchase->bitrix_id) {
+            return response()->json(
+                Helper::formatStandardApiResponse('error', null, trans('general.purchase_already_sent_to_bitrix')),
+                422
+            );
+        }
 
-        $file_data = file_get_contents(public_path() . '/uploads/purchases/' . $purchase->bitrix_send_json);
-
-        $params = json_decode($file_data, true);
-        /** @var \GuzzleHttp\Client $client */
-        $client = new \GuzzleHttp\Client();
-        $user = auth::user();
-        $raw_bitrix_token = $user->decryptedBitrixToken();
+        $user = $request->user();
+        $raw_bitrix_token = $user?->decryptedBitrixToken();
         if (! $raw_bitrix_token || ! $user->bitrix_id) {
+            $purchase->setStatusError();
+            $purchase->save();
+
             return response()->json(
                 Helper::formatStandardApiResponse('error', null, trans('admin/users/table.bitrix_token_invalid')),
                 422
             );
         }
 
-        $response = $client->request('POST', env('BITRIX_URL').'rest/'.$user->bitrix_id.'/'.$raw_bitrix_token.'/lists.element.add.json/', $params);
+        try {
+            $payloadPath = public_path('/uploads/purchases/' . $purchase->bitrix_send_json);
+            if (! $purchase->bitrix_send_json || ! is_file($payloadPath)) {
+                throw new RuntimeException('Saved Bitrix payload is missing.');
+            }
 
-        $response = $response->getBody()->getContents();
-        $bitrix_result = json_decode($response, true);
-        $bitrix_id = $bitrix_result["result"];
-        $purchase->bitrix_id = $bitrix_id;
+            $params = json_decode(file_get_contents($payloadPath), true);
+            if (! is_array($params)) {
+                throw new RuntimeException('Saved Bitrix payload is invalid.');
+            }
 
+            $client = new \GuzzleHttp\Client();
+            $response = $client->request('POST', env('BITRIX_URL').'rest/'.$user->bitrix_id.'/'.$raw_bitrix_token.'/lists.element.add.json/', $params);
+            $responseBody = $response->getBody()->getContents();
+            $bitrixResult = json_decode($responseBody, true);
+            if (! is_array($bitrixResult) || empty($bitrixResult['result'])) {
+                throw new RuntimeException('Bitrix did not return a purchase ID.');
+            }
 
-        if ($purchase->save()) {
-            return "ok";
+            $purchase->bitrix_result = $responseBody;
+            $purchase->bitrix_id = $bitrixResult['result'];
+            $purchase->setStatusInprogress();
+
+            if (! $purchase->save()) {
+                return response()->json(Helper::formatStandardApiResponse('error', null, $purchase->getErrors()), 422);
+            }
+        } catch (Throwable $exception) {
+            $purchase->setStatusError();
+            $purchase->save();
+            report($exception);
+
+            return response()->json(
+                Helper::formatStandardApiResponse('error', null, trans('general.bitrix_send_failed')),
+                502
+            );
         }
 
-        return response()->json(Helper::formatStandardApiResponse('error', null, $purchase->getErrors()));
+        return response()->json(
+            Helper::formatStandardApiResponse(
+                'success',
+                (new PurchasesTransformer)->transformPurchase($purchase),
+                trans('general.bitrix_send_success')
+            )
+        );
     }
 }

@@ -28,6 +28,7 @@
                     <option value="rejected">{{ trans('general.purchase_statuses.rejected') }}</option>
                     <option value="paid">{{ trans('general.purchase_statuses.paid') }}</option>
                     <option value="inprogress">{{ trans('general.purchase_statuses.inprogress') }}</option>
+                    <option value="error">{{ trans('general.purchase_statuses.error') }}</option>
                 </select>
             </div>
             <table
