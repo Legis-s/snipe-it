@@ -282,6 +282,36 @@ class ImpersonateUserTest extends TestCase
             ->assertSee(route('users.impersonate.start', $target), false);
     }
 
+    public function test_users_api_only_enables_impersonation_for_an_allowed_target()
+    {
+        $actor = User::factory()->superuser()->create();
+        $target = User::factory()->create(['activated' => 1]);
+        $otherSuperuser = User::factory()->superuser()->create(['activated' => 1]);
+        $this->allow($actor);
+
+        $rows = $this->actingAsForApi($actor)
+            ->getJson(route('api.users.index'))
+            ->assertOk()
+            ->json('rows');
+
+        $this->assertTrue(collect($rows)->firstWhere('id', $target->id)['available_actions']['impersonate']);
+        $this->assertFalse(collect($rows)->firstWhere('id', $actor->id)['available_actions']['impersonate']);
+        $this->assertFalse(collect($rows)->firstWhere('id', $otherSuperuser->id)['available_actions']['impersonate']);
+    }
+
+    public function test_users_index_uses_the_current_impersonation_flow()
+    {
+        $actor = User::factory()->superuser()->create();
+        $this->allow($actor);
+
+        $this->actingAs($actor)
+            ->get(route('users.index'))
+            ->assertOk()
+            ->assertSee('impersonate-user', false)
+            ->assertDontSee('/impersonate/take/', false)
+            ->assertSee('/impersonate', false);
+    }
+
     public function test_button_hidden_from_non_allowlisted_superuser()
     {
         $actor = User::factory()->superuser()->create();

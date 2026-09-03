@@ -145,7 +145,7 @@ class UsersTransformer
             'delete' => ($user->isDeletable() && (auth()->user()->can('canEditAuthFields', $user) && auth()->user()->can('editableOnDemo'))),
             'clone' => (Gate::allows('create', User::class) && ($user->deleted_at == '')),
             'restore' => (Gate::allows('create', User::class) && ($user->deleted_at != '')),
-            'impersonate' => (Gate::allows('superadmin')) ? true : false,
+            'impersonate' => auth()->user()?->mayImpersonate($user) ?? false,
         ];
 
         $array += $permissions_array;
