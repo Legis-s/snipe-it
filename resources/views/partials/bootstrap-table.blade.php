@@ -2307,7 +2307,7 @@
                 actions += '<span class="btn btn-sm btn-warning inventory" data-tooltip="true" title="Inventory Item"><i class="fas fa-key" style="color: white" aria-hidden="true"></i><span class="sr-only">Inventory</span></span>&nbsp;';
             }
             if ((row.available_actions) && (row.available_actions.impersonate === true)) {
-                actions += '<a href="{{ url('/') }}/impersonate/take/' + row.id + '/" class="btn btn-sm btn-danger" data-tooltip="true" title="Impersonate"><i class="fas fa-unlock" aria-hidden="true"></i><span class="sr-only">impersonate</span></a>&nbsp;';
+                actions += '<button type="button" class="btn btn-sm btn-danger impersonate-user" data-user-id="' + row.id + '" data-user-name="' + row.name + '" data-tooltip="true" title="{{ trans('general.impersonate') }}"><i class="fas fa-unlock" aria-hidden="true"></i><span class="sr-only">{{ trans('general.impersonate') }}</span></button>&nbsp;';
             }
             /**
              *  END CUSTOM
@@ -2604,6 +2604,51 @@
         window[formatters[i] + 'ActionsFormatter'] = genericActionsFormatter(formatters[i]);
         window[formatters[i] + 'InOutFormatter'] = genericCheckinCheckoutFormatter(formatters[i]);
     }
+
+    $(document).on('click', '.impersonate-user', function () {
+        var button = $(this);
+        var userId = button.data('user-id');
+        var userName = button.data('user-name');
+        var confirmationText = @json(trans('admin/users/general.impersonate_confirm_body', ['name' => '__USER_NAME__']))
+            .replace('__USER_NAME__', userName);
+
+        Swal.fire({
+            title: @json(trans('admin/users/general.impersonate_confirm_title')),
+            text: confirmationText,
+            input: 'textarea',
+            inputLabel: @json(trans('admin/users/general.impersonate_note_label')),
+            inputPlaceholder: @json(trans('admin/users/general.impersonate_note_placeholder')),
+            inputAttributes: {
+                maxlength: 500,
+                required: true
+            },
+            showCancelButton: true,
+            confirmButtonText: @json(trans('general.yes')),
+            cancelButtonText: @json(trans('button.cancel')),
+            preConfirm: function (note) {
+                note = String(note || '').trim();
+                if (!note) {
+                    Swal.showValidationMessage(@json(trans('admin/users/general.impersonate_note_required')));
+                    return false;
+                }
+
+                return note;
+            }
+        }).then(function (result) {
+            if (!result.isConfirmed) {
+                return;
+            }
+
+            $('<form>', {
+                method: 'POST',
+                action: @json(url('/users')) + '/' + encodeURIComponent(userId) + '/impersonate'
+            })
+                .append($('<input>', {type: 'hidden', name: '_token', value: $('meta[name="csrf-token"]').attr('content')}))
+                .append($('<input>', {type: 'hidden', name: 'note', value: result.value}))
+                .appendTo(document.body)
+                .trigger('submit');
+        });
+    });
 
     // Maintenances need a custom actions formatter (adds the green
     // "mark complete" button between update and delete). Defined AFTER the
