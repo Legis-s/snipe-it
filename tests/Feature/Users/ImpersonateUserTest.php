@@ -9,30 +9,10 @@ use Tests\TestCase;
 
 class ImpersonateUserTest extends TestCase
 {
-    protected function allow(User ...$users): void
-    {
-        config(['app.user_impersonation_usernames' => array_map(fn ($u) => $u->username, $users)]);
-    }
-
-    public function test_impersonate_endpoint_is_disabled_when_list_is_empty()
-    {
-        config(['app.user_impersonation_usernames' => []]);
-
-        $actor = User::factory()->superuser()->create();
-        $target = User::factory()->create(['activated' => 1]);
-
-        $this->actingAs($actor)
-            ->post(route('users.impersonate.start', $target))
-            ->assertNotFound();
-
-        $this->assertNull(session('impersonator_id'));
-    }
-
-    public function test_non_superuser_cannot_impersonate_even_if_id_is_in_list()
+    public function test_non_superuser_cannot_impersonate()
     {
         $actor = User::factory()->admin()->create();
         $target = User::factory()->create(['activated' => 1]);
-        $this->allow($actor);
 
         $this->actingAs($actor)
             ->post(route('users.impersonate.start', $target))
@@ -41,26 +21,25 @@ class ImpersonateUserTest extends TestCase
         $this->assertNull(session('impersonator_id'));
     }
 
-    public function test_superuser_not_in_allowlist_cannot_impersonate()
+    public function test_legacy_allowlist_does_not_restrict_superusers()
     {
         $actor = User::factory()->superuser()->create();
         $someoneElse = User::factory()->superuser()->create();
         $target = User::factory()->create(['activated' => 1]);
-        $this->allow($someoneElse);
+        config(['app.user_impersonation_usernames' => [$someoneElse->username]]);
 
         $this->actingAs($actor)
-            ->post(route('users.impersonate.start', $target))
-            ->assertForbidden();
+            ->post(route('users.impersonate.start', $target), ['note' => 'Support request'])
+            ->assertRedirect(route('home'));
 
-        $this->assertNull(session('impersonator_id'));
+        $this->assertSame($target->id, auth()->id());
+        $this->assertSame($actor->id, session('impersonator_id'));
     }
 
-    public function test_allowlisted_superuser_can_impersonate_activated_user()
+    public function test_superuser_can_impersonate_activated_user()
     {
         $actor = User::factory()->superuser()->create();
         $target = User::factory()->create(['activated' => 1]);
-        $this->allow($actor);
-
         $response = $this->actingAs($actor)
             ->post(route('users.impersonate.start', $target), ['note' => 'Investigating ticket #4242']);
 
@@ -82,8 +61,6 @@ class ImpersonateUserTest extends TestCase
     {
         $actor = User::factory()->superuser()->create();
         $target = User::factory()->create(['activated' => 1]);
-        $this->allow($actor);
-
         // No note
         $this->actingAs($actor)
             ->post(route('users.impersonate.start', $target))
@@ -102,12 +79,10 @@ class ImpersonateUserTest extends TestCase
         $this->assertNull(session('impersonator_id'));
     }
 
-    public function test_allowlisted_superuser_cannot_impersonate_deactivated_user()
+    public function test_superuser_cannot_impersonate_deactivated_user()
     {
         $actor = User::factory()->superuser()->create();
         $target = User::factory()->create(['activated' => 0]);
-        $this->allow($actor);
-
         $this->actingAs($actor)
             ->post(route('users.impersonate.start', $target))
             ->assertRedirect(route('users.show', $target));
@@ -116,12 +91,10 @@ class ImpersonateUserTest extends TestCase
         $this->assertNull(session('impersonator_id'));
     }
 
-    public function test_allowlisted_superuser_cannot_impersonate_another_superuser()
+    public function test_superuser_cannot_impersonate_another_superuser()
     {
         $actor = User::factory()->superuser()->create();
         $target = User::factory()->superuser()->create(['activated' => 1]);
-        $this->allow($actor);
-
         $this->actingAs($actor)
             ->post(route('users.impersonate.start', $target))
             ->assertRedirect(route('users.show', $target));
@@ -134,8 +107,6 @@ class ImpersonateUserTest extends TestCase
     {
         $actor = User::factory()->superuser()->create();
         $target = User::factory()->superuser()->create(['activated' => 1]);
-        $this->allow($actor);
-
         $this->actingAs($actor)
             ->get(route('users.show', $target))
             ->assertOk()
@@ -146,8 +117,6 @@ class ImpersonateUserTest extends TestCase
     {
         $actor = User::factory()->superuser()->create();
         $target = User::factory()->create(['activated' => 1]);
-        $this->allow($actor);
-
         $this->actingAs($actor)
             ->get(route('users.show', $target))
             ->assertOk()
@@ -157,11 +126,9 @@ class ImpersonateUserTest extends TestCase
             ->assertSee('required', false);
     }
 
-    public function test_allowlisted_superuser_cannot_impersonate_themselves()
+    public function test_superuser_cannot_impersonate_themselves()
     {
         $actor = User::factory()->superuser()->create();
-        $this->allow($actor);
-
         $this->actingAs($actor)
             ->post(route('users.impersonate.start', $actor))
             ->assertRedirect(route('users.show', $actor));
@@ -173,8 +140,6 @@ class ImpersonateUserTest extends TestCase
     {
         $actor = User::factory()->superuser()->create();
         $target = User::factory()->create(['activated' => 1]);
-        $this->allow($actor);
-
         $this->actingAs($actor)
             ->post(route('users.impersonate.start', $target), ['note' => 'test note'])
             ->assertRedirect(route('home'));
@@ -199,8 +164,6 @@ class ImpersonateUserTest extends TestCase
     {
         $actor = User::factory()->superuser()->create(['first_name' => 'Sooper', 'last_name' => 'Actor']);
         $target = User::factory()->create(['activated' => 1, 'first_name' => 'Target', 'last_name' => 'User']);
-        $this->allow($actor);
-
         $this->actingAs($actor)
             ->post(route('users.impersonate.start', $target), ['note' => 'test note'])
             ->assertRedirect(route('home'));
@@ -225,8 +188,6 @@ class ImpersonateUserTest extends TestCase
 
         $target = User::factory()->forCompany($companyB)->create(['activated' => 1]);
         $target->companies()->sync([$companyB->id]);
-
-        $this->allow($actor);
 
         $this->actingAs($actor)
             ->post(route('users.impersonate.start', $target), ['note' => 'test note'])
@@ -257,53 +218,33 @@ class ImpersonateUserTest extends TestCase
         $this->assertSame($actor->id, auth()->id());
     }
 
-    public function test_button_hidden_when_list_is_empty()
-    {
-        config(['app.user_impersonation_usernames' => []]);
-
-        $actor = User::factory()->superuser()->create();
-        $target = User::factory()->create(['activated' => 1]);
-
-        $this->actingAs($actor)
-            ->get(route('users.show', $target))
-            ->assertOk()
-            ->assertDontSee(route('users.impersonate.start', $target));
-    }
-
-    public function test_button_visible_to_allowlisted_superuser()
+    public function test_button_visible_to_superuser()
     {
         $actor = User::factory()->superuser()->create();
         $target = User::factory()->create(['activated' => 1]);
-        $this->allow($actor);
-
         $this->actingAs($actor)
             ->get(route('users.show', $target))
             ->assertOk()
             ->assertSee(route('users.impersonate.start', $target), false);
     }
 
-    public function test_users_api_only_enables_impersonation_for_an_allowed_target()
+    public function test_users_api_keeps_impersonation_action_visible_for_superusers()
     {
         $actor = User::factory()->superuser()->create();
         $target = User::factory()->create(['activated' => 1]);
-        $otherSuperuser = User::factory()->superuser()->create(['activated' => 1]);
-        $this->allow($actor);
 
         $rows = $this->actingAsForApi($actor)
             ->getJson(route('api.users.index'))
             ->assertOk()
             ->json('rows');
 
-        $this->assertTrue(collect($rows)->firstWhere('id', $target->id)['available_actions']['impersonate']);
-        $this->assertFalse(collect($rows)->firstWhere('id', $actor->id)['available_actions']['impersonate']);
-        $this->assertFalse(collect($rows)->firstWhere('id', $otherSuperuser->id)['available_actions']['impersonate']);
+        $targetRow = collect($rows)->firstWhere('id', $target->id);
+        $this->assertTrue($targetRow['available_actions']['impersonate']);
     }
 
     public function test_users_index_uses_the_current_impersonation_flow()
     {
         $actor = User::factory()->superuser()->create();
-        $this->allow($actor);
-
         $this->actingAs($actor)
             ->get(route('users.index'))
             ->assertOk()
@@ -312,25 +253,10 @@ class ImpersonateUserTest extends TestCase
             ->assertSee('/impersonate', false);
     }
 
-    public function test_button_hidden_from_non_allowlisted_superuser()
-    {
-        $actor = User::factory()->superuser()->create();
-        $someoneElse = User::factory()->superuser()->create();
-        $target = User::factory()->create(['activated' => 1]);
-        $this->allow($someoneElse);
-
-        $this->actingAs($actor)
-            ->get(route('users.show', $target))
-            ->assertOk()
-            ->assertDontSee(route('users.impersonate.start', $target));
-    }
-
-    public function test_button_hidden_from_non_superuser_in_allowlist()
+    public function test_button_hidden_from_non_superuser()
     {
         $actor = User::factory()->admin()->create();
         $target = User::factory()->create(['activated' => 1]);
-        $this->allow($actor);
-
         $this->actingAs($actor)
             ->get(route('users.show', $target))
             ->assertOk()
