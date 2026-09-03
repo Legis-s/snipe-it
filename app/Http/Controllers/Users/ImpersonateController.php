@@ -16,10 +16,6 @@ class ImpersonateController extends Controller
     {
         $actor = Auth::user();
 
-        if (empty(config('app.user_impersonation_usernames'))) {
-            abort(404);
-        }
-
         if (! $actor || ! $actor->canImpersonate()) {
             abort(403);
         }

@@ -569,13 +569,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
 
     public function canImpersonate(): bool
     {
-        if (! $this->isSuperUser()) {
-            return false;
-        }
-
-        $allowed = array_map('mb_strtolower', (array) config('app.user_impersonation_usernames'));
-
-        return in_array(mb_strtolower((string) $this->username), $allowed, true);
+        return $this->isSuperUser();
     }
 
     public function mayImpersonate(User $target): bool

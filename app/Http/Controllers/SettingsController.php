@@ -54,23 +54,7 @@ class SettingsController extends Controller
     {
         $settings = Setting::getSettings();
 
-        $impersonationUsernames = (array) config('app.user_impersonation_usernames');
-        if (empty($impersonationUsernames)) {
-            $impersonators = collect();
-            $missingImpersonationUsernames = [];
-        } else {
-            $impersonators = User::withTrashed()
-                ->whereIn(DB::raw('LOWER(username)'), array_map('mb_strtolower', $impersonationUsernames))
-                ->orderBy('username')
-                ->get();
-            $foundLower = $impersonators->map(fn ($u) => mb_strtolower((string) $u->username))->all();
-            $missingImpersonationUsernames = array_values(array_filter(
-                $impersonationUsernames,
-                fn ($name) => ! in_array(mb_strtolower($name), $foundLower, true)
-            ));
-        }
-
-        return view('settings/index', compact('settings', 'impersonators', 'missingImpersonationUsernames'));
+        return view('settings/index', compact('settings'));
     }
 
     /**
