@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Throwable;
 
 class PurchasesController extends Controller
 {
@@ -304,17 +305,35 @@ class PurchasesController extends Controller
 //            \Debugbar::info("send bitrix");
             $raw_bitrix_token = $user->decryptedBitrixToken();
             if (! $raw_bitrix_token || ! $user->bitrix_id) {
+                $purchase->setStatusError();
+                $purchase->save();
+
                 return redirect()->back()->withInput()->with('error', trans('admin/users/table.bitrix_token_invalid'));
             }
 
-            $response = $client->request('POST', env('BITRIX_URL').'rest/'.$user->bitrix_id.'/'.$raw_bitrix_token.'/lists.element.add.json/', $params);
-            $response = $response->getBody()->getContents();
+            try {
+                $response = $client->request('POST', env('BITRIX_URL').'rest/'.$user->bitrix_id.'/'.$raw_bitrix_token.'/lists.element.add.json/', $params);
+                $response = $response->getBody()->getContents();
 
-            $purchase->bitrix_result = $response;
-            $bitrix_result = json_decode($response, true);
-            $bitrix_id = $bitrix_result["result"];
-            $purchase->bitrix_id = $bitrix_id;
-            $purchase->save();
+                $purchase->bitrix_result = $response;
+                $bitrix_result = json_decode($response, true);
+                if (! is_array($bitrix_result) || empty($bitrix_result['result'])) {
+                    throw new RuntimeException('Bitrix did not return a purchase ID.');
+                }
+
+                $purchase->bitrix_id = $bitrix_result['result'];
+                $purchase->setStatusInprogress();
+                if (! $purchase->save()) {
+                    throw new RuntimeException($purchase->getErrors()->first());
+                }
+            } catch (Throwable $exception) {
+                $purchase->setStatusError();
+                $purchase->save();
+                report($exception);
+
+                return redirect()->route('purchases.index')->with('error', trans('general.bitrix_send_failed'));
+            }
+
             return redirect()->route("purchases.index")->with('success', trans('admin/locations/message.create.success'));
         }
         return redirect()->back()->withInput()->withErrors($purchase->getErrors());
@@ -357,6 +376,7 @@ class PurchasesController extends Controller
 
         $purchase = clone $purchase_to_clone;
         $purchase->id = null;
+        $purchase->resetConsumablesReviewProgress();
 
         return view('purchases/edit')
             ->with('item', $purchase);
@@ -378,17 +398,21 @@ class PurchasesController extends Controller
         if (is_null($purchase = Purchase::find($purchaseId))) {
             return redirect()->to(route('purchases.index'))->with('error', trans('admin/locations/message.not_found'));
         }
-        if ($purchase->status == Purchase::REJECTED) {
-            $assets = Asset::where('purchase_id', $purchase->id)->get();
-            foreach ($assets as &$value) {
-                $value->unsetEventDispatcher();
-                $value->forceDelete();
-            }
-            $purchase->delete();
-        } else {
+        if (! $purchase->canDeleteWithAssets()) {
             return redirect()->to(route('purchases.index'))->with('error', "Нельзя удалить");
         }
 
+        DB::transaction(function () use ($purchase) {
+            $assets = Asset::where('purchase_id', $purchase->id)->get();
+
+            Asset::withoutEvents(function () use ($assets) {
+                foreach ($assets as $asset) {
+                    $asset->forceDelete();
+                }
+            });
+
+            $purchase->delete();
+        });
 
         return redirect()->to(route('purchases.index'))->with('success', trans('admin/locations/message.delete.success'));
     }

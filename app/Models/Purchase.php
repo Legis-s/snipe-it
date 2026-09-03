@@ -22,6 +22,7 @@ class Purchase extends SnipeModel
     const REVIEW = 'review';
     const INVENTORY = 'inventory';
     const REJECTED = 'rejected';
+    const ERROR = 'error';
 
     protected $table = 'purchases';
     protected $rules = [
@@ -101,6 +102,15 @@ class Purchase extends SnipeModel
         'supplier' => ['name'],
     ];
 
+    protected static function booted(): void
+    {
+        static::saving(function (Purchase $purchase) {
+            if (! $purchase->bitrix_id) {
+                $purchase->setStatusError();
+            }
+        });
+    }
+
 
     public function assets()
     {
@@ -151,6 +161,38 @@ class Purchase extends SnipeModel
     public function setStatusInprogress()
     {
         $this->status = $this::INPROGRESS;
+    }
+
+    public function setStatusError()
+    {
+        $this->status = $this::ERROR;
+    }
+
+    public function statusForDisplay(): ?string
+    {
+        return $this->bitrix_id ? $this->status : $this::ERROR;
+    }
+
+    public function canDeleteWithAssets(): bool
+    {
+        return in_array($this->statusForDisplay(), [self::REJECTED, self::ERROR], true);
+    }
+
+    public function resetConsumablesReviewProgress(): void
+    {
+        $consumables = json_decode($this->consumables_json ?: '[]', true);
+        if (! is_array($consumables)) {
+            return;
+        }
+
+        foreach ($consumables as &$consumable) {
+            if (is_array($consumable)) {
+                $consumable['reviewed'] = 0;
+            }
+        }
+        unset($consumable);
+
+        $this->consumables_json = json_encode($consumables, JSON_UNESCAPED_UNICODE);
     }
 
     public function setStatusPaid()

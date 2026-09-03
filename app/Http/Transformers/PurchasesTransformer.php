@@ -34,7 +34,7 @@ class PurchasesTransformer
             'bitrix_id' => ($purchase->bitrix_id) ? e($purchase->bitrix_id) : null,
             'final_price' => ($purchase->final_price) ? e($purchase->final_price) : null,
             'delivery_cost' => ($purchase->delivery_cost) ? e($purchase->delivery_cost) : null,
-            'status' => ($purchase->status) ? e($purchase->status) : null,
+            'status' => e($purchase->statusForDisplay()),
             'currency' => ($purchase->currency) ? e($purchase->currency) : null,
             'supplier' => ($purchase->supplier) ? [
                 'id' => (int)$purchase->supplier->id,
@@ -59,7 +59,7 @@ class PurchasesTransformer
 
         $permissions_array['available_actions'] = [
             'clone' => (Gate::allows('create', Purchase::class) && ($purchase->deleted_at == '')),
-            'delete' => (Gate::allows('superadmin') && ($purchase->status ==  $purchase::REJECTED)),
+            'delete' => Gate::allows('superadmin') && $purchase->canDeleteWithAssets(),
         ];
         if ($full) {
             $array += ['consumables_json' => ($purchase->consumables_json) ? $consumables : null];
