@@ -71,13 +71,15 @@
                         name="requestable"
                         :label="trans('admin/hardware/general.requestable')"
                         :item="$asset"
+                        data-user-preference-key="snipeit.checkout.requestable_default.{{ auth()->id() ?? 'guest' }}"
+                        data-had-old-input="{{ ((bool) old('requestable', false)) || session()->has('_old_input.requestable') ? '1' : '0' }}"
                     />
 
                     @include ('partials.forms.checkout-selector', ['user_select' => 'true', 'asset_select' => 'true', 'location_select' => 'true', 'deal_select' => 'true'])
                     <x-input.user-select
                         :label="trans('general.user')"
                         name="assigned_user"
-                        :selected="old('assigned_user')"
+                        :selected="old('assigned_user', $checkoutRequest?->user_id)"
                         :companyId="$asset->company_id"
                         :style="(session('checkout_to_type') ?: 'user') == 'user' ? null : 'display: none;'"
                     />
@@ -101,7 +103,6 @@
                         :default="date('Y-m-d H:i:s')"
                         input_div_class="col-md-4"
                     />
-                        </div>
 
                     <x-form.row
                         :label="trans('admin/hardware/form.expected_checkin')"
@@ -109,6 +110,7 @@
                         type="datetimepicker"
                         :item="$item"
                         :default_now="false"
+                        :default="old('expected_checkin', ($checkoutRequest?->end_date ? $checkoutRequest->end_date->toDateString() : ($item->expected_checkin ?? null)))"
                         input_div_class="col-md-4"
                     />
 
@@ -177,116 +179,12 @@
                             @endif
                         </div>
                     @endif
-
-                        <x-input.quality-select
-                                :label="trans('general.quality')"
-                                name="quality"
-                                :selected="old('quality', $asset->quality)"
-                        />
-                        <!-- life Cost -->
-                        <div class="form-group">
-                            <label for="life" class="col-md-3 control-label">Срок эксплуатации (прошло/рассчетный)</label>
-                            <div class="col-md-9">
-                                @php
-                                    if ($asset->purchase_date){
-                                         $now = new DateTime();
-                                         $d2 = new DateTime($asset->purchase_date);
-                                         $interval = $d2->diff($now);
-                                         $result =  $interval->m + 12*$interval->y;
-                                     }else{
-                                         $result = "Нет даты закупки";
-                                     }
-                                     if($asset->model && $asset->model->depreciation &&  $asset->model->depreciation->months){
-                                          $months= $asset->model->depreciation->months;
-                                     }else{
-                                         $months = 36;
-                                     }
-                                @endphp
-                                <div class="input-group col-md-4" style="padding-left: 0px;">
-                                    <input class="form-control float" type="text" disabled
-                                           value="{{$result}}/{{ $months }}"/>
-                                    <span class="input-group-addon">Месяцев</span>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Purchase Cost -->
-                        <div class="form-group {{ $errors->has('purchase_cost') ? ' has-error' : '' }}">
-                            <label for="purchase_cost" class="col-md-3 control-label">Закупочная стоимость</label>
-                            <div class="col-md-9">
-                                <div class="input-group col-md-4" style="padding-left: 0px;">
-                                    <input class="form-control float" type="text"
-                                           name="purchase_cost" aria-label="Purchase_cost"
-                                           id="purchase_cost"
-                                           @if (isset($asset->purchase_cost))
-                                               disabled
-                                           @endif
-                                           value="{{ Request::old('purchase_cost', \App\Helpers\Helper::formatCurrencyOutput($asset->purchase_cost)) }}"/>
-                                    <span class="input-group-addon">
-                                        @if (isset($currency_type))
-                                            {{ $currency_type }}
-                                        @else
-                                            {{ $snipeSettings->default_currency }}
-                                        @endif
-                                    </span>
-                                </div>
-
-                                <div class="col-md-9" style="padding-left: 0px;">
-                                    {!! $errors->first('depreciable_cost', '<span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span>') !!}
-                                </div>
-                            </div>
-                        </div>
-                        @if (isset($asset->depreciable_cost))
-                            <!-- depreciable Cost -->
-                            <div class="form-group {{ $errors->has('depreciable_cost') ? ' has-error' : '' }}">
-                                <label for="purchase_cost" class="col-md-3 control-label">Старая остаточная
-                                    стоимость</label>
-                                <div class="col-md-9">
-                                    <div class="input-group col-md-4" style="padding-left: 0px;">
-                                        <input class="form-control float" type="text"
-                                               name="depreciable_cost" aria-label="depreciable_cost"
-                                               id="depreciable_cost"
-                                               disabled
-                                               value="{{ Request::old('depreciable_cost', \App\Helpers\Helper::formatCurrencyOutput($asset->depreciable_cost)) }}"/>
-                                        <span class="input-group-addon">
-                                        @if (isset($currency_type))
-                                                {{ $currency_type }}
-                                            @else
-                                                {{ $snipeSettings->default_currency }}
-                                            @endif
-                                    </span>
-                                    </div>
-
-                                    <div class="col-md-9" style="padding-left: 0px;">
-                                        {!! $errors->first('depreciable_cost', '<span class="alert-msg" aria-hidden="true"><i class="fa fa-times" aria-hidden="true"></i> :message</span>') !!}
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-                        <!-- new depreciable Cost -->
-                        <div class="form-group {{ $errors->has('new_depreciable_cost') ? ' has-error' : '' }}">
-                            <label for="purchase_cost" class="col-md-3 control-label">Новая остаточная
-                                стоимость</label>
-                            <div class="col-md-9">
-                                <div class="input-group col-md-4" style="padding-left: 0px;">
-                                    <input class="form-control float" type="text"
-                                           name="new_depreciable_cost" aria-label="depreciable_cost"
-                                           id="new_depreciable_cost"
-                                           value="{{ Request::old('new_depreciable_cost', \App\Helpers\Helper::formatCurrencyOutput($asset->new_depreciable_cost)) }}"/>
-                                    <span class="input-group-addon">
-                @if (isset($currency_type))
-                                            {{ $currency_type }}
-                                        @else
-                                            {{ $snipeSettings->default_currency }}
-                                        @endif
-            </span>
-                                </div>
-
-                                <div class="col-md-9" style="padding-left: 0px;">
-                                </div>
-                            </div>
-                        </div>
-
-                        <x-slot:customfooter>
+                            <x-input.quality-select
+                                    :label="trans('general.quality')"
+                                    name="quality"
+                                    :selected="old('quality', $asset->quality)"
+                            />
+                    <x-slot:customfooter>
                         <x-redirect_submit_options
                             index_route="hardware.index"
                             :button_label="trans('general.checkout')"
@@ -306,58 +204,10 @@
         </x-page-column>
 
         <x-page-column class="col-md-5">
+            <x-checkout-request-context :request="$checkoutRequest ?? null" :requestable="$asset" />
+
             <livewire:checkout-target-panel type="assets" />
         </x-page-column>
 
     </x-container>
-@stop
-
-@section('moar_scripts')
-
-    <script nonce="{{ csrf_token() }}">
-        // Per-user localStorage preference for the requestable default on
-        // checkout. Namespaced by user id so a shared browser doesn't leak one
-        // user's habit into another user's default. Only takes over when the
-        // field wasn't repopulated from a validation-error redirect (old()
-        // beats the stored preference). On submit we save whatever the user
-        // actually chose, so the preference tracks their real habit.
-        const initializeCheckoutRequestablePreference = function () {
-            const storageKey = 'snipeit.checkout.requestable_default.' + @json(auth()->id() ?? 'guest');
-            const hadOldInput = @json((bool) old('requestable', false)) || @json(session()->has('_old_input.requestable'));
-            const checkbox = document.getElementById('requestable');
-            const form = checkbox ? checkbox.closest('form') : null;
-
-            if (!checkbox || !form) {
-                return;
-            }
-
-            if (!hadOldInput) {
-                let stored = null;
-                try {
-                    stored = window.localStorage.getItem(storageKey);
-                } catch (e) {
-                    // localStorage may be unavailable (private mode, disabled).
-                }
-                if (stored === '1' || stored === '0') {
-                    checkbox.checked = stored === '1';
-                }
-            }
-
-            form.addEventListener('submit', function () {
-                try {
-                    window.localStorage.setItem(storageKey, checkbox.checked ? '1' : '0');
-                } catch (e) {
-                    // Non-fatal: preference just won't persist this time.
-                }
-            });
-        };
-
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializeCheckoutRequestablePreference);
-        } else {
-            initializeCheckoutRequestablePreference();
-        }
-    </script>
-
-    @include('partials.hardware-depreciable-cost-calculator')
 @stop

@@ -124,6 +124,8 @@
     </x-page-column>
 
     <x-page-column class="col-md-5">
+        <x-checkout-request-context :request="$checkoutRequest ?? null" :requestable="$consumable" />
+
         <livewire:checkout-target-panel type="consumables" />
     </x-page-column>
 

@@ -58,7 +58,7 @@
 {{-- Page content --}}
 @section('content')
     <x-container>
-        <x-box name="assets">
+        <x-box name="assets" sr_only_title>
             <x-table.assets
                 :route="route('api.assets.index', array(
                     'status_type' => is_scalar($requestStatusType) ? $requestStatusType : null,
@@ -69,6 +69,7 @@
                 :status_type="is_scalar($requestStatusType) ? $requestStatusType : null"
             />
         </x-box>
+        <x-shiftclick/>
     </x-container>
 @stop
 

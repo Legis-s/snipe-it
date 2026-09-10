@@ -210,6 +210,10 @@
                                             {{ Helper::formatCurrencyOutput($user->getUserTotalCost()->accessory_cost)}}
                                         </x-data-row>
 
+                                        <x-data-row icon_type="consumables" label="{{ trans('general.consumables') }}" align="right">
+                                            {{ Helper::formatCurrencyOutput($user->getUserTotalCost()->consumable_cost) }}
+                                        </x-data-row>
+
                                         {{-- Sum across complete + active maintenances tied
                                              to this user — used to surface "which users
                                              cost the most maintenance over time" as a glance.
@@ -358,7 +362,7 @@
                             <thead>
                                 <tr>
                                     @can('checkin', \App\Models\License::class)
-                                    <th scope="col" class="hidden-print"><input type="checkbox" id="userLicenseSelectAll"></th>
+                                        <th scope="col" class="hidden-print">{{ trans('general.id') }}</th>
                                     @endcan
                                     <th scope="col">{{ trans('general.name') }}</th>
                                     <th scope="col">{{ trans('admin/licenses/form.license_key') }}</th>
@@ -448,7 +452,7 @@
                                         <td>{{ Helper::getFormattedDateObject($accessory->pivot->created_at, 'datetime',  false) }}</td>
                                         <td>{{ $accessory->pivot->note }}</td>
                                         <td>
-                                            {!! Helper::formatCurrencyOutput($accessory->purchase_cost) !!}
+                                            {!! Helper::formatCurrencyOutput($accessory->lastOrderDefaults()['unit_cost'] ?? null) !!}
                                         </td>
                                         <td class="hidden-print">
                                             @can('checkin', $accessory)
@@ -576,7 +580,7 @@
 
                     <!-- start history tab pane -->
                     <x-tabs.pane name="history">
-                        <x-table.history :model="$user" :route="route('api.users.history', $user)"/>
+                        <x-table.history :model="$user" :route="route('api.users.history', $user)" :hide_fields="['order_number']"/>
                     </x-tabs.pane>
                     <!-- end history tab pane -->
                 </x-slot:tabpanes>
@@ -632,7 +636,7 @@
                         <x-button.delete :item="$user"/>
 
                         @can('delete', $user)
-                            <form action="{{ route('users/bulkedit') }}" method="POST" class="form-inline" style="display: inline; padding-right: 5px;">
+                            <form action="{{ route('users/bulkedit') }}" method="POST" class="form-inline pull-right" style="display: inline; padding-right: 5px;">
                                 <!-- CSRF Token -->
                                 <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
                                 <input type="hidden" name="bulk_actions" value="delete"/>
@@ -654,12 +658,13 @@
     @endif
 
     @if (auth()->user()->isSuperUser() && $user->twoFactorResettable())
-        @include('modals.confirm-action', [
-            'modal_name' => 'confirmTwoFactorResetModal',
-            'route' => route('users.two_factor_reset', $user->id),
-            'title' => trans('admin/settings/general.two_factor_reset'),
-            'body' => trans('admin/settings/general.two_factor_reset_confirm', ['name' => $user->display_name]),
-        ])
+        <x-modals.confirm-action
+            modal-name="confirmTwoFactorResetModal"
+            :route="route('users.two_factor_reset', $user->id)"
+            :title="trans('admin/settings/general.two_factor_reset')"
+        >
+            {{ trans('admin/settings/general.two_factor_reset_confirm', ['name' => $user->display_name]) }}
+        </x-modals.confirm-action>
     @endif
 
 @endsection
@@ -667,7 +672,7 @@
 
 @section('moar_scripts')
     @can('files', $user)
-        @include ('modals.upload-file', ['item_type' => 'users', 'item_id' => $user->id])
+        <x-modals.upload-file item-type="users" :item-id="$user->id" />
     @endcan
 
     @include ('partials.bootstrap-table', ['simple_view' => true])
