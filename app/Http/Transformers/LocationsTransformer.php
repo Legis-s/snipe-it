@@ -86,12 +86,13 @@ class LocationsTransformer
             ];
 
             $permissions_array['available_actions'] = [
-                'update' => (Gate::allows('update', Location::class) && ($location->deleted_at == '')),
+                'update' => (Gate::allows('update', $location) && ($location->deleted_at == '')),
                 'delete' => $location->isDeletable(),
                 'bulk_selectable' => [
+                    'edit' => (Gate::allows('update', $location) && ($location->deleted_at == '')),
                     'delete' => $location->isDeletable(),
                 ],
-                'clone' => (Gate::allows('create', Location::class) && ($location->deleted_at == '')),
+                'clone' => (Gate::allows('clone', $location) && ($location->deleted_at == '')),
                 'restore' => (Gate::allows('create', Location::class) && ($location->deleted_at != '')),
             ];
 
@@ -134,7 +135,7 @@ class LocationsTransformer
 
         $permissions_array['available_actions'] = [
             'checkout' => false,
-            'checkin' => Gate::allows('checkin', Accessory::class),
+            'checkin' => Gate::allows('checkin', $accessory_checkout->accessory),
         ];
 
         $array += $permissions_array;
@@ -181,92 +182,5 @@ class LocationsTransformer
         }
 
         return null;
-    }
-
-    public function transformCollectionForMap(Collection $locations): array
-    {
-        $array = array();
-        foreach ($locations as $location) {
-            if (!$location->active && $location->assets_count == 0) {
-
-            } else {
-                $array[] = self::transformForMap($location);
-            }
-        }
-        $objects_array['type'] = "FeatureCollection";
-        $objects_array['features'] = $array;
-        return $objects_array;
-
-    }
-
-    public function transformForMap(Location $location = null): array
-    {
-        if ($location) {
-            $cords = [];
-            if ($location->coordinates) {
-                $cords = explode(",", $location->coordinates);
-            }
-            $count = 0;
-            $all_price = 0;
-            $count = $location->checked_assets_count;
-            $max = $location->assets_count;
-
-            $res = "808080";
-
-
-            if ($max > 0 && $count == $max) {
-                $res = "00FF00";
-            }
-            if ($max > 0 && $count != $max) {
-                $res = "FF0000";
-            }
-            if ($location->object_code == "455") {
-                if ($location->active) {
-                    $options = [
-                        "iconColor" => '#' . $res,
-                    ];
-                } else {
-                    $options = [
-                        "iconColor" => '#' . $res,
-                        "preset" => 'islands#circleIcon',
-                    ];
-                }
-            } else {
-                if ($location->active) {
-                    $options = [
-                        "iconColor" => '#' . $res,
-                        "preset" => 'islands#dotIcon',
-                    ];
-                } else {
-                    $options = [
-                        "iconColor" => '#' . $res,
-                        "preset" => 'islands#icon',
-                    ];
-                }
-            }
-
-            $array = [
-                "id" => (int)$location->id,
-                "type" => "Feature",
-                "code" => (int)$location->object_code,
-                "assets_count" => $location->assets_count,
-                "checked_assets_count" => $location->checked_assets_count,
-                "geometry" => [
-                    "type" => "Point",
-                    "coordinates" => $cords,
-                    "active" => e($location->active)
-                ],
-                "properties" => [
-                    "balloonContentHeader" => e($location->name),
-                    "balloonContentBody" => "<a target='_blank'  href='/locations/" . $location->id . "'>Открыть список</a><br><a target='_blank'  href='https://bitrix.legis-s.ru/crm/type/1032/details/" . $location->bitrix_id . "/'>Открыть Bitrix [" . $location->bitrix_id . "]</a><br>Адрес: " . e($location->address) . "<br>Активов: " . e($location->assets_count) . "<br>" . "Инвентаризированно: " . $location->checked_assets_count . "<br>",
-                    "balloonContentFooter" => "",
-                    "hintContent" => e($location->name)
-                ],
-                "options" => $options
-            ];
-            return $array;
-        } else {
-            return [];
-        }
     }
 }

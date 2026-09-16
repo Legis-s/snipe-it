@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'parent_within_scope' => 'Выбранный объект :attribute находится за пределами доступной вам области.',
 
     /*
     |--------------------------------------------------------------------------
@@ -47,7 +48,7 @@ return [
     'digits' => 'Поле :attribute должно содержать :digits цифр.',
     'digits_between' => 'Поле :attribute должно содержать от :min до :max цифр.',
     'dimensions' => 'Поле :attribute имеет неверные размеры изображения.',
-    'distinct' => 'Поле атрибута: имеет двойное значение.',
+    'distinct' => 'Поле :attribute содержит повторяющееся значение.',
     'doesnt_end_with' => 'Поле :attribute не должно заканчиваться одним из следующих значений: :values.',
     'doesnt_start_with' => 'Поле :attribute не должно начинаться с одного из следующих значений: :values.',
     'email' => 'Поле :attribute должно быть действительным адресом электронной почты.',
@@ -56,7 +57,7 @@ return [
     'exists' => 'Выбранный :attribute неправильный.',
     'extensions' => 'Поле :attribute должно иметь одно из следующих расширений: :values.',
     'file' => 'Поле :attribute должно быть файлом.',
-    'filled' => 'Поле атрибута: должно иметь значение.',
+    'filled' => 'Поле :attribute должно быть заполнено.',
     'gt' => [
         'array' => 'Поле :attribute должно иметь более :value элементов.',
         'file' => 'Поле :attribute должно быть больше :value килобайт.',
@@ -95,7 +96,7 @@ return [
     ],
     'mac_address' => 'Поле :attribute должно быть действительным MAC-адресом.',
     'max' => [
-        'array' => 'Поле :attribute не должно содержать более :value элементов.',
+        'array' => 'Поле :attribute не должно содержать более :max элементов.',
         'file' => 'Поле :attribute не должно быть больше :max килобайт.',
         'numeric' => 'Поле :attribute не должно быть больше :max.',
         'string' => 'Поле :attribute должно быть не длиннее :max символов.',
@@ -128,7 +129,7 @@ return [
     ],
     'percent' => 'Минимальная амортизация должна быть в пределах от 0 до 100, если тип амортизации — процентный.',
 
-    'present' => 'Поле атрибута: должно присутствовать.',
+    'present' => 'Поле :attribute должно присутствовать.',
     'present_if' => 'Поле :attribute должно присутствовать, когда :other равно :value.',
     'present_unless' => 'Поле :attribute должно присутствовать, если только :other не равно :value.',
     'present_with' => 'Поле :attribute должно присутствовать, если присутствует :values.',
@@ -143,11 +144,11 @@ return [
     'required_if' => ':attribute обязательное поле, когда :other :value.',
     'required_if_accepted' => 'Поле :attribute является обязательным, если :other принят.',
     'required_if_declined' => 'Поле :attribute является обязательным, если :other отклонено.',
-    'required_unless' => 'Поле атрибута: требуется, если: other находится в: значения.',
+    'required_unless' => 'Поле :attribute обязательно, если значение :other не входит в :values.',
     'required_with' => ':attribute обязательное поле, когда присутствует :values.',
     'required_with_all' => 'Поле :attribute является обязательным, если присутствуют :values.',
     'required_without' => ':attribute обязательное поле, когда отсутствует :values.',
-    'required_without_all' => 'Поле атрибута: требуется, если ни один из: значений не присутствует.',
+    'required_without_all' => 'Поле :attribute обязательно, если не заполнено ни одно из полей :values.',
     'same' => 'Поле :attribute должно соответствовать :other.',
     'size' => [
         'array' => 'Поле :attribute должно содержать :size элементов.',
@@ -156,10 +157,12 @@ return [
         'string' => 'Поле :attribute должно содержать :size символов.',
     ],
     'starts_with' => 'Поле :attribute должно начинаться с одного из следующих значений: :values.',
-    'string' => 'Атрибут: должен быть строкой.',
+    'string' => 'Значение :attribute должно быть строкой.',
     'two_column_unique_undeleted' => 'Поле :attribute должно быть уникальным для :table1 и :table2. ',
     'unique_undeleted' => 'Свойство :attribute должно быть уникальным.',
     'non_circular' => ':attribute не должен создавать циклическую ссылку.',
+    'parent_must_be_top_level' => 'Выбранный объект :attribute должен находиться на верхнем уровне. Допускается только один уровень вложенности.',
+    'must_have_no_children' => 'У этого объекта уже есть дочерние объекты, поэтому ему нельзя назначить родительский.',
     'not_array' => ':attribute не может быть массивом.',
     'disallow_same_pwd_as_user_fields' => 'Пароль не может совпадать с именем пользователя.',
     'letters' => 'Пароль должен содержать хотя бы одну букву.',
@@ -168,14 +171,16 @@ return [
     'symbols' => 'Пароль должен содержать символы.',
     'timezone' => 'Поле :attribute должно содержать действительный часовой пояс.',
     'unique' => ':attribute уже занят.',
-    'uploaded' => 'Атрибут: не удалось загрузить.',
+    'uploaded' => 'Не удалось загрузить :attribute.',
     'uppercase' => 'Поле :attribute должно быть указано заглавными буквами.',
     'url' => 'Поле :attribute должно быть действительным URL-адресом.',
+    'external_url' => 'Поле :attribute должно содержать корректный внешний URL (http:// или https://), не указывающий на частный или локальный адрес.',
     'ulid' => 'Поле :attribute должно быть корректным значением UUID.',
     'uuid' => 'Поле :attribute должно быть корректным значением UUID.',
-    'valid_css_color' => 'The :attribute field must be a valid CSS color (hex, rgb, rgba, hsl, or hsla).',
-    'fmcs_location' => 'Полная поддержка и определение местоположения нескольких компаний включены в настройках администратора, а выбранное местоположение и выбранная компания не совместимы.',
-    'is_unique_across_company_and_location' => 'The :attribute must be unique within the selected company and location.',
+    'valid_css_color' => 'Поле :attribute должно содержать корректный цвет CSS (hex, rgb, rgba, hsl или hsla).',
+    'fmcs_company' => 'Поле :attribute обязательно, поскольку включена полная поддержка нескольких компаний и запрещены объекты без компании.',
+    'fmcs_location' => 'Местоположение «:location» принадлежит компании :location_company, которая не совпадает с выбранной компанией.',
+    'is_unique_across_company_and_location' => 'Значение :attribute должно быть уникальным в пределах выбранной компании и местоположения.',
 
     /*
     |--------------------------------------------------------------------------
@@ -193,7 +198,7 @@ return [
     'radio_buttons' => ':attribute не верно.',
 
     'custom' => [
-        'alpha_space' => 'Поле атрибута: содержит символ, который не разрешен.',
+        'alpha_space' => 'Поле :attribute содержит недопустимый символ.',
 
         'hashed_pass' => 'Ваш текущий пароль неверен',
         'dumbpwd' => 'Этот пароль слишком распространен.',
@@ -214,9 +219,9 @@ return [
         'invalid_value_in_field' => 'Недопустимое значение в этом поле',
 
         'ldap_username_field' => [
-            'not_in' => '<code>sAMAccountName</code> (mixed case) will likely not work. You should use <code>samaccountname</code> (lowercase) instead.',
+            'not_in' => '<code>sAMAccountName</code> (смешанный регистр), скорее всего, не сработает. Используйте <code>samaccountname</code> (строчными буквами).',
         ],
-        'ldap_auth_filter_query' => ['not_in' => '<code>uid=samaccountname</code> is probably not a valid auth filter. You probably want <code>uid=</code> '],
+        'ldap_auth_filter_query' => ['not_in' => '<code>uid=samaccountname</code>, вероятно, является некорректным фильтром авторизации. Скорее всего, требуется <code>uid=</code>.'],
         'ldap_filter' => ['regex' => 'Это значение, вероятно, не должно быть заключено в скобки.'],
 
     ],

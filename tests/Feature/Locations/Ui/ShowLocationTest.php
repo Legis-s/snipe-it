@@ -8,6 +8,41 @@ use Tests\TestCase;
 
 class ShowLocationTest extends TestCase
 {
+    public function test_map_renders_in_sidebar_using_stored_coordinates(): void
+    {
+        $location = Location::factory()->create(['coordinates' => '55.76, 37.64']);
+
+        $this->actingAs(User::factory()->superuser()->create())
+            ->get(route('locations.show', $location))
+            ->assertOk()
+            ->assertSeeInOrder(['href="#users"', 'side-box expanded', 'id="location-map"'], false)
+            ->assertSee('var coordinates = [55.76,37.64];', false)
+            ->assertSeeInOrder(['id="location-map"', 'api-maps.yandex.ru', 'new window.ymaps.Map'], false)
+            ->assertSee('type="text/javascript"></script>', false);
+    }
+
+    public function test_map_is_omitted_without_coordinates(): void
+    {
+        $location = Location::factory()->create(['coordinates' => null]);
+
+        $this->actingAs(User::factory()->superuser()->create())
+            ->get(route('locations.show', $location))
+            ->assertOk()
+            ->assertDontSee('id="location-map"', false)
+            ->assertDontSee('api-maps.yandex.ru', false);
+    }
+
+    public function test_invalid_coordinates_are_not_injected_into_javascript(): void
+    {
+        $location = Location::factory()->create(['coordinates' => '55,37];alert(1);//']);
+
+        $this->actingAs(User::factory()->superuser()->create())
+            ->get(route('locations.show', $location))
+            ->assertOk()
+            ->assertDontSee('id="location-map"', false)
+            ->assertDontSee('api-maps.yandex.ru', false);
+    }
+
     public function test_page_renders()
     {
         $this->actingAs(User::factory()->superuser()->create())

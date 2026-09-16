@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Locations\Api;
 
+use App\Models\Company;
 use App\Models\Location;
 use App\Models\User;
 use Illuminate\Testing\Fluent\AssertableJson;
@@ -9,6 +10,52 @@ use Tests\TestCase;
 
 class LocationsForSelectListTest extends TestCase
 {
+    public function test_nested_locations_appear_once_with_favorite_first_among_siblings(): void
+    {
+        $root = Location::factory()->create(['name' => 'Root']);
+        $child = Location::factory()->create(['name' => 'A child', 'parent_id' => $root->id]);
+        $favorite = Location::factory()->create(['name' => 'Z favorite', 'parent_id' => $root->id]);
+        $leaf = Location::factory()->create(['name' => 'Leaf', 'parent_id' => $favorite->id]);
+        $actor = User::factory()->createUsers()->create(['favorite_location_id' => $favorite->id]);
+
+        $response = $this->actingAsForApi($actor)
+            ->getJson(route('api.locations.selectlist'))
+            ->assertOk()
+            ->assertJsonPath('total_count', 4)
+            ->assertJsonPath('results.1.text', '-- Z favorite')
+            ->assertJsonPath('results.2.text', '---- Leaf');
+
+        $this->assertSame([$root->id, $favorite->id, $leaf->id, $child->id], array_column($response->json('results'), 'id'));
+    }
+
+    public function test_favorite_location_does_not_bypass_exclusion_or_search(): void
+    {
+        $favorite = Location::factory()->create(['name' => 'Favorite']);
+        $other = Location::factory()->create(['name' => 'Other']);
+        $this->actingAsForApi(User::factory()->createUsers()->create(['favorite_location_id' => $favorite->id]));
+
+        foreach ([['excludeId' => $favorite->id], ['search' => 'Other']] as $query) {
+            $this->getJson(route('api.locations.selectlist', $query))
+                ->assertOk()
+                ->assertJsonCount(1, 'results')
+                ->assertJsonPath('results.0.id', $other->id);
+        }
+    }
+
+    public function test_warehouse_label_is_displayed_without_changing_stored_name(): void
+    {
+        $warehouse = Location::factory()->create(['name' => 'Stockroom', 'sklad' => true]);
+        $this->actingAsForApi(User::factory()->createUsers()->create(['locale' => 'en-US']));
+
+        foreach ([[], ['search' => 'Stockroom']] as $query) {
+            $this->getJson(route('api.locations.selectlist', $query))
+                ->assertOk()
+                ->assertJsonPath('results.0.text', '[Warehouse] Stockroom');
+        }
+
+        $this->assertSame('Stockroom', $warehouse->fresh()->name);
+    }
+
     public function test_getting_location_list_requires_proper_permission()
     {
         $this->actingAsForApi(User::factory()->create())
@@ -48,6 +95,40 @@ class LocationsForSelectListTest extends TestCase
             );
     }
 
+    public function test_multiple_locations_are_excluded_when_exclude_ids_is_a_comma_separated_list(): void
+    {
+        // Used by the bulk-edit form's parent picker so a location can't
+        // be picked as its own new parent (or the parent of a sibling
+        // in the same batch, which would collapse the hierarchy).
+        [$locationA, $locationB, $locationC] = Location::factory()->count(3)->create();
+
+        $response = $this->actingAsForApi(User::factory()->createUsers()->create())
+            ->getJson(route('api.locations.selectlist', ['excludeIds' => $locationA->id.','.$locationB->id]))
+            ->assertOk();
+
+        $ids = collect($response->json('results'))->pluck('id')->all();
+        $this->assertNotContains($locationA->id, $ids);
+        $this->assertNotContains($locationB->id, $ids);
+        $this->assertContains($locationC->id, $ids);
+    }
+
+    public function test_exclude_ids_also_accepts_a_native_array(): void
+    {
+        // Belt-and-braces: js-data-ajax forwards data-exclude-ids as a
+        // comma-separated string, but a caller building the URL by hand
+        // (Postman, cURL, etc.) could pass excludeIds[] as an array.
+        [$locationA, $locationB, $locationC] = Location::factory()->count(3)->create();
+
+        $response = $this->actingAsForApi(User::factory()->createUsers()->create())
+            ->getJson(route('api.locations.selectlist', ['excludeIds' => [$locationA->id, $locationB->id]]))
+            ->assertOk();
+
+        $ids = collect($response->json('results'))->pluck('id')->all();
+        $this->assertNotContains($locationA->id, $ids);
+        $this->assertNotContains($locationB->id, $ids);
+        $this->assertContains($locationC->id, $ids);
+    }
+
     public function test_locations_are_returned_when_user_is_updating_their_profile_and_has_permission_to_update_location()
     {
         $this->actingAsForApi(User::factory()->canEditOwnLocation()->create())
@@ -56,13 +137,13 @@ class LocationsForSelectListTest extends TestCase
             ->assertOk();
     }
 
-    public function test_search_result_shows_parent_chain_in_breadcrumb(): void
+    public function test_search_result_shows_plain_names_without_parent_chain(): void
     {
-        // Two data centers each with their own rack. Location::name is
-        // `unique_undeleted` today so two children literally named
-        // "Rack 1" cannot coexist, but the disambiguation the breadcrumb
-        // provides is still valuable whenever the child names share a
-        // prefix or the tree is deep.
+        // Per #19398, the location dropdown reverted from the breadcrumb
+        // form (`DC1 › RackA`) to plain indentation. Search results are
+        // cherry-picked out of the tree so there's no depth to indent by;
+        // they render as plain names and the user's search term supplies
+        // the disambiguation context.
         $dc1 = Location::factory()->create(['name' => 'DC1']);
         $dc2 = Location::factory()->create(['name' => 'DC2']);
         Location::factory()->create(['name' => 'RackA', 'parent_id' => $dc1->id]);
@@ -73,14 +154,14 @@ class LocationsForSelectListTest extends TestCase
             ->assertOk();
 
         $texts = collect($response->json('results'))->pluck('text');
-        $this->assertTrue($texts->contains('DC1 › RackA'));
-        $this->assertTrue($texts->contains('DC2 › RackB'));
+        $this->assertTrue($texts->contains('RackA'));
+        $this->assertTrue($texts->contains('RackB'));
     }
 
-    public function test_search_result_walks_multiple_ancestor_levels(): void
+    public function test_search_result_for_deeply_nested_match_shows_plain_name(): void
     {
-        // Deeper tree: HQ > DC1 > Rack 1. The chain should show every
-        // ancestor level.
+        // Deeper tree: HQ > DC1 > Rack 1. Only the matched leaf's name
+        // renders in the search result — no ancestor chain.
         $hq = Location::factory()->create(['name' => 'HQ']);
         $dc1 = Location::factory()->create(['name' => 'DC1', 'parent_id' => $hq->id]);
         Location::factory()->create(['name' => 'Rack 1', 'parent_id' => $dc1->id]);
@@ -90,7 +171,7 @@ class LocationsForSelectListTest extends TestCase
             ->assertOk();
 
         $texts = collect($response->json('results'))->pluck('text');
-        $this->assertTrue($texts->contains('HQ › DC1 › Rack 1'));
+        $this->assertTrue($texts->contains('Rack 1'));
     }
 
     public function test_search_result_for_top_level_location_has_no_prefix(): void
@@ -105,5 +186,78 @@ class LocationsForSelectListTest extends TestCase
 
         $texts = collect($response->json('results'))->pluck('text');
         $this->assertTrue($texts->contains('Standalone Site'));
+    }
+
+    public function test_unsearched_dropdown_uses_dash_indentation_for_nested_locations(): void
+    {
+        // Pins the reverted-to-old-style dropdown display. Root shows plain
+        // name, children get "-- " prefix, grandchildren "---- ", etc.
+        $hq = Location::factory()->create(['name' => 'HQ']);
+        $dc1 = Location::factory()->create(['name' => 'DC1', 'parent_id' => $hq->id]);
+        Location::factory()->create(['name' => 'Rack 1', 'parent_id' => $dc1->id]);
+
+        $response = $this->actingAsForApi(User::factory()->createUsers()->create())
+            ->getJson(route('api.locations.selectlist'))
+            ->assertOk();
+
+        $texts = collect($response->json('results'))->pluck('text');
+        $this->assertTrue($texts->contains('HQ'), 'Top-level location renders without indent prefix.');
+        $this->assertTrue($texts->contains('-- DC1'), 'One-level-deep location gets a two-dash indent.');
+        $this->assertTrue($texts->contains('---- Rack 1'), 'Two-levels-deep location gets a four-dash indent.');
+    }
+
+    /**
+     * #19394 regression: under FMCS + floater mode, a company-scoped user
+     * asking for locations narrowed by companyId should also see
+     * null-company (floater) locations. Matches the documented "items
+     * from any company can be checked out to targets with no company
+     * assignment" rule that server-side canCheckoutTo already enforces.
+     */
+    public function test_floater_locations_appear_in_selectlist_under_floater_mode_when_narrowed_by_company()
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+        $this->settings->enableFloaterMode();
+
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+
+        $companyLocation = Location::factory()->create(['name' => 'FloaterModeLocA', 'company_id' => $companyA->id]);
+        $otherCompanyLocation = Location::factory()->create(['name' => 'FloaterModeLocB', 'company_id' => $companyB->id]);
+        $floaterLocation = Location::factory()->create(['name' => 'FloaterModeLocNull', 'company_id' => null]);
+
+        $actor = User::factory()->createUsers()->forCompany($companyA->id)->create();
+
+        $response = $this->actingAsForApi($actor)
+            ->getJson(route('api.locations.selectlist', ['companyId' => $companyA->id]))
+            ->assertOk();
+
+        $ids = collect($response->json('results'))->pluck('id')->all();
+        $this->assertContains($companyLocation->id, $ids, 'Same-company location must be visible.');
+        $this->assertContains($floaterLocation->id, $ids, 'Null-company (floater) location must be visible under floater mode.');
+        $this->assertNotContains($otherCompanyLocation->id, $ids, 'Other-company location must not leak in.');
+    }
+
+    /**
+     * #19394 negative counterpart: under FMCS + strict mode (floater OFF),
+     * the companyId narrowing must stay exact — null-company locations
+     * do not leak into the picker for a company-scoped caller.
+     */
+    public function test_floater_locations_are_hidden_in_selectlist_under_strict_mode_when_narrowed_by_company()
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+        $this->settings->disableFloaterMode();
+
+        $companyA = Company::factory()->create();
+        $companyLocation = Location::factory()->create(['name' => 'StrictLocA', 'company_id' => $companyA->id]);
+        $floaterLocation = Location::factory()->create(['name' => 'StrictLocNull', 'company_id' => null]);
+
+        $actor = User::factory()->createUsers()->forCompany($companyA->id)->create();
+
+        $response = $this->actingAsForApi($actor)
+            ->getJson(route('api.locations.selectlist', ['companyId' => $companyA->id]))
+            ->assertOk();
+
+        $ids = collect($response->json('results'))->pluck('id')->all();
+        $this->assertContains($companyLocation->id, $ids);
+        $this->assertNotContains($floaterLocation->id, $ids, 'Null-company location must not appear under strict mode.');
     }
 }

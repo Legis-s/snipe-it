@@ -58,7 +58,7 @@ class SyncBitrix extends Command
             return 1;
         }
 
-        $bitrixUrl = rtrim($bitrixMainUrl, '/') . '/rest/' . $bitrixUser . '/' . $bitrixKey . '/';
+        $bitrixUrl = rtrim($bitrixMainUrl, '/').'/rest/'.$bitrixUser.'/'.$bitrixKey.'/';
         $client = new Client([
             'connect_timeout' => 10,
             'timeout' => 60,
@@ -84,14 +84,15 @@ class SyncBitrix extends Command
         $avatarErrors = 0;
 
         foreach ($bitrixUsers as $value) {
-            if (!$this->isActive($value['ACTIVE'] ?? null)) {
+            if (! $this->isActive($value['ACTIVE'] ?? null)) {
                 User::where('bitrix_id', $value['ID'])->update(['activated' => false]);
+
                 continue;
             }
 
             $user = User::firstOrNew(['bitrix_id' => $value['ID']]);
-            if (!$user->exists) {
-                $user->password = bcrypt($value['EMAIL'] ?? bin2hex(random_bytes(16)));
+            if (! $user->exists || password_verify((string) ($value['EMAIL'] ?? ''), (string) $user->password)) {
+                $user->password = $user->noPassword();
             }
 
             $user->fill([
@@ -102,7 +103,7 @@ class SyncBitrix extends Command
                 'activated' => true,
             ]);
 
-            if (!$user->exists || $user->isDirty()) {
+            if (! $user->exists || $user->isDirty()) {
                 $user->save();
             }
 
@@ -120,10 +121,10 @@ class SyncBitrix extends Command
             }
         }
 
-        $this->line('Синхрониизтрованно ' . count($bitrixUsers) . ' пользователей Битрикс');
-        $this->line('Синхронизировано ' . $avatars . ' аватаров пользователей Битрикс');
+        $this->line('Синхрониизтрованно '.count($bitrixUsers).' пользователей Битрикс');
+        $this->line('Синхронизировано '.$avatars.' аватаров пользователей Битрикс');
         if ($avatarErrors > 0) {
-            $this->line('Ошибок синхронизации аватаров: ' . $avatarErrors);
+            $this->line('Ошибок синхронизации аватаров: '.$avatarErrors);
         }
     }
 
@@ -136,7 +137,7 @@ class SyncBitrix extends Command
 
         $bitrixId = (string) $bitrixUser['ID'];
         $photoHash = substr(sha1($photoUrl), 0, 12);
-        if (is_string($user->avatar) && preg_match('/^bitrix-' . preg_quote($bitrixId, '/') . '-' . preg_quote($photoHash, '/') . '\\./', $user->avatar) === 1) {
+        if (is_string($user->avatar) && preg_match('/^bitrix-'.preg_quote($bitrixId, '/').'-'.preg_quote($photoHash, '/').'\\./', $user->avatar) === 1) {
             return false;
         }
 
@@ -147,7 +148,7 @@ class SyncBitrix extends Command
         ]);
 
         if ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300) {
-            throw new RuntimeException('Bitrix photo download returned HTTP ' . $response->getStatusCode());
+            throw new RuntimeException('Bitrix photo download returned HTTP '.$response->getStatusCode());
         }
 
         $image = $response->getBody()->getContents();
@@ -156,8 +157,8 @@ class SyncBitrix extends Command
         }
 
         $mime = $this->detectImageMime($image);
-        if ($mime === null || !array_key_exists($mime, self::BITRIX_AVATAR_MIME_EXTENSIONS)) {
-            throw new RuntimeException('Unsupported Bitrix photo mime type: ' . ($mime ?? 'unknown'));
+        if ($mime === null || ! array_key_exists($mime, self::BITRIX_AVATAR_MIME_EXTENSIONS)) {
+            throw new RuntimeException('Unsupported Bitrix photo mime type: '.($mime ?? 'unknown'));
         }
 
         $filename = sprintf(
@@ -168,7 +169,7 @@ class SyncBitrix extends Command
         );
 
         Storage::disk('public')->makeDirectory('avatars');
-        Storage::disk('public')->put('avatars/' . $filename, $image);
+        Storage::disk('public')->put('avatars/'.$filename, $image);
         $this->deletePreviousBitrixAvatar($user, $filename);
 
         $user->avatar = $filename;
@@ -190,14 +191,14 @@ class SyncBitrix extends Command
             }
         }
 
-        if (!is_string($photo) || trim($photo) === '') {
+        if (! is_string($photo) || trim($photo) === '') {
             return null;
         }
 
         $photo = trim($photo);
         if (str_starts_with($photo, '//')) {
             $scheme = parse_url($bitrixUrl, PHP_URL_SCHEME) ?: 'https';
-            $photo = $scheme . ':' . $photo;
+            $photo = $scheme.':'.$photo;
         } elseif (str_starts_with($photo, '/')) {
             $scheme = parse_url($bitrixUrl, PHP_URL_SCHEME);
             $host = parse_url($bitrixUrl, PHP_URL_HOST);
@@ -205,15 +206,15 @@ class SyncBitrix extends Command
                 return null;
             }
 
-            $photo = $scheme . '://' . $host . $photo;
+            $photo = $scheme.'://'.$host.$photo;
         }
 
-        if (!filter_var($photo, FILTER_VALIDATE_URL)) {
+        if (! filter_var($photo, FILTER_VALIDATE_URL)) {
             return null;
         }
 
         $scheme = parse_url($photo, PHP_URL_SCHEME);
-        if (!in_array($scheme, ['http', 'https'], true)) {
+        if (! in_array($scheme, ['http', 'https'], true)) {
             return null;
         }
 
@@ -235,15 +236,15 @@ class SyncBitrix extends Command
 
     private function deletePreviousBitrixAvatar(User $user, string $currentFilename): void
     {
-        if (!is_string($user->avatar) || $user->avatar === $currentFilename) {
+        if (! is_string($user->avatar) || $user->avatar === $currentFilename) {
             return;
         }
 
-        if (preg_match('/^bitrix-' . preg_quote((string) $user->bitrix_id, '/') . '-[a-f0-9]{12}\.[a-z0-9]+$/', $user->avatar) !== 1) {
+        if (preg_match('/^bitrix-'.preg_quote((string) $user->bitrix_id, '/').'-[a-f0-9]{12}\.[a-z0-9]+$/', $user->avatar) !== 1) {
             return;
         }
 
-        Storage::disk('public')->delete('avatars/' . $user->avatar);
+        Storage::disk('public')->delete('avatars/'.$user->avatar);
     }
 
     private function syncObjects(Client $client, string $bitrixUrl): void
@@ -282,8 +283,8 @@ class SyncBitrix extends Command
             $location = $locationsByBitrixId->get($value['id']);
             $objectData = $this->mapObjectPayload($value, $managerIdByBitrixId[(string) ($value['assignedById'] ?? '')] ?? null);
 
-            if (!$objectData['active'] && $location && $location->isDeletableNoGate()) {
-                if (!$location->trashed()) {
+            if (! $objectData['active'] && $location && $location->isDeletableNoGate()) {
+                if (! $location->trashed()) {
                     $location->delete();
                 }
 
@@ -301,7 +302,7 @@ class SyncBitrix extends Command
             }
         }
 
-        $this->line('Синхронизировано ' . $count . ' объектов Битрикс');
+        $this->line('Синхронизировано '.$count.' объектов Битрикс');
     }
 
     private function mapObjectPayload(array $value, ?int $managerId): array
@@ -311,9 +312,9 @@ class SyncBitrix extends Command
         $objectCode = (int) ($value['ufCrm5_1721062689'] ?? 0);
         $title = $value['title'] ?? '';
         $name = match ($objectCode) {
-            845 => '[Тех. безопасность] ' . $title,
-            847 => '[Клининг] ' . $title,
-            848 => '[Биометрика] ' . $title,
+            845 => '[Тех. безопасность] '.$title,
+            847 => '[Клининг] '.$title,
+            848 => '[Биометрика] '.$title,
             default => $title,
         };
 
@@ -321,15 +322,15 @@ class SyncBitrix extends Command
         $closeDate = $value['ufCrm5_1721063355'] ?? '';
         if ($closeDate !== '') {
             $dateTime = DateTime::createFromFormat('d.m.Y', $closeDate);
-            if ($dateTime instanceof DateTime && $dateTime <= new DateTime()) {
+            if ($dateTime instanceof DateTime && $dateTime <= new DateTime) {
                 $active = false;
-                $name = '[Закрыто]' . $title;
+                $name = '[Закрыто]'.$title;
             }
         }
 
         if (($value['stageId'] ?? null) === 'DT1032_7:FAIL') {
             $active = false;
-            $name = '[Закрыто]' . $title;
+            $name = '[Закрыто]'.$title;
         }
 
         return [
@@ -351,7 +352,7 @@ class SyncBitrix extends Command
         }
 
         $yandexMap = json_decode($yandexMapJson);
-        if (!is_object($yandexMap)) {
+        if (! is_object($yandexMap)) {
             return ['', ''];
         }
 
@@ -402,7 +403,7 @@ class SyncBitrix extends Command
             Supplier::whereNotIn('bitrix_id', $existingSuppliers)->delete();
         }
 
-        $this->line('Синхронизировано ' . count($bitrixSuppliers) . ' поставщиков');
+        $this->line('Синхронизировано '.count($bitrixSuppliers).' поставщиков');
     }
 
     private function syncLegals(Client $client, string $bitrixUrl): void
@@ -425,7 +426,7 @@ class SyncBitrix extends Command
             LegalPerson::whereNotIn('bitrix_id', $existingLegalPersons)->delete();
         }
 
-        $this->line('Синхронизировано ' . count($bitrixLegalPersons) . ' юр. лиц');
+        $this->line('Синхронизировано '.count($bitrixLegalPersons).' юр. лиц');
     }
 
     private function syncDeals(Client $client, string $bitrixUrl): void
@@ -465,7 +466,7 @@ class SyncBitrix extends Command
             );
         }
 
-        $this->line('Синхронизировано ' . count($deals) . ' сделок');
+        $this->line('Синхронизировано '.count($deals).' сделок');
     }
 
     private function syncTypes(Client $client, string $bitrixUrl): void
@@ -488,7 +489,7 @@ class SyncBitrix extends Command
             InvoiceType::whereNotIn('bitrix_id', $existingInvoiceTypes)->delete();
         }
 
-        $this->line('Синхронизировано ' . count($bitrixInvoiceTypes) . ' типов закупок');
+        $this->line('Синхронизировано '.count($bitrixInvoiceTypes).' типов закупок');
     }
 
     private function fetchPaged(Client $client, string $bitrixUrl, string $method, array $query, callable $extractItems, bool $continueByPageSize = false): array
@@ -499,8 +500,8 @@ class SyncBitrix extends Command
         while (true) {
             $response = $this->bitrixGet($client, $bitrixUrl, $method, array_merge($query, ['start' => $start]));
             $pageItems = $extractItems($response);
-            if (!is_array($pageItems)) {
-                throw new RuntimeException('Bitrix response items are not an array for ' . $method);
+            if (! is_array($pageItems)) {
+                throw new RuntimeException('Bitrix response items are not an array for '.$method);
             }
 
             foreach ($pageItems as $item) {
@@ -509,11 +510,13 @@ class SyncBitrix extends Command
 
             if (isset($response['next'])) {
                 $start = (int) $response['next'];
+
                 continue;
             }
 
             if ($continueByPageSize && count($pageItems) === 50) {
                 $start += 50;
+
                 continue;
             }
 
@@ -525,7 +528,7 @@ class SyncBitrix extends Command
 
     private function bitrixGet(Client $client, string $bitrixUrl, string $method, array $query = []): array
     {
-        $response = $client->request('GET', $bitrixUrl . $method, [
+        $response = $client->request('GET', $bitrixUrl.$method, [
             'http_errors' => false,
             'query' => $query,
         ]);
@@ -541,15 +544,15 @@ class SyncBitrix extends Command
         try {
             $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException $exception) {
-            throw new RuntimeException('Bitrix request ' . $method . ' returned invalid JSON: ' . $exception->getMessage(), 0, $exception);
+            throw new RuntimeException('Bitrix request '.$method.' returned invalid JSON: '.$exception->getMessage(), 0, $exception);
         }
 
-        if (!is_array($data)) {
-            throw new RuntimeException('Bitrix request ' . $method . ' returned a non-array response');
+        if (! is_array($data)) {
+            throw new RuntimeException('Bitrix request '.$method.' returned a non-array response');
         }
 
         if (isset($data['error'])) {
-            throw new RuntimeException('Bitrix request ' . $method . ' failed: ' . ($data['error_description'] ?? $data['error']));
+            throw new RuntimeException('Bitrix request '.$method.' failed: '.($data['error_description'] ?? $data['error']));
         }
 
         return $data;

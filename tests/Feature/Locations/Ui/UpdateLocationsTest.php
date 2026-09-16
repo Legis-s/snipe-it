@@ -7,10 +7,58 @@ use App\Models\Location;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class UpdateLocationsTest extends TestCase
 {
+    public static function warehouse_values(): array
+    {
+        return [
+            'enabled' => ['1', true],
+            'disabled' => ['0', false],
+            'empty' => ['', false],
+            'omitted' => [null, false],
+            'checkbox' => ['on', true],
+        ];
+    }
+
+    #[DataProvider('warehouse_values')]
+    public function test_custom_location_fields_are_saved_consistently(?string $warehouse, bool $expected): void
+    {
+        $payload = ['name' => 'Custom location', 'bitrix_id' => '456', 'notes' => 'Location notes'];
+        if ($warehouse !== null) {
+            $payload['sklad'] = $warehouse;
+        }
+
+        $this->actingAs(User::factory()->superuser()->create())
+            ->post(route('locations.store'), $payload)
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('locations.index'));
+
+        $created = Location::where('name', $payload['name'])->sole();
+        $this->assertSame((int) $expected, (int) $created->sklad);
+        $this->assertEquals(456, $created->bitrix_id);
+        $this->assertSame($payload['notes'], $created->notes);
+
+        $existing = Location::factory()->create([
+            'sklad' => ! $expected,
+            'bitrix_id' => 123,
+            'coordinates' => '55.76, 37.64',
+        ]);
+        $payload['name'] = 'Updated custom location';
+        $this->put(route('locations.update', $existing), $payload)
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('locations.index'));
+
+        $existing->refresh();
+        $this->assertNotNull($existing->sklad);
+        $this->assertSame((int) $expected, (int) $existing->sklad);
+        $this->assertEquals(456, $existing->bitrix_id);
+        $this->assertSame($payload['notes'], $existing->notes);
+        $this->assertSame('55.76, 37.64', $existing->coordinates);
+    }
+
     public function test_permission_required_to_store_location()
     {
         $this->actingAs(User::factory()->create())
@@ -30,12 +78,14 @@ class UpdateLocationsTest extends TestCase
 
     public function test_edit_page_ships_manager_select_and_submit_controls()
     {
-        // Regression guard for the migration off @include('partials.forms
-        // .edit.user-select') to <x-input.user-select>. The manager
-        // picker must still emit the assigned_user_select select id (the
-        // "+ New user" quick-create modal targets it via data-select), and
-        // the bottom cancel/save controls come from <x-box.footer /> which
-        // <x-box> renders when its parent <x-form> exposes a route.
+        // Regression guard for the manager picker + submit controls on
+        // the location edit page. The select id is derived from the
+        // component's `name` prop, so a manager picker with
+        // name="manager_id" gets id="manager_id_select" and the
+        // "+ New user" quick-create modal targets that id via
+        // data-select. The bottom cancel/save controls come from
+        // <x-box.footer /> which <x-box> renders when its parent
+        // <x-form> exposes a route.
         $manager = User::factory()->create();
         $location = Location::factory()->create(['manager_id' => $manager->id]);
 
@@ -43,10 +93,11 @@ class UpdateLocationsTest extends TestCase
             ->get(route('locations.edit', $location))
             ->assertOk();
 
-        $response->assertSee('id="assigned_user_select"', false);
+        $response->assertSee('id="manager_id_select"', false);
         $response->assertSee('name="manager_id"', false);
         $response->assertSee('value="'.$manager->id.'"', false);
         $response->assertSee('id="submit_button"', false);
+        $response->assertSee(trans('admin/locations/table.update'));
     }
 
     public function test_user_can_edit_locations()

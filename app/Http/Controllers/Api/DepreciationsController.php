@@ -6,7 +6,6 @@ use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\FilterRequest;
 use App\Http\Transformers\DepreciationsTransformer;
-use App\Http\Transformers\SelectlistTransformer;
 use App\Models\Depreciation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -47,7 +46,8 @@ class DepreciationsController extends Controller
         }
 
         // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $depreciations->count()) ? $depreciations->count() : app('api_offset_value');
+        $total = $depreciations->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
         $sort_override = $request->input('sort');
@@ -62,7 +62,6 @@ class DepreciationsController extends Controller
                 break;
         }
 
-        $total = $depreciations->count();
         $depreciations = $depreciations->skip($offset)->take($limit)->get();
 
         return (new DepreciationsTransformer)->transformDepreciations($depreciations, $total);
@@ -155,36 +154,5 @@ class DepreciationsController extends Controller
         $depreciation->delete();
 
         return response()->json(Helper::formatStandardApiResponse('success', null, trans('admin/depreciations/message.delete.success')));
-    }
-
-
-    /**
-     * Gets a paginated collection for the select2 menus
-     * @see \App\Http\Transformers\SelectlistTransformer
-     */
-    public function selectlist(Request $request)
-    {
-
-        $this->authorize('view.selectlists');
-        $depreciations = Depreciation::select([
-            'id',
-            'name',
-        ]);
-
-        if ($request->filled('search')) {
-            $depreciations = $depreciations->where('name', 'LIKE', '%'.$request->get('search').'%');
-        }
-
-        $depreciations = $depreciations->orderBy('name', 'ASC')->paginate(50);
-
-        // Loop through and set some custom properties for the transformer to use.
-        // This lets us have more flexibility in special cases like assets, where
-        // they may not have a ->name value but we want to display something anyway
-        foreach ($depreciations as $depreciation) {
-            $depreciation->use_text = $depreciation->name;
-            $depreciation->use_image =  null;
-        }
-
-        return (new SelectlistTransformer)->transformSelectlist($depreciations);
     }
 }

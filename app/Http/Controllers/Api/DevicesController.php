@@ -4,20 +4,19 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Transformers\DevicesTransformer;
-use App\Http\Transformers\InventoryItemTransformer;
+use App\Models\Asset;
 use App\Models\Device;
-use App\Models\InventoryItem;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class DevicesController extends Controller
 {
-
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request): JsonResponse|array
     {
+        $this->authorize('view', Asset::class);
         $devices = Device::with('asset')
             ->select([
                 'devices.id',
@@ -50,9 +49,8 @@ class DevicesController extends Controller
 
         $allowed_columns =
             [
-                'id', "number", 'publicIp', 'enrollTime', 'imei', 'statusCode', 'description', 'batteryLevel', 'model', 'androidVersion', 'biometrikaVersion', 'launcherVersion', 'lastUpdate', 'asset_id', 'asset_sim_id', 'coordinates', 'locationUpdate', 'distance', 'created_at', 'updated_at'
+                'id', 'number', 'publicIp', 'enrollTime', 'imei', 'statusCode', 'description', 'batteryLevel', 'model', 'androidVersion', 'biometrikaVersion', 'launcherVersion', 'lastUpdate', 'asset_id', 'asset_sim_id', 'coordinates', 'locationUpdate', 'distance', 'created_at', 'updated_at',
             ];
-
 
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
         $sort = in_array($request->input('sort'), $allowed_columns) ? $request->input('sort') : 'created_at';
@@ -65,22 +63,22 @@ class DevicesController extends Controller
         // Check to make sure the limit is not higher than the max allowed
         ((config('app.max_results') >= $request->input('limit')) && ($request->filled('limit'))) ? $limit = $request->input('limit') : $limit = config('app.max_results');
 
-
         $total = $devices->count();
         $devices = $devices->skip($offset)->take($limit)->get();
 
-        return (new DevicesTransformer())->transformDevices($devices, $total);
+        return (new DevicesTransformer)->transformDevices($devices, $total);
     }
-
 
     /**
      * Display the specified resource.
-     * @param int $id
+     *
+     * @param  int  $id
      */
     public function show($id): JsonResponse|array
     {
-        $inventory_item = InventoryItem::findOrFail($id);
-        return (new InventoryItemTransformer)->transformInventoryItem($inventory_item);
-    }
+        $this->authorize('view', Asset::class);
+        $device = Device::with(['asset.location', 'asset_sim'])->findOrFail($id);
 
+        return (new DevicesTransformer)->transformDevice($device);
+    }
 }

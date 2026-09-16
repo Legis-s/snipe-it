@@ -2,6 +2,8 @@
 
 namespace Tests\Unit;
 
+use App\Events\CheckoutableRent;
+use App\Events\CheckoutableSell;
 use App\Http\Controllers\Assets\BulkAssetsController;
 use App\Models\Accessory;
 use App\Models\AccessoryCheckout;
@@ -9,16 +11,108 @@ use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\Category;
 use App\Models\Component;
+use App\Models\Deal;
 use App\Models\Depreciation;
 use App\Models\Setting;
 use App\Models\Statuslabel;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class AssetTest extends TestCase
 {
+    public static function deal_checkout_operators(): array
+    {
+        return [
+            ['sell', 'Продано', CheckoutableSell::class, 'session'],
+            ['sell', 'Продано', CheckoutableSell::class, 'model'],
+            ['sell', 'Продано', CheckoutableSell::class, 'id'],
+            ['rent', 'В аренде', CheckoutableRent::class, 'session'],
+            ['rent', 'В аренде', CheckoutableRent::class, 'model'],
+            ['rent', 'В аренде', CheckoutableRent::class, 'id'],
+        ];
+    }
+
+    #[DataProvider('deal_checkout_operators')]
+    public function test_deal_checkout_resolves_operator_like_standard_checkout(string $operation, string $statusName, string $eventClass, string $operatorType): void
+    {
+        $currentUser = User::factory()->create();
+        $explicitOperator = User::factory()->create();
+        $this->actingAs($currentUser);
+        $status = Statuslabel::factory()->create(['name' => $statusName]);
+        $asset = Asset::factory()->create(['checkout_counter' => 0]);
+        $deal = Deal::create(['name' => 'Operator resolution deal']);
+        $this->assertTrue($deal->exists);
+        Event::fake([$eventClass]);
+
+        $operator = match ($operatorType) {
+            'model' => $explicitOperator,
+            'id' => $explicitOperator->id,
+            default => null,
+        };
+        $expectedOperator = $operatorType === 'session' ? $currentUser : $explicitOperator;
+
+        $this->assertTrue($asset->{$operation}($deal, $operator));
+
+        Event::assertDispatched($eventClass, fn (CheckoutableSell|CheckoutableRent $event): bool => $event->checkedOutBy->is($expectedOperator)
+            && $event->checkedOutTo->is($deal)
+            && $event->checkoutable->is($asset));
+        Event::assertDispatchedTimes($eventClass, 1);
+        $asset = $asset->fresh();
+        $this->assertEquals($status->id, $asset->status_id);
+        $this->assertTrue($asset->assignedTo->is($deal));
+        $this->assertEquals(1, $asset->checkout_counter);
+    }
+
+    public function test_payment_only_transitions_purchased_assets_without_saving_them(): void
+    {
+        $purchaseStatus = Statuslabel::factory()->create(['name' => 'В закупке']);
+        $inventoryStatus = Statuslabel::factory()->create(['name' => 'Ожидает инвентаризации']);
+        $asset = Asset::factory()->create(['status_id' => $purchaseStatus->id]);
+        $otherAsset = Asset::factory()->create();
+        $originalStatusId = $otherAsset->status_id;
+
+        $asset->setStatusAfterPaid();
+        $otherAsset->setStatusAfterPaid();
+
+        $this->assertEquals($inventoryStatus->id, $asset->status_id);
+        $this->assertEquals($purchaseStatus->id, $asset->fresh()->status_id);
+        $this->assertEquals($originalStatusId, $otherAsset->status_id);
+        $this->assertTrue($asset->save());
+        $this->assertEquals($inventoryStatus->id, $asset->fresh()->status_id);
+    }
+
+    public function test_purchase_workflow_relations_keep_their_foreign_keys(): void
+    {
+        $asset = Asset::factory()->make();
+        $purchase = new \App\Models\Purchase;
+        $purchase->id = 123;
+        $reviewer = User::factory()->create();
+
+        $asset->purchase()->associate($purchase);
+        $asset->user_verified()->associate($reviewer);
+
+        $this->assertSame(123, $asset->purchase_id);
+        $this->assertTrue($asset->purchase->is($purchase));
+        $this->assertEquals($reviewer->id, $asset->user_verified_id);
+        $this->assertTrue($asset->user_verified()->first()->is($reviewer));
+    }
+
+    public function test_review_requires_an_existing_matching_status(): void
+    {
+        $asset = Asset::factory()->create();
+        $this->assertFalse($asset->availableForReview());
+
+        $reviewStatus = Statuslabel::factory()->create(['name' => 'Ожидает проверки']);
+        $this->assertFalse($asset->availableForReview());
+
+        $asset->status_id = $reviewStatus->id;
+        $this->assertTrue($asset->availableForReview());
+    }
+
     public function test_auto_increment()
     {
         $this->settings->enableAutoIncrement();
@@ -354,8 +448,11 @@ class AssetTest extends TestCase
         $asset = Asset::factory()->create();
         $otherAsset = Asset::factory()->create();
 
-        $primaryAccessory = Accessory::factory()->create(['purchase_cost' => 10]);
-        $secondaryAccessory = Accessory::factory()->create(['purchase_cost' => 15]);
+        // See test_asset_components_calculated_total_uses_assigned_quantity
+        // for why per-unit cost must be seeded via withInitialAcquisition
+        // rather than a create-array override.
+        $primaryAccessory = Accessory::factory()->withInitialAcquisition(null, 10.0)->create();
+        $secondaryAccessory = Accessory::factory()->withInitialAcquisition(null, 15.0)->create();
 
         AccessoryCheckout::factory()->create([
             'accessory_id' => $primaryAccessory->id,
@@ -386,8 +483,12 @@ class AssetTest extends TestCase
     {
         $asset = Asset::factory()->create();
 
-        $firstComponent = Component::factory()->create(['purchase_cost' => 10]);
-        $secondComponent = Component::factory()->create(['purchase_cost' => 25]);
+        // Per-unit cost lives on the initial OrderItem the observer
+        // writes; withInitialAcquisition seeds that OrderItem's price so
+        // calculatedPurchaseCost (via lastOrderDefaults) reads the
+        // expected value back for this test.
+        $firstComponent = Component::factory()->withInitialAcquisition(null, 10.0)->create();
+        $secondComponent = Component::factory()->withInitialAcquisition(null, 25.0)->create();
 
         $asset->components()->attach($firstComponent->id, [
             'assigned_qty' => 3,
@@ -403,7 +504,6 @@ class AssetTest extends TestCase
 
         $freshAsset = $asset->fresh();
 
-        $this->assertEquals(35, $freshAsset->components->sum('purchase_cost'));
         $this->assertEquals(80, $freshAsset->components->sum('calculated_purchase_cost'));
         $this->assertSame(80.0, $freshAsset->getComponentCost());
     }
@@ -412,7 +512,12 @@ class AssetTest extends TestCase
     {
         $asset = Asset::factory()->create();
 
-        $componentWithoutCost = Component::factory()->create(['purchase_cost' => null]);
+        // Force the observer-written OrderItem's price to null AND null
+        // out the parent's default_purchase_cost so lastOrderDefaults
+        // returns unit_cost=null; calculatedPurchaseCost coerces to 0.0
+        // when assigned to an asset.
+        $componentWithoutCost = Component::factory()->create(['default_purchase_cost' => null]);
+        $componentWithoutCost->orderItems()->update(['price' => null]);
 
         $asset->components()->attach($componentWithoutCost->id, [
             'assigned_qty' => 4,

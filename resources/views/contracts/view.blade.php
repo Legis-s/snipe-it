@@ -103,15 +103,6 @@
                     @endif
                 </ul>
             </div>
-            @can('checkout', \App\Models\Asset::class)
-                @if (($contract->assets_no_docs && count($contract->assets_no_docs) >0) or ($contract->consumable_no_docs_count && count($contract->consumable_no_docs_count>0)))
-                <div class="col-md-12" id="closeing_docs_div">
-                    <div id="closeing_docs" style="margin-bottom:10px; width:100%" class="btn btn-primary pull-right">
-                        Есть закрывающие документы
-                    </div>
-                </div>
-                @endif
-            @endcan
         </div>
     </div>
 
@@ -122,25 +113,4 @@
         'exportFile' => 'contracts-export',
         'search' => true
      ])
-    <script nonce="{{ csrf_token() }}">
-        $(function () {
-            $( "#closeing_docs" ).click(function() {
-                $( "#closeing_docs" ).addClass('disabled');
-                $.ajax({
-                    type: 'POST',
-                    url:"/api/v1/contracts/{{ $contract->id }}/closesell",
-                    headers: {
-                        "X-Requested-With": 'XMLHttpRequest',
-                        "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                    },
-                    dataType: 'json',
-                    success: function (data) {
-                        $( "#closeing_docs_div" ).html("");
-                        $( "#assetsTable" ).bootstrapTable('refresh');
-                        $( "#consumablesCheckedoutTable" ).bootstrapTable('refresh');
-                    },
-                });
-            });
-        });
-    </script>
 @stop

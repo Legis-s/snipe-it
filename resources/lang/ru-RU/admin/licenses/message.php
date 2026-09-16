@@ -1,6 +1,9 @@
 <?php
 
 return [
+    'import' => [
+        'no_free_seats' => 'У лицензии «:license» нет свободных мест. «:target» не назначен на место.',
+    ],
 
     'does_not_exist' => 'Лицензии не существует или у вас нет разрешения на её просмотр.',
     'user_does_not_exist' => 'Пользователь не существует или у вас нет разрешения на его просмотр.',
@@ -37,9 +40,14 @@ return [
         'confirm' => 'Вы уверены, что хотите удалить эту лицензию?',
         'error' => 'При удалении лицензии возникла проблема. Попробуйте снова.',
         'success' => 'Лицензия удалена.',
-        'bulk_success' => 'The selected licenses were deleted successfully.',
-        'partial_success' => 'License deleted successfully. See additional information below. | :count licenses were deleted successfully. See additional information below.',
-        'bulk_checkout_warning' => ':license_name has seats that are currently checked out and cannot be deleted. Please check in all seats before deleting.',
+        'bulk_success' => 'Выбранные лицензии успешно удалены.',
+        'partial_success' => 'Лицензия успешно удалена. Смотрите дополнительную информацию ниже. | :count лицензий были удалены. Смотрите дополнительную информацию ниже.',
+        'bulk_checkout_warning' => ':license_name имеет места, которые в настоящее время выданы и не могут быть удалены. Пожалуйста, проверьте все места перед удалением.',
+    ],
+
+    'delete_with_checkin' => [
+        'bulk_success' => 'Успешно удалено лицензий: :count. Возвращено мест: :seats.',
+        'partial_success' => 'Успешно удалено лицензий: :count. Возвращено мест: :seats. Подробности ниже.',
     ],
 
     'checkout' => [
@@ -48,12 +56,12 @@ return [
         'not_enough_seats' => 'Недостаточно мест лицензии для выдачи',
         'mismatch' => 'Предоставленное место лицензии не соответствует лицензии',
         'unavailable' => 'Место недоступно для выдачи.',
-        'license_is_inactive' => 'This license is expired or terminated.',
+        'license_is_inactive' => 'Лицензия истекает или прекращена.',
     ],
 
     'checkin' => [
         'error' => 'При возврате лицензии произошла проблема. Попробуйте снова.',
-        'not_reassignable' => 'Seat has been used',
+        'not_reassignable' => 'Место уже используется',
         'success' => 'Лицензия возвращена',
     ],
 

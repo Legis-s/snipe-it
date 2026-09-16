@@ -1,30 +1,34 @@
 <?php
 
-
 namespace App\Models;
-
 
 use App\Http\Traits\UniqueUndeletedTrait;
 use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
-use DateTime;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Watson\Validating\ValidatingTrait;
 
 class Purchase extends SnipeModel
 {
     protected $presenter = \App\Presenters\PurchasePresenter::class;
+
     use Presentable;
     use SoftDeletes;
 
     const INPROGRESS = 'inprogress';
+
     const FINISHED = 'finished';
+
     const REVIEW = 'review';
+
     const INVENTORY = 'inventory';
+
     const REJECTED = 'rejected';
+
     const ERROR = 'error';
 
     protected $table = 'purchases';
+
     protected $rules = [
         'invoice_number' => 'required|min:1|max:255',
         'final_price' => 'required',
@@ -33,7 +37,7 @@ class Purchase extends SnipeModel
         'legal_person_id' => ['required', 'integer', 'exists:legal_persons,id', 'not_array'],
         'invoice_type_id' => ['required', 'integer', 'exists:invoice_types,id', 'not_array'],
         'invoice_file' => 'required',
-        'bitrix_id' => 'min:1|max:10|nullable'
+        'bitrix_id' => 'min:1|max:10|nullable',
     ];
 
     protected $casts = [
@@ -50,12 +54,12 @@ class Purchase extends SnipeModel
      * validation rules before attempting validation. If this property
      * is not set in the model it will default to true.
      *
-     * @var boolean
+     * @var bool
      */
     protected $injectUniqueIdentifier = true;
-    use ValidatingTrait;
-    use UniqueUndeletedTrait;
 
+    use UniqueUndeletedTrait;
+    use ValidatingTrait;
 
     /**
      * The attributes that are mass assignable.
@@ -72,16 +76,16 @@ class Purchase extends SnipeModel
         'legal_person_id',
         'invoice_type_id',
         'comment',
-        "status",
-        "assets_json",
-        "consumables_json",
-        "bitrix_send_json",
-        "created_by",
-        "bitrix_result_at",
-        "verified_at",
-        "bitrix_task_id",
-        "user_verified_id",
-        "delivery_cost",
+        'status',
+        'assets_json',
+        'consumables_json',
+        'bitrix_send_json',
+        'created_by',
+        'bitrix_result_at',
+        'verified_at',
+        'bitrix_task_id',
+        'user_verified_id',
+        'delivery_cost',
     ];
 
     use Searchable;
@@ -111,7 +115,6 @@ class Purchase extends SnipeModel
         });
     }
 
-
     public function assets()
     {
         return $this->hasMany(\App\Models\Asset::class, 'purchase_id');
@@ -120,6 +123,11 @@ class Purchase extends SnipeModel
     public function consumables()
     {
         return $this->hasMany(\App\Models\Consumable::class, 'purchase_id');
+    }
+
+    public function currentConsumables(): \Illuminate\Database\Eloquent\Builder
+    {
+        return Consumable::forLegacyPurchase($this->id);
     }
 
     public function supplier()
@@ -136,7 +144,6 @@ class Purchase extends SnipeModel
     {
         return $this->belongsTo(\App\Models\LegalPerson::class);
     }
-
 
     public function getInvoiceFile()
     {
@@ -156,7 +163,6 @@ class Purchase extends SnipeModel
     {
         return $this->belongsTo(\App\Models\User::class, 'user_verified_id');
     }
-
 
     public function setStatusInprogress()
     {
@@ -195,49 +201,22 @@ class Purchase extends SnipeModel
         $this->consumables_json = json_encode($consumables, JSON_UNESCAPED_UNICODE);
     }
 
-    public function setStatusPaid()
-    {
-        $this->bitrix_result_at = new DateTime();
-
-        $assets = Asset::where('purchase_id', $this->id)->get();
-        $need_to_inventrory = false;
-        if (count($assets) > 0) {
-            $need_to_inventrory = true;
-            foreach ($assets as &$asset) {
-                $asset->setStatusAfterPaid();
-                $asset->unsetEventDispatcher();
-                $asset->save();
-            }
-        }
-
-        // меняем статус на "В процессе инвентаризации", только если еще её не было у закупки
-        if ($this->status != $this::REVIEW && $this->status != $this::FINISHED && $this->status != $this::INVENTORY) {
-            if ($need_to_inventrory) {
-                $this->status = $this::INVENTORY;
-            } else {
-                $this->status = $this::REVIEW;
-            }
-        }
-
-    }
-
     public function checkStatus($asset_new = null)
     {
-
         $status_review_wait = Statuslabel::where('name', 'Ожидает проверки')->first();
-        $status_review_wait_id = intval($status_review_wait->id);
+        $status_review_wait_id = intval($status_review_wait?->id);
         $status_ok = Statuslabel::where('name', 'Доступные')->first();
-        $status_ok_id = intval($status_ok->id);
+        $status_ok_id = intval($status_ok?->id);
 
         $assets = Asset::where('purchase_id', $this->id)->get();
         $consumables_json = $this->consumables_json;
-        $consumables = json_decode($consumables_json, true);
+        $consumables = json_decode($consumables_json ?: '[]', true) ?? [];
         $consumables_count = count($consumables);
 
-        $all_status = "inventory";
-        $consumables_status = "review";
+        $all_status = 'inventory';
+        $consumables_status = 'review';
 
-        $asset_status = "inventory";
+        $asset_status = 'inventory';
         $assets_count = count($assets);
         $assets_review_wait_count = 0;
         $assets_status_ok_count = 0;
@@ -258,49 +237,50 @@ class Purchase extends SnipeModel
             }
 
             if ($assets_count == $assets_review_wait_count + $assets_status_ok_count) {
-                $asset_status = "review";
+                $asset_status = 'review';
             }
             if ($assets_count == $assets_status_ok_count) {
-                $asset_status = "finished";
+                $asset_status = 'finished';
             }
         } else {
-            $asset_status = "finished";
+            $asset_status = 'finished';
         }
 
         if ($consumables_count > 0) {
             $consumable_all_count = 0;
             $consumable_review_count = 0;
             foreach ($consumables as &$consumable) {
-                $consumable_all_count += $consumable["quantity"];
-                if (isset($consumable["reviewed"])) {
-                    $consumable_review_count += $consumable["reviewed"];
+                $consumable_all_count += $consumable['quantity'];
+                if (isset($consumable['reviewed'])) {
+                    $consumable_review_count += $consumable['reviewed'];
                 }
             }
             if ($consumable_all_count == $consumable_review_count) {
-                $consumables_status = "finished";
+                $consumables_status = 'finished';
             }
         } else {
-            $consumables_status = "finished";
+            $consumables_status = 'finished';
         }
 
-        if (($asset_status == "review") || ($consumables_status == "review")) {
-            $all_status = "review";
+        if (($asset_status == 'review') || ($consumables_status == 'review')) {
+            $all_status = 'review';
         }
-        if (($asset_status == "inventory") || ($consumables_status == "inventory")) {
-            $all_status = "inventory";
+        if (($asset_status == 'inventory') || ($consumables_status == 'inventory')) {
+            $all_status = 'inventory';
         }
-        if ($asset_status == $consumables_status && $asset_status == "finished") {
-            $all_status = "finished";
+        if ($asset_status == $consumables_status && $asset_status == 'finished') {
+            $all_status = 'finished';
         }
-        if ($all_status == "review") {
+        if ($all_status == 'review') {
             $this->status = $this::REVIEW;
         }
-        if ($all_status == "finished") {
+        if ($all_status == 'finished') {
             $this->status = $this::FINISHED;
             if ($asset_new) {
                 $this->closeBitrixTask($asset_new);
             }
         }
+
         return $all_status;
 
     }
@@ -308,7 +288,7 @@ class Purchase extends SnipeModel
     public function closeBitrixTask($asset = null)
     {
         /** @var \GuzzleHttp\Client $client */
-        $client = new \GuzzleHttp\Client();
+        $client = new \GuzzleHttp\Client;
         if ($asset) {
             $user = null;
             $user = $asset->user_verified;
@@ -318,19 +298,19 @@ class Purchase extends SnipeModel
             if ($raw_bitrix_token && $user->bitrix_id && $this->bitrix_task_id) {
                 $params1 = [
                     'query' => [
-                        'taskId' => $this->bitrix_task_id
-                    ]
+                        'taskId' => $this->bitrix_task_id,
+                    ],
                 ];
-                $client->request('POST', env('BITRIX_URL') . 'rest/' . $user->bitrix_id . '/' . $raw_bitrix_token . '/tasks.task.complete/', $params1);
+                $client->request('POST', env('BITRIX_URL').'rest/'.$user->bitrix_id.'/'.$raw_bitrix_token.'/tasks.task.complete/', $params1);
                 $params2 = [
                     'query' => [
                         'TASKID' => $this->bitrix_task_id,
                         'FIELDS' => [
-                            'POST_MESSAGE' => 'Закрыта автоматически.'
-                        ]
-                    ]
+                            'POST_MESSAGE' => 'Закрыта автоматически.',
+                        ],
+                    ],
                 ];
-                $client->request('POST', env('BITRIX_URL') . 'rest/' . $user->bitrix_id . '/' . $raw_bitrix_token . '/task.commentitem.add/', $params2);
+                $client->request('POST', env('BITRIX_URL').'rest/'.$user->bitrix_id.'/'.$raw_bitrix_token.'/task.commentitem.add/', $params2);
             }
         }
 

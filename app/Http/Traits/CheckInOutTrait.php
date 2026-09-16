@@ -3,7 +3,6 @@
 namespace App\Http\Traits;
 
 use App\Models\Asset;
-use App\Models\Contract;
 use App\Models\Deal;
 use App\Models\Location;
 use App\Models\SnipeModel;
@@ -14,21 +13,20 @@ trait CheckInOutTrait
     /**
      * Find target for checkout
      */
-    protected function determineCheckoutTarget(): ?SnipeModel
+    protected function determineCheckoutTarget(?\Illuminate\Http\Request $request = null): ?SnipeModel
     {
+        $request ??= request();
         // This item is checked out to a location
-        switch (request('checkout_to_type')) {
+        switch ($request->input('checkout_to_type')) {
             case 'location':
-                return Location::findOrFail(request('assigned_location'));
+                return Location::findOrFail($request->input('assigned_location'));
             case 'asset':
-                return Asset::findOrFail(request('assigned_asset'));
+                return Asset::findOrFail($request->input('assigned_asset'));
             case 'deal':
-                return Deal::findOrFail(request('assigned_deal'));
+                return Deal::findOrFail($request->input('assigned_deal'));
             default:
-                return User::findOrFail(request('assigned_user'));
+                return User::findOrFail($request->input('assigned_user'));
         }
-
-        return null;
     }
 
     /**

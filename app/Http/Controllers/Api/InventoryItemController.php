@@ -2,18 +2,16 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Actions\Inventories\UpdateInventoryItemAction;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Transformers\InventoryItemTransformer;
 use App\Models\Inventory;
 use App\Models\InventoryItem;
-use App\Models\InventoryStatuslabel;
 use App\Models\Location;
-use Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Image;
 
 /**
  * This class controls all actions related to inventory items for
@@ -21,7 +19,6 @@ use Image;
  */
 class InventoryItemController extends Controller
 {
-
     /**
      * Returns JSON listing of all inventory items
      */
@@ -48,8 +45,7 @@ class InventoryItemController extends Controller
                 'inventory_items.updated_at',
                 'inventory_items.successfully',
             ])
-            ->with('adminuser')
-        ;
+            ->with('adminuser');
 
         if ($request->filled('inventory_id')) {
             $inventory_items->where('inventory_items.inventory_id', '=', $request->input('inventory_id'));
@@ -77,7 +73,7 @@ class InventoryItemController extends Controller
                 'checked_at',
                 'status_id',
                 'created_at',
-                'updated_at'
+                'updated_at',
             ];
 
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
@@ -97,13 +93,14 @@ class InventoryItemController extends Controller
         return (new InventoryItemTransformer)->transformInventoryItemsvsAsset($inventory_items, $total);
     }
 
-
     /**
      * Display the specified resource.
      */
     public function show($id): JsonResponse|array
     {
+        $this->authorize('view', Location::class);
         $inventory_item = InventoryItem::findOrFail($id);
+
         return (new InventoryItemTransformer)->transformInventoryItem($inventory_item);
     }
 
@@ -112,68 +109,11 @@ class InventoryItemController extends Controller
      */
     public function update(Request $request, $id): JsonResponse
     {
-        $inventory_item = InventoryItem::with(['asset', 'inventory', 'status'])->findOrFail($id);
-        $inventory_item->fill($request->all());
+        $item = UpdateInventoryItemAction::run((int) $id, $request->all());
 
-        if ($request['photo']) {
-            $destinationPath = public_path() . '/uploads/inventory_items/';
-
-            $file = base64_decode($inventory_item->photo);
-            $filename = 'items-' . $inventory_item->id . '-' . str_random(8) . ".jpg";
-            $success = file_put_contents($destinationPath . $filename, $file);
-            if ($success > 0) {
-                $inventory_item->photo = $filename;
-            }
-        }
-
-        if ($request->filled('status_id')) {
-            $inventory_item->status_id = $request->input('status_id');
-        }
-
-        if ($inventory_item->status_id) {
-            if ($inventory_item->status_id == 4 && str_starts_with($inventory_item->asset->asset_tag, 'it_')) {
-                $inventory_item->status_id = 1;
-            }
-            if ($inventory_item->status_id == 1) {
-                $inventory_item->successfully = true;
-            }
-        }
-
-        $label = InventoryStatuslabel::findOrFail($inventory_item->status_id);
-        $inventory_item->status()->associate($label);
-
-        if ($inventory_item->save()) {
-            if ($inventory_item->checked) {
-                $asset = $inventory_item->asset;
-                $asset->last_audit_date = date('Y-m-d h:i:s');
-                $asset->save();
-            }
-
-            /** @var Inventory $inventory */
-            $inventory = $inventory_item->inventory;
-            $inventory_items = $inventory->inventory_items;
-            $finished = true;
-            foreach ($inventory_items as $item) {
-                /** @var InventoryItem $item */
-                if (!$item->checked) {
-                    $finished = false;
-                    break;
-                }
-            }
-            if ($finished) {
-                $inventory->status = "FINISH_OK";
-                $inventory->save();
-            }
-
-            return response()->json(
-                Helper::formatStandardApiResponse(
-                    'success',
-                    (new InventoryItemTransformer)->transformInventoryItem($inventory_item),
-                    trans('admin/locations/message.update.success')
-                )
-            );
-        }
-
-        return response()->json(Helper::formatStandardApiResponse('error', null, $inventory_item->getErrors()));
+        return response()->json(Helper::formatStandardApiResponse(
+            'success', (new InventoryItemTransformer)->transformInventoryItem($item),
+            trans('admin/locations/message.update.success')
+        ));
     }
 }

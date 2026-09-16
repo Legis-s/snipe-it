@@ -106,11 +106,17 @@ class LocationsController extends Controller
             'locations.bitrix_id',
             'locations.sklad',
         ])
-            ->withCount('assignedAssets as assigned_assets_count')
-            ->withCount('assets as assets_count')
+            // Asset counts thread through AssetsForShow so the API totals
+            // agree with the tab counts in resources/views/locations/view.blade.php,
+            // which use ->assets()->AssetsForShow() etc. Without the scope,
+            // rtd_assets_count in particular ignores the show_archived_in_list
+            // setting because the rtd_assets() relation has no built-in status
+            // filter. See #17565.
+            ->withCount(['assignedAssets as assigned_assets_count' => fn ($q) => $q->AssetsForShow()])
+            ->withCount(['assets as assets_count' => fn ($q) => $q->AssetsForShow()])
             ->withCount('assignedAccessories as assigned_accessories_count')
             ->withCount('accessories as accessories_count')
-            ->withCount('rtd_assets as rtd_assets_count')
+            ->withCount(['rtd_assets as rtd_assets_count' => fn ($q) => $q->AssetsForShow()])
             ->withCount('children as children_count')
             ->withCount('users as users_count')
             ->withCount('consumables as consumables_count')
@@ -283,11 +289,12 @@ class LocationsController extends Controller
                 'locations.sklad',
                 'locations.tag_color',
             ])
-            ->withCount('assignedAssets as assigned_assets_count')
-            ->withCount('assets as assets_count')
+            // See index() for why the asset counts thread AssetsForShow. #17565.
+            ->withCount(['assignedAssets as assigned_assets_count' => fn ($q) => $q->AssetsForShow()])
+            ->withCount(['assets as assets_count' => fn ($q) => $q->AssetsForShow()])
             ->withCount('assignedAccessories as assigned_accessories_count')
             ->withCount('accessories as accessories_count')
-            ->withCount('rtd_assets as rtd_assets_count')
+            ->withCount(['rtd_assets as rtd_assets_count' => fn ($q) => $q->AssetsForShow()])
             ->withCount('children as children_count')
             ->withCount('users as users_count')
             ->withCount('consumables as consumables_count')
@@ -387,10 +394,10 @@ class LocationsController extends Controller
         $this->authorize('view', $location);
         $accessory_checkouts = AccessoryCheckout::LocationAssigned()->where('assigned_to', $location->id)->with('adminuser')->with('accessories');
 
-        $offset = ($request->input('offset') > $accessory_checkouts->count()) ? $accessory_checkouts->count() : app('api_offset_value');
+        $total = $accessory_checkouts->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
 
-        $total = $accessory_checkouts->count();
         $accessory_checkouts = $accessory_checkouts->skip($offset)->take($limit)->get();
 
         return (new LocationsTransformer)->transformCheckedoutAccessories($accessory_checkouts, $total);
@@ -474,6 +481,7 @@ class LocationsController extends Controller
             'locations.parent_id',
             'locations.image',
             'locations.tag_color',
+            'locations.sklad',
         ]);
 
         if ($request->filled('search')) {
@@ -484,59 +492,66 @@ class LocationsController extends Controller
             $locations->where('locations.id', '!=', (int) $request->input('excludeId'));
         }
 
+        // excludeIds is the batch variant used by the bulk-edit form's
+        // parent picker so a location can't be picked as its own new
+        // parent (or the parent of one of its siblings in the same
+        // batch, which would collapse the hierarchy in confusing ways).
+        // Accepts a comma-separated list of ints because js-data-ajax
+        // forwards data-exclude-ids as-is.
+        if ($request->filled('excludeIds')) {
+            $rawExclude = $request->input('excludeIds');
+            $excludeIds = array_filter(array_map('intval', is_array($rawExclude) ? $rawExclude : explode(',', (string) $rawExclude)));
+            if ($excludeIds !== []) {
+                $locations->whereNotIn('locations.id', $excludeIds);
+            }
+        }
+
         if ((Setting::getSettings()->full_multiple_companies_support == '1') && $request->filled('companyId')) {
-            $locations->where('locations.company_id', '=', (int) $request->input('companyId'));
+            $companyId = (int) $request->input('companyId');
+
+            if (Setting::getSettings()->null_company_is_floater) {
+                // Floater mode: include null-company (floater) locations too,
+                // matching the "items from any company can be checked out
+                // to targets with no company assignment" policy. Without
+                // this the strict equality below hid all floaters from the
+                // checkout dropdown while the server-side canCheckoutTo
+                // still permitted the checkout (#19394).
+                $locations->where(function ($q) use ($companyId) {
+                    $q->where('locations.company_id', '=', $companyId)
+                        ->orWhereNull('locations.company_id');
+                });
+            } else {
+                $locations->where('locations.company_id', '=', $companyId);
+            }
         }
 
         $locations = $locations->orderBy('name', 'ASC')->get();
+        $favoriteLocationId = (int) auth()->user()->favorite_location_id;
+        $locations = $locations->sortBy(fn (Location $location): bool => $location->id !== $favoriteLocationId);
 
         $locations_with_children = [];
 
         // Use 0 (not null) for the top-level bucket — null array offsets are
         // deprecated in PHP 8.4 and Location::indenter expects an int key.
-        $locations_new = collect([]);
-        $favorite_location = auth()->user()->favoriteLocation;
-        if ($favorite_location){
-
-            foreach ($locations as $location) {
-                if ($location->id == $favorite_location->id){
-                    $locations_new->prepend($location);
-                }else{
-                    $locations_new->push($location);
-                }
-            }
-            $locations = $locations_new;
-        }
-
         foreach ($locations as $location) {
             $parentKey = (int) $location->parent_id;
             if (! array_key_exists($parentKey, $locations_with_children)) {
                 $locations_with_children[$parentKey] = [];
             }
             $locations_with_children[$parentKey][] = $location;
-            $locations_with_children[$location->parent_id][] = $location;
-            if ($location->sklad){
-                $location->name =   "[Склад] ".$location->name;
+            if ($location->sklad) {
+                $location->name = '['.trans('general.sklad').'] '.$location->name;
             }
         }
 
         if ($request->filled('search')) {
-            // Search results are cherry-picked out of the tree so the
-            // pre-search Location::indenter walk cannot be reused as-is.
-            // Instead, walk each match's parent chain and inline the
-            // ancestors with the same `›` breadcrumb separator that
-            // Location::indenter uses on the tree-order branch, so both
-            // views share one visual style: `DC1 › Rack 1` distinguishes
-            // Rack 1 under DC1 from Rack 1 under DC2.
-            $locations->load('parent');
+            // Search results are cherry-picked out of the tree — no useful
+            // indent depth to apply — so just use the plain name. The user
+            // is filtering by typed text so context comes from the search
+            // term rather than dropdown position (see #19398 for why we
+            // stopped inlining the parent chain here too).
             foreach ($locations as $location) {
-                $chain = [$location->name];
-                $ancestor = $location->parent;
-                while ($ancestor) {
-                    array_unshift($chain, $ancestor->name);
-                    $ancestor = $ancestor->parent;
-                }
-                $location->use_text = implode(' › ', $chain);
+                $location->use_text = $location->name;
             }
             $locations_formatted = $locations;
         } else {

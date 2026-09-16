@@ -1,6 +1,6 @@
 @extends('layouts/edit-form', [
     'updateText' => trans('admin/invoicetypes/table.update'),
-    'formAction' => (isset($item->id)) ? route('invoicetypes.update', ['invoicetype' => $item->id]) : route('invoicetypes.store'),
+    'formAction' => route('invoicetypes.update', ['invoicetype' => $item->id]),
 ])
 
 {{-- Page content --}}
@@ -10,4 +10,3 @@
 @include ('partials.forms.custom.invocetype_active')
 
 @stop
-

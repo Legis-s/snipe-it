@@ -9,7 +9,6 @@ use App\Models\Location;
 use App\Models\Setting;
 use App\Models\User;
 use Exception;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -28,45 +27,49 @@ class CheckoutablesCheckedOutInBulkListener
     {
         $notifiableUser = $this->getNotifiableUser($event);
 
-//        $shouldSendEmailToUser = $this->shouldSendCheckoutEmailToUser($notifiableUser, $event->assets);
-//        $shouldSendEmailToAlertAddress = $this->shouldSendEmailToAlertAddress($event->assets);
+        $shouldSendEmailToUser = $this->shouldSendCheckoutEmailToUser($notifiableUser, $event->assets);
+        $shouldSendEmailToAlertAddress = $this->shouldSendEmailToAlertAddress($event->assets);
 
-        $shouldSendEmailToUser = false;
-        $shouldSendEmailToAlertAddress = false;
+        if ($shouldSendEmailToUser && $notifiableUser) {
+            try {
+                Mail::to($notifiableUser)->send(new BulkAssetCheckoutMail(
+                    $event->assets,
+                    $event->target,
+                    $event->admin,
+                    $event->checkout_at,
+                    $event->expected_checkin,
+                    $event->note,
+                ));
 
-//        if ($shouldSendEmailToUser && $notifiableUser) {
-//            try {
-//                Mail::to($notifiableUser)->send(new BulkAssetCheckoutMail(
-//                    $event->assets,
-//                    $event->target,
-//                    $event->admin,
-//                    $event->checkout_at,
-//                    $event->expected_checkin,
-//                    $event->note,
-//                ));
-//
-//                Log::info('BulkAssetCheckoutMail sent to checkout target');
-//            } catch (Exception $e) {
-//                Log::debug('Exception caught during BulkAssetCheckoutMail to target: '.$e->getMessage());
-//            }
-//        }
+                Log::info('BulkAssetCheckoutMail sent to checkout target');
+            } catch (Exception $e) {
+                Log::debug('Exception caught during BulkAssetCheckoutMail to target: '.$e->getMessage());
+            }
+        }
 
-//        if ($shouldSendEmailToAlertAddress && Setting::getSettings()->admin_cc_email) {
-//            try {
-//                Mail::to(Setting::getSettings()->admin_cc_email)->send(new BulkAssetCheckoutMail(
-//                    $event->assets,
-//                    $event->target,
-//                    $event->admin,
-//                    $event->checkout_at,
-//                    $event->expected_checkin,
-//                    $event->note,
-//                ));
-//
-//                Log::info('BulkAssetCheckoutMail sent to admin_cc_email');
-//            } catch (Exception $e) {
-//                Log::debug('Exception caught during BulkAssetCheckoutMail to admin_cc_email: '.$e->getMessage());
-//            }
-//        }
+        if ($shouldSendEmailToAlertAddress && Setting::getSettings()->admin_cc_email) {
+            // admin_cc_email is validated as a comma-separated list
+            // (email_array validator on the settings request). CheckoutableListener
+            // already explodes on comma before handing to Mail::to; this listener
+            // used to pass the raw string, which Symfony Mailer would treat as
+            // one recipient and reject as invalid. See #19426.
+            $recipients = array_filter(array_map('trim', explode(',', Setting::getSettings()->admin_cc_email)));
+
+            try {
+                Mail::to($recipients)->send(new BulkAssetCheckoutMail(
+                    $event->assets,
+                    $event->target,
+                    $event->admin,
+                    $event->checkout_at,
+                    $event->expected_checkin,
+                    $event->note,
+                ));
+
+                Log::info('BulkAssetCheckoutMail sent to admin_cc_email');
+            } catch (Exception $e) {
+                Log::debug('Exception caught during BulkAssetCheckoutMail to admin_cc_email: '.$e->getMessage());
+            }
+        }
     }
 
     private function shouldSendCheckoutEmailToUser(?User $user, Collection $assets): bool
@@ -156,6 +159,6 @@ class CheckoutablesCheckedOutInBulkListener
             return $target->manager;
         }
 
-        return $target instanceof User ? $target : null;
+        return $target;
     }
 }

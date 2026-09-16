@@ -9,19 +9,18 @@ use Illuminate\Database\Eloquent\Collection;
 
 class InventoriesTransformer
 {
-
     public function transformInventories(Collection $inventories, $total)
     {
-        $array = array();
+        $array = [];
         foreach ($inventories as $inventory) {
             $array[] = self::transformInventory($inventory);
         }
+
         return (new DatatablesTransformer)->transformDatatables($array, $total);
     }
 
     public function transformInventory(Inventory $inventory, $full = false)
     {
-
 
         $inventory_items_arr = [];
         if ($full) {
@@ -30,13 +29,10 @@ class InventoriesTransformer
             }
         }
 
-
         $array = [
-            'id' => (int)$inventory->id,
+            'id' => (int) $inventory->id,
             'status' => $inventory->status ? e($inventory->status) : null,
-            'status_text' => $inventory->status
-                ? Helper::getFormattedStatus($inventory->status)
-                : "",
+            'status_text' => $inventory->present()->statusText(),
             'name' => e($inventory->name),
             'device' => $inventory->device ? e($inventory->device) : null,
             'responsible' => $inventory->responsible ? e($inventory->responsible) : null,
@@ -46,9 +42,9 @@ class InventoriesTransformer
             'comment' => $inventory->comment ? e($inventory->comment) : null,
             'created_at' => Helper::getFormattedDateObject($inventory->created_at, 'datetime'),
             'updated_at' => Helper::getFormattedDateObject($inventory->updated_at, 'datetime'),
-            'total' => (int)$inventory->total,
-            'checked' => (int)$inventory->checked,
-            'successfully' => (int)$inventory->successfully,
+            'total' => (int) $inventory->total,
+            'checked' => (int) $inventory->checked,
+            'successfully' => (int) $inventory->successfully,
             'location' => $inventory->location
                 ? (new LocationsTransformer)->transformLocation($inventory->location)
                 : null,
@@ -67,5 +63,4 @@ class InventoriesTransformer
     {
         return (new DatatablesTransformer)->transformDatatables($inventories);
     }
-
 }

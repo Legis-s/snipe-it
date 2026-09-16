@@ -3,15 +3,18 @@
 namespace App\Models;
 
 use App\Events\CheckoutableCheckedOut;
-use App\Events\CheckoutableRent;
-use App\Events\CheckoutableSell;
 use App\Exceptions\CheckoutNotAllowed;
 use App\Helpers\Helper;
 use App\Http\Traits\UniqueUndeletedTrait;
 use App\Models\Traits\Acceptable;
+use App\Models\Traits\ChecksOutToDeals;
 use App\Models\Traits\CompanyableTrait;
+use App\Models\Traits\HasCalendarEvents;
+use App\Models\Traits\HasOrders;
+use App\Models\Traits\HasPurchaseWorkflow;
 use App\Models\Traits\HasUploads;
 use App\Models\Traits\Loggable;
+use App\Models\Traits\LogsAssetWorkflows;
 use App\Models\Traits\Requestable;
 use App\Models\Traits\Searchable;
 use App\Presenters\AssetPresenter;
@@ -20,8 +23,8 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Gate;
@@ -32,6 +35,14 @@ use Watson\Validating\ValidatingTrait;
  * Model for Assets.
  *
  * @version v1.0
+ *
+ * @property ?int $location_id
+ * @property Carbon|string|null $next_audit_date
+ * @property Carbon|string|null $last_audit_date
+ * @property Carbon|string|null $asset_eol_date
+ * @property ?int $company_id
+ * @property Carbon|string|null $last_checkin
+ * @property bool $requestable
  */
 class Asset extends Depreciable
 {
@@ -39,10 +50,15 @@ class Asset extends Depreciable
 
     // protected $with = ['model', 'adminuser', 'location', 'company'];
 
+    use ChecksOutToDeals;
     use CompanyableTrait;
+    use HasCalendarEvents;
     use HasFactory;
+    use HasOrders;
+    use HasPurchaseWorkflow;
     use HasUploads;
     use Loggable;
+    use LogsAssetWorkflows;
     use Presentable;
     use Requestable;
     use SoftDeletes;
@@ -116,6 +132,36 @@ class Asset extends Depreciable
         'nds' => 'integer',
     ];
 
+    /**
+     * location_id and company_id should store NULL when there's no
+     * assignment, never 0. Old data and previous bugs occasionally
+     * left `0` behind (empty select2 → '' → integer-cast → 0), which
+     * then breaks `exists:` validation and FMCS queries that treat
+     * NULL and 0 as different. `set` normalizes on write, `get`
+     * normalizes on read so legacy rows already storing 0 present as
+     * null at the model boundary until they're re-saved.
+     *
+     * @return Attribute<int|null, int|null>
+     */
+    protected function locationId(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => ($value === null || (int) $value === 0) ? null : (int) $value,
+            set: fn ($value) => ($value === '' || $value === null || (int) $value === 0) ? null : (int) $value,
+        );
+    }
+
+    /**
+     * @return Attribute<int|null, int|null>
+     */
+    protected function companyId(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => ($value === null || (int) $value === 0) ? null : (int) $value,
+            set: fn ($value) => ($value === '' || $value === null || (int) $value === 0) ? null : (int) $value,
+        );
+    }
+
     protected $rules = [
         'model_id' => ['required', 'integer', 'exists:models,id,deleted_at,NULL', 'not_array'],
         'status_id' => ['required', 'integer', 'exists:status_labels,id'],
@@ -146,9 +192,9 @@ class Asset extends Depreciable
         'assigned_location' => ['integer', 'nullable', 'exists:locations,id,deleted_at,NULL', 'fmcs_location'],
         'assigned_asset' => ['integer', 'nullable', 'exists:assets,id,deleted_at,NULL'],
         'assigned_deal' => ['integer', 'nullable', 'exists:deals,id,deleted_at,NULL'],
-        'depreciable_cost'  => ['nullable', 'numeric', 'gte:0', 'max:9999999999999'],
-        'quality'           => ['nullable', 'integer', 'between:1,5'],
-        'purchase_id'       => ['nullable', 'integer'],
+        'depreciable_cost' => ['nullable', 'numeric', 'gte:0', 'max:9999999999999'],
+        'quality' => ['nullable', 'integer', 'between:1,5'],
+        'purchase_id' => ['nullable', 'integer'],
         'nds' => ['nullable', 'integer'],
     ];
 
@@ -320,15 +366,26 @@ class Asset extends Depreciable
     /**
      * Returns the warranty expiration date as Carbon object
      *
-     * @return Carbon|null
+     * @return Attribute<Carbon|null, never>
+     *
+     * @SuppressWarnings("PHPMD.UnusedFormalParameter")
+     * `$value` is unused because this is a computed accessor - the
+     * warranty expiration is derived from purchase_date +
+     * warranty_months, not stored as its own column. Laravel's
+     * Attribute closure signature is positional though (`$value` must
+     * be the first parameter), so we can't drop it. Suppression tells
+     * PHPMD / Codacy to stop flagging.
      */
     protected function warrantyExpires(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value, array $attributes) => ($attributes['warranty_months'] && $attributes['purchase_date']) ? Carbon::parse($attributes['purchase_date'])->addMonths((int) $attributes['warranty_months']) : null,
+            get: fn (mixed $value, array $attributes) => (! empty($attributes['warranty_months']) && ! empty($attributes['purchase_date'])) ? Carbon::parse($attributes['purchase_date'])->addMonths((int) $attributes['warranty_months']) : null,
         );
     }
 
+    /**
+     * @return Attribute<string|null, never>
+     */
     protected function warrantyExpiresFormattedDate(): Attribute
     {
 
@@ -337,6 +394,9 @@ class Asset extends Depreciable
         );
     }
 
+    /**
+     * @return Attribute<float|null, never>
+     */
     protected function warrantyExpiresDiff(): Attribute
     {
         return Attribute::make(
@@ -345,6 +405,9 @@ class Asset extends Depreciable
 
     }
 
+    /**
+     * @return Attribute<string|null, never>
+     */
     protected function warrantyExpiresDiffForHumans(): Attribute
     {
         return Attribute::make(
@@ -353,6 +416,9 @@ class Asset extends Depreciable
 
     }
 
+    /**
+     * @return Attribute<string|null, never>
+     */
     protected function lastAuditFormattedDate(): Attribute
     {
 
@@ -361,6 +427,9 @@ class Asset extends Depreciable
         );
     }
 
+    /**
+     * @return Attribute<float|null, never>
+     */
     protected function lastAuditDiff(): Attribute
     {
         return Attribute::make(
@@ -369,6 +438,9 @@ class Asset extends Depreciable
 
     }
 
+    /**
+     * @return Attribute<string|null, never>
+     */
     protected function lastAuditDiffForHumans(): Attribute
     {
         return Attribute::make(
@@ -377,6 +449,9 @@ class Asset extends Depreciable
 
     }
 
+    /**
+     * @return Attribute<string|null, never>
+     */
     protected function nextAuditFormattedDate(): Attribute
     {
 
@@ -385,6 +460,9 @@ class Asset extends Depreciable
         );
     }
 
+    /**
+     * @return Attribute<float|null, never>
+     */
     protected function nextAuditDiffInDays(): Attribute
     {
         return Attribute::make(
@@ -392,6 +470,9 @@ class Asset extends Depreciable
         );
     }
 
+    /**
+     * @return Attribute<string|null, never>
+     */
     protected function nextAuditDiffForHumans(): Attribute
     {
         return Attribute::make(
@@ -400,6 +481,9 @@ class Asset extends Depreciable
 
     }
 
+    /**
+     * @return Attribute<Carbon|null, never>
+     */
     protected function eolDate(): Attribute
     {
 
@@ -417,6 +501,9 @@ class Asset extends Depreciable
 
     }
 
+    /**
+     * @return Attribute<string|null, never>
+     */
     protected function eolFormattedDate(): Attribute
     {
         return Attribute::make(
@@ -424,6 +511,9 @@ class Asset extends Depreciable
         );
     }
 
+    /**
+     * @return Attribute<float|null, never>
+     */
     protected function eolDiffInDays(): Attribute
     {
         return Attribute::make(
@@ -432,6 +522,9 @@ class Asset extends Depreciable
 
     }
 
+    /**
+     * @return Attribute<string|null, never>
+     */
     protected function eolDiffForHumans(): Attribute
     {
 
@@ -441,6 +534,9 @@ class Asset extends Depreciable
 
     }
 
+    /**
+     * @return Attribute<string|null, never>
+     */
     protected function expectedCheckinFormattedDate(): Attribute
     {
         return Attribute::make(
@@ -448,6 +544,9 @@ class Asset extends Depreciable
         );
     }
 
+    /**
+     * @return Attribute<string|null, never>
+     */
     protected function expectedCheckinDiffForHumans(): Attribute
     {
         return Attribute::make(
@@ -522,16 +621,6 @@ class Asset extends Depreciable
         return $this->status
             && ($this->status->archived == '0')
             && ($this->status->deployable == '1');
-    }
-
-
-    public function availableForReview()
-    {
-        $status = Statuslabel::where('name', 'Ожидает проверки')->first();
-        if ($this->status_id == $status->id){
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -1038,7 +1127,7 @@ class Asset extends Depreciable
      */
     public function maintenances()
     {
-        return $this->hasMany(Maintenance::class, 'asset_id')
+        return $this->morphMany(Maintenance::class, 'item')
             ->orderBy('created_at', 'desc');
     }
 
@@ -1343,7 +1432,13 @@ class Asset extends Depreciable
 
     public function getAccessoryCost()
     {
-        return (float) $this->accessories()->sum('purchase_cost');
+        // purchase_cost no longer lives on the accessories parent —
+        // per-unit cost is on the last OrderItem's price, with the
+        // parent's default_purchase_cost as fallback. lastOrderDefaults()
+        // encapsulates that fallback ladder.
+        return (float) $this->accessories()
+            ->get()
+            ->sum(fn ($accessory) => (float) ($accessory->lastOrderDefaults()['unit_cost'] ?? 0));
     }
 
     /**
@@ -1359,7 +1454,7 @@ class Asset extends Depreciable
      * in the database, but here we are.
      *
      * @param  $value
-     * @return void
+     * @return Attribute<string|null, string|null>
      */
     protected function nextAuditDate(): Attribute
     {
@@ -1369,6 +1464,9 @@ class Asset extends Depreciable
         );
     }
 
+    /**
+     * @return Attribute<string|null, string|null>
+     */
     protected function lastAuditDate(): Attribute
     {
         return Attribute::make(
@@ -1377,6 +1475,9 @@ class Asset extends Depreciable
         );
     }
 
+    /**
+     * @return Attribute<string|null, string|null>
+     */
     protected function lastCheckout(): Attribute
     {
         return Attribute::make(
@@ -1385,6 +1486,9 @@ class Asset extends Depreciable
         );
     }
 
+    /**
+     * @return Attribute<string|null, string|null>
+     */
     protected function lastCheckin(): Attribute
     {
         return Attribute::make(
@@ -1393,6 +1497,9 @@ class Asset extends Depreciable
         );
     }
 
+    /**
+     * @return Attribute<string|null, string|null>
+     */
     protected function assetEolDate(): Attribute
     {
         return Attribute::make(
@@ -1408,7 +1515,7 @@ class Asset extends Depreciable
      * This will also correctly parse a 1/0 if "true"/"false" is passed.
      *
      * @param  $value
-     * @return void
+     * @return Attribute<int, mixed>
      */
     protected function requestable(): Attribute
     {
@@ -1421,7 +1528,6 @@ class Asset extends Depreciable
     public function journal()
     {
         return $this->assetlog()->where('action_type', '=', 'note added')
-            ->orderBy('created_at', 'desc')
             ->withTrashed();
     }
 
@@ -1498,7 +1604,6 @@ class Asset extends Depreciable
 
         }
 
-
         /**
          * Assigned contracts
          */
@@ -1511,7 +1616,6 @@ class Asset extends Depreciable
             $query = $query->orWhere('assigned_contracts.name', 'LIKE', '%'.$term.'%');
 
         }
-
 
         /**
          * Assigned deals
@@ -1802,6 +1906,52 @@ class Asset extends Depreciable
      * @param  \Illuminate\Database\Query\Builder  $query  Query builder instance
      * @return \Illuminate\Database\Query\Builder Modified query builder
      */
+    public function calendarEventDefinitions(): array
+    {
+        // Most entries are marked all_day: true because they represent
+        // date-only obligations (an audit due on 2026-09-15, an EOL
+        // date, a warranty expiration). The mixed cast metadata on
+        // Asset (next_audit_date is 'datetime:m-d-Y', expected_checkin
+        // and last_checkout are 'datetime', asset_eol_date has no cast)
+        // means cast-based auto-detection wouldn't catch them
+        // uniformly, so the flag is explicit per entry.
+        //
+        // last_checkout is the one exception. Checkout happens at a
+        // specific moment in time, so the calendar shows it at that
+        // hour rather than as an all-day marker. The transformer's
+        // isAllDayField() reads all_day directly from this array, so
+        // flipping the flag here is all that's needed to switch the
+        // rendered event's shape.
+        return [
+            [
+                'field' => 'next_audit_date',
+                'event_type' => 'asset.audit_due',
+                'all_day' => true,
+            ],
+            [
+                'field' => 'expected_checkin',
+                'event_type' => 'asset.expected_checkin',
+                'all_day' => true,
+            ],
+            [
+                'field' => 'last_checkout',
+                'event_type' => 'asset.checkout',
+                'all_day' => false,
+            ],
+            [
+                'field' => 'asset_eol_date',
+                'event_type' => 'asset.eol',
+                'all_day' => true,
+            ],
+            [
+                'field' => 'warranty_expires',
+                'event_type' => 'asset.warranty_expiration',
+                'trigger_fields' => ['purchase_date', 'warranty_months'],
+                'all_day' => true,
+            ],
+        ];
+    }
+
     public function scopeAssetsForShow($query)
     {
         // Pluck IDs then whereIn — do NOT replace with whereHas. whereHas generates a correlated EXISTS per row and causes severe slowdowns in withCount contexts.
@@ -1845,7 +1995,7 @@ class Asset extends Depreciable
      * @param  \Illuminate\Database\Query\Builder  $query  Query builder instance
      * @return \Illuminate\Database\Query\Builder Modified query builder
      */
-    public function scopeRequestableAssets($query): Builder
+    public function scopeRequestable($query): Builder
     {
         $table = $query->getModel()->getTable();
 
@@ -2246,137 +2396,6 @@ class Asset extends Depreciable
         return $this->hasMany(\App\Models\InventoryItem::class);
     }
 
-    public function purchase()
-    {
-        return $this->belongsTo(\App\Models\Purchase::class);
-    }
-
-    public function user_verified()
-    {
-        return $this->belongsTo(\App\Models\User::class, 'user_verified_id');
-    }
-
-
-    public function setStatusAfterPaid()
-    {
-        $status_in_purchase = Statuslabel::where('name', 'В закупке')->first();
-        $status_inventory_wait = Statuslabel::where('name', 'Ожидает инвентаризации')->first();
-
-        // меняем статус на Ожидает инвентаризации, только если актив в статусе "В закупке"
-        if ($this->status_id == $status_in_purchase->id) {
-            $this->status_id = $status_inventory_wait->id;
-        }
-    }
-
-
-
-    /**
-     * Sell the asset out to the target
-     *
-     * @author [S. Markin] [<markin@legis-s.ru>]
-     *
-     * @param User $user
-     * @param User $admin
-     * @param Carbon $checkout_at
-     * @param Carbon $expected_checkin
-     * @param string $note
-     * @param null $name
-     * @return bool
-     *
-     */
-    public function sell($target, $admin = null, $checkout_at = null, $note = null, $name = null)
-    {
-        if (! $target) {
-            return false;
-        }
-        if ($this->is($target)) {
-            throw new CheckoutNotAllowed('You cannot check an asset out to itself.');
-        }
-
-        $this->last_checkout = $checkout_at;
-        $this->location_id = null;
-        $this->rtd_location_id = null;
-        $this->name = $name;
-
-        $status = Statuslabel::where('name', 'Продано')->first();
-        $this->status_id = $status->id;
-        $this->assignedTo()->associate($target);
-
-        $originalValues = $this->getRawOriginal();
-
-        // attempt to detect change in value if different from today's date
-        if ($checkout_at && strpos($checkout_at, date('Y-m-d')) === false) {
-            $originalValues['action_date'] = date('Y-m-d H:i:s');
-        }
-        if ($this->save()) {
-            if (is_int($admin)) {
-                $checkedOutBy = User::findOrFail($admin);
-            } elseif (get_class($admin) === \App\Models\User::class) {
-                $checkedOutBy = $admin;
-            } else {
-                $checkedOutBy = auth()->user();
-            }
-            event(new CheckoutableSell($this, $target, $checkedOutBy, $note, $originalValues));
-            $this->increment('checkout_counter', 1);
-
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Rent the asset out to the target
-     * @author [S. Markin] [<markin@legis-s.ru>]
-     * @param Carbon $checkout_at
-     * @param string $note
-     * @param null $name
-     * @return bool
-     * @since [v3.0]
-     * @return bool
-     */
-    public function rent($target, $admin = null, $checkout_at = null, $note = null, $name = null)
-    {
-        if (! $target) {
-            return false;
-        }
-        if ($this->is($target)) {
-            throw new CheckoutNotAllowed('You cannot check an asset out to itself.');
-        }
-
-        $this->last_checkout = $checkout_at;
-        $this->location_id = null;
-        $this->rtd_location_id = null;
-        $this->name = $name;
-
-        $status = Statuslabel::where('name', 'В аренде')->first();
-        $this->status_id = $status->id;
-        $this->assignedTo()->associate($target);
-
-        $originalValues = $this->getRawOriginal();
-
-        // attempt to detect change in value if different from today's date
-        if ($checkout_at && strpos($checkout_at, date('Y-m-d')) === false) {
-            $originalValues['action_date'] = date('Y-m-d H:i:s');
-        }
-
-        if ($this->save()) {
-            if (is_int($admin)) {
-                $checkedOutBy = User::findOrFail($admin);
-            } elseif (get_class($admin) === \App\Models\User::class) {
-                $checkedOutBy = $admin;
-            } else {
-                $checkedOutBy = auth()->user();
-            }
-            event(new CheckoutableRent($this, $target, $checkedOutBy, $note, $originalValues));
-            $this->increment('checkout_counter', 1);
-
-            return true;
-        }
-
-        return false;
-    }
-
     /**
      * Get the phone associated with the user.
      */
@@ -2384,5 +2403,4 @@ class Asset extends Depreciable
     {
         return $this->hasOne(Device::class);
     }
-
 }

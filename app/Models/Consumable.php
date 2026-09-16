@@ -4,19 +4,24 @@ namespace App\Models;
 
 use App\Events\CheckoutableCheckedOut;
 use App\Events\CheckoutableSell;
-use App\Helpers\Helper;
 use App\Models\Traits\Acceptable;
+use App\Models\Traits\AdjustsQuantity;
 use App\Models\Traits\CompanyableTrait;
+use App\Models\Traits\HasLegacyPurchaseLinks;
+use App\Models\Traits\HasOrders;
 use App\Models\Traits\HasUploads;
 use App\Models\Traits\Loggable;
+use App\Models\Traits\LogsAssetWorkflows;
+use App\Models\Traits\Requestable;
 use App\Models\Traits\Searchable;
 use App\Presenters\ConsumablePresenter;
 use App\Presenters\Presentable;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Watson\Validating\ValidatingTrait;
@@ -28,19 +33,22 @@ class Consumable extends SnipeModel
     protected $presenter = ConsumablePresenter::class;
 
     use Acceptable;
+    use AdjustsQuantity;
     use CompanyableTrait;
+    use HasLegacyPurchaseLinks;
+    use HasOrders;
     use HasUploads;
     use Loggable, Presentable;
+    use LogsAssetWorkflows;
+    use Requestable;
     use SoftDeletes;
 
     protected $table = 'consumables';
 
     protected $casts = [
-        'purchase_date' => 'datetime',
         'requestable' => 'boolean',
         'category_id' => 'integer',
         'company_id' => 'integer',
-        'supplier_id',
         'qty' => 'integer',
         'min_amt' => 'integer',
     ];
@@ -57,6 +65,9 @@ class Consumable extends SnipeModel
         'min_amt' => 'integer|min:0|max:99999|nullable',
         'purchase_cost' => 'numeric|nullable|gte:0|max:99999999999999999.99',
         'purchase_date' => 'date_format:Y-m-d|nullable',
+        'default_supplier_id' => 'nullable|integer|exists:suppliers,id',
+        'default_purchase_cost' => 'numeric|nullable|gte:0|max:99999999999999999.99',
+        'requestable' => 'nullable|boolean',
     ];
 
     /**
@@ -75,22 +86,24 @@ class Consumable extends SnipeModel
      *
      * @var array
      */
+    // supplier_id / purchase_date / purchase_cost are intentionally
+    // absent. See Accessory::$fillable for the full rationale.
+    // default_supplier_id / default_purchase_cost are parent-level
+    // "template" values that seed the adjust-quantity modal.
     protected $fillable = [
         'category_id',
         'company_id',
         'item_no',
         'location_id',
         'manufacturer_id',
-        'supplier_id',
         'name',
-        'order_number',
         'model_number',
-        'purchase_cost',
-        'purchase_date',
         'qty',
         'min_amt',
         'requestable',
         'notes',
+        'default_supplier_id',
+        'default_purchase_cost',
     ];
 
     use Searchable;
@@ -102,9 +115,6 @@ class Consumable extends SnipeModel
      */
     protected $searchableAttributes = [
         'name',
-        'order_number',
-        'purchase_cost',
-        'purchase_date',
         'item_no',
         'model_number',
         'notes',
@@ -120,26 +130,20 @@ class Consumable extends SnipeModel
         'company' => ['name'],
         'location' => ['name'],
         'manufacturer' => ['name'],
-        'model' => ['name', 'model_number'],
-        'model.category' => ['name'],
-        'supplier' => ['name'],
+        // Search by the parent's "typical supplier" template — see the
+        // Accessory model for the rationale.
+        'defaultSupplier' => ['name'],
         'adminuser' => ['first_name', 'last_name', 'display_name'],
+        // See Accessory::$searchableRelations. Search hits order_number
+        // through the HasOrders trait's orders() HasManyThrough into
+        // the Orders table so historical order references still match.
+        'orders' => ['order_number'],
     ];
 
     /**
-     * Sets the attribute of whether or not the consumable is requestable
-     *
-     * This isn't really implemented yet, as you can't currently request a consumable
-     * however it will be implemented in the future, and we needed to include
-     * this method here so all of our polymorphic methods don't break.
-     *
-     * @todo Update this comment once it's been implemented
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     *
-     * @since  [v3.0]
-     *
-     * @return Relation
+     * Normalize the requestable form input so an empty string from an
+     * unchecked checkbox lands as false rather than a truthy "0" cast
+     * (matches Accessory::setRequestableAttribute).
      */
     public function setRequestableAttribute($value)
     {
@@ -147,6 +151,18 @@ class Consumable extends SnipeModel
             $value = null;
         }
         $this->attributes['requestable'] = filter_var($value, FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
+     * Scope query to only requestable consumables. FMCS + location
+     * scoping falls out of the CompanyableTrait global scope, so the
+     * usual "user only sees rows in their reachable companies" rule
+     * applies without any additional wrapping here (matches the
+     * Accessory scope's shape and rationale).
+     */
+    public function scopeRequestable($query)
+    {
+        return $query->where('consumables.requestable', '1');
     }
 
     public function isDeletable()
@@ -293,9 +309,16 @@ class Consumable extends SnipeModel
      *
      * @return Relation
      */
-    public function supplier()
+    // No `supplier()` relation, no `supplier_id` / `purchase_date` /
+    // `purchase_cost` accessors — see Accessory model for rationale.
+    // Callers use `$consumable->orders` or `$consumable->lastOrderDefaults()`.
+
+    /**
+     * Parent-level "typical supplier" template — see Accessory model.
+     */
+    public function defaultSupplier(): BelongsTo
     {
-        return $this->belongsTo(Supplier::class, 'supplier_id');
+        return $this->belongsTo(Supplier::class, 'default_supplier_id');
     }
 
     /**
@@ -333,14 +356,22 @@ class Consumable extends SnipeModel
      * @author [A. Gianotto] [<snipe@snipe.net>]
      *
      * @since  [v5.0]
-     *
-     * @return int
      */
-    public function numCheckedOut() : int
+    public function numCheckedOut(): int
     {
         return (int) ConsumableAssignment::where('consumable_id', $this->id)
             ->whereIn('type', [ConsumableAssignment::SOLD, ConsumableAssignment::ISSUED])
-            ->sum('quantity');
+            ->sum('quantity') + $this->users()->count();
+    }
+
+    /**
+     * AdjustsQuantity trait hook: units currently distributed to users.
+     * The adjust-quantity modal uses this to reject decrements that
+     * would leave the on-hand qty below what's already handed out.
+     */
+    public function currentlyInUseCount(): int
+    {
+        return (int) $this->numCheckedOut();
     }
 
     /**
@@ -359,12 +390,6 @@ class Consumable extends SnipeModel
         $remaining = $total - $checkedout;
 
         return $remaining;
-    }
-
-    public function totalCostSum()
-    {
-
-        return $this->purchase_cost !== null ? $this->qty * $this->purchase_cost : null;
     }
 
     /**
@@ -478,7 +503,7 @@ class Consumable extends SnipeModel
      */
     public function scopeOrderRemaining($query, $order)
     {
-        $order_by = 'consumables.qty - consumables_users_count '.$order;
+        $order_by = 'consumables.qty - consumables_users_count - COALESCE(assigned_quantity, 0) '.$order;
 
         return $query->orderByRaw($order_by);
     }
@@ -492,12 +517,32 @@ class Consumable extends SnipeModel
      */
     public function scopeOrderSupplier($query, $order)
     {
-        return $query->leftJoin('suppliers', 'consumables.supplier_id', '=', 'suppliers.id')->orderBy('suppliers.name', $order);
+        return $query->leftJoin('suppliers', 'consumables.default_supplier_id', '=', 'suppliers.id')->orderBy('suppliers.name', $order);
     }
 
     public function scopeOrderByCreatedBy($query, $order)
     {
         return $query->leftJoin('users as users_sort', 'consumables.created_by', '=', 'users_sort.id')->select('consumables.*')->orderBy('users_sort.first_name', $order)->orderBy('users_sort.last_name', $order);
+    }
+
+    /**
+     * Query builder scope to sort by the calculated `% remaining` column.
+     *
+     * Counts both legacy user checkouts and custom issued/sold quantities.
+     * The API index adds the count and sum aliases before this scope runs.
+     * Guards against division by zero for consumables with qty of 0.
+     *
+     * PostgreSQL note: references a SELECT-list alias inside a compound
+     * ORDER BY expression, which PostgreSQL rejects per SQL standard.
+     * Snipe-IT officially supports MySQL/MariaDB and tests on SQLite
+     * (both allow this); moving to PostgreSQL would require inlining
+     * the subquery or wrapping the query in an outer SELECT.
+     */
+    public function scopeOrderPercentRemaining($query, $order)
+    {
+        $direction = strtolower($order) === 'asc' ? 'asc' : 'desc';
+
+        return $query->orderByRaw('CASE WHEN consumables.qty = 0 THEN 0 ELSE ((consumables.qty - consumables_users_count - COALESCE(assigned_quantity, 0)) * 100.0 / consumables.qty) END '.$direction);
     }
 
     public function contract()
@@ -530,34 +575,51 @@ class Consumable extends SnipeModel
      */
     public function checkOut($target, $quantity = 1, $note = null, bool $signInPlace = false): bool
     {
-        if (! $target) {
+        if (! $target || filter_var($quantity, FILTER_VALIDATE_INT) === false || (int) $quantity < 1) {
+            $this->setErrors(new \Illuminate\Support\MessageBag([
+                'checkout_qty' => trans('validation.min.numeric', ['attribute' => 'checkout_qty', 'min' => 1]),
+            ]));
+
             return false;
         }
 
-        $quantity = (int) $quantity;
-        $this->checkout_qty = $quantity;
+        return DB::transaction(function () use ($target, $quantity, $note, $signInPlace): bool {
+            $locked = static::whereKey($this->id)->lockForUpdate()->first();
+            if (! $locked || ! $locked->canCheckoutTo($target) || $locked->numRemaining() < (int) $quantity) {
+                $this->setErrors(new \Illuminate\Support\MessageBag([
+                    'checkout_qty' => trans('admin/consumables/message.checkout.unavailable', [
+                        'requested' => $quantity, 'remaining' => $locked?->numRemaining() ?? 0,
+                    ]),
+                ]));
 
-        $type = ConsumableAssignment::ISSUED;
-        if (is_a($target, Deal::class, true)) {
-            $type = ConsumableAssignment::SOLD;
-        }
+                return false;
+            }
+            $quantity = (int) $quantity;
+            $this->checkout_qty = $quantity;
 
-        $this->locations()->attach($this->id, [
-            'consumable_id' => $this->id,
-            'created_by' => auth()->id(),
-            'quantity' => $quantity,
-            'comment' => $note,
-            'cost' => $this->purchase_cost,
-            'type' => $type,
-            'assigned_to' => $target->id,
-            'assigned_type' => get_class($target),
-        ]);
+            $type = ConsumableAssignment::ISSUED;
+            if (is_a($target, Deal::class, true)) {
+                $type = ConsumableAssignment::SOLD;
+            }
 
-        if (is_a($target, Deal::class, true)) {
-            event(new CheckoutableSell($this, $target, auth()->user(), $note));
-        }else{
-            event(new CheckoutableCheckedOut($this, $target, auth()->user(), $note, [], $quantity, $signInPlace));
-        }
-        return true;
+            $this->locations()->attach($this->id, [
+                'consumable_id' => $this->id,
+                'created_by' => auth()->id(),
+                'quantity' => $quantity,
+                'comment' => $note,
+                'cost' => $this->lastOrderDefaults()['unit_cost'] ?? null,
+                'type' => $type,
+                'assigned_to' => $target->id,
+                'assigned_type' => get_class($target),
+            ]);
+
+            if (is_a($target, Deal::class, true)) {
+                event(new CheckoutableSell($this, $target, auth()->user(), $note));
+            } else {
+                event(new CheckoutableCheckedOut($this, $target, auth()->user(), $note, [], $quantity, $signInPlace));
+            }
+
+            return true;
+        });
     }
 }

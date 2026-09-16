@@ -1,22 +1,24 @@
 <?php
 
 return [
-    'not_found' => 'Maintenance type not found.',
+    'not_found' => 'Не найден тип обслуживания.',
     'create' => [
-        'error' => 'Maintenance type was not created, please try again.',
-        'success' => 'Maintenance type created successfully.',
+        'error' => 'Тип обслуживания не был создан, пожалуйста попробуйте ещё раз.',
+        'success' => 'Тип обслуживания успешно создан.',
     ],
     'update' => [
-        'error' => 'Maintenance type was not updated, please try again.',
-        'success' => 'Maintenance type updated successfully.',
+        'error' => 'Тип обслуживания не был обновлен, пожалуйста попробуйте ещё раз.',
+        'success' => 'Тип обслуживания успешно обновлен.',
     ],
     'delete' => [
-        'confirm' => 'Are you sure you wish to delete this maintenance type?',
-        'error' => 'There was an issue deleting this maintenance type. Please try again.',
-        'success' => 'The maintenance type was deleted successfully.',
+        'bulk_success' => 'Удалён :count тип обслуживания.|Удалено :count типа обслуживания.|Удалено :count типов обслуживания.',
+        'partial_success' => 'Удалён :count тип обслуживания. Подробности ниже.|Удалено :count типа обслуживания. Подробности ниже.|Удалено :count типов обслуживания. Подробности ниже.',
+        'confirm' => 'Вы действительно хотите удалить этот тип обслуживания?',
+        'error' => 'Возникла проблема с удалением этого типа обслуживания. Пожалуйста, попробуйте еще раз.',
+        'success' => 'Тип обслуживания успешно обновлен.',
     ],
     'complete' => [
-        'success' => 'Maintenance marked as complete.',
-        'error' => 'There was an issue marking this maintenance as complete. Please try again.',
+        'success' => 'Обслуживание отмечено как завершенное.',
+        'error' => 'Возникла проблема с пометкой этого обслуживания как завершенного. Пожалуйста, попробуйте снова.',
     ],
 ];

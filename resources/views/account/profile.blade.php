@@ -24,10 +24,10 @@
                   input_div_class="col-md-6"
               >
                   <x-slot:input>
-                      @if (!config('app.lock_passwords'))
+                      @if (! config('app.lock_passwords'))
                           <x-input.locale-select name="locale" :selected="old('locale', $user->locale)"/>
                       @else
-                          <x-form.help name="locale">{{ trans('general.feature_disabled') }}</x-form.help>
+                          <x-demo-lock>{{ trans('general.feature_disabled') }}</x-demo-lock>
                       @endif
                   </x-slot:input>
               </x-form.row>
@@ -160,7 +160,7 @@
                             <x-slot:input>
                                 <input class="form-control" type="text" name="gravatar" id="gravatar" value="{{ old('gravatar', $user->gravatar) }}" />
                                 <p style="padding-top: 3px;">
-                                    <img src="//secure.gravatar.com/avatar/{{ md5(strtolower(trim($user->gravatar))) }}" width="30" height="30" alt="{{ $user->display_name }} avatar image">
+                                    <img src="//secure.gravatar.com/avatar/{{ md5(strtolower(trim($user->gravatar))) }}" width="30" height="30" referrerpolicy="no-referrer" alt="{{ $user->display_name }} avatar image">
                                     {!! trans('general.gravatar_url') !!}
                                 </p>
                             </x-slot:input>
@@ -183,9 +183,7 @@
                             @else
                                 <x-form.help name="two_factor_optin">{{ trans('admin/settings/general.two_factor_enabled_edit_not_allowed') }}</x-form.help>
                             @endcan
-                            @if (config('app.lock_passwords'))
-                                <x-form.help name="two_factor_optin_lock">{{ trans('general.feature_disabled') }}</x-form.help>
-                            @endif
+                            <x-demo-lock>{{ trans('general.feature_disabled') }}</x-demo-lock>
                         </div>
                     @endif
           </fieldset>

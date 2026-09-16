@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Purchases\DeletePurchasesAction;
 use App\Http\Requests\FileUploadRequest;
 use App\Http\Requests\RecognizePurchaseInvoiceRequest;
 use App\Models\Asset;
@@ -11,15 +12,14 @@ use App\Models\Purchase;
 use App\Models\Statuslabel;
 use App\Models\Supplier;
 use App\Models\User;
-use App\Services\PurchaseInvoiceMapper;
 use App\Services\PurchaseInvoiceItemResolver;
+use App\Services\PurchaseInvoiceMapper;
 use App\Services\TimewebInvoiceRecognizer;
-use Carbon\Carbon;
 use DateTime;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
@@ -52,13 +52,15 @@ class PurchasesController extends Controller
         $users = User::find($ids);
         $suppliers = Supplier::find($ids_s);
         $this->authorize('view', Location::class);
+
         return view('purchases/index', compact('users', 'suppliers'));
     }
 
     /**
      * Returns a view that invokes the ajax tables which actually contains
      * the content for the locations detail page.
-     * @param int $purchaseId
+     *
+     * @param  int  $purchaseId
      */
     public function show(Purchase $purchase): View|RedirectResponse
     {
@@ -69,10 +71,11 @@ class PurchasesController extends Controller
         if (isset($purchase->id)) {
             $consumables_json = $purchase->consumables_json;
             $consumables = json_decode($consumables_json, true);
-            if (count($consumables) > 0 && isset($consumables[0]["category_id"])) {
+            if (count($consumables) > 0 && isset($consumables[0]['category_id'])) {
                 $old = true;
             }
-            return view('purchases/view', compact('purchase', "old"));
+
+            return view('purchases/view', compact('purchase', 'old'));
         }
 
         return redirect()->route('purchases.index')->with('error', trans('admin/locations/message.does_not_exist'));
@@ -98,17 +101,18 @@ class PurchasesController extends Controller
         return response()->download($path, $filename);
     }
 
-
     /**
      * Returns a form view used to create a new purchase.
+     *
      * @see PurchasesController::postCreate() method that validates and stores the data
      */
     public function create(): View
     {
         $this->authorize('create', Purchase::class);
+
         return view('purchases/edit')
             ->with('item', new Purchase);
-//            ->with('depreciation_list', Helper::depreciationList());
+        //            ->with('depreciation_list', Helper::depreciationList());
     }
 
     public function recognizeInvoice(
@@ -135,16 +139,16 @@ class PurchasesController extends Controller
 
     /**
      * Validates and stores a new purchase.
+     *
      * @see PurchasesController::getCreate() method that makes the form
      */
     public function store(
         FileUploadRequest $request,
         PurchaseInvoiceItemResolver $itemResolver
-    ): RedirectResponse
-    {
+    ): RedirectResponse {
         $this->authorize('create', Purchase::class);
 
-        $data_list = "";
+        $data_list = '';
         $assets = [];
         if ($request->filled('assets')) {
             $assets = json_decode($request->input('assets'), true);
@@ -166,24 +170,24 @@ class PurchasesController extends Controller
         }
 
         if (count($consumables) > 0) {
-            $data_list .= "Компоненты:" . "\n";
+            $data_list .= 'Компоненты:'."\n";
             foreach ($consumables as &$consumable) {
-                $consumable_name = $consumable["consumable"];
-                $consumable_id = $consumable["consumable_id"];
-                $purchase_cost = $consumable["purchase_cost"];
-                $quantity = $consumable["quantity"];
-                $data_list .= "[" . $consumable_id . "] " . $consumable_name . " - Количество: " . $quantity . " Цена: " . $purchase_cost . "\n";
+                $consumable_name = $consumable['consumable'];
+                $consumable_id = $consumable['consumable_id'];
+                $purchase_cost = $consumable['purchase_cost'];
+                $quantity = $consumable['quantity'];
+                $data_list .= '['.$consumable_id.'] '.$consumable_name.' - Количество: '.$quantity.' Цена: '.$purchase_cost."\n";
             }
         }
         $consumables_sorted = [];
         if (count($consumables) > 0) {
             foreach ($consumables as &$consumable) {
-                $consumable_id = $consumable["consumable_id"];
+                $consumable_id = $consumable['consumable_id'];
                 $need_add = true;
                 foreach ($consumables_sorted as &$cons_sorted) {
-                    if ($consumable_id == $cons_sorted["consumable_id"]) {
+                    if ($consumable_id == $cons_sorted['consumable_id']) {
                         $need_add = false;
-                        $cons_sorted["quantity"] = $consumable["quantity"] + $cons_sorted["quantity"];
+                        $cons_sorted['quantity'] = $consumable['quantity'] + $cons_sorted['quantity'];
                     }
                 }
                 if ($need_add) {
@@ -193,8 +197,7 @@ class PurchasesController extends Controller
         }
         $consumables = json_encode($consumables_sorted, JSON_UNESCAPED_UNICODE);
 
-
-        $purchase = new Purchase();
+        $purchase = new Purchase;
         $purchase->invoice_number = $request->input('invoice_number');
         $purchase->final_price = $request->input('final_price');
         $purchase->supplier_id = $request->input('supplier_id');
@@ -205,36 +208,36 @@ class PurchasesController extends Controller
         $purchase->assets_json = json_encode($assets, JSON_UNESCAPED_UNICODE);
         $purchase->delivery_cost = $request->input('delivery_cost');
         $purchase->created_by = auth()->id();
-        $purchase->currency = "руб";
+        $purchase->currency = 'руб';
         $purchase->setStatusInprogress();
 
-        $purchase = $request->handleFile($purchase, public_path() . '/uploads/purchases');
+        $purchase = $request->handleFile($purchase, public_path().'/uploads/purchases');
 
         $status = Statuslabel::where('name', 'В закупке')->first();
         if ($purchase->save()) {
             if (count($assets) > 0) {
-                $data_list .= "Активы:" . "\n";
+                $data_list .= 'Активы:'."\n";
                 foreach ($assets as &$value) {
-                    $model = $value["model"];
-                    $model_id = $value["model_id"];
-                    $purchase_cost = $value["purchase_cost"];
-                    $nds = $value["nds"];
-                    $warranty = $value["warranty"];
-                    $quantity = $value["quantity"];
+                    $model = $value['model'];
+                    $model_id = $value['model_id'];
+                    $purchase_cost = $value['purchase_cost'];
+                    $nds = $value['nds'];
+                    $warranty = $value['warranty'];
+                    $quantity = $value['quantity'];
                     $location_id = null;
-                    if (isset($value["location_id"]) && $value["location_id"] > 0) {
-                        $location_id = $value["location_id"];
+                    if (isset($value['location_id']) && $value['location_id'] > 0) {
+                        $location_id = $value['location_id'];
                     }
-                    $data_list .= "[" . $value["id"] . "] " . $model . " - Количество: " . $quantity . " Цена: " . $purchase_cost . "\n";
+                    $data_list .= '['.$value['id'].'] '.$model.' - Количество: '.$quantity.' Цена: '.$purchase_cost."\n";
 
-                    $dt = new DateTime();
+                    $dt = new DateTime;
                     for ($i = 1; $i <= $quantity; $i++) {
                         $asset_tag = Asset::autoincrement_asset();
-                        \Debugbar::info("NEW asset_tag");
+                        \Debugbar::info('NEW asset_tag');
                         \Debugbar::info($asset_tag);
-                        $asset = new Asset();
+                        $asset = new Asset;
                         $asset->model()->associate(AssetModel::find((int) $model_id));
-                        $asset->asset_tag =  $asset_tag;
+                        $asset->asset_tag = $asset_tag;
                         $asset->model_id = $model_id;
                         $asset->order_number = $purchase->invoice_number;
                         $asset->archived = '0';
@@ -248,9 +251,8 @@ class PurchasesController extends Controller
                         $asset->purchase_date = date('Y-m-d');
                         $asset->supplier_id = $purchase->supplier_id;
                         $asset->purchase_id = $purchase->id;
-                        $asset->created_by    = auth()->id();
+                        $asset->created_by = auth()->id();
                         $asset->location_id = $location_id;
-
 
                         if ($asset->isValid() && $asset->save()) {
                         } else {
@@ -261,12 +263,11 @@ class PurchasesController extends Controller
                 $data_list .= "\n";
             }
 
-
             if ($purchase->delivery_cost > 0) {
-                $data_list .= "Стоимость доставки:  " . $purchase->delivery_cost;
+                $data_list .= 'Стоимость доставки:  '.$purchase->delivery_cost;
             }
 
-            $file_data = file_get_contents(public_path() . '/uploads/purchases/' . $purchase->invoice_file);
+            $file_data = file_get_contents(public_path().'/uploads/purchases/'.$purchase->invoice_file);
 
             // Encode the image string data into base64
             $file_data_base64 = base64_encode($file_data);
@@ -274,35 +275,35 @@ class PurchasesController extends Controller
             $user = auth()->user();
 
             /** @var \GuzzleHttp\Client $client */
-            $client = new \GuzzleHttp\Client();
+            $client = new \GuzzleHttp\Client;
             $params = [
                 'headers' => [
                     'Content-Type' => 'multipart/form-data',
                 ],
                 'form_params' => [
-                    "IBLOCK_TYPE_ID" => "lists",
-                    "IBLOCK_ID" => 52,
-                    "ELEMENT_CODE" => "warehouse_buy_" . $purchase->id,
-                    "FIELDS[NAME]" => $purchase->invoice_number,
-                    "FIELDS[CREATED_BY]" => $user->bitrix_id,
-                    "FIELDS[PROPERTY_758]" => $purchase->invoice_type->bitrix_id, // тип платежа
-                    "FIELDS[PROPERTY_141]" => $purchase->comment, //описание
-                    "FIELDS[PROPERTY_142]" => $purchase->final_price, //сумма
-                    "FIELDS[PROPERTY_1641]" => $purchase->legal_person->bitrix_id, //Юр. лицо
-                    "FIELDS[PROPERTY_824]" => $purchase->supplier->bitrix_id, //Поставщик bitrix_id
-                    "FIELDS[PROPERTY_143][0]" => $purchase->invoice_file, //файл имя
-                    "FIELDS[PROPERTY_143][1]" => $file_data_base64, //файл base64
-                    "FIELDS[PROPERTY_1132]" => $data_list, // что покупаем
-                    "FIELDS[PROPERTY_1134]" => $purchase->id . "", //id заказа
-                ]
+                    'IBLOCK_TYPE_ID' => 'lists',
+                    'IBLOCK_ID' => 52,
+                    'ELEMENT_CODE' => 'warehouse_buy_'.$purchase->id,
+                    'FIELDS[NAME]' => $purchase->invoice_number,
+                    'FIELDS[CREATED_BY]' => $user->bitrix_id,
+                    'FIELDS[PROPERTY_758]' => $purchase->invoice_type->bitrix_id, // тип платежа
+                    'FIELDS[PROPERTY_141]' => $purchase->comment, // описание
+                    'FIELDS[PROPERTY_142]' => $purchase->final_price, // сумма
+                    'FIELDS[PROPERTY_1641]' => $purchase->legal_person->bitrix_id, // Юр. лицо
+                    'FIELDS[PROPERTY_824]' => $purchase->supplier->bitrix_id, // Поставщик bitrix_id
+                    'FIELDS[PROPERTY_143][0]' => $purchase->invoice_file, // файл имя
+                    'FIELDS[PROPERTY_143][1]' => $file_data_base64, // файл base64
+                    'FIELDS[PROPERTY_1132]' => $data_list, // что покупаем
+                    'FIELDS[PROPERTY_1134]' => $purchase->id.'', // id заказа
+                ],
             ];
             $params_json = json_encode($params);
-            file_put_contents(public_path() . '/uploads/purchases/' . $purchase->id . '.json', $params_json);
+            file_put_contents(public_path().'/uploads/purchases/'.$purchase->id.'.json', $params_json);
 
-            $purchase->bitrix_send_json = $purchase->id . '.json';
+            $purchase->bitrix_send_json = $purchase->id.'.json';
             $purchase->save();
 
-//            \Debugbar::info("send bitrix");
+            //            \Debugbar::info("send bitrix");
             $raw_bitrix_token = $user->decryptedBitrixToken();
             if (! $raw_bitrix_token || ! $user->bitrix_id) {
                 $purchase->setStatusError();
@@ -334,15 +335,17 @@ class PurchasesController extends Controller
                 return redirect()->route('purchases.index')->with('error', trans('general.bitrix_send_failed'));
             }
 
-            return redirect()->route("purchases.index")->with('success', trans('admin/locations/message.create.success'));
+            return redirect()->route('purchases.index')->with('success', trans('admin/locations/message.create.success'));
         }
+
         return redirect()->back()->withInput()->withErrors($purchase->getErrors());
     }
 
-
     /**
      * Makes a form view to edit location information.
-     * @param int $purchaseId
+     *
+     * @param  int  $purchaseId
+     *
      * @since [v1.0]
      */
     public function edit($purchaseId = null): View|RedirectResponse
@@ -353,15 +356,15 @@ class PurchasesController extends Controller
             return redirect()->route('purchases.index')->with('error', trans('admin/locations/message.does_not_exist'));
         }
 
-
         return view('purchases/edit', compact('item'));
     }
 
-
     /**
      * Returns a view that presents a form to clone purchase.
-     * @param int $purchaseId
+     *
+     * @param  int  $purchaseId
      * @return \Illuminate\Contracts\View\View
+     *
      * @since [v1.0]
      */
     public function getClone($purchaseId): View|RedirectResponse
@@ -382,13 +385,13 @@ class PurchasesController extends Controller
             ->with('item', $purchase);
     }
 
-
     /**
      * Validates and deletes selected purchase.
      *
-     * @param int $purchaseId
-     * @return \Illuminate\Http\RedirectResponse
+     * @param  int  $purchaseId
+     *
      * @throws \Illuminate\Auth\Access\AuthorizationException
+     *
      * @since [v1.0]
      */
     public function destroy($purchaseId): RedirectResponse
@@ -399,40 +402,20 @@ class PurchasesController extends Controller
             return redirect()->to(route('purchases.index'))->with('error', trans('admin/locations/message.not_found'));
         }
         if (! $purchase->canDeleteWithAssets()) {
-            return redirect()->to(route('purchases.index'))->with('error', "Нельзя удалить");
+            return redirect()->to(route('purchases.index'))->with('error', trans('general.purchase_delete_status_error'));
         }
 
-        DB::transaction(function () use ($purchase) {
-            $assets = Asset::where('purchase_id', $purchase->id)->get();
-
-            Asset::withoutEvents(function () use ($assets) {
-                foreach ($assets as $asset) {
-                    $asset->forceDelete();
-                }
-            });
-
-            $purchase->delete();
-        });
+        DeletePurchasesAction::run($purchase->id);
 
         return redirect()->to(route('purchases.index'))->with('success', trans('admin/locations/message.delete.success'));
     }
 
-
-    public function deleteAllRejected(): View|RedirectResponse
+    public function deleteAllRejected(Request $request): RedirectResponse
     {
         $this->authorize('delete', Purchase::class);
+        $request->validate(['confirmed' => 'accepted']);
+        $total = DeletePurchasesAction::run();
 
-        $purchases = Purchase::with('assets')->where("status", Purchase::REJECTED)->get();
-        foreach ($purchases as &$purchase) {
-            $pas = $purchase->assets;
-            foreach ($pas as &$pa) {
-                $pa->unsetEventDispatcher();
-                $pa->forceDelete();
-            }
-            $purchase->delete();
-        }
-        $total = $purchases->count();
-        return redirect()->to(route('purchases.index'))->with('success', "Dell " . $total);
+        return redirect()->route('purchases.index')->with('success', trans('general.rejected_purchases_deleted', ['count' => $total]));
     }
-
 }

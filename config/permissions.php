@@ -524,6 +524,10 @@ return [
             'permission' => 'self.view_purchase_cost',
             'display' => true,
         ],
+        [
+            'permission' => 'assets.view.requestable',
+            'display' => true,
+        ],
 
     ],
 
