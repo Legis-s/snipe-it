@@ -275,10 +275,10 @@ class PurchasesController extends Controller
             $user = auth()->user();
 
             /** @var \GuzzleHttp\Client $client */
-            $client = new \GuzzleHttp\Client;
+            $client = app(\GuzzleHttp\Client::class);
             $params = [
                 'headers' => [
-                    'Content-Type' => 'multipart/form-data',
+                    'Content-Type' => 'application/x-www-form-urlencoded',
                 ],
                 'form_params' => [
                     'IBLOCK_TYPE_ID' => 'lists',
@@ -313,7 +313,7 @@ class PurchasesController extends Controller
             }
 
             try {
-                $response = $client->request('POST', env('BITRIX_URL').'rest/'.$user->bitrix_id.'/'.$raw_bitrix_token.'/lists.element.add.json/', $params);
+                $response = $client->request('POST', rtrim((string) config('services.bitrix.url'), '/').'/rest/'.$user->bitrix_id.'/'.$raw_bitrix_token.'/lists.element.add.json/', $params);
                 $response = $response->getBody()->getContents();
 
                 $purchase->bitrix_result = $response;
