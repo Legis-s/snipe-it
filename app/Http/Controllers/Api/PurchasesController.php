@@ -331,8 +331,10 @@ class PurchasesController extends Controller
                 throw new RuntimeException('Saved Bitrix payload is invalid.');
             }
 
-            $client = new \GuzzleHttp\Client;
-            $response = $client->request('POST', env('BITRIX_URL').'rest/'.$user->bitrix_id.'/'.$raw_bitrix_token.'/lists.element.add.json/', $params);
+            // Older saved payloads incorrectly marked URL-encoded forms as multipart.
+            $params['headers']['Content-Type'] = 'application/x-www-form-urlencoded';
+            $client = app(\GuzzleHttp\Client::class);
+            $response = $client->request('POST', rtrim((string) config('services.bitrix.url'), '/').'/rest/'.$user->bitrix_id.'/'.$raw_bitrix_token.'/lists.element.add.json/', $params);
             $responseBody = $response->getBody()->getContents();
             $bitrixResult = json_decode($responseBody, true);
             if (! is_array($bitrixResult) || empty($bitrixResult['result'])) {
