@@ -152,13 +152,14 @@ class Location extends SnipeModel
             && (($this->users_count ?? $this->users()->count()) === 0);
     }
 
-
     /**
-     * Determine whether or not this location can be deleted
+     * Determine whether Bitrix synchronization can hide this location.
      */
-    public function isDeletableNoGate()
+    public function isDeletableNoGate(): bool
     {
-        return  (count($this->assets) === 0) && (count($this->rtd_assets) === 0) && (count($this->assignedAssets) === 0);
+        return ! $this->assets()->exists()
+            && ! $this->rtd_assets()->exists()
+            && ! $this->assignedAssets()->withoutTrashed()->exists();
     }
 
     /**
@@ -466,6 +467,7 @@ class Location extends SnipeModel
 
     /**
      * Establishes the assigned inventories -> location assignment relationship
+     *
      * @return Relation
      */
     public function inventories()
@@ -473,14 +475,13 @@ class Location extends SnipeModel
         return $this->hasMany(Inventory::class);
     }
 
-
     /**
      * Establishes the assignedConsumables -> location assignment relationship
+     *
      * @return Relation
      */
     public function assignedConsumables()
     {
         return $this->morphMany(ConsumableAssignment::class, 'assigned', 'assigned_type', 'assigned_to');
     }
-
 }
