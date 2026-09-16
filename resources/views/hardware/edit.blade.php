@@ -309,7 +309,7 @@
                         :item="$item"
                         :currencyType="$item->id && $item->location && $item->location->currency !== '' ? $item->location->currency : null"
                 />
-                @include ('partials.forms.custom.depreciable_cost', ['currency_type' => $currency_type])
+                @include ('partials.forms.custom.depreciable_cost', ['currency_type' => $item->id && $item->location && $item->location->currency !== '' ? $item->location->currency : null])
                 <x-input.quality-select
                     :label="trans('general.quality')"
                     name="quality"

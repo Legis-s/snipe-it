@@ -481,6 +481,7 @@ class LocationsController extends Controller
             'locations.parent_id',
             'locations.image',
             'locations.tag_color',
+            'locations.sklad',
         ]);
 
         if ($request->filled('search')) {
@@ -525,34 +526,21 @@ class LocationsController extends Controller
         }
 
         $locations = $locations->orderBy('name', 'ASC')->get();
+        $favoriteLocationId = (int) auth()->user()->favorite_location_id;
+        $locations = $locations->sortBy(fn (Location $location): bool => $location->id !== $favoriteLocationId);
 
         $locations_with_children = [];
 
         // Use 0 (not null) for the top-level bucket — null array offsets are
         // deprecated in PHP 8.4 and Location::indenter expects an int key.
-        $locations_new = collect([]);
-        $favorite_location = auth()->user()->favoriteLocation;
-        if ($favorite_location){
-
-            foreach ($locations as $location) {
-                if ($location->id == $favorite_location->id){
-                    $locations_new->prepend($location);
-                }else{
-                    $locations_new->push($location);
-                }
-            }
-            $locations = $locations_new;
-        }
-
         foreach ($locations as $location) {
             $parentKey = (int) $location->parent_id;
             if (! array_key_exists($parentKey, $locations_with_children)) {
                 $locations_with_children[$parentKey] = [];
             }
             $locations_with_children[$parentKey][] = $location;
-            $locations_with_children[$location->parent_id][] = $location;
-            if ($location->sklad){
-                $location->name =   "[Склад] ".$location->name;
+            if ($location->sklad) {
+                $location->name = '['.trans('general.sklad').'] '.$location->name;
             }
         }
 

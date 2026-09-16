@@ -3,6 +3,8 @@
 namespace Tests\Feature\Checkouts\Ui;
 
 use App\Events\CheckoutableCheckedOut;
+use App\Events\CheckoutableRent;
+use App\Events\CheckoutableSell;
 use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\CheckoutAcceptance;
@@ -214,32 +216,108 @@ class AssetCheckoutTest extends TestCase
             ->assertSee('data-required-select="#assigned_deal_deal_select"', false);
     }
 
-    public function test_selling_asset_to_deal_creates_only_sell_action_log()
+    public static function dealCheckoutOperations(): array
     {
-        Statuslabel::factory()->create(['name' => 'Продано']);
+        return [
+            'sale' => [false, 'Продано', 'sell', CheckoutableSell::class],
+            'rent' => [true, 'В аренде', 'rent', CheckoutableRent::class],
+        ];
+    }
+
+    #[DataProvider('dealCheckoutOperations')]
+    public function test_deal_checkout_creates_only_its_action_log(bool $rent, string $statusName, string $action, string $eventClass): void
+    {
+        $status = Statuslabel::factory()->create(['name' => $statusName]);
         $asset = Asset::factory()->create();
+        $originalStatusId = $asset->status_id;
+        $actor = User::factory()->checkoutAssets()->create();
         $deal = Deal::create(['name' => 'Test deal']);
+
+        $this->actingAs($actor)
+            ->post(route('hardware.checkout.store', $asset), [
+                'checkout_to_type' => 'deal',
+                'assigned_deal' => $deal->id,
+                'name' => $asset->name,
+                'rent' => $rent,
+                'redirect_option' => 'item',
+                'note' => 'Deal workflow log',
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertSessionHas('success', trans('admin/hardware/message.'.$action.'.success'))
+            ->assertRedirect(route('hardware.show', $asset));
+
+        $asset->refresh();
+
+        $this->assertTrue($asset->assignedTo()->is($deal));
+        $this->assertTrue($asset->status->is($status));
+        $this->assertSame(1, (int) $asset->checkout_counter);
+        $log = $asset->assetlog()->where('action_type', $rent ? 'rented' : 'sell')->sole();
+        $this->assertEquals($actor->id, $log->created_by);
+        $this->assertSame(Deal::class, $log->target_type);
+        $this->assertEquals($deal->id, $log->target_id);
+        $this->assertSame('Deal workflow log', $log->note);
+        $metadata = json_decode($log->log_meta, true);
+        $this->assertEquals($originalStatusId, $metadata['status_id']['old']);
+        $this->assertEquals($status->id, $metadata['status_id']['new']);
+        Event::assertNotDispatched(CheckoutableCheckedOut::class);
+        $this->assertSame(
+            [$rent ? 'rented' : 'sell'],
+            $asset->assetlog()
+                ->whereIn('action_type', ['checkout', 'update', 'sell', 'rented'])
+                ->reorder('id')
+                ->pluck('action_type')
+                ->all()
+        );
+    }
+
+    #[DataProvider('dealCheckoutOperations')]
+    public function test_deal_checkout_rolls_back_when_its_event_fails(bool $rent, string $statusName, string $action, string $eventClass): void
+    {
+        Statuslabel::factory()->create(['name' => $statusName]);
+        $asset = Asset::factory()->create();
+        $original = $asset->refresh()->getAttributes();
+        $deal = Deal::create(['name' => 'Test deal']);
+
+        Event::listen($eventClass, function () {
+            throw new \RuntimeException('Deal checkout listener failed');
+        });
 
         $this->actingAs(User::factory()->checkoutAssets()->create())
             ->post(route('hardware.checkout.store', $asset), [
                 'checkout_to_type' => 'deal',
                 'assigned_deal' => $deal->id,
-                'name' => $asset->name,
+                'name' => 'Changed name',
+                'rent' => $rent,
             ])
-            ->assertSessionHasNoErrors()
-            ->assertSessionHas('success');
+            ->assertStatus(500);
 
         $asset->refresh();
+        foreach (['assigned_to', 'assigned_type', 'status_id', 'location_id', 'rtd_location_id', 'name', 'checkout_counter'] as $field) {
+            $this->assertSame($original[$field], $asset->getAttributes()[$field], $field);
+        }
+        $this->assertFalse($asset->assetlog()->whereIn('action_type', ['sell', 'rented', 'checkout'])->exists());
+    }
 
-        $this->assertTrue($asset->assignedTo()->is($deal));
-        $this->assertSame(
-            ['sell'],
-            $asset->assetlog()
-                ->whereIn('action_type', ['checkout', 'update', 'sell'])
-                ->reorder('id')
-                ->pluck('action_type')
-                ->all()
-        );
+    #[DataProvider('dealCheckoutOperations')]
+    public function test_deal_checkout_rejects_already_assigned_asset(bool $rent, string $statusName, string $action, string $eventClass): void
+    {
+        $target = User::factory()->create();
+        $asset = Asset::factory()->assignedToUser($target)->create(['checkout_counter' => 1]);
+        $deal = Deal::create(['name' => 'Test deal']);
+        Event::fake([$eventClass]);
+
+        $this->actingAs(User::factory()->checkoutAssets()->create())
+            ->post(route('hardware.checkout.store', $asset), [
+                'checkout_to_type' => 'deal',
+                'assigned_deal' => $deal->id,
+                'rent' => $rent,
+            ])
+            ->assertSessionHas('error');
+
+        $asset->refresh();
+        $this->assertTrue($asset->assignedTo()->is($target));
+        $this->assertSame(1, (int) $asset->checkout_counter);
+        Event::assertNotDispatched($eventClass);
     }
 
     /**

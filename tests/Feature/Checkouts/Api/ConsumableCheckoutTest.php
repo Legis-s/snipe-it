@@ -48,7 +48,10 @@ class ConsumableCheckoutTest extends TestCase
                 'assigned_to' => $user->id,
             ]);
 
-        $this->assertTrue($user->consumables->contains($consumable));
+        $this->assertDatabaseHas('consumables_locations', [
+            'consumable_id' => $consumable->id, 'assigned_to' => $user->id,
+            'assigned_type' => User::class, 'quantity' => 1, 'type' => 'issued',
+        ]);
         $this->assertHasTheseActionLogs($consumable, ['create', 'checkout']);
     }
 
@@ -94,7 +97,7 @@ class ConsumableCheckoutTest extends TestCase
     public function test_pivot_row_created_by_is_the_actor_not_the_target()
     {
         // Regression: previously the pivot's created_by was set to $user->id
-        // (the checkout target), so audit surfaces that read consumables_users
+        // (the checkout target), so audit surfaces that read the assignment ledger
         // (e.g. "who checked this consumable out to me") would show the target
         // as their own creator. The action_logs stream separately recorded the
         // correct actor, which is why the pivot bug survived.
@@ -108,13 +111,13 @@ class ConsumableCheckoutTest extends TestCase
                 'note' => 'created_by attribution regression',
             ]);
 
-        $this->assertDatabaseHas('consumables_users', [
+        $this->assertDatabaseHas('consumables_locations', [
             'consumable_id' => $consumable->id,
             'assigned_to' => $target->id,
             'created_by' => $actor->id,
         ]);
 
-        $this->assertDatabaseMissing('consumables_users', [
+        $this->assertDatabaseMissing('consumables_locations', [
             'consumable_id' => $consumable->id,
             'assigned_to' => $target->id,
             'created_by' => $target->id,

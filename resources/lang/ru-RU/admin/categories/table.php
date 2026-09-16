@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'eula_text' => 'EULA',
+    'eula_text' => 'Лицензионное соглашение',
     'id' => 'ID',
     'parent' => 'Родительская категория',
     'require_acceptance' => 'Подтверждение',

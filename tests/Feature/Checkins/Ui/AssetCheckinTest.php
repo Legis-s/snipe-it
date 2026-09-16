@@ -14,10 +14,42 @@ use App\Models\Statuslabel;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class AssetCheckinTest extends TestCase
 {
+    public static function checkin_depreciable_costs(): array
+    {
+        return [
+            'omitted' => [[], '125.50'],
+            'updated' => [['depreciable_cost' => '80.25'], '80.25'],
+            'zero' => [['depreciable_cost' => '0'], '0.00'],
+            'cleared' => [['depreciable_cost' => null], null],
+            'empty' => [['depreciable_cost' => ''], null],
+        ];
+    }
+
+    #[DataProvider('checkin_depreciable_costs')]
+    public function test_checkin_only_changes_depreciable_cost_when_submitted(array $payload, ?string $expected): void
+    {
+        $asset = Asset::factory()->assignedToUser()->create(['depreciable_cost' => '125.50']);
+
+        $this->actingAs(User::factory()->checkinAssets()->create())
+            ->post(route('hardware.checkin.store', $asset), $payload)
+            ->assertSessionHasNoErrors()
+            ->assertSessionHas('success');
+
+        $asset->refresh();
+        $this->assertNull($asset->assigned_to);
+        if ($expected === null) {
+            $this->assertNull($asset->depreciable_cost);
+        } else {
+            $this->assertNotNull($asset->depreciable_cost);
+            $this->assertEquals($expected, $asset->depreciable_cost);
+        }
+    }
+
     public function test_checking_in_asset_requires_correct_permission()
     {
         $this->actingAs(User::factory()->create())

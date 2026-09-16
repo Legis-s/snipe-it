@@ -1,6 +1,15 @@
 <?php
 
 return [
+    'device_summary' => ['title' => 'Device', 'unknown' => 'Unknown', 'launcher' => 'Launcher', 'application' => 'Biometrika', 'sim' => 'SIM card', 'location_updated' => 'Location updated', 'no_coordinates' => 'Location not available'],
+    'inventory_summary' => ['progress' => 'Audit progress', 'total' => 'Total', 'checked' => 'Checked', 'successful' => 'Successful', 'responsible' => 'Responsible person', 'device' => 'Device'],
+    'map' => 'Map',
+    'map_total' => 'Total',
+    'map_complete' => 'Fully audited',
+    'map_without_assets' => 'Without assets',
+    'map_show_empty' => 'Show locations without assets',
+    'map_retry' => 'Retry',
+    'map_load_error' => 'Could not load the map. Check your connection and try again.',
     'show_all' => 'Show All',
     '2FA_reset' => '2FA reset',
     'accessories' => 'Accessories',
@@ -866,5 +875,20 @@ return [
 
     'token_unrevoked' => 'API token reinstated',
     'token_revoked' => 'API token revoked',
+    'sklad' => 'Warehouse',
+    'delete_rejected_purchases' => 'Delete all rejected purchases',
+    'confirm_delete_rejected_purchases' => 'Delete all rejected purchases and their unassigned assets? Records will remain in deleted history.',
+    'rejected_purchases_deleted' => 'Rejected purchases deleted: :count.',
+    'purchase_delete_assigned' => 'A purchase contains assigned assets. No purchases were deleted.',
+    'purchase_delete_error' => 'Could not delete purchases. No changes were made.',
+    'purchase_delete_status_error' => 'Only rejected purchases or purchases with an error can be deleted.',
+    'consumable_merge_dependencies' => 'These consumables cannot be merged while purchase links or lines are invalid or ambiguous. No changes were made.',
+    'consumable_merged_into' => 'Merged into consumable #:id.',
+    'consumable_already_merged' => 'This consumable has already been merged. Open the current consumable before continuing.',
+    'purchase_line_invalid' => 'The purchase line is missing, ambiguous or invalid. Refresh the purchase.',
+    'purchase_line_received' => 'A purchase line with received consumables cannot be deleted.',
+    'inventory_started' => 'Started',
+    'inventory_finished_successfully' => 'Completed successfully',
+    'inventory_finished_incompletely' => 'Partially completed',
 
 ];

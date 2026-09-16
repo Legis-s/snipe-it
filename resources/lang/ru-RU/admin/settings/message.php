@@ -13,14 +13,14 @@ return [
         'file_not_found' => 'Эта резервная копия не найдена на сервере.',
         'restore_warning' => 'Да, восстановить. Я осознаю, что это перезапишет все существующие данные в базе данных. Это также выйдет из учетных записей всех ваших существующих пользователей (включая вас).',
         'restore_confirm' => 'Вы уверены, что хотите восстановить базу данных из :filename?',
-        'delete_disabled_help' => 'Deleting backups is disabled. Contact your administrator if you wish to enable deleting backups.',
+        'delete_disabled_help' => 'Удаление резервных копий отключено. Обратитесь к администратору, чтобы включить его.',
     ],
     'restore' => [
         'success' => 'Ваша резервная копия была восстановлена. Пожалуйста, войдите в систему снова.',
-        'archive_invalid' => 'The selected backup file (:filename) is not a valid zip archive. Restore aborted before touching the database.',
-        'zip_extension_missing' => 'PHP zip extension is not loaded on this server. Cannot validate the backup archive, and restore has been aborted to prevent data loss. Ask your server administrator to install ext-zip.',
-        'pre_backup_failed' => 'Could not create a pre-restore safety backup. Restore aborted so that the existing database is not destroyed without a recovery path.',
-        'failed_with_backup' => 'Restore failed. The pre-existing database was wiped as part of the restore attempt, but a pre-restore backup was saved to :backup and can be used to recover.',
+        'archive_invalid' => 'Выбранный файл резервной копии (:filename) не является корректным ZIP-архивом. Восстановление остановлено до изменения базы данных.',
+        'zip_extension_missing' => 'На сервере не загружено расширение PHP zip. Проверить архив резервной копии невозможно. Восстановление остановлено, чтобы избежать потери данных. Попросите администратора установить ext-zip.',
+        'pre_backup_failed' => 'Не удалось создать резервную копию перед восстановлением. Восстановление остановлено, чтобы не уничтожить существующую базу без возможности вернуть её.',
+        'failed_with_backup' => 'Восстановление завершилось ошибкой. Существовавшая база данных была очищена при попытке восстановления, но предварительная резервная копия сохранена в :backup и может быть использована для возврата данных.',
     ],
     'purge' => [
         'error' => 'Возникла ошибка при попытке очистки. ',
@@ -42,7 +42,7 @@ return [
         'authentication_success' => 'Пользователь успешно аутентифицирован с LDAP!',
     ],
     'labels' => [
-        'null_template' => 'Label template not found. Please select a template.',
+        'null_template' => 'Шаблон этикетки не найден. Выберите шаблон.',
     ],
     'webhook' => [
         'sending' => 'Отправка тестового сообщения в :app...',

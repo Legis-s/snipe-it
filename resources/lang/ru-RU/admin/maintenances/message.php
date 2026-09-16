@@ -23,6 +23,6 @@ return [
         'success' => 'Обслуживание отмечено как завершенное.',
         'error' => 'Возникла проблема с пометкой этого обслуживания как завершенного. Пожалуйста, попробуйте снова.',
     ],
-    'bulk_delete' => 'No maintenance records were deleted (:skipped skipped).|Deleted :count maintenance record. (:skipped skipped)|Deleted :count maintenance records. (:skipped skipped)',
-    'bulk_complete' => 'No maintenance records were marked complete (:skipped skipped or already complete).|Marked :count maintenance record complete. (:skipped skipped or already complete)|Marked :count maintenance records complete. (:skipped skipped or already complete)',
+    'bulk_delete' => '{0} Записи об обслуживании не удалены (пропущено: :skipped).|[1,*] Удалено записей об обслуживании: :count (пропущено: :skipped).',
+    'bulk_complete' => '{0} Ни одно обслуживание не отмечено завершённым (пропущено или уже завершено: :skipped).|[1,*] Отмечено завершёнными: :count (пропущено или уже завершено: :skipped).',
 ];

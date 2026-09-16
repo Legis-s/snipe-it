@@ -5,7 +5,14 @@ namespace Tests\Feature\Assets\Api;
 use App\Models\Asset;
 use App\Models\Company;
 use App\Models\CustomField;
+use App\Models\Deal;
+use App\Models\InvoiceType;
+use App\Models\LegalPerson;
 use App\Models\Location;
+use App\Models\Purchase;
+use App\Models\Setting;
+use App\Models\Statuslabel;
+use App\Models\Supplier;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Testing\Fluent\AssertableJson;
@@ -13,6 +20,50 @@ use Tests\TestCase;
 
 class AssetIndexTest extends TestCase
 {
+    public function test_custom_filters_include_archived_assets_without_changing_shared_settings(): void
+    {
+        $this->settings->set(['show_archived_in_list' => '0']);
+        $purchase = new Purchase([
+            'invoice_number' => 'Archive-filter-invoice', 'invoice_file' => 'invoice.pdf',
+            'bitrix_id' => 123, 'final_price' => 20, 'comment' => 'Archive filter test',
+            'supplier_id' => Supplier::factory()->create()->id,
+            'legal_person_id' => LegalPerson::create(['name' => 'Archive filter company'])->id,
+            'invoice_type_id' => InvoiceType::create(['name' => 'Archive filter type'])->id,
+        ]);
+        $this->assertTrue($purchase->save(), (string) $purchase->getErrors());
+        $deal = Deal::create(['name' => 'Archive filter deal']);
+        $archivedStatus = Statuslabel::factory()->archived()->create();
+        $archived = Asset::factory()->create([
+            'name' => 'Archived purchase asset',
+            'status_id' => $archivedStatus->id,
+            'purchase_id' => $purchase->id,
+            'assigned_type' => Deal::class,
+            'assigned_to' => $deal->id,
+        ]);
+        $unrelated = Asset::factory()->create(['name' => 'Unrelated archived asset', 'status_id' => $archivedStatus->id]);
+        $ordinary = Asset::factory()->create(['name' => 'Ordinary asset']);
+        $settings = Setting::getSettings();
+        $original = $settings->getAttributes();
+        $this->actingAsForApi(User::factory()->superuser()->create());
+
+        foreach (['purchase_id' => $purchase->id, 'deal_id' => $deal->id] as $filter => $id) {
+            $this->getJson(route('api.assets.index', [$filter => $id]))
+                ->assertOk()
+                ->assertJsonPath('total', 1)
+                ->assertResponseContainsInRows($archived)
+                ->assertResponseDoesNotContainInRows($unrelated);
+
+            $this->assertSame($original, $settings->getAttributes());
+            $this->assertSame($original, Setting::getSettings()->getAttributes());
+
+            $this->getJson(route('api.assets.index'))
+                ->assertOk()
+                ->assertResponseContainsInRows($ordinary)
+                ->assertResponseDoesNotContainInRows($archived)
+                ->assertResponseDoesNotContainInRows($unrelated);
+        }
+    }
+
     public function test_asset_api_index_returns_expected_assets()
     {
         Asset::factory()->count(3)->create();

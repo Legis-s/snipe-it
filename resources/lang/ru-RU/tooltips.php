@@ -3,22 +3,22 @@
 return [
 
     'disabled_assoc' => [
-        'accessory' => 'This accessory cannot be deleted because it still has items, users, or locations associated with it',
-        'asset' => 'This asset cannot be deleted because it still has items associated with it',
-        'category' => 'This category cannot be deleted because it still has items associated with it',
-        'company' => 'This company cannot be deleted because it still has items or users associated with it',
-        'component' => 'This component cannot be deleted because it still has items associated with it',
-        'custom_field' => 'This custom field cannot be deleted because it is still associated with at least one fieldset',
-        'department' => 'This department cannot be deleted because it still has users associated with it',
-        'location' => 'This location cannot be deleted because it still has items or users associated with it',
-        'manufacturer' => 'This manufacturer cannot be deleted because it still has items associated with it',
-        'supplier' => 'This supplier cannot be deleted because it still has items associated with it',
-        'user' => 'This user cannot be deleted because it still has items associated with it',
-        'user_self' => 'You cannot delete yourself',
+        'accessory' => 'Нельзя удалить аксессуар, пока с ним связаны предметы, пользователи или местоположения',
+        'asset' => 'Нельзя удалить актив, пока с ним связаны предметы',
+        'category' => 'Нельзя удалить категорию, пока с ней связаны предметы',
+        'company' => 'Нельзя удалить компанию, пока с ней связаны предметы или пользователи',
+        'component' => 'Нельзя удалить компонент, пока с ним связаны предметы',
+        'custom_field' => 'Нельзя удалить поле, пока оно входит хотя бы в один набор полей',
+        'department' => 'Нельзя удалить подразделение, пока с ним связаны пользователи',
+        'location' => 'Нельзя удалить местоположение, пока с ним связаны предметы или пользователи',
+        'manufacturer' => 'Нельзя удалить производителя, пока с ним связаны предметы',
+        'supplier' => 'Нельзя удалить поставщика, пока с ним связаны предметы',
+        'user' => 'Нельзя удалить пользователя, пока за ним закреплены предметы',
+        'user_self' => 'Нельзя удалить собственную учётную запись',
     ],
 
     'checkin_all' => [
-        'user' => 'Checkin all items for this user and optionally delete them. You will be able to confirm this on the next page.',
+        'user' => 'Оформить возврат всех предметов пользователя и при необходимости удалить пользователя. Подтверждение будет на следующей странице.',
     ],
 
 ];

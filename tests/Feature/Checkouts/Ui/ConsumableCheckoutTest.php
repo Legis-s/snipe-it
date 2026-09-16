@@ -6,12 +6,58 @@ use App\Mail\CheckoutConsumableMail;
 use App\Models\Actionlog;
 use App\Models\CheckoutAcceptance;
 use App\Models\Consumable;
+use App\Models\ConsumableAssignment;
+use App\Models\Deal;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class ConsumableCheckoutTest extends TestCase
 {
+    public function test_checkout_to_deal_records_sale_and_prevents_over_allocation(): void
+    {
+        $consumable = Consumable::factory()->create(['qty' => 5]);
+        $deal = Deal::create(['name' => 'Consumable sale']);
+        $actor = User::factory()->checkoutConsumables()->create();
+        $payload = [
+            'checkout_to_type' => 'deal',
+            'assigned_deal' => $deal->id,
+            'checkout_qty' => 2,
+            'note' => 'Sold for installation',
+            'redirect_option' => 'target',
+        ];
+
+        $this->actingAs($actor)
+            ->post(route('consumables.checkout.store', $consumable), $payload)
+            ->assertSessionHasNoErrors()
+            ->assertSessionMissing('error')
+            ->assertRedirect(route('deals.show', $deal));
+
+        $this->assertDatabaseHas('consumables_locations', [
+            'consumable_id' => $consumable->id,
+            'assigned_to' => $deal->id,
+            'assigned_type' => Deal::class,
+            'type' => ConsumableAssignment::SOLD,
+            'quantity' => 2,
+        ]);
+        $saleLogs = Actionlog::where([
+            'action_type' => 'sell',
+            'item_type' => Consumable::class,
+            'item_id' => $consumable->id,
+            'target_type' => Deal::class,
+            'target_id' => $deal->id,
+            'created_by' => $actor->id,
+            'note' => 'Sold for installation',
+        ]);
+        $this->assertSame(1, $saleLogs->count());
+        $this->assertEquals(3, $consumable->fresh()->numRemaining());
+
+        $this->post(route('consumables.checkout.store', $consumable), array_replace($payload, ['checkout_qty' => 4]))
+            ->assertSessionHas('error');
+        $this->assertSame(1, $saleLogs->count());
+        $this->assertEquals(3, $consumable->fresh()->numRemaining());
+    }
+
     public function test_checking_out_consumable_requires_correct_permission()
     {
         $this->actingAs(User::factory()->create())
@@ -32,7 +78,7 @@ class ConsumableCheckoutTest extends TestCase
             ->post(route('consumables.checkout.store', Consumable::factory()->create()), [
                 // missing assigned_user
             ])
-            ->assertSessionHas('error');
+            ->assertSessionHasErrors('assigned_user');
     }
 
     public function test_consumable_must_be_available_when_checking_out()
@@ -54,7 +100,10 @@ class ConsumableCheckoutTest extends TestCase
                 'assigned_user' => $user->id,
             ]);
 
-        $this->assertTrue($user->consumables->contains($consumable));
+        $this->assertDatabaseHas('consumables_locations', [
+            'consumable_id' => $consumable->id, 'assigned_to' => $user->id,
+            'assigned_type' => User::class, 'quantity' => 1, 'type' => 'issued',
+        ]);
         $this->assertHasTheseActionLogs($consumable, ['create', 'checkout']);
     }
 

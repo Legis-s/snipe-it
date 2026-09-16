@@ -4,12 +4,27 @@ namespace Tests\Feature\AssetModels\Api;
 
 use App\Models\Asset;
 use App\Models\AssetModel;
+use App\Models\Consumable;
 use App\Models\User;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Tests\TestCase;
 
 class IndexAssetModelsTest extends TestCase
 {
+    public function test_dormant_conversion_is_not_exposed_as_an_api_operation(): void
+    {
+        $model = AssetModel::factory()->create();
+        $asset = Asset::factory()->create(['model_id' => $model->id]);
+        $consumableCount = Consumable::count();
+
+        $this->actingAsForApi(User::factory()->superuser()->create())
+            ->postJson(route('api.models.show', $model).'/convert')
+            ->assertStatus(405);
+
+        $this->assertFalse($asset->fresh()->trashed());
+        $this->assertSame($consumableCount, Consumable::count());
+    }
+
     public function test_viewing_asset_model_index_requires_authentication()
     {
         $this->getJson(route('api.models.index'))->assertRedirect();

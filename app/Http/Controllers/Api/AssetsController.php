@@ -28,7 +28,6 @@ use App\Models\License;
 use App\Models\LicenseSeat;
 use App\Models\Location;
 use App\Models\Setting;
-use App\Models\Statuslabel;
 use App\Models\User;
 use App\View\Label;
 use Carbon\Carbon;
@@ -140,7 +139,7 @@ class AssetsController extends Controller
             'depreciable_cost',
             'quality',
             'purchase_id',
-            'nds'
+            'nds',
         ];
 
         $all_custom_fields = CustomField::all(); // used as a 'cache' of custom fields throughout this page load
@@ -221,13 +220,11 @@ class AssetsController extends Controller
 
         if ($request->filled('purchase_id')) {
             $assets->where('assets.purchase_id', '=', $request->input('purchase_id'));
-            $settings->show_archived_in_list = "1";
         }
 
         if ($request->filled('deal_id')) {
             $assets->where('assets.assigned_to', '=', $request->input('deal_id'))
-                ->where('assets.assigned_type', '=',\App\Models\Deal::class);
-            $settings->show_archived_in_list = "1";
+                ->where('assets.assigned_type', '=', \App\Models\Deal::class);
         }
 
         /**
@@ -250,8 +247,8 @@ class AssetsController extends Controller
         switch ($status_type_key) {
             case 'Sold':
                 $assets->join('status_labels AS status_alias', function ($join) {
-                    $join->on('status_alias.id', "=", "assets.status_id")
-                        ->where('status_alias.name', '=', "Продано");
+                    $join->on('status_alias.id', '=', 'assets.status_id')
+                        ->where('status_alias.name', '=', 'Продано');
                 });
                 break;
             case 'Deleted':
@@ -306,7 +303,7 @@ class AssetsController extends Controller
                 break;
             default:
 
-                if ((! $request->filled('status_id')) && ($settings->show_archived_in_list != '1')) {
+                if (! $request->filled('status_id') && ! $request->filled('purchase_id') && ! $request->filled('deal_id') && $settings->show_archived_in_list != '1') {
                     // terrible workaround for complex-query Laravel bug in fulltext
                     $assets->join('status_labels AS status_alias', function ($join) {
                         $join->on('status_alias.id', '=', 'assets.status_id')
@@ -405,7 +402,7 @@ class AssetsController extends Controller
             }
         }
 
-        //Custom filters
+        // Custom filters
         if ($request->filled('bitrix_object_id')) {
             $bitrix_object_id = $request->input('bitrix_object_id');
             $location = Location::where('bitrix_id', $bitrix_object_id)->firstOrFail();
@@ -1407,27 +1404,11 @@ class AssetsController extends Controller
             $asset->quality = intval($request->get('quality'));
         }
 
-
         $checkout_at = request('checkout_at', date('Y-m-d H:i:s'));
         $expected_checkin = request('expected_checkin', null);
         $note = request('note', null);
         // Using `->has` preserves the asset name if the name parameter was not included in request.
         $asset_name = request()->has('name') ? request('name') : $asset->name;
-        $photos = request('photos', null);
-        $photos_json = [];
-        if ($photos != null && count($photos) > 0) {
-            foreach ($photos as &$photo) {
-                $imgBase64 = substr($photo['base64'], strpos($photo['base64'], ",") + 1);
-                $image = base64_decode($imgBase64);
-                $jpg_url = "/uploads/log_img/log_img-" . time() . "-" . uniqid() . ".jpeg";
-                $path = public_path() . $jpg_url;
-                file_put_contents($path, $image);
-                array_push($photos_json, [
-                    "path" => $jpg_url,
-                    "comment" => $photo['comment'],
-                ]);
-            }
-        }
 
         // Set the location ID to the RTD location id if there is one
         // Wait, why are we doing this? This overrides the stuff we set further up, which makes no sense.
@@ -2194,83 +2175,4 @@ class AssetsController extends Controller
 
         return response()->json((new ActionlogsTransformer)->transformActionlogs($history, $total), 200, ['Content-Type' => 'application/json;charset=utf8'], JSON_UNESCAPED_UNICODE);
     }
-
-    /**
-    |--------------------------------------------------------------------------
-    | BEGIN CUSTOM ROUTES
-    |--------------------------------------------------------------------------
-     */
-
-    /**
-     * Returns JSON with information about an asset for detail view.
-     * @param $id
-     * @return JsonResponse
-     * @throws \Exception
-     */
-    public function inventory($id) : JsonResponse
-    {
-
-        $this->authorize('update', Asset::class);
-        $asset = Asset::with('status')->withTrashed()->findOrFail($id);
-        $asset_tag = request('asset_tag');
-        if ($asset) {
-            $asset->unsetEventDispatcher();
-            $originalValues = $asset->getRawOriginal();
-            $note = "Инвентризация после покупки";
-            $status = Statuslabel::where('name', 'Ожидает проверки')->first();
-            if (isset($asset_tag)) {
-                $asset->asset_tag = $asset_tag;
-            }
-            $asset->status_id = $status->id;
-
-            if ($asset->save()) {
-                $asset->logTag($note,$originalValues);
-                return response()->json((new AssetsTransformer)->transformAsset($asset));
-
-            }
-        }
-        return response()->json(Helper::formatStandardApiResponse('error', ['asset_tag'=> e($asset->asset_tag)], 'Asset with tag '.e($asset->asset_tag).' not found'));
-    }
-
-
-    /**
-     * Mark an asset as audited
-     * @param int $id
-     */
-    public function review($id) : array| JsonResponse
-    {
-        $this->authorize('review', Asset::class);
-        $asset = Asset::with('status')->withTrashed()->findOrFail($id);
-
-        $settings = Setting::getSettings();
-        $dt = Carbon::now()->addMonths($settings->audit_interval)->toDateString();
-
-        if ($asset) {
-            // We don't want to log this as a normal update, so let's bypass that
-            $asset->unsetEventDispatcher();
-            $note = "Проверка после покупки";
-            $asset->purchase_date =date('Y-m-d');
-            $asset->next_audit_date = $dt;
-            $asset->last_audit_date = date('Y-m-d H:i:s');
-            $user = auth()->user();
-            $asset->user_verified_id = $user->id;
-            $status = Statuslabel::where('name', 'Доступные')->first();
-            $asset->status_id = $status->id;
-
-            if ($asset->save()) {
-                $asset->logAudit($note, request('location_id'));
-
-                return (new AssetsTransformer)->transformAsset($asset);
-            }
-        }
-
-        return response()->json(Helper::formatStandardApiResponse('error', ['asset_tag'=> e($asset->asset_tag)], 'Asset with tag '.e($asset->asset_tag).' not found'));
-    }
-
-    /**
-    |--------------------------------------------------------------------------
-    | END CUSTOM ROUTES
-    |--------------------------------------------------------------------------
-     */
-
 }

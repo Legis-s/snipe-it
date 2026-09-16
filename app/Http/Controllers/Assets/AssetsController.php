@@ -200,12 +200,11 @@ class AssetsController extends Controller
                 $asset->requestable = request('requestable', 0);
                 $asset->rtd_location_id = request('rtd_location_id', null);
                 $asset->byod = request('byod', 0);
-                $asset->depreciable_cost        = Helper::ParseFloat($request->get('depreciable_cost'));
-                $asset->quality                 = intval(request('quality', 5));
-                $asset->nds;
+                $asset->depreciable_cost = Helper::ParseFloat($request->get('depreciable_cost'));
+                $asset->quality = intval(request('quality', 5));
 
-                if (!empty($settings->audit_interval)) {
-                    $asset->next_audit_date = Carbon::now()->addMonths((int)$settings->audit_interval)->toDateString();
+                if (! empty($settings->audit_interval)) {
+                    $asset->next_audit_date = Carbon::now()->addMonths((int) $settings->audit_interval)->toDateString();
                 }
 
                 // Set location_id to rtd_location_id ONLY if the asset isn't being checked out
@@ -480,7 +479,6 @@ class AssetsController extends Controller
         $asset->nds = $request->input('nds', 22);
         $asset->expected_checkin = $request->input('expected_checkin', null);
         $asset->requestable = $request->input('requestable', 0);
-        $asset->location_id = $request->input('location_id', null);
         $asset->rtd_location_id = $request->input('rtd_location_id', null);
         // Current location is editable from the asset edit form as of
         // the location-dropdown addition. Only overwrite when the key
@@ -505,20 +503,6 @@ class AssetsController extends Controller
             $asset->last_checkin = now();
             event(new CheckoutableCheckedIn($asset, $target, auth()->user(), 'Checkin on asset update with '.$status->getStatuslabelType().' status', date('Y-m-d H:i:s'), $originalValues));
         }
-
-
-        //////////////////
-        $status_inv = Statuslabel::where('name', 'Ожидает инвентаризации')->first();
-        $status_review = Statuslabel::where('name', 'Ожидает проверки')->first();
-        if ($asset->status_id == $status_inv->id && $request->filled('asset_tag')){
-            $asset->status_id=$status_review->id;
-        }
-
-        if ($asset->assigned_to == '') {
-            $asset->location_id = $request->input('rtd_location_id', null);
-        }
-
-        /////////////
 
         if ($request->filled('image_delete')) {
             try {
@@ -548,6 +532,14 @@ class AssetsController extends Controller
 
         if (is_array($request->input('asset_tags'))) {
             $asset->asset_tag = $asset_tags[1];
+        }
+
+        $inventoryStatus = Statuslabel::where('name', 'Ожидает инвентаризации')->first();
+        if ($inventoryStatus && $asset->status_id == $inventoryStatus->id && ! empty($asset->asset_tag)) {
+            $reviewStatus = Statuslabel::where('name', 'Ожидает проверки')->first();
+            if ($reviewStatus) {
+                $asset->status_id = $reviewStatus->id;
+            }
         }
 
         $asset->notes = $request->input('notes');

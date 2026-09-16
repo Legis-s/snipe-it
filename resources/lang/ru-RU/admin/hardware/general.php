@@ -1,6 +1,10 @@
 <?php
 
 return [
+    'fulfilled' => 'Выполнено',
+    'fulfill' => 'Выполнить',
+    'fulfill_multiple' => 'Выполнить несколько заявок',
+    'open_requests_count' => ':count открытая заявка|:count открытые заявки|:count открытых заявок',
     'about_assets_title' => 'Об активах',
     'about_assets_text' => 'Активы - вещи, которые отслеживаются по серийному номеру или инвентарному номеру. Они, как правило, являются ценными.',
     'archived' => 'Архивированные',
@@ -8,7 +12,7 @@ return [
     'bulk_checkout' => 'Массовая выдача',
     'bulk_checkin' => 'Массовый возврат',
     'bulk_audit' => 'Массовый аудит',
-    'bulk_audit_location_hidden_mixed_companies' => 'The audit location field is hidden because the selected assets belong to multiple companies. With location scoping enabled, one shared audit location can\'t apply to assets from different companies. Audit each company\'s assets in a separate batch to set an audit location.',
+    'bulk_audit_location_hidden_mixed_companies' => 'Поле местоположения проверки скрыто, поскольку выбранные активы принадлежат разным компаниям. При ограничении местоположений по компаниям нельзя задать одно местоположение проверки для всех этих активов. Проверяйте активы каждой компании отдельно.',
     'checkin' => 'Вернуть актив на склад',
     'checkin_assets' => 'Проверка активов',
     'checkout' => 'Выдать актив',
@@ -47,6 +51,6 @@ return [
     'user_department' => 'Отдел пользователя',
     'issued_for_sale' => 'Выданные на продажу',
     'sold' => 'Проданные',
-    'sell'=> 'Продать актив',
-    'rent'=> 'Выдать актив в аренду',
+    'sell' => 'Продать актив',
+    'rent' => 'Выдать актив в аренду',
 ];

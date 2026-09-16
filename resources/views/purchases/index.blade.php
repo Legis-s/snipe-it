@@ -8,6 +8,12 @@
 
 {{-- Page content --}}
 @section('content')
+    @can('delete', \App\Models\Purchase::class)
+        <form id="delete-rejected-purchases" method="POST" action="{{ route('purchases.delete_all_rejected') }}">
+            @csrf
+            <input type="hidden" name="confirmed" value="1">
+        </form>
+    @endcan
     <x-container>
         <x-box>
             <div id="toolbar">

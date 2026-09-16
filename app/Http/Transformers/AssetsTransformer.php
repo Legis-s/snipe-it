@@ -193,9 +193,9 @@ class AssetsTransformer
                 'labels' => $asset->deleted_at == '',
                 'restore' => ($asset->deleted_at != '' && Gate::allows('create', Asset::class)),
             ],
-            'print_label'   => true,
-            'inventory'     => ($asset->deleted_at=='' && Gate::allows('view', Asset::class)) ? true : false,
-            'review'        =>  ($asset->deleted_at=='' && Gate::allows('review', Asset::class)) ? true : false,
+            'print_label' => true,
+            'inventory' => ($asset->deleted_at == '' && Gate::allows('update', Asset::class)) ? true : false,
+            'review' => ($asset->deleted_at == '' && Gate::allows('review', Asset::class)) ? true : false,
         ];
 
         if (request('components') == 'true') {

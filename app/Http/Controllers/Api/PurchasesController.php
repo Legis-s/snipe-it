@@ -2,17 +2,21 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Asset;
-use App\Models\Consumable;
-use App\Models\Statuslabel;
-use DateTime;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use App\Actions\Purchases\PayPurchaseAction;
+use App\Actions\Purchases\ReceiveLegacyConsumablesAction;
+use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Transformers\PurchasesTransformer;
-use App\Helpers\Helper;
+use App\Models\Asset;
+use App\Models\Consumable;
 use App\Models\Purchase;
+use App\Models\Statuslabel;
+use DateTime;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use RuntimeException;
 use Throwable;
 
@@ -47,12 +51,11 @@ class PurchasesController extends Controller
                 'purchases.consumables_json',
                 'purchases.delivery_cost',
             ])->withCount([
-                'consumables as consumables_count',
                 'assets as assets_count',
                 'assets as assets_count_ok' => function (Builder $query) use ($status) {
                     $query->where('status_id', $status->id);
                 },
-            ]);
+            ])->addSelect(['consumables_count' => Consumable::forLegacyPurchase(DB::raw('purchases.id'))->selectRaw('count(*)')]);
 
         if ($request->filled('search')) {
             $purchases = $purchases->TextSearch($request->input('search'));
@@ -71,15 +74,14 @@ class PurchasesController extends Controller
         $allowed_columns =
             [
                 'id', 'invoice_number', 'bitrix_id', 'final_price', 'status', 'created_at',
-                'deleted_at'
+                'deleted_at',
             ];
-
 
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
         $sort = in_array($request->input('sort'), $allowed_columns) ? $request->input('sort') : 'created_at';
 
         if ($request->input('not_finished_status')) {
-            $purchases->where('status', '<>', "finished");
+            $purchases->where('status', '<>', 'finished');
         }
 
         $purchases->orderBy($sort, $order);
@@ -90,16 +92,16 @@ class PurchasesController extends Controller
         // Check to make sure the limit is not higher than the max allowed
         ((config('app.max_results') >= $request->input('limit')) && ($request->filled('limit'))) ? $limit = $request->input('limit') : $limit = config('app.max_results');
 
-
         $total = $purchases->count();
         $purchases = $purchases->skip($offset)->take($limit)->get();
+
         return (new PurchasesTransformer)->transformPurchases($purchases, $total);
     }
 
-
     /**
      * Display the specified resource.
-     * @param int $id
+     *
+     * @param  int  $id
      */
     public function show($id): JsonResponse|array
     {
@@ -125,13 +127,13 @@ class PurchasesController extends Controller
                 'purchases.bitrix_task_id',
                 'purchases.consumables_json',
             ])->withCount([
-                'consumables as consumables_count',
                 'assets as assets_count',
                 'assets as assets_count_ok' => function (Builder $query) use ($status) {
                     $query->where('status_id', $status->id);
                 },
-            ])
+            ])->addSelect(['consumables_count' => Consumable::forLegacyPurchase(DB::raw('purchases.id'))->selectRaw('count(*)')])
             ->findOrFail($id);
+
         return (new PurchasesTransformer)->transformPurchase($purchise, true);
     }
 
@@ -140,21 +142,16 @@ class PurchasesController extends Controller
      */
     public function paid(Request $request, $purchaseId = null): JsonResponse
     {
-        $this->authorize('view', Purchase::class);
-        $purchase = Purchase::findOrFail($purchaseId);
-        $purchase->setStatusPaid();
+        $this->authorize('update', Purchase::class);
+        $purchase = PayPurchaseAction::run((int) $purchaseId);
 
-        if ($purchase->save()) {
-            return response()->json(
-                Helper::formatStandardApiResponse(
-                    'success',
-                    (new PurchasesTransformer)->transformPurchase($purchase),
-                    trans('admin/locations/message.update.success')
-                )
-            );
-        }
-
-        return response()->json(Helper::formatStandardApiResponse('error', null, $purchase->getErrors()));
+        return response()->json(
+            Helper::formatStandardApiResponse(
+                'success',
+                (new PurchasesTransformer)->transformPurchase($purchase),
+                trans('admin/locations/message.update.success')
+            )
+        );
     }
 
     /**
@@ -162,56 +159,12 @@ class PurchasesController extends Controller
      */
     public function consumables_check(Request $request, $purchaseId = null): JsonResponse
     {
-        $this->authorize('view', Purchase::class);
-        $purchase = Purchase::findOrFail($purchaseId);
+        $purchase = ReceiveLegacyConsumablesAction::run((int) $purchaseId);
 
-        $assets = Asset::where('purchase_id', $purchase->id)->get();
-        $status_ok = Statuslabel::where('name', 'Доступные')->first();
-        if (count($assets) > 0) {
-            $all_ok = true;
-            foreach ($assets as &$asset) {
-                if ($asset->status_id != $status_ok->id) {
-                    $all_ok = false;
-                }
-            }
-            if ($all_ok) {
-                $purchase->status = "finished";
-            }
-        } else {
-            $purchase->status = "finished";
-        }
-
-        if ($purchase->save()) {
-            $consumables_server = Consumable::where('purchase_id', $purchase->id)->get();
-            $consumables = json_decode($purchase->consumables_json, true);
-            if ($purchase->consumables_json != null && count($consumables) > 0 && count($consumables_server) == 0) {
-                foreach ($consumables as &$consumable_new) {
-                    $consumable_server = new Consumable();
-                    $consumable_server->name = $consumable_new["name"];
-                    $consumable_server->category_id = $consumable_new["category_id"];
-                    if (!empty($consumable_new["model_id"])) {
-                        $consumable_server->model_id = $consumable_new["model_id"];
-                    }
-                    $consumable_server->order_number = $purchase->id;
-                    $consumable_server->manufacturer_id = $consumable_new["manufacturer_id"];
-//                    $consumable_server->model_number = $consumable_new["model_number"];
-                    $consumable_server->purchase_date = $purchase->created_at;
-                    $consumable_server->purchase_cost = Helper::ParseFloat($consumable_new["purchase_cost"]);
-                    $consumable_server->qty = Helper::ParseFloat($consumable_new["quantity"]);
-                    $consumable_server->purchase_id = $purchase->id;
-                    $consumable_server->save();
-                }
-            }
-            return response()->json(
-                Helper::formatStandardApiResponse(
-                    'success',
-                    (new PurchasesTransformer)->transformPurchase($purchase),
-                    trans('admin/locations/message.update.success')
-                )
-            );
-        }
-
-        return response()->json(Helper::formatStandardApiResponse('error', null, $purchase->getErrors()));
+        return response()->json(Helper::formatStandardApiResponse(
+            'success', (new PurchasesTransformer)->transformPurchase($purchase),
+            trans('admin/locations/message.update.success')
+        ));
     }
 
     /**
@@ -220,96 +173,61 @@ class PurchasesController extends Controller
     public function update_consumables_line(Request $request, $purchaseId = null): JsonResponse
     {
         $this->authorize('review');
-
-        $purchase = Purchase::findOrFail($purchaseId);
-        $consumables = json_decode($purchase->consumables_json ?: '[]', true);
-
-        if (!is_array($consumables)) {
-            return response()->json(Helper::formatStandardApiResponse('error', null, 'Некорректный список расходников.'));
-        }
-
-        $rowId = $request->input('row_id');
-        $action = $request->input('action', 'update');
-        $found = false;
-
-        foreach ($consumables as $index => &$consumable) {
-            if (($consumable['id'] ?? null) != $rowId) {
-                continue;
+        $data = $request->validate([
+            'row_id' => 'required|integer|min:1',
+            'action' => 'sometimes|required|in:update,delete',
+            'quantity' => 'required_unless:action,delete|integer|min:1|max:2147483647',
+            'purchase_cost' => 'required_unless:action,delete|numeric|min:0|max:99999999999999999.99',
+            'nds' => 'sometimes|required|numeric|min:0',
+        ]);
+        $purchase = DB::transaction(function () use ($purchaseId, $data): Purchase {
+            $purchase = Purchase::whereKey($purchaseId)->lockForUpdate()->firstOrFail();
+            $lines = json_decode($purchase->consumables_json ?: '[]', true);
+            if (! is_array($lines) || collect($lines)->contains(fn ($line): bool => ! is_array($line))) {
+                throw ValidationException::withMessages(['row_id' => trans('general.purchase_line_invalid')]);
             }
-
-            $found = true;
-            $reviewed = (int)($consumable['reviewed'] ?? 0);
-
-            if ($action === 'delete') {
+            $matches = collect($lines)->filter(fn (array $line): bool => (string) ($line['id'] ?? '') === (string) $data['row_id']);
+            if ($matches->count() !== 1) {
+                throw ValidationException::withMessages(['row_id' => trans('general.purchase_line_invalid')]);
+            }
+            $index = $matches->keys()->first();
+            $reviewed = (int) ($lines[$index]['reviewed'] ?? 0);
+            if (($data['action'] ?? 'update') === 'delete') {
                 if ($reviewed > 0) {
-                    return response()->json(Helper::formatStandardApiResponse('error', null, 'Нельзя удалить строку, по которой уже есть принятые расходники.'));
+                    throw ValidationException::withMessages(['row_id' => trans('general.purchase_line_received')]);
                 }
-
-                unset($consumables[$index]);
-                break;
+                unset($lines[$index]);
+            } else {
+                if ((int) $data['quantity'] < $reviewed) {
+                    throw ValidationException::withMessages(['quantity' => trans('validation.min.numeric', ['attribute' => trans('general.quantity'), 'min' => $reviewed])]);
+                }
+                $lines[$index]['quantity'] = (int) $data['quantity'];
+                $lines[$index]['purchase_cost'] = $data['purchase_cost'];
+                $lines[$index]['nds'] = $data['nds'] ?? 0;
+            }
+            $purchase->consumables_json = json_encode(array_values($lines), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
+            $purchase->checkStatus();
+            if (! $purchase->save()) {
+                throw ValidationException::withMessages($purchase->getErrors()->toArray());
             }
 
-            $quantity = (int)$request->input('quantity');
-            $purchaseCost = Helper::ParseFloat($request->input('purchase_cost'));
-            $nds = Helper::ParseFloat($request->input('nds', 0));
+            return $purchase;
+        });
 
-            if ($quantity < 1) {
-                return response()->json(Helper::formatStandardApiResponse('error', null, 'Количество должно быть больше нуля.'));
-            }
-
-            if ($quantity < $reviewed) {
-                return response()->json(Helper::formatStandardApiResponse('error', null, 'Количество не может быть меньше уже принятого.'));
-            }
-
-            if ($purchaseCost < 0 || $nds < 0) {
-                return response()->json(Helper::formatStandardApiResponse('error', null, 'Цена и НДС не могут быть отрицательными.'));
-            }
-
-            $consumable['quantity'] = $quantity;
-            $consumable['purchase_cost'] = $purchaseCost;
-            $consumable['nds'] = $nds;
-            break;
-        }
-        unset($consumable);
-
-        if (!$found) {
-            return response()->json(Helper::formatStandardApiResponse('error', null, 'Строка расходника не найдена.'));
-        }
-
-        $consumables = array_values($consumables);
-        foreach ($consumables as $index => &$consumable) {
-            $consumable['id'] = $index + 1;
-        }
-        unset($consumable);
-
-        $purchase->consumables_json = json_encode($consumables, JSON_UNESCAPED_UNICODE);
-        $purchase->checkStatus();
-
-        if ($purchase->save()) {
-            return response()->json(
-                Helper::formatStandardApiResponse(
-                    'success',
-                    [
-                        'purchase' => (new PurchasesTransformer)->transformPurchase($purchase),
-                        'consumables' => $consumables,
-                    ],
-                    trans('admin/consumables/message.update.success')
-                )
-            );
-        }
-
-        return response()->json(Helper::formatStandardApiResponse('error', null, $purchase->getErrors()));
+        return response()->json(Helper::formatStandardApiResponse('success', [
+            'purchase' => (new PurchasesTransformer)->transformPurchase($purchase),
+            'consumables' => json_decode($purchase->consumables_json, true),
+        ], trans('admin/consumables/message.update.success')));
     }
-
 
     /**
      * Display a listing of the resource.
      */
     public function in_payment(Request $request, $purchaseId = null): JsonResponse
     {
-        $this->authorize('view', Purchase::class);
+        $this->authorize('update', Purchase::class);
         $purchase = Purchase::findOrFail($purchaseId);
-        $purchase->status = "in_payment";
+        $purchase->status = 'in_payment';
         if ($purchase->save()) {
 
             return response()->json(
@@ -324,13 +242,12 @@ class PurchasesController extends Controller
         return response()->json(Helper::formatStandardApiResponse('error', null, $purchase->getErrors()));
     }
 
-
     /**
      * Display a listing of the resource.
      */
     public function bitrix_task(Request $request, $purchaseId = null, $bitrix_task = null): JsonResponse|array
     {
-        $this->authorize('view', Purchase::class);
+        $this->authorize('update', Purchase::class);
         $purchase = Purchase::findOrFail($purchaseId);
         $purchase->bitrix_task_id = $bitrix_task;
         if ($purchase->save()) {
@@ -346,16 +263,15 @@ class PurchasesController extends Controller
         return response()->json(Helper::formatStandardApiResponse('error', null, $purchase->getErrors()));
     }
 
-
     /**
      * Display a listing of the resource.
      */
     public function reject(Request $request, $purchaseId = null): JsonResponse|array
     {
-        $this->authorize('view', Purchase::class);
+        $this->authorize('update', Purchase::class);
         $purchase = Purchase::findOrFail($purchaseId);
-        $purchase->status = "rejected";
-        $purchase->bitrix_result_at = new DateTime();
+        $purchase->status = 'rejected';
+        $purchase->bitrix_result_at = new DateTime;
         if ($purchase->save()) {
             $status = Statuslabel::where('name', 'Отклонено')->first();
             $assets = Asset::where('purchase_id', $purchase->id)->get();
@@ -377,13 +293,12 @@ class PurchasesController extends Controller
         return response()->json(Helper::formatStandardApiResponse('error', null, $purchase->getErrors()));
     }
 
-
     /**
      * Display a listing of the resource.
      */
     public function resend(Request $request, $purchaseId = null): JsonResponse|array
     {
-        $this->authorize('view', Purchase::class);
+        $this->authorize('update', Purchase::class);
         $purchase = Purchase::findOrFail($purchaseId);
 
         if ($purchase->bitrix_id) {
@@ -406,7 +321,7 @@ class PurchasesController extends Controller
         }
 
         try {
-            $payloadPath = public_path('/uploads/purchases/' . $purchase->bitrix_send_json);
+            $payloadPath = public_path('/uploads/purchases/'.$purchase->bitrix_send_json);
             if (! $purchase->bitrix_send_json || ! is_file($payloadPath)) {
                 throw new RuntimeException('Saved Bitrix payload is missing.');
             }
@@ -416,7 +331,7 @@ class PurchasesController extends Controller
                 throw new RuntimeException('Saved Bitrix payload is invalid.');
             }
 
-            $client = new \GuzzleHttp\Client();
+            $client = new \GuzzleHttp\Client;
             $response = $client->request('POST', env('BITRIX_URL').'rest/'.$user->bitrix_id.'/'.$raw_bitrix_token.'/lists.element.add.json/', $params);
             $responseBody = $response->getBody()->getContents();
             $bitrixResult = json_decode($responseBody, true);

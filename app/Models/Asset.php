@@ -3,17 +3,18 @@
 namespace App\Models;
 
 use App\Events\CheckoutableCheckedOut;
-use App\Events\CheckoutableRent;
-use App\Events\CheckoutableSell;
 use App\Exceptions\CheckoutNotAllowed;
 use App\Helpers\Helper;
 use App\Http\Traits\UniqueUndeletedTrait;
 use App\Models\Traits\Acceptable;
+use App\Models\Traits\ChecksOutToDeals;
 use App\Models\Traits\CompanyableTrait;
 use App\Models\Traits\HasCalendarEvents;
 use App\Models\Traits\HasOrders;
+use App\Models\Traits\HasPurchaseWorkflow;
 use App\Models\Traits\HasUploads;
 use App\Models\Traits\Loggable;
+use App\Models\Traits\LogsAssetWorkflows;
 use App\Models\Traits\Requestable;
 use App\Models\Traits\Searchable;
 use App\Presenters\AssetPresenter;
@@ -22,8 +23,8 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Gate;
@@ -49,12 +50,15 @@ class Asset extends Depreciable
 
     // protected $with = ['model', 'adminuser', 'location', 'company'];
 
+    use ChecksOutToDeals;
     use CompanyableTrait;
     use HasCalendarEvents;
     use HasFactory;
     use HasOrders;
+    use HasPurchaseWorkflow;
     use HasUploads;
     use Loggable;
+    use LogsAssetWorkflows;
     use Presentable;
     use Requestable;
     use SoftDeletes;
@@ -188,9 +192,9 @@ class Asset extends Depreciable
         'assigned_location' => ['integer', 'nullable', 'exists:locations,id,deleted_at,NULL', 'fmcs_location'],
         'assigned_asset' => ['integer', 'nullable', 'exists:assets,id,deleted_at,NULL'],
         'assigned_deal' => ['integer', 'nullable', 'exists:deals,id,deleted_at,NULL'],
-        'depreciable_cost'  => ['nullable', 'numeric', 'gte:0', 'max:9999999999999'],
-        'quality'           => ['nullable', 'integer', 'between:1,5'],
-        'purchase_id'       => ['nullable', 'integer'],
+        'depreciable_cost' => ['nullable', 'numeric', 'gte:0', 'max:9999999999999'],
+        'quality' => ['nullable', 'integer', 'between:1,5'],
+        'purchase_id' => ['nullable', 'integer'],
         'nds' => ['nullable', 'integer'],
     ];
 
@@ -617,16 +621,6 @@ class Asset extends Depreciable
         return $this->status
             && ($this->status->archived == '0')
             && ($this->status->deployable == '1');
-    }
-
-
-    public function availableForReview()
-    {
-        $status = Statuslabel::where('name', 'Ожидает проверки')->first();
-        if ($this->status_id == $status->id){
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -1610,7 +1604,6 @@ class Asset extends Depreciable
 
         }
 
-
         /**
          * Assigned contracts
          */
@@ -1623,7 +1616,6 @@ class Asset extends Depreciable
             $query = $query->orWhere('assigned_contracts.name', 'LIKE', '%'.$term.'%');
 
         }
-
 
         /**
          * Assigned deals
@@ -2404,137 +2396,6 @@ class Asset extends Depreciable
         return $this->hasMany(\App\Models\InventoryItem::class);
     }
 
-    public function purchase()
-    {
-        return $this->belongsTo(\App\Models\Purchase::class);
-    }
-
-    public function user_verified()
-    {
-        return $this->belongsTo(\App\Models\User::class, 'user_verified_id');
-    }
-
-
-    public function setStatusAfterPaid()
-    {
-        $status_in_purchase = Statuslabel::where('name', 'В закупке')->first();
-        $status_inventory_wait = Statuslabel::where('name', 'Ожидает инвентаризации')->first();
-
-        // меняем статус на Ожидает инвентаризации, только если актив в статусе "В закупке"
-        if ($this->status_id == $status_in_purchase->id) {
-            $this->status_id = $status_inventory_wait->id;
-        }
-    }
-
-
-
-    /**
-     * Sell the asset out to the target
-     *
-     * @author [S. Markin] [<markin@legis-s.ru>]
-     *
-     * @param User $user
-     * @param User $admin
-     * @param Carbon $checkout_at
-     * @param Carbon $expected_checkin
-     * @param string $note
-     * @param null $name
-     * @return bool
-     *
-     */
-    public function sell($target, $admin = null, $checkout_at = null, $note = null, $name = null)
-    {
-        if (! $target) {
-            return false;
-        }
-        if ($this->is($target)) {
-            throw new CheckoutNotAllowed('You cannot check an asset out to itself.');
-        }
-
-        $this->last_checkout = $checkout_at;
-        $this->location_id = null;
-        $this->rtd_location_id = null;
-        $this->name = $name;
-
-        $status = Statuslabel::where('name', 'Продано')->first();
-        $this->status_id = $status->id;
-        $this->assignedTo()->associate($target);
-
-        $originalValues = $this->getRawOriginal();
-
-        // attempt to detect change in value if different from today's date
-        if ($checkout_at && strpos($checkout_at, date('Y-m-d')) === false) {
-            $originalValues['action_date'] = date('Y-m-d H:i:s');
-        }
-        if ($this->save()) {
-            if (is_int($admin)) {
-                $checkedOutBy = User::findOrFail($admin);
-            } elseif (get_class($admin) === \App\Models\User::class) {
-                $checkedOutBy = $admin;
-            } else {
-                $checkedOutBy = auth()->user();
-            }
-            event(new CheckoutableSell($this, $target, $checkedOutBy, $note, $originalValues));
-            $this->increment('checkout_counter', 1);
-
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Rent the asset out to the target
-     * @author [S. Markin] [<markin@legis-s.ru>]
-     * @param Carbon $checkout_at
-     * @param string $note
-     * @param null $name
-     * @return bool
-     * @since [v3.0]
-     * @return bool
-     */
-    public function rent($target, $admin = null, $checkout_at = null, $note = null, $name = null)
-    {
-        if (! $target) {
-            return false;
-        }
-        if ($this->is($target)) {
-            throw new CheckoutNotAllowed('You cannot check an asset out to itself.');
-        }
-
-        $this->last_checkout = $checkout_at;
-        $this->location_id = null;
-        $this->rtd_location_id = null;
-        $this->name = $name;
-
-        $status = Statuslabel::where('name', 'В аренде')->first();
-        $this->status_id = $status->id;
-        $this->assignedTo()->associate($target);
-
-        $originalValues = $this->getRawOriginal();
-
-        // attempt to detect change in value if different from today's date
-        if ($checkout_at && strpos($checkout_at, date('Y-m-d')) === false) {
-            $originalValues['action_date'] = date('Y-m-d H:i:s');
-        }
-
-        if ($this->save()) {
-            if (is_int($admin)) {
-                $checkedOutBy = User::findOrFail($admin);
-            } elseif (get_class($admin) === \App\Models\User::class) {
-                $checkedOutBy = $admin;
-            } else {
-                $checkedOutBy = auth()->user();
-            }
-            event(new CheckoutableRent($this, $target, $checkedOutBy, $note, $originalValues));
-            $this->increment('checkout_counter', 1);
-
-            return true;
-        }
-
-        return false;
-    }
-
     /**
      * Get the phone associated with the user.
      */
@@ -2542,5 +2403,4 @@ class Asset extends Depreciable
     {
         return $this->hasOne(Device::class);
     }
-
 }

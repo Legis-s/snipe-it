@@ -1456,6 +1456,7 @@ class Helper
             'png' => 'far fa-image',
             'webp' => 'far fa-image',
             'avif' => 'far fa-image',
+            'ico' => 'far fa-image',
             'svg' => 'fas fa-vector-square',
 
             // word
@@ -1480,14 +1481,17 @@ class Helper
             'txt' => 'far fa-file-alt',
             'rtf' => 'far fa-file-alt',
             'xml' => 'fas fa-code',
+            'json' => 'fas fa-code',
 
             // Misc
             'pdf' => 'far fa-file-pdf',
             'lic' => 'far fa-save',
+            'key' => 'fas fa-key',
 
             // video
             'mov' => 'fa-solid fa-video',
             'mp4' => 'fa-solid fa-video',
+            'webm' => 'fa-solid fa-video',
 
             // audio
             'ogg' => 'fa-solid fa-file-audio',
@@ -1617,31 +1621,10 @@ class Helper
             'depreciations*',
             'inventorystatuslabels*',
             'contracts*',
-            'deals*'
+            'deals*',
         ];
 
         return $settings;
-    }
-
-    public static function getFormattedStatus($status): string | null {
-
-        if ($status=='') {
-            return null;
-        }
-        $status_text = "";
-        switch ($status) {
-            case "START":
-                $status_text = "Начата";
-                break;
-            case "FINISH_OK":
-                $status_text = "Завершена успешно";
-                break;
-            case "FINISH_BAD":
-                $status_text = "Завершена не полностью";
-                break;
-        }
-        return $status_text;
-
     }
 
     /*
@@ -1915,8 +1898,9 @@ class Helper
                     ? redirect()->route('contracts.show', $contractId)
                     : redirect()->route('contracts.index'),
                 'deal' => $dealId
-                    ? redirect()->route('deals.show', $assetId)
+                    ? redirect()->route('deals.show', $dealId)
                     : redirect()->route('deals.index'),
+                default => redirect()->route('home'),
             };
         }
 

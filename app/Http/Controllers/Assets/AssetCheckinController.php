@@ -121,7 +121,7 @@ class AssetCheckinController extends Controller
         $asset->assignedTo()->disassociate($asset);
         $asset->accepted = null;
         $asset->name = $request->input('name');
-        $asset->depreciable_cost = $request->input('depreciable_cost');
+        $asset->depreciable_cost = $request->input('depreciable_cost', $asset->depreciable_cost);
 
         if ($request->filled('status_id')) {
             $asset->status_id = e($request->input('status_id'));

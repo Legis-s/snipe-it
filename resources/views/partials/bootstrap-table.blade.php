@@ -1519,20 +1519,24 @@
                 title: '{{ trans('admin/hardware/general.custom_export') }}',
             }
         },
+        @can('delete', \App\Models\Purchase::class)
         deleteAllRejected: {
-            text: 'Удалить все отклоненные',
+            text: {{ Illuminate\Support\Js::from(trans('general.delete_rejected_purchases')) }},
             icon: 'fa-solid fa-trash',
             event () {
-                window.location.href = '{{ route('purchases.delete_all_rejected') }}';
+                if (window.confirm({{ Illuminate\Support\Js::from(trans('general.confirm_delete_rejected_purchases')) }})) {
+                    document.getElementById('delete-rejected-purchases').requestSubmit();
+                }
             },
             attributes: {
                 class: 'btn-danger',
-                title: 'Удалить все отклоненные',
+                title: {{ Illuminate\Support\Js::from(trans('general.delete_rejected_purchases')) }},
                 @if ($snipeSettings->shortcuts_enabled == 1)
                 accesskey: 'a'
                 @endif
             }
         },
+        @endcan
     });
 
     window.inventoriesButtons = () => ({

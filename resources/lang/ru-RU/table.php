@@ -1,15 +1,16 @@
 <?php
 
 return [
+    'shift_select' => 'Установите флажок, затем, удерживая <code>shift</code>, нажмите другой флажок в таблице, чтобы выбрать или снять выделение диапазона.',
 
     'actions' => 'Действия',
     'action' => 'Действие',
     'by' => 'Кем',
     'item' => 'Предмет',
     'no_matching_records' => 'Подходящие записи не найдены',
-    'load_error_title' => 'Could not load results',
-    'load_error_body' => 'The server returned an error. Please try again in a moment. If this keeps happening, check the application log.',
-    'load_error_http_status' => 'HTTP status',
-    'load_error_session_expired' => 'Your session has expired. Reloading the page.',
+    'load_error_title' => 'Не удалось загрузить результаты',
+    'load_error_body' => 'Сервер вернул ошибку. Повторите попытку позже. Если ошибка сохраняется, проверьте журнал приложения.',
+    'load_error_http_status' => 'Статус HTTP',
+    'load_error_session_expired' => 'Срок действия сеанса истёк. Страница перезагружается.',
 
 ];

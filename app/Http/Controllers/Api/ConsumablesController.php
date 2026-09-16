@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Events\CheckoutableCheckedOut;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AdjustQuantityRequest;
@@ -11,15 +10,14 @@ use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\StoreConsumableRequest;
 use App\Http\Traits\HandlesAdjustQuantity;
 use App\Http\Transformers\ActionlogsTransformer;
+use App\Http\Transformers\ConsumablesSelectlistTransformer;
 use App\Http\Transformers\ConsumablesTransformer;
-use App\Http\Transformers\SelectlistTransformer;
 use App\Models\Company;
 use App\Models\Consumable;
 use App\Models\ConsumableAssignment;
-use App\Models\Purchase;
-use App\Models\Setting;
 use App\Models\User;
 use DomainException;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -39,7 +37,13 @@ class ConsumablesController extends Controller
     {
         $this->authorize('index', Consumable::class);
 
-        $consumables = Consumable::with('company', 'location', 'category', 'supplier', 'manufacturer');
+        // See ComponentsController for the orderItems.order.supplier eager-load rationale.
+        $consumables = Consumable::with('company', 'location', 'category', 'defaultSupplier', 'manufacturer', 'orderItems.order.supplier')
+            ->withCount('users as consumables_users_count')
+            ->withSum([
+                'consumableAssignments as assigned_quantity' => fn (Builder $query): Builder => $query
+                    ->whereIn('type', [ConsumableAssignment::SOLD, ConsumableAssignment::ISSUED]),
+            ], 'quantity');
 
         // This array is what determines which fields should be allowed to be sorted on ON the table itself.
         // These must match a column on the consumables table directly.
@@ -121,9 +125,8 @@ class ConsumablesController extends Controller
         }
 
         if ($request->filled('purchase_id')) {
-            $consumables->where('purchase_id', '=', $request->input('purchase_id'));
+            $consumables->forLegacyPurchase($request->integer('purchase_id'));
         }
-
 
         // Make sure the offset and limit are actually integers and do not exceed system limits
         $total = $consumables->count();
@@ -246,7 +249,6 @@ class ConsumablesController extends Controller
     {
         $this->authorize('update', Consumable::class);
         $consumable = Consumable::findOrFail($id);
-        $consumable->fill($request->all());
 
         // See Api\AccessoriesController::update for the qty / order_number
         // / supplier_id contract. Same logic mirrored here.
@@ -382,7 +384,11 @@ class ConsumablesController extends Controller
 
         $this->authorize('checkout', $consumable);
 
-        $consumable->checkout_qty = $request->input('checkout_qty', 1);
+        $quantity = $request->input('checkout_qty', 1);
+        if (filter_var($quantity, FILTER_VALIDATE_INT) === false || (int) $quantity < 1) {
+            return response()->json(Helper::formatStandardApiResponse('error', null, trans('validation.integer', ['attribute' => 'checkout_qty'])));
+        }
+        $consumable->checkout_qty = (int) $quantity;
 
         // Make sure there is a valid category
         if (! $consumable->category) {
@@ -404,7 +410,7 @@ class ConsumablesController extends Controller
             return response()->json(Helper::formatStandardApiResponse('error', null, 'No user found'));
         }
 
-        if ((Setting::getSettings()->full_multiple_companies_support == '1') && (! $user->companies()->where('companies.id', $consumable->company_id)->exists())) {
+        if (! $consumable->canCheckoutTo($user)) {
             return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.error_user_company')));
         }
 
@@ -442,87 +448,10 @@ class ConsumablesController extends Controller
 
     }
 
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param int $id
-     */
-    public function review(Request $request, $id): JsonResponse|array
-    {
-        $this->authorize('review');
-        $consumable = Consumable::withTrashed()->findOrFail($id);
-        if ($consumable->trashed()) {
-            $consumable->qty = 0;
-            $consumable->save();
-            $consumable->restore();
-        }
-        if ($request->filled('purchase_id') && $request->filled('quantity')) {
-
-            $purchase_id = $request->input("purchase_id");
-            $purchase = Purchase::findOrFail($purchase_id);
-
-            $consumables_json = $purchase->consumables_json;
-            $consumables = json_decode($consumables_json, true);
-
-            $quantity = $request->input("quantity");
-            $purchase_cost = $request->input("purchase_cost");
-            $assigned_type = \App\Models\Purchase::class;
-            foreach ($consumables as &$consumable_json) {
-                if ($consumable_json["consumable_id"] == $consumable->id) {
-                    $quantity_in_json = $consumable_json["quantity"];
-
-                    $reviewed = 0;
-                    if (isset($consumable_json["reviewed"])) {
-                        $reviewed = $consumable_json["reviewed"];
-                    }
-                    $max_quantity = $quantity_in_json - $reviewed;
-
-                    if ($quantity > $max_quantity) {
-                        return response()->json(Helper::formatStandardApiResponse('error', null, $consumable->getErrors()));
-                    } else {
-                        $consumable_json["reviewed"] = $quantity + $reviewed;
-                    }
-
-                }
-            }
-            $purchase->consumables_json = json_encode($consumables);
-
-//            if ($consumable->purchase_cost < $purchase_cost) {
-//                $consumable->purchase_cost = $purchase_cost;
-//            }
-            $consumable->purchase_cost = $purchase_cost;
-            $consumable->qty = $consumable->qty + $quantity;
-            $consumable->locations()->attach($consumable->id, [
-                'consumable_id' => $consumable->id,
-                'created_by' => auth()->id(),
-                'quantity' => $quantity,
-                'cost' => $purchase_cost,
-                'type' => ConsumableAssignment::PURCHASE,
-                'assigned_to' => $purchase->id,
-                'assigned_type' => $assigned_type,
-            ]);
-
-
-            if ($consumable->save()) {
-                $purchase->checkStatus();
-                $purchase->save();
-                return response()->json(Helper::formatStandardApiResponse('success', $consumable, trans('admin/consumables/message.update.success')));
-            }
-
-        } else {
-            return response()->json(Helper::formatStandardApiResponse('error', null, $consumable->getErrors()));
-        }
-
-        return response()->json(Helper::formatStandardApiResponse('error', null, $consumable->getErrors()));
-    }
-
-
     /**
      * Gets a paginated collection for the select2 menus
      *
-     * @see SelectlistTransformer
+     * @see ConsumablesSelectlistTransformer
      */
     public function selectlist(Request $request): array
     {
@@ -540,16 +469,10 @@ class ConsumablesController extends Controller
 
         $consumables = $consumables->orderBy('name', 'ASC')->paginate(50);
 
-        foreach ($consumables as $consumable) {
-            $consumable->use_text = "[" . $consumable->numRemaining() . "] ".e($consumable->name);;
-
-        }
-        if ($request->filled('assetStatusType') && $request->input('assetStatusType') === 'notnull') {
-            return (new SelectlistTransformer)->transformSelectlistConsumables($consumables);
-        } else {
-            return (new SelectlistTransformer)->transformSelectlist($consumables);
-        }
-
+        return (new ConsumablesSelectlistTransformer)->transformSelectlist(
+            $consumables,
+            $request->input('assetStatusType') === 'notnull',
+        );
 
     }
 
@@ -563,44 +486,6 @@ class ConsumablesController extends Controller
         $history = (clone $historyQuery)->skip($offset)->take($limit)->get();
 
         return response()->json((new ActionlogsTransformer)->transformActionlogs($history, $total), 200, ['Content-Type' => 'application/json;charset=utf8'], JSON_UNESCAPED_UNICODE);
-    }
-
-
-    /**
-     * Compact Consumable.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param int $id
-     */
-    public function compact(Request $request, $id): JsonResponse|array
-    {
-        $this->authorize('edit', Consumable::class);
-        $main_consumable = Consumable::findOrFail($id);
-
-        if ($request->filled('id_array')) {
-
-            $id_array = $request->input("id_array");
-
-            $consumables = Consumable::findMany($id_array);
-            ConsumableAssignment::whereIn('consumable_id', $id_array)->update(['consumable_id' => $main_consumable->id]);
-            Actionlog::where("item_type", "App\Models\Consumable")->whereNotIn("action_type", ["create", "delete", "update"])->whereIn('item_id', $id_array)->update(['item_id' => $main_consumable->id]);
-            $all_amount = 0;
-            foreach ($consumables as &$consumable_delete) {
-                $all_amount += $consumable_delete->qty;
-                $consumable_delete->delete();
-            }
-
-            $main_consumable->qty = $main_consumable->qty + $all_amount;
-
-            if ($main_consumable->save()) {
-                return response()->json(Helper::formatStandardApiResponse('success', $main_consumable, trans('admin/consumables/message.update.success')));
-            }
-
-        } else {
-            return response()->json(Helper::formatStandardApiResponse('error', null, $main_consumable->getErrors()));
-        }
-
-        return response()->json(Helper::formatStandardApiResponse('error', null, $main_consumable->getErrors()));
     }
 
     /**

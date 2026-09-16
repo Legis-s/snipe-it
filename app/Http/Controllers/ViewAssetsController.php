@@ -121,7 +121,7 @@ class ViewAssetsController extends Controller
             'assets',
             'assets.model',
             'assets.model.fieldset.fields',
-//            'consumables',
+            'consumables',
             'accessories',
             'licenses',
             'companies',

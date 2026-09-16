@@ -7,8 +7,12 @@ use App\Mail\CheckoutAssetMail;
 use App\Models\Asset;
 use App\Models\Company;
 use App\Models\Deal;
+use App\Models\InvoiceType;
+use App\Models\LegalPerson;
 use App\Models\Location;
+use App\Models\Purchase;
 use App\Models\Statuslabel;
+use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -17,6 +21,76 @@ use Tests\TestCase;
 
 class BulkAssetCheckoutTest extends TestCase
 {
+    private function create_purchase(): Purchase
+    {
+        $purchase = new Purchase([
+            'invoice_number' => fake()->unique()->numerify('INV-########'), 'invoice_file' => 'invoice.pdf',
+            'bitrix_id' => fake()->unique()->numberBetween(1, 1000000), 'final_price' => 20, 'comment' => 'Bulk checkout test',
+            'supplier_id' => Supplier::factory()->create()->id,
+            'legal_person_id' => LegalPerson::create(['name' => fake()->unique()->company()])->id,
+            'invoice_type_id' => InvoiceType::create(['name' => fake()->unique()->uuid()])->id,
+        ]);
+        $this->assertTrue($purchase->save(), (string) $purchase->getErrors());
+
+        return $purchase;
+    }
+
+    public function test_purchase_preselects_only_available_assets(): void
+    {
+        $purchase = $this->create_purchase();
+        $available = Asset::factory()->count(2)->create(['purchase_id' => $purchase->id]);
+        Asset::factory()->assignedToUser()->create(['purchase_id' => $purchase->id]);
+        Asset::factory()->create([
+            'purchase_id' => $purchase->id,
+            'status_id' => Statuslabel::factory()->archived()->create()->id,
+        ]);
+        Asset::factory()->create(['purchase_id' => $purchase->id])->delete();
+        Asset::factory()->create(['purchase_id' => $this->create_purchase()->id]);
+
+        $response = $this->actingAs(User::factory()->checkoutAssets()->create())
+            ->get(route('hardware.bulkcheckout.show', ['purchase_id' => $purchase->id]))
+            ->assertOk()
+            ->assertSessionHas('_old_input.selected_assets', $available->pluck('id')->all());
+
+        foreach ($available as $asset) {
+            $response->assertSee('value="'.$asset->id.'" selected="selected"', false);
+        }
+    }
+
+    public function test_purchase_preselection_respects_company_scope(): void
+    {
+        $purchase = $this->create_purchase();
+        $this->settings->enableMultipleFullCompanySupport();
+        $company = Company::factory()->create();
+        $available = Asset::factory()->for($company)->create(['purchase_id' => $purchase->id]);
+        Asset::factory()->for(Company::factory()->create())->create(['purchase_id' => $purchase->id]);
+
+        $this->actingAs(User::factory()->forCompany($company)->checkoutAssets()->create())
+            ->get(route('hardware.bulkcheckout.show', ['purchase_id' => $purchase->id]))
+            ->assertOk()
+            ->assertSessionHas('_old_input.selected_assets', [$available->id]);
+    }
+
+    public function test_purchase_does_not_replace_previous_asset_selection(): void
+    {
+        $purchase = $this->create_purchase();
+        $selected = Asset::factory()->create();
+        Asset::factory()->create(['purchase_id' => $purchase->id]);
+
+        $this->actingAs(User::factory()->checkoutAssets()->create())
+            ->withSession(['_old_input' => ['selected_assets' => [$selected->id]]])
+            ->get(route('hardware.bulkcheckout.show', ['purchase_id' => $purchase->id]))
+            ->assertOk()
+            ->assertSessionHas('_old_input.selected_assets', [$selected->id]);
+    }
+
+    public function test_purchase_preselection_requires_checkout_permission(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->get(route('hardware.bulkcheckout.show', ['purchase_id' => 123]))
+            ->assertForbidden();
+    }
+
     public function test_requires_permission()
     {
         // The target user must actually exist and be undeleted, or the
@@ -82,9 +156,18 @@ class BulkAssetCheckoutTest extends TestCase
         });
     }
 
-    public function test_bulk_selling_assets_to_deal_creates_only_sell_action_logs()
+    public static function dealOperations(): array
     {
-        Statuslabel::factory()->create(['name' => 'Продано']);
+        return [
+            'sale' => [false, 'Продано', 'sell'],
+            'rent' => [true, 'В аренде', 'rented'],
+        ];
+    }
+
+    #[DataProvider('dealOperations')]
+    public function test_bulk_deal_checkout_creates_only_its_action_logs(bool $rent, string $statusName, string $action): void
+    {
+        $status = Statuslabel::factory()->create(['name' => $statusName]);
         $assets = Asset::factory()->count(2)->create();
         $deal = Deal::create(['name' => 'Test deal']);
 
@@ -93,18 +176,23 @@ class BulkAssetCheckoutTest extends TestCase
                 'selected_assets' => $assets->pluck('id')->all(),
                 'checkout_to_type' => 'deal',
                 'assigned_deal' => $deal->id,
+                'rent' => $rent,
             ])
             ->assertSessionHasNoErrors()
             ->assertSessionHas('success');
 
-        $assets->each(function (Asset $asset) use ($deal) {
+        $assets->each(function (Asset $asset) use ($deal, $status, $action) {
             $asset->refresh();
 
             $this->assertTrue($asset->assignedTo()->is($deal));
+            $this->assertEquals($status->id, $asset->status_id);
+            $this->assertSame(1, (int) $asset->checkout_counter);
+            $this->assertNull($asset->location_id);
+            $this->assertNull($asset->rtd_location_id);
             $this->assertSame(
-                ['sell'],
+                [$action],
                 $asset->assetlog()
-                    ->whereIn('action_type', ['checkout', 'update', 'sell'])
+                    ->whereIn('action_type', ['checkout', 'update', 'sell', 'rented'])
                     ->reorder('id')
                     ->pluck('action_type')
                     ->all()

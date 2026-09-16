@@ -10,7 +10,7 @@
 @section('content')
     <x-container>
         <x-box name="consumables" sr_only_title>
-            <x-table.consumables :route="route('api.consumables.index')" />
+            <x-table.consumables :route="route('api.consumables.index')" buttons="consumableButtons" />
         </x-box>
     </x-container>
 @can('update', \App\Models\Consumable::class)

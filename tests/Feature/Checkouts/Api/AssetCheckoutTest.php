@@ -10,12 +10,51 @@ use App\Models\Statuslabel;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Storage;
 use Notification;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class AssetCheckoutTest extends TestCase
 {
+    public static function unused_photo_payloads(): array
+    {
+        return [
+            'base64 entry' => [[['base64' => 'data:image/jpeg;base64,'.base64_encode('unused image data'), 'comment' => 'Unused photo']]],
+            'scalar' => ['not-an-array'],
+            'missing fields' => [[[]]],
+        ];
+    }
+
+    #[DataProvider('unused_photo_payloads')]
+    public function test_checkout_ignores_unused_photos_without_writing_public_files(mixed $photos): void
+    {
+        $disk = Storage::fake('checkout-test-public');
+        $disk->makeDirectory('uploads/log_img');
+        $originalPublicPath = public_path();
+        $this->app->usePublicPath($disk->path(''));
+
+        try {
+            $asset = Asset::factory()->create();
+            $target = User::factory()->create();
+
+            $this->actingAsForApi(User::factory()->checkoutAssets()->create())
+                ->postJson(route('api.asset.checkout', $asset), [
+                    'checkout_to_type' => 'user',
+                    'assigned_user' => $target->id,
+                    'photos' => $photos,
+                ])
+                ->assertOk()
+                ->assertStatusMessageIs('success');
+
+            $this->assertSame([], $disk->allFiles());
+            $this->assertEquals($target->id, $asset->fresh()->assigned_to);
+            Event::assertDispatchedTimes(CheckoutableCheckedOut::class, 1);
+        } finally {
+            $this->app->usePublicPath($originalPublicPath);
+        }
+    }
+
     protected function setUp(): void
     {
         parent::setUp();

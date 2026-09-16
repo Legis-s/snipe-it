@@ -1,3 +1,15 @@
+@extends('layouts/default')
+
+{{-- Page title --}}
+@section('title')
+    @if ($item->id)
+        {{ trans('admin/locations/table.update') }}
+    @else
+        {{ trans('admin/locations/table.create') }}
+    @endif
+    @parent
+@stop
+
 @push('js')
     <script nonce="{{ csrf_token() }}">
         $(function () {
@@ -126,4 +138,3 @@
     </x-container>
 
 @stop
-

@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'create' => 'Создать обслуживание актива',
     'asset_maintenances' => 'Активы на обслуживании', // not used anymore
     'maintenances' => 'Техобслуживание',
     'edit' => 'Редактировать',

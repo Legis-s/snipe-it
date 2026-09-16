@@ -1,15 +1,123 @@
 @extends('layouts/default')
 
+@php
+    $parseCoordinates = static function (mixed $value): ?array {
+        $parts = array_map('trim', explode(',', (string) $value));
+        if (count($parts) !== 2 || !is_numeric($parts[0]) || !is_numeric($parts[1])) {
+            return null;
+        }
+        $parts = array_map('floatval', $parts);
+        return abs($parts[0]) <= 90 && abs($parts[1]) <= 180 && $parts !== [0.0, 0.0] ? $parts : null;
+    };
+    $deviceCoordinates = $parseCoordinates($device->coordinates);
+    $locationCoordinates = $parseCoordinates($asset?->location?->coordinates);
+    $battery = is_numeric($device->batteryLevel) ? max(0, min(100, (int) $device->batteryLevel)) : null;
+    $mdmColor = ['green' => 'success', 'yellow' => 'warning', 'red' => 'danger'][$device->statusCode] ?? 'default';
+@endphp
+
 {{-- Page title --}}
 @section('title')
-    {{ trans('general.device') }} - {{ $device->number }}
+    {{ trans('general.device_summary.title') }} - {{ $device->number }}
     @parent
 @stop
 
 {{-- Page content --}}
 @section('content')
+    <style>
+        .device-page { padding: 20px; background: var(--main-box-bg, #fff); }
+        .device-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 20px; }
+        .device-heading h2 { font-size: 22px; margin: 0; overflow-wrap: anywhere; }
+        .device-overview { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; padding-bottom: 24px; }
+        .device-facts { display: grid; grid-template-columns: minmax(100px, 140px) minmax(0, 1fr); gap: 12px 16px; margin: 0; }
+        .device-facts dt { font-size: 12px; font-weight: 400; opacity: .75; }
+        .device-facts dd { margin: 0; overflow-wrap: anywhere; }
+        .device-page .label { white-space: normal; line-height: 1.4; }
+        .device-page #map { width: 100%; height: 340px; }
+        .device-map-caption { font-size: 12px; margin-top: 8px; opacity: .75; overflow-wrap: anywhere; }
+        .device-detail { clear: both; }
+        .device-page > .nav-tabs-custom { box-shadow: none; margin-bottom: 0; }
+        .device-page > .nav-tabs-custom > .tab-content { padding: 20px 0 0; }
+        .device-detail .box { margin: 12px 0 0; border: 0; box-shadow: none; }
+        .device-detail > .col-md-12 { float: none; width: 100%; padding: 0; }
+        .device-detail .box-body .row { display: grid; grid-template-columns: minmax(110px, 160px) minmax(0, 1fr); gap: 12px; margin: 0; padding: 9px 0; border-bottom: 1px solid #eee; }
+        .device-detail .box-body .row > div { width: auto; float: none; padding: 0; min-width: 0; overflow-wrap: anywhere; }
+        .device-detail .box-body .row strong { font-weight: 400; opacity: .75; font-size: 12px; }
+        .device-asset-details .box-body { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 24px; }
+        /* Bootstrap clearfix pseudo-elements must not occupy grid cells. */
+        .device-detail .box-body .row::before,
+        .device-detail .box-body .row::after,
+        .device-asset-details .box-body::before,
+        .device-asset-details .box-body::after { content: none; display: none; }
+        .device-asset-details .box-body > .col-md-6 { width: 100%; float: none; padding: 0; }
+        .device-detail .assetimg { max-height: 320px; object-fit: contain; margin: 0 auto; }
+        @media (max-width: 767px) {
+            .device-page { padding: 12px; }
+            .device-overview, .device-asset-details .box-body { grid-template-columns: minmax(0, 1fr); }
+            .device-detail .box-body .row { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+            .device-page #map { height: 260px; }
+        }
+    </style>
     <x-container>
+        <div class="device-page">
+            <x-tabs>
+                <x-slot:tabnav>
+                    <x-tabs.nav-item name="details" icon="fas fa-tablet-alt" label="{{ trans('general.device_summary.title') }}" class="active" />
+                    @isset($asset)
+                        <x-tabs.nav-item name="asset" icon="fas fa-barcode" label="{{ trans('general.asset') }}" />
+                    @endisset
+                    @isset($asset_sim)
+                        <x-tabs.nav-item name="sim" icon="fas fa-sim-card" label="{{ trans('general.device_summary.sim') }}" />
+                    @endisset
+                </x-slot:tabnav>
+                <x-slot:tabpanes>
+                    <x-tabs.pane name="details" class="active in">
+            <header class="device-heading">
+                <h2>{{ $device->model ?: trans('general.device_summary.title') }} <small>#{{ $device->number }}</small></h2>
+                <span class="label label-{{ $mdmColor }}">MDM: {{ $device->statusCode ?: trans('general.device_summary.unknown') }}</span>
+                @if ($battery !== null)
+                    <span><i class="fas fa-battery-half" aria-hidden="true"></i> {{ $battery }}%</span>
+                @endif
+            </header>
+            <section class="device-overview" aria-label="{{ trans('general.information') }}">
+                <dl class="device-facts">
+                    @foreach ([
+                        'IMEI' => $device->imei ?: $device->info_imei,
+                        trans('admin/hardware/form.serial') => $device->serial,
+                        'Android' => $device->androidVersion,
+                        trans('general.device_summary.launcher') => $device->launcherVersion,
+                        trans('general.device_summary.application') => $device->biometrikaVersion,
+                        'IP' => $device->publicIp,
+                        'AnyDesk' => $device->anyDesk,
+                        trans('general.updated_at') => Helper::getFormattedDateObject($device->lastUpdate, 'datetime', false),
+                        trans('general.notes') => $device->description,
+                    ] as $label => $value)
+                        @if ($value !== null && $value !== '')
+                            <dt>{{ $label }}</dt><dd>{{ $value }}</dd>
+                        @endif
+                    @endforeach
+                    @if ($asset)
+                        <dt>{{ trans('general.asset') }}</dt><dd><a href="{{ route('hardware.show', $asset->id) }}">{{ $asset->asset_tag }}</a></dd>
+                        @if ($asset->location)
+                            <dt>{{ trans('general.location') }}</dt><dd><a href="{{ route('locations.show', $asset->location->id) }}">{{ $asset->location->name }}</a></dd>
+                        @endif
+                    @endif
+                    @if ($asset_sim)
+                        <dt>{{ trans('general.device_summary.sim') }}</dt><dd><a href="{{ route('hardware.show', $asset_sim->id) }}">{{ $asset_sim->asset_tag }}</a></dd>
+                    @endif
+                </dl>
+                <div>
+                    @if ($deviceCoordinates)
+                        <div id="map"></div>
+                        @if ($device->locationUpdate)<div class="device-map-caption">{{ trans('general.device_summary.location_updated') }}: {{ $device->locationUpdate }}</div>@endif
+                    @else
+                        <p class="text-muted">{{ trans('general.device_summary.no_coordinates') }}</p>
+                    @endif
+                </div>
+            </section>
+                    </x-tabs.pane>
         @isset($asset)
+            <x-tabs.pane name="asset">
+            <div class="device-detail device-asset-details">
             <div class="col-md-12">
                 <div class="box box-default">
                     <div class="box-header with-border">
@@ -707,7 +815,7 @@
                                     @if ($inventory_item->photo)
                                         <div class="text-center col-md-12" style="padding-bottom: 15px;">
                                             <a href="{{$inventory_item->photo_url() }}" data-toggle="lightbox">
-                                                <img src="{{ $inventory_item->photo_url()}}" class="assetimg img-responsive"">
+                                                <img src="{{ $inventory_item->photo_url()}}" class="assetimg img-responsive" alt="{{ $asset->asset_tag }}" onerror="this.parentElement.hidden = true;">
                                             </a>
                                         </div>
                                         @break
@@ -720,8 +828,12 @@
                     </div>
                 </div>
             </div>
+            </div>
+            </x-tabs.pane>
         @endisset
         @isset($asset_sim)
+            <x-tabs.pane name="sim">
+            <div class="device-detail">
                 <div class="col-md-12">
                     <div class="box box-default">
                         <div class="box-header with-border">
@@ -954,25 +1066,11 @@
                         </div>
                     </div>
                 </div>
-        @endisset
-    </div>
-    <div class="row">
-        <div class="col-md-12">
-            <div class="box box-default">
-                <div class="box-header with-border">
-                    <div class="box-heading">
-                        <h2 class="box-title">MDM</h2>
-                    </div>
-                </div>
-                <div class="box-body">
-                    <div class="col-md-6">
-
-                    </div>
-                    <div class="col-md-6">
-                        <div id="map" style=" width: 100%; height: 400px"></div>
-                    </div>
-                </div>
             </div>
+            </x-tabs.pane>
+        @endisset
+                </x-slot:tabpanes>
+            </x-tabs>
         </div>
     </x-container>
 
@@ -984,35 +1082,38 @@
         'search' => true
      ])
 
+    @if ($deviceCoordinates)
     <script src="https://api-maps.yandex.ru/2.1/?apikey=9aff6103-40f7-49e4-ad79-aa2a69d421d6&lang=ru_RU"
             type="text/javascript">
     </script>
     <script type="text/javascript">
-        @if ($device->coordinates!='')
         ymaps.ready(init);
         function init() {
             // Создание карты.
             var myMap = new ymaps.Map("map", {
-                center: [{{$device->coordinates}}],
+                center: {{ Illuminate\Support\Js::from($deviceCoordinates) }},
                 zoom: 15,
                 controls: ['zoomControl']
             });
+            $('a[data-toggle="tab"][href="#details"]').on('shown.bs.tab', function () {
+                myMap.container.fitToViewport();
+            });
 
-            myMap.geoObjects.add(new ymaps.Placemark([{{$device->coordinates}}], {
-                iconCaption: '{{$device->locationUpdate}}',
-                balloonContent: '{{$device->model}}',
+            myMap.geoObjects.add(new ymaps.Placemark({{ Illuminate\Support\Js::from($deviceCoordinates) }}, {
+                iconCaption: {{ Illuminate\Support\Js::from($device->locationUpdate) }},
+                balloonContent: {{ Illuminate\Support\Js::from($device->model) }},
             }, {
                 preset: 'islands#greenDotIconWithCaption'
             }));
-            @if ($asset->location and $asset->location->coordinates!='')
-                myMap.geoObjects.add(new ymaps.Placemark([{{$asset->location->coordinates}}], {
-                    iconCaption: '{{$asset->location->name}} '
+            @if ($locationCoordinates)
+                myMap.geoObjects.add(new ymaps.Placemark({{ Illuminate\Support\Js::from($locationCoordinates) }}, {
+                    iconCaption: {{ Illuminate\Support\Js::from($asset->location->name) }}
                 }, {
                     preset: 'islands#redDotIconWithCaption'
                 }));
             @endif
 
         }
-        @endif
     </script>
+    @endif
 @stop

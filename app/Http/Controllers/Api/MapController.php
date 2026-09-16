@@ -1,10 +1,9 @@
 <?php
 
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Transformers\LocationsTransformer;
+use App\Http\Transformers\LocationsMapTransformer;
 use App\Models\Location;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -14,13 +13,14 @@ class MapController extends Controller
 {
     /**
      * Display a list feature for a map.
+     *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request): JsonResponse | array
+    public function index(Request $request): JsonResponse|array
     {
         $this->authorize('view', Location::class);
 
-        $locations = Location::with('assets')->select([
+        $locations = Location::select([
             'locations.id',
             'locations.name',
             'locations.address',
@@ -29,13 +29,14 @@ class MapController extends Controller
             'locations.object_code',
             'locations.active',
         ])
-            ->whereIn('object_code', [843, 847,848])
-            ->where('active', "=", true)
+            ->whereIn('object_code', [843, 847, 848])
+            ->where('active', '=', true)
             ->withCount(['assets as assets_count',
                 'assets as checked_assets_count' => function (Builder $query) {
                     $query->whereNotNull('assets.last_audit_date');
                 }])
             ->get();
-        return (new LocationsTransformer)->transformCollectionForMap($locations);
+
+        return (new LocationsMapTransformer)->transformCollectionForMap($locations);
     }
 }

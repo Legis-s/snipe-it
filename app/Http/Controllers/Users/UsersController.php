@@ -13,6 +13,7 @@ use App\Mail\UnacceptedAssetReminderMail;
 use App\Models\Accessory;
 use App\Models\Actionlog;
 use App\Models\Asset;
+use App\Models\CheckoutAcceptance;
 use App\Models\Company;
 use App\Models\Component;
 use App\Models\Consumable;
@@ -312,6 +313,11 @@ class UsersController extends Controller
         $user->autoassign_licenses = $request->input('autoassign_licenses', 0);
         $user->bitrix_id = $request->input('bitrix_id', null);
         $user->favorite_location_id = $request->input('favorite_location_id', null);
+        if ($request->boolean('clear_bitrix_token')) {
+            $user->bitrix_token = null;
+        } elseif ($request->filled('new_bitrix_token')) {
+            $user->setBitrixToken($request->input('new_bitrix_token'));
+        }
         // Permission-gated fields: `activated` lives inside this gate too.
         // An earlier version of this method assigned `activated` right
         // before the gate on the theory that the gate would overwrite it.

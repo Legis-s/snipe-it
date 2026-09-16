@@ -249,6 +249,8 @@
                         <x-button.delete :item="$location"/>
                     </x-slot:buttons>
 
+                    @include('partials.location-map', ['location' => $location])
+
                     @if ($location->ldap_ou)
                         <x-info-element icon_type="ldap">
                             {{ $location->ldap_ou }}
@@ -270,27 +272,5 @@
         <x-modals.upload-file item-type="locations" :item-id="$location->id" />
     @endcan
 
-    @if ($location->coordinates!='')
-        <script src="https://api-maps.yandex.ru/2.1/?apikey=9aff6103-40f7-49e4-ad79-aa2a69d421d6&lang=ru_RU"
-                type="text/javascript"/>
-        <script type="text/javascript">
-            ymaps.ready(init);
-            function init() {
-                // Создание карты.
-                const myMap = new ymaps.Map("map", {
-                    center: [{{$location->coordinates}}],
-                    zoom: 15,
-                    controls: ['zoomControl']
-                });
-                myMap.geoObjects.add(new ymaps.Placemark([{{$location->coordinates}}], {
-                    // balloonContent: 'цвет <strong>воды пляжа бонди</strong>'
-                }, {
-                    preset: 'islands#blueCircleDotIconWithCaption',
-                }));
-            }
-        </script>
-    @endif
-
     @include ('partials.bootstrap-table')
 @endsection
-

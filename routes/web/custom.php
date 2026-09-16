@@ -1,16 +1,16 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\InvoiceTypesController;
-use App\Http\Controllers\PurchasesController;
-use App\Http\Controllers\MapController;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Consumables;
+use App\Http\Controllers\ContractsController;
+use App\Http\Controllers\DealsController;
+use App\Http\Controllers\DevicesController;
 use App\Http\Controllers\InventoriesController;
 use App\Http\Controllers\InventoryStatuslabelsController;
-use App\Http\Controllers\DevicesController;
-use App\Http\Controllers\ContractsController;
-use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\DealsController;
-use App\Http\Controllers\Consumables;
+use App\Http\Controllers\InvoiceTypesController;
+use App\Http\Controllers\MapController;
+use App\Http\Controllers\PurchasesController;
+use Illuminate\Support\Facades\Route;
 
 Route::impersonate();
 
@@ -19,22 +19,22 @@ Route::group(['middleware' => 'auth'], function () {
     /**
      * InvoiceTypes
      */
-    Route::resource('invoicetypes', InvoiceTypesController::class);
+    Route::resource('invoicetypes', InvoiceTypesController::class)->only(['index', 'edit', 'update']);
 
     /**
      * Contracts
      */
-    Route::resource('contracts', ContractsController::class);
+    Route::resource('contracts', ContractsController::class)->only(['index', 'show']);
 
     /**
      * Deals
      */
-    Route::resource('deals', DealsController::class);
+    Route::resource('deals', DealsController::class)->only(['index', 'show']);
 
     /**
      * Inventories
      */
-    Route::resource('inventories', InventoriesController::class);
+    Route::resource('inventories', InventoriesController::class)->only(['index', 'show', 'destroy']);
 
     /**
      * Inventory Status Labels
@@ -44,11 +44,10 @@ Route::group(['middleware' => 'auth'], function () {
     /**
      * Purchases
      */
-    Route::get(
+    Route::post(
         'purchases/delete_all_rejected',
         [PurchasesController::class, 'deleteAllRejected']
     )->name('purchases.delete_all_rejected');
-
 
     Route::get(
         'purchases/{assetId}/clone',
@@ -65,7 +64,7 @@ Route::group(['middleware' => 'auth'], function () {
         [PurchasesController::class, 'recognizeInvoice']
     )->name('purchases.recognize-invoice');
 
-    Route::resource('purchases', PurchasesController::class);
+    Route::resource('purchases', PurchasesController::class)->only(['index', 'create', 'store', 'show', 'edit', 'destroy']);
 
     /**
      * Map
@@ -78,10 +77,8 @@ Route::group(['middleware' => 'auth'], function () {
     /**
      * Devices
      */
-    Route::resource('devices', DevicesController::class);
+    Route::resource('devices', DevicesController::class)->only(['index', 'show']);
 });
-
-
 
 /*
 |--------------------------------------------------------------------------

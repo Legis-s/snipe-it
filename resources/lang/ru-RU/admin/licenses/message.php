@@ -1,6 +1,9 @@
 <?php
 
 return [
+    'import' => [
+        'no_free_seats' => 'У лицензии «:license» нет свободных мест. «:target» не назначен на место.',
+    ],
 
     'does_not_exist' => 'Лицензии не существует или у вас нет разрешения на её просмотр.',
     'user_does_not_exist' => 'Пользователь не существует или у вас нет разрешения на его просмотр.',
@@ -43,8 +46,8 @@ return [
     ],
 
     'delete_with_checkin' => [
-        'bulk_success' => ':count licenses were deleted successfully after checking in :seats seats.',
-        'partial_success' => ':count licenses were deleted successfully after checking in :seats seats. See additional information below.',
+        'bulk_success' => 'Успешно удалено лицензий: :count. Возвращено мест: :seats.',
+        'partial_success' => 'Успешно удалено лицензий: :count. Возвращено мест: :seats. Подробности ниже.',
     ],
 
     'checkout' => [

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Http\Traits\UniqueUndeletedTrait;
 use App\Models\Traits\CompanyableTrait;
+use App\Models\Traits\HasBitrixToken;
 use App\Models\Traits\HasCalendarEvents;
 use App\Models\Traits\HasUploads;
 use App\Models\Traits\Loggable;
@@ -16,7 +17,6 @@ use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
-use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -29,17 +29,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
-use Laravel\Passport\HasApiTokens;
 use Lab404\Impersonate\Models\Impersonate;
+use Laravel\Passport\HasApiTokens;
 use Watson\Validating\ValidatingTrait;
 
 class User extends SnipeModel implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract, HasLocalePreference
 {
     use CompanyableTrait;
+    use HasBitrixToken;
     use HasCalendarEvents;
     use HasFactory;
     use HasUploads;
@@ -47,10 +47,10 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     protected $presenter = UserPresenter::class;
 
     use Authenticatable, Authorizable, CanResetPassword, HasApiTokens;
+    use Impersonate;
     use Loggable, SoftDeletes, ValidatingTrait;
     use Notifiable;
     use Presentable;
-    use Impersonate;
     use Searchable;
     use UniqueUndeletedTrait;
 
@@ -127,24 +127,6 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         'bitrix_id',
         'favorite_location_id',
     ];
-
-    public function setBitrixToken(string $token): void
-    {
-        $this->bitrix_token = Crypt::encryptString($token);
-    }
-
-    public function decryptedBitrixToken(): ?string
-    {
-        if (! $this->bitrix_token) {
-            return null;
-        }
-
-        try {
-            return Crypt::decryptString($this->bitrix_token);
-        } catch (DecryptException) {
-            return null;
-        }
-    }
 
     protected $casts = [
         'manager_id' => 'integer',
@@ -1236,7 +1218,6 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         return $this->belongsTo(Location::class, 'location_id')->withTrashed();
     }
 
-
     /**
      * Get the asset's favorite location based on the assigned user
      *
@@ -1246,7 +1227,6 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     {
         return $this->belongsTo(\App\Models\Location::class, 'favorite_location_id')->withTrashed();
     }
-
 
     /**
      * Establishes the user -> manager relationship
@@ -1822,6 +1802,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
 
     /**
      * Get any purchases the user manages.
+     *
      * @return Relation
      **/
     public function purchases()

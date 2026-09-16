@@ -1,17 +1,18 @@
 <?php
 
-
 namespace App\Http\Controllers\Api;
-
 
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ConsumableReturnRequest;
 use App\Http\Transformers\ConsumableAssignmentTransformer;
 use App\Models\Actionlog;
 use App\Models\Consumable;
 use App\Models\ConsumableAssignment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class ConsumableAssignmentController extends Controller
 {
@@ -43,7 +44,6 @@ class ConsumableAssignmentController extends Controller
             'consumables_locations.updated_at',
         ]);
 
-
         if ($request->filled('search')) {
             $consumableAssignments = $consumableAssignments->AssignedSearch($request->input('search'));
         }
@@ -52,7 +52,6 @@ class ConsumableAssignmentController extends Controller
             $consumableAssignments->where('type', '=', 'sold');
             $consumableAssignments->where('assigned_type', \App\Models\User::class);
         }
-
 
         if ($request->filled('consumable_id')) {
             $consumableAssignments->where('consumable_id', '=', $request->input('consumable_id'));
@@ -86,11 +85,9 @@ class ConsumableAssignmentController extends Controller
             $consumableAssignments->where('assigned_type', \App\Models\Purchase::class);
         }
 
-
         if ($request->filled('massoperation_id')) {
             $consumableAssignments->join('cons_assignment_mass_operation', 'cons_assignment_mass_operation.consumable_assignment_id', '=', 'consumables_locations.id')->where('cons_assignment_mass_operation.mass_operation_id', '=', $request->input('massoperation_id'));
         }
-
 
         // Set the offset to the API call's offset, unless the offset is higher than the actual count of items in which
         // case we override with the actual count, so we should return 0 items.
@@ -105,42 +102,53 @@ class ConsumableAssignmentController extends Controller
         $consumableAssignments->orderBy('consumables_locations.created_at', 'desc')->orderBy('consumables_locations.id', 'desc');
         $total = $consumableAssignments->count();
         $consumableAssignments = $consumableAssignments->skip($offset)->take($limit)->get();
+
         return (new ConsumableAssignmentTransformer)->transformConsumableAssignments($consumableAssignments, $total);
     }
-
 
     /**
      * Update the specified resource in storage.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param int $id
+     * @param  \Illuminate\Http\Request  $request
      */
-    public function return(Request $request, $id): JsonResponse
+    public function return(ConsumableReturnRequest $request, int $id): JsonResponse
     {
-        $this->authorize('view', Consumable::class);
-        $consumableAssignment = ConsumableAssignment::findOrFail($id);
-        $user = auth()->user();
+        $assignment = ConsumableAssignment::findOrFail($id);
+        $consumable = Consumable::findOrFail($assignment->consumable_id);
+        $this->authorize('checkout', $consumable);
 
-        if ($request->filled('quantity')) {
-            $consumableAssignment->quantity = $consumableAssignment->quantity - $request->input('quantity');
-            $user_name = "(" . $user->id . ") " . $user->last_name . " " . $user->first_name;
-            $consumableAssignment->comment = $consumableAssignment->comment . " Возвращено: " . $request->input('quantity') . ", " . date("Y-m-d H:i:s") . ", " . $user_name;
-            if ($consumableAssignment->save()) {
-
-                $log = new Actionlog();
-                $log->created_by = auth()->id();
-                $log->action_type = 'return';
-                $log->item_id = $consumableAssignment->consumable_id;
-                $log->item_type = Consumable::class;
-                $log->note = json_encode($request->all());
-                $log->save();
-
-                return response()->json(Helper::formatStandardApiResponse('success', $consumableAssignment, trans('admin/consumables/message.update.success')));
+        $assignment = DB::transaction(function () use ($request, $id, $consumable): ConsumableAssignment {
+            Consumable::whereKey($consumable->id)->lockForUpdate()->firstOrFail();
+            $assignment = ConsumableAssignment::whereKey($id)->lockForUpdate()->firstOrFail();
+            $quantity = $request->integer('quantity');
+            if (! in_array($assignment->type, [ConsumableAssignment::ISSUED, ConsumableAssignment::SOLD], true)
+                || $quantity > $assignment->quantity) {
+                throw ValidationException::withMessages(['quantity' => trans('validation.between.numeric', [
+                    'attribute' => trans('general.quantity'), 'min' => 1, 'max' => $assignment->quantity,
+                ])]);
             }
-        } else {
-            return response()->json(Helper::formatStandardApiResponse('error', null, $consumableAssignment->getErrors()));
-        }
-        return response()->json(Helper::formatStandardApiResponse('error', null, $consumableAssignment->getErrors()));
-    }
+            $assignment->quantity -= $quantity;
+            if (! $assignment->save()) {
+                throw ValidationException::withMessages($assignment->getErrors()->toArray());
+            }
+            $log = new Actionlog;
+            $log->created_by = auth()->id();
+            $log->action_type = 'return';
+            $log->item_id = $consumable->id;
+            $log->item_type = Consumable::class;
+            $log->target_id = $assignment->assigned_to;
+            $log->target_type = $assignment->assigned_type;
+            $log->quantity = $quantity;
+            $log->note = json_encode(['assignment_id' => $id, 'quantity' => $quantity]);
+            $log->save();
 
+            return $assignment;
+        });
+
+        return response()->json(Helper::formatStandardApiResponse(
+            'success',
+            (new ConsumableAssignmentTransformer)->transformConsumableAssignment($assignment),
+            trans('admin/consumables/message.update.success')
+        ));
+    }
 }

@@ -15,7 +15,7 @@ return [
     'responsible_party' => 'Ответственная сторона',
     'checked_out_to_at_creation' => 'Привязан к',
     'completed_at' => 'Завершено',
-    'completed_at_help' => 'When this maintenance was actually finished. Leave blank if not yet complete. Setting a date here is equivalent to clicking Mark Complete but lets you enter a past date instead of using the current time.',
+    'completed_at_help' => 'Дата фактического завершения обслуживания. Оставьте пустым, если оно ещё не завершено. Указание даты равнозначно действию «Отметить завершённым», но позволяет выбрать прошедшую дату вместо текущей.',
     'completed_by' => 'Завершено',
     'mark_complete' => 'Отметить как завершенное',
     'already_complete' => 'Завершено',

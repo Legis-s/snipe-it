@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'pending_requesters' => 'Также запрошено пользователями',
 
     'asset_tag' => 'Тег',
     'asset_model' => 'Модель',

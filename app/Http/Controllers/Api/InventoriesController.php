@@ -1,6 +1,6 @@
 <?php
-namespace App\Http\Controllers\Api;
 
+namespace App\Http\Controllers\Api;
 
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
@@ -9,7 +9,6 @@ use App\Models\Asset;
 use App\Models\Inventory;
 use App\Models\InventoryItem;
 use App\Models\Location;
-use Auth;
 use DateTime;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -20,9 +19,10 @@ class InventoriesController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request): JsonResponse | array
+    public function index(Request $request): JsonResponse|array
     {
-        $inventories = Inventory::with('inventory_items','location')
+        $this->authorize('view', Location::class);
+        $inventories = Inventory::with('inventory_items', 'location')
             ->select([
                 'inventories.id',
                 'inventories.status',
@@ -54,10 +54,10 @@ class InventoriesController extends Controller
 
         if ($request->filled('bitrix_id')) {
             $location = Location::where('bitrix_id', $request->input('bitrix_id'))->first();
-            if($location){
+            if ($location) {
                 $inventories->where('inventories.location_id', '=', $location->id);
-            } else{
-                return response()->json(Helper::formatStandardApiResponse('error', null ));
+            } else {
+                return response()->json(Helper::formatStandardApiResponse('error', null));
             }
         }
 
@@ -66,10 +66,9 @@ class InventoriesController extends Controller
         }
         $allowed_columns =
             [
-                'id','status','name','device','status','created_at',
-                'updated_at'
+                'id', 'status', 'name', 'device', 'status', 'created_at',
+                'updated_at',
             ];
-
 
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
         $sort = in_array($request->input('sort'), $allowed_columns) ? $request->input('sort') : 'created_at';
@@ -82,21 +81,22 @@ class InventoriesController extends Controller
         // Check to make sure the limit is not higher than the max allowed
         ((config('app.max_results') >= $request->input('limit')) && ($request->filled('limit'))) ? $limit = $request->input('limit') : $limit = config('app.max_results');
 
-
         $total = $inventories->count();
         $inventories = $inventories->skip($offset)->take($limit)->get();
+
         return (new InventoriesTransformer)->transformInventories($inventories, $total);
     }
 
     /**
      * Display the specified resource.
+     *
      * @param  int  $id
      */
-    public function show($id): JsonResponse | array
+    public function show($id): JsonResponse|array
     {
-//        $this->authorize('view', Location::class);
+        $this->authorize('view', Location::class);
 
-        $inventory = Inventory::with('inventory_items','location')
+        $inventory = Inventory::with('inventory_items', 'location')
             ->select([
                 'inventories.id',
                 'inventories.status',
@@ -126,37 +126,36 @@ class InventoriesController extends Controller
         return (new InventoriesTransformer)->transformInventory($inventory);
     }
 
-
-    public function store(Request $request) : JsonResponse
+    public function store(Request $request): JsonResponse
     {
+        $this->authorize('audit', Asset::class);
         $data = $request->all();
-        if (isset($data['bitrix_id'])){
-            $location = Location::where('bitrix_id',$data["bitrix_id"] )->firstOrFail();
-        }elseif (isset($data['location_id'])){
-            $location = Location::where('id',$data["location_id"] )->firstOrFail();
-        }else{
+        if (isset($data['bitrix_id'])) {
+            $location = Location::where('bitrix_id', $data['bitrix_id'])->firstOrFail();
+        } elseif (isset($data['location_id'])) {
+            $location = Location::where('id', $data['location_id'])->firstOrFail();
+        } else {
             return response()->json(Helper::formatStandardApiResponse('error'));
         }
 
+        $assets = Asset::with('assignedTo', 'model',
+            'model.category', 'model.manufacturer', 'status')->select([
+                'assets.id',
+                'assets.name',
+                'assets.notes',
+                'assets.asset_tag',
+                'assets.status_id',
+                'assets.model_id',
+                'assets.location_id',
+                'assets.serial',
+                'assets.created_at',
+                'assets.updated_at',
+                'assets.deleted_at',
+            ]);
 
-        $assets = Asset::with('assignedTo','model',
-                'model.category', 'model.manufacturer', 'status')->select([
-            'assets.id',
-            'assets.name',
-            'assets.notes',
-            'assets.asset_tag',
-            'assets.status_id',
-            'assets.model_id',
-            'assets.location_id',
-            'assets.serial',
-            'assets.created_at',
-            'assets.updated_at',
-            'assets.deleted_at',
-        ]);
-
-//        $assets = Company::scopeCompanyables(Asset::select('assets.*'),"company_id","assets")
-//            ->with('location', 'assetstatus', 'assetlog', 'company', 'defaultLoc','assignedTo',
-//                'model.category', 'model.manufacturer', 'model.fieldset','supplier');
+        //        $assets = Company::scopeCompanyables(Asset::select('assets.*'),"company_id","assets")
+        //            ->with('location', 'assetstatus', 'assetlog', 'company', 'defaultLoc','assignedTo',
+        //                'model.category', 'model.manufacturer', 'model.fieldset','supplier');
         $assets->where('assets.location_id', '=', $location->id);
         $assets->whereNull('assets.deleted_at');
 
@@ -166,21 +165,19 @@ class InventoriesController extends Controller
                 ->where('archived', '=', 0);
         });
 
-
         $assets = $assets->get();
 
         $inventory = new Inventory;
-        $inventory->name = $location->name ."_".date("d.m.Y H:i:s");
+        $inventory->name = $location->name.'_'.date('d.m.Y H:i:s');
         $inventory->location_id = $location->id;
         $inventory->fill($request->all());
 
-
-        if ($request['responsible_photo']){
+        if ($request['responsible_photo']) {
             $destinationPath = public_path().'/uploads/inventories/';
             $file = base64_decode($inventory->responsible_photo);
-            $filename = 'inventories-'.$inventory->id.'-'.str_random(8).".jpg";
+            $filename = 'inventories-'.$inventory->id.'-'.str_random(8).'.jpg';
             $success = file_put_contents($destinationPath.$filename, $file);
-            if ($success>0){
+            if ($success > 0) {
                 $inventory->responsible_photo = $filename;
             }
         }
@@ -190,45 +187,44 @@ class InventoriesController extends Controller
                 $inventory_item->asset_id = $asset->id;
                 $inventory_item->name = $asset->name;
                 $inventory_item->notes = $asset->notes;
-                if ($asset->model && $asset->model->name){
+                if ($asset->model && $asset->model->name) {
                     $inventory_item->setAttribute('model', $asset->model->name);
                 }
-                if ($asset->model && $asset->model->manufacturer){
+                if ($asset->model && $asset->model->manufacturer) {
                     $inventory_item->manufacturer = $asset->model->manufacturer->name;
                 }
-                if ($asset->model && $asset->model->category){
+                if ($asset->model && $asset->model->category) {
                     $inventory_item->category = $asset->model->category->name;
                 }
                 $inventory_item->tag = $asset->asset_tag;
-                $inventory_item->serial_number= $asset->serial;
+                $inventory_item->serial_number = $asset->serial;
                 $inventory_item->inventory_id = $inventory->id;
                 $inventory_item->save();
             }
 
-            return response()->json(Helper::formatStandardApiResponse('success', (new InventoriesTransformer)->transformInventory($inventory,true), "Инвентаризация успешно создана"));
+            return response()->json(Helper::formatStandardApiResponse('success', (new InventoriesTransformer)->transformInventory($inventory, true), 'Инвентаризация успешно создана'));
         }
+
         return response()->json(Helper::formatStandardApiResponse('error', null, $inventory->getErrors()));
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param Request $request
-     * @param int $id
-     * @return JsonResponse
+     * @param  int  $id
      */
-    public function update(Request $request, $id) : JsonResponse
+    public function update(Request $request, $id): JsonResponse
     {
-//        $this->authorize('update', Location::class);
+        $this->authorize('audit', Asset::class);
         $inventory = Inventory::findOrFail($id);
         $inventory->fill($request->all());
 
-        if ($request['responsible_photo']){
+        if ($request['responsible_photo']) {
             $destinationPath = public_path().'/uploads/inventories/';
             $file = base64_decode($inventory->responsible_photo);
-            $filename = 'inventories-'.$inventory->id.'-'.str_random(8).".jpg";
+            $filename = 'inventories-'.$inventory->id.'-'.str_random(8).'.jpg';
             $success = file_put_contents($destinationPath.$filename, $file);
-            if ($success>0){
+            if ($success > 0) {
                 $inventory->responsible_photo = $filename;
             }
         }
@@ -237,7 +233,7 @@ class InventoriesController extends Controller
             return response()->json(
                 Helper::formatStandardApiResponse(
                     'success',
-                    (new InventoriesTransformer)->transformInventory($inventory,true),
+                    (new InventoriesTransformer)->transformInventory($inventory, true),
                     trans('admin/locations/message.update.success')
                 )
             );
@@ -246,17 +242,12 @@ class InventoriesController extends Controller
         return response()->json(Helper::formatStandardApiResponse('error', null, $inventory->getErrors()));
     }
 
-
-    /**
-     *
-     * @param  \Illuminate\Http\Request  $request
-     */
     public function clearallemply(Request $request): JsonResponse
     {
+        $this->authorize('admin');
         $dayBefore = (new DateTime('now'))->format('Y-m-d');
 
-
-        $inventories = Inventory::with('inventory_items','location')
+        $inventories = Inventory::with('inventory_items', 'location')
             ->select([
                 'inventories.id',
                 'inventories.status',
@@ -284,18 +275,18 @@ class InventoriesController extends Controller
             ->where('inventories.created_at', '<', $dayBefore)
             ->get();
 
-        $to_delete  = 0;
+        $to_delete = 0;
         foreach ($inventories as &$inv) {
             $checked = $inv->checked;
-            if ($checked == 0){
+            if ($checked == 0) {
                 $to_delete++;
                 $inv->inventory_items()->forceDelete();
                 $inv->forceDelete();
             }
         }
-//        $text = "Получено " . count($inventories) . "  инвентаризаций\n К удалению  " . $to_delete . "  инвентаризаций\n";
-//        return response()->json(Helper::formatStandardApiResponse('success', null,$text));
-        return response()->json(Helper::formatStandardApiResponse('success', null,null));
-    }
 
+        //        $text = "Получено " . count($inventories) . "  инвентаризаций\n К удалению  " . $to_delete . "  инвентаризаций\n";
+        //        return response()->json(Helper::formatStandardApiResponse('success', null,$text));
+        return response()->json(Helper::formatStandardApiResponse('success', null, null));
+    }
 }

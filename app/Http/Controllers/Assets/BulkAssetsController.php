@@ -14,8 +14,8 @@ use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\CheckoutAcceptance;
 use App\Models\Company;
-use App\Models\Deal;
 use App\Models\CustomField;
+use App\Models\Deal;
 use App\Models\LicenseSeat;
 use App\Models\Location;
 use App\Models\Setting;
@@ -661,18 +661,12 @@ class BulkAssetsController extends Controller
     {
         $this->authorize('checkout', Asset::class);
 
-        $ids = [];
-        if (request()->filled('purchase_id')) {
-            $assets = Company::scopeCompanyables(Asset::select('assets.*'), "company_id", "assets")
-                ->with('location', 'assetstatus', 'assetlog', 'company', 'defaultLoc', 'assignedTo',
-                    'model.category', 'model.manufacturer', 'model.fieldset', 'supplier');
-            $assets->where('assets.purchase_id', '=', request()->input('purchase_id'))->where('status_id', '=', 2)->where('assigned_to', '=', null);
-
-            foreach ($assets->get() as $asset) {
-                array_push($ids, $asset->id);
-            }
+        if (request()->filled('purchase_id') && ! session()->hasOldInput('selected_assets')) {
+            session()->flashInput(['selected_assets' => Company::scopeCompanyables(Asset::query())
+                ->RTD()
+                ->where('assets.purchase_id', request()->input('purchase_id'))
+                ->pluck('assets.id')->all()]);
         }
-
 
         $alreadyAssigned = collect();
 
@@ -835,14 +829,16 @@ class BulkAssetsController extends Controller
             });
 
             if (! $errors) {
-                CheckoutablesCheckedOutInBulk::dispatch(
-                    $assets,
-                    $target,
-                    $admin,
-                    $checkout_at,
-                    $expected_checkin,
-                    e($request->get('note')),
-                );
+                if (! $target instanceof Deal) {
+                    CheckoutablesCheckedOutInBulk::dispatch(
+                        $assets,
+                        $target,
+                        $admin,
+                        $checkout_at,
+                        $expected_checkin,
+                        e($request->get('note')),
+                    );
+                }
 
                 // Honor the redirect_option select from the form. Choosing
                 // 'bulk_checkout' bounces the operator right back to the

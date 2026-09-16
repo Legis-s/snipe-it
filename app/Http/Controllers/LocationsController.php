@@ -125,12 +125,7 @@ class LocationsController extends Controller
         }
 
         $location->bitrix_id = $request->input('bitrix_id');
-        $location->notes            = $request->input('notes');
-        if ($request->input('sklad')){
-            $location->sklad            = $request->input('sklad');
-        }else{
-            $location->sklad = false;
-        }
+        $location->sklad = $request->boolean('sklad');
 
         if ($location->save()) {
             return redirect()->route('locations.index')->with('success', trans('admin/locations/message.create.success'));
@@ -204,10 +199,8 @@ class LocationsController extends Controller
             $location->company_id = $request->input('company_id');
         }
 
-
-        $location->bitrix_id        = $request->input('bitrix_id');
-        $location->notes            = $request->input('notes');
-        $location->sklad            = $request->input('sklad');
+        $location->bitrix_id = $request->input('bitrix_id');
+        $location->sklad = $request->boolean('sklad');
 
         // Parent company check applies whenever FMCS is on, independent of scope_locations_fmcs.
         if (Setting::getSettings()->full_multiple_companies_support) {

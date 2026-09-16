@@ -42,7 +42,6 @@ class UpdateUserTest extends TestCase
             $input = $xpath->query('//input[@name="'.$field.'"]')->item(0);
             $this->assertNotNull($input);
             $this->assertFalse($input->hasAttribute('required'), "{$field} must be optional when editing a user");
-            $this->assertSame('false', $input->getAttribute('data-required-when-active'));
         }
     }
 

@@ -126,7 +126,7 @@
                                 name="activated"
                                 :label="trans('admin/users/general.activated_help_text')"
                                 :item="$user"
-                                :help_text="trans('admin/users/general.activated_password_required_help')"
+                                :help_text="$user->exists ? null : trans('admin/users/general.activated_password_required_help')"
                                 help_icon="tip"
                             />
                         @endif
@@ -688,4 +688,3 @@
         </x-form>
     </x-container>
 @stop
-

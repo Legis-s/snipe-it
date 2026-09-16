@@ -2,47 +2,43 @@
 
 namespace App\Http\Transformers;
 
-use App\Models\Contract;
-use App\Models\Location;
-use Illuminate\Database\Eloquent\Collection;
-use Gate;
 use App\Helpers\Helper;
+use App\Models\Contract;
+use Illuminate\Database\Eloquent\Collection;
 
 class ContractsTransformer
 {
     public function transformContracts(Collection $contracts, $total)
     {
-        $array = array();
+        $array = [];
         foreach ($contracts as $contract) {
             $array[] = self::transformContract($contract);
         }
+
         return (new DatatablesTransformer)->transformDatatables($array, $total);
     }
 
-    public function transformContract(Contract $contract = null)
+    public function transformContract(?Contract $contract = null)
     {
         if ($contract) {
 
             $array = [
-                'id' => (int)$contract->id,
+                'id' => (int) $contract->id,
                 'name' => e($contract->name),
                 'number' => e($contract->number),
                 'status' => e($contract->getStatusText()),
                 'type' => e($contract->getTypeText()),
-                'assets_count'    => (int) $contract->assets_count,
-                'assets_no_docs_count'    => (int) $contract->assets_no_docs_count,
-                'assets_sum_purchase_cost'    => (int) $contract->assets_sum,
-                'consumable_count'    => (int) $contract->consumable_count,
-                'consumable_no_docs_count'    => (int) $contract->consumable_no_docs_count,
-                'consumables_cost'    => (int) $contract->consumables_cost,
-                'summ'    => (int) $contract->summ,
+                'assets_count' => (int) $contract->assets_count,
+                'assets_sum_purchase_cost' => (int) $contract->assets_sum,
+                'consumable_count' => (int) $contract->consumable_count,
+                'consumables_cost' => (int) $contract->consumables_cost,
+                'summ' => (int) $contract->summ,
                 'created_at' => Helper::getFormattedDateObject($contract->created_at, 'datetime'),
                 'updated_at' => Helper::getFormattedDateObject($contract->updated_at, 'datetime'),
-                'bitrix_id' => ($contract->bitrix_id) ? (int)$contract->bitrix_id : null,
+                'bitrix_id' => ($contract->bitrix_id) ? (int) $contract->bitrix_id : null,
             ];
 
             return $array;
         }
     }
-
 }

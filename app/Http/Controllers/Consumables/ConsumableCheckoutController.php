@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Consumables;
 
 use App\Actions\Acceptances\CreateCheckoutAcceptanceAction;
-use App\Events\CheckoutableCheckedOut;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ConsumableCheckoutRequest;
 use App\Http\Traits\CheckInOutTrait;
 use App\Models\CheckoutAcceptance;
+use App\Models\CheckoutRequest;
 use App\Models\Consumable;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -94,8 +94,11 @@ class ConsumableCheckoutController extends Controller
         }
 
         $this->authorize('checkout', $consumable);
-        $target = $this->determineCheckoutTarget();
+        $target = $this->determineCheckoutTarget($request);
         $signInPlace = $request->boolean('sign_in_place') && $target instanceof User;
+        if (! $consumable->canCheckoutTo($target)) {
+            return redirect()->back()->with('error', trans('general.error_user_company'));
+        }
 
         // If the quantity is not present in the request or is not a positive integer, set it to 1
         $quantity = $request->input('checkout_qty');
@@ -109,24 +112,24 @@ class ConsumableCheckoutController extends Controller
         }
 
         $admin_user = auth()->user();
-//        $assigned_to = e($request->input('assigned_to'));
+        //        $assigned_to = e($request->input('assigned_to'));
 
         // Check if the user exists
-//        if (is_null($user = User::find($assigned_to))) {
-//            // Redirect to the consumable management page with error
-//            return redirect()->route('consumables.checkout.show', $consumable)->with('error', trans('admin/consumables/message.checkout.user_does_not_exist'))->withInput();
-//        }
+        //        if (is_null($user = User::find($assigned_to))) {
+        //            // Redirect to the consumable management page with error
+        //            return redirect()->route('consumables.checkout.show', $consumable)->with('error', trans('admin/consumables/message.checkout.user_does_not_exist'))->withInput();
+        //        }
 
-//        if (! $consumable->canCheckoutTo($user)) {
-//            return redirect()->back()->with('error', trans('general.error_checkout_company_mismatch', [
-//                'item' => trans('general.consumable').' "'.$consumable->name.'"',
-//                'item_company' => $consumable->company?->name ?? trans('general.unassigned'),
-//                'target' => trans('general.user').' "'.$user->username.'"',
-//            ]));
-//        }
+        //        if (! $consumable->canCheckoutTo($user)) {
+        //            return redirect()->back()->with('error', trans('general.error_checkout_company_mismatch', [
+        //                'item' => trans('general.consumable').' "'.$consumable->name.'"',
+        //                'item_company' => $consumable->company?->name ?? trans('general.unassigned'),
+        //                'target' => trans('general.user').' "'.$user->username.'"',
+        //            ]));
+        //        }
 
         // Update the consumable data
-//        $consumable->assigned_to = e($request->input('assigned_user'));
+        //        $consumable->assigned_to = e($request->input('assigned_user'));
         $consumable->checkout_qty = $quantity;
 
         // Concurrency guard. The unlocked numRemaining() check above is
@@ -140,15 +143,17 @@ class ConsumableCheckoutController extends Controller
 
         $remaining = null;
 
-        DB::transaction(function () use ($consumable, $target, $quantity, $request, $signInPlace, &$remaining): void {
+        DB::transaction(function () use ($consumable, $target, $quantity, $request, $signInPlace, &$remaining, &$overAllocated): void {
             $locked = Consumable::whereKey($consumable->id)->lockForUpdate()->first();
             $remaining = $locked?->numRemaining() ?? 0;
 
             if ($remaining < $quantity) {
+                $overAllocated = true;
+
                 return;
             }
 
-            $locked->checkOut(
+            $overAllocated = ! $locked->checkOut(
                 $target,
                 $quantity,
                 $request->input('note'),
@@ -163,19 +168,6 @@ class ConsumableCheckoutController extends Controller
             ]));
         }
 
-        event(new CheckoutableCheckedOut(
-            $consumable,
-            $target,
-            auth()->user(),
-            $request->input('note'),
-            [],
-            $consumable->checkout_qty,
-            $request->boolean('sign_in_place'),
-        ));
-
-        $request->request->add(['checkout_to_type' => 'user']);
-        $request->request->add(['assigned_user' => $user->id]);
-
         session()->put([
             'redirect_option' => $request->input('redirect_option'),
             'checkout_to_type' => $request->input('checkout_to_type'),
@@ -184,10 +176,10 @@ class ConsumableCheckoutController extends Controller
 
         // When sign_in_place is requested, redirect to the acceptance/signature page
         // so the user can sign in person. The signature is attributed to the target user.
-        if ($request->boolean('sign_in_place')) {
+        if ($signInPlace) {
             $acceptance = CheckoutAcceptance::where('checkoutable_type', Consumable::class)
                 ->where('checkoutable_id', $consumable->id)
-                ->where('assigned_to_id', $user->id)
+                ->where('assigned_to_id', $target->id)
                 ->pending()
                 ->latest()
                 ->first();
@@ -326,7 +318,7 @@ class ConsumableCheckoutController extends Controller
 
             $overAllocated = false;
 
-            DB::transaction(function () use ($consumable, $targetUser, $qty, $note, $adminUser, &$overAllocated): void {
+            DB::transaction(function () use ($consumable, $targetUser, $qty, $note, &$overAllocated): void {
                 $locked = Consumable::whereKey($consumable->id)->lockForUpdate()->first();
 
                 if (! $locked || $locked->numRemaining() < $qty) {
@@ -335,36 +327,13 @@ class ConsumableCheckoutController extends Controller
                     return;
                 }
 
-                for ($i = 0; $i < $qty; $i++) {
-                    $consumable->users()->attach($consumable->id, [
-                        'consumable_id' => $consumable->id,
-                        'created_by' => $adminUser->id,
-                        'assigned_to' => $targetUser->id,
-                        'note' => $note,
-                    ]);
-                }
+                $overAllocated = ! $locked->checkOut($targetUser, $qty, $note);
             });
 
             if ($overAllocated) {
-                $errors[] = trans('admin/hardware/message.requests.row_over_allocated', [
-                    'id' => $requestId,
-                ]);
+                $errors[] = trans('admin/hardware/message.requests.row_over_allocated', ['id' => $requestId]);
 
                 continue;
-            }
-
-            try {
-                event(new CheckoutableCheckedOut(
-                    $consumable,
-                    $targetUser,
-                    $adminUser,
-                    $note,
-                    [],
-                    $qty,
-                    false,
-                ));
-            } catch (\Throwable $e) {
-                \Illuminate\Support\Facades\Log::warning('Bulk-fulfill event dispatch failed for request '.$requestId.': '.$e->getMessage());
             }
 
             $fulfilled++;

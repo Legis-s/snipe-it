@@ -60,6 +60,12 @@ class BulkFulfillConsumableTest extends TestCase
             ])
             ->assertRedirect(route('requests.index'));
 
+        $this->assertSame(8, $consumable->fresh()->numRemaining());
+        $this->assertDatabaseHas('consumables_locations', [
+            'consumable_id' => $consumable->id, 'quantity' => 2,
+            'assigned_type' => User::class, 'assigned_to' => $alice->id,
+        ]);
+        $this->assertDatabaseCount('consumables_users', 0);
         $this->assertSame(CheckoutRequestState::Fulfilled, $aliceRequest->fresh()->state);
         $this->assertSame(CheckoutRequestState::Pending, $bobRequest->fresh()->state);
     }

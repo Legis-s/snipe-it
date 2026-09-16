@@ -8,6 +8,21 @@ use Tests\TestCase;
 
 class BitrixCredentialsTest extends TestCase
 {
+    public function test_token_round_trip_remains_hidden_from_serialization(): void
+    {
+        $user = User::factory()->create();
+        $this->assertNull($user->decryptedBitrixToken());
+
+        $user->setBitrixToken('trait-secret');
+        $this->assertTrue($user->save());
+        $user->refresh();
+
+        $this->assertSame('trait-secret', $user->decryptedBitrixToken());
+        $this->assertNotSame('trait-secret', $user->bitrix_token);
+        $this->assertArrayNotHasKey('bitrix_token', $user->toArray());
+        $this->assertStringNotContainsString('trait-secret', $user->toJson());
+    }
+
     public function test_edit_form_contains_bitrix_fields_without_exposing_saved_token(): void
     {
         $user = User::factory()->create(['bitrix_id' => 123]);

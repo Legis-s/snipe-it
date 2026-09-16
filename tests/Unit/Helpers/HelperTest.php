@@ -6,10 +6,50 @@ use App\Helpers\Helper;
 use App\Models\Location;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Session;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class HelperTest extends TestCase
 {
+    public static function customTargetRedirects(): array
+    {
+        return [
+            'deal' => ['deal', ['assigned_deal' => 42, 'assigned_asset' => 99], null, 'deals.show', 42],
+            'contract' => ['contract', ['assigned_contract' => 43, 'assigned_asset' => 99], null, 'contracts.show', 43],
+            'deal checkin' => ['deal', [], 44, 'deals.show', 44],
+            'contract checkin' => ['contract', [], 45, 'contracts.show', 45],
+            'missing deal' => ['deal', [], null, 'deals.index', null],
+            'missing contract' => ['contract', [], null, 'contracts.index', null],
+            'unknown target' => ['unknown', [], null, 'home', null],
+            'unset target' => [null, [], null, 'home', null],
+        ];
+    }
+
+    #[DataProvider('customTargetRedirects')]
+    public function test_custom_target_redirects_preserve_upstream_fallback(?string $type, array $input, ?int $checkedInFrom, string $routeName, ?int $targetId): void
+    {
+        Session::put('redirect_option', 'target');
+        Session::put('checkout_to_type', $type);
+        Session::put('checkedInFrom', $checkedInFrom);
+
+        $redirect = Helper::getRedirectOption((object) $input, 123, 'Assets');
+
+        $this->assertSame(route($routeName, $targetId === null ? [] : [$targetId]), $redirect->getTargetUrl());
+    }
+
+    public function test_standard_file_icons_are_preserved(): void
+    {
+        foreach ([
+            'ico' => 'far fa-image',
+            'json' => 'fas fa-code',
+            'key' => 'fas fa-key',
+            'webm' => 'fa-solid fa-video',
+            'unknown' => 'far fa-file',
+        ] as $extension => $icon) {
+            $this->assertSame($icon, Helper::filetype_icon('attachment.'.$extension));
+        }
+    }
+
     /**
      * Regression: `<x-form.row type="datetimepicker">` on transient checkout
      * forms (hardware/checkout, bulk-checkout, kits/checkout, etc.) passes

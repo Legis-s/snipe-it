@@ -2,13 +2,16 @@
 
 @php
     $purchaseAssets = $purchase->assets;
-    $purchaseConsumables = $purchase->consumables;
+    $purchaseConsumables = $purchase->currentConsumables()->get();
     $purchaseAssetTags = $purchaseAssets
         ->filter(fn ($asset) => filled($asset->asset_tag))
         ->mapWithKeys(fn ($asset) => [(string) $asset->id => $asset->asset_tag]);
     $consumableRows = json_decode($purchase->consumables_json ?: '[]', true);
     $consumableRows = is_array($consumableRows) ? $consumableRows : [];
     $hasConsumableRows = count($consumableRows) > 0;
+    $hasUnacceptedConsumables = $old
+        ? $hasConsumableRows && $purchaseConsumables->isEmpty()
+        : collect($consumableRows)->contains(fn ($row) => is_array($row) && (int) ($row['quantity'] ?? 0) > (int) ($row['reviewed'] ?? 0));
     $purchaseStatuses = [
         'inventory' => ['warning', trans('general.purchase_statuses.inventory')],
         'in_payment' => ['primary', trans('general.purchase_statuses.in_payment')],
@@ -75,7 +78,8 @@
                 </x-box>
             @endif
             @if ($hasConsumableRows && $purchase->status !== 'paid')
-                <div class="box">
+                @if ($hasUnacceptedConsumables)
+                <div class="box" id="unaccepted-consumables">
                     <div class="box-header with-border">
                         <div class="box-heading">
                             <h2 class="box-title">{{ trans('general.unaccepted_consumables') }}</h2>
@@ -121,6 +125,7 @@
                         </div>
                     </div><!-- /.box-body -->
                 </div> <!--/.box-->
+                @endif
                 <div class="box">
                     <div class="box-header with-border">
                         <div class="box-heading">
@@ -554,7 +559,12 @@
 
             function reloadConsumables(updatedConsumables) {
                 consumables = Array.isArray(updatedConsumables) ? updatedConsumables : [];
-                $consumablesTable.bootstrapTable('load', consumables);
+                if ($consumablesTable.length) {
+                    $consumablesTable.bootstrapTable('load', consumables);
+                    $('#unaccepted-consumables').toggle(consumables.some(function (row) {
+                        return remainingQuantity(row) > 0;
+                    }));
+                }
             }
 
             function syncConsumableLine(requestData) {
@@ -583,6 +593,12 @@
                 apiRequest('GET', endpoints.purchase)
                     .done(function (purchase) {
                         renderStatus(purchase.status);
+                        if (Array.isArray(purchase.consumables_json)) {
+                            reloadConsumables(purchase.consumables_json);
+                        }
+                        if (isLegacyPurchase && Number(purchase.consumables_count_real) > 0) {
+                            $('#unaccepted-consumables').hide();
+                        }
                         if ($acceptedConsumablesTable.length) {
                             $acceptedConsumablesTable.bootstrapTable('refresh');
                         }
@@ -668,6 +684,7 @@
 
                         apiRequest('POST', endpoints.review + '/' + encodeURIComponent(row.consumable_id) + '/review', {
                             purchase_id: purchaseId,
+                            row_id: row.id,
                             quantity: result.value,
                             nds: row.nds,
                             purchase_cost: row.purchase_cost
@@ -738,24 +755,30 @@
                 })[0].outerHTML;
             }
 
-            function actionButton(className, label) {
+            function actionButton(className, label, icon) {
                 return $('<button>', {
                     type: 'button',
-                    class: 'btn btn-sm ' + className,
-                    text: label
-                })[0].outerHTML;
+                    class: 'btn ' + className,
+                    title: label,
+                    'aria-label': label
+                }).append($('<i>', {class: 'fa fa-fw fa-' + icon, 'aria-hidden': 'true'}))[0].outerHTML;
             }
 
             function actionButtons(value, row) {
                 const buttons = [];
                 if (remainingQuantity(row) > 0) {
-                    buttons.push(actionButton('btn-primary check_consumable', labels.accept));
+                    buttons.push(actionButton('btn-primary check_consumable', labels.accept, 'check'));
                 }
-                buttons.push(actionButton('btn-default edit_consumable', labels.edit));
+                buttons.push(actionButton('btn-default edit_consumable', labels.edit, 'pencil'));
                 if (Number(row.reviewed || 0) === 0) {
-                    buttons.push(actionButton('btn-danger remove_consumable', labels.delete));
+                    buttons.push(actionButton('btn-danger remove_consumable', labels.delete, 'trash'));
                 }
-                return buttons.join(' ');
+                return $('<div>', {
+                    class: 'btn-group btn-group-sm',
+                    role: 'group',
+                    'aria-label': labels.actions,
+                    style: 'display: inline-flex; white-space: nowrap;'
+                }).html(buttons.join(''))[0].outerHTML;
             }
 
             function tableColumns() {
@@ -787,7 +810,7 @@
                         title: labels.actions,
                         align: 'center',
                         valign: 'middle',
-                        width: 240,
+                        width: 120,
                         events: actionEvents,
                         formatter: actionButtons
                     });

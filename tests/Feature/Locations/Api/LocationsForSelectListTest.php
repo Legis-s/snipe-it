@@ -10,6 +10,52 @@ use Tests\TestCase;
 
 class LocationsForSelectListTest extends TestCase
 {
+    public function test_nested_locations_appear_once_with_favorite_first_among_siblings(): void
+    {
+        $root = Location::factory()->create(['name' => 'Root']);
+        $child = Location::factory()->create(['name' => 'A child', 'parent_id' => $root->id]);
+        $favorite = Location::factory()->create(['name' => 'Z favorite', 'parent_id' => $root->id]);
+        $leaf = Location::factory()->create(['name' => 'Leaf', 'parent_id' => $favorite->id]);
+        $actor = User::factory()->createUsers()->create(['favorite_location_id' => $favorite->id]);
+
+        $response = $this->actingAsForApi($actor)
+            ->getJson(route('api.locations.selectlist'))
+            ->assertOk()
+            ->assertJsonPath('total_count', 4)
+            ->assertJsonPath('results.1.text', '-- Z favorite')
+            ->assertJsonPath('results.2.text', '---- Leaf');
+
+        $this->assertSame([$root->id, $favorite->id, $leaf->id, $child->id], array_column($response->json('results'), 'id'));
+    }
+
+    public function test_favorite_location_does_not_bypass_exclusion_or_search(): void
+    {
+        $favorite = Location::factory()->create(['name' => 'Favorite']);
+        $other = Location::factory()->create(['name' => 'Other']);
+        $this->actingAsForApi(User::factory()->createUsers()->create(['favorite_location_id' => $favorite->id]));
+
+        foreach ([['excludeId' => $favorite->id], ['search' => 'Other']] as $query) {
+            $this->getJson(route('api.locations.selectlist', $query))
+                ->assertOk()
+                ->assertJsonCount(1, 'results')
+                ->assertJsonPath('results.0.id', $other->id);
+        }
+    }
+
+    public function test_warehouse_label_is_displayed_without_changing_stored_name(): void
+    {
+        $warehouse = Location::factory()->create(['name' => 'Stockroom', 'sklad' => true]);
+        $this->actingAsForApi(User::factory()->createUsers()->create(['locale' => 'en-US']));
+
+        foreach ([[], ['search' => 'Stockroom']] as $query) {
+            $this->getJson(route('api.locations.selectlist', $query))
+                ->assertOk()
+                ->assertJsonPath('results.0.text', '[Warehouse] Stockroom');
+        }
+
+        $this->assertSame('Stockroom', $warehouse->fresh()->name);
+    }
+
     public function test_getting_location_list_requires_proper_permission()
     {
         $this->actingAsForApi(User::factory()->create())

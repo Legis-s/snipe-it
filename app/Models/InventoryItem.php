@@ -2,10 +2,8 @@
 
 namespace App\Models;
 
-
 use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Watson\Validating\ValidatingTrait;
 
 /**
@@ -16,24 +14,29 @@ use Watson\Validating\ValidatingTrait;
 final class InventoryItem extends SnipeModel
 {
     protected $table = 'inventory_items';
+
     protected $presenter = \App\Presenters\InventoryItemPresenter::class;
+
     use Presentable;
     use Searchable;
 
-    protected $dates = ['deleted_at','checked_at'];
-    protected $rules = array(
+    protected $dates = ['deleted_at', 'checked_at'];
+
+    protected $rules = [
         'model' => 'required',
         'tag' => 'required',
         'category' => 'required',
-    );
+    ];
+
     /**
      * Whether the model should inject it's identifier to the unique
      * validation rules before attempting validation. If this property
      * is not set in the model it will default to true.
      *
-     * @var boolean
+     * @var bool
      */
     protected $injectUniqueIdentifier = true;
+
     use ValidatingTrait;
 
     /**
@@ -80,16 +83,11 @@ final class InventoryItem extends SnipeModel
      *
      * @var array
      */
-    protected $searchableRelations = [
-        'model'              => ['name', 'model_number'],
-        'model.category'     => ['name'],
-        'model.manufacturer' => ['name'],
-    ];
-
+    protected $searchableRelations = [];
 
     public function photo_url()
     {
-        return '/uploads/inventory_items/' . $this->photo;
+        return '/uploads/inventory_items/'.$this->photo;
     }
 
     public function inventory()

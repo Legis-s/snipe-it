@@ -16,6 +16,50 @@ use Tests\TestCase;
 
 class EditAssetTest extends TestCase
 {
+    public function test_current_location_can_be_set_and_cleared_independently_of_default(): void
+    {
+        $default = Location::factory()->create();
+        $current = Location::factory()->create();
+        $asset = Asset::factory()->create(['rtd_location_id' => $default->id]);
+        $this->actingAs(User::factory()->editAssets()->create());
+
+        foreach ([$current->id, null] as $locationId) {
+            $this->put(route('hardware.update', $asset), [
+                'model_id' => $asset->model_id,
+                'status_id' => $asset->status_id,
+                'asset_tags' => [1 => $asset->asset_tag],
+                'rtd_location_id' => $default->id,
+                'location_id' => $locationId,
+            ])->assertSessionHasNoErrors()->assertSessionHas('success');
+
+            $asset->refresh();
+            $this->assertEquals($locationId, $asset->location_id);
+            $this->assertEquals($default->id, $asset->rtd_location_id);
+        }
+    }
+
+    public function test_inventory_status_advances_only_when_review_status_exists(): void
+    {
+        $inventory = StatusLabel::factory()->readyToDeploy()->create(['name' => 'Ожидает инвентаризации']);
+        $asset = Asset::factory()->create(['status_id' => $inventory->id]);
+        $this->actingAs(User::factory()->editAssets()->create());
+
+        $payload = [
+            'model_id' => $asset->model_id,
+            'status_id' => $inventory->id,
+            'asset_tags' => [1 => 'Inventory-tag-42'],
+        ];
+        $this->put(route('hardware.update', $asset), $payload)
+            ->assertSessionHasNoErrors()->assertSessionHas('success');
+        $this->assertEquals($inventory->id, $asset->fresh()->status_id);
+
+        $review = StatusLabel::factory()->readyToDeploy()->create(['name' => 'Ожидает проверки']);
+        $this->put(route('hardware.update', $asset), $payload)
+            ->assertSessionHasNoErrors()->assertSessionHas('success');
+        $this->assertEquals($review->id, $asset->fresh()->status_id);
+        $this->assertSame('Inventory-tag-42', $asset->fresh()->asset_tag);
+    }
+
     public function test_permission_required_to_view_edit_asset_page()
     {
         $asset = Asset::factory()->create();
@@ -30,6 +74,7 @@ class EditAssetTest extends TestCase
         $user = User::factory()->editAssets()->create();
         $response = $this->actingAs($user)->get(route('hardware.edit', $asset));
         $response->assertStatus(200);
+        $response->assertSee('name="depreciable_cost"', false);
     }
 
     public function test_asset_edit_post_is_redirected_if_redirect_selection_is_index()
