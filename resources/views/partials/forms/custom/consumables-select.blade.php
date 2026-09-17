@@ -18,7 +18,7 @@
 
             @if ((!isset($unselect)) && ($consumable_id = old($fieldname, (isset($consumable) ? $consumable->id  : (isset($item) ? $item->{$fieldname} : '')))))
                 <option value="{{ $consumable_id }}" selected="selected" role="option" aria-selected="true"  role="option">
-                    {{ (\App\Models\Consumable::find($consumable_id)) ? \App\Models\Consumable::find($consumable_id)->present()->fullName : '' }}
+                    {{ \App\Models\Consumable::find($consumable_id)?->name ?? '' }}
                 </option>
             @else
                 @if(!isset($multiple))
@@ -28,7 +28,7 @@
                         @foreach($consumable_ids as $consumable_id)
                             <option value="{{ $consumable_id }}" selected="selected" role="option" aria-selected="true"
                                     role="option">
-                                {{ (\App\Models\Consumable::find($consumable_id)) ? \App\Models\Consumable::find($consumable_id)->present()->fullName : '' }}
+                                {{ \App\Models\Consumable::find($consumable_id)?->name ?? '' }}
                             </option>
                         @endforeach
                     @endif
