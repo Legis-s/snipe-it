@@ -201,6 +201,17 @@
                                 :selected="old('quality', $asset->quality)"
                         />
 
+                        <x-form.row :label="trans('general.depreciable_cost')" name="depreciable_cost">
+                            <x-slot:input>
+                                <div class="input-group">
+                                    <input class="form-control" type="number" min="0" max="9999999999999" step="0.01"
+                                           id="depreciable_cost" name="depreciable_cost"
+                                           value="{{ old('depreciable_cost', $asset->depreciable_cost) }}">
+                                    <span class="input-group-addon">{{ $currency_type ?? $snipeSettings->default_currency }}</span>
+                                </div>
+                            </x-slot:input>
+                        </x-form.row>
+
                     {{-- Custom fields --}}
                     @include('models/custom_fields_form', [
                         'model' => $asset->model,
@@ -228,4 +239,3 @@
     </x-container>
 
 @stop
-

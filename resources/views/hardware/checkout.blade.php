@@ -95,6 +95,7 @@
                                     {{ trans('general.rent') }}
                                 </label>
                             </div>
+                        </div>
                     <x-form.row
                         :label="trans('admin/hardware/form.checkout_date')"
                         name="checkout_at"
@@ -184,6 +185,18 @@
                                     name="quality"
                                     :selected="old('quality', $asset->quality)"
                             />
+                    <x-form.row :label="trans('general.depreciable_cost')" name="new_depreciable_cost">
+                        <x-slot:input>
+                            <div class="input-group">
+                                <input class="form-control" type="number" min="0" max="9999999999999" step="0.01"
+                                       id="new_depreciable_cost" name="new_depreciable_cost"
+                                       value="{{ old('new_depreciable_cost', $asset->depreciable_cost) }}">
+                                <span class="input-group-addon">{{ $currency_type ?? $snipeSettings->default_currency }}</span>
+                            </div>
+                            <x-form.error name="depreciable_cost" />
+                        </x-slot:input>
+                    </x-form.row>
+
                     <x-slot:customfooter>
                         <x-redirect_submit_options
                             index_route="hardware.index"

@@ -134,15 +134,16 @@ $(function () {
   });
 
     $('#createModal').on('click','#modal-save', function () {
+    var form = $('#createModal .modal-body form');
     $.ajax({
         type: 'POST',
-        url: $('.modal-body form').attr('action'),
+        url: form.attr('action'),
         headers: {
             "X-Requested-With": 'XMLHttpRequest',
             "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
         },
 
-        data: $('.modal-body form').serialize(),
+        data: form.serialize(),
         success: function (result) {
 
             if(result.status == "error") {

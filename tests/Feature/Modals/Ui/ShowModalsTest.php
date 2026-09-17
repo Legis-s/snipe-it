@@ -7,6 +7,22 @@ use Tests\TestCase;
 
 class ShowModalsTest extends TestCase
 {
+    public function test_consumable_modal_renders(): void
+    {
+        $this->actingAs(User::factory()->superuser()->create())
+            ->get(route('modal.show', 'consumable'))
+            ->assertOk()
+            ->assertSee(route('api.consumables.store'))
+            ->assertSee('name="qty"', false)
+            ->assertSee('id="modal-save"', false);
+    }
+
+    public function test_consumable_modal_requires_authentication(): void
+    {
+        $this->get(route('modal.show', 'consumable'))
+            ->assertRedirect(route('login'));
+    }
+
     public function test_user_modal_renders()
     {
         // Force distinctive attribute values here rather than accepting the
