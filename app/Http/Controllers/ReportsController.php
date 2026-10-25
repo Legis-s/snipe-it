@@ -4,38 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Helpers\Helper;
 use App\Http\Requests\CustomAssetReportRequest;
-use App\Mail\CheckoutAccessoryMail;
-use App\Mail\CheckoutAssetMail;
-use App\Mail\CheckoutComponentMail;
-use App\Mail\CheckoutConsumableMail;
-use App\Mail\CheckoutLicenseMail;
 use App\Models\Accessory;
 use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\Category;
-use App\Models\Checkoutable;
-use App\Models\CheckoutAcceptance;
 use App\Models\Company;
-use App\Models\Component;
-use App\Models\Consumable;
 use App\Models\CustomField;
 use App\Models\Depreciation;
 use App\Models\License;
-use App\Models\LicenseSeat;
 use App\Models\Maintenance;
 use App\Models\ReportTemplate;
 use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use League\Csv\EscapeFormula;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -62,11 +48,6 @@ class ReportsController extends Controller
 
         $audit_alert_count = Asset::DueOrOverdueForAudit($settings)->count();
         $checkin_alert_count = Asset::DueOrOverdueForCheckin($settings)->count();
-        // CheckoutAcceptance has no company_id column; scope through the checkoutable
-        // relationship so each type's CompanyableTrait global scope is applied.
-        $pending_acceptance_count = CheckoutAcceptance::pending()
-            ->whereHasMorph('checkoutable', [Asset::class, LicenseSeat::class, Accessory::class, Component::class, Consumable::class])
-            ->count();
         $licenses_low_count = License::withCount(['freeSeats as free_seats_count'])
             ->get()
             ->filter(fn ($l) => $l->free_seats_count <= 0)
@@ -75,7 +56,6 @@ class ReportsController extends Controller
         return view('reports/index', compact(
             'audit_alert_count',
             'checkin_alert_count',
-            'pending_acceptance_count',
             'licenses_low_count',
         ));
     }
@@ -117,7 +97,7 @@ class ReportsController extends Controller
                 trans('admin/accessories/general.total'),
                 trans('admin/accessories/general.remaining'),
             ];
-            fputcsv($handle, $header);
+            fputcsv($handle, $header, escape: '\\');
 
             $formatter = new EscapeFormula('`');
 
@@ -132,9 +112,9 @@ class ReportsController extends Controller
                         ];
 
                         if (config('app.escape_formulas') === false) {
-                            fputcsv($handle, $row);
+                            fputcsv($handle, $row, escape: '\\');
                         } else {
-                            fputcsv($handle, $formatter->escapeRecord($row));
+                            fputcsv($handle, $formatter->escapeRecord($row), escape: '\\');
                         }
                     }
                 });
@@ -191,7 +171,7 @@ class ReportsController extends Controller
                 trans('admin/hardware/table.book_value'),
                 trans('admin/hardware/table.diff'),
             ];
-            fputcsv($handle, $header);
+            fputcsv($handle, $header, escape: '\\');
 
             Asset::with('model', 'assignedTo', 'status', 'defaultLoc', 'assetlog')
                 ->orderBy('created_at', 'DESC')
@@ -232,9 +212,9 @@ class ReportsController extends Controller
                         ];
 
                         if (config('app.escape_formulas') === false) {
-                            fputcsv($handle, $row);
+                            fputcsv($handle, $row, escape: '\\');
                         } else {
-                            fputcsv($handle, $formatter->escapeRecord($row));
+                            fputcsv($handle, $formatter->escapeRecord($row), escape: '\\');
                         }
                     }
                 });
@@ -271,9 +251,38 @@ class ReportsController extends Controller
      */
     public function getActivityReport(): View
     {
-        $this->authorize('reports.view');
+        // Two entry points to this page:
+        //   - reports.view holders reach it through the main Reports
+        //     nav and get the full endpoint (api.activity.index) with
+        //     search / filter / sort intact and the CSV export button.
+        //   - Scoped viewers (canViewUsersAndCheckoutables but no
+        //     activity.view) reach it via the dashboard Recent
+        //     Activity widget's View-all button. The blade points
+        //     them at api.dashboard.activity (narrow, type-filtered)
+        //     and hides admin-shaped UI via $canManageReports.
+        $hasReportsView = Gate::allows('reports.view');
+        abort_unless($hasReportsView || Gate::allows('canViewUsersAndCheckoutables'), 403);
 
-        return view('reports/activity');
+        // Dropdown filter lists for the activity report toolbar. Both
+        // are sourced from enums (ActivityItemType, ActionType) so a
+        // future case addition shows up in the UI automatically.
+        $typeFilters = array_map(fn (\App\Enums\ActivityItemType $case) => [
+            'value' => $case->value,
+            'label' => $case->label(),
+            'icon' => $case->icon(),
+        ], \App\Enums\ActivityItemType::cases());
+
+        $actionTypes = collect(\App\Enums\ActionType::cases())
+            ->pluck('value')
+            ->sort()
+            ->values()
+            ->all();
+
+        return view('reports/activity', [
+            'canManageReports' => $hasReportsView,
+            'typeFilters' => $typeFilters,
+            'actionTypes' => $actionTypes,
+        ]);
     }
 
     /**
@@ -286,11 +295,34 @@ class ReportsController extends Controller
     public function postActivityReport(Request $request): StreamedResponse
     {
         ini_set('max_execution_time', 12000);
-        $this->authorize('reports.view');
+        // Two entry points, same as getActivityReport() above:
+        //   - reports.view holders get the full unfiltered CSV.
+        //   - Scoped viewers arriving via the dashboard widget's
+        //     View-all + Download can export a CSV of what they'd see
+        //     on the page (item_type / target_type they can view).
+        $hasReportsView = Gate::allows('reports.view');
+        abort_unless($hasReportsView || Gate::allows('canViewUsersAndCheckoutables'), 403);
+
+        // Build the viewable-type filter once so the streaming chunk
+        // callback below can add it without recomputing per chunk.
+        // Only applied when the caller lacks reports.view. Mirrors
+        // Api\DashboardController::activity so the CSV export shows
+        // the same row set the page shows for scoped viewers.
+        $viewableTypeFilter = null;
+        if (! $hasReportsView) {
+            $candidateTypes = array_merge(
+                \App\Models\CalendarEvent::sourceModels(),
+                [\App\Models\Accessory::class, \App\Models\Consumable::class, \App\Models\Component::class],
+            );
+            $viewableTypeFilter = array_values(array_filter(
+                $candidateTypes,
+                fn ($class) => Gate::allows('view', $class),
+            ));
+        }
 
         $this->disableDebugbar();
 
-        $response = new StreamedResponse(function () {
+        $response = new StreamedResponse(function () use ($viewableTypeFilter) {
             Log::debug('Starting streamed response');
             Log::debug('CSV escaping is set to: '.config('app.escape_formulas'));
 
@@ -317,11 +349,15 @@ class ReportsController extends Controller
             ];
             $executionTime = microtime(true) - $_SERVER['REQUEST_TIME_FLOAT'];
             Log::debug('Starting headers: '.$executionTime);
-            fputcsv($handle, $header);
+            fputcsv($handle, $header, escape: '\\');
             $executionTime = microtime(true) - $_SERVER['REQUEST_TIME_FLOAT'];
             Log::debug('Added headers: '.$executionTime);
 
             $actionlogs = Actionlog::with('item', 'user', 'target', 'location', 'adminuser')
+                ->when($viewableTypeFilter !== null, fn ($q) => $q->where(function ($inner) use ($viewableTypeFilter) {
+                    $inner->whereIn('item_type', $viewableTypeFilter)
+                        ->orWhereIn('target_type', $viewableTypeFilter);
+                }))
                 ->orderBy('created_at', 'DESC')
                 ->chunk(500, function ($actionlogs) use ($handle) {
                     $executionTime = microtime(true) - $_SERVER['REQUEST_TIME_FLOAT'];
@@ -378,11 +414,11 @@ class ReportsController extends Controller
 
                         // CSV_ESCAPE_FORMULAS is set to false in the .env
                         if (config('app.escape_formulas') === false) {
-                            fputcsv($handle, $row);
+                            fputcsv($handle, $row, escape: '\\');
 
                             // CSV_ESCAPE_FORMULAS is set to true or is not set in the .env
                         } else {
-                            fputcsv($handle, $formatter->escapeRecord($row));
+                            fputcsv($handle, $formatter->escapeRecord($row), escape: '\\');
                         }
                     }
                 });
@@ -443,7 +479,7 @@ class ReportsController extends Controller
                 trans('general.depreciation'),
                 trans('general.purchase_cost'),
             ];
-            fputcsv($handle, $header);
+            fputcsv($handle, $header, escape: '\\');
 
             License::orderBy('created_at', 'DESC')->chunk(500, function ($licenses) use ($handle, $formatter) {
                 foreach ($licenses as $license) {
@@ -467,9 +503,9 @@ class ReportsController extends Controller
                     ];
 
                     if (config('app.escape_formulas') === false) {
-                        fputcsv($handle, $row);
+                        fputcsv($handle, $row, escape: '\\');
                     } else {
-                        fputcsv($handle, $formatter->escapeRecord($row));
+                        fputcsv($handle, $formatter->escapeRecord($row), escape: '\\');
                     }
                 }
             });
@@ -765,7 +801,7 @@ class ReportsController extends Controller
             // cell like "=cmd|'/c calc.exe'!A1" would evaluate as a
             // formula on a reports.view user's workstation.
             $headerFormatter = new EscapeFormula('`');
-            fputcsv($handle, $headerFormatter->escapeRecord($header));
+            fputcsv($handle, $headerFormatter->escapeRecord($header), escape: '\\');
             $executionTime = microtime(true) - $_SERVER['REQUEST_TIME_FLOAT'];
             Log::debug('Added headers: '.$executionTime);
 
@@ -1239,11 +1275,11 @@ class ReportsController extends Controller
 
                     // CSV_ESCAPE_FORMULAS is set to false in the .env
                     if (config('app.escape_formulas') === false) {
-                        fputcsv($handle, $row);
+                        fputcsv($handle, $row, escape: '\\');
 
                         // CSV_ESCAPE_FORMULAS is set to true or is not set in the .env
                     } else {
-                        fputcsv($handle, $formatter->escapeRecord($row));
+                        fputcsv($handle, $formatter->escapeRecord($row), escape: '\\');
                     }
 
                     $executionTime = microtime(true) - $_SERVER['REQUEST_TIME_FLOAT'];
@@ -1307,7 +1343,7 @@ class ReportsController extends Controller
                 trans('admin/maintenances/form.is_warranty'),
                 trans('admin/maintenances/form.notes'),
             ];
-            fputcsv($handle, $header);
+            fputcsv($handle, $header, escape: '\\');
 
             // No completed-filter here — exports every maintenance, active
             // or completed. Eager-load the four relations the row loop
@@ -1340,9 +1376,9 @@ class ReportsController extends Controller
                         ];
 
                         if (config('app.escape_formulas') === false) {
-                            fputcsv($handle, $row);
+                            fputcsv($handle, $row, escape: '\\');
                         } else {
-                            fputcsv($handle, $formatter->escapeRecord($row));
+                            fputcsv($handle, $formatter->escapeRecord($row), escape: '\\');
                         }
                     }
                 });
@@ -1352,308 +1388,6 @@ class ReportsController extends Controller
             'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="maintenances-report-'.date('Y-m-d-his').'.csv"',
         ]);
-
-        return $response;
-    }
-
-    /**
-     * getAssetAcceptanceReport
-     *
-     * @author  Vincent Sposato <vincent.sposato@gmail.com>
-     *
-     * @version v1.0
-     */
-    public function getAssetAcceptanceReport($deleted = false): View
-    {
-        $this->authorize('reports.view');
-
-        $this->disableDebugbar();
-
-        $showDeleted = $deleted == 'deleted';
-
-        $query = CheckoutAcceptance::Pending()
-            ->with([
-                'checkoutable' => function (MorphTo $query) {
-                    $query->withTrashed()->morphWith([
-                        Asset::class => ['model.category', 'assignedTo', 'company'],
-                        Accessory::class => ['category', 'checkouts', 'company'],
-                        LicenseSeat::class => ['user', 'license'],
-                        Component::class => ['assignedTo', 'company'],
-                        Consumable::class => ['company'],
-                    ]);
-                },
-                'assignedTo' => function ($query) {
-                    $query->withTrashed();
-                },
-            ])->orderByDesc('checkout_acceptances.created_at');
-
-        if ($showDeleted) {
-            $query->withTrashed();
-        }
-
-        $itemsForReport = $query->get()
-            ->filter(fn ($unaccepted) => $unaccepted->checkoutable)
-            // FMCS scope, mirrors sentAssetAcceptanceReminder + deleteAssetAcceptance.
-            // CheckoutAcceptance has no company_id column and does not use
-            // CompanyableTrait / CompanyableChildTrait, so it is not covered
-            // by the CompanyableScope global scope. Without this per-row
-            // check, a reports.view user scoped to Company A sees pending
-            // acceptances for items owned by Company B in both the page
-            // render and the CSV export. Same helper the two mutating
-            // actions already use.
-            ->filter(fn ($unaccepted) => $this->currentUserCanAccessAcceptance($unaccepted))
-            ->map(fn ($unaccepted) => Checkoutable::fromAcceptance($unaccepted));
-
-        return view('reports/unaccepted_assets', compact('itemsForReport', 'showDeleted'));
-    }
-
-    /**
-     * sentAssetAcceptanceReminder
-     *
-     * @param  int|null  $acceptanceId
-     *
-     * @version v1.0
-     */
-    public function sentAssetAcceptanceReminder(Request $request): RedirectResponse
-    {
-        $this->authorize('reports.view');
-        $id = $request->input('acceptance_id');
-        $query = CheckoutAcceptance::query()
-            ->with([
-                'checkoutable' => function (MorphTo $query) {
-                    $query->withTrashed()->morphWith([
-                        Asset::class => ['model.category', 'assignedTo', 'company', 'checkouts'],
-                        Accessory::class => ['category', 'company', 'checkouts'],
-                        LicenseSeat::class => ['user', 'license', 'checkouts'],
-                        Component::class => ['assignedTo', 'company', 'checkouts'],
-                        Consumable::class => ['company', 'checkouts'],
-                    ]);
-                },
-                'assignedTo' => fn ($q) => $q->withTrashed(),
-            ])
-            ->pending();
-        $acceptance = $query->find($id);
-        if (! $acceptance) {
-            Log::debug('No pending acceptances');
-
-            // Redirect to the unaccepted items report page with error
-            return redirect()->route('reports/unaccepted_assets')->with('error', trans('general.bad_data'));
-        }
-
-        if (! $this->currentUserCanAccessAcceptance($acceptance)) {
-            return redirect()->route('reports/unaccepted_assets')->with('error', trans('general.insufficient_permissions'));
-        }
-
-        $item = $acceptance->checkoutable;
-        $assignee = $acceptance->assignedTo ?? $item->assignedTo ?? null;
-        $email = $assignee?->email;
-        $locale = $assignee?->locale;
-
-        Log::debug(print_r($acceptance, true));
-
-        if (is_null($acceptance->created_at)) {
-            Log::debug('No acceptance created_at');
-
-            return redirect()->route('reports/unaccepted_assets')->with('error', trans('general.bad_data'));
-        } else {
-            if ($item instanceof LicenseSeat) {
-                $logItem_res = $item->license->checkouts()->with('adminuser')->where('created_at', '=', $acceptance->created_at)->get();
-            } else {
-                $logItem_res = $item->checkouts()->with('adminuser')->where('created_at', '=', $acceptance->created_at)->get();
-            }
-            if ($logItem_res->isEmpty()) {
-                Log::debug('Acceptance date mismatch');
-
-                return redirect()->route('reports/unaccepted_assets')->with('error', trans('general.bad_data'));
-            }
-            $logItem = $logItem_res[0];
-        }
-
-        if (is_null($email) || $email === '') {
-            return redirect()->route('reports/unaccepted_assets')->with('error', trans('general.no_email'));
-        }
-        $mailable = $this->getCheckoutMailType($acceptance, $logItem);
-        Mail::to($email)->send($mailable->locale($locale));
-
-        return redirect()->route('reports/unaccepted_assets')->with('success', trans('admin/reports/general.reminder_sent'));
-    }
-
-    private function currentUserCanAccessAcceptance(CheckoutAcceptance $acceptance): bool
-    {
-        if (! Company::isFullMultipleCompanySupportEnabled()) {
-            return true;
-        }
-
-        if (auth()->user()->isSuperUser()) {
-            return true;
-        }
-
-        // Bypass Eloquent global scopes so cross-company items are still resolved for the check.
-        $checkoutableType = $acceptance->checkoutable_type;
-        $checkoutable = $checkoutableType::withoutGlobalScopes()->find($acceptance->checkoutable_id);
-
-        // LicenseSeat has no company_id of its own; the parent License carries the company.
-        if ($checkoutable instanceof LicenseSeat) {
-            $checkoutable = License::withoutGlobalScopes()->find($checkoutable->license_id);
-        }
-
-        return Company::isCurrentUserHasAccess($checkoutable);
-    }
-
-    private function getCheckoutMailType(CheckoutAcceptance $acceptance, $logItem): Mailable
-    {
-        $lookup = [
-            Accessory::class => CheckoutAccessoryMail::class,
-            Asset::class => CheckoutAssetMail::class,
-            LicenseSeat::class => CheckoutLicenseMail::class,
-            Consumable::class => CheckoutConsumableMail::class,
-            Component::class => CheckoutComponentMail::class,
-        ];
-        $mailable = $lookup[get_class($acceptance->checkoutable)];
-
-        return new $mailable(
-            $acceptance->checkoutable,
-            $acceptance->checkedOutTo ?? $acceptance->assignedTo,
-            $logItem->adminuser,
-            $acceptance,
-            $acceptance->note,
-            firstTimeSending: false,
-        );
-    }
-
-    /**
-     * sentAssetAcceptanceReminder
-     *
-     * @param  int|null  $acceptanceId
-     *
-     * @version v1.0
-     */
-    public function deleteAssetAcceptance($acceptanceId = null): RedirectResponse
-    {
-        $this->authorize('reports.view');
-
-        $acceptance = CheckoutAcceptance::pending()
-            ->with(['checkoutable' => function (MorphTo $morphTo) {
-                $morphTo->morphWith([LicenseSeat::class => ['license']]);
-            }])
-            ->find($acceptanceId);
-
-        if (! $acceptance) {
-            // Redirect to the unaccepted assets report page with error
-            return redirect()->route('reports/unaccepted_assets')->with('error', trans('general.bad_data'));
-        }
-
-        if (! $this->currentUserCanAccessAcceptance($acceptance)) {
-            return redirect()->route('reports/unaccepted_assets')->with('error', trans('general.insufficient_permissions'));
-        }
-
-        if ($acceptance->delete()) {
-            return redirect()->route('reports/unaccepted_assets')->with('success', trans('admin/reports/general.acceptance_deleted'));
-        } else {
-            return redirect()->route('reports/unaccepted_assets')->with('error', trans('general.deletion_failed'));
-        }
-    }
-
-    /**
-     * Exports the AssetAcceptance report to CSV
-     *
-     * @author  Vincent Sposato <vincent.sposato@gmail.com>
-     *
-     * @version v1.0
-     */
-    public function postAssetAcceptanceReport($deleted = false): Response
-    {
-        $this->authorize('reports.view');
-        $showDeleted = request('deleted') === 'deleted';
-
-        /**
-         * Get all assets with pending checkout acceptances
-         */
-        $acceptances = CheckoutAcceptance::pending()
-            ->with([
-                'checkoutable' => function (MorphTo $acceptance) {
-                    $acceptance->withTrashed()->morphWith([
-                        Asset::class => ['model.category', 'assignedTo', 'company'],
-                        Accessory::class => ['category', 'checkouts', 'company'],
-                        LicenseSeat::class => ['user', 'license'],
-                        Component::class => ['assignedTo', 'company'],
-                        Consumable::class => ['company'],
-                    ]);
-                },
-                'assignedTo',
-            ])->orderByDesc('checkout_acceptances.created_at');
-
-        if ($showDeleted) {
-            $acceptances->withTrashed();
-        }
-
-        $itemsForReport = $acceptances->get()
-            ->filter(fn ($unaccepted) => $unaccepted->checkoutable)
-            // FMCS scope, same rationale as getAssetAcceptanceReport.
-            // The CSV export path had the same missing filter as the page
-            // render, so a reports.view user scoped to Company A could
-            // download pending acceptances for Company B items.
-            ->filter(fn ($unaccepted) => $this->currentUserCanAccessAcceptance($unaccepted))
-            ->map(fn ($unaccepted) => Checkoutable::fromAcceptance($unaccepted));
-
-        $header = [
-            trans('general.date'),
-            trans('general.type'),
-            trans('admin/companies/table.title'),
-            trans('general.category'),
-            trans('admin/hardware/form.model'),
-            trans('general.name'),
-            trans('admin/hardware/table.asset_tag'),
-            trans('admin/hardware/table.checkoutto'),
-        ];
-
-        $header = array_map('trim', $header);
-
-        // Formula-escape data rows using the same helper + setting as the
-        // sibling exports in this file. Row values (company / category /
-        // model / item name / asset tag / assignee display name) are all
-        // user-editable free-text fields that a low-privilege user could
-        // set to a spreadsheet formula. Without escaping, the payload
-        // evaluates when a reports.view user opens the downloaded CSV in
-        // Excel / LibreOffice / Google Sheets. Same backtick prefix used
-        // by every other export in ReportsController.
-        $formatter = new EscapeFormula('`');
-
-        // Build the CSV via fputcsv so cells containing commas, quotes,
-        // or newlines get RFC 4180 quoted rather than concatenated into
-        // the row/record stream. The prior implode(',') + implode("\n")
-        // approach let a mid-cell newline become a real record break,
-        // dropping the second half of the cell onto its own line where
-        // EscapeFormula's leading-character check no longer applied.
-        $handle = fopen('php://temp', 'r+');
-        fputcsv($handle, $header);
-
-        foreach ($itemsForReport as $item) {
-            $row = [
-                $item->acceptance->created_at,
-                $item->type,
-                $item->plain_text_company,
-                $item->plain_text_category,
-                $item->plain_text_model,
-                $item->plain_text_name,
-                $item->asset_tag,
-                $item->acceptance->assignedto ? $item->acceptance->assignedto->display_name : trans('admin/reports/general.deleted_user'),
-            ];
-
-            if (config('app.escape_formulas') !== false) {
-                $row = $formatter->escapeRecord($row);
-            }
-
-            fputcsv($handle, $row);
-        }
-
-        rewind($handle);
-        $csv = stream_get_contents($handle);
-        fclose($handle);
-
-        $response = response()->make($csv, 200);
-        $response->header('Content-Type', 'text/csv');
-        $response->header('Content-disposition', 'attachment;filename=report.csv');
 
         return $response;
     }

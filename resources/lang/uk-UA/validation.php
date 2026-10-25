@@ -160,8 +160,9 @@ return [
     'two_column_unique_undeleted' => 'Поле :attribute має бути унікальним для :table1 і :table2. ',
     'unique_undeleted' => 'Поле :attribute має бути унікальним.',
     'non_circular' => 'Поле :attribute не повинне створювати круглие посилання.',
-    'parent_must_be_top_level' => 'The selected :attribute must itself be a top-level item. Only one level of nesting is allowed.',
-    'must_have_no_children' => 'This item already has children of its own, so it cannot be assigned a parent.',
+    'parent_must_be_top_level' => 'Вибраний елемент «:attribute» має бути елементом верхнього рівня. Допускається лише один рівень вкладеності.',
+    'must_have_no_children' => 'Цей елемент уже має дочірні елементи, тому йому не можна призначити батьківський елемент.',
+    'parent_within_scope' => 'Вибраний елемент «:attribute» перебуває поза межами призначеної вам області.',
     'not_array' => ':attribute не може бути масивом.',
     'disallow_same_pwd_as_user_fields' => 'Пароль не може бути таким же, як ім\'я користувача.',
     'letters' => 'Пароль має містити принаймні одну букву.',
@@ -173,12 +174,19 @@ return [
     'uploaded' => 'Завантаження поля :attribute не вдалося.',
     'uppercase' => 'Поле :attribute має бути з верхнім регістром.',
     'url' => 'Поле :attribute має бути коректним URL.',
-    'external_url' => 'The :attribute field must be a valid external URL (http:// or https://) that does not point at a private or local address.',
+    'external_url' => 'Поле :attribute має містити дійсну зовнішню URL-адресу (http:// або https://), яка не вказує на приватну чи локальну адресу.',
+    'asset_tag_pattern_placeholder' => 'Шаблон тегу активу має містити принаймні один заповнювач із :placeholders, інакше кожен синхронізований актив отримає однаковий тег і буде збережено лише перший.',
+    'custom_http_extras_json' => [
+        'not_json' => 'Додаткові параметри мають бути коректними даними у форматі JSON. Помилка синтаксичного аналізу: :error',
+        'not_array' => 'Додаткові параметри мають бути масивом JSON (починатися з [ і закінчуватися ]).',
+        'entry_not_object' => 'Запис «Додаткові параметри» №:index має бути об’єктом JSON із полями key, label і path.',
+        'missing_field' => 'У записі «Додаткові параметри» №:index відсутнє обов’язкове поле ":field".',
+    ],
     'ulid' => 'Поле :attribute має бути дійсним ULID.',
     'uuid' => 'Поле :attribute має бути коректним UUID.',
-    'valid_css_color' => 'The :attribute field must be a valid CSS color (hex, rgb, rgba, hsl, or hsla).',
-    'fmcs_company' => 'The :attribute field is required because full multiple companies support is enabled and floaters are not allowed.',
-    'fmcs_location' => 'Location ":location" belongs to :location_company, which does not match the selected company.',
+    'valid_css_color' => 'Поле :attribute має містити коректне значення кольору CSS (hex, rgb, rgba, hsl або hsla).',
+    'fmcs_company' => 'Поле :attribute є обов’язковим, оскільки ввімкнено повну підтримку кількох компаній, а активи без прив’язки до компанії не дозволені.',
+    'fmcs_location' => 'Розташування «:location» належить компанії :location_company, яка не відповідає вибраній компанії.',
     'is_unique_across_company_and_location' => 'Поле :attribute має бути унікальним у межах вибраної компанії та локації.',
 
     /*
@@ -195,6 +203,7 @@ return [
     'email_array' => 'Одна або кілька адрес електронної пошти не правильні.',
     'checkboxes' => ':attribute містить неприпустимі параметри.',
     'radio_buttons' => ':attribute є неприпустимим.',
+    'image_file_too_large' => 'Значення поля :attribute не може перевищувати :max.',
 
     'custom' => [
         'alpha_space' => 'Поле :attribute містить символ, який не допускається.',
@@ -237,7 +246,7 @@ return [
 
     'attributes' => [
         'serials.*' => 'Серійний номер',
-        'asset_tags.*' => 'Тег активу',
+        'asset_tags.*' => 'Інвентарний номер',
     ],
 
     /*

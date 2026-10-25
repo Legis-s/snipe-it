@@ -13,11 +13,12 @@ return [
     'no_default_eula' => 'Keine Standard EULA gefunden. Füge eine in den Einstellungen hinzu.',
     'total' => 'Gesamt',
     'remaining' => 'Verfügbar',
-    'requestable' => 'Users may request this accessory',
+    'requestable' => 'Benutzer können dieses Zubehör anfordern',
     'update' => 'Zubehör aktualisieren',
     'use_default_eula' => 'Die <a href="#" data-toggle="modal" data-target="#eulaModal">Standard EULA</a> stattdessen verwenden.',
     'use_default_eula_disabled' => '<del>Die Standard-EULA verwenden.</del> Es wurde keine Standard-EULA definiert. Bitte füge eine in den Einstellungen hinzu.',
     'clone' => 'Zubehör kopieren',
     'delete_disabled' => 'Dieses Zubehör kann noch nicht gelöscht werden, da einige Artikel noch herausgegeben sind.',
+    'accessory_deleted_warning' => 'This accessory has been deleted. You must restore it before you can assign it.',
 
 ];

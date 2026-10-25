@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\Group;
 use App\Models\Ldap;
@@ -51,6 +52,15 @@ class LdapSync extends Command
             exit();
         }
 
+        // Tag every action_log written during this run (direct writes
+        // and the observer-driven writes User saves trigger) as `ldap`
+        // so the activity report distinguishes LDAP-created entries
+        // from gui / api / sync-adapter origins.
+        return Actionlog::withActionSource('ldap', fn () => $this->runSync());
+    }
+
+    private function runSync()
+    {
         ini_set('max_execution_time', config('app.ldap_time_limit')); // 600 seconds = 10 minutes
         ini_set('memory_limit', config('app.ldap_memory_limit'));
 
@@ -117,7 +127,11 @@ class LdapSync extends Command
              */
             $attributes = array_values(array_filter($ldap_map));
 
-            if (Setting::getSettings()->is_ad === 1 && is_null($ldap_map['activated'])) {
+            // empty() rather than is_null() because the LDAP wizard
+            // (App\Livewire\LdapSettings) persists an unset mapping as ''
+            // whereas the legacy form path routes through
+            // ConvertEmptyStringsToNull and persists it as null.
+            if (Setting::getSettings()->is_ad === 1 && empty($ldap_map['activated'])) {
                 $attributes[] = 'useraccountcontrol';
             }
 
@@ -207,10 +221,9 @@ class LdapSync extends Command
                         }
                     }
                 }
-
-                $global_count = $results['count'];
+                
                 $results = array_merge($location_users, $results);
-                $results['count'] = $global_count;
+                $results['count'] = count(array_filter(array_keys($results), 'is_int'));
             }
         }
 
@@ -237,7 +250,7 @@ class LdapSync extends Command
             $item['ldap_location_override'] = $results[$i]['ldap_location_override'] ?? null;
             $item['location_id'] = $results[$i]['location_id'] ?? null;
 
-            $user = User::withTrashed()->where('username', $item['username'])->first();
+            $user = self::findLocalUserForLdapUsername((string) $item['username'], withTrashed: true);
             if (! empty($item['username'])) {
                 $seen_ldap_usernames[] = $item['username'];
             }
@@ -294,8 +307,7 @@ class LdapSync extends Command
                                 // PHP LDAP returns every LDAP attribute as an array, and 90% of the time it's an array of just one item. But, hey, it's an array.
                                 $ldapManagerUsername = $ldap_manager[0][$ldap_map['username']][0];
 
-                                // Get User from Manager username.
-                                $ldap_manager = User::where('username', $ldapManagerUsername)->first();
+                                $ldap_manager = self::findLocalUserForLdapUsername((string) $ldapManagerUsername);
 
                                 if ($ldap_manager && isset($ldap_manager->id)) {
                                     // Link user to manager id.
@@ -485,5 +497,20 @@ class LdapSync extends Command
         } else {
             return $summary;
         }
+    }
+
+    /**
+     * Resolve a local user by the LDAP-supplied username. See GHSA-97h5-f5j2-6v99.
+     */
+    public static function findLocalUserForLdapUsername(string $username, bool $withTrashed = false): ?User
+    {
+        if ($username === '') {
+            return null;
+        }
+
+        $query = $withTrashed ? User::withTrashed() : User::query();
+        $user = $query->where('username', $username)->first();
+
+        return User::verifyExactUsernameMatch($user, $username);
     }
 }

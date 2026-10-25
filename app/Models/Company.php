@@ -2,13 +2,17 @@
 
 namespace App\Models;
 
+use App\Enums\FileStorage;
 use App\Http\Traits\UniqueUndeletedTrait;
+use App\Models\Builders\CompanyQueryBuilder;
 use App\Models\Traits\CompanyableTrait;
 use App\Models\Traits\HasUploads;
 use App\Models\Traits\Loggable;
 use App\Models\Traits\Searchable;
 use App\Presenters\CompanyPresenter;
 use App\Presenters\Presentable;
+use App\Rules\ExternalUrl;
+use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -25,6 +29,8 @@ use Watson\Validating\ValidatingTrait;
  * Model for Companies.
  *
  * @version v1.8
+ *
+ * @mixin IdeHelperCompany
  */
 final class Company extends SnipeModel
 {
@@ -37,14 +43,30 @@ final class Company extends SnipeModel
 
     protected $table = 'companies';
 
-    // Declare the rules for the model validation
+    // Declare the rules for the model validation. The ExternalUrl rule
+    // for webhook_endpoint is layered on in getRules() below because PHP
+    // rejects `new` in a property-default array initializer.
     protected $rules = [
         'name' => 'required|max:255|unique_undeleted_in_scope:parent_id',
         'fax' => 'min:7|max:35|nullable',
         'phone' => 'min:7|max:35|nullable',
         'email' => 'email|max:150|nullable',
         'parent_id' => 'nullable|integer|exists:companies,id|parent_must_be_top_level:companies,id|must_have_no_children:companies,id|parent_within_scope',
+        'webhook_selected' => 'nullable|string|in:slack,general,google,microsoft',
+        'webhook_channel' => 'nullable|string',
+        'webhook_botname' => 'nullable|string|max:255',
     ];
+
+    /**
+     * PHP 8.2 doesn't allow `new` in a property default, so the ExternalUrl rule is added on here.
+     */
+    public function getRules()
+    {
+        $rules = $this->rules;
+        $rules['webhook_endpoint'] = ['nullable', 'url', new ExternalUrl('app.webhook_allow_internal_targets')];
+
+        return $rules;
+    }
 
     protected $casts = [
         'parent_id' => 'integer',
@@ -106,7 +128,7 @@ final class Company extends SnipeModel
     /**
      * The attributes that are mass assignable.
      *
-     * @var array
+     * @var list<string>
      */
     protected $fillable = [
         'name',
@@ -116,6 +138,10 @@ final class Company extends SnipeModel
         'email',
         'tag_color',
         'notes',
+        'webhook_selected',
+        'webhook_endpoint',
+        'webhook_channel',
+        'webhook_botname',
     ];
 
     /**
@@ -250,7 +276,7 @@ final class Company extends SnipeModel
 
             $company->use_text = $breadcrumb;
             $company->use_image = ($company->image)
-                ? Storage::disk('public')->url('companies/'.$company->image)
+                ? Storage::disk('public')->url(FileStorage::Companies->publicPath().$company->image)
                 : null;
             $results[] = $company;
 
@@ -349,8 +375,12 @@ final class Company extends SnipeModel
             return true;
         }
 
-        // Again, where would this happen? But check that $companyable is not a string
-        if (! is_string($companyable)) {
+        // Skip the hasColumn early-return for User targets. users.company_id
+        // was renamed to legacy_company_id, so hasColumn would now return false
+        // for every User and short-circuit the per-target check further down
+        // (which is the back-patch for #19187). User targets defer to
+        // CompanyableScope in the auth block below.
+        if (! is_string($companyable) && ! ($companyable instanceof User)) {
             $company_table = $companyable->getModel()->getTable();
             try {
                 // This is primarily for the gate:allows-check in location->isDeletable()
@@ -453,6 +483,34 @@ final class Company extends SnipeModel
     }
 
     /**
+     * On hard-delete, wipe the image file. Soft-delete leaves it alone so a
+     * subsequent restore comes back with its image intact.
+     */
+    protected static function booted(): void
+    {
+        self::forceDeleted(function (self $company) {
+            if ($company->image) {
+                try {
+                    Storage::disk('public')->delete(FileStorage::Companies->publicPath().$company->image);
+                } catch (\Exception $e) {
+                    Log::info($e->getMessage());
+                }
+            }
+
+            foreach ($company->uploads as $upload) {
+                if (($path = $upload->uploads_file_path()) !== null) {
+                    try {
+                        Storage::delete($path);
+                    } catch (\Exception $e) {
+                        Log::info($e->getMessage());
+                    }
+                }
+                $upload->delete();
+            }
+        });
+    }
+
+    /**
      * Checks if company can be deleted
      *
      * @author [Dan Meltzer] [<dmeltzer.devel@gmail.com>]
@@ -502,33 +560,16 @@ final class Company extends SnipeModel
      */
     public function parent(): BelongsTo
     {
-        return $this->belongsTo(self::class, 'parent_id')->withoutGlobalScopes();
+        return $this->belongsTo(self::class, 'parent_id')->withoutGlobalScopes([CompanyableScope::class]);
     }
 
     /**
      * Child companies. The one-level-deep validator on parent_id guarantees
      * children of a child cannot be created, so this is the full descendant set.
-     * See parent() above for why the global scope is dropped.
      */
     public function children()
     {
-        return $this->hasMany(self::class, 'parent_id')->withoutGlobalScopes();
-    }
-
-    /**
-     * Sort the company list by the parent company's name. Left join so that
-     * top-level companies (parent_id IS NULL) still appear in the results.
-     *
-     * Use addSelect (not select) so prior withCount subqueries on the query
-     * survive — select() replaces the whole columns list and would strip the
-     * eager *_count columns, forcing isDeletable() and the transformer into a
-     * 7-query-per-row N+1.
-     */
-    public function scopeOrderParent($query, $order)
-    {
-        return $query->leftJoin('companies as parent_co', 'companies.parent_id', '=', 'parent_co.id')
-            ->addSelect('companies.*')
-            ->orderBy('parent_co.name', $order);
+        return $this->hasMany(self::class, 'parent_id')->withoutGlobalScopes([CompanyableScope::class]);
     }
 
     public function assets()
@@ -794,17 +835,8 @@ final class Company extends SnipeModel
         }
     }
 
-    /**
-     * Query builder scope to order on the user that created it.
-     *
-     * Use addSelect (not select) so prior withCount subqueries on the query
-     * survive — see scopeOrderParent() for the same rationale.
-     */
-    public function scopeOrderByCreatedBy($query, $order)
+    public function newEloquentBuilder($query): CompanyQueryBuilder
     {
-        return $query->leftJoin('users as admin_sort', 'companies.created_by', '=', 'admin_sort.id')
-            ->addSelect('companies.*')
-            ->orderBy('admin_sort.first_name', $order)
-            ->orderBy('admin_sort.last_name', $order);
+        return new CompanyQueryBuilder($query);
     }
 }

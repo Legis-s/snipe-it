@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\Helper;
 use App\Models\Accessory;
 use App\Models\Asset;
 use App\Models\Company;
@@ -11,6 +12,7 @@ use App\Models\License;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Session;
 
 /**
@@ -24,7 +26,7 @@ use Illuminate\Support\Facades\Session;
 class DashboardController extends Controller
 {
     /**
-     * Check authorization and display admin dashboard, otherwise display
+     * Check authorization and display the dashboard, otherwise display
      * the user's checked-out assets.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
@@ -33,32 +35,41 @@ class DashboardController extends Controller
      */
     public function index(): View|RedirectResponse
     {
-        // Show the page
-        if (auth()->user()->hasAccess('admin')) {
-            $asset_stats = null;
-
-            $counts = [];
-            $counts['asset'] = Asset::count();
-            $counts['accessory'] = Accessory::count();
-            $counts['license'] = License::assetcount();
-            $counts['consumable'] = Consumable::count();
-            $counts['component'] = Component::count();
-            $counts['user'] = Company::scopeCompanyables(auth()->user())->count();
-            $counts['grand_total'] = $counts['asset'] + $counts['accessory'] + $counts['license'] + $counts['consumable'];
-
-            if ((! file_exists(storage_path().'/oauth-private.key')) || (! file_exists(storage_path().'/oauth-public.key'))) {
-                Artisan::call('migrate', ['--force' => true]);
-                Artisan::call('passport:install', ['--no-interaction' => true]);
-            }
-
-            return view('dashboard')
-                ->with('asset_stats', $asset_stats)
-                ->with('counts', $counts);
-        } else {
+        if (! Gate::allows('canViewUsersAndCheckoutables')) {
             Session::reflash();
 
-            // Redirect to the profile page
-            return redirect()->intended('account/view-assets');
+            return Helper::safeIntended('account/view-assets');
         }
+
+        // Top-boxes + empty-inventory shortcut are admin-only in the
+        // dashboard blade, so the six count queries only need to run
+        // for admins. Non-admins get an empty array and the view's
+        // hasAccess('admin') gates short-circuit before touching any
+        // $counts key.
+        $counts = [];
+        if (auth()->user()->hasAccess('admin')) {
+            $counts['asset'] = Asset::count();
+            // Accessory / Consumable / Component rows are parents with a
+            // qty column that represents individual units in stock. Show
+            // the sum of units across live non-archived rows instead of
+            // the parent-row count so the dashboard reflects actual
+            // inventory volume. SoftDeletes drops trashed parents, and
+            // notArchived() excludes retired-but-live rows.
+            $counts['accessory'] = (int) Accessory::notArchived()->sum('qty');
+            $counts['license'] = License::assetcount();
+            $counts['consumable'] = (int) Consumable::notArchived()->sum('qty');
+            $counts['component'] = (int) Component::notArchived()->sum('qty');
+            $counts['user'] = Company::scopeCompanyables(auth()->user())->count();
+            $counts['grand_total'] = $counts['asset'] + $counts['accessory'] + $counts['license'] + $counts['consumable'];
+        }
+
+        if ((! file_exists(storage_path().'/oauth-private.key')) || (! file_exists(storage_path().'/oauth-public.key'))) {
+            Artisan::call('migrate', ['--force' => true]);
+            Artisan::call('passport:install', ['--no-interaction' => true]);
+        }
+
+        return view('dashboard')
+            ->with('asset_stats', null)
+            ->with('counts', $counts);
     }
 }

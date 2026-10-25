@@ -4,7 +4,7 @@ return [
     'accessory_category' => 'Tartozék kategória',
     'accessory_name' => 'Tartozék neve',
     'checkout' => 'Kiadott tartozék',
-    'checkin' => 'Visszavett tartozék',
+    'checkin' => 'Tartozék visszavétele',
     'create' => 'Tartozék létrehozása',
     'edit' => 'Tartozék szerkesztése',
     'eula_text' => 'Kategória EULA',
@@ -13,11 +13,12 @@ return [
     'no_default_eula' => 'Nincs alapértelmezett EULA. Adjon hozzá egyet a Beállításokban!',
     'total' => 'Összesen',
     'remaining' => 'Maradék',
-    'requestable' => 'Users may request this accessory',
+    'requestable' => 'A felhasználók igényelhetik ezt a tartozékot',
     'update' => 'Tartozék frissítése',
     'use_default_eula' => 'Használja inkább az <a href="#" data-toggle="modal" data-target="#eulaModal">alapértelmezett EULA</a>-t.',
     'use_default_eula_disabled' => '<del>Használja inkább az alapértelmezett EULA-t.</del> Nincs alapértelmezett EULA beállítva. Kérem adjon hozzá egyet a Beállításokban!',
     'clone' => 'Tartozék másolása',
     'delete_disabled' => 'A tartozék még nem törölhető, mert még néhány belőle ki van adva.',
+    'accessory_deleted_warning' => 'This accessory has been deleted. You must restore it before you can assign it.',
 
 ];

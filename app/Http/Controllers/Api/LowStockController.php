@@ -5,6 +5,11 @@ namespace App\Http\Controllers\Api;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Transformers\LowStockTransformer;
+use App\Models\Accessory;
+use App\Models\AssetModel;
+use App\Models\Component;
+use App\Models\Consumable;
+use App\Models\License;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -33,7 +38,7 @@ class LowStockController extends Controller
     public function index(Request $request): JsonResponse|array
     {
         // Base access gate. Anyone who can view any of the source types
-        // can see the widget; per-row permissions (adjust_quantity)
+        // can see the widget. Per-row permissions (adjust_quantity)
         // still gate the action buttons inside the transformer.
         $viewer = auth()->user();
         $canView = false;
@@ -47,7 +52,12 @@ class LowStockController extends Controller
             abort(403);
         }
 
-        $rows = Helper::checkLowInventory();
+        // Filter rows to types the caller can view so a viewer with
+        // only e.g. accessories.view doesn't get consumable / component
+        // rows leaked through the shared widget endpoint. Shared with
+        // AlertMenu so both surfaces agree on which rows a given user
+        // can see.
+        $rows = LowStockTransformer::viewableByCaller(Helper::checkLowInventory(), $viewer);
 
         $search = trim((string) $request->input('search', ''));
         if ($search !== '') {

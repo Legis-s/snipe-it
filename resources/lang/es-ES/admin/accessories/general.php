@@ -9,15 +9,16 @@ return [
     'edit' => 'Editar accesorio',
     'eula_text' => 'Acuerdo de uso de la categoría',
     'eula_text_help' => 'Este campo permite personalizar los acuerdos de uso para tipos específicos de activos. Si solo tiene un acuerdo de uso para todos sus activos, puede seleccionar la siguiente opción para usar el valor predeterminado.',
-    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
+    'require_acceptance' => 'Requerir que los usuarios confirmen la aceptación del ítem en esta categoría.',
     'no_default_eula' => 'No se encontró el acuerdo de uso predeterminado. Agregue unos en Configuración.',
     'total' => 'Total ',
     'remaining' => 'Disponibles',
-    'requestable' => 'Users may request this accessory',
+    'requestable' => 'Los usuarios pueden solicitar este elemento',
     'update' => 'Actualizar accesorio',
     'use_default_eula' => 'En su lugar, utilice el <a href="#" data-toggle="modal" data-target="#eulaModal">acuerdo de uso predeterminado</a>.',
     'use_default_eula_disabled' => '<del>En su lugar, utilice el acuerdo de uso predeterminado.</del> No está configurado el acuerdo de uso predeterminado. Por favor agregue uno en Configuración.',
     'clone' => 'Clonar accesorio',
     'delete_disabled' => 'Este accesorio no se puede eliminar aún porque algunos elementos todavía están asignados.',
+    'accessory_deleted_warning' => 'This accessory has been deleted. You must restore it before you can assign it.',
 
 ];

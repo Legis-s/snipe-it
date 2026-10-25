@@ -163,6 +163,7 @@ return [
     'non_circular' => ':attribute не должен создавать циклическую ссылку.',
     'parent_must_be_top_level' => 'Выбранный объект :attribute должен находиться на верхнем уровне. Допускается только один уровень вложенности.',
     'must_have_no_children' => 'У этого объекта уже есть дочерние объекты, поэтому ему нельзя назначить родительский.',
+    'parent_within_scope' => 'The selected :attribute is outside your assigned scope.',
     'not_array' => ':attribute не может быть массивом.',
     'disallow_same_pwd_as_user_fields' => 'Пароль не может совпадать с именем пользователя.',
     'letters' => 'Пароль должен содержать хотя бы одну букву.',
@@ -175,6 +176,13 @@ return [
     'uppercase' => 'Поле :attribute должно быть указано заглавными буквами.',
     'url' => 'Поле :attribute должно быть действительным URL-адресом.',
     'external_url' => 'Поле :attribute должно содержать корректный внешний URL (http:// или https://), не указывающий на частный или локальный адрес.',
+    'asset_tag_pattern_placeholder' => 'The asset tag pattern must include at least one placeholder from :placeholders, otherwise every synced asset would receive the same tag and only the first would save.',
+    'custom_http_extras_json' => [
+        'not_json' => 'Custom Extras must be valid JSON. Parser error: :error',
+        'not_array' => 'Custom Extras must be a JSON array (starting with [ and ending with ]).',
+        'entry_not_object' => 'Custom Extras entry #:index must be a JSON object with key, label, and path fields.',
+        'missing_field' => 'Custom Extras entry #:index is missing the required ":field" field.',
+    ],
     'ulid' => 'Поле :attribute должно быть корректным значением UUID.',
     'uuid' => 'Поле :attribute должно быть корректным значением UUID.',
     'valid_css_color' => 'Поле :attribute должно содержать корректный цвет CSS (hex, rgb, rgba, hsl или hsla).',
@@ -196,6 +204,7 @@ return [
     'email_array' => 'Один или несколько адресов эл. почты являются недействительным.',
     'checkboxes' => ':attribute содержит недопустимые параметры.',
     'radio_buttons' => ':attribute не верно.',
+    'image_file_too_large' => 'The :attribute may not be larger than :max.',
 
     'custom' => [
         'alpha_space' => 'Поле :attribute содержит недопустимый символ.',

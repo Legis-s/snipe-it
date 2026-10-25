@@ -389,6 +389,106 @@ class HelperTest extends TestCase
         $this->assertNull(Helper::sameOriginUrl('//evil.example.com/steal-session'));
     }
 
+    #[\PHPUnit\Framework\Attributes\DataProvider('schemeOnlyBypassProvider')]
+    public function test_same_origin_url_rejects_scheme_without_authority(string $input): void
+    {
+        $this->assertNull(Helper::sameOriginUrl($input));
+    }
+
+    public static function schemeOnlyBypassProvider(): array
+    {
+        return [
+            'https scheme only' => ['https:evil.example.com'],
+            'http scheme only' => ['http:evil.example.com'],
+            'https with path suffix' => ['https:evil.example.com/path?q=1'],
+            'https with port and path' => ['https:evil.example.com:8080/admin'],
+            'http userinfo without authority' => ['http:@evil.example.com'],
+            'https single slash prefix' => ['https:/evil.example.com'],
+            'bare scheme with colon' => ['http:'],
+            'ipv4 loopback via scheme-only' => ['http:127.0.0.1:9931/bg'],
+        ];
+    }
+
+    public function test_same_origin_url_rejects_backslash_userinfo_parser_differential(): void
+    {
+        config(['app.url' => 'https://app.example.com']);
+
+        $this->assertNull(Helper::sameOriginUrl('https://evil.example.com\\@app.example.com/'));
+        $this->assertNull(Helper::sameOriginUrl('https://evil.example.com\\\\@app.example.com/'));
+    }
+
+    public function test_same_origin_url_rejects_userinfo_in_authority(): void
+    {
+        // Same-origin redirects never legitimately carry credentials. Any
+        // input where parse_url extracted userinfo is rejected outright,
+        // closing further parser-differential variants that hide the real
+        // authority behind an `@`.
+        config(['app.url' => 'https://app.example.com']);
+
+        $this->assertNull(Helper::sameOriginUrl('https://user@app.example.com/'));
+        $this->assertNull(Helper::sameOriginUrl('https://user:pass@app.example.com/'));
+        $this->assertNull(Helper::sameOriginUrl('https://user:pass@evil.example.com/'));
+    }
+
+    public function test_safe_intended_returns_stored_url_when_it_passes_the_origin_guard(): void
+    {
+        config(['app.url' => 'https://app.example.com']);
+        Session::put('url.intended', 'https://app.example.com/foo?bar=1');
+
+        $response = Helper::safeIntended('/fallback');
+
+        $this->assertSame(302, $response->getStatusCode());
+        $this->assertSame('https://app.example.com/foo?bar=1', $response->headers->get('Location'));
+    }
+
+    public function test_safe_intended_falls_back_to_default_when_stored_url_is_offsite(): void
+    {
+        // A writer that skipped Helper::sameOriginUrl (or a future
+        // parser-differential bypass at the write) leaves a poisoned
+        // url.intended in session. The read-side guard must fall back to
+        // the caller-supplied default rather than emit the poisoned URL.
+        config(['app.url' => 'https://app.example.com']);
+        Session::put('url.intended', 'https://evil.example.com/steal-session');
+
+        $response = Helper::safeIntended('/fallback');
+
+        $this->assertStringEndsWith('/fallback', $response->headers->get('Location'));
+    }
+
+    public function test_safe_intended_falls_back_to_default_when_stored_url_uses_backslash_bypass(): void
+    {
+        // GHSA-579m-9gf4-28jp regression: even if a writer accepted the
+        // backslash-userinfo payload against an older Helper::sameOriginUrl,
+        // the emission-side guard must reject it.
+        config(['app.url' => 'https://app.example.com']);
+        Session::put('url.intended', 'https://evil.example.com\\@app.example.com/');
+
+        $response = Helper::safeIntended('/fallback');
+
+        $this->assertStringEndsWith('/fallback', $response->headers->get('Location'));
+    }
+
+    public function test_safe_intended_falls_back_to_default_when_session_key_is_absent(): void
+    {
+        Session::forget('url.intended');
+
+        $response = Helper::safeIntended('/fallback');
+
+        $this->assertStringEndsWith('/fallback', $response->headers->get('Location'));
+    }
+
+    public function test_safe_intended_pulls_the_session_key(): void
+    {
+        // pull() semantics: after the redirect is built, url.intended must
+        // be gone so subsequent requests don't re-consume the same target.
+        config(['app.url' => 'https://app.example.com']);
+        Session::put('url.intended', 'https://app.example.com/foo');
+
+        Helper::safeIntended('/fallback');
+
+        $this->assertFalse(Session::has('url.intended'));
+    }
+
     /**
      * FD-56673 regression coverage: customFieldFormValue collapses the
      * gate + decrypt + default fallback that every branch of

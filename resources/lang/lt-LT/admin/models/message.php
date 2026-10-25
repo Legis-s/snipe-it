@@ -45,4 +45,14 @@ return [
         'success_partial' => 'Panaikinti modeliai – :success_count, tačiau dar :fail_count nepavyko panaikinti, nes vis dar yra su jais susieto turto.',
     ],
 
+    'merge' => [
+        'min_two' => 'Pasirinkite bent du modelius, kuriuos norite sujungti.',
+        'no_target' => 'Prieš sujungdami pasirinkite, kurį modelį palikti.',
+        'not_found' => 'Nepavyko įkelti vieno ar kelių pasirinktų modelių. Atnaujinkite modelių sąrašą ir bandykite dar kartą.',
+        'information' => 'Ketinate sujungti :count modelius. Pasirinkite modelį, kurį norite pasilikti. Visas kitiems modeliams priskirtas turtas bus priskirtas jūsų pasirinktam modeliui, o tada ankstesni modeliai bus ištrinti.',
+        'warning' => 'Šio veiksmo atšaukti neįmanoma. Perleistam turtui bus priskirta išlikusio modelio kategorija, laukų rinkinys ir nusidėvėjimo nustatymai.',
+        'pick_target' => 'Kokį modelį norėtumėte pasilikti?',
+        'success' => 'Modeliai (:source_count) sujungti į ":target". Perkelta turto vienetų – :asset_count.',
+    ],
+
 ];
