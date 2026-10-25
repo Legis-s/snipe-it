@@ -70,6 +70,7 @@ class Purchase extends SnipeModel
         'invoice_number',
         'invoice_file',
         'bitrix_id',
+        'bitrix_status',
         'final_price',
         'paid',
         'supplier_id',

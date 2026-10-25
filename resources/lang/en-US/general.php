@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'bitrix_status' => 'Bitrix status',
     'device_summary' => ['title' => 'Device', 'unknown' => 'Unknown', 'launcher' => 'Launcher', 'application' => 'Biometrika', 'sim' => 'SIM card', 'location_updated' => 'Location updated', 'no_coordinates' => 'Location not available'],
     'inventory_summary' => ['progress' => 'Audit progress', 'total' => 'Total', 'checked' => 'Checked', 'successful' => 'Successful', 'responsible' => 'Responsible person', 'device' => 'Device'],
     'map' => 'Map',
