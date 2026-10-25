@@ -4,14 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Actions\Purchases\PayPurchaseAction;
 use App\Actions\Purchases\ReceiveLegacyConsumablesAction;
+use App\Actions\Purchases\TransitionPurchaseAction;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Transformers\PurchasesTransformer;
-use App\Models\Asset;
 use App\Models\Consumable;
 use App\Models\Purchase;
 use App\Models\Statuslabel;
-use DateTime;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -35,6 +34,7 @@ class PurchasesController extends Controller
                 'purchases.invoice_number',
                 'purchases.invoice_file',
                 'purchases.bitrix_id',
+                'purchases.bitrix_status',
                 'purchases.final_price',
                 'purchases.status',
                 'purchases.supplier_id',
@@ -113,6 +113,7 @@ class PurchasesController extends Controller
                 'purchases.invoice_number',
                 'purchases.invoice_file',
                 'purchases.bitrix_id',
+                'purchases.bitrix_status',
                 'purchases.final_price',
                 'purchases.status',
                 'purchases.supplier_id',
@@ -226,20 +227,13 @@ class PurchasesController extends Controller
     public function in_payment(Request $request, $purchaseId = null): JsonResponse
     {
         $this->authorize('update', Purchase::class);
-        $purchase = Purchase::findOrFail($purchaseId);
-        $purchase->status = 'in_payment';
-        if ($purchase->save()) {
+        $purchase = TransitionPurchaseAction::run((int) $purchaseId, 'in_payment');
 
-            return response()->json(
-                Helper::formatStandardApiResponse(
-                    'success',
-                    (new PurchasesTransformer)->transformPurchase($purchase),
-                    trans('admin/locations/message.update.success')
-                )
-            );
-        }
-
-        return response()->json(Helper::formatStandardApiResponse('error', null, $purchase->getErrors()));
+        return response()->json(Helper::formatStandardApiResponse(
+            'success',
+            (new PurchasesTransformer)->transformPurchase($purchase),
+            trans('admin/locations/message.update.success')
+        ));
     }
 
     /**
@@ -269,28 +263,13 @@ class PurchasesController extends Controller
     public function reject(Request $request, $purchaseId = null): JsonResponse|array
     {
         $this->authorize('update', Purchase::class);
-        $purchase = Purchase::findOrFail($purchaseId);
-        $purchase->status = 'rejected';
-        $purchase->bitrix_result_at = new DateTime;
-        if ($purchase->save()) {
-            $status = Statuslabel::where('name', 'Отклонено')->first();
-            $assets = Asset::where('purchase_id', $purchase->id)->get();
-            foreach ($assets as &$value) {
-                $value->status_id = $status->id;
-                $value->unsetEventDispatcher();
-                $value->save();
-            }
+        $purchase = TransitionPurchaseAction::run((int) $purchaseId, 'rejected');
 
-            return response()->json(
-                Helper::formatStandardApiResponse(
-                    'success',
-                    (new PurchasesTransformer)->transformPurchase($purchase),
-                    trans('admin/locations/message.update.success')
-                )
-            );
-        }
-
-        return response()->json(Helper::formatStandardApiResponse('error', null, $purchase->getErrors()));
+        return response()->json(Helper::formatStandardApiResponse(
+            'success',
+            (new PurchasesTransformer)->transformPurchase($purchase),
+            trans('admin/locations/message.update.success')
+        ));
     }
 
     /**

@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'bitrix_status' => 'Статус Bitrix',
     'device_summary' => ['title' => 'Устройство', 'unknown' => 'Нет данных', 'launcher' => 'Лаунчер', 'application' => 'Биометрика', 'sim' => 'SIM-карта', 'location_updated' => 'Геопозиция обновлена', 'no_coordinates' => 'Геопозиция недоступна'],
     'inventory_summary' => ['progress' => 'Ход проверки', 'total' => 'Всего', 'checked' => 'Проверено', 'successful' => 'Успешно', 'responsible' => 'Ответственный', 'device' => 'Устройство'],
     'map_total' => 'Всего',

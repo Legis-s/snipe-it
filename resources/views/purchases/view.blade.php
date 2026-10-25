@@ -176,6 +176,10 @@
                             </div>
                         </div>
                     @endif
+                    <div class="row">
+                        <div class="col-md-4"><strong>{{ trans('general.bitrix_status') }}</strong></div>
+                        <div class="col-md-8">{{ $purchase->bitrix_status ?: '—' }}</div>
+                    </div>
                     @if ($purchase->invoice_number)
                         <div class="row">
                             <div class="col-md-4">
