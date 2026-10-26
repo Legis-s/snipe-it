@@ -308,7 +308,7 @@
                                         <li {!! (request()->is('account/accept') ? ' class="active" aria-current="page"' : '') !!}>
                                             <a href="{{ route('account.accept') }}">
                                                 <x-icon type="signature" class="fa-fw"/>
-                                                {{ trans('general.accept_assets_menu') }}
+                                                {{ trans('general.accept_items') }}
                                             </a>
                                         </li>
 
@@ -513,6 +513,13 @@
                                         </a>
                                     </li>
 
+                                    <li id="past-eol-sidenav-option"{!! (request()->is('hardware') && request()->boolean('past_eol') ? ' class="active" aria-current="page"' : '') !!}>
+                                        <a href="{{ route('hardware.index', ['past_eol' => 1]) }}">
+                                            <x-icon type="due" class="text-orange fa-fw"/>
+                                            {{ trans('general.past_eol') }}
+                                        </a>
+                                    </li>
+
                                     <li class="divider">&nbsp;</li>
                                     @can('checkin', \App\Models\Asset::class)
                                         <li{!! (request()->is('hardware/quickscancheckin') ? ' class="active" aria-current="page"' : '') !!}>
@@ -581,14 +588,6 @@
                                 </li>
                             @endif
 
-                            @can('view', \App\Models\Asset::class)
-                                <li{!! (request()->routeIs('calendar.index') ? ' class="active" aria-current="page"' : '') !!}>
-                                    <a href="{{ route('calendar.index') }}">
-                                        <x-icon type="calendar" class="fa-fw"/>
-                                        <span>{{ trans('general.calendar') }}</span>
-                                    </a>
-                            </li>
-                        @endcan
                        @can('view', \App\Models\Location::class)
                              <li{!! (request()->is('devices*') ? ' class="active"' : '') !!}>
                                 <a href="{{ route('devices.index') }}">
@@ -698,9 +697,23 @@
                                                 {{ trans('general.login_disabled') }}
                                             </a>
                                         </li>
+                                        <li class="{{ (request()->is('users') && request()->filled('end_date_within')) ? 'active' : '' }}" id="users-sidenav-offboarding">
+                                            <a href="{{ route('users.index', ['end_date_within' => \App\Livewire\NeedsAttention::OFFBOARDING_DAYS, 'with_assignments' => 1]) }}">
+                                                <x-icon type="offboarding" class="text-warning fa-fw"/>
+                                                {{ trans('general.offboarding_soon') }}
+                                            </a>
+                                        </li>
                                     </ul>
                                 </li>
                         @endcan
+                            @can('canViewUsersAndCheckoutables')
+                                <li{!! (request()->routeIs('calendar.index') ? ' class="active" aria-current="page"' : '') !!}>
+                                    <a href="{{ route('calendar.index') }}">
+                                        <x-icon type="calendar" class="fa-fw"/>
+                                        <span>{{ trans('general.calendar') }}</span>
+                                    </a>
+                                </li>
+                            @endcan
                         @can('import')
                             <li id="import-sidenav-option"{!! (request()->is('import*') ? ' class="active" aria-current="page"' : '') !!}>
                                 <a href="{{ route('imports.index') }}">
@@ -808,14 +821,14 @@
                                                 </a>
                                             </li>
                                         @endcan
-                                        @can('view', \App\Models\Asset::class)
+                                        @can('view', \App\Models\Location::class)
                                             <li {!! (request()->is('contracts*') ? ' class="active"' : '') !!}>
                                                 <a href="{{ route('contracts.index') }}">
                                                     {{ trans('general.contracts') }}
                                                 </a>
                                             </li>
                                         @endcan
-                                        @can('view', \App\Models\Asset::class)
+                                        @can('view', \App\Models\Location::class)
                                             <li {!! (request()->is('deals*') ? ' class="active"' : '') !!}>
                                                 <a href="{{ route('deals.index') }}">
                                                     {{ trans('general.deals') }}
@@ -880,11 +893,6 @@
                                             {{ trans('general.asset_maintenance_report') }}
                                         </a>
                                     </li>
-                                    <li {!! (request()->is('reports/unaccepted_assets') ? ' class="active" aria-current="page"' : '') !!}>
-                                        <a href="{{ url('reports/unaccepted_assets') }}">
-                                            {{ trans('general.unaccepted_asset_report') }}
-                                        </a>
-                                    </li>
                                     <li  {!! (request()->is('reports/accessories') ? ' class="active" aria-current="page"' : '') !!}>
                                         <a href="{{ url('reports/accessories') }}">
                                             {{ trans('general.accessory_report') }}
@@ -896,8 +904,14 @@
                             @can('canCheckoutAtLeastOneItemType')
                                 <li{!! (request()->is('requests.index') ? ' class="active" aria-current="page"' : '') !!}>
                                     <a href="{{ route('requests.index') }}">
-                                        <i class="fa-solid fa-boxes-packing"></i>
+                                        <x-icon type="pending-requests" class="fa-fw"/>
                                         <span>{{ trans('general.pending_requests') }}</span>
+                                    </a>
+                                </li>
+                                <li{!! (request()->is('unaccepted-acceptances') ? ' class="active" aria-current="page"' : '') !!}>
+                                    <a href="{{ route('unaccepted-acceptances.index') }}">
+                                        <x-icon type="signature" class="fa-fw"/>
+                                        <span>{{ trans('general.unaccepted_asset_report') }}</span>
                                     </a>
                                 </li>
                             @endcan
@@ -1185,11 +1199,13 @@
 
             // Reference: https://jqueryvalidation.org/validate/
             //
-            // Two form-ids get the same validator: `create-form` is the default
-            // id emitted by the form blade component, and `checkout_form` is
-            // the anti-double-submit id used by the six checkout flows. Both
-            // need the same error styling + select2 error placement, so we
-            // init in a loop instead of duplicating the options block.
+            // A handful of form-ids get the same validator: `create-form` is
+            // the default id emitted by the form blade component, `checkout_form`
+            // is the anti-double-submit id used by the six checkout flows, and
+            // the sync-adapter tabs each render their own form as
+            // `adapter-form-<slug>`. Everyone needs the same error styling +
+            // select2 error placement, so we init in a loop instead of
+            // duplicating the options block.
             var snipeValidatorOptions = {
                 ignore: 'input[type=hidden]',
                 errorClass: 'alert-msg',
@@ -1206,8 +1222,17 @@
                     error.attr('aria-live', 'assertive');
 
                     if ($(element).hasClass('select2') || $(element).hasClass('js-data-ajax')) {
-                        // If the element is a select2 then append the error to the parent div
-                        element.parent('div').append(error);
+                        // If the element is a select2 then append the error to the parent div,
+                        // unless that parent is an input-group (select2 paired with a sibling
+                        // action button, like the sync-adapter refresh widget). Appending into
+                        // an input-group makes the error a display:table-cell sibling that
+                        // steals width from the select2. Insert after the group instead.
+                        var $parent = element.parent('div');
+                        if ($parent.hasClass('input-group')) {
+                            error.insertAfter($parent);
+                        } else {
+                            $parent.append(error);
+                        }
 
                      } else if ($(element).parent().hasClass('input-group')) {
                         var end_input_group = $(element).next('.input-group-addon').parent();
@@ -1237,7 +1262,7 @@
 
             };
 
-            $('#create-form, #checkout_form, #userForm, #adjustQuantityForm').each(function () {
+            $('#create-form, #checkout_form, #userForm, #adjustQuantityForm, form[id^="adapter-form-"]').each(function () {
                 $(this).validate(snipeValidatorOptions);
             });
 

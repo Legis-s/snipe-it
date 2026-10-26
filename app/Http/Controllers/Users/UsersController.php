@@ -9,7 +9,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\DeleteUserRequest;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\SaveUserRequest;
-use App\Mail\UnacceptedAssetReminderMail;
 use App\Models\Accessory;
 use App\Models\Actionlog;
 use App\Models\Asset;
@@ -22,13 +21,13 @@ use App\Models\License;
 use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\CurrentInventory;
+use App\Notifications\UnacceptedAssetReminderNotification;
 use App\Notifications\WelcomeNotification;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 use League\Csv\EscapeFormula;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -84,7 +83,7 @@ class UsersController extends Controller
         }
 
         $permissions = config('permissions');
-        $userPermissions = Helper::selectedPermissionsArray($permissions, $request->old('permissions', []));
+        $userPermissions = Helper::selectedPermissionsArray($permissions, $request->old('permission', []));
         $permissions = $this->filterDisplayable($permissions);
 
         $user = new User;
@@ -184,7 +183,7 @@ class UsersController extends Controller
             }
 
             if (auth()->user()->isSuperUser() && auth()->user()->can('editableOnDemo')) {
-                $user->syncGroupsWithLogging((array) $request->input('groups'));
+                $user->syncGroupsWithLogging(self::normalizeGroupsInput($request->input('groups')));
             }
 
             return Helper::getRedirectOption($request, $user->id, 'Users')
@@ -204,6 +203,33 @@ class UsersController extends Controller
         }
 
         return $output;
+    }
+
+    /**
+     * Normalize the groups form input to an int array of group ids.
+     * The legacy user form posted groups[] as separate inputs (one per
+     * selected group). The scrolling select2-checkboxes-scrollbox on the new form
+     * posts a single hidden CSV, matching the groups-edit pattern.
+     * Accept both shapes so other callers (API, cloning, legacy
+     * clients) keep working.
+     */
+    private static function normalizeGroupsInput(mixed $input): array
+    {
+        if (is_array($input)) {
+            return array_values(array_filter(
+                array_map('intval', $input),
+                fn (int $id) => $id > 0,
+            ));
+        }
+
+        if (is_string($input) && $input !== '') {
+            return array_values(array_filter(
+                array_map('intval', explode(',', $input)),
+                fn (int $id) => $id > 0,
+            ));
+        }
+
+        return [];
     }
 
     /**
@@ -227,7 +253,7 @@ class UsersController extends Controller
         if ($safeReferer = Helper::sameOriginUrl(url()->previous())) {
             session()->put('url.intended', $safeReferer);
         }
-        $user = User::with(['assets', 'assets.model', 'consumables', 'accessories', 'licenses', 'userloc'])->withTrashed()->find($user->id);
+        $user = User::withTrashed()->find($user->id);
 
         if ($user) {
 
@@ -255,7 +281,6 @@ class UsersController extends Controller
      *
      * @since [v1.0]
      *
-     * @param  int  $id
      * @return RedirectResponse
      *
      * @throws AuthorizationException
@@ -278,8 +303,6 @@ class UsersController extends Controller
         $permissions = $request->input('permissions', []);
         app('request')->request->set('permissions', $permissions);
 
-        $user->load(['assets', 'assets.model', 'consumables', 'accessories', 'licenses', 'userloc'])->withTrashed();
-
         $this->authorize('update', $user);
 
         $orig_permissions_array = NormalizePermissionsPayloadAction::run($user->decodePermissions());
@@ -289,7 +312,6 @@ class UsersController extends Controller
         $user->first_name = $request->input('first_name');
         $user->last_name = $request->input('last_name');
         $user->display_name = $request->input('display_name');
-        $user->two_factor_optin = $request->input('two_factor_optin') ?: 0;
         $user->locale = $request->input('locale');
         $user->employee_num = $request->input('employee_num');
         $user->jobtitle = $request->input('jobtitle', null);
@@ -331,6 +353,7 @@ class UsersController extends Controller
             $user->username = trim($request->input('username'));
             $user->email = trim($request->input('email'));
             $user->activated = $request->input('activated', $request->user()->is($user) ? 1 : 0);
+            $user->two_factor_optin = $request->input('two_factor_optin') ?: 0;
 
             // Do we want to update the user password?
             if ($request->filled('password')) {
@@ -368,7 +391,7 @@ class UsersController extends Controller
             if (auth()->user()->isSuperUser()
                 && auth()->user()->can('canEditAuthFields', $user)
                 && auth()->user()->can('editableOnDemo')) {
-                $user->syncGroupsWithLogging((array) $request->input('groups'));
+                $user->syncGroupsWithLogging(self::normalizeGroupsInput($request->input('groups')));
             }
 
             // Redirect to the user page
@@ -419,7 +442,6 @@ class UsersController extends Controller
      *
      * @since [v1.0]
      *
-     * @param  int  $id
      * @return RedirectResponse
      *
      * @throws AuthorizationException
@@ -459,7 +481,6 @@ class UsersController extends Controller
      *
      * @since [v1.0]
      *
-     * @param  int  $userId
      * @return View
      *
      * @throws AuthorizationException
@@ -470,14 +491,9 @@ class UsersController extends Controller
         $this->authorize('view', $user);
 
         $user = User::with([
-            'consumables',
-            'accessories',
-            'licenses',
             'userloc',
             'groups',
-        ])
-            ->withTrashed()
-            ->find($user->id);
+        ])->withTrashed()->find($user->id);
 
         // Make sure they can view this particular user
         $this->authorize('view', $user);
@@ -497,7 +513,6 @@ class UsersController extends Controller
      *
      * @since [v1.0]
      *
-     * @param  int  $id
      * @return View
      *
      * @throws AuthorizationException
@@ -615,7 +630,7 @@ class UsersController extends Controller
                 trans('admin/licenses/table.deleted_at'),
             ];
 
-            fputcsv($handle, $headers);
+            fputcsv($handle, $headers, escape: '\\');
 
             $users = User::with(
                 'assets',
@@ -697,11 +712,11 @@ class UsersController extends Controller
 
                         // CSV_ESCAPE_FORMULAS is set to false in the .env
                         if (config('app.escape_formulas') === false) {
-                            fputcsv($handle, $values);
+                            fputcsv($handle, $values, escape: '\\');
 
                             // CSV_ESCAPE_FORMULAS is set to true or is not set in the .env
                         } else {
-                            fputcsv($handle, $formatter->escapeRecord($values));
+                            fputcsv($handle, $formatter->escapeRecord($values), escape: '\\');
                         }
                     }
                 });
@@ -765,7 +780,12 @@ class UsersController extends Controller
             return view('users.print')
                 ->with('users', [$user])
                 ->with('indirectItemsCount', $indirectItemsCount)
-                ->with('settings', Setting::getSettings());
+                ->with('settings', Setting::getSettings())
+                ->with('canViewAssets', $canViewAssets)
+                ->with('canViewLicenses', $canViewLicenses)
+                ->with('canViewAccessories', $canViewAccessories)
+                ->with('canViewConsumables', $canViewConsumables)
+                ->with('canViewComponents', $canViewComponents);
         }
 
         return redirect()->route('users.index')->with('error', trans('admin/users/message.user_not_found', compact('id')));
@@ -807,6 +827,9 @@ class UsersController extends Controller
 
     /**
      * Resend pending acceptance reminder email for a specific user.
+     * Routes through UnacceptedAssetReminderNotification so the
+     * console command, this button, and the bulk UI all share the
+     * same channel.
      */
     public function resendAcceptanceReminder(User $user): RedirectResponse
     {
@@ -836,13 +859,7 @@ class UsersController extends Controller
             return redirect()->back()->with('warning', trans('admin/users/message.error.no_pending_acceptances'));
         }
 
-        $mailable = new UnacceptedAssetReminderMail($firstAcceptance, $pendingItems->count());
-
-        if (! empty($user->locale)) {
-            $mailable->locale($user->locale);
-        }
-
-        Mail::to($user->email)->send($mailable);
+        $user->notify(new UnacceptedAssetReminderNotification($firstAcceptance, $pendingItems->count()));
 
         return redirect()->back()->with('success', trans_choice('admin/users/message.success.acceptance_reminder_sent', $pendingItems->count(), ['count' => $pendingItems->count()]));
     }

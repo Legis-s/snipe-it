@@ -29,8 +29,6 @@ class AssetCheckoutController extends Controller
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
      *
-     * @param  int  $assetId
-     *
      * @since [v1.0]
      *
      * @return View

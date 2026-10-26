@@ -27,6 +27,7 @@
     'onlyTopLevel' => false,
     'excludeId' => null,
     'id' => null,
+    'help_text' => null,
 ])
 
 @php
@@ -69,10 +70,16 @@
     @unless($hideNewButton)
         <div class="col-md-1 col-sm-1 text-left">
             @can('create', Company::class)
-                <a href="{{ route('modal.show', 'company') }}" data-toggle="modal" data-target="#createModal" data-select="{{ $selectId }}" class="btn btn-sm btn-theme">{{ trans('button.new') }}</a>
+                <x-button.modal-add type="company" :target="$selectId"/>
             @endcan
         </div>
     @endunless
+
+    @if ($help_text)
+        <div class="col-md-7 col-md-offset-3">
+            <x-form.help :name="$selectId">{!! $help_text !!}</x-form.help>
+        </div>
+    @endif
 
     @if ($snipeSettings->full_multiple_companies_support == '1')
         @cannot('superadmin')

@@ -2,6 +2,7 @@
 
 namespace App\Presenters;
 
+use App\Enums\FileStorage;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Storage;
 
@@ -565,7 +566,7 @@ class UserPresenter extends Presenter
             }
 
             // Otherwise assume it's an uploaded image
-            return Storage::disk('public')->url('avatars/'.e($this->avatar));
+            return Storage::disk('public')->url(FileStorage::Avatars->publicPath().e($this->avatar));
         }
 
         // If the default is system default
@@ -575,7 +576,7 @@ class UserPresenter extends Presenter
 
         // If there is a custom default avatar
         if (Setting::getSettings()->default_avatar != '') {
-            return Storage::disk('public')->url('avatars/'.e(Setting::getSettings()->default_avatar));
+            return Storage::disk('public')->url(FileStorage::Avatars->publicPath().e(Setting::getSettings()->default_avatar));
         }
 
         // If there is no default and no custom avatar, check for gravatar
@@ -645,5 +646,199 @@ class UserPresenter extends Presenter
     {
         return $this->model->department?->tag_color
             ?? $this->model->company?->color;
+    }
+
+    public static function consumablesDataTableLayout(): string
+    {
+        $layout = [
+            [
+                'field' => 'consumable',
+                'scope' => 'col',
+                'searchable' => true,
+                'sortable' => true,
+                'switchable' => false,
+                'title' => trans('general.name'),
+                'visible' => true,
+                'formatter' => 'consumablesLinkObjFormatter',
+            ],
+            [
+                'field' => 'qty',
+                'scope' => 'col',
+                'searchable' => false,
+                'sortable' => false,
+                'switchable' => true,
+                'title' => trans('general.qty'),
+                'visible' => true,
+                'footerFormatter' => 'sumFormatter',
+                'class' => 'text-right',
+            ],
+            [
+                'field' => 'purchase_cost',
+                'scope' => 'col',
+                'searchable' => false,
+                'sortable' => false,
+                'switchable' => true,
+                'title' => trans('general.unit_cost'),
+                'visible' => true,
+                'footerFormatter' => 'sumFormatter',
+                'class' => 'text-right',
+            ],
+            [
+                'field' => 'created_at',
+                'scope' => 'col',
+                'searchable' => false,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('general.date'),
+                'visible' => true,
+                'formatter' => 'dateDisplayFormatter',
+            ],
+            [
+                'field' => 'note',
+                'scope' => 'col',
+                'searchable' => true,
+                'sortable' => false,
+                'switchable' => true,
+                'title' => trans('general.notes'),
+                'visible' => true,
+            ],
+        ];
+
+        return json_encode($layout);
+    }
+
+    public static function accessoriesDataTableLayout(): string
+    {
+        $layout = [
+            [
+                'field' => 'accessory',
+                'scope' => 'col',
+                'searchable' => true,
+                'sortable' => true,
+                'switchable' => false,
+                'title' => trans('general.name'),
+                'visible' => true,
+                'formatter' => 'accessoriesLinkObjFormatter',
+            ],
+            [
+                'field' => 'created_at',
+                'scope' => 'col',
+                'searchable' => false,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('general.date'),
+                'visible' => true,
+                'formatter' => 'dateDisplayFormatter',
+            ],
+            [
+                'field' => 'note',
+                'scope' => 'col',
+                'searchable' => true,
+                'sortable' => false,
+                'switchable' => true,
+                'title' => trans('general.notes'),
+                'visible' => true,
+            ],
+            [
+                'field' => 'purchase_cost',
+                'scope' => 'col',
+                'searchable' => false,
+                'sortable' => false,
+                'switchable' => true,
+                'title' => trans('general.unit_cost'),
+                'visible' => true,
+                'footerFormatter' => 'sumFormatter',
+                'class' => 'text-right',
+            ],
+            [
+                'field' => 'actions',
+                'scope' => 'col',
+                'searchable' => false,
+                'sortable' => false,
+                'switchable' => false,
+                'title' => trans('table.actions'),
+                'visible' => true,
+                'formatter' => 'accessoriesInOutFormatter',
+                'class' => 'hidden-print',
+            ],
+        ];
+
+        return json_encode($layout);
+    }
+
+    public static function licensesDataTableLayout(): string
+    {
+        $layout = [
+            [
+                'field' => 'checkbox',
+                'scope' => 'col',
+                'checkbox' => true,
+                'titleTooltip' => trans('general.select_all_none'),
+                'printIgnore' => true,
+                'class' => 'hidden-print',
+            ],
+            [
+                'field' => 'license',
+                'scope' => 'col',
+                'searchable' => true,
+                'sortable' => true,
+                'switchable' => false,
+                'title' => trans('general.name'),
+                'visible' => true,
+                'formatter' => 'licensesLinkObjFormatter',
+            ],
+            [
+                'field' => 'serial',
+                'scope' => 'col',
+                'searchable' => false,
+                'sortable' => false,
+                'switchable' => true,
+                'title' => trans('admin/licenses/form.license_key'),
+                'visible' => true,
+                'formatter' => 'licenseKeyFormatter',
+            ],
+            [
+                'field' => 'purchase_cost',
+                'scope' => 'col',
+                'searchable' => false,
+                'sortable' => false,
+                'switchable' => true,
+                'title' => trans('general.purchase_cost'),
+                'visible' => true,
+                'footerFormatter' => 'sumFormatter',
+                'class' => 'text-right',
+            ],
+            [
+                'field' => 'purchase_order',
+                'scope' => 'col',
+                'searchable' => false,
+                'sortable' => false,
+                'switchable' => true,
+                'title' => trans('admin/licenses/form.purchase_order'),
+                'visible' => true,
+            ],
+            [
+                'field' => 'order_number',
+                'scope' => 'col',
+                'searchable' => false,
+                'sortable' => false,
+                'switchable' => true,
+                'title' => trans('general.order_number'),
+                'visible' => true,
+            ],
+            [
+                'field' => 'actions',
+                'scope' => 'col',
+                'searchable' => false,
+                'sortable' => false,
+                'switchable' => false,
+                'title' => trans('table.actions'),
+                'visible' => true,
+                'formatter' => 'licenseSeatInOutFormatter',
+                'class' => 'hidden-print',
+            ],
+        ];
+
+        return json_encode($layout);
     }
 }

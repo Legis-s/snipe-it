@@ -2,24 +2,16 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Http\Transformers\DealsTransformer;
-use App\Models\Actionlog;
-use App\Models\Asset;
-use App\Models\Consumable;
+use App\Http\Transformers\SelectlistTransformer;
 use App\Models\ConsumableAssignment;
 use App\Models\Deal;
-use App\Models\Statuslabel;
-use App\Models\User;
+use App\Models\Location;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Helpers\Helper;
-use App\Models\Location;
-use App\Http\Transformers\SelectlistTransformer;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
-use Auth;
-use Illuminate\Support\Facades\DB;
 
 class DealsController extends Controller
 {
@@ -31,7 +23,7 @@ class DealsController extends Controller
         $this->authorize('view', Location::class);
         $allowed_columns = [
             'id', 'name', 'number', 'created_at', 'assets_count', 'consumable_count',
-            'assets_sum_purchase_cost', 'consumables_sum_purchase_cost', 'summ', 'bitrix_id'
+            'assets_sum_purchase_cost', 'consumables_sum_purchase_cost', 'summ', 'bitrix_id',
         ];
 
         $deals = Deal::select([
@@ -52,9 +44,8 @@ class DealsController extends Controller
             ->addSelect(['consumables_sum_purchase_cost' => ConsumableAssignment::query()
                 ->whereColumn('assigned_to', 'deals.id')
                 ->where('assigned_type', Deal::class)
-                ->selectRaw('sum(quantity * cost)')
+                ->selectRaw('sum(quantity * cost)'),
             ]);
-
 
         if ($request->filled('filter') || $request->filled('search')) {
             $deals->TextSearch($request->input('filter') ? $request->input('filter') : $request->input('search'));
@@ -87,21 +78,20 @@ class DealsController extends Controller
         return (new DealsTransformer)->transformDeals($deals, $total);
     }
 
-
     /**
      * Display the specified resource.
-     *
-     * @param int $id
      */
-    public function show(int $id): JsonResponse | array
+    public function show(int $id): JsonResponse|array
     {
-        $this->authorize('view', Deal::class);
-        $deal = Deal::with('')
+        $this->authorize('view', Location::class);
+        $deal = Deal::query()
             ->select([
                 'deals.id',
                 'deals.name',
                 'deals.number',
                 'deals.status',
+                'deals.type',
+                'deals.summ',
                 'deals.date_start',
                 'deals.date_end',
                 'deals.bitrix_id',
@@ -109,9 +99,9 @@ class DealsController extends Controller
                 'deals.updated_at',
             ])
             ->findOrFail($id);
-        return (new DealsTransformer())->transformDeal($deal);
-    }
 
+        return (new DealsTransformer)->transformDeal($deal);
+    }
 
     /**
      * Gets a paginated collection for the select2 menus
@@ -138,7 +128,6 @@ class DealsController extends Controller
      * sea... this time.
      *
      * @see \App\Http\Transformers\SelectlistTransformer
-     *
      */
     public function selectlist(Request $request): array
     {
@@ -156,8 +145,8 @@ class DealsController extends Controller
         }
 
         if ($request->filled('search')) {
-            $deals = $deals->where('deals.name', 'LIKE', '%' . $request->input('search') . '%')
-                ->orWhere('deals.number', 'LIKE', '%' . $request->input('search') . '%');
+            $deals = $deals->where('deals.name', 'LIKE', '%'.$request->input('search').'%')
+                ->orWhere('deals.number', 'LIKE', '%'.$request->input('search').'%');
         }
 
         $deals = $deals->orderBy('name', 'ASC')->get();
@@ -165,10 +154,10 @@ class DealsController extends Controller
         foreach ($deals as $deal) {
             $name_str = '';
             if ($deal->number != '') {
-                $name_str .= "[" . e($deal->number) . '] ';
+                $name_str .= '['.e($deal->number).'] ';
             }
             $name_str .= e($deal->name);
-            $deal->use_text = preg_replace('/&quot;/', '"', $name_str);;
+            $deal->use_text = preg_replace('/&quot;/', '"', $name_str);
         }
 
         $paginated_results = new LengthAwarePaginator($deals->forPage($page, 500), $deals->count(), 500, $page, []);

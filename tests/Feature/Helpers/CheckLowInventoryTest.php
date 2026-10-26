@@ -150,6 +150,81 @@ class CheckLowInventoryTest extends TestCase
     }
 
     /**
+     * Components are checked out with a per-pivot-row assigned_qty. A
+     * component with qty=10, min_amt=2, and a single pivot row that
+     * shipped 10 units has 0 remaining and must be flagged as low. The
+     * pre-fix implementation used withCount() on the assets relation,
+     * which counted 1 (one pivot row) instead of 10 (sum of
+     * assigned_qty), calling remaining=9 and skipping the alert. Pin
+     * both the flagged-membership and the reported remaining value so
+     * this can't regress silently.
+     */
+    public function test_component_fully_assigned_in_one_pivot_row_reports_correct_remaining()
+    {
+        $this->settings->set(['alert_threshold' => 0]);
+
+        $component = Component::factory()->create(['qty' => 10, 'min_amt' => 2]);
+        $asset = Asset::factory()->create();
+
+        $component->assets()->attach($asset->id, [
+            'assigned_qty' => 10,
+            'created_at' => now(),
+            'created_by' => User::factory()->create()->id,
+        ]);
+
+        $rows = collect(Helper::checkLowInventory())->where('type', 'components')->keyBy('id');
+
+        $this->assertTrue($rows->has($component->id));
+        $this->assertSame(0, (int) $rows[$component->id]['remaining']);
+    }
+
+    public function test_archived_component_is_excluded_even_when_below_min_amt()
+    {
+        // Archived components are retired from active inventory and
+        // should not drive low-stock alerts even when they fall below
+        // their min_amt threshold.
+        $this->settings->set(['alert_threshold' => 0]);
+
+        $component = Component::factory()->archived()->create(['qty' => 1, 'min_amt' => 5]);
+
+        $this->assertNotContains(
+            $component->id,
+            $this->idsForType(Helper::checkLowInventory(), 'components'),
+        );
+    }
+
+    /**
+     * Sums across multiple pivot rows too: 4 + 3 = 7 units shipped, so
+     * a qty=10 component reports remaining=3, not 8 (row-count) or
+     * some other artifact.
+     */
+    public function test_component_partially_assigned_across_pivots_sums_assigned_qty()
+    {
+        $this->settings->set(['alert_threshold' => 0]);
+
+        $component = Component::factory()->create(['qty' => 10, 'min_amt' => 5]);
+        $assetA = Asset::factory()->create();
+        $assetB = Asset::factory()->create();
+        $actor = User::factory()->create();
+
+        $component->assets()->attach($assetA->id, [
+            'assigned_qty' => 4,
+            'created_at' => now(),
+            'created_by' => $actor->id,
+        ]);
+        $component->assets()->attach($assetB->id, [
+            'assigned_qty' => 3,
+            'created_at' => now(),
+            'created_by' => $actor->id,
+        ]);
+
+        $rows = collect(Helper::checkLowInventory())->where('type', 'components')->keyBy('id');
+
+        $this->assertTrue($rows->has($component->id));
+        $this->assertSame(3, (int) $rows[$component->id]['remaining']);
+    }
+
+    /**
      * The AssetModel branch counts RTD (Ready to Deploy, unassigned) assets
      * via the availableAssets() scope, so this test creates exactly min_amt
      * such assets to prove that hitting the floor without falling through

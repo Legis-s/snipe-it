@@ -19,6 +19,8 @@ class ShowModalsTest extends TestCase
 
     public function test_consumable_modal_requires_authentication(): void
     {
+        User::factory()->create();
+
         $this->get(route('modal.show', 'consumable'))
             ->assertRedirect(route('login'));
     }

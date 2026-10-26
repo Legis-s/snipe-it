@@ -9,15 +9,16 @@ return [
     'edit' => 'Redigera tillbehör',
     'eula_text' => 'EULA-kategori',
     'eula_text_help' => 'Det här fältet tillåter att du ändrar din EULA för specifika typer av tillgångar. Om du endast har en EULA för samtliga tillgångar så kan du kryssa i rutan nedan för att använda den.',
-    'require_acceptance' => 'Require users to confirm acceptance of item in this category.',
+    'require_acceptance' => 'Kräv att användare bekräftar mottagandet av föremål i denna kategori.',
     'no_default_eula' => 'Ingen EULA funnen. Lägg till en i inställningarna.',
     'total' => 'Totalt',
     'remaining' => 'Kvarvarande',
-    'requestable' => 'Users may request this accessory',
+    'requestable' => 'Användare kan begära detta tillbehör',
     'update' => 'Uppdatera tillbehör',
     'use_default_eula' => 'Använd <a href="#" data-toggle="modal" data-target="#eulaModal">den primära EULA:n</a> istället.',
     'use_default_eula_disabled' => '<del>Använd den primära EULA:n istället.</del> Ingen primär EULA är satt. Vänligen lägg till en i Inställningar.',
     'clone' => 'Kopiera tillbehör',
     'delete_disabled' => 'Detta tillbehör kan inte tas bort ännu eftersom vissa objekt fortfarande är utcheckade.',
+    'accessory_deleted_warning' => 'This accessory has been deleted. You must restore it before you can assign it.',
 
 ];

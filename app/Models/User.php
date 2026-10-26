@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Enums\FileStorage;
 use App\Http\Traits\UniqueUndeletedTrait;
+use App\Models\Builders\UserQueryBuilder;
 use App\Models\Traits\CompanyableTrait;
 use App\Models\Traits\HasBitrixToken;
 use App\Models\Traits\HasCalendarEvents;
+use App\Models\Traits\HasImageUpload;
 use App\Models\Traits\HasUploads;
 use App\Models\Traits\Loggable;
 use App\Models\Traits\Searchable;
@@ -36,13 +39,22 @@ use Lab404\Impersonate\Models\Impersonate;
 use Laravel\Passport\HasApiTokens;
 use Watson\Validating\ValidatingTrait;
 
+/**
+ * @mixin IdeHelperUser
+ */
 class User extends SnipeModel implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract, HasLocalePreference
 {
     use CompanyableTrait;
     use HasBitrixToken;
     use HasCalendarEvents;
     use HasFactory;
+    use HasImageUpload;
     use HasUploads;
+
+    public static function fileStorage(): FileStorage
+    {
+        return FileStorage::Avatars;
+    }
 
     protected $presenter = UserPresenter::class;
 
@@ -68,6 +80,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         'email',
         'activated',
         'permissions',
+        'two_factor_optin',
     ];
 
     protected $hidden = [
@@ -281,6 +294,10 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         static::forceDeleted(function (User $user) {
             CheckoutRequest::where(['user_id' => $user->id])->forceDelete();
             $user->purgeAssociatedPassportTokens();
+            // Soft-delete leaves pivot rows so a restore preserves group
+            // memberships. Force-delete removes the row entirely, so the
+            // pivot rows would point at nothing.
+            $user->groups()->detach();
         });
 
         static::softDeleted(function (User $user) {
@@ -672,11 +689,27 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     {
         return [
             [
+                'field' => 'start_date',
+                'event_type' => 'user.start_date',
+                'all_day' => true,
+            ],
+            [
                 'field' => 'end_date',
                 'event_type' => 'user.end_date',
                 'all_day' => true,
             ],
         ];
+    }
+
+    /**
+     * SCIM library shim. This could maybe be moved into the user model itself,
+     * but since it hooks into arietimmerman's library, this was the easier path
+     * without pulling it into traits. Returns the primary key so a scim-client
+     * fetch of /Me matches the shape of a fetch of /Users/{id}
+     */
+    public function getUserId(): int
+    {
+        return (int) $this->id;
     }
 
     /**
@@ -989,16 +1022,20 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
      * Superuser editors skip the merge because they can see every
      * company, so their submission already represents full intent.
      */
-    public function syncCompaniesPreservingInvisibleTo(User $editor, array $submittedCompanyIds): void
+    public function syncCompaniesPreservingInvisibleTo(?User $editor, array $submittedCompanyIds): void
     {
         $submitted = array_map('intval', $submittedCompanyIds);
 
         // FMCS is off, so every user can see every company
         // and there is no invisible-to-editor set to preserve. Superuser
         // editors also skip because their submission already
-        // represents full intent across all tenants.
+        // represents full intent across all tenants. A null editor
+        // means no scope context (CLI-run importer, seeder, artisan
+        // command), which behaves like a superuser edit: sync the
+        // submission verbatim because there is no scope to preserve
+        // against.
         $fmcsOn = (bool) Setting::getSettings()->full_multiple_companies_support;
-        if (! $fmcsOn || $editor->isSuperUser()) {
+        if (! $fmcsOn || $editor === null || $editor->isSuperUser()) {
             $this->syncCompaniesWithLogging($submitted);
 
             return;
@@ -1013,11 +1050,27 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         // companies from the Companies side of the join, which turns
         // the whereNotIn below into an empty result and drops every
         // preserved company. See GH #19569.
-        $editorVisible = DB::table('company_user')
+        $editorDirect = DB::table('company_user')
             ->where('user_id', $editor->id)
             ->pluck('company_id')
             ->map(fn ($id) => (int) $id)
             ->all();
+
+        // The editor's reach must match what every gate upstream of this
+        // helper enforces (Company::getIdsForCurrentUser(), the
+        // SaveUserRequest floater gate, parent_within_scope): direct
+        // memberships PLUS their child companies. Using only the direct
+        // rows silently drops a permitted child-company submission after
+        // the gates have accepted it. Under null_company_is_floater that
+        // left the target with no company at all, promoting them to a
+        // system-wide floater and escaping tenant isolation. See
+        // GHSA-35hv-26vj-9445.
+        $editorChildren = empty($editorDirect) ? [] : DB::table('companies')
+            ->whereIn('parent_id', $editorDirect)
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+        $editorVisible = array_values(array_unique(array_merge($editorDirect, $editorChildren)));
 
         $submittedVisible = array_values(array_intersect($submitted, $editorVisible));
 
@@ -1236,10 +1289,8 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
      * @author A. Gianotto <snipe@snipe.net>
      *
      * @since  [v2.0]
-     *
-     * @return Relation
      */
-    public function accessories()
+    public function accessories(): BelongsToMany
     {
         return $this->belongsToMany(Accessory::class, 'accessories_checkout', 'assigned_to', 'accessory_id')
             ->where('assigned_type', '=', 'App\Models\User')
@@ -1252,10 +1303,8 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
      * @author A. Gianotto <snipe@snipe.net>
      *
      * @since  [v3.0]
-     *
-     * @return Relation
      */
-    public function consumables()
+    public function consumables(): BelongsToMany
     {
         return $this->belongsToMany(Consumable::class, 'consumables_users', 'assigned_to', 'consumable_id')->withPivot('id', 'created_at', 'note')->withTrashed();
     }
@@ -1266,10 +1315,8 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
      * @author A. Gianotto <snipe@snipe.net>
      *
      * @since  [v1.0]
-     *
-     * @return Relation
      */
-    public function licenses()
+    public function licenses(): BelongsToMany
     {
         return $this->belongsToMany(License::class, 'license_seats', 'assigned_to', 'license_id')->withPivot('id', 'created_at', 'updated_at');
     }
@@ -1534,40 +1581,6 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     }
 
     /**
-     * Query builder scope to return NOT-deleted users
-     *
-     * @author A. Gianotto <snipe@snipe.net>
-     *
-     * @since  [v2.0]
-     *
-     * @param  string  $query
-     * @return \Illuminate\Database\Query\Builder
-     */
-    public function scopeGetNotDeleted($query)
-    {
-        return $query->whereNull('deleted_at');
-    }
-
-    /**
-     * Query builder scope to return users by email or username
-     *
-     * @author A. Gianotto <snipe@snipe.net>
-     *
-     * @since  [v2.0]
-     *
-     * @param  string  $query
-     * @param  string  $user_username
-     * @param  string  $user_email
-     * @return \Illuminate\Database\Query\Builder
-     */
-    public function scopeMatchEmailOrUsername($query, $user_username, $user_email)
-    {
-        return $query->where('email', '=', $user_email)
-            ->orWhere('username', '=', $user_username)
-            ->orWhere('username', '=', $user_email);
-    }
-
-    /**
      * Generate email from full name
      *
      * @author A. Gianotto <snipe@snipe.net>
@@ -1617,7 +1630,13 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
             $username = $users_name;
         } else {
 
-            [$first_name, $last_name] = explode(' ', $users_name, 2);
+            // Respect name_display_format when splitting a joined full
+            // name into first and last.
+            if (Setting::getSettings()?->name_display_format === 'last_first') {
+                [$last_name, $first_name] = explode(' ', $users_name, 2);
+            } else {
+                [$first_name, $last_name] = explode(' ', $users_name, 2);
+            }
 
             // Assume filastname by default
             $username = str_slug(substr($first_name, 0, 1).$last_name);
@@ -1766,33 +1785,15 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     }
 
     /**
-     * Query builder scope to search user by name with spaces in it.
-     * We don't use the advancedTextSearch() scope because that searches
-     * all of the relations as well, which is more than what we need.
+     * Run additional, advanced searches. Overrides advancedTextSearch
+     * on the Searchable trait to also search user name with spaces in
+     * it via orWhereMultipleColumns.
      *
-     * @param  \Illuminate\Database\Query\Builder  $query  Query builder instance
-     * @param  array  $terms  The search terms
-     * @return \Illuminate\Database\Query\Builder
-     */
-    public function scopeSimpleNameSearch($query, $search)
-    {
-        return $query->where('first_name', 'LIKE', '%'.$search.'%')
-            ->orWhere('last_name', 'LIKE', '%'.$search.'%')
-            ->orWhere('display_name', 'LIKE', '%'.$search.'%')
-            ->orWhereMultipleColumns(
-                [
-                    'users.first_name',
-                    'users.last_name',
-                ], $search
-            );
-    }
-
-    /**
-     * Run additional, advanced searches.
+     * Both column orders are tried so a user named "John Doe" matches
+     * both "John Doe" and "Doe John" regardless of the install's
+     * name_display_format. Issue #19626.
      *
-     * @param  \Illuminate\Database\Query\Builder  $query  Query builder instance
-     * @param  array  $terms  The search terms
-     * @return Builder
+     * @param  array<int, string>  $terms  The search terms
      */
     public function advancedTextSearch(Builder $query, array $terms)
     {
@@ -1801,6 +1802,11 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
                 [
                     'users.first_name',
                     'users.last_name',
+                ], $term
+            )->orWhereMultipleColumns(
+                [
+                    'users.last_name',
+                    'users.first_name',
                 ], $term
             );
         }
@@ -1964,149 +1970,84 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         return $this->locale ?? Setting::getSettings()->locale ?? config('app.locale');
     }
 
+    protected bool $userTotalCostComputed = false;
+
     public function getUserTotalCost()
     {
-        $asset_cost = 0;
-        $license_cost = 0;
-        $accessory_cost = 0;
-        $consumable_cost = 0;
-        $maintenance_cost = 0;
-
-        foreach ($this->assets as $asset) {
-            $asset_cost += (float) $asset->purchase_cost;
+        if ($this->userTotalCostComputed) {
+            return $this;
         }
-        $this->asset_cost = $asset_cost;
 
-        foreach ($this->licenses as $license) {
-            $license_cost += (float) $license->purchase_cost;
-        }
-        $this->license_cost = $license_cost;
+        $this->asset_cost = (float) $this->assets()->sum('purchase_cost');
+        $this->license_cost = (float) $this->licenses()->sum('purchase_cost');
+        $this->maintenance_cost = (float) $this->assignedMaintenances()->sum('cost');
 
-        // Accessory / consumable unit cost tracks the info-panel's "last
-        // unit cost" so this tally matches the per-item rows in the tab
-        // tables. lastOrderDefaults() already merges last-Order price
-        // with the parent's `default_purchase_cost` template value when
-        // an item has no order history, so nothing to fall back to here.
-        foreach ($this->accessories as $accessory) {
-            $accessory_cost += (float) ($accessory->lastOrderDefaults()['unit_cost'] ?? 0);
-        }
-        $this->accessory_cost = $accessory_cost;
+        $this->accessory_cost = $this->sumPivotUnitCosts(
+            pivotTable: 'accessories_checkout',
+            pivotFk: 'accessory_id',
+            modelClass: \App\Models\Accessory::class,
+            extraWhere: ['assigned_type' => \App\Models\User::class],
+        );
+        $this->consumable_cost = $this->sumPivotUnitCosts(
+            pivotTable: 'consumables_users',
+            pivotFk: 'consumable_id',
+            modelClass: \App\Models\Consumable::class,
+        );
 
-        foreach ($this->consumables as $consumable) {
-            $consumable_cost += (float) ($consumable->lastOrderDefaults()['unit_cost'] ?? 0);
-        }
-        $this->consumable_cost = $consumable_cost;
+        $this->total_user_cost = $this->asset_cost + $this->accessory_cost + $this->consumable_cost + $this->license_cost + $this->maintenance_cost;
 
-        // Maintenances tied to this user as the polymorphic checked_out_to
-        // target. Summed across open + completed records because the
-        // user "caused" both.
-        foreach ($this->assignedMaintenances as $maintenance) {
-            $maintenance_cost += (float) $maintenance->cost;
-        }
-        $this->maintenance_cost = $maintenance_cost;
-
-        $this->total_user_cost = $asset_cost + $accessory_cost + $consumable_cost + $license_cost + $maintenance_cost;
+        $this->userTotalCostComputed = true;
 
         return $this;
     }
 
-    public function scopeUserLocation($query, $location, $search)
-    {
+    /**
+     * Sum (pivot_row_count * last_unit_cost) across every distinct
+     * item this user has any pivot rows for.
+     *
+     * $modelClass must use the HasOrders trait.
+     *
+     * @param  array<string, mixed>  $extraWhere  additional pivot-side filters (e.g. polymorphic assigned_type)
+     */
+    private function sumPivotUnitCosts(
+        string $pivotTable,
+        string $pivotFk,
+        string $modelClass,
+        array $extraWhere = [],
+    ): float {
+        $countsByItem = \Illuminate\Support\Facades\DB::table($pivotTable)
+            ->where('assigned_to', $this->id);
+        foreach ($extraWhere as $column => $value) {
+            $countsByItem->where($column, $value);
+        }
+        $countsByItem = $countsByItem
+            ->groupBy($pivotFk)
+            ->select($pivotFk)
+            ->selectRaw('COUNT(*) as pivot_count')
+            ->pluck('pivot_count', $pivotFk)
+            ->all();
 
-        return $query->where('location_id', '=', $location)
-            ->where('users.first_name', 'LIKE', '%'.$search.'%')
-            ->orWhere('users.email', 'LIKE', '%'.$search.'%')
-            ->orWhere('users.last_name', 'LIKE', '%'.$search.'%')
-            ->orWhere('users.permissions', 'LIKE', '%'.$search.'%')
-            ->orWhere('users.country', 'LIKE', '%'.$search.'%')
-            ->orWhere('users.phone', 'LIKE', '%'.$search.'%')
-            ->orWhere('users.jobtitle', 'LIKE', '%'.$search.'%')
-            ->orWhere('users.employee_num', 'LIKE', '%'.$search.'%')
-            ->orWhere('users.username', 'LIKE', '%'.$search.'%')
-            ->orWhere('users.display_name', 'LIKE', '%'.$search.'%')
-            ->orWhereRaw('CONCAT(users.first_name," ",users.last_name) LIKE ?', [$search.'%']);
+        if ($countsByItem === []) {
+            return 0.0;
+        }
 
+        $items = $modelClass::query()
+            ->whereIn('id', array_keys($countsByItem))
+            ->get(['id', 'default_purchase_cost']);
+
+        $unitCosts = $modelClass::lastUnitCostsFor($items);
+
+        $total = 0.0;
+        foreach ($countsByItem as $itemId => $count) {
+            $total += (float) ($unitCosts[$itemId] ?? 0) * (int) $count;
+        }
+
+        return $total;
     }
 
-    public function scopeWithInventoryRelations(
-        $query,
-        int $id,
-        bool $withAssets = true,
-        bool $withLicenses = true,
-        bool $withAccessories = true,
-        bool $withConsumables = true,
-        bool $withComponents = true,
-    ) {
-        $with = [];
-
-        if ($withAssets) {
-            $with = array_merge($with, [
-                'assets.log' => fn ($query) => $query->withTrashed()
-                    ->where('target_type', User::class)
-                    ->where('target_id', $id)
-                    ->where('action_type', 'accepted'),
-                'assets.defaultLoc',
-                'assets.location',
-                'assets.model.category',
-                'assets.assignedAssets.log' => fn ($query) => $query->withTrashed()
-                    ->where('target_type', User::class)
-                    ->where('target_id', $id)
-                    ->where('action_type', 'accepted'),
-                'assets.assignedAssets.assignedTo',
-                'assets.assignedAssets.defaultLoc',
-                'assets.assignedAssets.location',
-                'assets.assignedAssets.model.category',
-            ]);
-
-            if ($withComponents) {
-                $with[] = 'assets.components.category';
-            }
-
-            if ($withLicenses) {
-                $with = array_merge($with, [
-                    'assets.licenses',
-                    'assets.licenses.category',
-                ]);
-            }
-
-            if ($withAccessories) {
-                $with = array_merge($with, [
-                    'assets.assignedAccessories',
-                    'assets.assignedAccessories.accessory.category',
-                ]);
-            }
-        }
-
-        if ($withLicenses) {
-            $with = array_merge($with, [
-                'directLicenses.category',
-                'licenses.category',
-            ]);
-        }
-
-        if ($withAccessories) {
-            $with = array_merge($with, [
-                'accessories.log' => fn ($query) => $query->withTrashed()
-                    ->where('target_type', User::class)
-                    ->where('target_id', $id)
-                    ->where('action_type', 'accepted'),
-                'accessories.category',
-                'accessories.manufacturer',
-            ]);
-        }
-
-        if ($withConsumables) {
-            $with = array_merge($with, [
-                'consumables.log' => fn ($query) => $query->withTrashed()
-                    ->where('target_type', User::class)
-                    ->where('target_id', $id)
-                    ->where('action_type', 'accepted'),
-                'consumables.category',
-                'consumables.manufacturer',
-            ]);
-        }
-
-        return $query->where('id', $id)->with($with)->withTrashed();
+    public function newEloquentBuilder($query): UserQueryBuilder
+    {
+        return new UserQueryBuilder($query);
     }
 
     /**

@@ -20,8 +20,8 @@ return [
         'confirm' => 'この付属品を本当に削除してもよろしいですか？',
         'error' => 'この付属品を削除する際に問題が発生しました。もう一度、やり直して下さい。',
         'success' => 'この付属品は正常に削除されました。',
-        'bulk_success' => 'Accessory deleted successfully.|:count accessories were deleted successfully.',
-        'partial_success' => ':count accessory was deleted successfully, but others could not be deleted. See below for details.|:count accessories were deleted successfully, but others could not be deleted. See below for details.',
+        'bulk_success' => 'アクセサリは正常に削除されました。|:count アクセサリは正常に削除されました。',
+        'partial_success' => ':count個のアクセサリーは正常に削除されましたが、それ以外のものは削除できませんでした。詳細は以下をご覧ください。|:count個のアクセサリーは正常に削除されましたが、それ以外のものは削除できませんでした。詳細は以下をご覧ください。',
     ],
 
     'checkout' => [
@@ -41,4 +41,29 @@ return [
         'user_does_not_exist' => 'その利用者は不正です。もう一度、やり直して下さい。',
     ],
 
+    'restore' => [
+        'error' => 'Accessory was not restored, please try again',
+        'success' => 'Accessory restored successfully.',
+    ],
+
+    'bulk' => [
+        'no_accessories_selected' => 'No accessories were selected.',
+        'no_action_selected' => 'Please pick an action from the dropdown.',
+        'no_fields_updated' => 'フィールドが選択されていないため、更新されませんでした。',
+        'skipped_unauthorized' => ':count accessory(s) were skipped because you do not have permission to update them.',
+
+        'update' => [
+            'success' => ':count accessory was updated.|:count accessories were updated.',
+            'none_updated' => 'The selected accessory could not be updated. See errors below for details.|None of the selected accessories could be updated. See errors below for details.',
+        ],
+
+        'restore' => [
+            'success' => ':count accessory was restored.|:count accessories were restored.',
+        ],
+
+        'checkin_selected' => [
+            'no_rows_selected' => 'No checked-out accessories were selected.',
+            'success' => ':count accessory checkout was returned.|:count accessory checkouts were returned.',
+        ],
+    ],
 ];

@@ -23,19 +23,21 @@ class ContractsController extends Controller
     {
         // Grab all the locations
         $this->authorize('view', Location::class);
+
         // Show the page
         return view('contracts/index');
     }
-
 
     /**
      * Returns a view that invokes the ajax tables which actually contains
      * the content for the contract detail page.
      *
-     * @param int $id
+     * @param  int  $id
      */
     public function show(Contract $contract): View|RedirectResponse
     {
+        $this->authorize('view', Location::class);
+
         $contract = Contract::find($contract->id);
 
         if (isset($contract->id)) {

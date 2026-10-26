@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Helpers\Helper;
 use App\Http\Traits\ConvertsBase64ToFiles;
 use App\Models\SnipeModel;
 use enshrined\svgSanitize\Sanitizer;
@@ -34,11 +35,51 @@ class ImageUploadRequest extends Request
      */
     public function rules()
     {
+        // Dimensions caps run via getimagesize() (header-read only, no raster
+        // decode), so they fire before Image::make() gets to allocate a
+        // decompressed pixel buffer. Without them, a tiny solid-color PNG
+        // with large declared dimensions decodes to many hundreds of
+        // megabytes of RGBA before resize() ever runs. SVGs are hard-skipped
+        // by the dimensions validator - they go through the sanitizer,
+        // not GD/ImageMagick.
+        //
+        // 4096x4096 (16.7MP) caps RGBA raster at ~64MB. Combined with the
+        // resize-target buffer plus GD / Imagick overhead, total peak stays
+        // comfortably under a 256MB worker memory limit. The earlier
+        // 10000x10000 cap was per-axis but the pixel budget (100MP ->
+        // ~400MB raster) could still overrun a worker on a highly-compressed
+        // image that passed the file-size check (reported by Wojciech
+        // Ciemski post-GHSA-2q8x-3vjh-f757 patch).
+        //
+        // Laravel's `max:` rule treats its argument as KIBIBYTES for file
+        // validators, not bytes. file_upload_max_size() returns bytes, so
+        // divide by 1024 and round up before interpolating or the rule is
+        // 1024x too permissive.
+        $max_kib = (int) ceil(Helper::file_upload_max_size() / 1024);
 
         return [
-            'image' => 'mimes:png,gif,jpg,jpeg,svg,bmp,svg+xml,webp,avif',
-            'avatar' => 'mimes:png,gif,jpg,jpeg,svg,bmp,svg+xml,webp,avif',
-            'favicon' => 'mimes:png,gif,jpg,jpeg,svg,bmp,svg+xml,webp,image/x-icon,image/vnd.microsoft.icon,ico',
+            'image' => 'mimes:png,gif,jpg,jpeg,svg,bmp,svg+xml,webp,avif|max:'.$max_kib.'|dimensions:max_width=4096,max_height=4096',
+            'avatar' => 'mimes:png,gif,jpg,jpeg,svg,bmp,svg+xml,webp,avif|max:'.$max_kib.'|dimensions:max_width=4096,max_height=4096',
+            'favicon' => 'mimes:png,gif,jpg,jpeg,svg,bmp,svg+xml,webp,image/x-icon,image/vnd.microsoft.icon,ico|max:'.$max_kib.'|dimensions:max_width=1024,max_height=1024',
+        ];
+    }
+
+    /**
+     * Per-field overrides for the `max:` rule's validation message. The
+     * default Laravel message interpolates the rule argument raw, which
+     * reads as "greater than 2048 kilobytes" with our byte-to-KiB
+     * conversion. Swap in `file_upload_max_size_readable()` output
+     * ("2M", "20M", "2G") so the user-facing message matches the
+     * configured PHP limit without exposing the raw KiB value.
+     */
+    public function messages(): array
+    {
+        $max = Helper::file_upload_max_size_readable();
+
+        return [
+            'image.max' => trans('validation.image_file_too_large', ['max' => $max]),
+            'avatar.max' => trans('validation.image_file_too_large', ['max' => $max]),
+            'favicon.max' => trans('validation.image_file_too_large', ['max' => $max]),
         ];
     }
 
@@ -97,10 +138,10 @@ class ImageUploadRequest extends Request
         $path = trim((string) $path, '/');
         $prefix = $path === '' ? '' : $path.'/';
 
-        if ($path !== '' && ! Storage::disk('public')->exists($path)) {
-            Storage::disk('public')->makeDirectory($path);
-        }
-
+        // No pre-emptive makeDirectory. S3 has no directories to
+        // create (flat namespace), and LocalFilesystemAdapter::write()
+        // calls ensureDirectoryExists() before writing, so the parent
+        // is auto-created on the local disk anyway.
         if ($this->offsetGet($form_fieldname) instanceof UploadedFile) {
             $image = $this->offsetGet($form_fieldname);
         } elseif ($this->hasFile($form_fieldname)) {
@@ -186,20 +227,33 @@ class ImageUploadRequest extends Request
     {
 
         if ($item->{$db_fieldname} != '') {
+            // Absolute http(s) URLs (OAuth-sourced avatars from Google,
+            // Microsoft, Gravatar, etc.) do not point at anything on this
+            // disk and early return.
+            if (preg_match('#^https?://#i', (string) $item->{$db_fieldname}) === 1) {
+                $item->{$db_fieldname} = null;
+
+                return $item;
+            }
+
             try {
                 // Same path normalization as handleImages. Branding callers
                 // pass '' for the disk root, and we don't want to produce a
                 // leading-slash key on S3.
                 $path = trim((string) $path, '/');
-                $key = $path === '' ? $item->{$db_fieldname} : $path.'/'.$item->{$db_fieldname};
+
+                // Defense in depth against a stored value that carries
+                // path traversal (e.g. `../barcodes/target.png`). Every
+                // sanctioned writer of these image columns produces a bare
+                // filename, but a legacy row or a future writer that skips
+                // that step must not reach the delete with a
+                // composable-into-cross-directory key.
+                $filename = basename((string) $item->{$db_fieldname});
+                $key = $path === '' ? $filename : $path.'/'.$filename;
                 $deleted = Storage::disk('public')->delete($key);
 
                 // Only null the model reference if the delete actually
-                // succeeded. Before, the field was cleared unconditionally
-                // even when Storage::delete returned false (silent-fail
-                // mode on the default local disk). The result was a model
-                // row that reported "no image" while the file remained on
-                // disk, orphaned.
+                // succeeded.
                 if ($deleted) {
                     $item->{$db_fieldname} = null;
                 } else {

@@ -106,7 +106,7 @@
                             <x-page-data>
 
                                 <x-data-row :label="trans('general.name')" copy_what="name">
-                                    {{ $user->first_name }} {{ $user->last_name }}
+                                    {{ $user->full_name }}
                                 </x-data-row>
 
                                 <x-data-row :label="trans('admin/users/table.display_name')" copy_what="display_name">
@@ -115,9 +115,9 @@
 
                                 <x-data-row :label="trans('general.username')" copy_what="username">
                                     @if ($user->isSuperUser())
-                                        <span class="label label-danger" data-tooltip="true" title="{{ trans('general.superuser_tooltip') }}"><x-icon type="superadmin" style="padding-right: 5px;"/>{{ $user->username }}</span>
+                                        <span class="label label-danger label-normal" data-tooltip="true" title="{{ trans('general.superuser_tooltip') }}"><x-icon type="superadmin" style="padding-right: 5px;"/>{{ $user->username }}</span>
                                     @elseif ($user->hasAccess('admin'))
-                                        <span class="label label-warning" data-tooltip="true" title="{{ trans('general.admin_tooltip') }}"><x-icon type="superadmin" style="padding-right: 5px;"/>{{ $user->username }}</span>
+                                        <span class="label label-warning label-normal" data-tooltip="true" title="{{ trans('general.admin_tooltip') }}"><x-icon type="superadmin" style="padding-right: 5px;"/>{{ $user->username }}</span>
                                     @else
                                         {{ $user->username }}
                                     @endif
@@ -134,11 +134,7 @@
                                 <x-data-row :label="trans('general.groups')" copy_what="groups">
                                     @if ($user->groups->count() > 0)
                                         @foreach ($user->groups as $group)
-                                            @can('superadmin')
-                                                <a href="{{ route('groups.show', $group->id) }}" class="label label-default">{{ $group->name }}</a>
-                                            @else
-                                                <span class="label label-default">{{ $group->name }}</span>
-                                            @endcan
+                                            {!! $group->present()->formattedNameLink() !!}
                                         @endforeach
                                     @endif
 
@@ -149,11 +145,11 @@
 
                                 <x-data-row :label="trans('general.permissions')">
                                     @if ($user->isSuperUser())
-                                        <span class="label label-danger" data-tooltip="true" title="{{ trans('general.superuser_tooltip') }}">
+                                        <span class="label label-danger label-normal" data-tooltip="true" title="{{ trans('general.superuser_tooltip') }}">
                                             <x-icon type="superadmin" style="padding-right: 5px;"/>{{ trans('general.superuser') }}
                                         </span>
                                     @elseif ($user->hasAccess('admin'))
-                                        <span class="label label-warning" data-tooltip="true" title="{{ trans('general.admin_tooltip') }}">
+                                        <span class="label label-warning label-normal" data-tooltip="true" title="{{ trans('general.admin_tooltip') }}">
                                             <x-icon type="superadmin" style="padding-right: 5px;"/>{{ trans('general.admin_user') }}
                                         </span>
                                     @elseif (!empty($effectivePermissionsBySection))
@@ -327,93 +323,37 @@
 
                     <x-tabs.pane name="licenses" :count="$user->licenses()->count()">
 
-                        @can('checkin', \App\Models\License::class)
                         <x-slot:table_header>{{ trans('general.licenses') }}</x-slot:table_header>
+
+                        @can('checkin', \App\Models\License::class)
                         <x-slot:bulkactions>
-                            <div class="hidden-print" style="padding-top:10px; min-width:400px;">
-                                <form method="POST" action="{{ route('licenses.bulkcheckin.selected') }}" id="userLicenseBulkCheckinForm" class="form-inline">
-                                    @csrf
-                                    <label for="userLicenseBulkActions"><span class="sr-only">{{ trans('button.bulk_actions') }}</span></label>
-                                    <select name="bulk_actions" id="userLicenseBulkActions" class="form-control select2" style="min-width:350px;">
-                                        <option value="checkin">{{ trans('general.checkin') }}</option>
-                                    </select>
-                                    <button type="submit" id="userLicenseBulkCheckinButton" class="btn btn-theme" disabled>{{ trans('button.go') }}</button>
-                                    <span id="userLicenseBulkCheckinCount" style="display:none; margin-left:8px; line-height:34px;">&mdash; <span class="badge">0</span> {{ trans('general.selected') }}</span>
-                                </form>
-                            </div>
+                            <x-table.bulk-actions
+                                name="userLicenseTable"
+                                :action_route="route('licenses.bulkcheckin.show')"
+                                model_name="license_seats"
+                                :actions="[
+                                    'checkin' => ['label' => trans('general.checkin')],
+                                ]"
+                            />
                         </x-slot:bulkactions>
                         @endcan
 
                         @can('view', \App\Models\License::class)
-                        <table
-                            data-cookie-id-table="userLicenseTable"
-                            data-id-table="userLicenseTable"
-                            id="userLicenseTable"
-                            data-buttons="licenseButtons"
-                            data-side-pagination="client"
-                            data-show-footer="true"
-                            data-sort-name="name"
-                            class="table table-striped snipe-table table-hover"
-                            data-export-options='{
-                    "fileName": "export-license-{{ str_slug($user->username) }}-{{ date('Y-m-d') }}",
-                    "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","delete","download","icon"]
-                    }'>
-
-                            <thead>
-                                <tr>
-                                    @can('checkin', \App\Models\License::class)
-                                        <th scope="col" class="hidden-print">{{ trans('general.id') }}</th>
-                                    @endcan
-                                    <th scope="col">{{ trans('general.name') }}</th>
-                                    <th scope="col">{{ trans('admin/licenses/form.license_key') }}</th>
-                                    <th scope="col" data-footer-formatter="sumFormatter" data-fieldname="purchase_cost">{{ trans('general.purchase_cost') }}</th>
-                                    <th scope="col">{{ trans('admin/licenses/form.purchase_order') }}</th>
-                                    <th scope="col">{{ trans('general.order_number') }}</th>
-                                    <th scope="col" class="col-md-1 hidden-print">{{ trans('general.action') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($user->licenses as $license)
-                                    <tr>
-                                        @can('checkin', \App\Models\License::class)
-                                        <td class="hidden-print">
-                                            <input type="checkbox" class="user-license-seat-checkbox hidden-print" form="userLicenseBulkCheckinForm" name="ids[]" value="{{ $license->pivot->id }}">
-                                        </td>
-                                        @endcan
-                                        <td class="col-md-4">
-                                            {!! $license->present()->nameUrl() !!}
-                                        </td>
-                                        <td class="col-md-4">
-                                            @can('viewKeys', $license)
-                                                <code class="single-line"><span class="js-copy-link" data-clipboard-target=".js-copy-key-{{ $license->id }}" aria-hidden="true" data-tooltip="true" data-placement="top" title="{{ trans('general.copy_to_clipboard') }}"><span class="js-copy-key-{{ $license->id }}">{{ $license->serial }}</span></span></code>
-                                            @else
-                                                ------------
-                                            @endcan
-                                        </td>
-                                        <td class="col-md-2">
-                                            {{ Helper::formatCurrencyOutput($license->purchase_cost) }}
-                                        </td>
-                                        <td>
-                                            {{ $license->purchase_order }}
-                                        </td>
-                                        <td>
-                                            {{ $license->order_number }}
-                                        </td>
-                                        <td class="hidden-print col-md-2">
-                                            @can('update', $license)
-                                                <a href="{{ route('licenses.checkin', $license->pivot->id, ['backto'=>'user']) }}" class="btn bg-purple btn-sm hidden-print">{{ trans('general.checkin') }}</a>
-                                            @endcan
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                        <x-table
+                            name="userLicenseTable"
+                            show_column_search="false"
+                            show_footer="true"
+                            buttons="licenseButtons"
+                            api_url="{{ route('api.users.licenselist', ['user' => $user->id]) }}"
+                            :presenter="\App\Presenters\UserPresenter::licensesDataTableLayout()"
+                            export_filename="export-license-{{ str_slug($user->username) }}-{{ date('Y-m-d') }}"
+                        />
                         @endcan
 
                     </x-tabs.pane>
 
                     <x-tabs.pane name="assets" :count="$user->assets()->AssetsForShow()->count()">
-                        <x-table.assets :route="route('api.assets.index',['assigned_to' => e($user->id), 'assigned_type' => 'App\Models\User'])"/>
+                        <x-table.assets name="userAssets" :route="route('api.assets.index',['assigned_to' => e($user->id), 'assigned_type' => 'App\Models\User'])"/>
                     </x-tabs.pane>
 
                     <x-tabs.pane name="accessories" :count="$user->accessories()->count()">
@@ -422,47 +362,15 @@
                         </x-slot:table_header>
 
                         @can('view', \App\Models\Accessory::class)
-                        <table
-                            data-cookie-id-table="userAccessoryTable"
-                            data-id-table="userAccessoryTable"
-                            id="userAccessoryTable"
-                            data-buttons="accessoryButtons"
-                            data-side-pagination="client"
-                            data-sort-name="name"
-                            class="table table-striped snipe-table table-hover"
-                            data-export-options='{
-                    "fileName": "export-accessory-{{ str_slug($user->username) }}-{{ date('Y-m-d') }}",
-                    "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","delete","download","icon"]
-                    }'>
-                            <thead>
-                                <tr>
-                                    <th scope="col">{{ trans('general.id') }}</th>
-                                    <th scope="col">{{ trans('general.name') }}</th>
-                                    <th scope="col">{{ trans('general.date') }}</th>
-                                    <th scope="col" data-fieldname="note">{{ trans('general.notes') }}</th>
-                                    <th scope="col" data-footer-formatter="sumFormatter" data-fieldname="purchase_cost">{{ trans('general.unit_cost') }}</th>
-                                    <th scope="col" class="hidden-print">{{ trans('general.action') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($user->accessories as $accessory)
-                                    <tr>
-                                        <td>{{ $accessory->pivot->id }}</td>
-                                        <td>{!! $accessory->present()->nameUrl() !!}</td>
-                                        <td>{{ Helper::getFormattedDateObject($accessory->pivot->created_at, 'datetime',  false) }}</td>
-                                        <td>{{ $accessory->pivot->note }}</td>
-                                        <td>
-                                            {!! Helper::formatCurrencyOutput($accessory->lastOrderDefaults()['unit_cost'] ?? null) !!}
-                                        </td>
-                                        <td class="hidden-print">
-                                            @can('checkin', $accessory)
-                                                <a href="{{ route('accessories.checkin.show', array('accessoryID'=> $accessory->pivot->id, 'backto'=>'user')) }}" class="btn bg-purple btn-sm hidden-print">{{ trans('general.checkin') }}</a>
-                                            @endcan
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                        <x-table
+                            name="userAccessoryTable"
+                            show_column_search="false"
+                            show_footer="true"
+                            buttons="accessoryButtons"
+                            api_url="{{ route('api.users.accessorieslist', ['user' => $user->id]) }}"
+                            :presenter="\App\Presenters\UserPresenter::accessoriesDataTableLayout()"
+                            export_filename="export-accessory-{{ str_slug($user->username) }}-{{ date('Y-m-d') }}"
+                        />
                         @endcan
 
                     </x-tabs.pane>
@@ -485,6 +393,15 @@
                     "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","delete","download","icon"]
                     }'>
                         </table>
+                        <x-table
+                            name="userConsumedConsumableTable"
+                            show_column_search="false"
+                            show_footer="true"
+                            buttons="consumableButtons"
+                            api_url="{{ route('api.users.consumableslist', ['user' => $user->id]) }}"
+                            :presenter="\App\Presenters\UserPresenter::consumablesDataTableLayout()"
+                            export_filename="export-consumable-{{ str_slug($user->username) }}-{{ date('Y-m-d') }}"
+                        />
                         @endcan
 
                     </x-tabs.pane>
@@ -494,7 +411,7 @@
                          closed; the tab badge only counts the open ones
                          (see assignedMaintenances()->active() above). --}}
                     <x-tabs.pane name="maintenances" :count="$user->assignedMaintenances()->count()">
-                        <x-table.maintenances
+                        <x-table.maintenances name="userMaintenances"
                             :route="route('api.maintenances.index', ['checked_out_to_id' => $user->id, 'checked_out_to_type' => \App\Models\User::class])"
                             export_filename="export-maintenances-{{ str_slug($user->username) }}-{{ date('Y-m-d') }}"
                         />
@@ -580,7 +497,7 @@
 
                     <!-- start history tab pane -->
                     <x-tabs.pane name="history">
-                        <x-table.history :model="$user" :route="route('api.users.history', $user)" :hide_fields="['order_number']"/>
+                        <x-table.history name="userHistory" :model="$user" :route="route('api.users.history', $user)" :hide_fields="['order_number']"/>
                     </x-tabs.pane>
                     <!-- end history tab pane -->
                 </x-slot:tabpanes>
@@ -686,23 +603,6 @@ $(function () {
         document.cookie = "optional_info_open="+optional_info_open+'; path=/';
     });
 
-    $(document).on('change', '.user-license-seat-checkbox', function () {
-        var count = $('.user-license-seat-checkbox:checked').length;
-        $('#userLicenseBulkCheckinButton').prop('disabled', count === 0);
-        $('#userLicenseBulkCheckinCount .badge').text(count);
-        if (count > 0) {
-            $('#userLicenseBulkCheckinCount').show();
-        } else {
-            $('#userLicenseBulkCheckinCount').hide();
-        }
-        var total = $('.user-license-seat-checkbox').length;
-        $('#userLicenseSelectAll').prop('indeterminate', count > 0 && count < total);
-        $('#userLicenseSelectAll').prop('checked', count === total);
-    });
-
-    $(document).on('change', '#userLicenseSelectAll', function () {
-        $('.user-license-seat-checkbox').prop('checked', $(this).is(':checked')).trigger('change');
-    });
 });
 </script>
 

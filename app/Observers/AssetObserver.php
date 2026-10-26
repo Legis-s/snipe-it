@@ -4,11 +4,14 @@ namespace App\Observers;
 
 use App\Models\Actionlog;
 use App\Models\Asset;
-use App\Models\Purchase;
+use App\Models\CalendarEvent;
+use App\Models\CheckoutRequest;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Purchase;
 use App\Models\Setting;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class AssetObserver
 {
@@ -79,7 +82,7 @@ class AssetObserver
         }
 
         $purchase = $asset->purchase;
-        if ($purchase != null && $purchase->status != Purchase::FINISHED){
+        if ($purchase != null && $purchase->status != Purchase::FINISHED) {
             $purchase->checkStatus($asset);
             $purchase->save();
         }
@@ -101,22 +104,30 @@ class AssetObserver
             // IF - auto_increment_assets is on, AND (there is no prefix OR the prefix matches the start of the tag)
             //      AND the rest of the string after the prefix is all digits, THEN...
             if ($settings->auto_increment_assets && ($prefix == '' || strpos($tag, $prefix) === 0) && preg_match('/\d+/', $number) === 1) {
-                // new way of auto-trueing-up auto_increment ID's
+                // intval() rather than cast because $number could be '01234'
+                // which would otherwise be read as octal
                 $next_asset_tag = intval($number, 10) + 1;
-                // we had to use 'intval' because the $number could be '01234' and
-                // might get interpreted in Octal instead of decimal
 
-                // only modify the 'next' one if it's *bigger* than the stored base
-                //
-                if ($next_asset_tag > $settings->next_auto_tag_base && $next_asset_tag < PHP_INT_MAX) {
-                    $settings->next_auto_tag_base = $next_asset_tag;
-                    $settings->save();
+                // Server-side UPDATE so two concurrent asset
+                // creates can't clobber each other's catch-up write. If another
+                // request already pushed next_auto_tag_base past our
+                // value between our read and save, the update matches
+                // zero rows and we leave their (higher) value in place.
+                // PHP_INT_MAX guard matches the pre-#19744 behavior so an
+                // asset tag at the ceiling can't push the base to a value
+                // that overflows on the next bump.
+                if ($next_asset_tag < PHP_INT_MAX) {
+                    Setting::where('id', $settings->id)
+                        ->where('next_auto_tag_base', '<', $next_asset_tag)
+                        ->update(['next_auto_tag_base' => $next_asset_tag]);
+                    // Resync the in-process $_cache from the DB so callers
+                    // in this request see the authoritative value, whether
+                    // the winner was us or a concurrent writer.
+                    $settings->refresh();
                 }
-
             } else {
-                // legacy method
+                // Legacy method.
                 $settings->increment('next_auto_tag_base');
-                $settings->save();
             }
         }
 
@@ -281,6 +292,17 @@ class AssetObserver
         $logAction->action_date = date('Y-m-d H:i:s');
         $logAction->created_by = auth()->id();
         $logAction->logaction('delete');
+
+        $this->reservationCalendarEventsFor($asset)
+            ->whereNull('deleted_at')
+            ->delete();
+
+        // Sync-adapter identity rows would otherwise become orphans
+        // that violate the unique(source, external_id) constraint on
+        // the next sync run when the vendor keeps reporting the same
+        // host. If the admin later restores the asset the link is gone,
+        // and the next sync creates a fresh identity for it.
+        DB::table('asset_external_sources')->where('asset_id', $asset->id)->delete();
     }
 
     /**
@@ -297,6 +319,10 @@ class AssetObserver
         $logAction->created_at = date('Y-m-d H:i:s');
         $logAction->created_by = auth()->id();
         $logAction->logaction('restore');
+
+        $this->reservationCalendarEventsFor($asset)
+            ->whereNotNull('deleted_at')
+            ->restore();
     }
 
     /**
@@ -335,5 +361,18 @@ class AssetObserver
         if ((! is_null($asset->asset_eol_date)) && (! is_null($asset->purchase_date)) && (is_null($asset->model?->eol) || ($asset->model?->eol == 0))) {
             $asset->eol_explicit = true;
         }
+    }
+
+    private function reservationCalendarEventsFor(Asset $asset)
+    {
+        $requestIds = CheckoutRequest::withTrashed()
+            ->where('requestable_type', Asset::class)
+            ->where('requestable_id', $asset->id)
+            ->pluck('id');
+
+        return CalendarEvent::withTrashed()
+            ->where('source_type', CheckoutRequest::class)
+            ->whereIn('source_id', $requestIds)
+            ->where('event_type', 'request.reservation');
     }
 }

@@ -740,4 +740,34 @@ class CompanyHierarchyTest extends TestCase
 
         $this->assertNull($child->fresh()->parent_id);
     }
+
+    // Soft-deleted children still counted against
+    // isDeletable(), blocking parent deletion after a child was removed.
+    public function test_soft_deleted_child_does_not_block_parent_deletion()
+    {
+        // isDeletable() calls Gate::allows('delete', ...) so we need an
+        // authenticated superuser for the gate to pass through to the
+        // children-count check the regression pins.
+        $this->actingAs(User::factory()->superuser()->create());
+
+        $parent = Company::factory()->create();
+        $child = Company::factory()->create(['parent_id' => $parent->id]);
+
+        $this->assertFalse($parent->fresh()->isDeletable(), 'Parent with an active child should not be deletable.');
+
+        $child->delete();
+
+        $this->assertSame(0, $parent->fresh()->children()->count(), 'Soft-deleted children must not show up in ->children().');
+        $this->assertTrue($parent->fresh()->isDeletable(), 'Parent should be deletable once its only child is soft-deleted.');
+    }
+
+    public function test_soft_deleted_parent_is_not_returned_on_children_parent_relation()
+    {
+        $parent = Company::factory()->create();
+        $child = Company::factory()->create(['parent_id' => $parent->id]);
+
+        $parent->delete();
+
+        $this->assertNull($child->fresh()->parent, 'A soft-deleted parent should not surface via ->parent on its child.');
+    }
 }

@@ -9,11 +9,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\DeleteUserRequest;
 use App\Http\Requests\FilterRequest;
 use App\Http\Requests\SaveUserRequest;
-use App\Http\Transformers\AccessoriesTransformer;
 use App\Http\Transformers\ActionlogsTransformer;
 use App\Http\Transformers\AssetsTransformer;
-use App\Http\Transformers\ConsumablesTransformer;
-use App\Http\Transformers\LicensesTransformer;
 use App\Http\Transformers\SelectlistTransformer;
 use App\Http\Transformers\UsersTransformer;
 use App\Models\Accessory;
@@ -30,6 +27,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -305,6 +303,30 @@ class UsersController extends Controller
             $users = $users->where('users.end_date', '=', $request->input('end_date'));
         }
 
+        if ($request->filled('end_date_within')) {
+            // Window filter for the dashboard's offboarding tile. Range
+            // comparison instead of whereDate so the index on
+            // users.end_date (added in the 2026_08_14_170000 migration)
+            // can actually be used.
+            $days = (int) $request->input('end_date_within');
+            $users = $users->whereBetween('users.end_date', [
+                now()->startOfDay(),
+                now()->addDays($days)->endOfDay(),
+            ]);
+        }
+
+        if ($request->boolean('with_assignments')) {
+            // Narrow to users who still hold at least one assigned
+            // item. Matches the NeedsAttention widget's offboarding
+            // count so the tile's click-through lands on the same set.
+            $users = $users->where(function ($query) {
+                $query->has('assets')
+                    ->orHas('licenses')
+                    ->orHas('accessories')
+                    ->orHas('consumables');
+            });
+        }
+
         if ($request->filled('assets_count')) {
             $users->has('assets', '=', $request->input('assets_count'));
         }
@@ -448,7 +470,20 @@ class UsersController extends Controller
         }
 
         $users = $users->orderBy('display_name', 'asc')->orderBy('last_name', 'asc')->orderBy('first_name', 'asc');
-        $users = $users->paginate(50);
+
+        // ?all=1 opts into the single-page response the select2-checkboxes-scrollbox /
+        // select2-checkboxes pickers use for Select All. Capped by
+        // config('app.max_unpaginated_records'), bounded further by any
+        // ?cap=N the client sends (never higher than the config value).
+        if (request()->boolean('all')) {
+            $serverCap = (int) config('app.max_unpaginated_records', 5000);
+            $clientCap = (int) request()->integer('cap', PHP_INT_MAX);
+            $cap = $clientCap > 0 ? min($serverCap, $clientCap) : $serverCap;
+            $perPage = max($cap, 1);
+            $users = $users->paginate($perPage);
+        } else {
+            $users = $users->paginate(50);
+        }
 
         foreach ($users as $user) {
             $name_str = $user->display_name;
@@ -612,7 +647,6 @@ class UsersController extends Controller
      * @since [v4.0]
      *
      * @param  Request  $request
-     * @param  int  $id
      */
     public function update(SaveUserRequest $request, User $user): JsonResponse
     {
@@ -688,7 +722,6 @@ class UsersController extends Controller
             'remember_token',
             'two_factor_secret',
             'two_factor_enrolled',
-            'two_factor_optin',
         ])));
 
         if ($canEditAuthFields) {
@@ -895,13 +928,12 @@ class UsersController extends Controller
     }
 
     /**
-     * Return JSON containing a list of consumables assigned to a user.
+     * Return JSON containing a paginated list of consumable checkouts
+     * assigned to a user. One row per consumables_users pivot entry.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
      *
      * @since [v3.0]
-     *
-     * @param  $userId
      */
     public function consumables(Request $request, $id): array
     {
@@ -909,19 +941,44 @@ class UsersController extends Controller
         $this->authorize('view', Consumable::class);
         $user = User::findOrFail($id);
         $this->authorize('view', $user);
-        $consumables = $user->consumables;
 
-        return (new ConsumablesTransformer)->transformConsumables($consumables, $consumables->count(), $request);
+        $query = $user->consumables();
+
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('consumables.name', 'like', "%{$search}%")
+                    ->orWhere('consumables_users.note', 'like', "%{$search}%");
+            });
+        }
+
+        $total = $query->count();
+        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
+        $limit = app('api_limit_value');
+
+        $sortColumn = $request->input('sort') === 'name'
+            ? 'consumables.name'
+            : 'consumables_users.created_at';
+        $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
+
+        $consumables = $query
+            ->orderBy($sortColumn, $order)
+            ->skip($offset)
+            ->take($limit)
+            ->get();
+
+        $unitCostsById = Consumable::lastUnitCostsFor($consumables);
+
+        return (new UsersTransformer)
+            ->transformUserConsumables($consumables, $unitCostsById, $total);
     }
 
     /**
-     * Return JSON containing a list of accessories assigned to a user.
+     * Return JSON containing a paginated list of accessory checkouts
+     * assigned to a user. One row per accessories_checkout pivot entry.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
      *
      * @since [v4.6.14]
-     *
-     * @param  $userId
      */
     public function accessories(Request $request, $id): array
     {
@@ -930,25 +987,43 @@ class UsersController extends Controller
         $this->authorize('view', $user);
         $this->authorize('view', Accessory::class);
 
-        $accessories = $user->accessories();
+        $query = $user->accessories();
 
-        $total = $accessories->count();
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('accessories.name', 'like', "%{$search}%")
+                    ->orWhere('accessories_checkout.note', 'like', "%{$search}%");
+            });
+        }
+
+        $total = $query->count();
         $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
 
-        $accessories = $accessories->skip($offset)->take($limit)->get();
+        $sortColumn = $request->input('sort') === 'name'
+            ? 'accessories.name'
+            : 'accessories_checkout.created_at';
+        $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
 
-        return (new AccessoriesTransformer)->transformAccessories($accessories, $total);
+        $accessories = $query
+            ->reorder($sortColumn, $order)
+            ->skip($offset)
+            ->take($limit)
+            ->get();
+
+        $unitCostsById = Accessory::lastUnitCostsFor($accessories);
+
+        return (new UsersTransformer)
+            ->transformUserAccessories($accessories, $unitCostsById, $total);
     }
 
     /**
-     * Return JSON containing a list of licenses assigned to a user.
+     * Return JSON containing a paginated list of license seat
+     * assignments for a user. One row per license_seats pivot entry.
      *
      * @author [N. Mathar] [<snipe@snipe.net>]
      *
      * @since [v5.0]
-     *
-     * @param  $userId
      */
     public function licenses(Request $request, $id): JsonResponse|array
     {
@@ -957,15 +1032,37 @@ class UsersController extends Controller
 
         if ($user = User::where('id', $id)->withTrashed()->first()) {
             $this->authorize('view', $user);
-            $licenses = $user->licenses();
 
-            $total = $licenses->count();
+            $query = $user->licenses();
+
+            if ($search = $request->input('search')) {
+                $canViewKeys = Gate::allows('viewKeys', License::class);
+                $query->where(function ($q) use ($search, $canViewKeys) {
+                    $q->where('licenses.name', 'like', "%{$search}%")
+                        ->orWhere('licenses.purchase_order', 'like', "%{$search}%")
+                        ->orWhere('licenses.order_number', 'like', "%{$search}%");
+                    if ($canViewKeys) {
+                        $q->orWhere('licenses.serial', 'like', "%{$search}%");
+                    }
+                });
+            }
+
+            $total = $query->count();
             $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
             $limit = app('api_limit_value');
 
-            $licenses = $licenses->skip($offset)->take($limit)->get();
+            $sortColumn = $request->input('sort') === 'created_at'
+                ? 'license_seats.created_at'
+                : 'licenses.name';
+            $order = $request->input('order') === 'desc' ? 'desc' : 'asc';
 
-            return (new LicensesTransformer)->transformLicenses($licenses, $total);
+            $licenses = $query
+                ->orderBy($sortColumn, $order)
+                ->skip($offset)
+                ->take($limit)
+                ->get();
+
+            return (new UsersTransformer)->transformUserLicenses($licenses, $total);
         }
 
         return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/users/message.user_not_found', compact('id'))));

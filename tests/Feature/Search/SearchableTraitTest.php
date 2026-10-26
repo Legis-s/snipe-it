@@ -846,6 +846,42 @@ class SearchableTraitTest extends TestCase
     }
 
     /**
+     * Regression coverage for GH #19708: `is:not_null` on a DATE column
+     * previously returned zero rows because the applyNullFilter added a
+     * `!= ''` check that MySQL evaluates as UNKNOWN against DATE columns
+     * in strict mode, excluding every row.
+     */
+    public function test_is_null_filter_on_date_column()
+    {
+        // AssetFactory's afterMaking hook overwrites asset_eol_date, so set it after create.
+        $withEol = Asset::factory()->create();
+        $withEol->asset_eol_date = now()->addYear()->format('Y-m-d');
+        $withEol->save();
+
+        $withoutEol = Asset::factory()->create();
+        $withoutEol->asset_eol_date = null;
+        $withoutEol->save();
+
+        $superuser = User::factory()->viewAssets()->create();
+
+        $notNull = $this->actingAsForApi($superuser)
+            ->getJson(route('api.assets.index', ['filter' => json_encode(['asset_eol_date' => 'is:not_null'])]))
+            ->assertOk();
+
+        $notNullIds = collect($notNull->json('rows'))->pluck('id')->map(fn ($id) => (int) $id)->all();
+        $this->assertContains((int) $withEol->id, $notNullIds);
+        $this->assertNotContains((int) $withoutEol->id, $notNullIds);
+
+        $isNull = $this->actingAsForApi($superuser)
+            ->getJson(route('api.assets.index', ['filter' => json_encode(['asset_eol_date' => 'is:null'])]))
+            ->assertOk();
+
+        $isNullIds = collect($isNull->json('rows'))->pluck('id')->map(fn ($id) => (int) $id)->all();
+        $this->assertContains((int) $withoutEol->id, $isNullIds);
+        $this->assertNotContains((int) $withEol->id, $isNullIds);
+    }
+
+    /**
      * "is:not_null" on the User virtual "name" column should match users where
      * at least one constituent column (first_name, last_name) is not null.
      * All factory-created users have a first_name, so they should all appear.
@@ -944,6 +980,107 @@ class SearchableTraitTest extends TestCase
 
         $this->assertContains((int) $assignedAsset->id, $returnedNotNullIds);
         $this->assertNotContains((int) $unassignedAsset->id, $returnedNotNullIds);
+    }
+
+    /**
+     * Regression coverage for the follow-up half of #19708. The "Title"
+     * column on the hardware list renders users.jobtitle via the
+     * assignedTo polymorphic morph, but the trait had no plumbing for
+     * "column on a related table surfaced as a top-level filter key",
+     * so is:null / is:not_null (and plain LIKE) silently dropped the
+     * filter and returned every row. The fix routes `jobtitle` through
+     * whereHasMorph on assignedTo so all three operators work the way
+     * the UI implies.
+     */
+    public function test_jobtitle_filter_matches_assigned_user_jobtitle()
+    {
+        $ts = now()->timestamp;
+
+        $engineer = User::factory()->create(['jobtitle' => 'Site Engineer '.$ts]);
+        $designer = User::factory()->create(['jobtitle' => 'Senior Designer '.$ts]);
+
+        $engineerAsset = Asset::factory()->assignedToUser($engineer)->create();
+        $designerAsset = Asset::factory()->assignedToUser($designer)->create();
+
+        $superuser = User::factory()->viewAssets()->create();
+
+        $response = $this->actingAsForApi($superuser)
+            ->getJson(route('api.assets.index', ['filter' => json_encode(['jobtitle' => 'Engineer'])]))
+            ->assertOk();
+
+        $returnedIds = collect($response->json('rows'))->pluck('id')->map(fn ($id) => (int) $id)->all();
+
+        $this->assertContains((int) $engineerAsset->id, $returnedIds);
+        $this->assertNotContains((int) $designerAsset->id, $returnedIds);
+    }
+
+    public function test_is_not_null_filter_on_jobtitle_relation_column_matches_assets_with_titled_assignee()
+    {
+        $ts = now()->timestamp;
+
+        $withTitle = User::factory()->create(['jobtitle' => 'VP Operations '.$ts]);
+        $withoutTitle = User::factory()->create(['jobtitle' => null]);
+        $withEmptyTitle = User::factory()->create(['jobtitle' => '']);
+
+        $titledAsset = Asset::factory()->assignedToUser($withTitle)->create();
+        $nullTitleAsset = Asset::factory()->assignedToUser($withoutTitle)->create();
+        $emptyTitleAsset = Asset::factory()->assignedToUser($withEmptyTitle)->create();
+        $unassignedAsset = Asset::factory()->create([
+            'assigned_to' => null,
+            'assigned_type' => null,
+        ]);
+
+        $superuser = User::factory()->viewAssets()->create();
+
+        $response = $this->actingAsForApi($superuser)
+            ->getJson(route('api.assets.index', ['filter' => json_encode(['jobtitle' => 'is:not_null'])]))
+            ->assertOk();
+
+        $returnedIds = collect($response->json('rows'))->pluck('id')->map(fn ($id) => (int) $id)->all();
+
+        $this->assertContains((int) $titledAsset->id, $returnedIds);
+        $this->assertNotContains(
+            (int) $nullTitleAsset->id,
+            $returnedIds,
+            'Assignee with a NULL jobtitle must not surface as "has title".'
+        );
+        $this->assertNotContains(
+            (int) $emptyTitleAsset->id,
+            $returnedIds,
+            'Assignee with an empty-string jobtitle must not surface as "has title", the way admins read the UI column.',
+        );
+        $this->assertNotContains((int) $unassignedAsset->id, $returnedIds);
+    }
+
+    public function test_is_null_filter_on_jobtitle_relation_column_matches_untitled_and_unassigned()
+    {
+        $ts = now()->timestamp;
+
+        $withTitle = User::factory()->create(['jobtitle' => 'Director of Something '.$ts]);
+        $withoutTitle = User::factory()->create(['jobtitle' => null]);
+
+        $titledAsset = Asset::factory()->assignedToUser($withTitle)->create();
+        $nullTitleAsset = Asset::factory()->assignedToUser($withoutTitle)->create();
+        $unassignedAsset = Asset::factory()->create([
+            'assigned_to' => null,
+            'assigned_type' => null,
+        ]);
+
+        $superuser = User::factory()->viewAssets()->create();
+
+        $response = $this->actingAsForApi($superuser)
+            ->getJson(route('api.assets.index', ['filter' => json_encode(['jobtitle' => 'is:null'])]))
+            ->assertOk();
+
+        $returnedIds = collect($response->json('rows'))->pluck('id')->map(fn ($id) => (int) $id)->all();
+
+        $this->assertNotContains((int) $titledAsset->id, $returnedIds);
+        $this->assertContains((int) $nullTitleAsset->id, $returnedIds);
+        $this->assertContains(
+            (int) $unassignedAsset->id,
+            $returnedIds,
+            'An asset with no assignee should present as "no title" from the UI column standpoint.',
+        );
     }
 
     /**

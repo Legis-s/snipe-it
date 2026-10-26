@@ -226,7 +226,12 @@ class LocationsController extends Controller
 
         // Parent company check applies whenever FMCS is on, independent of scope_locations_fmcs.
         if (Setting::getSettings()->full_multiple_companies_support) {
-            $parent = $location->parent_id ? Location::find($location->parent_id) : null;
+            // withoutGlobalScopes: Location::CompanyableScope would filter a
+            // cross-tenant parent out for a scoped non-superuser, so find()
+            // would return null and the null check below would short-circuit
+            // the reject branch, letting the parent_id save through. See
+            // ValidationServiceProvider::fmcs_location for the sibling fix.
+            $parent = $location->parent_id ? Location::withoutGlobalScopes()->find($location->parent_id) : null;
             if ($parent && $parent->company_id != $location->company_id) {
                 return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.error_location_parent_company', [
                     'parent' => $parent->name,
@@ -342,7 +347,12 @@ class LocationsController extends Controller
         // Parent company check applies whenever FMCS is on, independent of scope_locations_fmcs.
         // Runs outside the company_id gate so a parent_id-only update is also validated.
         if (Setting::getSettings()->full_multiple_companies_support) {
-            $parent = $location->parent_id ? Location::find($location->parent_id) : null;
+            // withoutGlobalScopes: Location::CompanyableScope would filter a
+            // cross-tenant parent out for a scoped non-superuser, so find()
+            // would return null and the null check below would short-circuit
+            // the reject branch, letting the parent_id save through. See
+            // ValidationServiceProvider::fmcs_location for the sibling fix.
+            $parent = $location->parent_id ? Location::withoutGlobalScopes()->find($location->parent_id) : null;
             if ($parent && $parent->company_id != $location->company_id) {
                 return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.error_location_parent_company', [
                     'parent' => $parent->name,
@@ -468,12 +478,11 @@ class LocationsController extends Controller
      */
     public function selectlist(Request $request): array
     {
-        // If a user is in the process of editing their profile, as determined by the referrer,
-        // then we check that they have permission to edit their own location.
-        // Otherwise, we do our normal check that they can view select lists.
-        $request->headers->get('referer') === route('profile')
-            ? $this->authorize('self.edit_location')
-            : $this->authorize('view.selectlists');
+        
+        abort_unless(
+            auth()->user()?->canAny(['view.selectlists', 'self.edit_location']),
+            403
+        );
 
         $locations = Location::select([
             'locations.id',

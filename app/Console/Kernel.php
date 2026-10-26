@@ -30,6 +30,17 @@ class Kernel extends ConsoleKernel
             $schedule->command('snipeit:sync-bitrix')->everyFiveMinutes()->appendOutputTo(storage_path('logs/sync-bitrix.log'));
             $schedule->command('snipeit:sync-devices')->everyTwoHours()->appendOutputTo(storage_path('logs/sync-mdm.log'));
         }
+
+        $schedule->command('snipeit:pull-inventory')
+            ->daily()
+            ->withoutOverlapping();
+
+        // Push runs a few hours offset from the pull so the two
+        // don't stack on a single Laravel scheduler tick if a slow
+        // adapter's pull runs long.
+        $schedule->command('snipeit:push-inventory')
+            ->dailyAt('03:00')
+            ->withoutOverlapping();
     }
 
     /**

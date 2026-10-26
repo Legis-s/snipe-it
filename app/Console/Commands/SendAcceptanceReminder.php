@@ -2,50 +2,50 @@
 
 namespace App\Console\Commands;
 
-use App\Mail\UnacceptedAssetReminderMail;
 use App\Models\Accessory;
 use App\Models\Asset;
 use App\Models\CheckoutAcceptance;
 use App\Models\Component;
 use App\Models\Consumable;
 use App\Models\LicenseSeat;
-use App\Models\User;
+use App\Notifications\UnacceptedAssetReminderNotification;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+use Symfony\Component\Mailer\Exception\TransportException;
 
 class SendAcceptanceReminder extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'snipeit:acceptance-reminder';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'This will resend users with unaccepted items a reminder to accept or decline them.';
 
-    /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
+    public function handle()
     {
-        parent::__construct();
+        $result = self::dispatchAll();
+
+        $this->info($result['sent'].' users notified.');
+        if ($result['failed'] > 0) {
+            $this->warn($result['failed'].' reminder(s) failed to send due to mail transport errors. See log for details.');
+        }
+
+        if (! empty($result['no_email'])) {
+            $this->info('The following users do not have an email address:');
+            $this->table(['ID', 'Name'], array_map(fn ($u) => [$u['id'], $u['name']], $result['no_email']));
+        }
+
+        return 0;
     }
 
     /**
-     * Execute the console command.
+     * Nudge every assignee who still has a pending acceptance.
+     * Shared between the artisan command and the API's send-all
+     * path so both land in one implementation. Returns a tally so
+     * the API can surface the sent count in its JSON response.
      *
-     * @return mixed
+     * @return array{sent: int, failed: int, no_email: array<int, array{id: ?int, name: ?string}>}
      */
-    public function handle()
+    public static function dispatchAll(): array
     {
         $pending = CheckoutAcceptance::query()
             ->with([
@@ -69,55 +69,45 @@ class SendAcceptanceReminder extends Command
             ->pending()
             ->get();
 
-        $count = 0;
-        $unacceptedAssetGroups = $pending
-            ->map(function ($acceptance) {
-                return ['assetItem' => $acceptance->checkoutable, 'acceptance' => $acceptance];
-            })
-            ->groupBy(function ($item) {
-                return $item['acceptance']->assignedTo ? $item['acceptance']->assignedTo->id : '';
-            });
-        $no_email_list = [];
+        $byAssignee = $pending
+            ->map(fn ($acceptance) => ['assetItem' => $acceptance->checkoutable, 'acceptance' => $acceptance])
+            ->groupBy(fn ($item) => $item['acceptance']->assignedTo ? $item['acceptance']->assignedTo->id : '');
 
-        foreach ($unacceptedAssetGroups as $unacceptedAssetGroup) {
-            // The [0] is weird, but it allows for the item_count to work and grabs the appropriate info for each user.
-            // Collapsing and flattening the collection doesn't work above.
-            $acceptance = $unacceptedAssetGroup[0]['acceptance'];
+        $sent = 0;
+        $failed = 0;
+        $noEmail = [];
 
-            $locale = $acceptance->assignedTo?->locale;
-            $email = $acceptance->assignedTo?->email;
+        foreach ($byAssignee as $group) {
+            // The [0] grab here is intentional. groupBy keeps the
+            // group as a Collection, and we need both one
+            // representative acceptance (header for the mail) and the
+            // group's size (count for the mail). flattening either
+            // way drops one of the two.
+            $acceptance = $group[0]['acceptance'];
+            $user = $acceptance->assignedTo;
 
-            if (! $email) {
-                $no_email_list[] = [
-                    'id' => $acceptance->assignedTo?->id,
-                    'name' => $acceptance->assignedTo?->display_name,
+            if (! $user?->email) {
+                $noEmail[] = [
+                    'id' => $user?->id,
+                    'name' => $user?->display_name,
                 ];
-            } else {
-                $count++;
-            }
-            $item_count = $unacceptedAssetGroup->count();
 
-            if ($locale && $email) {
-                Mail::to($email)->send((new UnacceptedAssetReminderMail($acceptance, $item_count))->locale($locale));
-            } elseif ($email) {
-                Mail::to($email)->send((new UnacceptedAssetReminderMail($acceptance, $item_count)));
+                continue;
             }
 
+            try {
+                $user->notify(new UnacceptedAssetReminderNotification($acceptance, $group->count()));
+                $sent++;
+            } catch (TransportException $e) {
+                $failed++;
+                Log::warning('Failed to send acceptance reminder to '.$user->email.': '.$e->getMessage());
+            }
         }
 
-        $this->info($count.' users notified.');
-        $headers = ['ID', 'Name'];
-        $rows = [];
-
-        foreach ($no_email_list as $user) {
-            $rows[] = [$user['id'], $user['name']];
-        }
-
-        if (! empty($rows)) {
-            $this->info('The following users do not have an email address:');
-            $this->table($headers, $rows);
-        }
-
-        return 0;
+        return [
+            'sent' => $sent,
+            'failed' => $failed,
+            'no_email' => $noEmail,
+        ];
     }
 }

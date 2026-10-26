@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use App\Models\Asset;
 use App\Models\Location;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class LocationTest extends TestCase
@@ -17,9 +18,7 @@ class LocationTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider asset_location_links
-     */
+    #[DataProvider('asset_location_links')]
     public function test_bitrix_hiding_ignores_deleted_assets(string $foreignKey): void
     {
         $location = Location::factory()->create();
@@ -61,6 +60,6 @@ class LocationTest extends TestCase
         ]);
 
         $this->assertFalse($a->isValid());
-        $this->assertStringContainsString(trans('validation.non_circular', ['attribute' => 'parent id']), $a->getErrors());
+        $this->assertContains(trans('validation.non_circular', ['attribute' => 'parent id']), $a->getErrors()->get('parent_id'));
     }
 }

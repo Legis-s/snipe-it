@@ -12,5 +12,6 @@ return [
     'load_error_body' => 'Сервер вернул ошибку. Повторите попытку позже. Если ошибка сохраняется, проверьте журнал приложения.',
     'load_error_http_status' => 'Статус HTTP',
     'load_error_session_expired' => 'Срок действия сеанса истёк. Страница перезагружается.',
+    'shift_select' => 'Click on a checkbox and hold <code>shift</code> and click another checkbox in the table to select/de-select a range.'
 
 ];

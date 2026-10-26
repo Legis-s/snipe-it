@@ -242,11 +242,42 @@ class LdapSettings extends Component
         // Clamp against total step count in case a session pointer
         // was seeded when the wizard had a different step layout.
         $this->highestStepReached = min($this->highestStepReached, 5);
+        
+        if (!$this->ldap_enabled && !$this->isReadOnly) {
+            $this->highestStepReached = min($this->highestStepReached, $this->highestReachableByPersistedData());
+        }
 
         // Clamp URL-restored step to [1, highestStepReached]. Blocks
         // both direct URL tampering (?step=99) and stale bookmarks
         // pointing at a step the user hasn't unlocked yet.
         $this->currentStep = max(1, min($this->currentStep, $this->highestStepReached));
+    }
+
+    /**
+     * Highest step whose required persisted fields are populated.
+     * Used by mount() to cap highestStepReached when the session
+     * pointer is ahead of what the current data actually supports.
+     */
+    protected function highestReachableByPersistedData(): int
+    {
+        // Step 1: requires an LDAP server URL. Without it the
+        // network-test and bind paths have nothing to connect to.
+        if (trim($this->ldap_server) === '') {
+            return 1;
+        }
+
+        // Step 2: requires base DN. Bind credentials themselves can be
+        // blank under SASL EXTERNAL, but a search needs a base DN.
+        if (trim($this->ldap_basedn) === '') {
+            return 2;
+        }
+
+        // Step 3: requires the two always-required mapping fields.
+        if (trim($this->ldap_username_field) === '' || trim($this->ldap_fname_field) === '') {
+            return 3;
+        }
+
+        return 5;
     }
 
     protected function progressSessionKey(): string
@@ -623,11 +654,21 @@ class LdapSettings extends Component
         }
 
         $setting = Setting::getSettings();
-        $setting->ldap_uname = $this->ldap_uname;
-        // Only overwrite the persisted encrypted password when the user
-        // provided a new value. Blank pword = keep-what's-in-DB.
-        if ($this->ldap_pword !== '') {
-            $setting->ldap_pword = Crypt::encrypt($this->ldap_pword);
+
+        // SASL EXTERNAL uses the client cert as the identity, so both
+        // uname and pword must be empty in the persisted state for
+        // Ldap::shouldUseSaslExternal() to route bind attempts through
+        // ldap_sasl_bind().
+        if ($this->isSaslExternalCandidate()) {
+            $setting->ldap_uname = '';
+            $setting->ldap_pword = '';
+        } else {
+            $setting->ldap_uname = $this->ldap_uname;
+            // Only overwrite the persisted encrypted password when the user
+            // provided a new value. Blank pword = keep-what's-in-DB.
+            if ($this->ldap_pword !== '') {
+                $setting->ldap_pword = Crypt::encrypt($this->ldap_pword);
+            }
         }
         $setting->ldap_basedn = $this->ldap_basedn;
         $setting->ldap_filter = $this->ldap_filter;
@@ -640,9 +681,24 @@ class LdapSettings extends Component
         $this->persistAndAdvance($setting);
     }
 
+    /**
+     * Live-form wrapper around Ldap::shouldUseSaslExternal(). The
+     * component is passed as-is because it carries the four properties
+     * the predicate reads. Blade-accessible via #[Computed].
+     */
+    #[Computed]
+    public function isSaslExternalCandidate(): bool
+    {
+        return Ldap::shouldUseSaslExternal($this);
+    }
+
     protected function canAdvanceStep2(): bool
     {
-        if (trim($this->ldap_uname) === '') {
+        // SASL EXTERNAL (auto-detected in bindAdminToLdap when client
+        // cert + key are populated and uname/pword are blank) skips
+        // the empty-uname gate: those fields are meant to be blank on
+        // that path.
+        if (trim($this->ldap_uname) === '' && ! $this->isSaslExternalCandidate()) {
             return false;
         }
         if (trim($this->ldap_basedn) === '') {
@@ -674,9 +730,18 @@ class LdapSettings extends Component
         $normalizeDn = fn ($dn) => strtolower(preg_replace('/\s*,\s*/', ',', trim((string) $dn)));
         $bindDn = $normalizeDn($this->ldap_uname);
 
+        // Auto-detected SASL EXTERNAL (client cert + key populated,
+        // uname/pword blank) uses the TLS cert as the bind identity,
+        // so ldap_uname / ldap_pword are optional on that path.
+        $sasl = $this->isSaslExternalCandidate();
+        $unameRule = $sasl ? ['nullable', 'max:191'] : 'required|max:191';
+        $pwordRule = $sasl
+            ? 'nullable'
+            : \Illuminate\Validation\Rule::when(! $canReusePersisted, 'required');
+
         return [
-            'ldap_uname' => 'required|max:191',
-            'ldap_pword' => \Illuminate\Validation\Rule::when(! $canReusePersisted, 'required'),
+            'ldap_uname' => $unameRule,
+            'ldap_pword' => $pwordRule,
             'ldap_basedn' => [
                 'required',
                 // Guard against the common misconfiguration where the base
@@ -718,6 +783,8 @@ class LdapSettings extends Component
      * search returned at least one entry (zero entries is functionally
      * broken for sync). Any failure surfaces a specific message
      * pointing at the actual problem (bind vs search).
+     *
+     * @SuppressWarnings("PHPMD.ElseExpression")
      */
     protected function runStep2NetworkTest(): void
     {
@@ -732,29 +799,42 @@ class LdapSettings extends Component
             return;
         }
 
-        // Bind, always with credentials (uname required in step2SyntaxRules).
-        // Password resolution: form value if provided, otherwise fall back
-        // to the persisted encrypted password when the username matches.
+        // Bind. SASL EXTERNAL uses the client cert loaded by
+        // openLdapConnectionForTest() (via LDAP_OPT_X_TLS_CERTFILE /
+        // _KEYFILE) as the auth identity, so no username / password
+        // gets passed. Simple bind path resolves the password from the
+        // form value first, otherwise falls back to the persisted
+        // encrypted password when the username matches.
         $settings = Setting::getSettings();
         $server = (string) $settings->ldap_server;
-        $uname = trim($this->ldap_uname);
-        $pword = $this->ldap_pword;
-        if ($pword === '' && $uname === trim((string) $settings->ldap_uname) && $settings->ldap_pword) {
-            try {
-                $pword = Crypt::decrypt($settings->ldap_pword);
-            } catch (\Exception $e) {
-                @ldap_unbind($conn);
-                $this->recordTestResult(
-                    'error',
-                    trans('admin/settings/general.ldap_wizard.bind.pword_decrypt_failed'),
-                    'ldap bind test',
-                );
 
-                return;
+        if ($this->isSaslExternalCandidate()) {
+            // Success message uses $uname for the "Bound as ..."
+            // interpolation. Under SASL EXTERNAL there is no bind
+            // username, the client cert is the identity, so surface
+            // that instead of leaving $uname undefined.
+            $uname = trans('admin/settings/general.ldap_wizard.bind.sasl_external_identity');
+            $bindOk = @ldap_sasl_bind($conn, null, null, 'EXTERNAL');
+        } else {
+            $uname = trim($this->ldap_uname);
+            $pword = $this->ldap_pword;
+            if ($pword === '' && $uname === trim((string) $settings->ldap_uname) && $settings->ldap_pword) {
+                try {
+                    $pword = Crypt::decrypt($settings->ldap_pword);
+                } catch (\Exception $e) {
+                    @ldap_unbind($conn);
+                    $this->recordTestResult(
+                        'error',
+                        trans('admin/settings/general.ldap_wizard.bind.pword_decrypt_failed'),
+                        'ldap bind test',
+                    );
+
+                    return;
+                }
             }
-        }
 
-        $bindOk = @ldap_bind($conn, $uname, $pword);
+            $bindOk = @ldap_bind($conn, $uname, $pword);
+        }
         if (! $bindOk) {
             $errno = ldap_errno($conn);
             $ldapError = Ldap::bindError($conn);
@@ -836,25 +916,33 @@ class LdapSettings extends Component
         // that's an optional sanity check the user runs on demand to make sure
         // their syncs will look right and map all of the right fields, not
         // a network gate we run for them. Save + advance to step 5.
+        // Blank optional mapping fields persist as NULL, not ''.
+        // The legacy LDAP form (ConvertEmptyStringsToNull on the HTTP
+        // middleware stack) already stored blanks as null, so this
+        // matches legacy behavior and prevents wizard-stored blanks from
+        // tripping downstream `is_null()` / `=== null` gates like the
+        // AD useraccountcontrol fetch in LdapSync (issue #19789).
+        // ldap_username_field + ldap_fname_field are required by
+        // step3SyntaxRules() so they always carry a value.
         $setting = Setting::getSettings();
         $setting->ldap_username_field = $this->ldap_username_field;
         $setting->ldap_fname_field = $this->ldap_fname_field;
-        $setting->ldap_lname_field = $this->ldap_lname_field;
-        $setting->ldap_display_name = $this->ldap_display_name;
-        $setting->ldap_email = $this->ldap_email;
-        $setting->ldap_emp_num = $this->ldap_emp_num;
-        $setting->ldap_phone_field = $this->ldap_phone_field;
-        $setting->ldap_mobile = $this->ldap_mobile;
-        $setting->ldap_jobtitle = $this->ldap_jobtitle;
-        $setting->ldap_manager = $this->ldap_manager;
-        $setting->ldap_dept = $this->ldap_dept;
-        $setting->ldap_address = $this->ldap_address;
-        $setting->ldap_city = $this->ldap_city;
-        $setting->ldap_state = $this->ldap_state;
-        $setting->ldap_zip = $this->ldap_zip;
-        $setting->ldap_country = $this->ldap_country;
-        $setting->ldap_location = $this->ldap_location;
-        $setting->ldap_active_flag = $this->ldap_active_flag;
+        $setting->ldap_lname_field = trim($this->ldap_lname_field) ?: null;
+        $setting->ldap_display_name = trim($this->ldap_display_name) ?: null;
+        $setting->ldap_email = trim($this->ldap_email) ?: null;
+        $setting->ldap_emp_num = trim($this->ldap_emp_num) ?: null;
+        $setting->ldap_phone_field = trim($this->ldap_phone_field) ?: null;
+        $setting->ldap_mobile = trim($this->ldap_mobile) ?: null;
+        $setting->ldap_jobtitle = trim($this->ldap_jobtitle) ?: null;
+        $setting->ldap_manager = trim($this->ldap_manager) ?: null;
+        $setting->ldap_dept = trim($this->ldap_dept) ?: null;
+        $setting->ldap_address = trim($this->ldap_address) ?: null;
+        $setting->ldap_city = trim($this->ldap_city) ?: null;
+        $setting->ldap_state = trim($this->ldap_state) ?: null;
+        $setting->ldap_zip = trim($this->ldap_zip) ?: null;
+        $setting->ldap_country = trim($this->ldap_country) ?: null;
+        $setting->ldap_location = trim($this->ldap_location) ?: null;
+        $setting->ldap_active_flag = trim($this->ldap_active_flag) ?: null;
         $setting->ldap_invert_active_flag = $this->ldap_invert_active_flag ? '1' : '0';
 
         $this->persistAndAdvance($setting);
@@ -1271,10 +1359,34 @@ class LdapSettings extends Component
      * verified those credentials. Returns true on success, false
      * after recording the appropriate error and unbinding. Handles
      * password decrypt failure and bind rejection.
+     *
+     * SASL EXTERNAL configs never have a uname / pword to persist. The
+     * client cert IS the identity, so route those to ldap_sasl_bind()
+     * to match step 2's bind test at line 776. Without this branch, the
+     * SASL flow would fall through to anonymous bind and get rejected
+     * by the directory with "Invalid username", contradicting the
+     * successfully-tested bind step the wizard already advanced past.
      */
     protected function bindWithPersistedCredentials(\LDAP\Connection $conn, string $actionType): bool
     {
         $settings = Setting::getSettings();
+
+        if (Ldap::shouldUseSaslExternal($settings)) {
+            if (! @ldap_sasl_bind($conn, null, null, 'EXTERNAL')) {
+                $ldapError = Ldap::bindError($conn);
+                @ldap_unbind($conn);
+                $this->recordTestResult(
+                    'error',
+                    trans('admin/settings/general.ldap_wizard.search.bind_failed', ['error' => $ldapError]),
+                    $actionType,
+                );
+
+                return false;
+            }
+
+            return true;
+        }
+
         $uname = (string) $settings->ldap_uname;
         try {
             $pword = $settings->ldap_pword ? Crypt::decrypt($settings->ldap_pword) : '';
@@ -1447,6 +1559,11 @@ class LdapSettings extends Component
             return;
         }
 
+        // Clear AD  here so the component state matches what the user sees.
+        if ($property === 'is_ad' && ! $this->is_ad && $this->ad_domain !== '') {
+            $this->ad_domain = '';
+        }
+
         // Every string-typed prop that participates in the LDAP
         // handshake or a downstream test surface, grouped by wizard
         // step. Shared between the trim-on-assignment and the
@@ -1542,17 +1659,17 @@ class LdapSettings extends Component
             'ldap_username_field',
             'ldap_fname_field',
             'custom_forgot_pass_url',
-            'test_sample_username'
+            'test_sample_username',
         ], true)) {
             $this->resetValidation($property);
         }
 
-        if (!in_array($property, [
+        if (! in_array($property, [
             'currentStep',
             'highestStepReached',
             'dirty',
             'testStatus',
-            'testMessage'
+            'testMessage',
         ], true)) {
             $this->dirty = true;
         }
