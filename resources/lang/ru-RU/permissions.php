@@ -256,7 +256,7 @@ return [
     ],
     'usersview' => [
         'name' => 'Просмотр пользователей',
-        'note' => 'Note that users with this permission will also be able to see (not modify or delete) files uploaded to the user as well. Users with this permission will also be able to view edit and checkin history.',
+        'note' => 'Разрешает просматривать файлы, загруженные в карточку пользователя, без права их изменения или удаления, а также историю изменений и возвратов.',
     ],
     'userscreate' => [
         'name' => 'Создание пользователей',

@@ -2,25 +2,15 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Http\Transformers\ContractsTransformer;
-use App\Models\Actionlog;
-use App\Models\Asset;
-use App\Models\Consumable;
+use App\Http\Transformers\SelectlistTransformer;
 use App\Models\ConsumableAssignment;
 use App\Models\Contract;
-use App\Models\Statuslabel;
-use App\Models\User;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Helpers\Helper;
 use App\Models\Location;
-use App\Http\Transformers\LocationsTransformer;
-use App\Http\Transformers\SelectlistTransformer;
+use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
-use Auth;
-use Illuminate\Support\Facades\DB;
 
 class ContractsController extends Controller
 {
@@ -31,9 +21,9 @@ class ContractsController extends Controller
     {
         $this->authorize('view', Location::class);
         $allowed_columns = [
-            'id','name','address','address2','city','state','country','zip','created_at',
-            'updated_at','manager_id','image',
-            'assigned_assets_count','users_count','assets_count','currency'];
+            'id', 'name', 'address', 'address2', 'city', 'state', 'country', 'zip', 'created_at',
+            'updated_at', 'manager_id', 'image',
+            'assigned_assets_count', 'users_count', 'assets_count', 'currency'];
 
         $contracts = Contract::select([
             'contracts.id',
@@ -52,14 +42,14 @@ class ContractsController extends Controller
             ->withCount('consumable as consumable_count')
             ->addSelect(['consumables_cost' => ConsumableAssignment::query()
                 ->whereColumn('contract_id', 'contracts.id')
-                ->selectRaw('sum(quantity * cost) as consumables_cost')
+                ->selectRaw('sum(quantity * cost) as consumables_cost'),
             ]);
 
-//        $contracts = Contract::addSelect([]);
+        //        $contracts = Contract::addSelect([]);
         if ($request->filled('search')) {
             $contracts = $contracts->TextSearch($request->input('search'));
         }
-        if ($request->filled('sum_error') && $request->input('sum_error') == 1 ) {
+        if ($request->filled('sum_error') && $request->input('sum_error') == 1) {
             $contracts = $contracts->havingRaw('assets_sum + consumables_cost > contracts.summ');
         }
 
@@ -85,36 +75,36 @@ class ContractsController extends Controller
                 break;
         }
 
-
         $total = $contracts->count();
         $contracts = $contracts->skip($offset)->take($limit)->get();
+
         return (new ContractsTransformer)->transformContracts($contracts, $total);
     }
-
 
     /**
      * Display the specified resource.
      */
     public function show($id): array
     {
-        $this->authorize('view', Contract::class);
-        $contract = Contract::with('')
+        $this->authorize('view', Location::class);
+        $contract = Contract::query()
             ->select([
                 'contracts.id',
                 'contracts.name',
                 'contracts.number',
                 'contracts.status',
+                'contracts.type',
+                'contracts.summ',
                 'contracts.date_start',
                 'contracts.date_end',
                 'contracts.bitrix_id',
                 'contracts.created_at',
                 'contracts.updated_at',
             ])
-        ->findOrFail($id);
+            ->findOrFail($id);
+
         return (new ContractsTransformer)->transformContract($contract);
     }
-
-
 
     /**
      * Gets a paginated collection for the select2 menus
@@ -141,7 +131,6 @@ class ContractsController extends Controller
      * sea... this time.
      *
      * @see \App\Http\Transformers\SelectlistTransformer
-     *
      */
     public function selectlist(Request $request): array
     {
@@ -168,19 +157,18 @@ class ContractsController extends Controller
         foreach ($contracts as $contract) {
             $name_str = '';
 
-            if ($contract->status!='') {
-                $name_str .= "<".e($contract->getStatusText()).'> ';
+            if ($contract->status != '') {
+                $name_str .= '<'.e($contract->getStatusText()).'> ';
             }
-            if ($contract->number!='') {
-                $name_str .= "[".e($contract->number).'] ';
+            if ($contract->number != '') {
+                $name_str .= '['.e($contract->number).'] ';
             }
             $name_str .= e($contract->name);
-            $contract->use_text = preg_replace('/&quot;/', '"', $name_str);;
+            $contract->use_text = preg_replace('/&quot;/', '"', $name_str);
         }
 
-        $paginated_results =  new LengthAwarePaginator($contracts->forPage($page, 500), $contracts->count(), 500, $page, []);
+        $paginated_results = new LengthAwarePaginator($contracts->forPage($page, 500), $contracts->count(), 500, $page, []);
 
         return (new SelectlistTransformer)->transformSelectlist($paginated_results);
     }
-
 }

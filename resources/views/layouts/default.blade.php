@@ -821,14 +821,14 @@
                                                 </a>
                                             </li>
                                         @endcan
-                                        @can('view', \App\Models\Asset::class)
+                                        @can('view', \App\Models\Location::class)
                                             <li {!! (request()->is('contracts*') ? ' class="active"' : '') !!}>
                                                 <a href="{{ route('contracts.index') }}">
                                                     {{ trans('general.contracts') }}
                                                 </a>
                                             </li>
                                         @endcan
-                                        @can('view', \App\Models\Asset::class)
+                                        @can('view', \App\Models\Location::class)
                                             <li {!! (request()->is('deals*') ? ' class="active"' : '') !!}>
                                                 <a href="{{ route('deals.index') }}">
                                                     {{ trans('general.deals') }}

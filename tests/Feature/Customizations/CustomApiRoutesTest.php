@@ -19,7 +19,7 @@ class CustomApiRoutesTest extends TestCase
         $isolated = new Router($this->app['events'], $this->app);
         Route::swap($isolated);
         try {
-            Route::group(['prefix' => 'api', 'middleware' => 'auth:api'], function (): void {
+            Route::group(['prefix' => 'api', 'middleware' => 'auth:oidc,api'], function (): void {
                 require base_path('routes/api_custom.php');
             });
 
@@ -49,7 +49,7 @@ class CustomApiRoutesTest extends TestCase
                 $registered = Route::getRoutes()->match(Request::create('/'.$url, $method));
                 $this->assertSame($route->getActionName(), $registered->getActionName(), $method.' '.$url);
                 $this->assertSame($route->getName(), $registered->getName());
-                $this->assertContains('auth:api', $registered->gatherMiddleware());
+                $this->assertContains('auth:oidc,api', $registered->gatherMiddleware());
             }
         }
     }

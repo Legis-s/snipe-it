@@ -83,7 +83,7 @@ class UsersController extends Controller
         }
 
         $permissions = config('permissions');
-        $userPermissions = Helper::selectedPermissionsArray($permissions, $request->old('permissions', []));
+        $userPermissions = Helper::selectedPermissionsArray($permissions, $request->old('permission', []));
         $permissions = $this->filterDisplayable($permissions);
 
         $user = new User;

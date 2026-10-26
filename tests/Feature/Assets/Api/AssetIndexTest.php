@@ -4,6 +4,7 @@ namespace Tests\Feature\Assets\Api;
 
 use App\Models\Asset;
 use App\Models\Company;
+use App\Models\Contract;
 use App\Models\CustomField;
 use App\Models\Deal;
 use App\Models\InvoiceType;
@@ -32,11 +33,13 @@ class AssetIndexTest extends TestCase
         ]);
         $this->assertTrue($purchase->save(), (string) $purchase->getErrors());
         $deal = Deal::create(['name' => 'Archive filter deal']);
+        $contract = Contract::create(['name' => 'Archive filter contract']);
         $archivedStatus = Statuslabel::factory()->archived()->create();
         $archived = Asset::factory()->create([
             'name' => 'Archived purchase asset',
             'status_id' => $archivedStatus->id,
             'purchase_id' => $purchase->id,
+            'contract_id' => $contract->id,
             'assigned_type' => Deal::class,
             'assigned_to' => $deal->id,
         ]);
@@ -46,7 +49,7 @@ class AssetIndexTest extends TestCase
         $original = $settings->getAttributes();
         $this->actingAsForApi(User::factory()->superuser()->create());
 
-        foreach (['purchase_id' => $purchase->id, 'deal_id' => $deal->id] as $filter => $id) {
+        foreach (['purchase_id' => $purchase->id, 'deal_id' => $deal->id, 'contract_id' => $contract->id] as $filter => $id) {
             $this->getJson(route('api.assets.index', [$filter => $id]))
                 ->assertOk()
                 ->assertJsonPath('total', 1)

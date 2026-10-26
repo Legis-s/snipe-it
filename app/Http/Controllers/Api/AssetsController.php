@@ -230,6 +230,10 @@ class AssetsController extends Controller
             $assets->where('assets.purchase_id', '=', $request->input('purchase_id'));
         }
 
+        if ($request->filled('contract_id')) {
+            $assets->where('assets.contract_id', '=', $request->input('contract_id'));
+        }
+
         if ($request->filled('deal_id')) {
             $assets->where('assets.assigned_to', '=', $request->input('deal_id'))
                 ->where('assets.assigned_type', '=', \App\Models\Deal::class);
@@ -315,7 +319,7 @@ class AssetsController extends Controller
                 break;
             default:
 
-                if (! $request->filled('status_id') && ! $request->filled('purchase_id') && ! $request->filled('deal_id') && $settings->show_archived_in_list != '1') {
+                if (! $request->filled('status_id') && ! $request->filled('purchase_id') && ! $request->filled('contract_id') && ! $request->filled('deal_id') && $settings->show_archived_in_list != '1') {
                     // terrible workaround for complex-query Laravel bug in fulltext
                     $assets->join('status_labels AS status_alias', function ($join) {
                         $join->on('status_alias.id', '=', 'assets.status_id')

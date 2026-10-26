@@ -216,6 +216,29 @@ class AssetCheckoutTest extends TestCase
             ->assertSee('data-required-select="#assigned_deal_deal_select"', false);
     }
 
+    #[DataProvider('checkoutTargetTypesProvider')]
+    public function test_deal_checkout_rejects_an_additional_target(string $type): void
+    {
+        $target = match ($type) {
+            'user' => User::factory()->create(),
+            'asset' => Asset::factory()->create(),
+            'location' => Location::factory()->create(),
+        };
+        $asset = Asset::factory()->create();
+        $deal = Deal::create(['name' => 'Exclusive deal target']);
+
+        $this->actingAs(User::factory()->checkoutAssets()->create())
+            ->post(route('hardware.checkout.store', $asset), [
+                'checkout_to_type' => 'deal',
+                'assigned_deal' => $deal->id,
+                'assigned_'.$type => $target->id,
+            ])
+            ->assertSessionHasErrors(['assigned_deal', 'assigned_'.$type]);
+
+        $this->assertNull($asset->fresh()->assigned_to);
+        $this->assertSame(0, $asset->assetlog()->whereIn('action_type', ['checkout', 'sell', 'rented'])->count());
+    }
+
     public static function dealCheckoutOperations(): array
     {
         return [

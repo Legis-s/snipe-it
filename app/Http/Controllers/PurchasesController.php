@@ -30,6 +30,7 @@ class PurchasesController extends Controller
 {
     public function index(): View
     {
+        $this->authorize('view', Purchase::class);
 
         $purchases_d = DB::table('purchases')
             ->select('created_by')
@@ -51,7 +52,6 @@ class PurchasesController extends Controller
 
         $users = User::find($ids);
         $suppliers = Supplier::find($ids_s);
-        $this->authorize('view', Location::class);
 
         return view('purchases/index', compact('users', 'suppliers'));
     }
@@ -64,7 +64,7 @@ class PurchasesController extends Controller
      */
     public function show(Purchase $purchase): View|RedirectResponse
     {
-        $this->authorize('view', Asset::class);
+        $this->authorize('view', Purchase::class);
 
         $purchase = Purchase::find($purchase->id);
         $old = false;
@@ -83,7 +83,7 @@ class PurchasesController extends Controller
 
     public function downloadInvoice(Purchase $purchase): BinaryFileResponse
     {
-        $this->authorize('view', Asset::class);
+        $this->authorize('view', Purchase::class);
 
         $filename = basename((string) $purchase->invoice_file);
         $path = public_path('uploads/purchases/'.$filename);
